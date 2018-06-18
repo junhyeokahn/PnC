@@ -86,33 +86,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q(robot->getNumDofs());
     q.setZero();
 
-    q[5] =1.135;
-    //q[5] =1.14;
-
-    Eigen::VectorXd idx_joint(14);
-    // lower body
-    idx_joint[0] = robot->getDof("leftHipPitch")->getIndexInSkeleton();
-    idx_joint[1] = robot->getDof("rightHipPitch")->getIndexInSkeleton();
-    idx_joint[2] = robot->getDof("leftKneePitch")->getIndexInSkeleton();
-    idx_joint[3] = robot->getDof("rightKneePitch")->getIndexInSkeleton();
-    idx_joint[4] = robot->getDof("leftAnklePitch")->getIndexInSkeleton();
-    idx_joint[5] = robot->getDof("rightAnklePitch")->getIndexInSkeleton();
-
-    // upper body
-    idx_joint[6] = robot->getDof("rightShoulderPitch")->getIndexInSkeleton();
-    idx_joint[7] = robot->getDof("rightShoulderRoll")->getIndexInSkeleton();
-    idx_joint[8] = robot->getDof("rightElbowPitch")->getIndexInSkeleton();
-    idx_joint[9] = robot->getDof("rightForearmYaw")->getIndexInSkeleton();
-    idx_joint[10] = robot->getDof("leftShoulderPitch")->getIndexInSkeleton();
-    idx_joint[11] = robot->getDof("leftShoulderRoll")->getIndexInSkeleton();
-    idx_joint[12] = robot->getDof("leftElbowPitch")->getIndexInSkeleton();
-    idx_joint[13] = robot->getDof("leftForearmYaw")->getIndexInSkeleton();
-
-    Eigen::VectorXd config_joint(14);
-    config_joint << -0.3, -0.3, 0.6, 0.6, -0.3, -0.3, 0.2, 1.1, 0.4, 1.5, -0.3, -1.1, -0.4, 1.5;
-
-    for(int i(0); i<14; i++)
-        q[idx_joint[i]] = config_joint[i];
+    q[1] = 1.0;
 
     robot->setPositions(q);
 }
@@ -124,7 +98,7 @@ int main() {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"Simulator/SimulationModel/RobotModel/T1D/t1d.urdf");
+            THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -133,12 +107,12 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    displayJointFrames(world, robot);
+    //displayJointFrames(world, robot);
 
     // =====================
     // Initial configuration
     // =====================
-    //_setInitialConfiguration(robot);
+    _setInitialConfiguration(robot);
 
     // ================
     // Print Model Info
@@ -184,7 +158,7 @@ int main() {
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     viewer.addEventHandler(new OneStepProgress(node) );
-    viewer.record(THIS_COM"/ExperimentVideo");
+    //viewer.record(THIS_COM"/ExperimentVideo");
 
     //std::cout << "=====================================" << std::endl;
     //std::cout << viewer.getInstructions() << std::endl;

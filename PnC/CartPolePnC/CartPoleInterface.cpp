@@ -6,7 +6,7 @@
 #include "Utils/DataManager.hpp"
 
 CartPoleInterface::CartPoleInterface(): Interface() {
-    mRobot = new RobotSystem(0, THIS_COM"Simulator/SimulationModel/RobotModel/T1D/t1d.urdf");
+    mRobot = new RobotSystem(0, THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
 
     // Choose Test
     _constructTest();
