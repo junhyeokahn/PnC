@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+build
+tags
+.DS_Store
+ExperimentData
+ExperimentDataCheck
+ExperimentVideo
+Configuration.h
