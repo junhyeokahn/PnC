@@ -1,0 +1,196 @@
+#include <Configuration.h>
+#include <Utilities.hpp>
+#include <fstream>
+#include <string>
+#include <iostream>
+
+namespace myUtils {
+    Eigen::MatrixXd hStack(const Eigen::MatrixXd a,
+            const Eigen::MatrixXd b) {
+
+        if ( a.rows() != b.rows() ) {
+            std::cout << "[hStack] Matrix Size is Wrong" << std::endl; exit(0);
+        }
+
+        Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows(), a.cols() + b.cols());
+        ab << a, b;
+        return ab;
+    }
+
+    Eigen::MatrixXd vStack(const Eigen::MatrixXd a,
+            const Eigen::MatrixXd b) {
+        if ( a.cols() != b.cols() ) {
+            std::cout << "[vStack] Matrix Size is Wrong" << std::endl;
+            exit(0);
+        }
+        Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows() + b.rows(), a.cols());
+        ab << a, b;
+        return ab;
+    }
+
+    Eigen::MatrixXd vStack(const Eigen::VectorXd a,
+            const Eigen::VectorXd b) {
+
+        if (a.size() != b.size()) {
+            std::cout << "[vStack] Vector Size is Wrong" << std::endl;
+            exit(0);
+        }
+        Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.size(), 2);
+        ab << a, b;
+        return ab;
+    }
+
+    Eigen::MatrixXd deleteRow(const Eigen::MatrixXd & a_, int row_) {
+        Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(a_.rows()-1, a_.cols());
+        ret.block(0, 0, row_, a_.cols()) = a_.block(0, 0, row_, a_.cols());
+        ret.block(row_, 0, ret.rows()-row_, a_.cols()) =
+            a_.block(row_+1, 0, ret.rows()-row_, a_.cols());
+        return ret;
+    }
+
+    void saveVector(const Eigen::VectorXd & vec_, std::string name_, bool b_param){
+        std::string file_name;
+        cleaningFile(name_, file_name, b_param);
+
+        std::ofstream savefile(file_name.c_str(), std::ios::app);
+        for (int i(0); i < vec_.rows(); ++i){
+            savefile<<vec_(i)<< "\t";
+        }
+        savefile<<"\n";
+        savefile.flush();
+    }
+
+    void saveVector(double * _vec, std::string _name, int size, bool b_param){
+        std::string file_name;
+        cleaningFile(_name, file_name, b_param);
+        std::ofstream savefile(file_name.c_str(), std::ios::app);
+
+        for (int i(0); i < size; ++i){
+            savefile<<_vec[i]<< "\t";
+        }
+        savefile<<"\n";
+        savefile.flush();
+    }
+
+    void cleaningFile(std::string  _file_name, std::string & _ret_file, bool b_param){
+        if(b_param)
+            _ret_file += THIS_COM"parameter_data/";
+        else
+            _ret_file += THIS_COM"ExperimentData/";
+
+        _ret_file += _file_name;
+        _ret_file += ".txt";
+
+        std::list<std::string>::iterator iter = std::find(gs_fileName_string.begin(), gs_fileName_string.end(), _file_name);
+        if(gs_fileName_string.end() == iter){
+            gs_fileName_string.push_back(_file_name);
+            remove(_ret_file.c_str());
+        }
+    }
+
+    void pretty_print(Eigen::VectorXd const & vv, std::ostream & os,
+            std::string const & title, std::string const & prefix,
+            bool nonl) {
+        pretty_print((Eigen::MatrixXd const &) vv, os, title, prefix, true, nonl);
+    }
+
+    void pretty_print(Eigen::MatrixXd const & mm, std::ostream & os,
+            std::string const & title, std::string const & prefix,
+            bool vecmode, bool nonl) {
+        char const * nlornot("\n");
+        if (nonl) {
+            nlornot = "";
+        }
+        if ( ! title.empty()) {
+            os << title << nlornot;
+        }
+        if ((mm.rows() <= 0) || (mm.cols() <= 0)) {
+            os << prefix << " (empty)" << nlornot;
+        }
+        else {
+            // if (mm.cols() == 1) {
+            //   vecmode = true;
+            // }
+
+            if (vecmode) {
+                if ( ! prefix.empty())
+                    os << prefix;
+                for (int ir(0); ir < mm.rows(); ++ir) {
+                    os << pretty_string(mm.coeff(ir, 0));
+                }
+                os << nlornot;
+
+            }
+            else {
+
+                for (int ir(0); ir < mm.rows(); ++ir) {
+                    if ( ! prefix.empty())
+                        os << prefix;
+                    for (int ic(0); ic < mm.cols(); ++ic) {
+                        os << pretty_string(mm.coeff(ir, ic));
+                    }
+                    os << nlornot;
+                }
+
+            }
+        }
+    }
+
+    std::string pretty_string(Eigen::VectorXd const & vv) {
+        std::ostringstream os;
+        pretty_print(vv, os, "", "", true);
+        return os.str();
+    }
+
+    std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix) {
+        std::ostringstream os;
+        pretty_print(mm, os, "", prefix);
+        return os.str();
+    }
+
+    std::string pretty_string(double vv)
+    {
+        static int const buflen(32);
+        static char buf[buflen];
+        memset(buf, 0, sizeof(buf));
+        snprintf(buf, buflen-1, "% 6.6f  ", vv);
+        std::string str(buf);
+        return str;
+    }
+
+    double smooth_changing(double ini, double end, double moving_duration, double curr_time){
+        double ret;
+        ret = ini + (end - ini)*0.5*(1-cos(curr_time/moving_duration * M_PI));
+        if(curr_time>moving_duration){
+            ret = end;
+        }
+        return ret;
+    }
+
+    double smooth_changing_vel(double ini, double end, double moving_duration, double curr_time){
+        double ret;
+        ret = (end - ini)*0.5*(M_PI/moving_duration)*sin(curr_time/moving_duration*M_PI);
+        if(curr_time>moving_duration){
+            ret = 0.0;
+        }
+        return ret;
+    }
+    double smooth_changing_acc(double ini, double end, double moving_duration, double curr_time){
+        double ret;
+        ret = (end - ini)*0.5*(M_PI/moving_duration)*(M_PI/moving_duration)*cos(curr_time/moving_duration*M_PI);
+        if(curr_time>moving_duration){
+            ret = 0.0;
+        }
+        return ret;
+    }
+
+    double bind_half_pi(double ang){
+        if(ang > M_PI/2){
+            return ang - M_PI;
+        }
+        if(ang < -M_PI/2){
+            return ang + M_PI;
+        }
+        return ang;
+    }
+}

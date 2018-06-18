@@ -10,11 +10,11 @@ endif()
 set(CMAKE_CXX_FLAGS "-std=c++11")
 set(CXX_DISABLE_WERROR True)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ## ==========
 ## Dependancy
 ## ==========
-
 # Dart
 find_package(DART 6.5 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
@@ -23,28 +23,42 @@ include_directories(${DART_INCLUDE_DIRS})
 find_package(drake CONFIG REQUIRED)
 
 # Eigen
-#find_package(Eigen)
+if(NOT EIGEN_FOUND)
+  find_package(Eigen)
+endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 # Gurobi
 find_package(Gurobi)
-include_directories(${GUROBI_INCLUDE_DIRS})
+if(GUROBI_FOUND)
+  include_directories(${GUROBI_INCLUDE_DIRS})
+endif()
 
 # Mosek
 find_package(Mosek)
-include_directories(${MOSEK_INCLUDE_DIRS})
+if(MOSEK_FOUND)
+  include_directories(${MOSEK_INCLUDE_DIRS})
+endif()
 
 ## =================
 ## Include Directory
 ## =================
+include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/Simulator")
+include_directories("${PROJECT_SOURCE_DIR}/RobotSystem")
+include_directories("${PROJECT_SOURCE_DIR}/Utils")
+include_directories("${PROJECT_SOURCE_DIR}/PnC")
 
 ## ================
 ## Add Subdirectory
 ## ================
+add_subdirectory(Simulator)
+add_subdirectory(RobotSystem)
+add_subdirectory(Utils)
+add_subdirectory(PnC)
 
 ## ==================
 ## Configuration File
 ## ==================
-
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
