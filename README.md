@@ -6,8 +6,8 @@ and stabilizing the system over the trajectories.
 
 ### Trajectory Planning
 - Direct Transcription
-- Direct collocation
-- Constrained Direct collocation
+- Direct Collocation
+- Constrained Direct Collocation
 
 ### Stabilizing Controller
 - Linear Quadratic Regulator
