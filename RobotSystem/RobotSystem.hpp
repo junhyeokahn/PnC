@@ -85,7 +85,10 @@ public:
     Eigen::MatrixXd getBodyNodeCoMJacobianDot(const std::string & name_,
                                               dart::dynamics::Frame * wrt_
                                               =dart::dynamics::Frame::World());
-    void updateSystem(double time_, const Eigen::VectorXd & q, const Eigen::VectorXd & qdot_);
+    void updateSystem(double time_,
+                      const Eigen::VectorXd & q_,
+                      const Eigen::VectorXd & qdot_,
+                      bool isUpdatingCentroid_ = true);
 
     dart::dynamics::SkeletonPtr getSkeleton() { return mSkel; };
     Eigen::VectorXd getQ() { return mSkel->getPositions(); };

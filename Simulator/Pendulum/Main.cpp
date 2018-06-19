@@ -86,7 +86,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q(robot->getNumDofs());
     q.setZero();
 
-    q[1] = 1.0;
+    //q[1] = 1.0;
 
     robot->setPositions(q);
 }
@@ -102,12 +102,12 @@ int main() {
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/2000);
+    world->setTimeStep(1.0/1000);
 
     // ====================
     // Display Joints Frame
     // ====================
-    //displayJointFrames(world, robot);
+    displayJointFrames(world, robot);
 
     // =====================
     // Initial configuration

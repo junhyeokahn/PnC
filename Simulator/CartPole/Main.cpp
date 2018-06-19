@@ -86,7 +86,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q(robot->getNumDofs());
     q.setZero();
 
-    q[1] = 1.0;
+    q[1] = M_PI/3.0;
 
     robot->setPositions(q);
 }
@@ -102,7 +102,7 @@ int main() {
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/2000);
+    world->setTimeStep(1.0/1000);
 
     // ====================
     // Display Joints Frame
@@ -163,10 +163,8 @@ int main() {
     //std::cout << "=====================================" << std::endl;
     //std::cout << viewer.getInstructions() << std::endl;
     viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    //viewer.setUpViewInWindow(0, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
-            //::osg::Vec3( 5.14,  3.28, 1.8)*0.5,
-            ::osg::Vec3( 0.0,  -1.5, 0.9)*1.3,
+            ::osg::Vec3( 0.0,  -1.5, 0.9) * 3,
             ::osg::Vec3( 0.0,  0.0, 0.3),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());

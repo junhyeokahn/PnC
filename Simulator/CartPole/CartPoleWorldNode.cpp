@@ -19,7 +19,7 @@ void CartPoleWorldNode::customPreStep() {
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
     Eigen::VectorXd cmd = mInterface->getCommand(mSensorData);
-    mTorqueCommand = cmd;
+    mTorqueCommand[0] = cmd[0];
 
     mSkel->setForces(mTorqueCommand);
 }

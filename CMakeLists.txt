@@ -30,15 +30,11 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 
 # Gurobi
 find_package(Gurobi)
-if(GUROBI_FOUND)
-  include_directories(${GUROBI_INCLUDE_DIRS})
-endif()
+include_directories(${GUROBI_INCLUDE_DIRS})
 
 # Mosek
 find_package(Mosek)
-if(MOSEK_FOUND)
-  include_directories(${MOSEK_INCLUDE_DIRS})
-endif()
+include_directories(${MOSEK_INCLUDE_DIRS})
 
 ## =================
 ## Include Directory
@@ -48,6 +44,14 @@ include_directories("${PROJECT_SOURCE_DIR}/Simulator")
 include_directories("${PROJECT_SOURCE_DIR}/RobotSystem")
 include_directories("${PROJECT_SOURCE_DIR}/Utils")
 include_directories("${PROJECT_SOURCE_DIR}/PnC")
+include_directories("${PROJECT_SOURCE_DIR}/PnC/Contact")
+include_directories("${PROJECT_SOURCE_DIR}/PnC/WBC")
+include_directories("${PROJECT_SOURCE_DIR}/PnC/WBC/WBLC")
+include_directories("${PROJECT_SOURCE_DIR}/PnC/Trajectory")
+include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/yaml_cpp/include")
+include_directories("${PROJECT_SOURCE_DIR}/ExternalSource")
+include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Optimizer/")
+include_directories("${PROJECT_SOURCE_DIR}/Geometry/Polytope")
 
 ## ================
 ## Add Subdirectory
@@ -55,7 +59,9 @@ include_directories("${PROJECT_SOURCE_DIR}/PnC")
 add_subdirectory(Simulator)
 add_subdirectory(RobotSystem)
 add_subdirectory(Utils)
+add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
+add_subdirectory(Geometry)
 
 ## ==================
 ## Configuration File

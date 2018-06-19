@@ -146,12 +146,12 @@ void RobotSystem::getContactAspects(const std::string & linkName_,
 
 void RobotSystem::updateSystem(double time_,
                                const Eigen::VectorXd & q_,
-                               const Eigen::VectorXd & qdot_) {
+                               const Eigen::VectorXd & qdot_,
+                               bool isUpdatingCentroid) {
     mTime = time_;
     mSkel->setPositions(q_);
     mSkel->setVelocities(qdot_);
-    mSkel->computeForwardKinematics();
-    //_updateCentroidFrame(q_, qdot_);
+    if (isUpdatingCentroid)  mSkel->computeForwardKinematics();
 }
 
 void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd & q_,

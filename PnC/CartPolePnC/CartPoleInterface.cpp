@@ -6,7 +6,7 @@
 #include "Utils/DataManager.hpp"
 
 CartPoleInterface::CartPoleInterface(): Interface() {
-    mRobot = new RobotSystem(0, THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
+    mRobot = new RobotSystem(1, THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
 
     // Choose Test
     _constructTest();
@@ -25,7 +25,7 @@ CartPoleInterface::~CartPoleInterface() {
 
 Eigen::VectorXd CartPoleInterface::getCommand(void* sensorData_) {
     CartPoleSensorData* data = ((CartPoleSensorData*) sensorData_);
-    mRobot->updateSystem(mTime, data->q, data->qdot);
+    mRobot->updateSystem(mTime, data->q, data->qdot, false);
     mTime += SERVO_RATE;
 
     if (mTime < mInitTime) {
