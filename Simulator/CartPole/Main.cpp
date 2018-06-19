@@ -4,6 +4,7 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include "CartPoleWorldNode.hpp"
 #include "Configuration.h"
+#include "ParamHandler.hpp"
 
 void displayJointFrames(
     const dart::simulation::WorldPtr& world, 
@@ -92,6 +93,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 }
 
 int main() {
+    // ========================
+    // Parse Yaml for Simulator
+    // ========================
+    ParamHandler handler(THIS_COM"Config/CartPole/SIMULATION.yaml");
+    bool isRecord;
+    handler.getBoolean("IsRecord", isRecord);
+
     // ================================
     // Generate world and add skeletons
     // ================================
@@ -139,7 +147,6 @@ int main() {
     // ================
     // Wrap a worldnode
     // ================
-
     osg::ref_ptr<CartPoleWorldNode> node
         = new CartPoleWorldNode(world, msm);
     node->setNumStepsPerCycle(30);
@@ -158,10 +165,12 @@ int main() {
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     viewer.addEventHandler(new OneStepProgress(node) );
-    //viewer.record(THIS_COM"/ExperimentVideo");
 
-    //std::cout << "=====================================" << std::endl;
-    //std::cout << viewer.getInstructions() << std::endl;
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM"/ExperimentVideo");
+    }
+
     viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3( 0.0,  -1.5, 0.9) * 3,
