@@ -1,5 +1,4 @@
-#ifndef TEST_H
-#define TEST_H
+#pragma once
 
 #include <Eigen/Dense>
 #include <stdio.h>
@@ -24,5 +23,3 @@ public:
     virtual Eigen::VectorXd getTorqueInput() = 0;
     virtual void initialize() = 0;
 };
-
-#endif /* TEST_H */

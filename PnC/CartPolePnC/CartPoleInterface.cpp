@@ -3,7 +3,8 @@
 #include "CartPolePnC/TestSet/TestSet.hpp"
 #include "Configuration.h"
 #include "Utilities.hpp"
-#include "Utils/DataManager.hpp"
+#include "DataManager.hpp"
+#include "ParamHandler.hpp"
 
 CartPoleInterface::CartPoleInterface(): Interface() {
     mRobot = new RobotSystem(1, THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
@@ -39,5 +40,15 @@ Eigen::VectorXd CartPoleInterface::getCommand(void* sensorData_) {
 }
 
 void CartPoleInterface::_constructTest() {
-    mTest = new GravityCompensationTest(mRobot);
+    ParamHandler handler(THIS_COM"Config/CartPole/INTERFACE.yaml");
+    std::string tmp_string;
+    handler.getString("TestName", tmp_string);
+    if (tmp_string == "GravityCompensationTest") {
+        mTest = new GravityCompensationTest(mRobot);
+    } else if (tmp_string == "DirColSwingUpTest") {
+        mTest = new DirColSwingUpTest(mRobot);
+    } else {
+        printf("[Interface] There is no test matching with the name\n");
+        exit(0);
+    }
 }

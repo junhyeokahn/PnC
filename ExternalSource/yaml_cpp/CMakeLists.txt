@@ -1,17 +1,9 @@
 #message("YAML-CPP")
 set(GCC_EXTRA_OPTIONS "${GCC_EXTRA_OPTIONS} -fPIC")
 include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/yaml_cpp/include")
-if(POLICY CMP0012)
-	cmake_policy(SET CMP0012 OLD)
-endif()
-
-if(POLICY CMP0015)
-	cmake_policy(SET CMP0015 OLD)
-endif()
 
 if(POLICY CMP0042)
-	# Enable MACOSX_RPATH by default.
-	cmake_policy(SET CMP0042 NEW)
+  cmake_policy(SET CMP0042 NEW)
 endif()
 
 include(CheckCXXCompilerFlag)
