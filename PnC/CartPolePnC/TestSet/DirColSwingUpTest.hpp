@@ -2,9 +2,9 @@
 
 #include "Test.hpp"
 
-
 class RobotSystem;
 class Planner;
+class PlanningParameter;
 
 class DirColSwingUpTest: public Test
 {
@@ -16,4 +16,5 @@ public:
     virtual ~DirColSwingUpTest();
 
     virtual Eigen::VectorXd getTorqueInput();
+    virtual void initialize();
 };

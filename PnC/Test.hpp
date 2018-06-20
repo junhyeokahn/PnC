@@ -12,13 +12,15 @@ class Test
 protected:
     RobotSystem* mRobot;
 
-    bool mIsInitialized;
 
 public:
-    Test(RobotSystem* robot_): mIsInitialized(false) {
+    Test(RobotSystem* robot_): isInitialized(false) {
         mRobot = robot_;
     };
-    virtual ~Test() {};
-
+    virtual ~Test() {
+    };
     virtual Eigen::VectorXd getTorqueInput() = 0;
+    virtual void initialize() = 0;
+
+    bool isInitialized;
 };

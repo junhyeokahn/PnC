@@ -12,21 +12,30 @@
 class DirColSwingUpPlanningParameter : public PlanningParameter
 {
 public:
-    DirColSwingUpPlanningParameter (double startTime_, double endTime_) :
-        PlanningParameter(startTime_, endTime_) {};
-    virtual ~DirColSwingUpPlanningParameter ();
+    DirColSwingUpPlanningParameter () : PlanningParameter() {};
+    virtual ~DirColSwingUpPlanningParameter () {};
+
+    Eigen::VectorXd initialState;
+    Eigen::VectorXd finalState;
+    int numTimeSample;
+    double minimumTimeStep;
+    double maximumTimeStep;
+    double torqueLimit;
+    double R;
+    double timeSpanInit;
 };
+
 
 class DirColSwingUpPlanner : public Planner
 {
 public:
-    DirColSwingUpPlanner (
-            std::shared_ptr<DirColSwingUpPlanningParameter> param);
+    DirColSwingUpPlanner ();
     virtual ~DirColSwingUpPlanner ();
 
 private:
     std::unique_ptr< RigidBodyTree<double> > mTree;
     std::unique_ptr< drake::systems::RigidBodyPlant<double> > mPlant;
+    std::unique_ptr< drake::systems::trajectory_optimization::DirectCollocation > mDirCol;
 
     virtual void _doPlan();
     virtual void _evalTrajecotry( double time, Eigen::VectorXd & pos,

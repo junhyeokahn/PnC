@@ -1,24 +1,24 @@
 #pragma once
+
+#include <iostream>
 #include <Eigen/Dense>
 
 class PlanningParameter
 {
 public:
-    PlanningParameter (double startTime_, double endTime_) :
-        startTime(startTime_), endTime(endTime_) {};
-    virtual ~PlanningParameter ();
+    PlanningParameter () : startTime(0), endTime(0) {};
+    virtual ~PlanningParameter () {};
 
     double startTime;
     double endTime;
 private:
-    /* data */
 };
 
 class Planner
 {
 public:
-    Planner (std::shared_ptr<PlanningParameter> param_) : mDoReplan(true),
-                                                          param(param_) {};
+    Planner () : mDoPlan(true),
+                 isParamSet(false) {};
     virtual ~Planner () {};
 
     void getPlan( double time,
@@ -26,15 +26,32 @@ public:
                   Eigen::VectorXd & vel,
                   Eigen::VectorXd & acc,
                   Eigen::VectorXd & eff ) {
-        if (mDoReplan) _doPlan();
+        if (mDoPlan & isParamSet) {
+            _doPlan();
+            isParamSet = false;
+            mDoPlan = false;
+        } else if (mDoPlan & isParamSet) {
+            std::cout << "Replan flag without new parameter set" << std::endl;
+        };
         _evalTrajecotry( time, pos, vel, acc, eff );
     }
-    void doReplan() { mDoReplan = true; };
 
-    std::shared_ptr<PlanningParameter> param;
+    void doReplan(const std::shared_ptr<PlanningParameter> & param_) {
+        mDoPlan = true;
+        updatePlanningParameter(param_);
+    };
 
-private:
-    bool mDoReplan;
+    void updatePlanningParameter(
+            const std::shared_ptr<PlanningParameter> & param_) {
+        mParam = param_;
+        isParamSet = true;
+    }
+
+protected:
+    bool mDoPlan;
+    bool isParamSet;
+    std::shared_ptr<PlanningParameter> mParam;
+    // Do Planning with PlanningParameter.
     virtual void _doPlan() = 0;
     virtual void _evalTrajecotry( double time, Eigen::VectorXd & pos,
                                   Eigen::VectorXd & vel, Eigen::VectorXd acc,
