@@ -41,4 +41,5 @@ private:
     virtual void _evalTrajecotry( double time, Eigen::VectorXd & pos,
                                   Eigen::VectorXd & vel, Eigen::VectorXd acc,
                                   Eigen::VectorXd &eff );
+    void _saveTrajectory();
 };

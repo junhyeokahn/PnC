@@ -87,7 +87,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q(robot->getNumDofs());
     q.setZero();
 
-    q[1] = M_PI/3.0;
+    q[1] = M_PI;
 
     robot->setPositions(q);
 }

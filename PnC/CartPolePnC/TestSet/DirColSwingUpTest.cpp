@@ -21,6 +21,7 @@ Eigen::VectorXd DirColSwingUpTest::getTorqueInput() {
     mPlanner->getPlan(mRobot->getTime(), pos, vel, acc, eff);
 
     ret = eff;
+    std::cout << ret << std::endl;
 
     return ret;
 }

@@ -16,6 +16,9 @@ DirColSwingUpPlanner::~DirColSwingUpPlanner() {
 }
 
 void DirColSwingUpPlanner::_doPlan() {
+    // =========================================
+    // Construct Direct collocation Optimization
+    // =========================================
     std::unique_ptr<drake::systems::Context<double>> context =
         mPlant->CreateDefaultContext();
     std::shared_ptr<DirColSwingUpPlanningParameter> param =
@@ -23,21 +26,30 @@ void DirColSwingUpPlanner::_doPlan() {
     mDirCol = std::make_unique<drake::systems::trajectory_optimization::DirectCollocation>(
                 mPlant.get(), *context, param->numTimeSample,
                 param->minimumTimeStep, param->maximumTimeStep);
+    // ==============
+    // Add Constraint
+    // ==============
     mDirCol->AddEqualTimeIntervalsConstraints();
-    const drake::solvers::VectorXDecisionVariable& u = mDirCol->input();
     // Input Constraint
+    const drake::solvers::VectorXDecisionVariable& u = mDirCol->input();
     mDirCol->AddConstraintToAllKnotPoints(-(param->torqueLimit) <= u(0));
     mDirCol->AddConstraintToAllKnotPoints(u(0) <= param->torqueLimit);
-    // Initial Final Constraint
+    // Initial and Final State Constraint
     mDirCol->AddLinearConstraint(mDirCol->initial_state() ==
             param->initialState);
     mDirCol->AddLinearConstraint(mDirCol->final_state() == 
             param->finalState);
+    // ========
+    // Add Cost
+    // ========
     // Add Running Cost
     mDirCol->AddRunningCost((param->R * u(0)) * u(0));
     // Add Final Cost
     mDirCol->AddFinalCost(mDirCol->time().cast<drake::symbolic::Expression>());
 
+    // ========================
+    // Throw Initial Trajectory
+    // ========================
     auto traj_init_x = drake::trajectories::PiecewisePolynomial<double>::FirstOrderHold(
             {0, param->timeSpanInit}, {param->initialState, param->finalState});
     mDirCol->SetInitialTrajectory(
@@ -58,4 +70,24 @@ void DirColSwingUpPlanner::_evalTrajecotry( double time,
       mDirCol->ReconstructInputTrajectory();
   const drake::trajectories::PiecewisePolynomial<double> xtraj =
       mDirCol->ReconstructStateTrajectory();
+  eff = utraj.value(time);
+
+  // Print Solution Trajectories
+  //_saveTrajectory();
+}
+void DirColSwingUpPlanner::_saveTrajectory() {
+  const drake::trajectories::PiecewisePolynomial<double> utraj =
+      mDirCol->ReconstructInputTrajectory();
+  const drake::trajectories::PiecewisePolynomial<double> xtraj =
+      mDirCol->ReconstructStateTrajectory();
+
+    std::cout << "start" << std::endl;
+    std::cout << xtraj.start_time() << std::endl;
+    std::cout << utraj.start_time() << std::endl;
+    std::cout << "end" << std::endl;
+    std::cout << xtraj.end_time() << std::endl;
+    std::cout << utraj.end_time() << std::endl;
+    std::cout << xtraj.value(0.) << std::endl;
+    std::cout << xtraj.value(xtraj.end_time()) << std::endl;
+    exit(0);
 }
