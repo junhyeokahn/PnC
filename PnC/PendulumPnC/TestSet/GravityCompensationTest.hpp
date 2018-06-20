@@ -13,5 +13,4 @@ public:
     virtual ~GravityCompensationTest();
 
     virtual Eigen::VectorXd getTorqueInput();
-    virtual void initialize();
 };

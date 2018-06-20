@@ -15,11 +15,3 @@ Eigen::VectorXd GravityCompensationTest::getTorqueInput() {
 
     return ret;
 }
-
-void GravityCompensationTest::initialize() {
-    // Initialize Planner
-    if (!mIsInitialized) {
-        mIsInitialized = true;
-    }
-    // Initialize Controller
-}

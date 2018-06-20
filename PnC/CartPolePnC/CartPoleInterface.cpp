@@ -33,7 +33,6 @@ Eigen::VectorXd CartPoleInterface::getCommand(void* sensorData_) {
         mRobot->setInitialConfiguration(data->q);
         return Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
     } else {
-        mTest->initialize();
         DataManager::GetDataManager()->start();
         return mTest->getTorqueInput();
     }

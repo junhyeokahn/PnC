@@ -21,5 +21,4 @@ public:
     virtual ~Test() {};
 
     virtual Eigen::VectorXd getTorqueInput() = 0;
-    virtual void initialize() = 0;
 };
