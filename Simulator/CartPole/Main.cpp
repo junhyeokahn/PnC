@@ -171,7 +171,8 @@ int main() {
         viewer.record(THIS_COM"/ExperimentVideo");
     }
 
-    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    //viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(0, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3( 0.0,  -1.5, 0.9) * 10,
             ::osg::Vec3( 0.0,  0.0, 0.3),

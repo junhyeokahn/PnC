@@ -23,4 +23,5 @@ public:
     double mEffDes;
     Eigen::VectorXd mPosAct;
     Eigen::VectorXd mVelAct;
+    Eigen::VectorXd mEffAct;
 };

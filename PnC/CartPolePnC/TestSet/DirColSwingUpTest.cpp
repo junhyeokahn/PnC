@@ -12,11 +12,11 @@ DirColSwingUpTest::DirColSwingUpTest(RobotSystem* robot_): Test(robot_) {
     mEffDes = 0.0;
     mPosAct = Eigen::VectorXd::Zero(2);
     mVelAct = Eigen::VectorXd::Zero(2);
-    dataManager->RegisterData(&mPosDes, VECT2, "JPosDes", 2);
-    dataManager->RegisterData(&mVelDes, VECT2, "JVelDes", 2);
+    dataManager->RegisterData(&mPosDes, VECT, "JPosDes", 2);
+    dataManager->RegisterData(&mVelDes, VECT, "JVelDes", 2);
     dataManager->RegisterData(&mEffDes, DOUBLE, "JEffDes");
-    dataManager->RegisterData(&mPosAct, VECT2, "JPosAct", 2);
-    dataManager->RegisterData(&mVelAct, VECT2, "JVelAct", 2);
+    dataManager->RegisterData(&mPosAct, VECT, "JPosAct", 2);
+    dataManager->RegisterData(&mVelAct, VECT, "JVelAct", 2);
 
     printf("[DirCol Swing Up Test] Constructed\n");
 }
@@ -42,15 +42,6 @@ Eigen::VectorXd DirColSwingUpTest::getTorqueInput() {
     mEffDes = eff[0];
     mPosAct = mRobot->getQ();
     mVelAct = mRobot->getQdot();
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << mPosDes<< std::endl;
-    std::cout << "--" << std::endl;
-    std::cout << mVelDes<< std::endl;
-    std::cout << "--" << std::endl;
-    std::cout << mPosAct << std::endl;
-    std::cout << "--" << std::endl;
-    std::cout << mEffDes<< std::endl;
-    std::cout << "--" << std::endl;
 
     return ret;
 }

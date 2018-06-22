@@ -19,6 +19,7 @@ private:
     int mDof;
 
     Eigen::VectorXd mInit;
+    double mEffAct;
 
 public:
     CartPoleWorldNode(const dart::simulation::WorldPtr & world,

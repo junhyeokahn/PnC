@@ -72,13 +72,13 @@ void DirColSwingUpPlanner::_evalTrajecotry( double time,
       mDirCol->ReconstructInputTrajectory();
   const drake::trajectories::PiecewisePolynomial<double> xtraj =
       mDirCol->ReconstructStateTrajectory();
+  auto dummy = xtraj.value(time);
+
   if (xtraj.end_time() > time) {
-      //pos = xtraj.value(time).block(0, 0, 2, 1);
-      //vel = xtraj.value(time).block(0, 2, 2, 1);
       pos[0] = (xtraj.value(time))(0, 0);
-      pos[1] = (xtraj.value(time))(0, 1);
-      vel[0] = (xtraj.value(time))(0, 2);
-      vel[1] = (xtraj.value(time))(0, 3);
+      pos[1] = (xtraj.value(time))(1, 0);
+      vel[0] = (xtraj.value(time))(2, 0);
+      vel[1] = (xtraj.value(time))(3, 0);
       eff = utraj.value(time);
   } else {
       pos.setZero();
@@ -88,7 +88,7 @@ void DirColSwingUpPlanner::_evalTrajecotry( double time,
   }
 
   // Print Solution Trajectories
-  _saveTrajectory();
+  //_saveTrajectory();
 }
 
 void DirColSwingUpPlanner::_saveTrajectory() {

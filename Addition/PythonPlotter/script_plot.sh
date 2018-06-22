@@ -1,5 +1,4 @@
 #!/bin/bash
-plot_these=(PlotStateTrajectory
-            PlotInputTrajectory)
+plot_these=("PlotJoint")
 
 python plot_multiple.py  ${plot_these[*]}
