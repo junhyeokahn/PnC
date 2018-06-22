@@ -1,5 +1,6 @@
 #include "CartPolePnC/PlannerSet/DirColSwingUpPlanner.hpp"
 #include "Configuration.h"
+#include "Utilities.hpp"
 
 DirColSwingUpPlanner::DirColSwingUpPlanner() : Planner() {
     mTree = std::make_unique< RigidBodyTree<double> >();
@@ -58,6 +59,7 @@ void DirColSwingUpPlanner::_doPlan() {
     if (result != drake::solvers::SolutionResult::kSolutionFound) {
         std::cerr << "Failed to solve optimization for the swing-up trajectory"
             << std::endl;
+        exit(0);
     }
 }
 
@@ -70,24 +72,46 @@ void DirColSwingUpPlanner::_evalTrajecotry( double time,
       mDirCol->ReconstructInputTrajectory();
   const drake::trajectories::PiecewisePolynomial<double> xtraj =
       mDirCol->ReconstructStateTrajectory();
-  eff = utraj.value(time);
+  if (xtraj.end_time() > time) {
+      //pos = xtraj.value(time).block(0, 0, 2, 1);
+      //vel = xtraj.value(time).block(0, 2, 2, 1);
+      pos[0] = (xtraj.value(time))(0, 0);
+      pos[1] = (xtraj.value(time))(0, 1);
+      vel[0] = (xtraj.value(time))(0, 2);
+      vel[1] = (xtraj.value(time))(0, 3);
+      eff = utraj.value(time);
+  } else {
+      pos.setZero();
+      vel.setZero();
+      eff.setZero();
+      exit(0);
+  }
 
   // Print Solution Trajectories
-  //_saveTrajectory();
+  _saveTrajectory();
 }
-void DirColSwingUpPlanner::_saveTrajectory() {
-  const drake::trajectories::PiecewisePolynomial<double> utraj =
-      mDirCol->ReconstructInputTrajectory();
-  const drake::trajectories::PiecewisePolynomial<double> xtraj =
-      mDirCol->ReconstructStateTrajectory();
 
-    std::cout << "start" << std::endl;
-    std::cout << xtraj.start_time() << std::endl;
-    std::cout << utraj.start_time() << std::endl;
-    std::cout << "end" << std::endl;
-    std::cout << xtraj.end_time() << std::endl;
-    std::cout << utraj.end_time() << std::endl;
-    std::cout << xtraj.value(0.) << std::endl;
-    std::cout << xtraj.value(xtraj.end_time()) << std::endl;
+void DirColSwingUpPlanner::_saveTrajectory() {
+    const drake::trajectories::PiecewisePolynomial<double> utraj =
+        mDirCol->ReconstructInputTrajectory();
+    const drake::trajectories::PiecewisePolynomial<double> xtraj =
+        mDirCol->ReconstructStateTrajectory();
+    double startTime = xtraj.start_time();
+    double endTime = xtraj.end_time();
+    int numEval = std::floor((endTime - startTime) / SERVO_RATE);
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(4);
+    Eigen::VectorXd u = Eigen::VectorXd::Zero(1);
+    Eigen::VectorXd evalTime = Eigen::VectorXd::Zero(1);
+    evalTime[0] = startTime;
+    for (int i = 0; i < numEval; ++i) {
+        x = xtraj.value(evalTime[0]);
+        u = utraj.value(evalTime[0]);
+        myUtils::saveVector(x, "planned_state");
+        myUtils::saveVector(u, "planned_input");
+        myUtils::saveVector(evalTime, "time");
+        evalTime[0] += SERVO_RATE;
+    }
+
+    std::cout << "Trajectory Saved" << std::endl;
     exit(0);
 }

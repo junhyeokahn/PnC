@@ -110,7 +110,7 @@ int main() {
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/1000);
+    world->setTimeStep(1.0/1500);
 
     // ====================
     // Display Joints Frame
@@ -173,7 +173,7 @@ int main() {
 
     viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3( 0.0,  -1.5, 0.9) * 3,
+            ::osg::Vec3( 0.0,  -1.5, 0.9) * 10,
             ::osg::Vec3( 0.0,  0.0, 0.3),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
