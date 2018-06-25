@@ -38,7 +38,7 @@ void DirColSwingUpPlanner::_doPlan() {
     // Initial and Final State Constraint
     mDirCol->AddLinearConstraint(mDirCol->initial_state() ==
             param->initialState);
-    mDirCol->AddLinearConstraint(mDirCol->final_state() == 
+    mDirCol->AddLinearConstraint(mDirCol->final_state() ==
             param->finalState);
     // ========
     // Add Cost
@@ -63,55 +63,30 @@ void DirColSwingUpPlanner::_doPlan() {
     }
 }
 
-void DirColSwingUpPlanner::_evalTrajecotry( double time,
-                                            Eigen::VectorXd & pos,
-                                            Eigen::VectorXd & vel,
-                                            Eigen::VectorXd acc,
-                                            Eigen::VectorXd &eff ) {
-  const drake::trajectories::PiecewisePolynomial<double> utraj =
-      mDirCol->ReconstructInputTrajectory();
-  const drake::trajectories::PiecewisePolynomial<double> xtraj =
-      mDirCol->ReconstructStateTrajectory();
-  auto dummy = xtraj.value(time);
-
-  if (xtraj.end_time() > time) {
-      pos[0] = (xtraj.value(time))(0, 0);
-      pos[1] = (xtraj.value(time))(1, 0);
-      vel[0] = (xtraj.value(time))(2, 0);
-      vel[1] = (xtraj.value(time))(3, 0);
-      eff = utraj.value(time);
-  } else {
-      pos.setZero();
-      vel.setZero();
-      eff.setZero();
-      exit(0);
-  }
-
-  // Print Solution Trajectories
-  //_saveTrajectory();
-}
-
-void DirColSwingUpPlanner::_saveTrajectory() {
+void DirColSwingUpPlanner::_evalTrajectory( double time,
+        Eigen::VectorXd & pos,
+        Eigen::VectorXd & vel,
+        Eigen::VectorXd & acc,
+        Eigen::VectorXd & eff ) {
     const drake::trajectories::PiecewisePolynomial<double> utraj =
         mDirCol->ReconstructInputTrajectory();
     const drake::trajectories::PiecewisePolynomial<double> xtraj =
         mDirCol->ReconstructStateTrajectory();
-    double startTime = xtraj.start_time();
-    double endTime = xtraj.end_time();
-    int numEval = std::floor((endTime - startTime) / SERVO_RATE);
-    Eigen::VectorXd x = Eigen::VectorXd::Zero(4);
-    Eigen::VectorXd u = Eigen::VectorXd::Zero(1);
-    Eigen::VectorXd evalTime = Eigen::VectorXd::Zero(1);
-    evalTime[0] = startTime;
-    for (int i = 0; i < numEval; ++i) {
-        x = xtraj.value(evalTime[0]);
-        u = utraj.value(evalTime[0]);
-        myUtils::saveVector(x, "planned_state");
-        myUtils::saveVector(u, "planned_input");
-        myUtils::saveVector(evalTime, "time");
-        evalTime[0] += SERVO_RATE;
-    }
 
-    std::cout << "Trajectory Saved" << std::endl;
-    exit(0);
+    mParam->startTime = xtraj.start_time();
+    mParam->endTime = xtraj.end_time();
+
+    if (xtraj.end_time() > time) {
+        pos[0] = (xtraj.value(time))(0, 0);
+        pos[1] = (xtraj.value(time))(1, 0);
+        vel[0] = (xtraj.value(time))(2, 0);
+        vel[1] = (xtraj.value(time))(3, 0);
+        eff = utraj.value(time);
+    } else {
+        pos.setZero();
+        vel.setZero();
+        eff.setZero();
+        std::cout << "Try to evaluate trajectory at the wrong time" << std::endl;
+        exit(0);
+    }
 }

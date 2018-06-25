@@ -38,8 +38,7 @@ private:
     std::unique_ptr< drake::systems::trajectory_optimization::DirectCollocation > mDirCol;
 
     virtual void _doPlan();
-    virtual void _evalTrajecotry( double time, Eigen::VectorXd & pos,
-                                  Eigen::VectorXd & vel, Eigen::VectorXd acc,
+    virtual void _evalTrajectory( double time, Eigen::VectorXd & pos,
+                                  Eigen::VectorXd & vel, Eigen::VectorXd & acc,
                                   Eigen::VectorXd &eff );
-    void _saveTrajectory();
 };

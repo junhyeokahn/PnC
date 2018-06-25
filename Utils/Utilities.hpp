@@ -37,6 +37,12 @@ namespace myUtils
                       bool b_param);
     static std::list< std::string > gs_fileName_string; //global & static
 
+    // =========
+    // Read File
+    // =========
+    void readFile(std::string file_name_, std::vector<std::string> & _vec);
+    void splitString(std::string* str_array, std::string strTarget, std::string strTok );
+
     // ============
     // Pretty Print
     // ============

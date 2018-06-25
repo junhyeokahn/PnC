@@ -6,7 +6,7 @@ PATH_PACKAGE="/Users/junhyeokahn/Repository/PnC"
 cp $PATH_PACKAGE/ExperimentData/* $PATH_PACKAGE/ExperimentDataCheck/
 
 # Make video
-#ffmpeg -framerate 50 -i $PATH_PACKAGE/ExperimentVideo/image%06d.png $PATH_PACKAGE/ExperimentDataCheck/video.mp4
+ffmpeg -framerate 50 -i $PATH_PACKAGE/ExperimentVideo/image%06d.png $PATH_PACKAGE/ExperimentDataCheck/video.mp4
 
 # Remove every data for the next experiment
 rm $PATH_PACKAGE/ExperimentData/*

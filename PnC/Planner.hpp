@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include "Configuration.h"
+#include "Utilities.hpp"
 
 class PlanningParameter
 {
@@ -11,6 +13,8 @@ public:
 
     double startTime;
     double endTime;
+    int numState;
+    int numInput;
 private:
 };
 
@@ -33,7 +37,7 @@ public:
         } else if (mDoPlan & isParamSet) {
             std::cout << "Replan flag without new parameter set" << std::endl;
         };
-        _evalTrajecotry( time, pos, vel, acc, eff );
+        _evalTrajectory( time, pos, vel, acc, eff );
     }
 
     void doReplan(const std::shared_ptr<PlanningParameter> & param_) {
@@ -47,13 +51,47 @@ public:
         isParamSet = true;
     }
 
+    // file name looks like dircol_time_state_input
+    void saveTrajectory(const std::string & planner_type) {
+        double startTime = mParam->startTime;
+        double endTime = mParam->endTime;
+        int numEval = std::floor((endTime - startTime) / SERVO_RATE);
+        Eigen::VectorXd pos = Eigen::VectorXd::Zero(mParam->numState / 2 );
+        Eigen::VectorXd vel = Eigen::VectorXd::Zero(mParam->numState / 2);
+        Eigen::VectorXd acc = Eigen::VectorXd::Zero(mParam->numState / 2);
+        Eigen::VectorXd input = Eigen::VectorXd::Zero(mParam->numInput);
+        double evalTime(0.0);
+        Eigen::VectorXd aug =
+            Eigen::VectorXd::Zero(1 + mParam->numState + mParam->numInput);
+        std::string file_name =
+            "PnC/CartPolePnC/OfflineTrajectoryGeneration/TrajectoriesBin/";
+        file_name += planner_type;
+        file_name += "_";
+        file_name += "1";
+        file_name += "_";
+        file_name += std::to_string(mParam->numState);
+        file_name += "_";
+        file_name += std::to_string(mParam->numInput);
+
+        evalTime = startTime;
+        for (int i = 0; i < numEval; ++i) {
+            getPlan(evalTime, pos, vel, acc, input);
+            aug = Eigen::VectorXd::Zero(1 + mParam->numState + mParam->numInput);
+            aug << evalTime, pos, vel, input;
+            myUtils::saveVector(aug, file_name, true);
+            evalTime += SERVO_RATE;
+        }
+        std::cout << "[Trajectory Saved]" << std::endl;
+    }
+
 protected:
     bool mDoPlan;
     bool isParamSet;
     std::shared_ptr<PlanningParameter> mParam;
     // Do Planning with PlanningParameter.
     virtual void _doPlan() = 0;
-    virtual void _evalTrajecotry( double time, Eigen::VectorXd & pos,
-                                  Eigen::VectorXd & vel, Eigen::VectorXd acc,
-                                  Eigen::VectorXd &eff )= 0;
+    virtual void _evalTrajectory( double time, Eigen::VectorXd & pos,
+                                               Eigen::VectorXd & vel,
+                                               Eigen::VectorXd & acc,
+                                               Eigen::VectorXd &eff )= 0;
 };

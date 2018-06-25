@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <vector>
 
 namespace myUtils {
     Eigen::MatrixXd hStack(const Eigen::MatrixXd a,
@@ -74,7 +75,7 @@ namespace myUtils {
 
     void cleaningFile(std::string  _file_name, std::string & _ret_file, bool b_param){
         if(b_param)
-            _ret_file += THIS_COM"parameter_data/";
+            _ret_file += THIS_COM;
         else
             _ret_file += THIS_COM"ExperimentData/";
 
@@ -193,4 +194,36 @@ namespace myUtils {
         }
         return ang;
     }
+
+    void readFile(std::string _file_name, std::vector<std::string> & _vec){
+        std::ifstream  InputFile(_file_name.c_str());
+        std::string tempstring;
+        if(!InputFile.is_open()){
+            std::cout << "Data file load error... check the data file" << std::endl;
+            exit(0);
+        }
+        else{
+            while(!InputFile.eof()){
+                InputFile.clear();
+                std::getline(InputFile,tempstring);
+                _vec.push_back(tempstring);
+            }
+            InputFile.close();
+        }
+    }
+
+    void splitString(std::string* str_array, std::string strTarget, std::string strTok ){
+        int nCutPos = 0;
+        int nIndex = 0;
+        while ((nCutPos = strTarget.find_first_of(strTok)) != strTarget.npos){
+            if (nCutPos > 0){
+                str_array[nIndex++] = strTarget.substr(0, nCutPos);
+            }
+            strTarget = strTarget.substr(nCutPos+1);
+        }
+        if(strTarget.length() > 0){
+            str_array[nIndex++] = strTarget.substr(0, nCutPos);
+        }
+    }
+
 }

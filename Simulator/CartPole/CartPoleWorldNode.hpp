@@ -19,7 +19,12 @@ private:
     int mDof;
 
     Eigen::VectorXd mInit;
-    double mEffAct;
+    bool mIsVisualizeTrajectory;
+    std::string mTrajectoryFile;
+    std::vector<std::string> mFile;
+    std::string* mLine;
+    Eigen::VectorXd mPos;
+    Eigen::VectorXd mVel;
 
 public:
     CartPoleWorldNode(const dart::simulation::WorldPtr & world,
