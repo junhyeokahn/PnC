@@ -30,11 +30,15 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 
 # Gurobi
 find_package(Gurobi)
-include_directories(${GUROBI_INCLUDE_DIRS})
+if(GUROBI_FOUND)
+  include_directories(${GUROBI_INCLUDE_DIRS})
+endif()
 
 # Mosek
 find_package(Mosek)
-include_directories(${MOSEK_INCLUDE_DIRS})
+if(MOSEK_FOUND)
+  include_directories(${MOSEK_INCLUDE_DIRS})
+endif()
 
 ## =================
 ## Include Directory
