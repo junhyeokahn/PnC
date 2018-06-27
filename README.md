@@ -18,7 +18,7 @@ and stabilizing the system over the trajectories.
 
 ### Clone the repository
 ```
-$ git pull --recurse https://github.com/junhyeokahn/PnC.git
+$ git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
 
 ### Install Dependancies

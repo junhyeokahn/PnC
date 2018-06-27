@@ -1,4 +1,3 @@
-
 if [ "$(uname)" == "Darwin" ]; then
     mkdir drake_binary
     cd drake_binary
