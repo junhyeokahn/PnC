@@ -7,12 +7,14 @@
 
 class Interface;
 class CartPoleSensorData;
+class CartPoleCommand;
 
 class CartPoleWorldNode : public dart::gui::osg::WorldNode
 {
 private:
     Interface* mInterface;
     CartPoleSensorData* mSensorData;
+    CartPoleCommand* mCommand;
 
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;

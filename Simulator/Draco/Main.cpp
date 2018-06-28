@@ -2,8 +2,9 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/utils.hpp>
 #include <dart/utils/urdf/urdf.hpp>
-#include "PendulumWorldNode.hpp"
+#include "DracoWorldNode.hpp"
 #include "Configuration.h"
+#include "ParamHandler.hpp"
 
 void displayJointFrames(
     const dart::simulation::WorldPtr& world, 
@@ -32,7 +33,7 @@ void displayJointFrames(
 class OneStepProgress : public osgGA::GUIEventHandler
 {
 public:
-    OneStepProgress(PendulumWorldNode* worldnode): worldnode_(worldnode){  }
+    OneStepProgress(DracoWorldNode* worldnode): worldnode_(worldnode){  }
 
     /** Deprecated, Handle events, return true if handled, false otherwise. */
     virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& /*aa*/)
@@ -50,7 +51,7 @@ public:
         }
         return false;
     }
-    PendulumWorldNode* worldnode_;
+    DracoWorldNode* worldnode_;
 };
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
@@ -86,28 +87,35 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q(robot->getNumDofs());
     q.setZero();
 
-    //q[1] = 1.0;
+    q[1] = M_PI;
 
     robot->setPositions(q);
 }
 
 int main() {
+    // ========================
+    // Parse Yaml for Simulator
+    // ========================
+    ParamHandler handler(THIS_COM"Config/Draco/SIMULATION.yaml");
+    bool isRecord;
+    handler.getBoolean("IsRecord", isRecord);
+
     // ================================
     // Generate world and add skeletons
     // ================================
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"Simulator/SimulationModel/RobotModel/Pendulum/Pendulum.urdf");
+            THIS_COM"Simulator/SimulationModel/RobotModel/Draco/Draco.urdf");
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/1000);
+    world->setTimeStep(1.0/1500);
 
     // ====================
     // Display Joints Frame
     // ====================
-    displayJointFrames(world, robot);
+    //displayJointFrames(world, robot);
 
     // =====================
     // Initial configuration
@@ -139,9 +147,8 @@ int main() {
     // ================
     // Wrap a worldnode
     // ================
-
-    osg::ref_ptr<PendulumWorldNode> node
-        = new PendulumWorldNode(world, msm);
+    osg::ref_ptr<DracoWorldNode> node
+        = new DracoWorldNode(world, msm);
     node->setNumStepsPerCycle(30);
 
     // =====================
@@ -158,13 +165,16 @@ int main() {
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     viewer.addEventHandler(new OneStepProgress(node) );
-    //viewer.record(THIS_COM"/ExperimentVideo");
 
-    //std::cout << "=====================================" << std::endl;
-    //std::cout << viewer.getInstructions() << std::endl;
-    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM"/ExperimentVideo");
+    }
+
+    //viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(0, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3( 0.0,  -1.5, 0.9)*1.3,
+            ::osg::Vec3( 0.0,  -1.5, 0.9) * 10,
             ::osg::Vec3( 0.0,  0.0, 0.3),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());

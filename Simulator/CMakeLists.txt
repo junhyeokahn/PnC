@@ -1,2 +1,2 @@
 add_subdirectory(CartPole)
-add_subdirectory(Pendulum)
+add_subdirectory(Draco)

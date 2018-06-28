@@ -2,14 +2,15 @@
 
 #include "Interface.hpp"
 
-class CartPoleSensorData
+class DracoSensorData
 {
 public:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
+    Eigen::VectorXd jtrq;
 };
 
-class CartPoleCommand
+class DracoCommand
 {
 public:
     Eigen::VectorXd q;
@@ -18,13 +19,13 @@ public:
 };
 
 
-class CartPoleInterface: public Interface
+class DracoInterface: public Interface
 {
 protected:
     void _constructTest();
 
 public:
-    CartPoleInterface();
-    virtual ~CartPoleInterface();
+    DracoInterface();
+    virtual ~DracoInterface();
     virtual void getCommand(void* sensorData_, void* commandData_);
 };

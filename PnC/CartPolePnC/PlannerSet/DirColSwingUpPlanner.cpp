@@ -10,7 +10,7 @@ DirColSwingUpPlanner::DirColSwingUpPlanner() : Planner() {
     mPlant = std::make_unique< drake::systems::RigidBodyPlant<double> >(
             std::move(mTree), 0.0);
 
-    printf("[DirCol Swing Up Test] Constructed\n");
+    printf("[DirCol Swing Up Planner] Constructed\n");
 }
 
 DirColSwingUpPlanner::~DirColSwingUpPlanner() {

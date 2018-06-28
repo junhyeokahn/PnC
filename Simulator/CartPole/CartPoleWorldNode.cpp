@@ -11,6 +11,7 @@ CartPoleWorldNode::CartPoleWorldNode(const dart::simulation::WorldPtr & world_,
 
     mInterface = new CartPoleInterface();
     mSensorData = new CartPoleSensorData();
+    mCommand = new CartPoleCommand();
 
     mSkel = world_->getSkeleton("cart_pole");
     mDof = mSkel->getNumDofs();
@@ -33,6 +34,9 @@ CartPoleWorldNode::CartPoleWorldNode(const dart::simulation::WorldPtr & world_,
 }
 
 CartPoleWorldNode::~CartPoleWorldNode() {
+    delete mInterface;
+    delete mSensorData;
+    delete mCommand;
     delete mLine;
 }
 
@@ -52,8 +56,8 @@ void CartPoleWorldNode::customPreStep() {
         ++i;
         if (i == mFile.size())  exit(0);
     } else {
-        Eigen::VectorXd cmd = mInterface->getCommand(mSensorData);
-        mTorqueCommand[0] = cmd[0];
+        mInterface->getCommand(mSensorData, mCommand);
+        mTorqueCommand[0] = mCommand->jtrq[0];
     }
 
     mSkel->setForces(mTorqueCommand);

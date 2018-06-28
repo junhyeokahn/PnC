@@ -2,6 +2,7 @@
 #define INTERFACE_H
 
 #include <Eigen/Dense>
+#include <memory>
 
 class Test;
 class RobotSystem;
@@ -19,7 +20,7 @@ public:
     virtual ~Interface() {};
 
     // Get Command through Test
-    virtual Eigen::VectorXd getCommand(void* sensorData_) = 0;
+    virtual void getCommand(void* sensorData_, void* commandData_) = 0;
 };
 
 #endif /* INTERFACE_H */

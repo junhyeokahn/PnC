@@ -2,21 +2,10 @@
 #include "CartPolePnC/PlannerSet/PlannerSet.hpp"
 #include "RobotSystem.hpp"
 #include "DataManager.hpp"
+#include "ParamHandler.hpp"
 
 DirColSwingUpTest::DirColSwingUpTest(RobotSystem* robot_): Test(robot_) {
     mPlanner = new DirColSwingUpPlanner();
-
-    DataManager* dataManager = DataManager::GetDataManager();
-    mPosDes = Eigen::VectorXd::Zero(2);
-    mVelDes = Eigen::VectorXd::Zero(2);
-    mEffDes = 0.0;
-    mPosAct = Eigen::VectorXd::Zero(2);
-    mVelAct = Eigen::VectorXd::Zero(2);
-    dataManager->RegisterData(&mPosDes, VECT, "JPosDes", 2);
-    dataManager->RegisterData(&mVelDes, VECT, "JVelDes", 2);
-    dataManager->RegisterData(&mEffDes, DOUBLE, "JEffDes");
-    dataManager->RegisterData(&mPosAct, VECT, "JPosAct", 2);
-    dataManager->RegisterData(&mVelAct, VECT, "JVelAct", 2);
 
     printf("[DirCol Swing Up Test] Constructed\n");
 }
@@ -25,44 +14,53 @@ DirColSwingUpTest::~DirColSwingUpTest() {
     delete mPlanner;
 }
 
-Eigen::VectorXd DirColSwingUpTest::getTorqueInput() {
-    Eigen::VectorXd ret = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd pos = Eigen::VectorXd::Zero(mRobot->getNumDofs());
-    Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumDofs());
-    Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumDofs());
-    Eigen::VectorXd eff = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+void DirColSwingUpTest::getTorqueInput(void* commandData_) {
 
-    mPlanner->getPlan(mRobot->getTime(), pos, vel, acc, eff);
+    CartPoleCommand* cmd = (CartPoleCommand*) commandData_;
+    cmd->q = Eigen::VectorXd::Zero(mRobot->getNumDofs());
+    cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
+    cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    Eigen::VectorXd dummy;
 
-    ret = eff;
-
-    //Register Data
-    mPosDes = pos;
-    mVelDes = vel;
-    mEffDes = eff[0];
-    mPosAct = mRobot->getQ();
-    mVelAct = mRobot->getQdot();
-
-    return ret;
+    mPlanner->getPlan(mRobot->getTime(), cmd->q,
+                                         cmd->qdot,
+                                         dummy,
+                                         cmd->jtrq);
 }
 
 void DirColSwingUpTest::initialize() {
     // Update Planning Parameter
     std::shared_ptr<DirColSwingUpPlanningParameter> param =
         std::make_shared<DirColSwingUpPlanningParameter>();
-    Eigen::VectorXd state(2*mRobot->getNumDofs());
-    state << mRobot->getQ(), mRobot->getQdot();
-    // TODO: use a yaml
-    param->initialState = Eigen::Vector4d(0., M_PI, 0.,  0.);
-    param->finalState = Eigen::VectorXd::Zero(4);
-    param->numTimeSample = 21;
-    param->minimumTimeStep = 0.1;
-    param->maximumTimeStep = 0.4;
-    param->startTime = mRobot->getTime();
-    param->endTime = 100.0;
-    param->torqueLimit = 40.0;
-    param->R = 10.;
-    param->timeSpanInit = 4.0;
+
+    param->numState = 4;
+    param->numInput = 1;
+    ParamHandler handler(THIS_COM"Config/CartPole/DIRCOLSWINGUP.yaml");
+    double tmp_double;
+    std::vector<double> tmp_vector;
+    tmp_vector.resize(param->numState);
+    handler.getVector("InitialState", tmp_vector);
+    param->initialState = Eigen::Vector4d(tmp_vector[0], tmp_vector[1],
+                                          tmp_vector[2], tmp_vector[3]);
+    handler.getVector("FinalState", tmp_vector);
+    param->finalState= Eigen::Vector4d(tmp_vector[0], tmp_vector[1],
+                                          tmp_vector[2], tmp_vector[3]);
+    handler.getValue("NumTimeSample", tmp_double);
+    param->numTimeSample = tmp_double;
+    handler.getValue("MinimumTimeStep", tmp_double);
+    param->minimumTimeStep = tmp_double;
+    handler.getValue("MaximumTimeStep", tmp_double);
+    param->maximumTimeStep = tmp_double;
+    handler.getValue("StartTime", tmp_double);
+    param->startTime = tmp_double;
+    handler.getValue("EndTime", tmp_double);
+    param->endTime = tmp_double;
+    handler.getValue("TorqueLimit", tmp_double);
+    param->torqueLimit = tmp_double;
+    handler.getValue("InputCost", tmp_double);
+    param->R = tmp_double;
+    handler.getValue("TimeSpanInit", tmp_double);
+    param->timeSpanInit = tmp_double;
     mPlanner->updatePlanningParameter(param);
 
     isInitialized = true;

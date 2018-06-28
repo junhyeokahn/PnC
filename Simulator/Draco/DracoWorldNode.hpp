@@ -6,24 +6,31 @@
 #include <Eigen/Dense>
 
 class Interface;
-class PendulumSensorData;
+class DracoSensorData;
+class DracoCommandData;
 
-class PendulumWorldNode : public dart::gui::osg::WorldNode
+class DracoWorldNode : public dart::gui::osg::WorldNode
 {
 private:
     Interface* mInterface;
-    PendulumSensorData* mSensorData;
+    DracoSensorData* mSensorData;
 
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
 
     Eigen::VectorXd mInit;
+    bool mIsVisualizeTrajectory;
+    std::string mTrajectoryFile;
+    std::vector<std::string> mFile;
+    std::string* mLine;
+    Eigen::VectorXd mPos;
+    Eigen::VectorXd mVel;
 
 public:
-    PendulumWorldNode(const dart::simulation::WorldPtr & world,
+    DracoWorldNode(const dart::simulation::WorldPtr & world,
                       osgShadow::MinimalShadowMap *);
-    virtual ~PendulumWorldNode();
+    virtual ~DracoWorldNode();
 
     void customPreStep() override;
 };

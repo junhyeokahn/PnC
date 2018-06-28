@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Test.hpp"
+#include "CartPolePnC/CartPoleInterface.hpp"
 
 class RobotSystem;
 class Planner;
 class PlanningParameter;
+class CartPoleCommand;
 
 class DirColSwingUpTest: public Test
 {
@@ -15,13 +17,6 @@ public:
     DirColSwingUpTest(RobotSystem*);
     virtual ~DirColSwingUpTest();
 
-    virtual Eigen::VectorXd getTorqueInput();
+    virtual void getTorqueInput(void* commandData_);
     virtual void initialize();
-
-    Eigen::VectorXd mPosDes;
-    Eigen::VectorXd mVelDes;
-    double mEffDes;
-    Eigen::VectorXd mPosAct;
-    Eigen::VectorXd mVelAct;
-    Eigen::VectorXd mEffAct;
 };

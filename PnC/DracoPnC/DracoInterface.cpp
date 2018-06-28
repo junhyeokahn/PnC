@@ -1,13 +1,13 @@
 #include "RobotSystem.hpp"
-#include "CartPolePnC/CartPoleInterface.hpp"
-#include "CartPolePnC/TestSet/TestSet.hpp"
+#include "DracoPnC/DracoInterface.hpp"
+#include "DracoPnC/TestSet/TestSet.hpp"
 #include "Configuration.h"
 #include "Utilities.hpp"
 #include "DataManager.hpp"
 #include "ParamHandler.hpp"
 
-CartPoleInterface::CartPoleInterface(): Interface() {
-    mRobot = new RobotSystem(1, THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf");
+DracoInterface::(): Interface() {ecafretnIocarD
+    mRobot = new RobotSystem(6, THIS_COM"Simulator/SimulationModel/RobotModel/Draco/Draco.urdf");
 
     // Choose Test
     _constructTest();
@@ -19,18 +19,18 @@ CartPoleInterface::CartPoleInterface(): Interface() {
     printf("[CartPole Interface] Constructed\n");
 }
 
-CartPoleInterface::~CartPoleInterface() {
+DracoInterface::~DracoInterface() {
     delete mRobot;
     delete mTest;
 }
 
-void CartPoleInterface::getCommand(void* sensorData_, void* commandData_) {
+void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
 
-    CartPoleSensorData* data = (CartPoleSensorData*) sensorData_;
+    DracoSensorData* data = (DracoSensorData*) sensorData_;
     mRobot->updateSystem(mTime, data->q, data->qdot, false);
     if (mTime < mInitTime) {
         mRobot->setInitialConfiguration(data->q);
-        CartPoleCommand* cmd = (CartPoleCommand*) commandData_;
+        DracoCommand* cmd = (DracoCommand*) commandData_;
         cmd->q = data->q;
         cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
         cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
@@ -43,14 +43,14 @@ void CartPoleInterface::getCommand(void* sensorData_, void* commandData_) {
     mTime += SERVO_RATE;
 }
 
-void CartPoleInterface::_constructTest() {
-    ParamHandler handler(THIS_COM"Config/CartPole/INTERFACE.yaml");
+void DracoInterface::_constructTest() {
+    ParamHandler handler(THIS_COM"Config/Draco/INTERFACE.yaml");
     std::string tmp_string;
     handler.getString("TestName", tmp_string);
-    if (tmp_string == "DirColSwingUpTest") {
-        mTest = new DirColSwingUpTest(mRobot);
+    if (tmp_string == "GravityCompensation") {
+        mTest = new GravityCompensationTest(mRobot);
     } else {
-        printf("[Interface] There is no test matching with the name\n");
+        printf("[Interface] There is no test matching test with the name\n");
         exit(0);
     }
 }
