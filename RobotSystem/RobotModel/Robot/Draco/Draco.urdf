@@ -1,0 +1,583 @@
+<robot
+  name="Draco">
+
+  <!--<link name="world" />-->
+  <!--<joint name="ground_joint" type="fixed">-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<parent link="world" />-->
+      <!--<child link="torso" />-->
+  <!--</joint>-->
+
+  <link
+    name="torso">
+    <inertial>
+      <origin
+        xyz="-0.0133907728940907 0.000753510365864796 -0.187273411666051"
+        rpy="0 0 0" />
+      <mass
+        value="6.20812004330114" />
+      <inertia
+        ixx="0.0585154591166426"
+        ixy="-9.46724624145663E-05"
+        ixz="-0.00614431919973963"
+        iyy="0.0651574953784801"
+        iyz="-0.000230611945696951"
+        izz="0.0178352105631859" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/torso_.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/torso.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <link
+    name="lHipYaw">
+    <inertial>
+      <origin
+        xyz="-0.00133077571048809 0.0767264808447608 0.0331458698784674"
+        rpy="0 0 0" />
+      <mass
+        value="0.892151245856688" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lHipYaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/lHipYaw.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="lHipYaw"
+    type="continuous">
+    <origin
+      xyz="-0.0222250000000002 0.0870035316828367 -0.29508"
+      rpy="1.92592994438724E-34 0 0" />
+    <parent
+      link="torso" />
+    <child
+      link="lHipYaw" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="lHipRoll">
+    <inertial>
+      <origin
+        xyz="0.00339132677797452 0.0206605337063556 -0.0257292475385931"
+        rpy="0 0 0" />
+      <mass
+        value="0.357278398824283" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lHipRoll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/lHipRoll.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="lHipRoll"
+    type="continuous">
+    <origin
+      xyz="0 0.0699999999999993 -0.0200000000000001"
+      rpy="1.92592994438724E-34 0 0" />
+    <parent
+      link="lHipYaw" />
+    <child
+      link="lHipRoll" />
+    <axis
+      xyz="1 0 0" />
+  </joint>
+  <link
+    name="lHipPitch">
+    <inertial>
+      <origin
+        xyz="0.000893169405024874 0.00664975930349293 -0.240107607669368"
+        rpy="0 0 0" />
+      <mass
+        value="3.50208712499242" />
+      <inertia
+        ixx="0.0554597539343357"
+        ixy="-4.96353832634567E-05"
+        ixz="0.00387350926640959"
+        iyy="0.0594708575968679"
+        iyz="-8.76098197585977E-05"
+        izz="0.00586717920757217" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lHipPitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/lHipPitch.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="lHipPitch"
+    type="continuous">
+    <origin
+      xyz="0 0.0099999999999999 -0.065"
+      rpy="0 0 0" />
+    <parent
+      link="lHipRoll" />
+    <child
+      link="lHipPitch" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="lKnee">
+    <inertial>
+      <origin
+        xyz="-0.0160694818031384 0.0166915332296556 -0.247821663323642"
+        rpy="0 0 0" />
+      <mass
+        value="1.92207078647823" />
+      <inertia
+        ixx="0.0223500007162276"
+        ixy="1.90813341270288E-06"
+        ixz="-0.000469201405070835"
+        iyy="0.0239506799617116"
+        iyz="-3.52672806306326E-05"
+        izz="0.0016106132009756" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lKnee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/lKnee.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="lKnee"
+    type="continuous">
+    <origin
+      xyz="0 -0.016750000238715 -0.48"
+      rpy="1.92592994438724E-34 0 0" />
+    <parent
+      link="lHipPitch" />
+    <child
+      link="lKnee" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="lAnkle">
+    <inertial>
+      <origin
+        xyz="0.0106585017260504 -5.2874776534928E-06 -0.0442754848176794"
+        rpy="0 0 0" />
+      <mass
+        value="0.308587643244722" />
+      <inertia
+        ixx="9.25348009777962E-05"
+        ixy="2.93058689550461E-09"
+        ixz="3.47135990507816E-05"
+        iyy="0.000105757059469695"
+        iyz="-1.13707644905716E-08"
+        izz="1.32222791303708E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lAnkle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/lAnkle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lAnkle"
+    type="continuous">
+    <origin
+      xyz="0.00107750129935319 0.0167500014015612 -0.480000014901359"
+      rpy="1.92592994438724E-34 0 0" />
+    <parent
+      link="lKnee" />
+    <child
+      link="lAnkle" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+
+hi
+  <link
+    name="rHipYaw">
+    <inertial>
+      <origin
+        xyz="0.0013307756714234 -0.0767264807275769 0.0331458699108186"
+        rpy="0 0 0" />
+      <mass
+        value="0.89215124347132" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rHipYaw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/rHipYaw.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="rHipYaw"
+    type="continuous">
+    <origin
+      xyz="-0.022225 -0.086996 -0.29508"
+      rpy="1.9259E-34 0 0" />
+    <parent
+      link="torso" />
+    <child
+      link="rHipYaw" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="rHipRoll">
+    <inertial>
+      <origin
+        xyz="0.00339132768808093 -0.0206605359083746 -0.0257292459243485"
+        rpy="0 0 0" />
+      <mass
+        value="0.357278415264791" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rHipRoll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/rHipRoll.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="rHipRoll"
+    type="continuous">
+    <origin
+      xyz="0 -0.07 -0.02"
+      rpy="1.9259E-34 0 0" />
+    <parent
+      link="rHipYaw" />
+    <child
+      link="rHipRoll" />
+    <axis
+      xyz="1 0 0" />
+  </joint>
+  <link
+    name="rHipPitch">
+    <inertial>
+      <origin
+        xyz="0.00089317071447173 0.00664975895604998 -0.240107606129076"
+        rpy="0 0 0" />
+      <mass
+        value="3.50208703325148" />
+      <inertia
+        ixx="0.0554597533042375"
+        ixy="-4.96354116087342E-05"
+        ixz="0.00387350945211868"
+        iyy="0.0594708567299539"
+        iyz="-8.76095223056825E-05"
+        izz="0.00586717901421215" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rHipPitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/rHipPitch.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="rHipPitch"
+    type="continuous">
+    <origin
+      xyz="0 -0.01 -0.065"
+      rpy="1.9259E-34 0 0" />
+    <parent
+      link="rHipRoll" />
+    <child
+      link="rHipPitch" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="rKnee">
+    <inertial>
+      <origin
+        xyz="-0.0160694817441243 -0.016808467447866 -0.247821663241633"
+        rpy="0 0 0" />
+      <mass
+        value="1.92207077376842" />
+      <inertia
+        ixx="0.0223500008052621"
+        ixy="1.90814002856742E-06"
+        ixz="-0.000469201376317993"
+        iyy="0.023950680051575"
+        iyz="-3.52673166240163E-05"
+        izz="0.00161061320154054" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rKnee.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin-->
+        <!--xyz="0 0 0"-->
+        <!--rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/rKnee.STL" />-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+  <joint
+    name="rKnee"
+    type="continuous">
+    <origin
+      xyz="0 0.01675 -0.48"
+      rpy="1.9259E-34 0 0" />
+    <parent
+      link="rHipPitch" />
+    <child
+      link="rKnee" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="rAnkle">
+    <inertial>
+      <origin
+        xyz="0.0106585017298252 -5.28747676266372E-06 -0.0442754848373264"
+        rpy="0 0 0" />
+      <mass
+        value="0.308587643109314" />
+      <inertia
+        ixx="9.25348007064494E-05"
+        ixy="2.93059145991699E-09"
+        ixz="3.47135989993722E-05"
+        iyy="0.000105757059196872"
+        iyz="-1.13707770038274E-08"
+        izz="1.32222791289039E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rAnkle.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/rAnkle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rAnkle"
+    type="continuous">
+    <origin
+      xyz="0.0010775 -0.01675 -0.48"
+      rpy="1.9259E-34 0 0" />
+    <parent
+      link="rKnee" />
+    <child
+      link="rAnkle" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+</robot>
