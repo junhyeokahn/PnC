@@ -6,8 +6,8 @@
 #include "DataManager.hpp"
 #include "ParamHandler.hpp"
 
-DracoInterface::(): Interface() {ecafretnIocarD
-    mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/RobotModel/Draco/Draco.urdf");
+DracoInterface::(): Interface() {
+    mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
 
     // Choose Test
     _constructTest();

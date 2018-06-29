@@ -84,11 +84,12 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
-    Eigen::VectorXd q(robot->getNumDofs());
-    q.setZero();
-
-    q[1] = M_PI;
-
+    Eigen::VectorXd q = robot->getPositions();
+    int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
+    int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
+    q[lAnkleIdx] = M_PI/2;
+    q[rAnkleIdx] = M_PI/2;
+    q[5] = 1.45;
     robot->setPositions(q);
 }
 
@@ -105,8 +106,11 @@ int main() {
     // ================================
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
+    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
+            THIS_COM"RobotSystem/RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"RobotSystem/RobotModel/Robot/RobotModel/Draco/Draco.urdf");
+            THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
+    world->addSkeleton(ground);
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -115,7 +119,7 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    displayJointFrames(world, robot);
+    //displayJointFrames(world, robot);
 
     // =====================
     // Initial configuration
@@ -173,7 +177,7 @@ int main() {
 
     viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3( 0.0,  -1.5, 0.9) * 3,
+            ::osg::Vec3( 5.14,  3.28, 1.8)*1.1,
             ::osg::Vec3( 0.0,  0.2, 0.0),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());

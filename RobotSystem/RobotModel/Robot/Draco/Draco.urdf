@@ -1,12 +1,12 @@
 <robot
   name="Draco">
 
-  <!--<link name="world" />-->
-  <!--<joint name="ground_joint" type="fixed">-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<parent link="world" />-->
-      <!--<child link="torso" />-->
-  <!--</joint>-->
+  <link name="world" />
+  <joint name="ground_joint" type="floating">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="world" />
+      <child link="torso" />
+  </joint>
 
   <link
     name="torso">
@@ -30,7 +30,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/torso_.STL" />
+          filename="meshes/torso.STL" />
       </geometry>
       <material
         name="">
@@ -305,7 +305,7 @@
     type="continuous">
     <origin
       xyz="0.00107750129935319 0.0167500014015612 -0.480000014901359"
-      rpy="1.92592994438724E-34 0 0" />
+      rpy="0 -1.57 0" />
     <parent
       link="lKnee" />
     <child
@@ -519,7 +519,7 @@ hi
     type="continuous">
     <origin
       xyz="0 0.01675 -0.48"
-      rpy="1.9259E-34 0 0" />
+      rpy="0 0 0" />
     <parent
       link="rHipPitch" />
     <child
@@ -572,7 +572,7 @@ hi
     type="continuous">
     <origin
       xyz="0.0010775 -0.01675 -0.48"
-      rpy="1.9259E-34 0 0" />
+      rpy="0 -1.57 0" />
     <parent
       link="rKnee" />
     <child
