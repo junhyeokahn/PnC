@@ -106,7 +106,7 @@ int main() {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"Simulator/SimulationModel/RobotModel/Draco/Draco.urdf");
+            THIS_COM"RobotSystem/RobotModel/Robot/RobotModel/Draco/Draco.urdf");
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);

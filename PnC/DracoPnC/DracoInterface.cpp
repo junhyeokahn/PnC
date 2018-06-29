@@ -7,7 +7,7 @@
 #include "ParamHandler.hpp"
 
 DracoInterface::(): Interface() {ecafretnIocarD
-    mRobot = new RobotSystem(6, THIS_COM"Simulator/SimulationModel/RobotModel/Draco/Draco.urdf");
+    mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/RobotModel/Draco/Draco.urdf");
 
     // Choose Test
     _constructTest();
