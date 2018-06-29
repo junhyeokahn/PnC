@@ -1,6 +1,3 @@
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/junhyeokahn/cmake.git
-[submodule "Simulator/SimulationModel"]
-	path = Simulator/SimulationModel
-	url = https://github.com/junhyeokahn/SimulationModel.git
