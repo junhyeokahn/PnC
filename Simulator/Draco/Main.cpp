@@ -165,6 +165,7 @@ int main() {
     viewer.switchHeadlights(false);
     msm->setLight(viewer.getLightSource(0)->getLight());
     ::osg::Vec3 p1(1.0, 0.2, 1.5);
+    p1 = p1*0.7;
     viewer.getLightSource(0)->getLight()->setPosition(::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -177,8 +178,8 @@ int main() {
 
     viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3( 5.14,  3.28, 1.8)*1.1,
-            ::osg::Vec3( 0.0,  0.2, 0.0),
+            ::osg::Vec3( 5.14,  2.28, 3.0)*0.8,
+            ::osg::Vec3( 0.0,  0.2, 0.5),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
     viewer.run();

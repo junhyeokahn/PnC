@@ -30,7 +30,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/torso.STL" />
+          filename="meshes/torso.dae" />
       </geometry>
       <material
         name="">
@@ -44,7 +44,7 @@
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/torso.STL" />-->
+          <!--filename="meshes/torso.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -70,7 +70,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lHipYaw.STL" />
+          filename="meshes/lHipYaw.dae" />
       </geometry>
       <material
         name="">
@@ -84,7 +84,7 @@
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/lHipYaw.STL" />-->
+          <!--filename="meshes/lHipYaw.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -123,7 +123,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lHipRoll.STL" />
+          filename="meshes/lHipRoll.dae" />
       </geometry>
       <material
         name="">
@@ -137,7 +137,7 @@
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/lHipRoll.STL" />-->
+          <!--filename="meshes/lHipRoll.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -176,7 +176,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lHipPitch.STL" />
+          filename="meshes/lHipPitch.dae" />
       </geometry>
       <material
         name="">
@@ -190,7 +190,7 @@
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/lHipPitch.STL" />-->
+          <!--filename="meshes/lHipPitch.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -229,7 +229,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lKnee.STL" />
+          filename="meshes/lKnee.dae" />
       </geometry>
       <material
         name="">
@@ -243,7 +243,7 @@
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/lKnee.STL" />-->
+          <!--filename="meshes/lKnee.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -282,7 +282,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lAnkle.STL" />
+          filename="meshes/lAnkle.dae" />
       </geometry>
       <material
         name="">
@@ -296,7 +296,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/lAnkle.STL" />
+          filename="meshes/lAnkle.dae" />
       </geometry>
     </collision>
   </link>
@@ -337,7 +337,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rHipYaw.STL" />
+          filename="meshes/rHipYaw.dae" />
       </geometry>
       <material
         name="">
@@ -351,7 +351,7 @@ hi
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/rHipYaw.STL" />-->
+          <!--filename="meshes/rHipYaw.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -390,7 +390,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rHipRoll.STL" />
+          filename="meshes/rHipRoll.dae" />
       </geometry>
       <material
         name="">
@@ -404,7 +404,7 @@ hi
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/rHipRoll.STL" />-->
+          <!--filename="meshes/rHipRoll.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -443,7 +443,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rHipPitch.STL" />
+          filename="meshes/rHipPitch.dae" />
       </geometry>
       <material
         name="">
@@ -457,7 +457,7 @@ hi
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/rHipPitch.STL" />-->
+          <!--filename="meshes/rHipPitch.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -496,7 +496,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rKnee.STL" />
+          filename="meshes/rKnee.dae" />
       </geometry>
       <material
         name="">
@@ -510,7 +510,7 @@ hi
         <!--rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh-->
-          <!--filename="meshes/rKnee.STL" />-->
+          <!--filename="meshes/rKnee.dae" />-->
       <!--</geometry>-->
     <!--</collision>-->
   </link>
@@ -549,7 +549,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rAnkle.STL" />
+          filename="meshes/rAnkle.dae" />
       </geometry>
       <material
         name="">
@@ -563,7 +563,7 @@ hi
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/rAnkle.STL" />
+          filename="meshes/rAnkle.dae" />
       </geometry>
     </collision>
   </link>
