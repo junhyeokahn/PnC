@@ -115,7 +115,7 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    //displayJointFrames(world, robot);
+    displayJointFrames(world, robot);
 
     // =====================
     // Initial configuration
@@ -160,7 +160,7 @@ int main() {
     viewer.simulate(false);
     viewer.switchHeadlights(false);
     msm->setLight(viewer.getLightSource(0)->getLight());
-    ::osg::Vec3 p1(1.0, 0.2 , 1.5);
+    ::osg::Vec3 p1(1.0, 0.2, 1.5);
     viewer.getLightSource(0)->getLight()->setPosition(::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -171,11 +171,10 @@ int main() {
         viewer.record(THIS_COM"/ExperimentVideo");
     }
 
-    //viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    viewer.setUpViewInWindow(0, 0, 500, 500);
+    viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3( 0.0,  -1.5, 0.9) * 10,
-            ::osg::Vec3( 0.0,  0.0, 0.3),
+            ::osg::Vec3( 0.0,  -1.5, 0.9) * 3,
+            ::osg::Vec3( 0.0,  0.2, 0.0),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
     viewer.run();
