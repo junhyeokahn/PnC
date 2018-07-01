@@ -28,7 +28,6 @@ public:
     void getPlan( double time,
                   Eigen::VectorXd & pos,
                   Eigen::VectorXd & vel,
-                  Eigen::VectorXd & acc,
                   Eigen::VectorXd & eff ) {
         if (mDoPlan & isParamSet) {
             _doPlan();
@@ -37,7 +36,7 @@ public:
         } else if (mDoPlan & isParamSet) {
             std::cout << "Replan flag without new parameter set" << std::endl;
         };
-        _evalTrajectory( time, pos, vel, acc, eff );
+        _evalTrajectory( time, pos, vel, eff );
     }
 
     void doReplan(const std::shared_ptr<PlanningParameter> & param_) {
@@ -58,14 +57,11 @@ public:
         int numEval = std::floor((endTime - startTime) / SERVO_RATE);
         Eigen::VectorXd pos = Eigen::VectorXd::Zero(mParam->numState / 2 );
         Eigen::VectorXd vel = Eigen::VectorXd::Zero(mParam->numState / 2);
-        Eigen::VectorXd acc = Eigen::VectorXd::Zero(mParam->numState / 2);
         Eigen::VectorXd input = Eigen::VectorXd::Zero(mParam->numInput);
         double evalTime(0.0);
         Eigen::VectorXd aug =
             Eigen::VectorXd::Zero(1 + mParam->numState + mParam->numInput);
-        std::string file_name =
-            "PnC/CartPolePnC/OfflineTrajectoryGeneration/TrajectoriesBin/";
-        file_name += planner_type;
+        std::string file_name = planner_type;
         file_name += "_";
         file_name += "1";
         file_name += "_";
@@ -75,7 +71,7 @@ public:
 
         evalTime = startTime;
         for (int i = 0; i < numEval; ++i) {
-            getPlan(evalTime, pos, vel, acc, input);
+            getPlan(evalTime, pos, vel, input);
             aug = Eigen::VectorXd::Zero(1 + mParam->numState + mParam->numInput);
             aug << evalTime, pos, vel, input;
             myUtils::saveVector(aug, file_name, true);
@@ -92,6 +88,5 @@ protected:
     virtual void _doPlan() = 0;
     virtual void _evalTrajectory( double time, Eigen::VectorXd & pos,
                                                Eigen::VectorXd & vel,
-                                               Eigen::VectorXd & acc,
-                                               Eigen::VectorXd &eff )= 0;
+                                               Eigen::VectorXd & eff ) = 0;
 };

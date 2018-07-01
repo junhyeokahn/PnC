@@ -7,7 +7,7 @@
 #include "ParamHandler.hpp"
 
 CartPoleInterface::CartPoleInterface(): Interface() {
-    mRobot = new RobotSystem(1, THIS_COM"RobotSystem/RobotModel/Robot/RobotModel/CartPole/CartPole.urdf");
+    mRobot = new RobotSystem(1, THIS_COM"RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf");
 
     // Choose Test
     _constructTest();

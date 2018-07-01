@@ -22,9 +22,9 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
             mDim = 3;
             mType = "LinkRPY";
             break;
-        case TaskType::CENTROID:
-            mDim = 6;
-            mType = "Centroid";
+        case TaskType::COM:
+            mDim = 3;
+            mType = "CoM";
         default:
             std::cout << "[Task] Type is not Specified" << std::endl;
     }
@@ -114,14 +114,9 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                        }
                                        break;
                                    }
-            case TaskType::CENTROID:{
-                                        pos_act.head(3) = Eigen::VectorXd::Zero(3);
-                                        pos_act.tail(3) = mRobot->getCoMPosition();
+            case TaskType::COM:{
+                                        pos_act = mRobot->getCoMPosition();
                                         vel_act = mRobot->getCentroidVelocity();
-                                        for (int i = 0; i < 3; ++i) {
-                                            mKp[i] = 0.;
-                                            mKd[i] = 5.;
-                                        }
                                         for (int i = 3; i < 6; ++i) {
                                             mKp[i] = 100.;
                                             mKd[i] = 5.;
@@ -133,16 +128,12 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
         }
 
         // Compute task command
-        double rampTime(1.0);
         for (int i = 0; i < mDim; ++i) {
             mTaskCmd[i] = acc_des_[i] +
                 mKp[i] * (pos_des_[i] - pos_act[i]) +
                 mKd[i] * (vel_des_[i] - vel_act[i]);
-            if (mRobot->getTime() < rampTime) {
-                mTaskCmd[i] *= mRobot->getTime() / rampTime;
-            }
         }
-        _doPlot(pos_des_, vel_des_, pos_act, vel_act);       
+        _saveTask(pos_des_, vel_des_, pos_act, vel_act);
     }
 }
 
@@ -150,21 +141,24 @@ void Task::_updateJt() {
     switch (mTaskType) {
         case TaskType::JOINT:{
                                  (mJt.block(0, mRobot->getNumVirtualDofs(),
-                                            mDim, mRobot->getNumActuatedDofs())).setIdentity();
+                                  mDim, mRobot->getNumActuatedDofs())).setIdentity();
                                  break;
                              }
         case TaskType::LINKXYZ:{
                                    mJt = (mRobot->
-                                           getBodyNodeCoMJacobian(mLinkName)).block(3, 0, mDim, mRobot->getNumDofs());
+                                           getBodyNodeCoMJacobian(mLinkName)).block(
+                                           3, 0, mDim, mRobot->getNumDofs());
                                    break;
                                }
         case TaskType::LINKRPY:{
                                    mJt = (mRobot->
-                                           getBodyNodeCoMJacobian(mLinkName)).block(0, 0, mDim, mRobot->getNumDofs());
+                                           getBodyNodeCoMJacobian(mLinkName)).block(
+                                           0, 0, mDim, mRobot->getNumDofs());
                                    break;
                                }
-        case TaskType::CENTROID:{
-                                    mJt = mRobot->getCentroidJacobian();
+        case TaskType::COM:{
+                                    mJt = (mRobot->getCentroidJacobian()).block(
+                                            3, 0, mDim, mRobot->getNumDofs());
                                     break;
                                 }
         default:{
@@ -189,10 +183,10 @@ void Task::_updateJtDotQDot() {
                                        getBodyNodeCoMJacobianDot(mLinkName).block(0, 0, mDim, mRobot->getNumDofs());
                                    break;
                                }
-        case TaskType::CENTROID:{
-                                    mJtDotQDot = mRobot->getCentroidJacobian() *
+        case TaskType::COM:{
+                                    mJtDotQDot = (mRobot->getCentroidJacobian() *
                                         mRobot->getInvMassMatrix() *
-                                        mRobot->getCoriolis();
+                                        mRobot->getCoriolis()).tail(mDim);
                                     break;
                                 }
         default:{
@@ -201,10 +195,10 @@ void Task::_updateJtDotQDot() {
     }
 }
 
-void Task::_doPlot(const Eigen::VectorXd & pos_des_,
-        const Eigen::VectorXd & vel_des_,
-        const Eigen::VectorXd & pos_,
-        const Eigen::VectorXd & vel_) {
+void Task::_saveTask(const Eigen::VectorXd & pos_des_,
+                     const Eigen::VectorXd & vel_des_,
+                     const Eigen::VectorXd & pos_,
+                     const Eigen::VectorXd & vel_) {
     mPosDes = pos_des_;
     mVelDes = vel_des_;
     mPosAct = pos_;

@@ -13,7 +13,6 @@ class Test
 protected:
     RobotSystem* mRobot;
 
-
 public:
     Test(RobotSystem* robot_): isInitialized(false) {
         mRobot = robot_;

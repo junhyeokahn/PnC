@@ -5,4 +5,3 @@ add_library (myPolytope SHARED ${header} ${source})
 
 target_link_libraries (myPolytope myCdd
                                   ${MOSEK_LIBRARIES})
-

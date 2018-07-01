@@ -89,7 +89,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
     q[lAnkleIdx] = M_PI/2;
     q[rAnkleIdx] = M_PI/2;
-    q[5] = 1.45;
+    q[5] = 1.425;
     robot->setPositions(q);
 }
 

@@ -184,6 +184,27 @@ namespace myUtils {
         }
         return ret;
     }
+    void getSinusoidTrajectory(double initTime_,
+                               const Eigen::VectorXd & midPoint_,
+                               const Eigen::VectorXd & amp_,
+                               const Eigen::VectorXd & freq_,
+                               double evalTime_,
+                               Eigen::VectorXd & p_,
+                               Eigen::VectorXd & v_,
+                               Eigen::VectorXd & a_) {
+        int dim = midPoint_.size();
+        p_ = Eigen::VectorXd::Zero(dim);
+        v_ = Eigen::VectorXd::Zero(dim);
+        a_ = Eigen::VectorXd::Zero(dim);
+        for (int i = 0; i < dim; ++i) {
+            p_[i] =
+                amp_[i] * sin(2*M_PI*freq_[i]*(evalTime_-initTime_)+midPoint_[i]);
+            v_[i] =
+                amp_[i]*2*M_PI*freq_[i]*cos(2*M_PI*freq_[i]*(evalTime_-initTime_));
+            a_[i] =
+                -amp_[i]*2*M_PI*freq_[i]*2*M_PI*freq_[i]*sin(2*M_PI*freq_[i]*(evalTime_-initTime_));
+        }
+    }
 
     double bind_half_pi(double ang){
         if(ang > M_PI/2){

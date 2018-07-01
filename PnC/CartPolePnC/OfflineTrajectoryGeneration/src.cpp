@@ -41,8 +41,7 @@ void planDirColSwingUp() {
     Planner->updatePlanningParameter(Param);
 
     // Save Trajectory
-    Planner->saveTrajectory("dircol_swing_up");
-
+    Planner->saveTrajectory("PnC/CartPolePnC/OfflineTrajectoryGeneration/TrajectoriesBin/dircol_swing_up");
 }
 
 int main(int argc, char *argv[])

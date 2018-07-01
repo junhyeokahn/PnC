@@ -5,7 +5,7 @@
 
 class RobotSystem;
 
-enum TaskType { JOINT, LINKXYZ, LINKRPY, CENTROID };
+enum TaskType { JOINT, LINKXYZ, LINKRPY, COM };
 
 class Task{
     public:
@@ -23,8 +23,6 @@ class Task{
         bool IsTaskSet() { return mIsUpdated; }
         int getDims() { return mDim; }
         void unsetTaskSpec() { mIsUpdated = false; }
-        std::string getType() { return mType; };
-        TaskType getTaskType() { return mTaskType; };
 
     private:
         // Update mTaskCmd
@@ -35,10 +33,10 @@ class Task{
         void _updateJt();
         // Update mJtDotQDot
         void _updateJtDotQDot();
-        void _doPlot(const Eigen::VectorXd & pos_des_,
-                     const Eigen::VectorXd & vel_des_,
-                     const Eigen::VectorXd & pos_,
-                     const Eigen::VectorXd & vel_);
+        void _saveTask(const Eigen::VectorXd & pos_des_,
+                       const Eigen::VectorXd & vel_des_,
+                       const Eigen::VectorXd & pos_,
+                       const Eigen::VectorXd & vel_);
 
         TaskType mTaskType;
         std::string mType;

@@ -5,7 +5,7 @@
 DirColSwingUpPlanner::DirColSwingUpPlanner() : Planner() {
     mTree = std::make_unique< RigidBodyTree<double> >();
     drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
-            THIS_COM"Simulator/SimulationModel/RobotModel/CartPole/CartPole.urdf",
+            THIS_COM"RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf",
             drake::multibody::joints::kFixed, mTree.get());
     mPlant = std::make_unique< drake::systems::RigidBodyPlant<double> >(
             std::move(mTree), 0.0);
@@ -66,7 +66,6 @@ void DirColSwingUpPlanner::_doPlan() {
 void DirColSwingUpPlanner::_evalTrajectory( double time,
         Eigen::VectorXd & pos,
         Eigen::VectorXd & vel,
-        Eigen::VectorXd & acc,
         Eigen::VectorXd & eff ) {
     const drake::trajectories::PiecewisePolynomial<double> utraj =
         mDirCol->ReconstructInputTrajectory();

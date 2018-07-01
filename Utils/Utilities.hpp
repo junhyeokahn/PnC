@@ -58,15 +58,23 @@ namespace myUtils
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);
 
-    // ===============
-    // Smooth Changing
-    // ===============
+    // ===========================
+    // Simple Trajectory Generator
+    // ===========================
     double smooth_changing(double ini, double end,
             double moving_duration, double curr_time);
     double smooth_changing_vel(double ini, double end,
             double moving_duration, double curr_time);
     double smooth_changing_acc(double ini, double end,
             double moving_duration, double curr_time);
+    void getSinusoidTrajectory(double initTime_,
+                               const Eigen::VectorXd & midPoint_,
+                               const Eigen::VectorXd & amp_,
+                               const Eigen::VectorXd & freq_,
+                               double evalTime_,
+                               Eigen::VectorXd & p_,
+                               Eigen::VectorXd & v_,
+                               Eigen::VectorXd & a_);
 
     // ===
     // ETC

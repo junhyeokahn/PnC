@@ -1,13 +1,11 @@
 <robot
   name="Draco">
-
   <link name="world" />
   <joint name="ground_joint" type="floating">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="world" />
       <child link="torso" />
   </joint>
-
   <link
     name="torso">
     <inertial>
@@ -28,10 +26,10 @@
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="meshes/torso.dae" />
-      </geometry>
+      <!--<geometry>-->
+        <!--<mesh-->
+          <!--filename="meshes/torso.dae" />-->
+      <!--</geometry>-->
       <material
         name="">
         <color
@@ -292,11 +290,10 @@
     </visual>
     <collision>
       <origin
-        xyz="0 0 0"
+        xyz="0.015 0 -0.05"
         rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="meshes/lAnkle.dae" />
+        <box size="0.15 0.04 0.03"/>
       </geometry>
     </collision>
   </link>
@@ -559,11 +556,10 @@ hi
     </visual>
     <collision>
       <origin
-        xyz="0 0 0"
+        xyz="0.015 0 -0.05"
         rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="meshes/rAnkle.dae" />
+        <box size="0.15 0.04 0.03"/>
       </geometry>
     </collision>
   </link>

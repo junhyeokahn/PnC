@@ -6,7 +6,7 @@
 #include "DataManager.hpp"
 #include "ParamHandler.hpp"
 
-DracoInterface::(): Interface() {
+DracoInterface::DracoInterface(): Interface() {
     mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
 
     // Choose Test
@@ -16,7 +16,7 @@ DracoInterface::(): Interface() {
     DataManager* dataManager = DataManager::GetDataManager();
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
 
-    printf("[CartPole Interface] Constructed\n");
+    printf("[Draco Interface] Constructed\n");
 }
 
 DracoInterface::~DracoInterface() {
@@ -27,7 +27,7 @@ DracoInterface::~DracoInterface() {
 void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
 
     DracoSensorData* data = (DracoSensorData*) sensorData_;
-    mRobot->updateSystem(mTime, data->q, data->qdot, false);
+    mRobot->updateSystem(mTime, data->q, data->qdot, true);
     if (mTime < mInitTime) {
         mRobot->setInitialConfiguration(data->q);
         DracoCommand* cmd = (DracoCommand*) commandData_;
@@ -47,8 +47,8 @@ void DracoInterface::_constructTest() {
     ParamHandler handler(THIS_COM"Config/Draco/INTERFACE.yaml");
     std::string tmp_string;
     handler.getString("TestName", tmp_string);
-    if (tmp_string == "GravityCompensation") {
-        mTest = new GravityCompensationTest(mRobot);
+    if (tmp_string == "WholeBodyControllerTest") {
+        mTest = new WholeBodyControllerTest(mRobot);
     } else {
         printf("[Interface] There is no test matching test with the name\n");
         exit(0);

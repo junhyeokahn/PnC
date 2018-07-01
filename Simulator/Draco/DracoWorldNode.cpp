@@ -9,9 +9,9 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
                                    osgShadow::MinimalShadowMap * msm) :
     dart::gui::osg::WorldNode(world_, msm) {
 
-    //mInterface = new DracoInterface();
-    //mSensorData = new DracoSensorData();
-    //mCommandData = new DracoCommandData();
+    mInterface = new DracoInterface();
+    mSensorData = new DracoSensorData();
+    mCommand = new DracoCommand();
 
     mSkel = world_->getSkeleton("Draco");
     mDof = mSkel->getNumDofs();
@@ -38,24 +38,24 @@ DracoWorldNode::~DracoWorldNode() {
 }
 
 void DracoWorldNode::customPreStep() {
-    //mSensorData->q = mSkel->getPositions();
-    //mSensorData->qdot = mSkel->getVelocities();
+    mSensorData->q = mSkel->getPositions();
+    mSensorData->qdot = mSkel->getVelocities();
 
-    //if (mIsVisualizeTrajectory) {
-        //static int i = 0;
-        //myUtils::splitString(mLine, mFile[i], "\t");
-        //for (int j = 0; j < mDof; ++j) {
-            //mPos[j] = std::stod(mLine[j + 1]);
-            //mVel[j] = std::stod(mLine[j + 1 + mDof]);
-            //mTorqueCommand[j] = 100. * (mPos[j] - mSensorData->q[j]) +
-                //10. * (mVel[j] - mSensorData->qdot[j]);
-        //}
-        //++i;
-        //if (i == mFile.size())  exit(0);
-    //} else {
-        //mInterface->getCommand(mSensorData, mCommandData);
-        //mTorqueCommand[0] = cmd[0];
-    //}
+    if (mIsVisualizeTrajectory) {
+        static int i = 0;
+        myUtils::splitString(mLine, mFile[i], "\t");
+        for (int j = 0; j < mDof; ++j) {
+            mPos[j] = std::stod(mLine[j + 1]);
+            mVel[j] = std::stod(mLine[j + 1 + mDof]);
+            mTorqueCommand[j] = 100. * (mPos[j] - mSensorData->q[j]) +
+                10. * (mVel[j] - mSensorData->qdot[j]);
+        }
+        ++i;
+        if (i == mFile.size())  exit(0);
+    } else {
+        mInterface->getCommand(mSensorData, mCommand);
+        mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+    }
 
     mSkel->setForces(mTorqueCommand);
 }

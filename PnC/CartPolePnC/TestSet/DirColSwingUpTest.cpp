@@ -20,11 +20,9 @@ void DirColSwingUpTest::getTorqueInput(void* commandData_) {
     cmd->q = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd dummy;
 
     mPlanner->getPlan(mRobot->getTime(), cmd->q,
                                          cmd->qdot,
-                                         dummy,
                                          cmd->jtrq);
 }
 

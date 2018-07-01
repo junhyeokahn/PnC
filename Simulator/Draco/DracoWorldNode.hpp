@@ -7,13 +7,14 @@
 
 class Interface;
 class DracoSensorData;
-class DracoCommandData;
+class DracoCommand;
 
 class DracoWorldNode : public dart::gui::osg::WorldNode
 {
 private:
     Interface* mInterface;
     DracoSensorData* mSensorData;
+    DracoCommand* mCommand;
 
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;
