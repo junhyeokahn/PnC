@@ -62,11 +62,11 @@ void WholeBodyControllerTest::initialize() {
 
     //Controller Initialize
 
-    mCoMTask = new Task(mRobot, TaskType::COM);
+    mCoMTask = new Task(mRobot, TaskType::CENTROID);
     mJointTask = new Task(mRobot, TaskType::JOINT);
     mTaskList.clear();
+    mTaskList.push_back(mCoMTask);
     mTaskList.push_back(mJointTask);
-    //mTaskList.push_back(mCoMTask);
 
     mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);
     mLfContact = new WBLCContact(mRobot, "lAnkle", 0.7);
@@ -82,33 +82,41 @@ void WholeBodyControllerTest::_updateContact() {
         mContactList[i]->updateWBLCContactSpec();
 }
 
-void WholeBodyControllerTest::_updateTask() {
-    Eigen::VectorXd pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    mTaskList[0]->updateTaskSpec(pos, vel, acc);
-}
-
 //void WholeBodyControllerTest::_updateTask() {
-     ////CoM Task
-    //Eigen::VectorXd pos(mTaskList[0]->getDims());
-    //Eigen::VectorXd vel(mTaskList[0]->getDims());
-    //Eigen::VectorXd acc(mTaskList[0]->getDims());
-    //double t = mRobot->getTime();
-    //static double d_ary[3];
-    //if(t < mTestInitTime + mInterpolationDuration) {
-        //mSpline.getCurvePoint(t - mTestInitTime, d_ary);
-        //for (int i = 0; i < pos.size(); ++i) pos[i] = d_ary[i];
-        //mSpline.getCurveDerPoint(t - mTestInitTime, 1, d_ary);
-        //for (int i = 0; i < vel.size(); ++i) vel[i] = d_ary[i];
-        //mSpline.getCurveDerPoint(t - mTestInitTime, 2, d_ary);
-        //for (int i = 0; i < acc.size(); ++i) acc[i] = d_ary[i];
-    //} else {
-        //myUtils::getSinusoidTrajectory(mTestInitTime + mInterpolationDuration,
-                                       //mMid, mAmp, mFreq, t, pos, vel, acc);
-    //}
+    //Eigen::VectorXd pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
+    //Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    //Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
     //mTaskList[0]->updateTaskSpec(pos, vel, acc);
 //}
+
+void WholeBodyControllerTest::_updateTask() {
+     // CoM Task
+    Eigen::VectorXd pos = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    Eigen::VectorXd vel = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    Eigen::VectorXd acc = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    double t = mRobot->getTime();
+    static double d_ary[3];
+    if(t < mTestInitTime + mInterpolationDuration) {
+        mSpline.getCurvePoint(t - mTestInitTime, d_ary);
+        for (int i = 0; i < 3; ++i) pos[i+3] = d_ary[i];
+        mSpline.getCurveDerPoint(t - mTestInitTime, 1, d_ary);
+        for (int i = 0; i < 3; ++i) vel[i+3] = d_ary[i];
+        mSpline.getCurveDerPoint(t - mTestInitTime, 2, d_ary);
+        for (int i = 0; i < 3; ++i) acc[i+3] = d_ary[i];
+    } else {
+        Eigen::VectorXd p, v, a;
+        myUtils::getSinusoidTrajectory(mTestInitTime + mInterpolationDuration,
+                                       mMid, mAmp, mFreq, t, p, v, a);
+        pos.tail(3) = p; vel.tail(3) = v; acc.tail(3) = a;
+    }
+    mTaskList[0]->updateTaskSpec(pos, vel, acc);
+
+    // JPos Task
+    pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
+    vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    mTaskList[1]->updateTaskSpec(pos, vel, acc);
+}
 
 void WholeBodyControllerTest::_WBLCpreProcess() {
     // dynamic property setting

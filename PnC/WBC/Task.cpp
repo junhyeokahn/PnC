@@ -22,9 +22,9 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
             mDim = 3;
             mType = "LinkRPY";
             break;
-        case TaskType::COM:
-            mDim = 3;
-            mType = "CoM";
+        case TaskType::CENTROID:
+            mDim = 6;
+            mType = "Centroid";
             break;
         default:
             std::cout << "[Task] Type is not Specified" << std::endl;
@@ -117,12 +117,18 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                        }
                                        break;
                                    }
-            case TaskType::COM:{
-                                        pos_act = mRobot->getCoMPosition();
+            case TaskType::CENTROID:{
+                                        pos_act.head(3) = Eigen::VectorXd::Zero(3);
+                                        pos_act.tail(3) = mRobot->getCoMPosition();
                                         vel_act = mRobot->getCentroidVelocity();
-                                        for (int i = 0; i < mDim; ++i) {
-                                            mKp[i] = 100.;
+                                        for (int i = 0; i < 3; ++i) {
+                                            mKp[i] = 0.;
                                             mKd[i] = 5.;
+                                        }
+                                        for (int i = 3; i < 6; ++i) {
+                                            //mKp[i] = 100.;
+                                            mKp[i] = 10.;
+                                            mKd[i] = 1.;
                                         }
                                         break;
                                     }
@@ -159,9 +165,8 @@ void Task::_updateJt() {
                                            0, 0, mDim, mRobot->getNumDofs());
                                    break;
                                }
-        case TaskType::COM:{
-                                    mJt = (mRobot->getCentroidJacobian()).block(
-                                            3, 0, mDim, mRobot->getNumDofs());
+        case TaskType::CENTROID:{
+                                    mJt = mRobot->getCentroidJacobian();
                                     break;
                                 }
         default:{
@@ -186,10 +191,10 @@ void Task::_updateJtDotQDot() {
                                        getBodyNodeCoMJacobianDot(mLinkName).block(0, 0, mDim, mRobot->getNumDofs());
                                    break;
                                }
-        case TaskType::COM:{
-                                    mJtDotQDot = (mRobot->getCentroidJacobian() *
+        case TaskType::CENTROID:{
+                                    mJtDotQDot = mRobot->getCentroidJacobian() *
                                         mRobot->getInvMassMatrix() *
-                                        mRobot->getCoriolis()).tail(mDim);
+                                        mRobot->getCoriolis();
                                     break;
                                 }
         default:{

@@ -5,7 +5,7 @@
 
 class RobotSystem;
 
-enum TaskType { JOINT, LINKXYZ, LINKRPY, COM };
+enum TaskType { JOINT, LINKXYZ, LINKRPY, CENTROID };
 
 class Task{
     public:
