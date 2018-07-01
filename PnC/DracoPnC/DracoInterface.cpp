@@ -9,10 +9,8 @@
 DracoInterface::DracoInterface(): Interface() {
     mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
 
-    // Choose Test
     _constructTest();
 
-    // Variables for DataManager
     DataManager* dataManager = DataManager::GetDataManager();
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
 
@@ -25,7 +23,6 @@ DracoInterface::~DracoInterface() {
 }
 
 void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
-
     DracoSensorData* data = (DracoSensorData*) sensorData_;
     mRobot->updateSystem(mTime, data->q, data->qdot, true);
     if (mTime < mInitTime) {
@@ -34,9 +31,8 @@ void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
         cmd->q = data->q;
         cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
         cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+        if (!mTest->isInitialized) mTest->initialize();
     } else {
-        if (!mTest->isInitialized)
-            mTest->initialize();
         DataManager::GetDataManager()->start();
         mTest->getTorqueInput(commandData_);
     }

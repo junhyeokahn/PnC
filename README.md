@@ -2,7 +2,7 @@
 PnC is a C++ library designed for generating trajectories for a robot system
 and stabilizing the system over the trajectories. It is built on mathmatical
 programming in [Drake](https://github.com/junhyeokahn/drake) and multi body
-dynamics algorithm in [dart](https://github.com/junhyeokahn/dart).
+dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 
 ## Featured Algorithms
 
@@ -28,11 +28,11 @@ $ git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
 
 ### Install Dependancies
-- [dart 6.5.0](https://github.com/junhyeokahn/dart)
-- [drake](https://github.com/junhyeokahn/drake)
-- [gurobi](http://www.gurobi.com/)
-- [mosek](https://www.mosek.com/)
-- [snopt](http://ccom.ucsd.edu/~optimizers)
+- [Dart 6.5.0](https://github.com/junhyeokahn/dart)
+- [Drake](https://github.com/junhyeokahn/drake)
+- [Gurobi](http://www.gurobi.com/)
+- [Mosek](https://www.mosek.com/)
+- [Snopt](http://ccom.ucsd.edu/~optimizers)
 
 ### Build
 ```

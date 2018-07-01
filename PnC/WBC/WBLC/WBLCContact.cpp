@@ -5,6 +5,8 @@
 WBLCContact::WBLCContact(RobotSystem* robot_,
                          const std::string & linkName_,
                          double mu_): mIsUpdated(false) {
+    // TODO change constructor getting input for contact
+    // wrench point
     mRobot = robot_;
     mLinkName = linkName_;
     mContactBodyNodeIso = mRobot->getBodyNodeIsometry(mLinkName);

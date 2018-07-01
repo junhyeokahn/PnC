@@ -60,36 +60,61 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
         std::cout << i << "th" << std::endl;
         std::cout << bn->getName() << std::endl;
+        std::cout << bn->getMass() << std::endl;
     }
 
-    for (int i = 0; i < robot->getNumJoints(); ++i) {
-        dart::dynamics::Joint* joint = robot->getJoint(i);
-        std::cout << i << "th" << std::endl;
-        std::cout << joint->getNumDofs() << std::endl;
-    }
+    //for (int i = 0; i < robot->getNumJoints(); ++i) {
+        //dart::dynamics::Joint* joint = robot->getJoint(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << joint->getNumDofs() << std::endl;
+    //}
 
-    for (int i = 0; i < robot->getNumDofs(); ++i) {
-        dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-        std::cout << i << "th" << std::endl;
-        std::cout << dof->getName() << std::endl;
-        std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
-    }
+    //for (int i = 0; i < robot->getNumDofs(); ++i) {
+        //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << dof->getName() << std::endl;
+        //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
+    //}
 
-    std::cout << robot->getNumDofs() << std::endl;
-    std::cout << robot->getNumJoints() << std::endl;
-    std::cout << robot->getMassMatrix().rows() << std::endl;
-    std::cout << robot->getMassMatrix().cols() << std::endl;
+    //std::cout << robot->getNumDofs() << std::endl;
+    //std::cout << robot->getNumJoints() << std::endl;
+    //std::cout << robot->getMassMatrix().rows() << std::endl;
+    //std::cout << robot->getMassMatrix().cols() << std::endl;
+
     exit(0);
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
-    Eigen::VectorXd q = robot->getPositions();
+    int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
+    int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
+    int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
+    int rHipPitchIdx = robot->getDof("rHipPitch")->getIndexInSkeleton();
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
-    q[lAnkleIdx] = M_PI/2;
-    q[rAnkleIdx] = M_PI/2;
-    q[5] = 1.425;
+
+    int initPos(1); // 0 : Home, 1 : Bent
+    Eigen::VectorXd q = robot->getPositions();
+
+    switch (initPos) {
+        case 0:
+            q[5] = 1.425;
+            q[lAnkleIdx] = M_PI/2;
+            q[rAnkleIdx] = M_PI/2;
+            break;
+        case 1:
+            q[5] = 1.34;
+            q[lHipPitchIdx] = -M_PI/8;
+            q[lKneeIdx] = M_PI/4;
+            q[rHipPitchIdx] = -M_PI/8;
+            q[rKneeIdx] = M_PI/4;
+            q[lAnkleIdx] = M_PI/2 - M_PI/8;
+            q[rAnkleIdx] = M_PI/2 - M_PI/8;
+            break;
+        default:
+            std::cout << "wrong initial pos case" << std::endl;
+    }
+
     robot->setPositions(q);
 }
 
@@ -176,7 +201,8 @@ int main() {
         viewer.record(THIS_COM"/ExperimentVideo");
     }
 
-    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    //viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(1440, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3( 5.14,  2.28, 3.0)*0.8,
             ::osg::Vec3( 0.0,  0.2, 0.5),

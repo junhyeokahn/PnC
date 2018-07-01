@@ -25,6 +25,7 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
         case TaskType::COM:
             mDim = 3;
             mType = "CoM";
+            break;
         default:
             std::cout << "[Task] Type is not Specified" << std::endl;
     }
@@ -45,6 +46,8 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
     dataManager->RegisterData(&mVelDes, VECT, mType+"TaskVelDes", mDim);
     dataManager->RegisterData(&mPosAct, VECT, mType+"TaskPosAct", mDim);
     dataManager->RegisterData(&mVelAct, VECT, mType+"TaskVelAct", mDim);
+
+    printf("[Task %s] is Constructed\n", mType.c_str());
 }
 
 Task::~Task() {}
@@ -98,8 +101,8 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                      pos_act = mRobot->getQ().tail(mDim);
                                      vel_act = mRobot->getQdot().tail(mDim);
                                      for (int i = 0; i < mDim; ++i) {
-                                         mKp[i] = 150.;
-                                         mKd[i] = 10.;
+                                         mKp[i] = 300.;
+                                         mKd[i] = 5.;
                                      }
                                      break;
                                  }
@@ -117,7 +120,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             case TaskType::COM:{
                                         pos_act = mRobot->getCoMPosition();
                                         vel_act = mRobot->getCentroidVelocity();
-                                        for (int i = 3; i < 6; ++i) {
+                                        for (int i = 0; i < mDim; ++i) {
                                             mKp[i] = 100.;
                                             mKd[i] = 5.;
                                         }
@@ -193,6 +196,12 @@ void Task::_updateJtDotQDot() {
                     std::cout << "[Task] Type is not Specified" << std::endl;
                 }
     }
+}
+
+void Task::setGain(const Eigen::VectorXd & kp_,
+                    const Eigen::VectorXd & kd_) {
+    mKp = kp_;
+    mKd = kd_;
 }
 
 void Task::_saveTask(const Eigen::VectorXd & pos_des_,

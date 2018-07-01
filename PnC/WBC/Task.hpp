@@ -23,6 +23,8 @@ class Task{
         bool IsTaskSet() { return mIsUpdated; }
         int getDims() { return mDim; }
         void unsetTaskSpec() { mIsUpdated = false; }
+        void setGain(const Eigen::VectorXd & kp_,
+                     const Eigen::VectorXd & kd_);
 
     private:
         // Update mTaskCmd

@@ -55,6 +55,23 @@ void DracoWorldNode::customPreStep() {
     } else {
         mInterface->getCommand(mSensorData, mCommand);
         mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+
+        // Gain Testing
+        //static Eigen::VectorXd qdes = (mSkel->getPositions()).tail(10);
+        //Eigen::VectorXd q = (mSkel->getPositions()).tail(10);
+        //Eigen::VectorXd qdot = (mSkel->getVelocities()).tail(10);
+        //double v1(500); double v2(500);
+        //double v3(10); double v4(2);
+        //double kp[10] = {v1, v1, v1, v1, v2,
+                         //v1, v1, v1, v1, v2};
+        //double kd[10] = {v3, v3, v3, v3, v4,
+                         //v3, v3, v3, v3, v4};
+        //for (int i = 0; i < 10; ++i) {
+            //mTorqueCommand[i+6] = kp[i]*(qdes[i] - q[i]) -
+                //kd[i] * qdot[i];
+        //}
+        //myUtils::pretty_print(q, std::cout, "q");
+        //myUtils::pretty_print(qdes, std::cout, "qdes");
     }
 
     mSkel->setForces(mTorqueCommand);

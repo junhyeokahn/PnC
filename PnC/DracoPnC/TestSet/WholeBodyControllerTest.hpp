@@ -22,6 +22,7 @@ private:
     WBLC* mWBLC;
     WBLC_ExtraData* mWBLCExtraData;
     Task* mCoMTask;
+    Task* mJointTask;
     WBLCContact* mRfContact;
     WBLCContact* mLfContact;
     std::vector<Task*> mTaskList;

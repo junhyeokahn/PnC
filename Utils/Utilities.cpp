@@ -198,7 +198,7 @@ namespace myUtils {
         a_ = Eigen::VectorXd::Zero(dim);
         for (int i = 0; i < dim; ++i) {
             p_[i] =
-                amp_[i] * sin(2*M_PI*freq_[i]*(evalTime_-initTime_)+midPoint_[i]);
+                amp_[i] * sin(2*M_PI*freq_[i]*(evalTime_-initTime_)) + midPoint_[i];
             v_[i] =
                 amp_[i]*2*M_PI*freq_[i]*cos(2*M_PI*freq_[i]*(evalTime_-initTime_));
             a_[i] =
