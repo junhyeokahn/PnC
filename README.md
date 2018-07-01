@@ -1,8 +1,8 @@
 # Planning and Control Algorithms for Robotics
 PnC is a C++ library designed for generating trajectories for a robot system
-and stabilizing the system over the trajectories. It utilizes mathmatical
-programming in [drake](https://github.com/junhyeokahn/drake) and built on
-the dynamics engine [dart](https://github.com/junhyeokahn/dart).
+and stabilizing the system over the trajectories. It is built on mathmatical
+programming in [Drake](https://github.com/junhyeokahn/drake) and multi body
+dynamics algorithm in [dart](https://github.com/junhyeokahn/dart).
 
 ## Featured Algorithms
 
