@@ -1,7 +1,9 @@
-FILE(GLOB_RECURSE header *.h)
-file(GLOB_RECURSE source *.cpp)
+add_library(myPolytope SHARED Polytope.cpp Polytope.h)
+target_link_libraries(myPolytope myCdd)
 
-add_library (myPolytope SHARED ${header} ${source})
-
-target_link_libraries (myPolytope myCdd
-                                  ${MOSEK_LIBRARIES})
+if(MOSEK_FOUND)
+    add_library(myLownerJohnEllipsoid LownerJohnEllipsoid.cpp
+                                      LownerJohnEllipsoid.hpp
+                                      ${MOSEK_LIBRARIES})
+    target_link_libraries(myPolytope myLownerJohnEllipsoid)
+endif()
