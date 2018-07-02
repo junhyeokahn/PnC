@@ -23,14 +23,14 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
 
     ## read files
     data_time = np.genfromtxt(file_path+'Time.txt', delimiter='\n', dtype=(float))
-    data_com_pos_des= \
-    np.genfromtxt(file_path+'CoMTaskPosDes.txt', delimiter=None, dtype=(float))
-    data_com_pos_act= \
-    np.genfromtxt(file_path+'CoMTaskPosAct.txt', delimiter=None, dtype=(float))
-    data_com_vel_des= \
-    np.genfromtxt(file_path+'CoMTaskVelDes.txt', delimiter=None, dtype=(float))
-    data_com_vel_act= \
-    np.genfromtxt(file_path+'CoMTaskVelAct.txt', delimiter=None, dtype=(float))
+    data_cent_pos_des= \
+    np.genfromtxt(file_path+'CentroidTaskPosDes.txt', delimiter=None, dtype=(float))
+    data_cent_pos_act= \
+    np.genfromtxt(file_path+'CentroidTaskPosAct.txt', delimiter=None, dtype=(float))
+    data_cent_vel_des= \
+    np.genfromtxt(file_path+'CentroidTaskVelDes.txt', delimiter=None, dtype=(float))
+    data_cent_vel_act= \
+    np.genfromtxt(file_path+'CentroidTaskVelAct.txt', delimiter=None, dtype=(float))
 
     axes = plt.gca()
 
@@ -40,8 +40,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig.canvas.set_window_title('CoM Position')
     for i in range(1, num_dim+1, 1):
         ax1 = plt.subplot(num_dim, 1, i)
-        plt.plot(data_time, data_com_pos_des[:, i-1], "r-")
-        plt.plot(data_time, data_com_pos_act[:, i-1], "b-")
+        plt.plot(data_time, data_cent_pos_des[:, 3+i-1], "r-")
+        plt.plot(data_time, data_cent_pos_act[:, 3+i-1], "b-")
         plt.grid(True)
     plt.xlabel('time (sec)')
 
@@ -56,8 +56,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig.canvas.set_window_title('CoM Velocity')
     for i in range(1, num_dim+1, 1):
         ax1 = plt.subplot(num_dim, 1, i)
-        plt.plot(data_time, data_com_vel_des[:, i-1], "r-")
-        plt.plot(data_time, data_com_vel_act[:, i-1], "b-")
+        plt.plot(data_time, data_cent_vel_des[:, 3+i-1], "r-")
+        plt.plot(data_time, data_cent_vel_act[:, 3+i-1], "b-")
         plt.grid(True)
     plt.xlabel('time (sec)')
 

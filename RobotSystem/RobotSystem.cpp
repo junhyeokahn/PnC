@@ -151,7 +151,8 @@ void RobotSystem::updateSystem(double time_,
     mTime = time_;
     mSkel->setPositions(q_);
     mSkel->setVelocities(qdot_);
-    if (isUpdatingCentroid)  mSkel->computeForwardKinematics();
+    if (isUpdatingCentroid)  _updateCentroidFrame(q_, qdot_);
+    mSkel->computeForwardKinematics();
 }
 
 void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd & q_,

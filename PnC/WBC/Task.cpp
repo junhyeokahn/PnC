@@ -126,9 +126,8 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                             mKd[i] = 5.;
                                         }
                                         for (int i = 3; i < 6; ++i) {
-                                            //mKp[i] = 100.;
-                                            mKp[i] = 10.;
-                                            mKd[i] = 1.;
+                                            mKp[i] = 200.;
+                                            mKd[i] = 2.;
                                         }
                                         break;
                                     }

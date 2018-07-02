@@ -30,7 +30,8 @@ bool WBLC::_CheckNullSpace(const Eigen::MatrixXd & Npre){
 
     for(int i(0); i<svd.singularValues().rows(); ++i){
         if(svd.singularValues()[i] > 0.00001) {
-            printf("non singular!!\n");
+            printf("[non singular!!]\n");
+            //exit(0);
     //myUtils::pretty_print(svd.singularValues(), std::cout, "svd singular value");
             return false;
         }else{
@@ -91,7 +92,7 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
             - JtPreBar * JtPre);
 
     _PrintDebug(6);
-    //_CheckNullSpace(Npre);
+    _CheckNullSpace(Npre);
     // Optimization
     _PrintDebug(7);
     _OptimizationPreparation();
