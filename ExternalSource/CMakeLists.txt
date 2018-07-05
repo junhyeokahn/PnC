@@ -1,3 +1,3 @@
-add_subdirectory(myYaml)
+add_subdirectory(Yaml)
 add_subdirectory(cdd)
 add_subdirectory(Optimizer)

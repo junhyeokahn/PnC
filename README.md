@@ -10,9 +10,10 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 - Direct Transcription
 - Direct Collocation
 - [Constrained Direct Collocation](https://github.com/DAIRLab/dairlib-public)
+- [Embedded Conic Solver](https://github.com/embotech/ecos) using [sparse matrix routines](http://www.suitesparse.com)
 
 ### Trajectory Planning
-- [Centroid Dyanimcs Planning for Humanoid](https://hal.laas.fr/hal-01520248/document)
+- [Centroid Dyanimcs Planning for Humanoid](https://arxiv.org/pdf/1709.09265.pdf)
 - [DIRTREL](http://zacmanchester.github.io/docs/dirtrel-auro.pdf)
 
 ### Stabilizing Controller
@@ -23,6 +24,7 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 ## Run the Code
 
 ### Clone the repository
+Make sure [Git Lfs](https://git-lfs.github.com/) is also installed for large file meshes.
 ```
 $ git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
@@ -38,5 +40,5 @@ $ git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
 $ mkdir build && cd build && cmake..
 $ make -j
-$ ./cart_pole
+$ ./run_draco
 ```
