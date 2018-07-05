@@ -1,5 +1,4 @@
-#ifndef UTILITIES
-#define UTILITIES
+#pragma once
 
 #include <iostream>
 #include <stdio.h>
@@ -8,6 +7,7 @@
 #include <Configuration.h>
 #include <list>
 #include <Eigen/Dense>
+#include <yaml-cpp/yaml.h>
 
 namespace myUtils
 {
@@ -42,6 +42,21 @@ namespace myUtils
     // =========
     void readFile(std::string file_name_, std::vector<std::string> & _vec);
     void splitString(std::string* str_array, std::string strTarget, std::string strTok );
+    //template <typename YamlType>
+        //YamlType readParameter(const YAML::Node& node, const std::string& name);
+    //template <typename YamlType>
+        //void readParameter(const YAML::Node & node, const std::string& name, YamlType& parameter);
+    template <typename YamlType>
+        YamlType readParameter(const YAML::Node& node, const std::string& name) {
+            try { return node[name.c_str()].as<YamlType>(); }
+            catch (...) { throw std::runtime_error(name); }
+        };
+
+    template <typename YamlType>
+        void readParameter(const YAML::Node& node, const std::string& name, YamlType& parameter) {
+            try { parameter = readParameter<YamlType>(node, name); }
+            catch (...) { throw std::runtime_error(name); }
+        };
 
     // ============
     // Pretty Print
@@ -81,5 +96,3 @@ namespace myUtils
     // ===
     double bind_half_pi(double);
 } /* myUtils */
-
-#endif

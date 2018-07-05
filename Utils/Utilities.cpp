@@ -246,5 +246,4 @@ namespace myUtils {
             str_array[nIndex++] = strTarget.substr(0, nCutPos);
         }
     }
-
 }

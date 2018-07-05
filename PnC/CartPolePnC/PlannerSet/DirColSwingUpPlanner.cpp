@@ -66,7 +66,7 @@ void DirColSwingUpPlanner::_doPlan() {
 void DirColSwingUpPlanner::_evalTrajectory( double time,
         Eigen::VectorXd & pos,
         Eigen::VectorXd & vel,
-        Eigen::VectorXd & eff ) {
+        Eigen::VectorXd & trq ) {
     const drake::trajectories::PiecewisePolynomial<double> utraj =
         mDirCol->ReconstructInputTrajectory();
     const drake::trajectories::PiecewisePolynomial<double> xtraj =
@@ -80,11 +80,11 @@ void DirColSwingUpPlanner::_evalTrajectory( double time,
         pos[1] = (xtraj.value(time))(1, 0);
         vel[0] = (xtraj.value(time))(2, 0);
         vel[1] = (xtraj.value(time))(3, 0);
-        eff = utraj.value(time);
+        trq = utraj.value(time);
     } else {
         pos.setZero();
         vel.setZero();
-        eff.setZero();
+        trq.setZero();
         std::cout << "Try to evaluate trajectory at the wrong time" << std::endl;
         exit(0);
     }

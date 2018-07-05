@@ -1,7 +1,7 @@
 FILE(GLOB_RECURSE headers *.hpp)
 FILE(GLOB_RECURSE sources *.cpp)
 add_library (myUtils SHARED ${headers} ${sources})
-target_link_libraries(myUtils yaml-cpp)
+target_link_libraries(myUtils myYaml)
 
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
