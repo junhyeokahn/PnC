@@ -25,7 +25,7 @@ class DynamicsState
                            aMomD(Eigen::VectorXd::Zero(3)),
                            lMomD(Eigen::VectorXd::Zero(3)) {
             for (int eff = 0; eff < CentroidModel::numEEf; ++eff) {
-                eEfsIds[eff] = 0;
+                eEfsActivationIds[eff] = 0;
                 eEfsFrc[eff] = Eigen::Vector3d::Zero();
                 eEfsTrq[eff] = Eigen::Vector3d::Zero();
                 eEfsCop[eff] = Eigen::Vector3d::Zero();
@@ -63,7 +63,7 @@ class DynamicsState
         double time;
         Eigen::Vector3d com, aMom, lMom, aMomD, lMomD;
 
-        IntArray eEfsIds;
+        IntArray eEfsActivationIds;
         BoolArray eEfsActivation;
         OriArray eEfsOrientation;
         CntTypeArray eEfsContactType;

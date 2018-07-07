@@ -1,0 +1,54 @@
+solver_variables:
+
+  ##########################
+  # Convergence tolerances #
+  ##########################
+
+  feasibility_tolerance: 1e-7
+  absolute_suboptimality_gap: 1e-7
+  relative_suboptimality_gap: 1e-6
+  feasibility_tolerance_inaccurate: 1e-4
+  absolute_suboptimality_gap_inaccurate: 5e-5
+  relative_suboptimality_gap_inaccurate: 5e-5
+
+  ############################
+  # Equilibration parameters #
+  ############################
+
+  equil_iterations: 3
+
+  ############################
+  # Linear System parameters #
+  ############################
+
+  dyn_reg_thresh: 1e-13
+  lin_sys_accuracy: 1e-14
+  err_reduction_factor: 6.0
+  num_iter_ref_lin_solve: 9
+  static_regularization: 7e-8
+  dynamic_regularization: 2e-7
+
+  ########################
+  # Algorithm parameters #
+  ########################
+
+  safeguard: 500.0
+  min_step_length: 1e-6
+  max_step_length: 0.999
+  min_centering_step: 1e-4
+  max_centering_step: 1.00
+  step_length_scaling: 0.99
+
+  ####################
+  # Model parameters #
+  ####################
+
+  verbose: False
+
+  max_iters: 100
+  ipsolver_max_iters: 100
+  ipsolver_warm_iters: 100
+
+  num_itrefs_trustregion: 3
+  trust_region_threshold: 0.15
+  soft_constraint_weight: 1.0e4

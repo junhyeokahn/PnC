@@ -20,24 +20,24 @@ public:
                               double timeStep) {
         // configuration of end-effectors during contact
         dynamics_sequence.activeEEfSteps.setZero();
-        for (int eff_id=0; eff_id<CentroidModel::numEEf; eff_id++) {
+        for (int eef_id=0; eef_id<CentroidModel::numEEf; eef_id++) {
             int counter = 0;
-            int ini_id = 0, end_id = contactSequence.eEfContacts[eff_id].size();
+            int ini_id = 0, end_id = contactSequence.eEfContacts[eef_id].size();
             for (int cnt_id=ini_id; cnt_id<end_id; cnt_id++) {
                 for (int time_id=0; time_id<numTimeSteps; time_id++) {
                     double current_time = double(time_id+1.0)*timeStep;
-                    if (current_time>=contactSequence.eEfContacts[eff_id][cnt_id].timeIni &&
-                            current_time< contactSequence.eEfContacts[eff_id][cnt_id].timeEnd)
+                    if (current_time>=contactSequence.eEfContacts[eef_id][cnt_id].timeIni &&
+                            current_time< contactSequence.eEfContacts[eef_id][cnt_id].timeEnd)
                     {
-                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsActivation[eff_id] = true;
-                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsIds[eff_id] = counter++;
-                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsContactType[eff_id] = contactSequence.eEfContacts[eff_id][cnt_id].contactType;
-                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsPosition[eff_id] = contactSequence.eEfContacts[eff_id][cnt_id].position;
-                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsOrientation[eff_id] = contactSequence.eEfContacts[eff_id][cnt_id].orientation;
+                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsActivation[eef_id] = true;
+                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id] = counter++;
+                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsContactType[eef_id] = contactSequence.eEfContacts[eef_id][cnt_id].contactType;
+                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsPosition[eef_id] = contactSequence.eEfContacts[eef_id][cnt_id].position;
+                        dynamics_sequence.dynamicsStateSequence[time_id].eEfsOrientation[eef_id] = contactSequence.eEfContacts[eef_id][cnt_id].orientation;
                     }
                 }
             }
-            dynamics_sequence.activeEEfSteps[eff_id] = counter;
+            dynamics_sequence.activeEEfSteps[eef_id] = counter;
         }
     }
 

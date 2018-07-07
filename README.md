@@ -10,7 +10,7 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 - Direct Transcription
 - Direct Collocation
 - [Constrained Direct Collocation](https://github.com/DAIRLab/dairlib-public)
-- [Embedded Conic Solver](https://github.com/embotech/ecos) using [sparse matrix routines](http://www.suitesparse.com)
+- [Embedded Conic Solver](https://github.com/embotech/ecos) using [Sparse Matrix Routines](http://www.suitesparse.com)
 
 ### Trajectory Planning
 - [Centroid Dyanimcs Planning for Humanoid](https://arxiv.org/pdf/1709.09265.pdf)

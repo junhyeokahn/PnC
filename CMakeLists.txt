@@ -57,6 +57,7 @@ include_directories("${PROJECT_SOURCE_DIR}/PnC/Trajectory")
 include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Yaml/include")
 include_directories("${PROJECT_SOURCE_DIR}/ExternalSource")
 include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Optimizer/")
+include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Optimizer/ConicSolver/include")
 include_directories("${PROJECT_SOURCE_DIR}/Geometry/Polytope")
 
 ## ================
