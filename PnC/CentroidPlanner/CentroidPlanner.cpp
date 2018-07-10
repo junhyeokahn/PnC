@@ -187,7 +187,7 @@ void CentroidPlanner::_initializeOptimizationVariables() {
     }
 
     // upper and lower bound variables, forces, cops, torques
-    for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++) {
+    for (int eef_id=0; eef_id < mCentParam->numActEEfs; eef_id++) {
         mLbVar[eef_id].initialize('C', 3, mDynStateSeq.activeEEfSteps[eef_id], -inf_value, inf_value, mNumVars);
         mUbVar[eef_id].initialize('C', 3, mDynStateSeq.activeEEfSteps[eef_id], -inf_value, inf_value, mNumVars);
         mFrcWorld[eef_id].initialize('C', 3, mDynStateSeq.activeEEfSteps[eef_id], -inf_value, inf_value, mNumVars);
@@ -285,13 +285,16 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                 // penalty on forces
                 for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++) {
                     if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {
-                        if (eef_id==static_cast<int>(CentroidModel::EEfID::rightFoot) || eef_id==static_cast<int>(CentroidModel::EEfID::leftFoot)) { mQuadObjective.addQuaTerm(mCentParam->wFrcLeg[axis_id], mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]); }
-                        else { mQuadObjective.addQuaTerm(mCentParam->wFrcArm[axis_id], mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]); }
+                        if (eef_id==static_cast<int>(CentroidModel::EEfID::rightFoot) || eef_id==static_cast<int>(CentroidModel::EEfID::leftFoot)) {
+                            mQuadObjective.addQuaTerm(mCentParam->wFrcLeg[axis_id], mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]);
+                        } else {
+                            mQuadObjective.addQuaTerm(mCentParam->wFrcArm[axis_id], mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]);
+                        }
                     }
                 }
 
                 // penalty on rate of forces
-                for (int eef_id=0; eef_id < mCentParam->numActEEfs; eef_id++) {
+                for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
                     Eigen::Vector3d ctrl_rate_penalty = Eigen::Vector3d::Zero();
                     if (CentroidModel::isHand(eef_id)) { ctrl_rate_penalty = mCentParam->wFrcArm; }
                     else { ctrl_rate_penalty = mCentParam->wDFrcLeg; }
@@ -326,8 +329,12 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
             // penalty on torques
             for (int eef_id=0; eef_id < mCentParam->numActEEfs; eef_id++) {
                 if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {
-                    if (eef_id==static_cast<int>(CentroidModel::EEfID::rightFoot) || eef_id==static_cast<int>(CentroidModel::EEfID::leftFoot)) { mQuadObjective.addQuaTerm(mCentParam->wTrqLeg, mVars[mTrqLocal[eef_id].id(0,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]); }
-                    else { mQuadObjective.addQuaTerm(mCentParam->wTrqArm, mVars[mTrqLocal[eef_id].id(0,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]); }
+                    if (eef_id == static_cast<int>(CentroidModel::EEfID::rightFoot) || eef_id==static_cast<int>(CentroidModel::EEfID::leftFoot)) {
+                        mQuadObjective.addQuaTerm(mCentParam->wTrqLeg, mVars[mTrqLocal[eef_id].id(0,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]);
+                    }
+                    else {
+                        mQuadObjective.addQuaTerm(mCentParam->wTrqArm, mVars[mTrqLocal[eef_id].id(0,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])]);
+                    }
                 }
             }
 
@@ -339,8 +346,8 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         }
 
         if (!is_first_time && mCentParam->heuristic == Heuristic::timeOptimization) {
-            for (int time_id=0; time_id<mCentParam->numTimeSteps; time_id++) {
-                for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++) {
+            for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
+                for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
                     if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {
                         Eigen::Matrix3d rot = mDynStateSeq.dynamicsStateSequence[time_id].eEfsOrientation[eef_id].toRotationMatrix();
                         Eigen::Vector3d rx = rot.col(0);
@@ -411,8 +418,8 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         }
 
         // friction cone constraints
-        for (int time_id=0; time_id<mCentParam->numTimeSteps; time_id++) {
-            for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++) {
+        for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
+            for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
                 if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsContactType[eef_id] != ContactType::FullContact) {
                     if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {
                         Eigen::Matrix3d eff_rotation = mDynStateSeq.dynamicsStateSequence[time_id].eEfsOrientation[eef_id].toRotationMatrix();
@@ -526,26 +533,41 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
             } else {
                 // center of mass constraint
                 for (int axis_id=0; axis_id<3; axis_id++) {
-                    if (time_id==0) { mLinCons = LinExpr(mVars[mCom.id(axis_id,time_id)]) - LinExpr(mCentParam->initialState.com[axis_id]) - LinExpr(mVars[mLMom.id(axis_id,time_id)])*(mDynStateSeq.dynamicsStateSequence[time_id].time/mCentParam->robotMass); }
-                    else            { mLinCons = LinExpr(mVars[mCom.id(axis_id,time_id)]) - LinExpr(mVars[mCom.id(axis_id,time_id-1)])  - LinExpr(mVars[mLMom.id(axis_id,time_id)])*(mDynStateSeq.dynamicsStateSequence[time_id].time/mCentParam->robotMass); }
+                    if (time_id==0) {
+                        mLinCons = LinExpr(mVars[mCom.id(axis_id,time_id)]) - LinExpr(mCentParam->initialState.com[axis_id]) - LinExpr(mVars[mLMom.id(axis_id,time_id)])*(mDynStateSeq.dynamicsStateSequence[time_id].time/mCentParam->robotMass);
+                    }
+                    else {
+                        mLinCons = LinExpr(mVars[mCom.id(axis_id,time_id)]) - LinExpr(mVars[mCom.id(axis_id,time_id-1)])  - LinExpr(mVars[mLMom.id(axis_id,time_id)])*(mDynStateSeq.dynamicsStateSequence[time_id].time/mCentParam->robotMass);
+                    }
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
 
                 // linear momentum constraint
                 for (int axis_id=0; axis_id<3; axis_id++) {
-                    if (time_id==0) { mLinCons = LinExpr(mVars[mLMom.id(axis_id,time_id)]) - LinExpr(mDynStateSeq.dynamicsStateSequence[time_id].time*(mCentParam->robotMass*mCentParam->gravityVector[axis_id])) - LinExpr(mCentParam->initialState.lMom(axis_id)); }
-                    else            { mLinCons = LinExpr(mVars[mLMom.id(axis_id,time_id)]) - LinExpr(mDynStateSeq.dynamicsStateSequence[time_id].time*(mCentParam->robotMass*mCentParam->gravityVector[axis_id])) - LinExpr(mVars[mLMom.id(axis_id,time_id-1)]); }
+                    if (time_id==0) {
+                        mLinCons = LinExpr(mVars[mLMom.id(axis_id,time_id)]) - LinExpr(mDynStateSeq.dynamicsStateSequence[time_id].time*(mCentParam->robotMass*mCentParam->gravityVector[axis_id])) - LinExpr(mCentParam->initialState.lMom(axis_id));
+                    }
+                    else {
+                        mLinCons = LinExpr(mVars[mLMom.id(axis_id,time_id)]) - LinExpr(mDynStateSeq.dynamicsStateSequence[time_id].time*(mCentParam->robotMass*mCentParam->gravityVector[axis_id])) - LinExpr(mVars[mLMom.id(axis_id,time_id-1)]);
+                    }
 
-                    for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++)
-                        if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) { mLinCons += LinExpr(mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])])*(-mDynStateSeq.dynamicsStateSequence[time_id].time*mCentParam->massTimesGravity); }
+                    for (int eef_id=0; eef_id < mCentParam->numActEEfs; eef_id++) {
+                        if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {
+                            mLinCons += LinExpr(mVars[mFrcWorld[eef_id].id(axis_id,mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivationIds[eef_id])])*(-mDynStateSeq.dynamicsStateSequence[time_id].time*mCentParam->massTimesGravity);
+                        }
+                    }
                     if (time_id==0) { mLinCons += LinExpr(mCentParam->externalForce[axis_id])*(-mDynStateSeq.dynamicsStateSequence[time_id].time*mCentParam->massTimesGravity); }
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
 
                 // angular momentum constraint
                 for (int axis_id=0; axis_id<3; axis_id++) {
-                    if (time_id==0) { mLinCons = LinExpr(mVars[mAMom.id(axis_id,time_id)]) - LinExpr(mCentParam->initialState.aMom[axis_id]); }
-                    else            { mLinCons = LinExpr(mVars[mAMom.id(axis_id,time_id)]) - LinExpr(mVars[mAMom.id(axis_id,time_id-1)]); }
+                    if (time_id==0) {
+                        mLinCons = LinExpr(mVars[mAMom.id(axis_id,time_id)]) - LinExpr(mCentParam->initialState.aMom[axis_id]);
+                    }
+                    else {
+                        mLinCons = LinExpr(mVars[mAMom.id(axis_id,time_id)]) - LinExpr(mVars[mAMom.id(axis_id,time_id-1)]);
+                    }
 
                     for (int eef_id=0; eef_id<mCentParam->numActEEfs; eef_id++) {
                         if (mDynStateSeq.dynamicsStateSequence[time_id].eEfsActivation[eef_id]) {

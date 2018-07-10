@@ -13,7 +13,7 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 - [Embedded Conic Solver](https://github.com/embotech/ecos) using [Sparse Matrix Routines](http://www.suitesparse.com)
 
 ### Trajectory Planning
-- [Centroid Dyanimcs Planning for Humanoid](https://arxiv.org/pdf/1709.09265.pdf)
+- Centroid Dyanimcs Planning for Humanoid
 - [DIRTREL](http://zacmanchester.github.io/docs/dirtrel-auro.pdf)
 
 ### Stabilizing Controller
