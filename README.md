@@ -26,17 +26,28 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 ### Clone the repository
 Make sure [Git Lfs](https://git-lfs.github.com/) is also installed for large file meshes.
 ```
-$ git clone --recurse https://github.com/junhyeokahn/PnC.git
+$ cd 'your work space' && git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
 
-### Install Dependancies
-- [Dart 6.5.0](https://github.com/junhyeokahn/dart)
+### Install Required Dependancies
+- [Dart 6.4.0](https://github.com/junhyeokahn/dart)
+```
+$ cd 'your workspace' && git clone https://github.com/junhyeokahn/dart.git
+$ cd dart && git checkout release-6.4
+$ mkdir build && cd build && cmake .. && make -j
+$ sudo make install
+```
 - [Drake](https://github.com/junhyeokahn/drake)
+```
+$ cd 'your workspace' && cd PnC
+$ source ./install.sh
+```
+### Install Optional Dependancies
 - [Gurobi](http://www.gurobi.com/)
 - [Mosek](https://www.mosek.com/)
 - [Snopt](http://ccom.ucsd.edu/~optimizers)
 
-### Build
+### Compile the Code
 ```
 $ mkdir build && cd build && cmake..
 $ make -j
