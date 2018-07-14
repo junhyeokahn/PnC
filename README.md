@@ -26,7 +26,7 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 ### Clone the repository
 Make sure [Git Lfs](https://git-lfs.github.com/) is also installed for large file meshes.
 ```
-$ cd 'your work space' && git clone --recurse https://github.com/junhyeokahn/PnC.git
+$ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.git
 ```
 
 ### Install Required Dependancies
