@@ -7,19 +7,21 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 ## Featured Algorithms
 
 ### Mathmatical Programming
+- Sum of Squares
 - Direct Transcription
 - Direct Collocation
 - [Constrained Direct Collocation](https://github.com/DAIRLab/dairlib-public)
 - [Embedded Conic Solver](https://github.com/embotech/ecos) using [Sparse Matrix Routines](http://www.suitesparse.com)
 
 ### Trajectory Planning
+- [Inverse Kinematics](https://github.com/junhyeokahn/dart)
 - Centroid Dyanimcs Planning for Humanoid
 - [DIRTREL](http://zacmanchester.github.io/docs/dirtrel-auro.pdf)
+- [Funnel Libraries for Real-Time Robust Feedback Motion Planning](http://groups.csail.mit.edu/robotics-center/public_papers/Majumdar16.pdf)
 
 ### Stabilizing Controller
 - [Linear Quadratic Regulator](https://github.com/RobotLocomotion/drake)
 - Whole Body Controller
-- [Inverse Kinematics](https://github.com/junhyeokahn/dart)
 
 ## Run the Code
 

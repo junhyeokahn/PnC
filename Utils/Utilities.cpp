@@ -73,6 +73,17 @@ namespace myUtils {
         savefile.flush();
     }
 
+    void saveVector(const std::vector<double> & _vec, std::string _name, bool b_param){
+        std::string file_name;
+        cleaningFile(_name, file_name, b_param);
+        std::ofstream savefile(file_name.c_str(), std::ios::app);
+        for (int i(0); i < _vec.size(); ++i){
+            savefile<<_vec[i]<< "\t";
+        }
+        savefile<<"\n";
+        savefile.flush();
+    }
+
     void cleaningFile(std::string  _file_name, std::string & _ret_file, bool b_param){
         if(b_param)
             _ret_file += THIS_COM;
