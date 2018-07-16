@@ -41,9 +41,13 @@ $ sudo make install
 ```
 - [Drake](https://github.com/junhyeokahn/drake)
 ```
-$ cd 'your workspace' && cd PnC
-$ source ./install.sh
+$ cd 'your workspace' && git clone https://github.com/junhyeokahn/drake.git
+$ cd drake && ./setup/mac/install_prereqs.sh
+$ rm -rf ../drake-build && mkdir ../drake-build && cd ../drake-build
+$ cmake -DWITH_GUROBI=ON -DWITH_MOSEK=ON -DWITH_SNOPT=ON ../drake # Configure Gurobi, Mosek or Snopt if needed
+$ make
 ```
+
 ### Install Optional Dependancies
 - [Gurobi](http://www.gurobi.com/)
 - [Mosek](https://www.mosek.com/)
