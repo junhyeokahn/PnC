@@ -47,6 +47,10 @@ $ rm -rf ../drake-build && mkdir ../drake-build && cd ../drake-build
 $ cmake -DWITH_GUROBI=ON -DWITH_MOSEK=ON -DWITH_SNOPT=ON ../drake # Configure Gurobi, Mosek or Snopt if needed
 $ make
 ```
+Alternatively, you could also do
+```
+$ cd PnC && source source ./install.sh
+```
 
 ### Install Optional Dependancies
 - [Gurobi](http://www.gurobi.com/)
