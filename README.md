@@ -49,7 +49,7 @@ $ make
 ```
 Alternatively, you could also do
 ```
-$ cd PnC && source source ./install.sh
+$ cd PnC && source ./install.sh
 ```
 
 ### Install Optional Dependancies
