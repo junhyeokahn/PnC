@@ -3,6 +3,7 @@
 #include <memory>
 #include "CartPolePnC/PlannerSet/PlannerSet.hpp"
 #include "ParamHandler.hpp"
+#include "drake/solvers/mosek_solver.h"
 
 void planDirColSwingUp() {
     // Construct Planner and Parameters
@@ -46,6 +47,9 @@ void planDirColSwingUp() {
 
 int main(int argc, char *argv[])
 {
+  auto mosek_license = drake::solvers::MosekSolver::AcquireLicense();
+  std::cout << mosek_license << std::endl;
+  //exit(0);
     ParamHandler handler(THIS_COM"Config/CartPole/OFFLINETRAJECTORYGENERATION.yaml");
     std::string PlannerName;
     handler.getString("PlannerName", PlannerName);

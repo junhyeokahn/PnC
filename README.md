@@ -15,13 +15,11 @@ dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
 
 ### Trajectory Planning
 - [Inverse Kinematics](https://github.com/junhyeokahn/dart)
-- Centroid Dyanimcs Planning for Humanoid
-- [DIRTREL](http://zacmanchester.github.io/docs/dirtrel-auro.pdf)
-- [Funnel Libraries for Real-Time Robust Feedback Motion Planning](http://groups.csail.mit.edu/robotics-center/public_papers/Majumdar16.pdf)
+- [Centroid Dyanimcs Planning for Humanoid](https://arxiv.org/pdf/1709.09265.pdf)
 
 ### Stabilizing Controller
 - [Linear Quadratic Regulator](https://github.com/RobotLocomotion/drake)
-- Whole Body Controller
+- [Whole Body Controller](https://arxiv.org/pdf/1807.01222.pdf)
 
 ## Run the Code
 
