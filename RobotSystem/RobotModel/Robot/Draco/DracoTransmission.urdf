@@ -49,6 +49,12 @@
     <axis xyz="0 0 1" />
     <!--<limit lower="" upper=""/>-->
   </joint>
+    <!--<transmission name="lHipYaw" type="transmission_interface/SimpleTransmission">-->
+    <!--<joint name="lHipYaw"/>-->
+    <!--<actuator name="lHipYaw"/>-->
+    <!--<motorInertia>0.000061</motorInertia>-->
+    <!--<mechanicalReduction>25</mechanicalReduction>-->
+  <!--</transmission>-->
 
   <link name="lHipRoll">
     <inertial>
