@@ -1,3 +1,3 @@
 file(GLOB_RECURSE srcs "*.cpp" "*.hpp")
 
-add_library(myConicSolver ${srcs})
+add_library(myConicSolver SHARED ${srcs})

@@ -213,7 +213,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh= filename="meshes/rHipPitch.dae" />
+        <mesh filename="meshes/rHipPitch.dae" />
       </geometry>
       <material name="">
         <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
