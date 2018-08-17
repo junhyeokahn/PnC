@@ -51,7 +51,7 @@ INLINE double Tanh(double x) { return tanh(x); }
 /*
  * Sub functions
  */
-static void output1(Eigen::Matrix<double,1,3> &p_output1, const Eigen::Matrix<double,16,1> &var1)
+static void output1(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1)
 {
   double t26;
   double t112;
@@ -681,7 +681,7 @@ static void output1(Eigen::Matrix<double,1,3> &p_output1, const Eigen::Matrix<do
 
 
        
-void pcom_Draco(Eigen::Matrix<double,1,3> &p_output1, const Eigen::Matrix<double,16,1> &var1)
+void pcom_Draco(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1)
 {
   // Call Subroutines
   output1(p_output1, var1);

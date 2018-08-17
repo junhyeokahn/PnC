@@ -1,3 +1,9 @@
+#include <p_BasePosX.h>
+#include <p_BasePosY.h>
+#include <p_BasePosZ.h>
+#include <p_BaseRotX.h>
+#include <p_BaseRotY.h>
+#include <p_BaseRotZ.h>
 #include <p_rHipYaw.h>
 #include <p_rHipRoll.h>
 #include <p_rHipPitch.h>

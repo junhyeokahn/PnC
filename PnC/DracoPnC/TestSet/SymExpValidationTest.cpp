@@ -20,10 +20,9 @@ void SymExpValidationTest::getTorqueInput(void * commandData_) {
     cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
 
     // Comparison to Mathematica
-    Eigen::Vector3d lHipYaw1, lHipRoll1, lHipPitch1, lKnee1, lAnkle1, rHipYaw1, rHipRoll1, rHipPitch1, rKnee1, rAnkle1, com1;
+    Eigen::Vector3d basePosX, basePosY, basePosZ, baseRotX, baseRotY, baseRotZ, lHipYaw1, lHipRoll1, lHipPitch1, lKnee1, lAnkle1, rHipYaw1, rHipRoll1, rHipPitch1, rKnee1, rAnkle1, com1;
     Eigen::Vector3d lHipYaw2, lHipRoll2, lHipPitch2, lKnee2, lAnkle2, rHipYaw2, rHipRoll2, rHipPitch2, rKnee2, rAnkle2, com2;
 
-    p_lHipYaw(lHipYaw1, mRobot->getQ());
     lHipYaw2 = mRobot->getBodyNodeIsometry("lHipYaw").translation();
 
     p_lHipRoll(lHipRoll1, mRobot->getQ());
@@ -57,6 +56,15 @@ void SymExpValidationTest::getTorqueInput(void * commandData_) {
     if (!(myUtils::isEqual(rKnee1, rKnee2))) std::cout << "right knee is not equal" << std::endl;
     if (!(myUtils::isEqual(rAnkle1, rAnkle2))) std::cout << "right ankle is not equal" << std::endl;
     if (!(myUtils::isEqual(com1, com2))) std::cout << "com is not equal" << std::endl;
+
+    std::cout << "rankle" << std::endl;
+    std::cout << rAnkle1 << std::endl;
+    std::cout << "--" << std::endl;
+    std::cout << rAnkle2 << std::endl;
+    std::cout << "com" << std::endl;
+    std::cout << com1 << std::endl;
+    std::cout << "--" << std::endl;
+    std::cout << com2 << std::endl;
     exit(0);
 
 }
