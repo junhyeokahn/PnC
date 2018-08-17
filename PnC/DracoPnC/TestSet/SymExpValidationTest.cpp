@@ -1,7 +1,7 @@
 #include "DracoPnC/TestSet/TestSet.hpp"
 #include "RobotSystem.hpp"
 #include "Utilities.hpp"
-#include <MathmaticaDracoFixed.h>
+#include <MathmaticaDraco.h>
 
 SymExpValidationTest::SymExpValidationTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner
@@ -23,21 +23,19 @@ void SymExpValidationTest::getTorqueInput(void * commandData_) {
     Eigen::Vector3d lHipYaw1, lHipRoll1, lHipPitch1, lKnee1, lAnkle1, rHipYaw1, rHipRoll1, rHipPitch1, rKnee1, rAnkle1, com1;
     Eigen::Vector3d lHipYaw2, lHipRoll2, lHipPitch2, lKnee2, lAnkle2, rHipYaw2, rHipRoll2, rHipPitch2, rKnee2, rAnkle2, com2;
 
-    Eigen::VectorXd zero_vector = Eigen::VectorXd::Zero(16);
-    p_lHipYaw(lHipYaw1, zero_vector);
+    p_lHipYaw(lHipYaw1, mRobot->getQ());
     lHipYaw2 = mRobot->getBodyNodeIsometry("lHipYaw").translation();
-    static Eigen::Vector3d offset = lHipYaw1 - lHipYaw2;
 
-    p_lHipRoll(lHipRoll1, zero_vector);
-    p_lHipPitch(lHipPitch1, zero_vector);
-    p_lKnee(lKnee1, zero_vector);
-    p_lAnkle(lAnkle1, zero_vector);
-    p_rHipYaw(rHipYaw1, zero_vector);
-    p_rHipRoll(rHipRoll1, zero_vector);
-    p_rHipPitch(rHipPitch1, zero_vector);
-    p_rKnee(rKnee1, zero_vector);
-    p_rAnkle(rAnkle1, zero_vector);
-    pcom_Draco(com1, zero_vector);
+    p_lHipRoll(lHipRoll1, mRobot->getQ());
+    p_lHipPitch(lHipPitch1, mRobot->getQ());
+    p_lKnee(lKnee1, mRobot->getQ());
+    p_lAnkle(lAnkle1, mRobot->getQ());
+    p_rHipYaw(rHipYaw1, mRobot->getQ());
+    p_rHipRoll(rHipRoll1, mRobot->getQ());
+    p_rHipPitch(rHipPitch1, mRobot->getQ());
+    p_rKnee(rKnee1, mRobot->getQ());
+    p_rAnkle(rAnkle1, mRobot->getQ());
+    pcom_Draco(com1, mRobot->getQ());
 
     lHipRoll2 = mRobot->getBodyNodeIsometry("lHipRoll").translation();
     lHipPitch2 = mRobot->getBodyNodeIsometry("lHipPitch").translation();
