@@ -257,4 +257,14 @@ namespace myUtils {
             str_array[nIndex++] = strTarget.substr(0, nCutPos);
         }
     }
+
+    bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b, const double threshold) {
+        bool ret(true);
+        for (int i = 0; i < a.size(); ++i) {
+            if ( (a(i) - b(i)) > threshold || ((a(i) - b(i))) < -threshold) {
+                ret = false;
+            }
+        }
+        return ret;
+    }
 }

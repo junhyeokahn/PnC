@@ -63,11 +63,11 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         std::cout << bn->getMass() << std::endl;
     }
 
-    //for (int i = 0; i < robot->getNumJoints(); ++i) {
-        //dart::dynamics::Joint* joint = robot->getJoint(i);
-        //std::cout << i << "th" << std::endl;
-        //std::cout << joint->getNumDofs() << std::endl;
-    //}
+    for (int i = 0; i < robot->getNumJoints(); ++i) {
+        dart::dynamics::Joint* joint = robot->getJoint(i);
+        std::cout << i << "th" << std::endl;
+        std::cout << joint->getNumDofs() << std::endl;
+    }
 
     //for (int i = 0; i < robot->getNumDofs(); ++i) {
         //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
@@ -76,8 +76,8 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
     //}
 
-    //std::cout << robot->getNumDofs() << std::endl;
-    //std::cout << robot->getNumJoints() << std::endl;
+    std::cout << robot->getNumDofs() << std::endl;
+    std::cout << robot->getNumJoints() << std::endl;
     //std::cout << robot->getMassMatrix().rows() << std::endl;
     //std::cout << robot->getMassMatrix().cols() << std::endl;
 
@@ -99,11 +99,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     switch (initPos) {
         case 0:
             q[5] = 1.425;
+            //q[2] = 1.425;
             q[lAnkleIdx] = M_PI/2;
             q[rAnkleIdx] = M_PI/2;
             break;
         case 1:
-            q[5] = 1.34;
+            //q[5] = 1.34;
+            q[2] = 1.34;
             q[lHipPitchIdx] = -M_PI/8;
             q[lKneeIdx] = M_PI/4;
             q[rHipPitchIdx] = -M_PI/8;

@@ -1,11 +1,54 @@
 <robot name="Draco">
 
+  <!--<link name="world" />-->
+  <!--<joint name="ground_joint" type="floating">-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<parent link="world" />-->
+      <!--<child link="torso" />-->
+  <!--</joint>-->
+
   <link name="world" />
-  <joint name="ground_joint" type="floating">
-  <!--<joint name="ground_joint" type="fixed">-->
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <parent link="world" />
-      <child link="torso" />
+  <link name="basePosX" />
+  <joint name="basePosX" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="world" />
+    <child link="basePosX" />
+    <axis xyz="1 0 0" />
+    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+  </joint>
+
+  <link name="basePosY" />
+  <joint name="basePosY" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="basePosX" />
+    <child link="basePosY" />
+    <axis xyz="0 1 0" />
+    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+  </joint>
+
+  <link name="basePosZ" />
+  <joint name="basePosZ" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="basePosY" />
+    <child link="basePosZ" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+  </joint>
+
+  <link name="baseRotZ" />
+  <joint name="baseRotZ" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="basePosZ" />
+    <child link="baseRotZ" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <link name="baseRotY" />
+  <joint name="baseRotY" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="baseRotZ" />
+    <child link="baseRotY" />
+    <axis xyz="0 1 0" />
   </joint>
 
   <link name="torso">
@@ -16,14 +59,20 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/torso.dae" />
-      </geometry>
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/torso.dae" />-->
+      <!--</geometry>-->
       <material name="">
         <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
   </link>
+  <joint name="baseRotX" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="baseRotY" />
+    <child link="torso" />
+    <axis xyz="1 0 0" />
+  </joint>
 
   <link name="lHipYaw">
     <inertial>

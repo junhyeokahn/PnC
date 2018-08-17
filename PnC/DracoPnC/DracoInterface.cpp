@@ -24,7 +24,9 @@ DracoInterface::~DracoInterface() {
 
 void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
     DracoSensorData* data = (DracoSensorData*) sensorData_;
-    mRobot->updateSystem(mTime, data->q, data->qdot, true);
+    //mRobot->updateSystem(mTime, data->q, data->qdot, true);
+    Eigen::VectorXd zero_vector = Eigen::VectorXd::Zero(16);
+    mRobot->updateSystem(mTime, zero_vector, zero_vector, true);
     if (mTime < mInitTime) {
         mRobot->setInitialConfiguration(data->q);
         DracoCommand* cmd = (DracoCommand*) commandData_;
@@ -45,6 +47,8 @@ void DracoInterface::_constructTest() {
     handler.getString("TestName", tmp_string);
     if (tmp_string == "WholeBodyControllerTest") {
         mTest = new WholeBodyControllerTest(mRobot);
+    } else if (tmp_string == "SymExpValidationTest") {
+        mTest = new SymExpValidationTest(mRobot);
     } else {
         printf("[Interface] There is no test matching test with the name\n");
         exit(0);

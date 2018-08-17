@@ -7,5 +7,5 @@
 #define PCOM_DRACO_HH
 #include <Eigen/Dense>
 
-void pcom_Draco(Eigen::Matrix<double,1,3> &p_output1, const Eigen::Matrix<double,10,1> &var1);
+void pcom_Draco(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,10,1> &var1);
 #endif // PCOM_DRACO_HH
