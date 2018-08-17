@@ -1,6 +1,6 @@
 /*
  * Automatically Generated from Mathematica.
- * Thu 16 Aug 2018 18:04:35 GMT-05:00
+ * Thu 16 Aug 2018 23:21:24 GMT-05:00
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,16 +53,16 @@ INLINE double Tanh(double x) { return tanh(x); }
  */
 static void output1(Eigen::Matrix<double,3,3> &p_output1, const Eigen::Matrix<double,16,1> &var1)
 {
-  double t1680;
-  double t1648;
-  t1680 = Sin(var1[3]);
-  t1648 = Cos(var1[3]);
+  double t1511;
+  double t1462;
+  t1511 = Sin(var1[3]);
+  t1462 = Cos(var1[3]);
 
-  p_output1(0)=t1648;
-  p_output1(1)=t1680;
+  p_output1(0)=t1462;
+  p_output1(1)=t1511;
   p_output1(2)=0;
-  p_output1(3)=-1.*t1680;
-  p_output1(4)=t1648;
+  p_output1(3)=-1.*t1511;
+  p_output1(4)=t1462;
   p_output1(5)=0;
   p_output1(6)=0;
   p_output1(7)=0;

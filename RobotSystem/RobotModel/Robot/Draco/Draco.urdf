@@ -7,8 +7,22 @@
       <!--<child link="torso" />-->
   <!--</joint>-->
 
-  <link name="world" />
-  <link name="basePosX" />
+  <link name="world">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
+
+  <link name="basePosX">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
+
   <joint name="basePosX" type="prismatic">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="world" />
@@ -17,7 +31,13 @@
     <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
-  <link name="basePosY" />
+  <link name="basePosY">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
   <joint name="basePosY" type="prismatic">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="basePosX" />
@@ -26,7 +46,13 @@
     <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
-  <link name="basePosZ" />
+  <link name="basePosZ">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
   <joint name="basePosZ" type="prismatic">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="basePosY" />
@@ -35,7 +61,13 @@
     <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
-  <link name="baseRotZ" />
+  <link name="baseRotZ">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
   <joint name="baseRotZ" type="continuous">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="basePosZ" />
@@ -43,7 +75,13 @@
     <axis xyz="0 0 1" />
   </joint>
 
-  <link name="baseRotY" />
+  <link name="baseRotY">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
   <joint name="baseRotY" type="continuous">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="baseRotZ" />

@@ -1,6 +1,6 @@
 /*
  * Automatically Generated from Mathematica.
- * Thu 16 Aug 2018 18:04:37 GMT-05:00
+ * Thu 16 Aug 2018 23:21:27 GMT-05:00
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,24 +53,24 @@ INLINE double Tanh(double x) { return tanh(x); }
  */
 static void output1(Eigen::Matrix<double,3,3> &p_output1, const Eigen::Matrix<double,16,1> &var1)
 {
-  double t2107;
-  double t2192;
-  double t2038;
-  double t2348;
-  t2107 = Cos(var1[4]);
-  t2192 = Sin(var1[3]);
-  t2038 = Cos(var1[3]);
-  t2348 = Sin(var1[4]);
+  double t3512;
+  double t3771;
+  double t3140;
+  double t3948;
+  t3512 = Cos(var1[4]);
+  t3771 = Sin(var1[3]);
+  t3140 = Cos(var1[3]);
+  t3948 = Sin(var1[4]);
 
-  p_output1(0)=t2038*t2107;
-  p_output1(1)=t2107*t2192;
-  p_output1(2)=-1.*t2348;
-  p_output1(3)=-1.*t2192;
-  p_output1(4)=t2038;
+  p_output1(0)=t3140*t3512;
+  p_output1(1)=t3512*t3771;
+  p_output1(2)=-1.*t3948;
+  p_output1(3)=-1.*t3771;
+  p_output1(4)=t3140;
   p_output1(5)=0;
-  p_output1(6)=t2038*t2348;
-  p_output1(7)=t2192*t2348;
-  p_output1(8)=t2107;
+  p_output1(6)=t3140*t3948;
+  p_output1(7)=t3771*t3948;
+  p_output1(8)=t3512;
 }
 
 
