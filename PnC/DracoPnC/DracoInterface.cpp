@@ -40,15 +40,24 @@ void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
 }
 
 void DracoInterface::_constructTest() {
-    ParamHandler handler(THIS_COM"Config/Draco/INTERFACE.yaml");
-    std::string tmp_string;
-    handler.getString("TestName", tmp_string);
-    if (tmp_string == "WholeBodyControllerTest") {
-        mTest = new WholeBodyControllerTest(mRobot);
-    } else if (tmp_string == "SymExpValidationTest") {
-        mTest = new SymExpValidationTest(mRobot);
-    } else {
+    try {
+        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/INTERFACE.yaml");
+        std::string tmp_string;
+        //std::cout << readParameter<std::string>(cfg, "TestName") << std::endl;
+        myUtils::readParameter(cfg, "TestName", tmp_string);
+        std::cout << tmp_string << std::endl;
+        if (tmp_string == "WholeBodyControllerTest") {
+            mTest = new WholeBodyControllerTest(mRobot);
+        } else if (tmp_string == "SymExpValidationTest") {
+            mTest = new SymExpValidationTest(mRobot);
+        } else if (tmp_string == "CentroidKinematicOptimizationTest") {
+            mTest = new CentroidKinematicOptimizationTest(mRobot);
+        } else {
         printf("[Interface] There is no test matching test with the name\n");
+        exit(0);
+        }
+    }catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);
     }
 }

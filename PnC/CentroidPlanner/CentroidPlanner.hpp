@@ -91,9 +91,9 @@ class CentroidPlanner : public Planner
     private:
         virtual void _doPlan();
         virtual void _evalTrajectory( double time,
-                Eigen::VectorXd & pos,
-                Eigen::VectorXd & vel,
-                Eigen::VectorXd & trq);
+                                      Eigen::VectorXd & pos,
+                                      Eigen::VectorXd & vel,
+                                      Eigen::VectorXd & trq);
 
         std::shared_ptr<CentroidPlannerParameter> mCentParam;
 
