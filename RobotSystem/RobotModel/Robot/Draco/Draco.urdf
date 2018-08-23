@@ -1,25 +1,18 @@
 <robot name="Draco">
 
-  <!--<link name="world" />-->
-  <!--<joint name="ground_joint" type="floating">-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<parent link="world" />-->
-      <!--<child link="torso" />-->
-  <!--</joint>-->
-
   <link name="world">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
 
   <link name="basePosX">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
 
@@ -34,8 +27,8 @@
   <link name="basePosY">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
   <joint name="basePosY" type="prismatic">
@@ -49,8 +42,8 @@
   <link name="basePosZ">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
   <joint name="basePosZ" type="prismatic">
@@ -64,8 +57,8 @@
   <link name="baseRotZ">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
   <joint name="baseRotZ" type="continuous">
@@ -78,8 +71,8 @@
   <link name="baseRotY">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <mass value="0.00000001" />
+      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
     </inertial>
   </link>
   <joint name="baseRotY" type="continuous">
@@ -92,14 +85,14 @@
   <link name="torso">
     <inertial>
       <origin xyz="-0.0133907728940907 0.000753510365864796 -0.187273411666051" rpy="0 0 0" />
-      <mass value="12.0" />
+      <mass value="9.67" />
       <inertia ixx="0.0585154591166426" ixy="-9.46724624145663E-05" ixz="-0.00614431919973963" iyy="0.0651574953784801" iyz="-0.000230611945696951" izz="0.0178352105631859" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <!--<geometry>-->
-        <!--<mesh filename="meshes/torso.dae" />-->
-      <!--</geometry>-->
+      <geometry>
+        <mesh filename="meshes/torso.dae" />
+      </geometry>
       <material name="">
         <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
@@ -114,9 +107,9 @@
 
   <link name="lHipYaw">
     <inertial>
-      <origin xyz="-0.00133077571048809 0.0767264808447608 0.0331458698784674" rpy="0 0 0" />
-      <mass value="1.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <origin xyz="0 0.07 0.05" rpy="0 0 0" />
+      <mass value="2.962" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -128,20 +121,25 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipYaw" type="continuous">
-    <origin xyz="-0.0222250000000002 0.0870035316828367 -0.29508" rpy="1.92592994438724E-34 0 0" />
+  <joint name="lHipYaw" type="revolute">
+    <origin xyz="-0.0222 0.0870 -0.2951" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
-    <!--<limit lower="" upper=""/>-->
+    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
+  <transmission name="lHipYaw" type="transmission_interface/SimpleTransmission">
+    <actuator name="lHipYaw"/>
+    <joint name="lHipYaw"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="lHipRoll">
     <inertial>
-      <origin xyz="0.00339132677797452 0.0206605337063556 -0.0257292475385931" rpy="0 0 0" />
-      <mass value="0.5" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <origin xyz="0 0.022 -0.02" rpy="0 0 0" />
+      <mass value="0.408" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -153,20 +151,25 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipRoll" type="continuous">
-    <origin xyz="0 0.0699999999999993 -0.0200000000000001" rpy="1.92592994438724E-34 0 0" />
+  <joint name="lHipRoll" type="revolute">
+    <origin xyz="0 0.07 -0.02" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
-    <!--<limit lower="" upper=""/>-->
+    <limit effort="40" lower="-0.52" upper="1.04" velocity="25.0"/>
   </joint>
+  <transmission name="lHipRoll" type="transmission_interface/SimpleTransmission">
+    <actuator name="lHipRoll"/>
+    <joint name="lHipRoll"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="lHipPitch">
     <inertial>
-      <origin xyz="0.000893169405024874 0.00664975930349293 -0.240107607669368" rpy="0 0 0" />
+      <origin xyz="0.0009 0.0066 -0.24" rpy="0 0 0" />
       <mass value="6.0" />
-      <inertia ixx="0.0554597539343357" ixy="-4.96353832634567E-05" ixz="0.00387350926640959" iyy="0.0594708575968679" iyz="-8.76098197585977E-05" izz="0.00586717920757217" />
+      <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -178,20 +181,25 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipPitch" type="continuous">
-    <origin xyz="0 0.0099999999999999 -0.065" rpy="0 0 0" />
+  <joint name="lHipPitch" type="revolute">
+    <origin xyz="0 0.010 -0.065" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
-    <!--<limit lower="" upper=""/>-->
+    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
+  <transmission name="lHipPitch" type="transmission_interface/SimpleTransmission">
+    <actuator name="lHipPitch"/>
+    <joint name="lHipPitch"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="lKnee">
     <inertial>
-      <origin xyz="-0.0160694818031384 0.0166915332296556 -0.247821663323642" rpy="0 0 0" />
-      <mass value="3.8" />
-      <inertia ixx="0.0223500007162276" ixy="1.90813341270288E-06" ixz="-0.000469201405070835" iyy="0.0239506799617116" iyz="-3.52672806306326E-05" izz="0.0016106132009756" />
+      <origin xyz="0.0161 0.0167 -0.275" rpy="0 0 0" />
+      <mass value="3.5" />
+      <inertia ixx="0.0224" ixy="0.0001" ixz="-0.0005" iyy="0.0240" iyz="0.0001" izz="0.0016" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -203,20 +211,25 @@
       </material>
     </visual>
   </link>
-  <joint name="lKnee" type="continuous">
-    <origin xyz="0 -0.016750000238715 -0.48" rpy="1.92592994438724E-34 0 0" />
+  <joint name="lKnee" type="revolute">
+    <origin xyz="0 -0.0168 -0.48" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
-    <!--<limit lower="0.0" upper="2.13"/>-->
+    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
+  <transmission name="lKnee" type="transmission_interface/SimpleTransmission">
+    <actuator name="lKnee"/>
+    <joint name="lKnee"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="lAnkle">
     <inertial>
-      <origin xyz="0.0106585017260504 -5.2874776534928E-06 -0.0442754848176794" rpy="0 0 0" />
-      <mass value="0.5" />
-      <inertia ixx="9.25348009777962E-05" ixy="2.93058689550461E-09" ixz="3.47135990507816E-05" iyy="0.000105757059469695" iyz="-1.13707644905716E-08" izz="1.32222791303708E-05" />
+      <origin xyz="0.0108 0 -0.0443" rpy="0 0 0" />
+      <mass value="0.7" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -234,20 +247,25 @@
       </geometry>
     </collision>
   </link>
-  <joint name="lAnkle" type="continuous">
-    <origin xyz="0.00107750129935319 0.0167500014015612 -0.480000014901359" rpy="0 -1.57 0" />
+  <joint name="lAnkle" type="revolute">
+    <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
     <dynamics damping="0.01" />
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
-    <!--<limit lower="0.901" upper="2.44"/>-->
+    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
+  <transmission name="lAnkle" type="transmission_interface/SimpleTransmission">
+    <actuator name="lAnkle"/>
+    <joint name="lAnkle"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="rHipYaw">
     <inertial>
-      <origin xyz="0.0013307756714234 -0.0767264807275769 0.0331458699108186" rpy="0 0 0" />
-      <mass value="1.0" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <origin xyz="0 -0.07 0.05" rpy="0 0 0" />
+      <mass value="2.962" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -259,19 +277,25 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipYaw" type="continuous">
-    <origin xyz="-0.022225 -0.086996 -0.29508" rpy="1.9259E-34 0 0" />
+  <joint name="rHipYaw" type="revolute">
+    <origin xyz="-0.0222 -0.0870 -0.2951" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
+    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
+  <transmission name="rHipYaw" type="transmission_interface/SimpleTransmission">
+    <actuator name="rHipYaw"/>
+    <joint name="rHipYaw"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="rHipRoll">
     <inertial>
-      <origin xyz="0.00339132768808093 -0.0206605359083746 -0.0257292459243485" rpy="0 0 0" />
-      <mass value="0.5" />
-      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+      <origin xyz="0 -0.022 -0.02" rpy="0 0 0" />
+      <mass value="0.408" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -283,19 +307,25 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipRoll" type="continuous">
-    <origin xyz="0 -0.07 -0.02" rpy="1.9259E-34 0 0" />
+  <joint name="rHipRoll" type="revolute">
+    <origin xyz="0 -0.07 -0.02" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
+    <limit effort="40" lower="-1.04" upper="0.52" velocity="25.0"/>
   </joint>
+  <transmission name="rHipRoll" type="transmission_interface/SimpleTransmission">
+    <actuator name="rHipRoll"/>
+    <joint name="rHipRoll"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="rHipPitch">
     <inertial>
-      <origin xyz="0.00089317071447173 0.00664975895604998 -0.240107606129076" rpy="0 0 0" />
+      <origin xyz="0.0009 0.0066 -0.24" rpy="0 0 0" />
       <mass value="6.0" />
-      <inertia ixx="0.0554597533042375" ixy="-4.96354116087342E-05" ixz="0.00387350945211868" iyy="0.0594708567299539" iyz="-8.76095223056825E-05" izz="0.00586717901421215" />
+      <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -307,19 +337,25 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipPitch" type="continuous">
-    <origin xyz="0 -0.01 -0.065" rpy="1.9259E-34 0 0" />
+  <joint name="rHipPitch" type="revolute">
+    <origin xyz="0 -0.01 -0.065" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
+    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
+  <transmission name="rHipPitch" type="transmission_interface/SimpleTransmission">
+    <actuator name="rHipPitch"/>
+    <joint name="rHipPitch"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="rKnee">
     <inertial>
-      <origin xyz="-0.0160694817441243 -0.016808467447866 -0.247821663241633" rpy="0 0 0" />
-      <mass value="3.8" />
-      <inertia ixx="0.0223500008052621" ixy="1.90814002856742E-06" ixz="-0.000469201376317993" iyy="0.023950680051575" iyz="-3.52673166240163E-05" izz="0.00161061320154054" />
+      <origin xyz="-0.0161 -0.0168 -0.275" rpy="0 0 0" />
+      <mass value="3.5" />
+      <inertia ixx="0.0224" ixy="0.0001" ixz="-0.0005" iyy="0.0240" iyz="0.0001" izz="0.0016" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -331,20 +367,25 @@
       </material>
     </visual>
   </link>
-  <joint name="rKnee" type="continuous">
+  <joint name="rKnee" type="revolute">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
     <dynamics damping="0.01" />
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
-    <!--<limit lower="0.0" upper="2.13"/>-->
+    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
+  <transmission name="rKnee" type="transmission_interface/SimpleTransmission">
+    <actuator name="rKnee"/>
+    <joint name="rKnee"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 
   <link name="rAnkle">
     <inertial>
-      <origin xyz="0.0106585017298252 -5.28747676266372E-06 -0.0442754848373264" rpy="0 0 0" />
-      <mass value="0.5" />
-      <inertia ixx="9.25348007064494E-05" ixy="2.93059145991699E-09" ixz="3.47135989993722E-05" iyy="0.000105757059196872" iyz="-1.13707770038274E-08" izz="1.32222791289039E-05" />
+      <origin xyz="0.0108 0 -0.0443" rpy="0 0 0" />
+      <mass value="0.7" />
+      <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -362,12 +403,17 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rAnkle" type="continuous">
-    <origin xyz="0.0010775 -0.01675 -0.48" rpy="0 -1.57 0" />
+  <joint name="rAnkle" type="revolute">
+    <origin xyz="0.0011 -0.0168 -0.48" rpy="0 -1.57 0" />
     <dynamics damping="0.01" />
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />
-    <!--<limit lower="0.901" upper="2.44"/>-->
+    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
+  <transmission name="rAnkle" type="transmission_interface/SimpleTransmission">
+    <actuator name="rAnkle"/>
+    <joint name="rAnkle"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
 </robot>

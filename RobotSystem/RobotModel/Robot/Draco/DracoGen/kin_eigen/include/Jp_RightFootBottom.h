@@ -1,6 +1,6 @@
 /*
  * Automatically Generated from Mathematica.
- * Thu 16 Aug 2018 23:22:00 GMT-05:00
+ * Thu 23 Aug 2018 15:50:34 GMT-05:00
  */
 
 #ifndef JP_RIGHTFOOTBOTTOM_HH

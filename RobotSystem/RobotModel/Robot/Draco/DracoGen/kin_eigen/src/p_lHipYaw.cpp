@@ -1,6 +1,6 @@
 /*
  * Automatically Generated from Mathematica.
- * Thu 16 Aug 2018 23:21:30 GMT-05:00
+ * Thu 23 Aug 2018 15:50:14 GMT-05:00
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,54 +53,54 @@ INLINE double Tanh(double x) { return tanh(x); }
  */
 static void output1(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1)
 {
-  double t4540;
-  double t4654;
-  double t4269;
-  double t4633;
-  double t4793;
-  double t4920;
-  double t4925;
-  double t4932;
-  double t4955;
-  double t4883;
-  double t4887;
-  double t4915;
-  double t4981;
-  double t4949;
-  double t4959;
-  double t4969;
-  double t4985;
-  double t4988;
-  double t4991;
-  double t5092;
-  double t5093;
-  double t5095;
-  t4540 = Cos(var1[5]);
-  t4654 = Sin(var1[3]);
-  t4269 = Cos(var1[3]);
-  t4633 = Sin(var1[4]);
-  t4793 = Sin(var1[5]);
-  t4920 = Cos(var1[6]);
-  t4925 = -1.*t4920;
-  t4932 = 1. + t4925;
-  t4955 = Sin(var1[6]);
-  t4883 = -1.*t4540*t4654;
-  t4887 = t4269*t4633*t4793;
-  t4915 = t4883 + t4887;
-  t4981 = Cos(var1[4]);
-  t4949 = 0.087004*t4932;
-  t4959 = 0.022225*t4955;
-  t4969 = 0. + t4949 + t4959;
-  t4985 = -0.022225*t4932;
-  t4988 = 0.087004*t4955;
-  t4991 = 0. + t4985 + t4988;
-  t5092 = t4269*t4540;
-  t5093 = t4654*t4633*t4793;
-  t5095 = t5092 + t5093;
+  double t1381;
+  double t1559;
+  double t1366;
+  double t1507;
+  double t1632;
+  double t3340;
+  double t3352;
+  double t3581;
+  double t3621;
+  double t3214;
+  double t3270;
+  double t3312;
+  double t3763;
+  double t3610;
+  double t3630;
+  double t3662;
+  double t3768;
+  double t3813;
+  double t3998;
+  double t4215;
+  double t4216;
+  double t4222;
+  t1381 = Cos(var1[5]);
+  t1559 = Sin(var1[3]);
+  t1366 = Cos(var1[3]);
+  t1507 = Sin(var1[4]);
+  t1632 = Sin(var1[5]);
+  t3340 = Cos(var1[6]);
+  t3352 = -1.*t3340;
+  t3581 = 1. + t3352;
+  t3621 = Sin(var1[6]);
+  t3214 = -1.*t1381*t1559;
+  t3270 = t1366*t1507*t1632;
+  t3312 = t3214 + t3270;
+  t3763 = Cos(var1[4]);
+  t3610 = 0.087*t3581;
+  t3630 = 0.0222*t3621;
+  t3662 = 0. + t3610 + t3630;
+  t3768 = -0.0222*t3581;
+  t3813 = 0.087*t3621;
+  t3998 = 0. + t3768 + t3813;
+  t4215 = t1366*t1381;
+  t4216 = t1559*t1507*t1632;
+  t4222 = t4215 + t4216;
 
-  p_output1(0)=0. - 0.29508*(t4269*t4540*t4633 + t4654*t4793) + t4915*t4969 - 0.022225*(t4915*t4955 + t4269*t4920*t4981) + 0.087004*(t4915*t4920 - 1.*t4269*t4955*t4981) + t4269*t4981*t4991 + var1(0);
-  p_output1(1)=0. - 0.29508*(t4540*t4633*t4654 - 1.*t4269*t4793) + t4654*t4981*t4991 + t4969*t5095 + 0.087004*(-1.*t4654*t4955*t4981 + t4920*t5095) - 0.022225*(t4654*t4920*t4981 + t4955*t5095) + var1(1);
-  p_output1(2)=0. - 0.29508*t4540*t4981 + t4793*t4969*t4981 + 0.087004*(t4633*t4955 + t4793*t4920*t4981) - 0.022225*(-1.*t4633*t4920 + t4793*t4955*t4981) - 1.*t4633*t4991 + var1(2);
+  p_output1(0)=0. - 0.2951*(t1366*t1381*t1507 + t1559*t1632) + t3312*t3662 - 0.0222*(t3312*t3621 + t1366*t3340*t3763) + 0.087*(t3312*t3340 - 1.*t1366*t3621*t3763) + t1366*t3763*t3998 + var1(0);
+  p_output1(1)=0. - 0.2951*(t1381*t1507*t1559 - 1.*t1366*t1632) + t1559*t3763*t3998 + t3662*t4222 + 0.087*(-1.*t1559*t3621*t3763 + t3340*t4222) - 0.0222*(t1559*t3340*t3763 + t3621*t4222) + var1(1);
+  p_output1(2)=0. - 0.2951*t1381*t3763 + t1632*t3662*t3763 + 0.087*(t1507*t3621 + t1632*t3340*t3763) - 0.0222*(-1.*t1507*t3340 + t1632*t3621*t3763) - 1.*t1507*t3998 + var1(2);
 }
 
 

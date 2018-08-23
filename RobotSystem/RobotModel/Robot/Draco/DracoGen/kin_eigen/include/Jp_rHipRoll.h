@@ -1,6 +1,6 @@
 /*
  * Automatically Generated from Mathematica.
- * Thu 16 Aug 2018 23:21:46 GMT-05:00
+ * Thu 23 Aug 2018 15:50:23 GMT-05:00
  */
 
 #ifndef JP_RHIPROLL_HH
