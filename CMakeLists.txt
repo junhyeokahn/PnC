@@ -43,6 +43,12 @@ if(MOSEK_FOUND)
   include_directories(${MOSEK_INCLUDE_DIRS})
 endif()
 
+# GTest
+find_package(GTest)
+if(GTEST_FOUND)
+    enable_testing()
+endif()
+
 ## =================
 ## Include Directory
 ## =================

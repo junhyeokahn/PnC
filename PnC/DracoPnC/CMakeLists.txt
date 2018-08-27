@@ -11,6 +11,7 @@ target_link_libraries(DracoPnC drake::drake
                                myWBC
                                myCentPlanner)
 
+
 add_executable(cent_dyn_opt OfflineTrajGen/CentroidDynOpt.cpp)
 target_link_libraries(cent_dyn_opt DracoPnC)
 
