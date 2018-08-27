@@ -20,9 +20,9 @@ find_package(DART 6.4 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Drake
-#set(drake_DIR /opt/drake/lib/cmake/drake)
-set(drake_DIR
-    ${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
+set(drake_DIR /opt/drake/lib/cmake/drake)
+#set(drake_DIR
+    #${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
 find_package(drake CONFIG REQUIRED)
 
 # Eigen
