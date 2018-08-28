@@ -54,7 +54,10 @@ void DracoWorldNode::customPreStep() {
         if (i == mFile.size())  exit(0);
     } else {
         mInterface->getCommand(mSensorData, mCommand);
-        mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+        //mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+
+        // Inv Kin Test
+        mSkel->setPositions(mCommand->q);
 
         // Gain Testing
         //static Eigen::VectorXd qdes = (mSkel->getPositions()).tail(10);

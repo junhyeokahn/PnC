@@ -93,7 +93,7 @@ public:
     dart::dynamics::SkeletonPtr getSkeleton() { return mSkel; };
     Eigen::VectorXd getQ() { return mSkel->getPositions(); };
     Eigen::VectorXd getQdot() { return mSkel->getVelocities(); };
-    void setInitialConfiguration( const Eigen::VectorXd & qInit_ ) { mInitialConfiguration = qInit_; }
+    void setInitialConfiguration(const Eigen::VectorXd q) { mInitialConfiguration = q; };
     Eigen::VectorXd getInitialConfiguration() { return mInitialConfiguration; }
     double getTime() { return mTime; }
     int getNumDofs() { return mNumDof; };
