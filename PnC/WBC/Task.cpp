@@ -74,7 +74,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
         ori_act = mRobot->getBodyNodeCoMIsometry(mLinkName).linear();
         vel_act = mRobot->getBodyNodeCoMSpatialVelocity(mLinkName).head(3);
         for (int i = 0; i < mDim; ++i) {
-            mKp[i] = 150.;
+            mKp[i] = 130.;
             mKd[i] = 10.;
         }
 
@@ -101,8 +101,8 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                      pos_act = mRobot->getQ().tail(mDim);
                                      vel_act = mRobot->getQdot().tail(mDim);
                                      for (int i = 0; i < mDim; ++i) {
-                                         mKp[i] = 300.;
-                                         mKd[i] = 5.;
+                                         mKp[i] = 150.;
+                                         mKd[i] = 10.;
                                      }
                                      break;
                                  }

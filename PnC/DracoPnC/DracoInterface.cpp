@@ -31,8 +31,9 @@ void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
         cmd->q = data->q;
         cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
         cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-        if (!mTest->isInitialized) mTest->initialize();
+        //if (!mTest->isInitialized) mTest->initialize();
     } else {
+        if (!mTest->isInitialized) mTest->initialize();
         DataManager::GetDataManager()->start();
         mTest->getTorqueInput(commandData_);
     }

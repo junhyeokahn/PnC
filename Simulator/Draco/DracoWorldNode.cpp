@@ -9,8 +9,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
                                    osgShadow::MinimalShadowMap * msm) :
     dart::gui::osg::WorldNode(world_, msm) {
 
-    mInterface = new DracoInterface();
-    mSensorData = new DracoSensorData();
+    mInterface = new DracoInterface(); mSensorData = new DracoSensorData();
     mCommand = new DracoCommand();
 
     mSkel = world_->getSkeleton("Draco");
@@ -54,10 +53,19 @@ void DracoWorldNode::customPreStep() {
         if (i == mFile.size())  exit(0);
     } else {
         mInterface->getCommand(mSensorData, mCommand);
-        //mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+        mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+
+        static int count(0);
+        count += 1;
+        if (count > 1*1500) {
+            Eigen::VectorXd posErr = mCommand->q.tail(mDof - 6) - mSkel->getPositions().tail(mDof - 6);
+            Eigen::VectorXd velErr = mCommand->qdot.tail(mDof - 6) - mSkel->getVelocities().tail(mDof - 6);
+            double kp(100); double kd(1);
+            mTorqueCommand.tail(mDof - 6) += kp * posErr + kd * velErr;
+        }
 
         // Inv Kin Test
-        mSkel->setPositions(mCommand->q);
+        //mSkel->setPositions(mCommand->q);
 
         // Gain Testing
         //static Eigen::VectorXd qdes = (mSkel->getPositions()).tail(10);
