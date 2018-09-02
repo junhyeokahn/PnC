@@ -267,4 +267,21 @@ namespace myUtils {
         }
         return ret;
     }
+
+    double cropValue(double value, double min, double max, std::string source){
+        if(value> max){
+            printf("%s: Hit The MAX\t", source.c_str());
+            // printf("Original Value: %f\n", value);
+            return max;
+        }
+        else if(value < min){
+            printf("%s: Hit The MIN\t", source.c_str());
+            // printf("Original Value: %f\n", value);
+            return min;
+        }
+        else{
+            return value;
+        }
+    }
+
 }

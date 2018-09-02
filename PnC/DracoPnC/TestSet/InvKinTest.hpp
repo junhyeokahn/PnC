@@ -49,8 +49,19 @@ private:
     double mInterpolationDuration;
     double mTestInitTime;
 
+    // data manager
+    Eigen::VectorXd mCoMPosDes;
+    Eigen::VectorXd mCoMVelDes;
+    Eigen::VectorXd mCoMPosAct;
+    Eigen::VectorXd mCoMVelAct;
+    Eigen::VectorXd mCoMPosSol;
+    Eigen::VectorXd mQSol;
+    Eigen::VectorXd mQAct;
+    Eigen::VectorXd mQdotSol;
+    Eigen::VectorXd mQdotAct;
+
     void _updateContact(); // update mContactList
     void _WBLCpreProcess(); // Set dynamic properties and cost
     void _WBLCpostProcess(); // unset task and contact
-
+    void _checkIKResult(const Eigen::VectorXd q, const Eigen::VectorXd qdot);
 };

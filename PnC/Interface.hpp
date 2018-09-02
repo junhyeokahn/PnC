@@ -16,7 +16,7 @@ protected:
     double mInitTime;
 
 public:
-    Interface(): mInitTime(0.002), mTime(0.0) {};
+    Interface(): mInitTime(0.01), mTime(0.0) {};
     virtual ~Interface() {};
 
     // Get Command through Test

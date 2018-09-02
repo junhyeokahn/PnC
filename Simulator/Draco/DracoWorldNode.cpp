@@ -55,35 +55,10 @@ void DracoWorldNode::customPreStep() {
         mInterface->getCommand(mSensorData, mCommand);
         mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
 
-        static int count(0);
-        count += 1;
-        if (count > 1*1500) {
-            Eigen::VectorXd posErr = mCommand->q.tail(mDof - 6) - mSkel->getPositions().tail(mDof - 6);
-            Eigen::VectorXd velErr = mCommand->qdot.tail(mDof - 6) - mSkel->getVelocities().tail(mDof - 6);
-            double kp(100); double kd(1);
-            mTorqueCommand.tail(mDof - 6) += kp * posErr + kd * velErr;
-        }
-
         // Inv Kin Test
         //mSkel->setPositions(mCommand->q);
-
-        // Gain Testing
-        //static Eigen::VectorXd qdes = (mSkel->getPositions()).tail(10);
-        //Eigen::VectorXd q = (mSkel->getPositions()).tail(10);
-        //Eigen::VectorXd qdot = (mSkel->getVelocities()).tail(10);
-        //double v1(500); double v2(500);
-        //double v3(10); double v4(2);
-        //double kp[10] = {v1, v1, v1, v1, v2,
-                         //v1, v1, v1, v1, v2};
-        //double kd[10] = {v3, v3, v3, v3, v4,
-                         //v3, v3, v3, v3, v4};
-        //for (int i = 0; i < 10; ++i) {
-            //mTorqueCommand[i+6] = kp[i]*(qdes[i] - q[i]) -
-                //kd[i] * qdot[i];
-        //}
-        //myUtils::pretty_print(q, std::cout, "q");
-        //myUtils::pretty_print(qdes, std::cout, "qdes");
+        //mSkel->setVelocities(mCommand->qdot);
+        //mTorqueCommand.setZero();
     }
-
     mSkel->setForces(mTorqueCommand);
 }

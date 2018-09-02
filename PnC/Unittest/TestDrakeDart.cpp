@@ -17,6 +17,29 @@
 #include <dart/utils/utils.hpp>
 #include <dart/utils/urdf/urdf.hpp>
 
+TEST(TestDrakeDart, floatingTest) {
+    auto drake_model = std::make_unique<RigidBodyTree<double>>();
+    drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
+                THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoFixedNoVisualDrake.urdf",
+                drake::multibody::joints::kRollPitchYaw, drake_model.get());
+    auto cache = std::make_unique<KinematicsCache<double>>(
+            drake_model->CreateKinematicsCache());
+    dart::utils::DartLoader urdfLoader;
+    dart::dynamics::SkeletonPtr dart_model = urdfLoader.parseSkeleton(
+            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoNoVisualDart.urdf");
+    //for (int i = 0; i < dart_model->getNumBodyNodes(); ++i) {
+        //auto& rigid_body = drake_model->get_body(i+2);
+        //dart::dynamics::BodyNodePtr bn = dart_model->getBodyNode(i);
+        //EXPECT_EQ(rigid_body.get_name(), bn->getName());
+        //EXPECT_EQ(rigid_body.get_mass(), bn->getMass());
+        //std::cout << rigid_body.get_name() << std::endl;
+    //}
+    for (int i = 0; i < drake_model->get_num_bodies(); ++i) {
+        auto& rigid_body = drake_model->get_body(i);
+        std::cout << rigid_body.get_name() << std::endl;
+    }
+}
+
 TEST(TestDrakeDart, LoadURDF) {
 
     //////////////////////

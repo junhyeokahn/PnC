@@ -29,6 +29,8 @@ function ret = fn_read_file(path, file_name, num_col)
             ret = fscanf(fileID, '%f %f %f %f %f %f %f %f %f %f %f %f %f', [13 inf]);    
         case 15
             ret = fscanf(fileID, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f', [15 inf]);    
+        case 16
+            ret = fscanf(fileID, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f', [16 inf]);    
         case 20
             ret = fscanf(fileID, '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f', [20 inf]);
         case 21

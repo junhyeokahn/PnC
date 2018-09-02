@@ -1,109 +1,21 @@
 <robot name="Draco">
 
-  <link name="world">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-
-  <link name="basePosX">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-
-  <joint name="basePosX" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="world" />
-    <child link="basePosX" />
-    <axis xyz="1 0 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="basePosY">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="basePosY" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosX" />
-    <child link="basePosY" />
-    <axis xyz="0 1 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="basePosZ">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="basePosZ" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosY" />
-    <child link="basePosZ" />
-    <axis xyz="0 0 1" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="baseRotZ">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="baseRotZ" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosZ" />
-    <child link="baseRotZ" />
-    <axis xyz="0 0 1" />
-  </joint>
-
-  <link name="baseRotY">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="baseRotY" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="baseRotZ" />
-    <child link="baseRotY" />
-    <axis xyz="0 1 0" />
-  </joint>
-
   <link name="torso">
     <inertial>
       <origin xyz="-0.0133907728940907 0.000753510365864796 -0.187273411666051" rpy="0 0 0" />
       <mass value="9.67" />
       <inertia ixx="0.0585154591166426" ixy="-9.46724624145663E-05" ixz="-0.00614431919973963" iyy="0.0651574953784801" iyz="-0.000230611945696951" izz="0.0178352105631859" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
       <!--<geometry>-->
         <!--<mesh filename="meshes/torso.dae" />-->
       <!--</geometry>-->
-      <material name="">
-        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-      </material>
-    </visual>
+      <!--<material name="">-->
+        <!--<color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
-  <joint name="baseRotX" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="baseRotY" />
-    <child link="torso" />
-    <axis xyz="1 0 0" />
-  </joint>
 
   <link name="lHipYaw">
     <inertial>
@@ -111,19 +23,19 @@
       <mass value="2.962" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/lHipYaw.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/lHipYaw.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="lHipYaw" type="revolute">
     <origin xyz="-0.0222 0.0870 -0.2951" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
@@ -141,19 +53,19 @@
       <mass value="0.408" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/lHipRoll.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/lHipRoll.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="lHipRoll" type="revolute">
     <origin xyz="0 0.07 -0.02" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
@@ -171,19 +83,19 @@
       <mass value="6.0" />
       <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/lHipPitch.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/lHipPitch.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="lHipPitch" type="revolute">
     <origin xyz="0 0.010 -0.065" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
@@ -201,19 +113,19 @@
       <mass value="3.5" />
       <inertia ixx="0.0224" ixy="0.0001" ixz="-0.0005" iyy="0.0240" iyz="0.0001" izz="0.0016" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/lKnee.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/lKnee.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="lKnee" type="revolute">
     <origin xyz="0 -0.0168 -0.48" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
@@ -231,15 +143,15 @@
       <mass value="0.7" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/lAnkle.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/lAnkle.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
     <collision>
       <origin xyz="0.015 0 -0.05" rpy="0 0 0" />
       <geometry>
@@ -249,7 +161,7 @@
   </link>
   <joint name="lAnkle" type="revolute">
     <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
@@ -267,19 +179,19 @@
       <mass value="2.962" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/rHipYaw.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/rHipYaw.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="rHipYaw" type="revolute">
     <origin xyz="-0.0222 -0.0870 -0.2951" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
@@ -297,19 +209,19 @@
       <mass value="0.408" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/rHipRoll.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/rHipRoll.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="rHipRoll" type="revolute">
     <origin xyz="0 -0.07 -0.02" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
@@ -327,19 +239,19 @@
       <mass value="6.0" />
       <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/rHipPitch.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/rHipPitch.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="rHipPitch" type="revolute">
     <origin xyz="0 -0.01 -0.065" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
@@ -357,19 +269,19 @@
       <mass value="3.5" />
       <inertia ixx="0.0224" ixy="0.0001" ixz="-0.0005" iyy="0.0240" iyz="0.0001" izz="0.0016" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/rKnee.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/rKnee.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
   </link>
   <joint name="rKnee" type="revolute">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
@@ -387,15 +299,15 @@
       <mass value="0.7" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="meshes/rAnkle.dae" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
+    <!--<visual>-->
+      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<mesh filename="meshes/rAnkle.dae" />-->
+      <!--</geometry>-->
+      <!--<material name="">-->
+        <!--<color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />-->
+      <!--</material>-->
+    <!--</visual>-->
     <collision>
       <origin xyz="0.015 0 -0.05" rpy="0 0 0" />
       <geometry>
@@ -405,7 +317,7 @@
   </link>
   <joint name="rAnkle" type="revolute">
     <origin xyz="0.0011 -0.0168 -0.48" rpy="0 -1.57 0" />
-    <!--<dynamics damping="0.01" />-->
+    <dynamics damping="0.01" />
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />

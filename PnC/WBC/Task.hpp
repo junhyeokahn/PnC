@@ -51,6 +51,8 @@ class Task{
         int mDim;
         Eigen::VectorXd mKp;
         Eigen::VectorXd mKd;
+        Eigen::VectorXd mKi;
+        Eigen::VectorXd mErrSum;
 
         RobotSystem* mRobot;
 

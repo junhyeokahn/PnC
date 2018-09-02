@@ -34,6 +34,8 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
     mJtDotQDot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     mKp = Eigen::VectorXd::Zero(mDim);
     mKd = Eigen::VectorXd::Zero(mDim);
+    mKi = Eigen::VectorXd::Zero(mDim);
+    mErrSum = Eigen::VectorXd::Zero(mDim);
 
     // Variables for DataManager
     mPosDes = Eigen::VectorXd::Zero(mDim);
@@ -101,8 +103,10 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                      pos_act = mRobot->getQ().tail(mDim);
                                      vel_act = mRobot->getQdot().tail(mDim);
                                      for (int i = 0; i < mDim; ++i) {
-                                         mKp[i] = 150.;
-                                         mKd[i] = 10.;
+                                         mKp[i] = 100.;
+                                         mKd[i] = 8.;
+                                         //mKi[i] = 30.;
+                                         mKi[i] = 10.;
                                      }
                                      break;
                                  }
@@ -140,6 +144,9 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             mTaskCmd[i] = acc_des_[i] +
                 mKp[i] * (pos_des_[i] - pos_act[i]) +
                 mKd[i] * (vel_des_[i] - vel_act[i]);
+            mErrSum[i] += (pos_des_[i] - pos_act[i]) * (1.0/1500.0);
+            mErrSum[i] = myUtils::cropValue(mErrSum[i], -1., 1., "Joint Task");
+            mTaskCmd[i] += mKi[i] * mErrSum[i];
         }
         _saveTask(pos_des_, vel_des_, pos_act, vel_act);
     }

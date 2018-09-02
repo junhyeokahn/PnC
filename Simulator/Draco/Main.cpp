@@ -105,7 +105,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         case 1:
             //q[5] = 1.34;
-            q[2] = 1.34;
+            q[2] = 1.335;
             q[lHipPitchIdx] = -M_PI/8;
             q[lKneeIdx] = M_PI/4;
             q[rHipPitchIdx] = -M_PI/8;

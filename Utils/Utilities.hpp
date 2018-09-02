@@ -23,7 +23,6 @@ namespace myUtils
     Eigen::MatrixXd vStack(const Eigen::VectorXd & a_, const Eigen::VectorXd & b_);
     Eigen::MatrixXd deleteRow(const Eigen::MatrixXd & a_, int row);
     Eigen::MatrixXd deleteCol(const Eigen::MatrixXd & a_, int col);
-
     // ===========
     // Save Vector
     // ===========
@@ -99,4 +98,5 @@ namespace myUtils
     bool isEqual(const Eigen::VectorXd a,
                  const Eigen::VectorXd b,
                  const double threshold=0.00001);
+    double cropValue(double value, double min, double max, std::string source);
 } /* myUtils */

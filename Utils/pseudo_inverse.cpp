@@ -47,4 +47,14 @@ namespace myUtils {
         }
     }
 
+    Eigen::MatrixXd getNullSpace(const Eigen::MatrixXd & J,
+                                 const double threshold) {
+
+        Eigen::MatrixXd ret(J.cols(), J.cols());
+        Eigen::MatrixXd J_pinv;
+        pseudoInverse(J, threshold, J_pinv);
+        ret = Eigen::MatrixXd::Identity(J.cols(), J.cols()) - J_pinv * J;
+        return ret;
+    }
+
 }
