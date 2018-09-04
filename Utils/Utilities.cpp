@@ -62,6 +62,15 @@ namespace myUtils {
         savefile.flush();
     }
 
+    void saveValue(double _value, std::string _name, bool b_param){
+        std::string file_name;
+        cleaningFile(_name, file_name, b_param);
+        std::ofstream savefile(file_name.c_str(), std::ios::app);
+
+        savefile<<_value <<"\n";
+        savefile.flush();
+    }
+
     void saveVector(double * _vec, std::string _name, int size, bool b_param){
         std::string file_name;
         cleaningFile(_name, file_name, b_param);

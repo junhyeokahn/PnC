@@ -411,8 +411,28 @@ TEST(InvKin, test5) {
     //////////////////////////
     // generate CoM trajectory
     //////////////////////////
+    Eigen::VectorXd qInit = Eigen::VectorXd::Zero(16);
+    qInit <<
+        0.000971709,
+        0.000161351,
+        1.3235,
+        -0.000809759,
+        0.00724312,
+        -0.000535272,
+        0.000347594,
+        0.000567963,
+        -0.425732,
+        0.832267,
+        1.15919,
+        0.000876023,
+        0.000505368,
+        -0.425368,
+        0.831448,
+        1.16017;
+    KinematicsCache<double> cache_init = model->doKinematics(qInit);
+    Eigen::Vector3d init_com = model->centerOfMass(cache_init);
     BS_Basic<3, 3, 0, 2, 2> spline;
-    double ini[9] = {0.0, 0.0, 0.8,
+    double ini[9] = {init_com[0], init_com[1], init_com[2],
                      0.0, 0.0, 0.0,
                      0.0, 0.0, 0.0};
     double fin[9] = {0.0, 0.0, 0.7,
@@ -426,6 +446,7 @@ TEST(InvKin, test5) {
     ////////////////////////////////
     // desired task space trajectory
     ////////////////////////////////
+
 
     std::vector<double> t(num_knot);
     std::vector< Eigen::Vector3d > com_pos(num_knot);
@@ -451,24 +472,6 @@ TEST(InvKin, test5) {
     double quatTol = 0.0017453292519943296;
     Eigen::Vector4d des_quat; des_quat << 1, 0, 0, 0;
 
-    Eigen::VectorXd qInit = Eigen::VectorXd::Zero(16);
-    qInit <<
-        0.000971709,
-        0.000161351,
-        1.3235,
-        -0.000809759,
-        0.00724312,
-        -0.000535272,
-        0.000347594,
-        0.000567963,
-        -0.425732,
-        0.832267,
-        1.15919,
-        0.000876023,
-        0.000505368,
-        -0.425368,
-        0.831448,
-        1.16017;
     std::vector< Eigen::VectorXd > q_sol(num_knot, Eigen::VectorXd::Zero(16));
 
     Eigen::Vector2d tspan(0, 1);
@@ -544,6 +547,14 @@ TEST(InvKin, test5) {
     }
 
     // check solution
+    Eigen::Vector3d com_pos_sol;
+    Eigen::Vector3d com_vel_sol;
+    Eigen::Vector3d rf_pos_sol;
+    Eigen::Vector3d lf_pos_sol;
+    Eigen::Vector4d rf_quat_sol;
+    Eigen::Vector4d lf_quat_sol;
+    Eigen::VectorXd rf_vel_sol(6);
+    Eigen::VectorXd lf_vel_sol(6);
     double additional_tol(1e-5);
     for (int i = 0; i < num_knot; ++i) {
         std::cout << "**** " << i << " th Time Step Check ****" << std::endl;
@@ -560,6 +571,42 @@ TEST(InvKin, test5) {
         EXPECT_TRUE(CompareMatrices(des_lf_pos, lf_iso.translation(), posTol + additional_tol, drake::MatrixCompareType::absolute));
         EXPECT_TRUE(CompareMatrices(des_quat, lf_quat, quatTol + additional_tol, drake::MatrixCompareType::absolute));
         EXPECT_TRUE(CompareMatrices(des_quat, rf_quat, quatTol + additional_tol, drake::MatrixCompareType::absolute));
+
+        //// save vectors
+        com_pos_sol = com;
+        rf_pos_sol = rf_iso.translation(); rf_quat_sol = rf_quat;
+        lf_pos_sol = lf_iso.translation(); lf_quat_sol = lf_quat;
+        myUtils::saveVector(com_pos[i], "test_com_pos_des");
+        myUtils::saveVector(com_pos_sol, "test_com_pos");
+        myUtils::saveVector(rf_pos_sol, "test_rf_pos");
+        myUtils::saveVector(rf_quat_sol, "test_rf_quat");
+        myUtils::saveVector(lf_pos_sol, "test_lf_pos");
+        myUtils::saveVector(lf_quat_sol, "test_lf_quat");
+        Eigen::MatrixXd j_rf(6, 16); Eigen::MatrixXd j_lf(6, 16); Eigen::MatrixXd j_com(3, 16);
+        j_rf = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(rf_idx));
+        j_lf = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(lf_idx));
+        j_com = model->centerOfMassJacobian(cache);
+        Eigen::VectorXd q_prev;
+        double dt(t[1] - t[0]);
+        if (i==0) {
+            q_prev = qInit;
+        } else {
+            q_prev = q_sol[i-1];
+        }
+        rf_vel_sol = j_rf * (q_sol[i] - q_prev) / dt;
+        myUtils::saveVector(rf_vel_sol, "test_rf_vel");
+        lf_vel_sol = j_lf * (q_sol[i] - q_prev) / dt;
+        myUtils::saveVector(lf_vel_sol, "test_lf_vel");
+        com_vel_sol = j_com * (q_sol[i] - q_prev) / dt;
+        myUtils::saveVector(com_vel_sol, "test_com_vel");
+        myUtils::saveVector(com_vel[i], "test_com_vel_des");
+        myUtils::saveValue(t[i], "test_time");
+        myUtils::saveVector(q_sol[i], "test_q");
+        Eigen::VectorXd qdot_sol = (q_sol[i] - q_prev) / dt;
+        myUtils::saveVector(qdot_sol, "test_qdot");
+        myUtils::saveVector(des_rf_pos, "test_rf_pos_des");
+        myUtils::saveVector(des_lf_pos, "test_lf_pos_des");
+        myUtils::saveVector(des_quat, "test_quat_des");
     }
 
 }
