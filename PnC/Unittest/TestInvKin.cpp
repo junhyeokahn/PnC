@@ -512,22 +512,24 @@ TEST(InvKin, test5) {
         Eigen::VectorXi cols;
         Eigen::VectorXd vals;
         double dt(t[1] - t[0]);
-        double velTol(0.01);
+        Eigen::VectorXd velTol(12);
+        velTol << 1., 1., 1., 0.01, 0.01, 0.01, 1., 1., 1., 0.01, 0.01, 0.01;
+        double velTolVal(0.01);
         Eigen::VectorXd q_q_vec(32);
         q_q_vec << q_vec, q_vec;
         myUtils::collectNonZeroIdxAndValue(j_rf_lf, rows, cols, vals);
         SingleTimeLinearPostureConstraint fvc(model.get(), rows, cols, vals,
-                //j_rf_lf*q_q_vec - Eigen::VectorXd::Constant(12, velTol)*dt,
-                //j_rf_lf*q_q_vec + Eigen::VectorXd::Constant(12, velTol)*dt,
-                j_rf_lf*q_q_vec,
-                j_rf_lf*q_q_vec,
+                j_rf_lf*q_q_vec - velTol*dt,
+                j_rf_lf*q_q_vec + velTol*dt,
+                //j_rf_lf*q_q_vec,
+                //j_rf_lf*q_q_vec,
                 tspan);
-        //constraint_array.push_back(&fvc);
+        constraint_array.push_back(&fvc);
         // 4. com velocities
         myUtils::collectNonZeroIdxAndValue(j_com, rows, cols, vals);
         SingleTimeLinearPostureConstraint cvc(model.get(), rows, cols, vals,
-                com_vel[i]*dt + j_com*q_vec - Eigen::VectorXd::Constant(3, velTol)*dt,
-                com_vel[i]*dt + j_com*q_vec + Eigen::VectorXd::Constant(3, velTol)*dt,
+                com_vel[i]*dt + j_com*q_vec - Eigen::VectorXd::Constant(3, velTolVal)*dt,
+                com_vel[i]*dt + j_com*q_vec + Eigen::VectorXd::Constant(3, velTolVal)*dt,
                 tspan);
         constraint_array.push_back(&cvc);
 
@@ -609,6 +611,13 @@ TEST(InvKin, test5) {
         myUtils::saveVector(des_rf_pos, "test_rf_pos_des");
         myUtils::saveVector(des_lf_pos, "test_lf_pos_des");
         myUtils::saveVector(des_quat, "test_quat_des");
+        ////
+
+        EXPECT_TRUE(CompareMatrices(com_vel_sol, com_vel[i], 0.01 + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(rf_vel_sol.head(3), Eigen::VectorXd::Zero(3), 1. + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(rf_vel_sol.tail(3), Eigen::VectorXd::Zero(3), 0.01 + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(lf_vel_sol.head(3), Eigen::VectorXd::Zero(3), 1. + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(lf_vel_sol.tail(3), Eigen::VectorXd::Zero(3), 0.01 + additional_tol, drake::MatrixCompareType::absolute));
     }
 
 }
