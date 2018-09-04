@@ -153,6 +153,18 @@ int main() {
     // =====================
     _setInitialConfiguration(robot);
 
+    ////////////
+    // Collision
+    ////////////
+
+    //auto cd = world->getConstraintSolver()->getCollisionDetector();
+    //std::cout << cd->getType() << std::endl;
+    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getPrimitiveShapeType() << std::endl;
+    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getContactPointComputationMethod() << std::endl;
+    //static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->setPrimitiveShapeType(dart::collision::FCLCollisionDetector::PRIMITIVE);
+    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getPrimitiveShapeType() << std::endl;
+    //exit(0);
+
     // ================
     // Print Model Info
     // ================

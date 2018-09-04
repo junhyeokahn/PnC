@@ -16,7 +16,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ## Dependancy
 ## ==========
 # Dart
-find_package(DART 6.4 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+find_package(DART 6.5 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Drake

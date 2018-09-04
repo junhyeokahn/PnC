@@ -7,6 +7,8 @@
 #include <drake/multibody/rigid_body_constraint.h>
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
+#include "drake/math/eigen_sparse_triplet.h"
+#include <Utilities.hpp>
 
 #include "eigen_matrix_compare.h"
 #include "Configuration.h"
@@ -16,6 +18,8 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/utils.hpp>
 #include <dart/utils/urdf/urdf.hpp>
+
+#include "BSplineBasic.h"
 
 using Eigen::Vector2d;
 using Eigen::Vector3d;
@@ -273,8 +277,8 @@ TEST(InvKin, test3) {
     /////////////
     // validation
     /////////////
-    std::cout << q_sol << std::endl;
-    std::cout << "--" << std::endl;
+    //std::cout << q_sol << std::endl;
+    //std::cout << "--" << std::endl;
     for (int i = 0; i < nT; ++i) {
         Eigen::VectorXd q = q_sol.block(i, 0, q_sol.rows(), 1);
         Eigen::VectorXd qdot = qdot_sol = qdot_sol.block(i, 0, qdot_sol.rows(), 1);
@@ -285,14 +289,14 @@ TEST(InvKin, test3) {
         Eigen::Isometry3d lFootIsoRes = model->CalcBodyPoseInWorldFrame(
                 cache, *model->get_bodies()[lFootIdx] );
         Eigen::Vector3d comRes = model->centerOfMass(cache);
-        std::cout << "-------------------------------------------" << std::endl;
-        std::cout << i << " th Result" << std::endl;
-        std::cout << "rFoot" << std::endl;
-        std::cout << rFootIsoRes.translation() << std::endl;
-        std::cout << "lFoot" << std::endl;
-        std::cout << lFootIsoRes.translation() << std::endl;
-        std::cout << "com" << std::endl;
-        std::cout << comRes << std::endl;
+        //std::cout << "-------------------------------------------" << std::endl;
+        //std::cout << i << " th Result" << std::endl;
+        //std::cout << "rFoot" << std::endl;
+        //std::cout << rFootIsoRes.translation() << std::endl;
+        //std::cout << "lFoot" << std::endl;
+        //std::cout << lFootIsoRes.translation() << std::endl;
+        //std::cout << "com" << std::endl;
+        //std::cout << comRes << std::endl;
     }
 }
 
@@ -392,4 +396,170 @@ TEST(InvKin, test4) {
                  constraint_array.size(), constraint_array.data(), ikoptions,
                  &q_sol, &qdot_sol, &qddot_sol, &info, &infeasible_constraint);
   EXPECT_EQ(info, 1);
+}
+
+TEST(InvKin, test5) {
+
+    //////////////////////
+    // load draco to drake
+    //////////////////////
+    auto model = std::make_unique<RigidBodyTree<double>>();
+    drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
+                THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoNoVisualDrake.urdf",
+                drake::multibody::joints::kFixed, model.get());
+
+    //////////////////////////
+    // generate CoM trajectory
+    //////////////////////////
+    BS_Basic<3, 3, 0, 2, 2> spline;
+    double ini[9] = {0.0, 0.0, 0.8,
+                     0.0, 0.0, 0.0,
+                     0.0, 0.0, 0.0};
+    double fin[9] = {0.0, 0.0, 0.7,
+                     0.0, 0.0, 0.0,
+                     0.0, 0.0, 0.0};
+    double **middle_pt;
+    spline.SetParam(ini, fin, middle_pt, 1.0);
+
+    int num_knot(100);
+
+    ////////////////////////////////
+    // desired task space trajectory
+    ////////////////////////////////
+
+    std::vector<double> t(num_knot);
+    std::vector< Eigen::Vector3d > com_pos(num_knot);
+    std::vector< Eigen::Vector3d > com_vel(num_knot);
+    Eigen::VectorXd t_eigen =  Eigen::VectorXd::LinSpaced(num_knot, 0., 1.);
+    double d_ary[3];
+    for (int i = 0; i < num_knot; ++i) {
+        t[i] = t_eigen[i];
+        spline.getCurvePoint(t[i], d_ary);
+        for (int j = 0; j < 3; ++j) com_pos[i][j] = d_ary[j];
+        spline.getCurveDerPoint(t[i], 1, d_ary);
+        for (int j = 0; j < 3; ++j) com_vel[i][j] = d_ary[j];
+    }
+    int rf_idx = model->FindBodyIndex("rAnkle");
+    int lf_idx = model->FindBodyIndex("lAnkle");
+    double posTol = 0.0001;
+    Eigen::Vector3d des_rf_pos; des_rf_pos << -0.021, -0.167, 0.065;
+    Eigen::Vector3d des_rf_pos_lb; des_rf_pos_lb = des_rf_pos - Eigen::Vector3d::Constant(posTol);
+    Eigen::Vector3d des_rf_pos_ub; des_rf_pos_ub = des_rf_pos + Eigen::Vector3d::Constant(posTol);
+    Eigen::Vector3d des_lf_pos; des_lf_pos << -0.021, 0.167, 0.065;
+    Eigen::Vector3d des_lf_pos_lb; des_lf_pos_lb = des_lf_pos - Eigen::Vector3d::Constant(posTol);
+    Eigen::Vector3d des_lf_pos_ub; des_lf_pos_ub = des_lf_pos + Eigen::Vector3d::Constant(posTol);
+    double quatTol = 0.0017453292519943296;
+    Eigen::Vector4d des_quat; des_quat << 1, 0, 0, 0;
+
+    Eigen::VectorXd qInit = Eigen::VectorXd::Zero(16);
+    qInit <<
+        0.000971709,
+        0.000161351,
+        1.3235,
+        -0.000809759,
+        0.00724312,
+        -0.000535272,
+        0.000347594,
+        0.000567963,
+        -0.425732,
+        0.832267,
+        1.15919,
+        0.000876023,
+        0.000505368,
+        -0.425368,
+        0.831448,
+        1.16017;
+    std::vector< Eigen::VectorXd > q_sol(num_knot, Eigen::VectorXd::Zero(16));
+
+    Eigen::Vector2d tspan(0, 1);
+    for (int i = 0; i < num_knot; ++i) {
+        std::cout << "**** " << i << " th Time Step Solver ****" << std::endl;
+        std::vector<RigidBodyConstraint*> constraint_array;
+        // 1. foot position & orientation constraint
+        WorldPositionConstraint rfp(model.get(), rf_idx, Eigen::Vector3d::Zero(), des_rf_pos - Eigen::Vector3d::Constant(posTol), des_rf_pos + Eigen::Vector3d::Constant(posTol), tspan);
+        constraint_array.push_back(&rfp);
+        WorldPositionConstraint lfp(model.get(), lf_idx, Eigen::Vector3d::Zero(), des_lf_pos - Eigen::Vector3d::Constant(posTol), des_lf_pos + Eigen::Vector3d::Constant(posTol), tspan);
+        constraint_array.push_back(&lfp);
+        WorldQuatConstraint rfq(model.get(), rf_idx, des_quat, quatTol, tspan);
+        constraint_array.push_back(&rfq);
+        WorldQuatConstraint lfq(model.get(), lf_idx, des_quat, quatTol, tspan);
+        constraint_array.push_back(&lfq);
+        // 2. com position
+        WorldCoMConstraint comp(model.get(), com_pos[i] - Eigen::Vector3d::Constant(posTol), com_pos[i] + Eigen::Vector3d::Constant(posTol), tspan);
+        constraint_array.push_back(&comp);
+        // 3. foot velocities
+        Eigen::MatrixXd j_com(3, 16);
+        Eigen::MatrixXd j_rf_lf(12, 16);
+        Eigen::VectorXd q_vec(16);
+        if (i == 0) {
+            KinematicsCache<double> cache = model->doKinematics(qInit);
+            q_vec = qInit;
+            j_rf_lf.block(0, 0, 6, 16) = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(rf_idx));
+            j_rf_lf.block(6, 0, 6, 16) = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(lf_idx));
+            j_com = model->centerOfMassJacobian(cache);
+        } else {
+            KinematicsCache<double> cache = model->doKinematics(q_sol[i-1]);
+            q_vec = q_sol[i-1];
+            j_rf_lf.block(0, 0, 6, 16) = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(rf_idx));
+            j_rf_lf.block(6, 0, 6, 16) = model->CalcBodySpatialVelocityJacobianInWorldFrame(cache, model->get_body(lf_idx));
+            j_com = model->centerOfMassJacobian(cache);
+        }
+
+        Eigen::VectorXi rows;
+        Eigen::VectorXi cols;
+        Eigen::VectorXd vals;
+        double dt(t[1] - t[0]);
+        double velTol(0.01);
+        Eigen::VectorXd q_q_vec(32);
+        q_q_vec << q_vec, q_vec;
+        myUtils::collectNonZeroIdxAndValue(j_rf_lf, rows, cols, vals);
+        SingleTimeLinearPostureConstraint fvc(model.get(), rows, cols, vals,
+                j_rf_lf*q_q_vec - Eigen::VectorXd::Constant(12, velTol)*dt,
+                j_rf_lf*q_q_vec + Eigen::VectorXd::Constant(12, velTol)*dt,
+                tspan);
+        //constraint_array.push_back(&fvc);
+        // 4. com velocities
+        myUtils::collectNonZeroIdxAndValue(j_com, rows, cols, vals);
+        SingleTimeLinearPostureConstraint cvc(model.get(), rows, cols, vals,
+                com_vel[i]*dt + j_com*q_vec - Eigen::VectorXd::Constant(3, velTol)*dt,
+                com_vel[i]*dt + j_com*q_vec + Eigen::VectorXd::Constant(3, velTol)*dt,
+                tspan);
+        constraint_array.push_back(&cvc);
+
+        IKoptions ikoptions(model.get());
+        ikoptions.setMajorIterationsLimit(1500);
+        ikoptions.setIterationsLimit(20000);
+        std::vector<std::string> infeasible_constraint;
+        int info = 0;
+        if (i == 0) {
+         inverseKin(model.get(), qInit, qInit, constraint_array.size(),
+                constraint_array.data(), ikoptions, &(q_sol[i]), &info,
+                &infeasible_constraint);
+        } else {
+         inverseKin(model.get(), q_sol[i-1], q_sol[i-1], constraint_array.size(),
+                constraint_array.data(), ikoptions, &(q_sol[i]), &info,
+                &infeasible_constraint);
+        }
+        EXPECT_EQ(info, 1);
+    }
+
+    // check solution
+    double additional_tol(1e-5);
+    for (int i = 0; i < num_knot; ++i) {
+        std::cout << "**** " << i << " th Time Step Check ****" << std::endl;
+        KinematicsCache<double> cache = model->doKinematics(q_sol[i]);
+        Eigen::Isometry3d rf_iso = model->relativeTransform(cache, 0, rf_idx);
+        Eigen::Quaternion<double> rf_quat_(rf_iso.linear());
+        Eigen::Vector4d rf_quat(rf_quat_.w(), rf_quat_.x(), rf_quat_.y(), rf_quat_.z());
+        Eigen::Isometry3d lf_iso = model->relativeTransform(cache, 0, lf_idx);
+        Eigen::Quaternion<double> lf_quat_(lf_iso.linear());
+        Eigen::Vector4d lf_quat(lf_quat_.w(), lf_quat_.x(), lf_quat_.y(), lf_quat_.z());
+        Eigen::Vector3d com = model->centerOfMass(cache);
+        EXPECT_TRUE(CompareMatrices(com, com_pos[i], posTol + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(des_rf_pos, rf_iso.translation(), posTol + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(des_lf_pos, lf_iso.translation(), posTol + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(des_quat, lf_quat, quatTol + additional_tol, drake::MatrixCompareType::absolute));
+        EXPECT_TRUE(CompareMatrices(des_quat, rf_quat, quatTol + additional_tol, drake::MatrixCompareType::absolute));
+    }
+
 }

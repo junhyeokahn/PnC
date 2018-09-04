@@ -21,22 +21,28 @@ TaskPosDes = fn_read_file(data_path, 'JointTaskPosDes', numJoint);
 TaskVelDes = fn_read_file(data_path, 'JointTaskVelDes', numJoint);
 TaskPosAct = fn_read_file(data_path, 'JointTaskPosAct', numJoint);
 TaskVelAct = fn_read_file(data_path, 'JointTaskVelAct', numJoint);
+Cmd = fn_read_file(data_path, 'TorqueCommand', numJoint);
 
-startIdx = 1;
+startIdx = 5;
 endIdx = length(Time);
 %% Plot
 for i = 1:numTarget
     figure(fig(i))
-    subplot(2,1,1)
+    subplot(3,1,1)
     hold on
     plot(Time(startIdx:endIdx), TaskPosDes(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
     plot(Time(startIdx:endIdx), TaskPosAct(targetJointIdx(i), startIdx:endIdx),'b', 'linewidth', 3);
     grid on
     hold off
-    subplot(2,1,2)
+    subplot(3,1,2)
     hold on
     plot(Time(startIdx:endIdx), TaskVelDes(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
     plot(Time(startIdx:endIdx), TaskVelAct(targetJointIdx(i), startIdx:endIdx),'b', 'linewidth', 3);
     grid on
     hold off
+    subplot(3,1,3)
+    hold on
+    plot(Time(startIdx:endIdx), Cmd(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
+    hold off
+    grid on
 end

@@ -23,6 +23,7 @@ class DracoInterface: public Interface
 {
 protected:
     void _constructTest();
+    Eigen::VectorXd mTrqCmd;
 
 public:
     DracoInterface();

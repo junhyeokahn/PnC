@@ -42,10 +42,6 @@ namespace myUtils
     // =========
     void readFile(std::string file_name_, std::vector<std::string> & _vec);
     void splitString(std::string* str_array, std::string strTarget, std::string strTok );
-    //template <typename YamlType>
-        //YamlType readParameter(const YAML::Node& node, const std::string& name);
-    //template <typename YamlType>
-        //void readParameter(const YAML::Node & node, const std::string& name, YamlType& parameter);
     template <typename YamlType>
         YamlType readParameter(const YAML::Node& node, const std::string& name) {
             try { return node[name.c_str()].as<YamlType>(); }
@@ -99,4 +95,8 @@ namespace myUtils
                  const Eigen::VectorXd b,
                  const double threshold=0.00001);
     double cropValue(double value, double min, double max, std::string source);
+    void collectNonZeroIdxAndValue( const Eigen::MatrixXd A,
+                                          Eigen::VectorXi & rows,
+                                          Eigen::VectorXi & cols,
+                                          Eigen::VectorXd & vals);
 } /* myUtils */

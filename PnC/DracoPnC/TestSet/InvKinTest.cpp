@@ -120,8 +120,6 @@ void InvKinTest::getTorqueInput(void * commandData_) {
     }
 
     // TODO : TEST
-    static Eigen::Vector3d initialCoMPos = mRobot->getCoMPosition();
-    comPosDes = initialCoMPos;
     comVelDes.setZero();
     // TODO : TEST END
     Eigen::Vector3d comLb = comPosDes - Eigen::Vector3d::Constant(posTol);
@@ -161,7 +159,7 @@ void InvKinTest::getTorqueInput(void * commandData_) {
         myUtils::pseudoInverse(JcomNull, 0.0001, JcomNullInv);
         cmd->qdot = JcomNullInv* comVelDes;
         mPrevSol = qSol;
-        //_checkIKResult(cmd->q, cmd->qdot);
+        _checkIKResult(cmd->q, cmd->qdot);
 
     } else {
         std::cout << "[Inverse Kinematic Solver Falied] INFO : " << info << std::endl;
@@ -350,8 +348,8 @@ void InvKinTest::initialize() {
     mMid = mInitCOM;
     mAmp.setZero();
     mFreq.setZero();
-    //std::cout << mMid[0] << " --> " << (mInitRfIso.translation())[0] << std::endl;
-    //mMid[0] = (mInitRfIso.translation())[0];
+    std::cout << mMid[0] << " --> " << (mInitRfIso.translation())[0] << std::endl;
+    mMid[0] = (mInitRfIso.translation())[0];
     //mMid[2] -= 0.05;
     //mAmp[2] = 0.05;
     mAmp[2] = 0.0;

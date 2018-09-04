@@ -155,6 +155,22 @@ void RobotSystem::updateSystem(double time_,
     mSkel->computeForwardKinematics();
 }
 
+//void RobotSystem::updateSystem(double time_,
+                               //const Eigen::VectorXd & q_,
+                               //const Eigen::VectorXd & qdot_,
+                               //const Eigen::VectorXd & qdot_prev_,
+                               //bool isUpdatingCentroid) {
+    //mTime = time_;
+    //mSkel->setPositions(q_);
+    //if (myUtils::isEqual(qdot_, qdot_prev_)) {
+        
+    //}
+    //mSkel->setVelocities(qdot_);
+    //if (isUpdatingCentroid)  _updateCentroidFrame(q_, qdot_);
+    //mSkel->computeForwardKinematics();
+//}
+
+
 void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd & q_,
                                        const Eigen::VectorXd & qdot_) {
     Eigen::MatrixXd Jsp = Eigen::MatrixXd::Zero(6, mNumDof);

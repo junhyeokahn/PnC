@@ -13,6 +13,8 @@ DracoInterface::DracoInterface(): Interface() {
 
     DataManager* dataManager = DataManager::GetDataManager();
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
+    mTrqCmd = Eigen::VectorXd::Zero(10);
+    dataManager->RegisterData(&mTrqCmd, VECT, "TorqueCommand", 10);
 
     printf("[Draco Interface] Constructed\n");
 }
@@ -36,6 +38,7 @@ void DracoInterface::getCommand(void* sensorData_, void* commandData_) {
         if (!mTest->isInitialized) mTest->initialize();
         DataManager::GetDataManager()->start();
         mTest->getTorqueInput(commandData_);
+        mTrqCmd = ((DracoCommand*) commandData_)->jtrq.tail(10);
     }
     mTime += SERVO_RATE;
 }

@@ -1,7 +1,8 @@
 FILE(GLOB_RECURSE headers *.hpp)
 FILE(GLOB_RECURSE sources *.cpp)
 add_library (myUtils SHARED ${headers} ${sources})
-target_link_libraries(myUtils myYaml)
+target_link_libraries(myUtils myYaml
+                              drake::drake)
 
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
