@@ -64,7 +64,13 @@ void InvKinPlannerParameter::paramSetFromYaml(const std::string & cfg_file) {
             }
         }
 
-        // TODO : make endeffector desired traj
+        // TODO : make endeffector desired traj foot orientation
+        // std::vector< Eigen::Vector3d > rfPosDes;
+        // std::vector< Eigen::Vector3d > rfVelDes;
+        // std::vector< Eigen::Vector3d > lfPosDes;
+        // std::vector< Eigen::Vector3d > lfVelDes;
+        rfPosDes.resize(t.size()); rfVelDes.resize(t.size());
+        lfPosDes.resize(t.size()); lfVelDes.resize(t.size());
         exit(0);
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
