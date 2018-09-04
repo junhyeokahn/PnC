@@ -517,8 +517,10 @@ TEST(InvKin, test5) {
         q_q_vec << q_vec, q_vec;
         myUtils::collectNonZeroIdxAndValue(j_rf_lf, rows, cols, vals);
         SingleTimeLinearPostureConstraint fvc(model.get(), rows, cols, vals,
-                j_rf_lf*q_q_vec - Eigen::VectorXd::Constant(12, velTol)*dt,
-                j_rf_lf*q_q_vec + Eigen::VectorXd::Constant(12, velTol)*dt,
+                //j_rf_lf*q_q_vec - Eigen::VectorXd::Constant(12, velTol)*dt,
+                //j_rf_lf*q_q_vec + Eigen::VectorXd::Constant(12, velTol)*dt,
+                j_rf_lf*q_q_vec,
+                j_rf_lf*q_q_vec,
                 tspan);
         //constraint_array.push_back(&fvc);
         // 4. com velocities
