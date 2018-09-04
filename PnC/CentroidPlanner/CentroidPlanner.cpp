@@ -7,7 +7,7 @@ using namespace solver;
 void CentroidPlannerParameter::paramSetFromYaml(const std::string & cfg_file) {
     cfgFile = cfg_file;
     saveDynamicsFile = cfg_file.substr(0, cfg_file.size()-5) + "_RESULT.yaml";
-    defaultSolverSettingFile = THIS_COM + std::string("Config/Draco/DEFAULT_CONIC_SOLVER_SETTING.yaml");
+    defaultSolverSettingFile = THIS_COM + std::string("Config/Solver/DEFAULT_CONIC_SOLVER_SETTING.yaml");
     try {
         YAML::Node planner_cfg = YAML::LoadFile(cfgFile.c_str());
 
@@ -129,11 +129,11 @@ void CentroidPlannerParameter::paramSetFromYaml(const std::string & cfg_file) {
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
     }
-
 }
 
 
-CentroidPlanner::CentroidPlanner() {
+//CentroidPlanner::CentroidPlanner() : Planner(){
+CentroidPlanner::CentroidPlanner() : Planner(){
 }
 
 CentroidPlanner::~CentroidPlanner() {}
@@ -167,6 +167,7 @@ void CentroidPlanner::_initialize() {
     mCentParam->contactPlanInterface.fillDynamicsSequence(mDynStateSeq,
                                                           mCentParam->numTimeSteps,
                                                           mCentParam->timeStep);
+
     _initializeOptimizationVariables();
 }
 
@@ -479,7 +480,7 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         lmom_val  = mDynStateSeq.dynamicsStateSequence[time_id].lMom[axis_id];
                         mLinCons = 0.0;
                         if (time_id==0) { mLinCons += LinExpr(mCentParam->initialState.com[axis_id]) - LinExpr(mVars[mCom.id(axis_id,time_id)]); }
-                        else            { mLinCons += LinExpr(mVars[mCom.id(axis_id,time_id-1)])  - LinExpr(mVars[mCom.id(axis_id,time_id)]); }
+                        else            { mLinCons += LinExpr(mVars[mCom.id(axis_id,time_id-1)]) - LinExpr(mVars[mCom.id(axis_id,time_id)]); }
                         mLinCons += ( LinExpr(std::pow(dt_val+lmom_val, 2.0)) + ((dt+lmom)-(dt_val+lmom_val))*2.0*(dt_val+lmom_val) )*(0.25/mCentParam->robotMass)
                             - ( LinExpr(std::pow(dt_val-lmom_val, 2.0)) + ((dt-lmom)-(dt_val-lmom_val))*2.0*(dt_val-lmom_val) )*(0.25/mCentParam->robotMass);
                         mModel.addLinConstr(mLinCons, "=", 0.0);
@@ -743,6 +744,7 @@ void CentroidPlanner::_saveToFile(const DynamicsStateSequence& _ref_sequence) {
             YAML::Node cfg_pars = YAML::LoadFile(mCentParam->cfgFile.c_str());
 
             YAML::Node qcqp_cfg;
+            qcqp_cfg["robot_model_path"] = cfg_pars["robot_model_path"];
             qcqp_cfg["dynopt_params"]["time_step"] = mCentParam->timeStep;
             qcqp_cfg["dynopt_params"]["end_com"] = mComPosGoal;
             qcqp_cfg["dynopt_params"]["robot_mass"] = mCentParam->robotMass;

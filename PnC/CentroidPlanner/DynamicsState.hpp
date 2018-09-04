@@ -48,6 +48,7 @@ class DynamicsState
             for (int eff=0; eff< CentroidModel::numEEf; eff++)
             {
                 text << "  eff   " << eff << "\n";
+                text << "  eff activation id  " << eEfsActivationIds[eff] << "\n";
                 text << "  act " << eEfsActivation[eff] << "\n";
                 text << "  pos " << eEfsPosition[eff].transpose() << "\n";
                 text << "  ori " << (eEfsOrientation[eff]).coeffs().transpose() << "\n";

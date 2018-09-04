@@ -36,6 +36,7 @@ public:
             mDoPlan = false;
         } else if (mDoPlan & isParamSet) {
             std::cout << "Replan flag without new parameter set" << std::endl;
+            exit(0);
         };
         _evalTrajectory( time, pos, vel, trq );
     }

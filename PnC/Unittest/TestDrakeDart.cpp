@@ -145,5 +145,3 @@ TEST(TestDrakeDart, CentroidDynamics){
                 dart_model->getCentroidInertia()*dart_model->getCentroidJacobian(),
                 tol, drake::MatrixCompareType::absolute));
 }
-
-

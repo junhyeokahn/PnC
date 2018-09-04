@@ -4,4 +4,5 @@ add_library(myCentPlanner SHARED ${srcs})
 
 target_link_libraries(myCentPlanner myUtils
                                     myContact
-                                    myConicSolver)
+                                    myConicSolver
+                                    myRobotSystem)

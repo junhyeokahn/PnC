@@ -9,7 +9,7 @@
 
 
 enum class ContactType { FreeContact = 0, FlatContact = 1, FullContact = 2 };
-ContactType idToContactType(int cnt_type_id) {
+inline ContactType idToContactType(int cnt_type_id) {
     ContactType cnt_type = ContactType::FreeContact;
     switch (cnt_type_id) {
       case 0: { cnt_type = ContactType::FreeContact; break; }

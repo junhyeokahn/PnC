@@ -210,5 +210,3 @@ class CentroidPlanner : public Planner
         void _storeSolution();
         void _saveToFile(const DynamicsStateSequence& ref_sequence);
 };
-
-

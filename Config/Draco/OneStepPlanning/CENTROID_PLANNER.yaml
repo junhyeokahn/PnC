@@ -1,0 +1,115 @@
+robot_model_path: RobotSystem/RobotModel/Robot/Draco/
+
+initial_robot_configuration:
+
+  ###############################
+  # Initial robot configuration #
+  ###############################
+
+  com: [-0.021, 0.0, 0.8]
+  amom: [0.0, 0.0, 0.0]
+  lmom: [0.0, 0.0, 0.0]
+  eef_ctrl:
+    eef_frc_rf: [0.0, 0.0, 0.5]
+    eef_frc_lf: [0.0, 0.0, 0.5]
+    eef_frc_rh: [0.0, 0.0, 0.0]
+    eef_frc_lh: [0.0, 0.0, 0.0]
+  eef_pose: # activation, pos, quat
+    eef_rf: [1.0,   -0.021, -0.167,  0.0,    1.0, 0.0, 0.0, 0.0]
+    eef_lf: [1.0,   -0.021,  0.167,  0.0,    1.0, 0.0, 0.0, 0.0]
+    eef_rh: [0.0,      0.0,    0.0,  0.0,    1.0, 0.0, 0.0, 0.0]
+    eef_lh: [0.0,      0.0,    0.0,  0.0,    1.0, 0.0, 0.0, 0.0]
+
+
+contact_plan:
+
+  ######################
+  # Contact parameters #
+  ######################
+
+  num_contacts: [2, 2, 0, 0]
+  eefcnt_rf:
+    cnt0: [0.0, 1.0,   -0.021, -0.167, 0.0,    1.0, 0.0, 0.0, 0.0,       1.0]
+    cnt1: [2.0, 5.5,    0.031, -0.167, 0.0,    1.0, 0.0, 0.0, 0.0,       1.0]
+  eefcnt_lf:
+    cnt0: [0.0, 2.5,   -0.021, 0.167, 0.0,    1.0, 0.0, 0.0, 0.0,        1.0]
+    cnt1: [3.5, 5.5,    0.031, 0.167, 0.0,    1.0, 0.0, 0.0, 0.0,        1.0]
+  eefcnt_rh:
+  eefcnt_lh:
+
+
+planner_variables:
+
+  #######################
+  # Dynamics parameters #
+  #######################
+
+  heuristic: SoftConstraint  # Types: TrustRegion, SoftConstraint, TimeOptimization #
+  n_act_eefs: 2
+  time_step: 0.1
+  time_horizon: 4.5
+  external_force: [0.00, 0.00, 0.00]
+  com_displacement: [0.05, 0.00, 0.8]
+  num_com_viapoints: 0
+  com_viapoints:
+    via0: [2.50,    0.500, 0.45,  0.00]
+
+  #####################
+  # Timing parameters #
+  #####################
+
+  max_time_iterations: 100
+  max_time_residual_tolerance: 1e-3
+  min_time_residual_improvement: 1e-5
+
+  ############################
+  # Configuration parameters #
+  ############################
+
+  gravity: 9.81
+  robot_mass: 36.81
+  friction_coeff: 1.0
+  friction_cone: LinearCone  # Types: LinearCone, SocCone #
+  torque_range: [-200.0, 200.0]
+  eef_offset_rf: [ 0.00,  0.00,  0.00]
+  eef_offset_lf: [ 0.00,  0.00,  0.00]
+  eef_offset_rh: [ 0.20,  0.00,  0.48]
+  eef_offset_lh: [-0.20,  0.00,  0.48]
+  cop_range_rf: [-0.075, 0.075, -0.02, 0.02]
+  cop_range_lf: [-0.075, 0.075, -0.02, 0.02]
+  cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
+  cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
+  max_eef_lengths: [0.8,  0.8,  0.60,  0.60]
+
+  ####################
+  # Dynamics weights #
+  ####################
+
+  w_trq_arm:       1.000
+  w_trq_leg:       1.000
+  w_com:           [ 10000,  10000,  10000]
+  w_amom:          [ 0.500,  0.500,  0.500]
+  w_lmom:          [ 0.010,  0.001,  0.001]
+  w_amomd:         [ 0.100,  0.400,  0.100]
+  w_lmomd:         [ 0.015,  0.015,  0.015]
+  w_amom_final:    [ 10.00,  10.00,  10.00]
+  w_lmom_final:    [ 10.00,  10.00,  10.00]
+  w_com_via:       [ 0.000,  0.000,  0.000]
+  w_frc_arm:       [ 0.001,  0.001,  0.001]
+  w_frc_leg:       [ 0.001,  0.001,  0.001]
+  w_dfrc_arm:      [ 0.000,  0.000,  0.000]
+  w_dfrc_leg:      [ 0.000,  0.000,  0.000]
+  w_amom_track:    [ 1.000,  1.000,  1.000]
+  w_lmom_track:    [ 0.100,  0.100,  0.100]
+
+  #######################
+  # Storage information #
+  #######################
+
+  store_data: True
+
+  ##################
+  # Solver setting #
+  ##################
+
+  use_default_solver_setting: True
