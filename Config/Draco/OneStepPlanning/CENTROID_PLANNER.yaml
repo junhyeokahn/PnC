@@ -1,4 +1,4 @@
-robot_model_path: RobotSystem/RobotModel/Robot/Draco/
+robot_model_path: RobotSystem/RobotModel/Robot/Draco/DracoNoVisualDrake.urdf
 
 initial_robot_configuration:
 
@@ -6,7 +6,7 @@ initial_robot_configuration:
   # Initial robot configuration #
   ###############################
 
-  com: [-0.021, 0.0, 0.8]
+  com: [-0.021, 0.0, 0.79]
   amom: [0.0, 0.0, 0.0]
   lmom: [0.0, 0.0, 0.0]
   eef_ctrl:
@@ -49,7 +49,7 @@ planner_variables:
   time_step: 0.1
   time_horizon: 4.5
   external_force: [0.00, 0.00, 0.00]
-  com_displacement: [0.05, 0.00, 0.8]
+  com_displacement: [0.05, 0.00, 0.0]
   num_com_viapoints: 0
   com_viapoints:
     via0: [2.50,    0.500, 0.45,  0.00]
@@ -79,7 +79,7 @@ planner_variables:
   cop_range_lf: [-0.075, 0.075, -0.02, 0.02]
   cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
   cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
-  max_eef_lengths: [0.8,  0.8,  0.60,  0.60]
+  max_eef_lengths: [1.2,  1.2,  0.60,  0.60]
 
   ####################
   # Dynamics weights #

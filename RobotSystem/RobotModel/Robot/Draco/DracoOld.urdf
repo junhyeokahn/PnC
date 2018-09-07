@@ -123,7 +123,7 @@
   </link>
   <joint name="lHipYaw" type="continuous">
     <origin xyz="-0.0222250000000002 0.0870035316828367 -0.29508" rpy="1.92592994438724E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
@@ -148,7 +148,7 @@
   </link>
   <joint name="lHipRoll" type="continuous">
     <origin xyz="0 0.0699999999999993 -0.0200000000000001" rpy="1.92592994438724E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
@@ -173,7 +173,7 @@
   </link>
   <joint name="lHipPitch" type="continuous">
     <origin xyz="0 0.0099999999999999 -0.065" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
@@ -198,7 +198,7 @@
   </link>
   <joint name="lKnee" type="continuous">
     <origin xyz="0 -0.016750000238715 -0.48" rpy="1.92592994438724E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
@@ -229,7 +229,7 @@
   </link>
   <joint name="lAnkle" type="continuous">
     <origin xyz="0.00107750129935319 0.0167500014015612 -0.480000014901359" rpy="0 -1.57 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
@@ -254,7 +254,7 @@
   </link>
   <joint name="rHipYaw" type="continuous">
     <origin xyz="-0.022225 -0.086996 -0.29508" rpy="1.9259E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
@@ -278,7 +278,7 @@
   </link>
   <joint name="rHipRoll" type="continuous">
     <origin xyz="0 -0.07 -0.02" rpy="1.9259E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
@@ -302,7 +302,7 @@
   </link>
   <joint name="rHipPitch" type="continuous">
     <origin xyz="0 -0.01 -0.065" rpy="1.9259E-34 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
@@ -326,7 +326,7 @@
   </link>
   <joint name="rKnee" type="continuous">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
@@ -357,7 +357,7 @@
   </link>
   <joint name="rAnkle" type="continuous">
     <origin xyz="0.0010775 -0.01675 -0.48" rpy="0 -1.57 0" />
-    <dynamics damping="0.01" />
+    <!--<dynamics damping="0.01" />-->
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />

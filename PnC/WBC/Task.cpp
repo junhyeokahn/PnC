@@ -103,9 +103,9 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                      pos_act = mRobot->getQ().tail(mDim);
                                      vel_act = mRobot->getQdot().tail(mDim);
                                      for (int i = 0; i < mDim; ++i) {
-                                         mKp[i] = 10.;
-                                         mKd[i] = 1.;
-                                         mKi[i] = 5.;
+                                         mKp[i] = 150.;
+                                         mKd[i] = 5.;
+                                         mKi[i] = 0.;
                                      }
                                      //mKi[2] = 100.; mKi[3] = 200.; mKi[4] = 400.;
                                      //mKi[7] = 100.; mKi[8] = 200.; mKi[9] = 400.;
@@ -149,8 +149,6 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             mErrSum[i] = myUtils::cropValue(mErrSum[i], -1., 1., "Joint Task");
             mTaskCmd[i] += mKi[i] * mErrSum[i];
         }
-        std::cout << "error sum ***" << std::endl;
-        std::cout << mErrSum << std::endl;
         _saveTask(pos_des_, vel_des_, pos_act, vel_act);
     }
 }

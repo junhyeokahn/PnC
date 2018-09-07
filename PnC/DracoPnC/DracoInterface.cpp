@@ -6,6 +6,16 @@
 #include "DataManager.hpp"
 #include "ParamHandler.hpp"
 
+
+#include <drake/common/find_resource.h>
+#include <drake/multibody/ik_options.h>
+#include <drake/multibody/joints/floating_base_types.h>
+#include <drake/multibody/parsers/urdf_parser.h>
+#include <drake/multibody/rigid_body_constraint.h>
+#include <drake/multibody/rigid_body_ik.h>
+#include <drake/multibody/rigid_body_tree.h>
+#include "drake/math/eigen_sparse_triplet.h"
+
 DracoInterface::DracoInterface(): Interface() {
     mRobot = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
 

@@ -159,7 +159,7 @@ void InvKinTest::getTorqueInput(void * commandData_) {
         myUtils::pseudoInverse(JcomNull, 0.0001, JcomNullInv);
         cmd->qdot = JcomNullInv* comVelDes;
         mPrevSol = qSol;
-        _checkIKResult(cmd->q, cmd->qdot);
+        //_checkIKResult(cmd->q, cmd->qdot);
 
     } else {
         std::cout << "[Inverse Kinematic Solver Falied] INFO : " << info << std::endl;
@@ -182,8 +182,8 @@ void InvKinTest::getTorqueInput(void * commandData_) {
     // update task
     Eigen::VectorXd qdotSol = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
     Eigen::VectorXd qddotSol = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    mTaskList[0]->updateTaskSpec(qSol.tail(mRobot->getNumActuatedDofs()), cmd->qdot.tail(mRobot->getNumActuatedDofs()), qddotSol);
-    //mTaskList[0]->updateTaskSpec(mInitQ.tail(mRobot->getNumActuatedDofs()), qdotSol, qddotSol);
+    //mTaskList[0]->updateTaskSpec(qSol.tail(mRobot->getNumActuatedDofs()), cmd->qdot.tail(mRobot->getNumActuatedDofs()), qddotSol);
+    mTaskList[0]->updateTaskSpec(mInitQ.tail(mRobot->getNumActuatedDofs()), qdotSol, qddotSol);
     _WBLCpreProcess();
     mWBLC->MakeTorque(mTaskList, mContactList, cmd->jtrq, mWBLCExtraData);
     _WBLCpostProcess();

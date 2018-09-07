@@ -21,6 +21,7 @@ TaskPosDes = fn_read_file(data_path, 'JointTaskPosDes', numJoint);
 TaskVelDes = fn_read_file(data_path, 'JointTaskVelDes', numJoint);
 TaskPosAct = fn_read_file(data_path, 'JointTaskPosAct', numJoint);
 TaskVelAct = fn_read_file(data_path, 'JointTaskVelAct', numJoint);
+debug_cnst_frc = fn_read_file(data_path, 'ConstFrc', 16);
 Cmd = fn_read_file(data_path, 'TorqueCommand', numJoint);
 
 startIdx = 5;
@@ -42,7 +43,7 @@ for i = 1:numTarget
     hold off
     subplot(3,1,3)
     hold on
-    plot(Time(startIdx:endIdx), Cmd(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
+    plot(Time(startIdx:endIdx), debug_cnst_frc(targetJointIdx(i)+6, startIdx:endIdx),'r', 'linewidth', 3);
     hold off
     grid on
 end

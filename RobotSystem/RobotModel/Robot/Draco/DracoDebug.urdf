@@ -8,80 +8,6 @@
     </inertial>
   </link>
 
-  <link name="basePosX">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-
-  <joint name="basePosX" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="world" />
-    <child link="basePosX" />
-    <axis xyz="1 0 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="basePosY">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="basePosY" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosX" />
-    <child link="basePosY" />
-    <axis xyz="0 1 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="basePosZ">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="basePosZ" type="prismatic">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosY" />
-    <child link="basePosZ" />
-    <axis xyz="0 0 1" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
-  </joint>
-
-  <link name="baseRotZ">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="baseRotZ" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="basePosZ" />
-    <child link="baseRotZ" />
-    <axis xyz="0 0 1" />
-  </joint>
-
-  <link name="baseRotY">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.00000001" />
-      <inertia ixx="0.00000001" ixy="0.00000001" ixz="0.00000001" iyy="0.00000001" iyz="0.00000001" izz="0.00000001" />
-    </inertial>
-  </link>
-  <joint name="baseRotY" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="baseRotZ" />
-    <child link="baseRotY" />
-    <axis xyz="0 1 0" />
-  </joint>
-
   <link name="torso">
     <inertial>
       <origin xyz="-0.0133907728940907 0.000753510365864796 -0.187273411666051" rpy="0 0 0" />
@@ -98,11 +24,11 @@
       </material>
     </visual>
   </link>
-  <joint name="baseRotX" type="continuous">
+  <joint name="baseRotX" type="floating">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="baseRotY" />
+    <parent link="world" />
     <child link="torso" />
-    <axis xyz="1 0 0" />
+    <!--<axis xyz="1 0 0" />-->
   </joint>
 
   <link name="lHipYaw">
@@ -121,19 +47,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipYaw" type="revolute">
+  <joint name="lHipYaw" type="continuous">
     <origin xyz="-0.0222 0.0870 -0.2951" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
-  <transmission name="lHipYaw" type="transmission_interface/SimpleTransmission">
-    <actuator name="lHipYaw"/>
-    <joint name="lHipYaw"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="lHipRoll">
     <inertial>
@@ -151,19 +71,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipRoll" type="revolute">
+  <joint name="lHipRoll" type="continuous">
     <origin xyz="0 0.07 -0.02" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-0.52" upper="1.04" velocity="25.0"/>
   </joint>
-  <transmission name="lHipRoll" type="transmission_interface/SimpleTransmission">
-    <actuator name="lHipRoll"/>
-    <joint name="lHipRoll"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="lHipPitch">
     <inertial>
@@ -181,19 +95,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipPitch" type="revolute">
+  <joint name="lHipPitch" type="continuous">
     <origin xyz="0 0.010 -0.065" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
-  <transmission name="lHipPitch" type="transmission_interface/SimpleTransmission">
-    <actuator name="lHipPitch"/>
-    <joint name="lHipPitch"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="lKnee">
     <inertial>
@@ -211,19 +119,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lKnee" type="revolute">
+  <joint name="lKnee" type="continuous">
     <origin xyz="0 -0.0168 -0.48" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
-  <transmission name="lKnee" type="transmission_interface/SimpleTransmission">
-    <actuator name="lKnee"/>
-    <joint name="lKnee"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="lAnkle">
     <inertial>
@@ -247,19 +149,13 @@
       </geometry>
     </collision>
   </link>
-  <joint name="lAnkle" type="revolute">
+  <joint name="lAnkle" type="continuous">
     <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
     <dynamics damping="0.0" />
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
-  <transmission name="lAnkle" type="transmission_interface/SimpleTransmission">
-    <actuator name="lAnkle"/>
-    <joint name="lAnkle"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="rHipYaw">
     <inertial>
@@ -277,19 +173,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipYaw" type="revolute">
+  <joint name="rHipYaw" type="continuous">
     <origin xyz="-0.0222 -0.0870 -0.2951" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
-  <transmission name="rHipYaw" type="transmission_interface/SimpleTransmission">
-    <actuator name="rHipYaw"/>
-    <joint name="rHipYaw"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="rHipRoll">
     <inertial>
@@ -307,19 +197,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipRoll" type="revolute">
+  <joint name="rHipRoll" type="continuous">
     <origin xyz="0 -0.07 -0.02" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-1.04" upper="0.52" velocity="25.0"/>
   </joint>
-  <transmission name="rHipRoll" type="transmission_interface/SimpleTransmission">
-    <actuator name="rHipRoll"/>
-    <joint name="rHipRoll"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="rHipPitch">
     <inertial>
@@ -337,19 +221,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipPitch" type="revolute">
+  <joint name="rHipPitch" type="continuous">
     <origin xyz="0 -0.01 -0.065" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
-  <transmission name="rHipPitch" type="transmission_interface/SimpleTransmission">
-    <actuator name="rHipPitch"/>
-    <joint name="rHipPitch"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="rKnee">
     <inertial>
@@ -367,19 +245,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rKnee" type="revolute">
+  <joint name="rKnee" type="continuous">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
     <dynamics damping="0.0" />
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
-  <transmission name="rKnee" type="transmission_interface/SimpleTransmission">
-    <actuator name="rKnee"/>
-    <joint name="rKnee"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 
   <link name="rAnkle">
     <inertial>
@@ -403,17 +275,11 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rAnkle" type="revolute">
+  <joint name="rAnkle" type="continuous">
     <origin xyz="0.0011 -0.0168 -0.48" rpy="0 -1.57 0" />
     <dynamics damping="0.0" />
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
-  <transmission name="rAnkle" type="transmission_interface/SimpleTransmission">
-    <actuator name="rAnkle"/>
-    <joint name="rAnkle"/>
-    <mechanicalReduction>1</mechanicalReduction>
-  </transmission>
 </robot>
