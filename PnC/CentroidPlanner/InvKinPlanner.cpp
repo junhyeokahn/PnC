@@ -131,9 +131,10 @@ void InvKinPlanner::_doPlan() {
     mQSol.resize(mInvKinParam->t.size(), Eigen::VectorXd::Zero(mInvKinParam->robot->get_num_positions()));
     mQdotSol.resize(mInvKinParam->t.size());
     double posTol = 0.001;
-    Eigen::Vector3d additional_z_tol(0, 0, 0.01);
-    double rpyTol = 0.01;
+    Eigen::Vector3d additional_z_tol(0.01, 0.02, 0.02);
+    double rpyTol = 0.1;
     double velTol = 0.001;
+
     for (int time_id = 0; time_id < mInvKinParam->t.size(); ++time_id) {
         Eigen::Vector2d tspan(0, 1);
         std::vector<RigidBodyConstraint*> constraint_array;
@@ -256,12 +257,6 @@ void InvKinPlanner::_doPlan() {
             //_solutionCheck(time_id);
         } else {
             std::cout << "[info] : " << info << " @ InvKinPlanner.cpp " << std::endl;
-            std::cout << infeasible_constraint.size() << std::endl;
-            if (infeasible_constraint.size() > 0) {
-                for (int infeasible_id = 0;  infeasible_id < infeasible_constraint.size(); ++infeasible_id) {
-                    std::cout << infeasible_constraint[infeasible_id] << std::endl;
-                }
-            }
             //_solutionCheck(time_id);
         }
     }
