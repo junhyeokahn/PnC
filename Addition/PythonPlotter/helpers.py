@@ -311,7 +311,7 @@ class Graphics:
         lmomy_y_size = [-25.0/self.robot_mass, 25.0/self.robot_mass]
         lmomz_y_size = [-25.0/self.robot_mass, 25.0/self.robot_mass]
         amom_y_size  = [-10.0/self.robot_mass, 10.0/self.robot_mass]
-        mom_x_size = [1.0, time[len(time)-1]]
+        mom_x_size = [0., time[len(time)-1]]
         mom_axis_color = '#8C8E87'
         mom_grid_color = '#ACADA9'
         mom_axis_tick_color = '#434440'
@@ -329,7 +329,7 @@ class Graphics:
         frc_y_ysize = [-0.20, 0.20]
         frc_z_ysize = [-0.01, 1.02]
         frc_legend_frame_linewidth = 1
-        frc_xsize = [1.0, time[len(time)-1]]
+        frc_xsize = [0., time[len(time)-1]]
         frc_grid_color = '#ACADA9'
         frc_axis_color = '#8C8E87'
         frc_legend_color = '#8C8E87'

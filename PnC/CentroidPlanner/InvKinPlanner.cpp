@@ -52,6 +52,8 @@ void InvKinPlannerParameter::paramSetFromYaml(const std::string & cfg_file) {
                 t[j] = dummyMat(i, j);
             }
         }
+        startTime = t.front();
+        endTime = t.back();
 
         YAML::Node cntopt_params = planner_cfg["cntopt_params"];
         readParameter(cntopt_params, "num_contacts", contactPlanInterface.contactsPerEndeff);
@@ -123,17 +125,20 @@ void InvKinPlannerParameter::paramSetFromYaml(const std::string & cfg_file) {
     }
 }
 
-InvKinPlanner::InvKinPlanner() : Planner() {}
-InvKinPlanner::~InvKinPlanner() {}
+InvKinPlanner::InvKinPlanner() : Planner() {
+    mComTol << 0.01, 0.01, 0.03;
+    mFootPosTol << 0.0001, 0.0001, 0.0001;
+    mFootRPYTol << 0.01, 0.01, 0.01;
+    mHTol = Eigen::VectorXd::Zero(6);
+    mHTol << 1.0, 1.0, 1.0, 0.05, 0.05, 0.05;
+}
+InvKinPlanner::~InvKinPlanner() {
+}
 
 void InvKinPlanner::_doPlan() {
     mInvKinParam = std::dynamic_pointer_cast<InvKinPlannerParameter>(mParam);
     mQSol.resize(mInvKinParam->t.size(), Eigen::VectorXd::Zero(mInvKinParam->robot->get_num_positions()));
     mQdotSol.resize(mInvKinParam->t.size());
-    double posTol = 0.001;
-    Eigen::Vector3d additional_z_tol(0.01, 0.02, 0.02);
-    double rpyTol = 0.1;
-    double velTol = 0.001;
 
     for (int time_id = 0; time_id < mInvKinParam->t.size(); ++time_id) {
         Eigen::Vector2d tspan(0, 1);
@@ -143,25 +148,27 @@ void InvKinPlanner::_doPlan() {
 
         Eigen::Vector3d foot_offset(0.015, 0., -0.065);
         Eigen::Vector3d des_pos_0 = mInvKinParam->eEfPosDes[0][time_id];
-        Eigen::Vector3d des_rpy_0_lb(-rpyTol, -rpyTol, -rpyTol);
-        Eigen::Vector3d des_rpy_0_ub(rpyTol, rpyTol, rpyTol);
         Eigen::Vector3d des_pos_1 = mInvKinParam->eEfPosDes[1][time_id];
-        Eigen::Vector3d des_rpy_1_lb(-rpyTol, -rpyTol, -rpyTol);
-        Eigen::Vector3d des_rpy_1_ub(rpyTol, rpyTol, rpyTol);
 
         IKoptions ikoptions(mInvKinParam->robot.get());
         ikoptions.setMajorIterationsLimit(1500);
         ikoptions.setIterationsLimit(20000);
         //ikoptions.setMajorOptimalityTolerance(1E-3);
         //ikoptions.setMajorFeasibilityTolerance(1E-3);
+        Eigen::MatrixXd Q =
+            Eigen::MatrixXd::Identity(mInvKinParam->robot->get_num_positions(),
+                    mInvKinParam->robot->get_num_positions());
+        for (int i = 0; i < 3; ++i) Q(i, i) = 0.01;
+        for (int i = 3; i < 6; ++i) Q(i, i) = 10.;
+        ikoptions.setQ(Q);
         std::vector<std::string> infeasible_constraint;
         int info = 0;
 
         if (time_id > 0) {
             // 1. r constraint
             WorldCoMConstraint comc(mInvKinParam->robot.get(),
-                    des_com - Eigen::Vector3d::Constant(posTol) - additional_z_tol,
-                    des_com + Eigen::Vector3d::Constant(posTol) + additional_z_tol,
+                    des_com - mComTol,
+                    des_com + mComTol,
                     tspan);
             constraint_array.push_back(&comc);
             // 2. h constraint
@@ -177,8 +184,8 @@ void InvKinPlanner::_doPlan() {
             myUtils::collectNonZeroIdxAndValue(j_cent, rows, cols, vals);
             SingleTimeLinearPostureConstraint hc(mInvKinParam->robot.get(),
                     rows, cols, vals,
-                    des_h*dt + j_cent*mQSol[time_id-1] - Eigen::VectorXd::Constant(6, velTol*dt),
-                    des_h*dt + j_cent*mQSol[time_id-1] + Eigen::VectorXd::Constant(6, velTol*dt),
+                    des_h*dt + j_cent*mQSol[time_id-1] - mHTol*dt,
+                    des_h*dt + j_cent*mQSol[time_id-1] + mHTol*dt,
                     tspan);
             //constraint_array.push_back(&hc);
             // 3. ee constraint
@@ -186,37 +193,38 @@ void InvKinPlanner::_doPlan() {
             WorldPositionConstraint pc_0(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[0],
                     foot_offset,
-                    des_pos_0 - Eigen::Vector3d::Constant(posTol),
-                    des_pos_0 + Eigen::Vector3d::Constant(posTol),
+                    des_pos_0 - mFootPosTol,
+                    des_pos_0 + mFootPosTol,
                     tspan);
             constraint_array.push_back(&pc_0);
             WorldEulerConstraint oc_0(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[0],
-                    des_rpy_0_lb,
-                    des_rpy_0_ub,
+                    -mFootRPYTol,
+                    mFootRPYTol,
                     tspan);
             constraint_array.push_back(&oc_0);
             WorldPositionConstraint pc_1(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[1],
                     foot_offset,
-                    des_pos_1 - Eigen::Vector3d::Constant(posTol),
-                    des_pos_1 + Eigen::Vector3d::Constant(posTol),
+                    des_pos_1 - mFootPosTol,
+                    des_pos_1 + mFootPosTol,
                     tspan);
             constraint_array.push_back(&pc_1);
             WorldEulerConstraint oc_1(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[1],
-                    des_rpy_1_lb,
-                    des_rpy_1_ub,
+                    -mFootRPYTol,
+                    mFootRPYTol,
                     tspan);
             constraint_array.push_back(&oc_1);
             inverseKin(mInvKinParam->robot.get(), mQSol[time_id-1], mQSol[time_id-1], constraint_array.size(),
                     constraint_array.data(), ikoptions, &(mQSol[time_id]), &info,
                     &infeasible_constraint);
+            mQdotSol[time_id] = (mQSol[time_id] - mQSol[time_id-1]) / dt;
         } else {
             // 1. r constraint
             WorldCoMConstraint comc(mInvKinParam->robot.get(),
-                    des_com - Eigen::Vector3d::Constant(posTol) - additional_z_tol,
-                    des_com + Eigen::Vector3d::Constant(posTol) + additional_z_tol,
+                    des_com - mComTol,
+                    des_com + mComTol,
                     tspan);
             constraint_array.push_back(&comc);
             // 2. ee constraint
@@ -224,32 +232,33 @@ void InvKinPlanner::_doPlan() {
             WorldPositionConstraint pc_0(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[0],
                     foot_offset,
-                    des_pos_0 - Eigen::Vector3d::Constant(posTol),
-                    des_pos_0 + Eigen::Vector3d::Constant(posTol),
+                    des_pos_0 - mFootPosTol,
+                    des_pos_0 + mFootPosTol,
                     tspan);
             constraint_array.push_back(&pc_0);
             WorldEulerConstraint oc_0(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[0],
-                    des_rpy_0_lb,
-                    des_rpy_0_ub,
+                    -mFootRPYTol,
+                    mFootRPYTol,
                     tspan);
             constraint_array.push_back(&oc_0);
             WorldPositionConstraint pc_1(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[1],
                     foot_offset,
-                    des_pos_1 - Eigen::Vector3d::Constant(posTol),
-                    des_pos_1 + Eigen::Vector3d::Constant(posTol),
+                    des_pos_1 - mFootPosTol,
+                    des_pos_1 + mFootPosTol,
                     tspan);
             constraint_array.push_back(&pc_1);
             WorldEulerConstraint oc_1(mInvKinParam->robot.get(),
                     mInvKinParam->eEfIdx[1],
-                    des_rpy_1_lb,
-                    des_rpy_1_ub,
+                    -mFootRPYTol,
+                    mFootRPYTol,
                     tspan);
             constraint_array.push_back(&oc_1);
             inverseKin(mInvKinParam->robot.get(), mInvKinParam->initQ, mInvKinParam->initQ, constraint_array.size(),
                     constraint_array.data(), ikoptions, &(mQSol[time_id]), &info,
                     &infeasible_constraint);
+            mQdotSol[time_id] = Eigen::VectorXd::Zero(mInvKinParam->robot->get_num_positions());
         }
         std::cout << "At Time : " << mInvKinParam->t[time_id] << "  ";
         if (info == 1) {
@@ -257,16 +266,42 @@ void InvKinPlanner::_doPlan() {
             //_solutionCheck(time_id);
         } else {
             std::cout << "[info] : " << info << " @ InvKinPlanner.cpp " << std::endl;
-            //_solutionCheck(time_id);
+            _solutionCheck(time_id);
         }
     }
+    _generateCubicTrajectory();
+    for (int i = 0; i < mQSol.size(); ++i) {
+        myUtils::saveVector(mQSol[i], "ikp_qsol");
+        myUtils::saveVector(mQdotSol[i], "ikp_q_dot_sol");
+    }
+}
+
+void InvKinPlanner::_generateCubicTrajectory() {
+    int num_knot(mQSol.size());
+    mQSolMat.resize(num_knot);
+    mQdotSolMat.resize(num_knot);
+    for (int i = 0; i < num_knot; ++i) {
+        mQSolMat[i] = mQSol[i];
+        mQdotSolMat[i] = mQdotSol[i];
+    }
+
+     mQPoly = drake::trajectories::PiecewisePolynomial<double>::Cubic(
+             mInvKinParam->t, mQSolMat, mQdotSolMat);
+     mQdotPoly = mQPoly.derivative();
+     mQddotPoly = mQdotPoly.derivative();
 }
 
 void InvKinPlanner::_evalTrajectory( double time,
                                      Eigen::VectorXd & pos,
                                      Eigen::VectorXd & vel,
                                      Eigen::VectorXd & trq ) {
-
+    if (time > mInvKinParam->startTime & time < mInvKinParam->endTime) {
+        pos = mQPoly.value(time);
+        vel = mQdotPoly.value(time);
+        trq = mQddotPoly.value(time);
+    }   else {
+        std::cout << "Querying wrong time" << std::endl;
+    }
 }
 
 void InvKinPlanner::_solutionCheck( int time_id ) {
@@ -275,24 +310,46 @@ void InvKinPlanner::_solutionCheck( int time_id ) {
     Eigen::VectorXd q = mQSol[time_id];
     Eigen::VectorXd qdot = mQdotSol[time_id];
     KinematicsCache<double> cache = mInvKinParam->robot->doKinematics(q);
-    std::cout << "***** CoM *****" << std::endl;
     Eigen::VectorXd act_com = mInvKinParam->robot->centerOfMass(cache);
-    for (int i = 0; i < 3; ++i)
-        std::cout << mInvKinParam->rDes[time_id][i] << "  |  " << act_com[i] << "  |  " << mInvKinParam->rDes[time_id][i] - act_com[i]<< std::endl;
-    std::cout << "***** Rf pos *****" << std::endl;
+    Eigen::VectorXd des_com = mInvKinParam->rDes[time_id];
+    if (!(myUtils::isInBoundingBox(des_com - 2*mComTol, act_com, des_com + 2*mComTol))) {
+        std::cout << "***** CoM *****" << std::endl;
+        for (int i = 0; i < 3; ++i)
+            std::cout << des_com[i] << "  |  " << act_com[i] << "  |  " << des_com[i] - act_com[i] << std::endl;
+    }
+    Eigen::VectorXd act_h = mInvKinParam->robot->centroidalMomentumMatrix(cache) * qdot;
+    Eigen::VectorXd des_h(6);
+    des_h.head(3) = mInvKinParam->kDes[time_id];
+    des_h.tail(3) = mInvKinParam->lDes[time_id];
+    if (!(myUtils::isInBoundingBox(des_h - 2*mHTol, act_h, des_h + 2*mHTol))) {
+        std::cout << "***** h *****" << std::endl;
+        for (int i = 0; i < 6; ++i)
+            std::cout << des_h[i] << "  |  " << act_h[i] << "  |  " << des_h[i] - act_h[i] << std::endl;
+    }
     Eigen::VectorXd act_rf_pos = mInvKinParam->robot->relativeTransform(cache, 0, mInvKinParam->eEfIdx[0]).translation();
-    for (int i = 0; i < 3; ++i)
-        std::cout << (mInvKinParam->eEfPosDes[0][time_id]-foot_offset)[i] << "  |  " << act_rf_pos[i] << "  |  " << (mInvKinParam->eEfPosDes[0][time_id]-foot_offset)[i]- act_rf_pos[i]<< std::endl;
-    std::cout << "***** Rf rpy *****" << std::endl;
+    Eigen::VectorXd des_rf_pos = mInvKinParam->eEfPosDes[0][time_id] - foot_offset;
+    if (!(myUtils::isInBoundingBox(des_rf_pos - 2*mFootPosTol, act_rf_pos, des_rf_pos + 2*mFootPosTol))) {
+        std::cout << "***** Rf pos *****" << std::endl;
+        for (int i = 0; i < 3; ++i)
+            std::cout << des_rf_pos[i] << "  |  " << act_rf_pos[i] << "  |  " << des_rf_pos[i]- act_rf_pos[i]<< std::endl;
+    }
     Eigen::VectorXd act_rf_rpy = mInvKinParam->robot->relativeRollPitchYaw(cache, mInvKinParam->eEfIdx[0], 0);
-    for (int i = 0; i < 3; ++i)
-        std::cout << "0.0" << "  |  " << act_rf_rpy[i] << "  |  " << -act_rf_rpy[i] << std::endl;
-    std::cout << "***** Lf pos *****" << std::endl;
+    if (!(myUtils::isInBoundingBox(-2*mFootRPYTol, act_rf_rpy, 2*mFootRPYTol))) {
+        std::cout << "***** Rf rpy *****" << std::endl;
+        for (int i = 0; i < 3; ++i)
+            std::cout << "0.0" << "  |  " << act_rf_rpy[i] << "  |  " << -act_rf_rpy[i] << std::endl;
+    }
     Eigen::VectorXd act_lf_pos = mInvKinParam->robot->relativeTransform(cache, 0, mInvKinParam->eEfIdx[1]).translation();
-    for (int i = 0; i < 3; ++i)
-        std::cout << (mInvKinParam->eEfPosDes[1][time_id]-foot_offset)[i] << "  |  " << act_lf_pos[i] << "  |  " << (mInvKinParam->eEfPosDes[1][time_id]-foot_offset)[i] - act_lf_pos[i] << std::endl;
-    std::cout << "***** Lf rpy *****" << std::endl;
+    Eigen::VectorXd des_lf_pos = mInvKinParam->eEfPosDes[1][time_id] - foot_offset;
+    if (!(myUtils::isInBoundingBox(des_lf_pos - 2*mFootPosTol, act_lf_pos, des_lf_pos + 2*mFootPosTol))) {
+        std::cout << "***** Lf pos *****" << std::endl;
+        for (int i = 0; i < 3; ++i)
+            std::cout << des_lf_pos[i] << "  |  " << act_lf_pos[i] << "  |  " << des_lf_pos[i]- act_lf_pos[i]<< std::endl;
+    }
     Eigen::VectorXd act_lf_rpy = mInvKinParam->robot->relativeRollPitchYaw(cache, mInvKinParam->eEfIdx[1], 0);
-    for (int i = 0; i < 3; ++i)
-        std::cout << "0.0" << "  |  " << act_lf_rpy[i] << "  |  " << -act_lf_rpy[i] << std::endl;
+    if (!(myUtils::isInBoundingBox(-2*mFootRPYTol, act_lf_rpy, 2*mFootRPYTol))) {
+        std::cout << "***** Lf rpy *****" << std::endl;
+        for (int i = 0; i < 3; ++i)
+            std::cout << "0.0" << "  |  " << act_lf_rpy[i] << "  |  " << -act_lf_rpy[i] << std::endl;
+    }
 }

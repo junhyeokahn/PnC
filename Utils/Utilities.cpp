@@ -320,4 +320,18 @@ namespace myUtils {
             vals[i] = non_zero_val[i];
         }
     }
+    bool isInBoundingBox( const Eigen::VectorXd & lb,
+                          const Eigen::VectorXd & val,
+                          const Eigen::VectorXd & ub) {
+        int n = lb.size();
+        bool ret(true);
+        for (int i = 0; i < n; ++i) {
+            if (lb[i] <= val[i] && val[i] <= ub[i]) {
+
+            } else {
+                ret = false;
+            }
+        }
+        return ret;
+    }
 }

@@ -15,7 +15,8 @@
 #include <drake/multibody/rigid_body_constraint.h>
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
-#include "drake/math/eigen_sparse_triplet.h"
+#include <drake/math/eigen_sparse_triplet.h>
+#include "drake/common/trajectories/piecewise_polynomial.h"
 
 class InvKinPlannerParameter : public PlannerParameter
 {
@@ -56,9 +57,22 @@ private:
                                   Eigen::VectorXd & vel,
                                   Eigen::VectorXd & trq);
     void _solutionCheck( int time_id);
+    void _generateCubicTrajectory();
 
     std::shared_ptr<InvKinPlannerParameter> mInvKinParam;
 
     std::vector< Eigen::VectorXd > mQSol;
     std::vector< Eigen::VectorXd > mQdotSol;
-};
+
+    std::vector< Eigen::MatrixXd > mQSolMat;
+    std::vector< Eigen::MatrixXd > mQdotSolMat;
+    drake::trajectories::PiecewisePolynomial<double> mQPoly;
+    drake::trajectories::PiecewisePolynomial<double> mQdotPoly;
+    drake::trajectories::PiecewisePolynomial<double> mQddotPoly;
+
+    Eigen::Vector3d mComTol;
+    Eigen::Vector3d mFootPosTol;
+    Eigen::Vector3d mFootRPYTol;
+    Eigen::VectorXd mHTol;
+}
+;

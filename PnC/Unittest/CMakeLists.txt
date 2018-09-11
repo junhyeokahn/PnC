@@ -24,3 +24,12 @@ target_link_libraries(test_draco drake::drake
                                  gtest
                                  gtest_main)
 add_test(NAME test_draco COMMAND test_draco)
+
+add_executable(test_traj TestTrajectory.cpp)
+target_link_libraries(test_traj drake::drake
+                                ${DART_LIBRARIES}
+                                myRobotSystem
+                                myUtils
+                                gtest
+                                gtest_main)
+add_test(NAME test_traj COMMAND test_traj)
