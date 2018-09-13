@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <stdexcept>
 
 class CentroidModel
 {
