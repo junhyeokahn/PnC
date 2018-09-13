@@ -56,26 +56,26 @@ public:
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 
-    //for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
-        //dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
-        //std::cout << i << "th" << std::endl;
-        //std::cout << bn->getName() << std::endl;
-        //std::cout << bn->getMass() << std::endl;
-    //}
-
-    //for (int i = 0; i < robot->getNumJoints(); ++i) {
-        //dart::dynamics::Joint* joint = robot->getJoint(i);
-        //std::cout << i << "th" << std::endl;
-        //std::cout << joint->getNumDofs() << std::endl;
-    //}
-
-    for (int i = 0; i < robot->getNumDofs(); ++i) {
-        dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+    for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+        dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
         std::cout << i << "th" << std::endl;
-        std::cout << dof->getName() << std::endl;
-        //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
-        std::cout << dof->getCoulombFriction() << std::endl;
+        std::cout << bn->getName() << std::endl;
+        std::cout << bn->getMass() << std::endl;
     }
+
+    for (int i = 0; i < robot->getNumJoints(); ++i) {
+        dart::dynamics::Joint* joint = robot->getJoint(i);
+        std::cout << i << "th" << std::endl;
+        std::cout << joint->getNumDofs() << std::endl;
+    }
+
+    //for (int i = 0; i < robot->getNumDofs(); ++i) {
+        //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << dof->getName() << std::endl;
+        //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
+        //std::cout << dof->getCoulombFriction() << std::endl;
+    //}
 
     //std::cout << robot->getNumDofs() << std::endl;
     //std::cout << robot->getNumJoints() << std::endl;

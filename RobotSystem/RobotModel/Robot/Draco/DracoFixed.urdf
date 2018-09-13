@@ -55,13 +55,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipYaw" type="revolute">
+  <joint name="lHipYaw" type="continuous">
     <origin xyz="-0.0222 0.0870 -0.2951" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <!--<limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>-->
   </joint>
   <transmission name="lHipYaw" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipYaw"/>
@@ -85,13 +85,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipRoll" type="revolute">
+  <joint name="lHipRoll" type="continuous">
     <origin xyz="0 0.07 -0.02" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-0.52" upper="1.04" velocity="25.0"/>
+    <!--<limit effort="40" lower="-0.52" upper="1.04" velocity="25.0"/>-->
   </joint>
   <transmission name="lHipRoll" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipRoll"/>
@@ -115,13 +115,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lHipPitch" type="revolute">
+  <joint name="lHipPitch" type="continuous">
     <origin xyz="0 0.010 -0.065" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <!--<limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>-->
   </joint>
   <transmission name="lHipPitch" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipPitch"/>
@@ -145,13 +145,13 @@
       </material>
     </visual>
   </link>
-  <joint name="lKnee" type="revolute">
+  <joint name="lKnee" type="continuous">
     <origin xyz="0 -0.0168 -0.48" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
+    <!--<limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>-->
   </joint>
   <transmission name="lKnee" type="transmission_interface/SimpleTransmission">
     <actuator name="lKnee"/>
@@ -181,13 +181,13 @@
       </geometry>
     </collision>
   </link>
-  <joint name="lAnkle" type="revolute">
+  <joint name="lAnkle" type="continuous">
     <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
+    <!--<limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>-->
   </joint>
   <transmission name="lAnkle" type="transmission_interface/SimpleTransmission">
     <actuator name="lAnkle"/>
@@ -211,13 +211,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipYaw" type="revolute">
+  <joint name="rHipYaw" type="continuous">
     <origin xyz="-0.0222 -0.0870 -0.2951" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <!--<limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>-->
   </joint>
   <transmission name="rHipYaw" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipYaw"/>
@@ -241,13 +241,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipRoll" type="revolute">
+  <joint name="rHipRoll" type="continuous">
     <origin xyz="0 -0.07 -0.02" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-1.04" upper="0.52" velocity="25.0"/>
+    <!--<limit effort="40" lower="-1.04" upper="0.52" velocity="25.0"/>-->
   </joint>
   <transmission name="rHipRoll" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipRoll"/>
@@ -271,13 +271,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rHipPitch" type="revolute">
+  <joint name="rHipPitch" type="continuous">
     <origin xyz="0 -0.01 -0.065" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <!--<limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>-->
   </joint>
   <transmission name="rHipPitch" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipPitch"/>
@@ -301,13 +301,13 @@
       </material>
     </visual>
   </link>
-  <joint name="rKnee" type="revolute">
+  <joint name="rKnee" type="continuous">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
+    <!--<limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>-->
   </joint>
   <transmission name="rKnee" type="transmission_interface/SimpleTransmission">
     <actuator name="rKnee"/>
@@ -337,13 +337,13 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rAnkle" type="revolute">
+  <joint name="rAnkle" type="continuous">
     <origin xyz="0.0011 -0.0168 -0.48" rpy="0 -1.57 0" />
-    <dynamics damping="0.01" />
+    <dynamics damping="0.0" />
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
+    <!--<limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>-->
   </joint>
   <transmission name="rAnkle" type="transmission_interface/SimpleTransmission">
     <actuator name="rAnkle"/>

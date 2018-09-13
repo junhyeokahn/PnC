@@ -42,7 +42,7 @@ void FixedDracoInterface::getCommand(void* sensorData_, void* commandData_) {
 
 void FixedDracoInterface::_constructTest() {
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/INTERFACE.yaml");
+        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/FixedDraco/INTERFACE.yaml");
         std::string tmp_string;
         //std::cout << readParameter<std::string>(cfg, "TestName") << std::endl;
         myUtils::readParameter(cfg, "TestName", tmp_string);
