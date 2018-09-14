@@ -1,0 +1,2 @@
+add_subdirectory(CentroidPlanner)
+add_subdirectory(PreComputedPlanner)
