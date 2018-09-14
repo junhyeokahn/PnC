@@ -28,6 +28,9 @@ OSCTest::~OSCTest() {
 }
 
 void OSCTest::getTorqueInput(void * commandData_) {
+    ///////////
+    // Planning
+    ///////////
     FixedDracoCommand* cmd = (FixedDracoCommand*) commandData_;
     cmd->q = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
@@ -65,10 +68,16 @@ void OSCTest::getTorqueInput(void * commandData_) {
         rf_acc_des[i] += mKpRf[i] * (rf_pos_des[i] - rf_pos_act[i]) +
             mKdRf[i] * (rf_vel_des[i] - rf_vel_act[i]);
     }
-    // first task
-    //qddot_des_rf = J_rf_bar * (rf_acc_des - Jdot_rf * mRobot->getQdot());
-    qddot_des_rf = J_rf_bar * (rf_acc_des);
-    // second task
+
+    //////////
+    // Control
+    //////////
+
+    // First Task
+    qddot_des_rf = J_rf_bar * (rf_acc_des - Jdot_rf * mRobot->getQdot());
+    //qddot_des_rf = J_rf_bar * (rf_acc_des);
+
+    // Second Task
     Eigen::MatrixXd J_q = Eigen::MatrixXd::Identity(mRobot->getNumDofs(),
                                                     mRobot->getNumDofs());
     Eigen::MatrixXd N_rf =
@@ -82,9 +91,9 @@ void OSCTest::getTorqueInput(void * commandData_) {
             mKdQ[i] * (-mRobot->getQdot()[i]);
     }
     qddot_des_q = J_q_N_rf * ( qddot_des_q );
-    // compute torque
+
+    // Compute Torque
     qddot_des = qddot_des_rf + qddot_des_q;
-    //qddot_des = qddot_des_rf;
     cmd->jtrq = mRobot->getMassMatrix() * qddot_des + mRobot->getGravity();
 
     rf_pos_des_debug = rf_pos_des;
@@ -92,7 +101,6 @@ void OSCTest::getTorqueInput(void * commandData_) {
     rf_acc_des_debug = rf_acc_des;
     rf_pos_act_debug = rf_pos_act;
     rf_vel_act_debug = rf_vel_act;
-
 }
 
 void OSCTest::initialize() {

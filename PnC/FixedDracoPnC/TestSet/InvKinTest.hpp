@@ -14,11 +14,9 @@ public:
     virtual void initialize();
 
 private:
-    Eigen::VectorXd mInitQ;
-    BS_Basic<10, 10, 0, 2, 2> mSpline;
-    Eigen::VectorXd mMid;
-    Eigen::VectorXd mAmp;
-    Eigen::VectorXd mFreq;
-    double mInterpolationDuration;
     double mTestInitTime;
+    Eigen::VectorXd mTestInitQ;
+    BS_Basic<10, 3, 0, 2, 2> mSpline;
+    Eigen::VectorXd mInterpolationGoal;
+    double mInterpolationDuration;
 };
