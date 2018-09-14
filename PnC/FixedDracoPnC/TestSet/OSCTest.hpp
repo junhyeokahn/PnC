@@ -14,12 +14,23 @@ public:
     virtual void initialize();
 
 private:
-    Eigen::VectorXd mInitQ;
+    Eigen::VectorXd mTestInitQ;
+    Eigen::Vector3d mTestInitRFPos;
     BS_Basic<3, 3, 0, 2, 2> mSpline;
     Eigen::Vector3d mMid;
     Eigen::Vector3d mAmp;
     Eigen::Vector3d mFreq;
+    Eigen::VectorXd mKpRf;
+    Eigen::VectorXd mKdRf;
+    Eigen::VectorXd mKpQ;
+    Eigen::VectorXd mKdQ;
     double mInterpolationDuration;
     double mTestInitTime;
 
+    // Debugging Data
+    Eigen::VectorXd rf_pos_des_debug;
+    Eigen::VectorXd rf_vel_des_debug;
+    Eigen::VectorXd rf_acc_des_debug;
+    Eigen::VectorXd rf_pos_act_debug;
+    Eigen::VectorXd rf_vel_act_debug;
 };
