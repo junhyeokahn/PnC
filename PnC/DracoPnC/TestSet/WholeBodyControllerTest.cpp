@@ -16,7 +16,11 @@ WholeBodyControllerTest::WholeBodyControllerTest(RobotSystem* robot_): Test(robo
 
     mWBLC = new WBLC(act_list);
     mWBLCExtraData= new WBLC_ExtraData();
-
+    mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);
+    mLfContact = new WBLCContact(mRobot, "lAnkle", 0.7);
+    mContactList.clear();
+    mContactList.push_back(mRfContact);
+    mContactList.push_back(mLfContact);
 
     printf("[Whole Body Controller Test] Constructed\n");
 }
@@ -68,14 +72,14 @@ void WholeBodyControllerTest::initialize() {
     mCoMTask = new Task(mRobot, TaskType::CENTROID);
     mJointTask = new Task(mRobot, TaskType::JOINT);
     mTaskList.clear();
-    //mTaskList.push_back(mCoMTask);
-    mTaskList.push_back(mJointTask);
+    mTaskList.push_back(mCoMTask);
+    //mTaskList.push_back(mJointTask);
 
-    mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);
-    mLfContact = new WBLCContact(mRobot, "lAnkle", 0.7);
-    mContactList.clear();
-    mContactList.push_back(mRfContact);
-    mContactList.push_back(mLfContact);
+/*    mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);*/
+    //mLfContact = new WBLCContact(mRobot, "lAnkle", 0.7);
+    //mContactList.clear();
+    //mContactList.push_back(mRfContact);
+    /*mContactList.push_back(mLfContact);*/
 
     isInitialized = true;
 }
@@ -86,16 +90,15 @@ void WholeBodyControllerTest::_updateContact() {
 }
 
 //Joint Position Task
-void WholeBodyControllerTest::_updateTask() {
-    Eigen::VectorXd pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    mTaskList[0]->updateTaskSpec(pos, vel, acc);
-}
+//void WholeBodyControllerTest::_updateTask() {
+    //Eigen::VectorXd pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
+    //Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    //Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
+    //mTaskList[0]->updateTaskSpec(pos, vel, acc);
+//}
 
 
 // Centroid Task
-/*
 void WholeBodyControllerTest::_updateTask() {
     Eigen::VectorXd pos = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
     Eigen::VectorXd vel = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
@@ -117,7 +120,6 @@ void WholeBodyControllerTest::_updateTask() {
     }
     mTaskList[0]->updateTaskSpec(pos, vel, acc);
 }
-*/
 
 // Multi Task
 /*

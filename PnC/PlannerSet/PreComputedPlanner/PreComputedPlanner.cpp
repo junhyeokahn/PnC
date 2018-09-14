@@ -1,10 +1,10 @@
 #include "PreComputedPlanner.hpp"
 
-void PreComputedPlanner::PreComputedPlanner() {
+PreComputedPlanner::PreComputedPlanner() {
 
 }
 
-void PreComputedPlanner::~PreComputedPlanner() {}
+PreComputedPlanner::~PreComputedPlanner() {}
 
 void PreComputedPlanner::_doPlan() {
 }
