@@ -43,16 +43,6 @@ void DracoWorldNode::customPreStep() {
     myUtils::saveVector(mSkel->getVelocities(), "qdot_worldnode");
     myUtils::saveVector(mSkel->getConstraintForces(), "frc_worldnode");
 
-    std::cout << "init Q" << std::endl;
-    std::cout << mSkel->getPositions() << std::endl;
-    std::cout << "com" << std::endl;
-    std::cout << mSkel->getCOM() << std::endl;
-    std::cout << "rAnkle pos" << std::endl;
-    std::cout << mSkel->getBodyNode("rAnkle")->getWorldTransform().translation() << std::endl;
-    std::cout << "rAnkle rpy" << std::endl;
-    std::cout << mSkel->getBodyNode("rAnkle")->getWorldTransform().linear() << std::endl;
-    exit(0);
-
     if (mIsVisualizeTrajectory) {
         static int i = 0;
         myUtils::splitString(mLine, mFile[i], "\t");
@@ -73,6 +63,6 @@ void DracoWorldNode::customPreStep() {
         //mSkel->setVelocities(mCommand->qdot);
         //mTorqueCommand.setZero();
     }
-    mTorqueCommand.setZero(); // TODO
+    //mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);
 }

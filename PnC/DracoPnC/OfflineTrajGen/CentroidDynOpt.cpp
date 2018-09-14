@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     std::shared_ptr<CentroidPlannerParameter> mParam =
         std::make_shared<CentroidPlannerParameter>();
-    mParam->paramSetFromYaml(THIS_COM"Config/Draco/OneStepPlanning/CENTROID_PLANNER.yaml");
+    mParam->paramSetFromYaml(THIS_COM"Config/Draco/PLANNER/ONE_STEP_PLANNING/CENTROID_PLANNER.yaml");
 
     std::unique_ptr<CentroidPlanner> mPlanner =
         std::make_unique<CentroidPlanner>();

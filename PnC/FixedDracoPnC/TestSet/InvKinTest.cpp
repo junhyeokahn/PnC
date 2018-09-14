@@ -23,7 +23,7 @@ void InvKinTest::getTorqueInput(void * commandData_) {
 }
 
 void InvKinTest::initialize() {
-    mInitQ = mRobot->getInitialConfiguration();
+    mTestInitQ = mRobot->getInitialConfiguration();
     //Planner Initialize
 
     //Controller Initialize

@@ -1,0 +1,4 @@
+initial_configuration:
+
+  transition_time: 1.0
+  joint_position: [0.0, 0.0, -0.52, 0.52, 1.57, 0.0, 0.0, -0.52, 0.52, 1.57]

@@ -6,7 +6,6 @@
 #include "DataManager.hpp"
 #include "ParamHandler.hpp"
 
-
 #include <drake/common/find_resource.h>
 #include <drake/multibody/ik_options.h>
 #include <drake/multibody/joints/floating_base_types.h>
@@ -67,7 +66,7 @@ void DracoInterface::_constructTest() {
             mTest = new CentroidKinematicOptimizationTest(mRobot);
         } else if (tmp_string == "InvKinTest") {
             mTest = new InvKinTest(mRobot);
-        }else {
+        } else {
         printf("[Interface] There is no test matching test with the name\n");
         exit(0);
         }

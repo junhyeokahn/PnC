@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     std::shared_ptr<InvKinPlannerParameter> mParam =
         std::make_shared<InvKinPlannerParameter>();
-    mParam->paramSetFromYaml(THIS_COM"Config/Draco/OneStepPlanning/CENTROID_PLANNER_RESULT.yaml");
+    mParam->paramSetFromYaml(THIS_COM"Config/Draco/PLANNER/ONE_STEP_PLANNING/CENTROID_PLANNER_RESULT.yaml");
     Eigen::VectorXd initQ(16);
     initQ << 0,
           0,
