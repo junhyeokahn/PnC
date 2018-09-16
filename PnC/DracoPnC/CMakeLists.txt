@@ -9,8 +9,7 @@ target_link_libraries(DracoPnC drake::drake
                                myRobotSystem
                                myUtils
                                myWBC
-                               myCentPlanner)
-
+                               myPlanner)
 
 add_executable(opt_cent_dyn OfflineTrajGen/CentroidDynOpt.cpp)
 target_link_libraries(opt_cent_dyn DracoPnC)

@@ -1,4 +1,4 @@
-TestName: WholeBodyControllerTest
+#TestName: WholeBodyControllerTest
 #TestName: SymExpValidationTest
 #TestName: CentroidKinematicOptimizationTest 
-#TestName: InvKinTest
+TestName: InvKinTest
