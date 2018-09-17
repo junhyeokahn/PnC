@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Test.hpp"
-#include "BSplineBasic.h"
-#include "FixedDracoPnC/FixedDracoInterface.hpp"
+#include "PnC/Test.hpp"
+#include "Utils/BSplineBasic.h"
+#include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
 
 class OSCTest: public Test
 {

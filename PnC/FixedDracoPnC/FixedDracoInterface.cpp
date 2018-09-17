@@ -1,10 +1,10 @@
-#include "RobotSystem.hpp"
-#include "FixedDracoPnC/FixedDracoInterface.hpp"
-#include "FixedDracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
+#include "PnC/FixedDracoPnC/TestSet/TestSet.hpp"
 #include "Configuration.h"
-#include "Utilities.hpp"
-#include "DataManager.hpp"
-#include "ParamHandler.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/ParamHandler.hpp"
 
 FixedDracoInterface::FixedDracoInterface(): Interface() {
     mRobot = new RobotSystem(0, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoFixed.urdf");

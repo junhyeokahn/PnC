@@ -1,7 +1,7 @@
-#include "FixedDracoPnC/TestSet/TestSet.hpp"
-#include "RobotSystem.hpp"
-#include "Utilities.hpp"
-#include "DataManager.hpp"
+#include "PnC/FixedDracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/DataManager.hpp"
 
 InvKinTest::InvKinTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner

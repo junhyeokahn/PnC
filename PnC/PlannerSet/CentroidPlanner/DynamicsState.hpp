@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <Eigen/Eigen>
-#include "CentroidModel.hpp"
+#include "RobotSystem/CentroidModel.hpp"
 #include "ContactState.hpp"
 
 class DynamicsState

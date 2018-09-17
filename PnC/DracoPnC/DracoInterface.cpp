@@ -1,10 +1,10 @@
-#include "RobotSystem.hpp"
-#include "DracoPnC/DracoInterface.hpp"
-#include "DracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "PnC/DracoPnC/DracoInterface.hpp"
+#include "PnC/DracoPnC/TestSet/TestSet.hpp"
 #include "Configuration.h"
-#include "Utilities.hpp"
-#include "DataManager.hpp"
-#include "ParamHandler.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/ParamHandler.hpp"
 
 #include <drake/common/find_resource.h>
 #include <drake/multibody/ik_options.h>

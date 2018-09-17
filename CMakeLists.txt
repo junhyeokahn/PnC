@@ -12,6 +12,13 @@ set(CXX_DISABLE_WERROR True)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+## ===========
+## Build Setup
+## ===========
+set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib )
+set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin )
+set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
+
 ## ==========
 ## Dependancy
 ## ==========
@@ -54,23 +61,6 @@ endif()
 ## =================
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/Simulator")
-include_directories("${PROJECT_SOURCE_DIR}/RobotSystem")
-include_directories("${PROJECT_SOURCE_DIR}/RobotSystem/RobotModel/Robot/Draco/DracoGen/dyn_eigen/include")
-include_directories("${PROJECT_SOURCE_DIR}/RobotSystem/RobotModel/Robot/Draco/DracoGen/kin_eigen/include")
-include_directories("${PROJECT_SOURCE_DIR}/Utils")
-include_directories("${PROJECT_SOURCE_DIR}/PnC")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/Contact")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/WBC")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/PlannerSet/CentroidPlanner")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/PlannerSet/InvKinPlanner")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/PlannerSet/PreComputedPlanner")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/WBC/WBLC")
-include_directories("${PROJECT_SOURCE_DIR}/PnC/Trajectory")
-include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Yaml/include")
-include_directories("${PROJECT_SOURCE_DIR}/ExternalSource")
-include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Optimizer/")
-include_directories("${PROJECT_SOURCE_DIR}/ExternalSource/Optimizer/ConicSolver/include")
-include_directories("${PROJECT_SOURCE_DIR}/Geometry/Polytope")
 
 ## ================
 ## Add Subdirectory
@@ -87,3 +77,4 @@ add_subdirectory(Geometry)
 ## ==================
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
+install(FILES ${PROJECT_SOURCE_DIR}/Configuration.h DESTINATION "${INSTALL_INCLUDE_DIR}")

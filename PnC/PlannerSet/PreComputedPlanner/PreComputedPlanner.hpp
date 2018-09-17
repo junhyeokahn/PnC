@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Planner.hpp"
+#include "PnC/Planner.hpp"
 #include "Configuration.h"
 
 class PreComputedPlannerParameter : public PlannerParameter

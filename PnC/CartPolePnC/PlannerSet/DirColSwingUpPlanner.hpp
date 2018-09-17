@@ -1,5 +1,5 @@
 #pragma once
-#include "Planner.hpp"
+#include "PnC/Planner.hpp"
 
 #include "drake/multibody/rigid_body_plant/rigid_body_plant.h"
 #include "drake/multibody/rigid_body_tree_construction.h"

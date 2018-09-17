@@ -5,9 +5,9 @@
 #include <string>
 #include <iostream>
 #include <Eigen/Eigen>
-#include <ContactState.hpp>
-#include <DynamicsState.hpp>
-#include "CentroidModel.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/ContactState.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/DynamicsState.hpp"
+#include "RobotSystem/CentroidModel.hpp"
 
 class ContactPlanInterface
 {

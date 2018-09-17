@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Test.hpp"
-#include "CartPolePnC/CartPoleInterface.hpp"
+#include "PnC/Test.hpp"
+#include "PnC/CartPolePnC/CartPoleInterface.hpp"
 
 class RobotSystem;
 class Planner;

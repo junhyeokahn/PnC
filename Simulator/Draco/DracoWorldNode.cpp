@@ -1,8 +1,8 @@
 #include "DracoWorldNode.hpp"
-#include "DracoPnC/DracoInterface.hpp"
-#include "DataManager.hpp"
-#include "Utilities.hpp"
-#include "ParamHandler.hpp"
+#include "PnC/DracoPnC/DracoInterface.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/ParamHandler.hpp"
 #include "Configuration.h"
 
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,

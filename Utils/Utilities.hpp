@@ -7,7 +7,7 @@
 #include <Configuration.h>
 #include <list>
 #include <Eigen/Dense>
-#include <yaml-cpp/yaml.h>
+#include <ExternalSource/myYaml/include/myYaml/yaml.h>
 
 namespace myUtils
 {

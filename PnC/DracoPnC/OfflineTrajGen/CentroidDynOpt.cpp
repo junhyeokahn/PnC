@@ -1,8 +1,8 @@
 #include <iostream>
-#include "CentroidPlanner.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp"
 #include <memory>
 #include "Configuration.h"
-#include "Utilities.hpp"
+#include "Utils/Utilities.hpp"
 #include <vector>
 
 int main(int argc, char *argv[])

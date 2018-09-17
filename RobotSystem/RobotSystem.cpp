@@ -1,6 +1,6 @@
-#include "RobotSystem.hpp"
+#include "RobotSystem/RobotSystem.hpp"
 #include <chrono>
-#include "Utilities.hpp"
+#include "Utils/Utilities.hpp"
 
 RobotSystem::RobotSystem(int numVirtual_, std::string file) {
     dart::utils::DartLoader urdfLoader;

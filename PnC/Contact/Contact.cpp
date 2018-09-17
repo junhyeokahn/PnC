@@ -1,5 +1,5 @@
-#include "Contact.hpp"
-#include <Polytope.h>
+#include "PnC/Contact/Contact.hpp"
+#include "Geometry/Polytope/Polytope.h"
 #include <iostream>
 #include <dart/dart.hpp>
 

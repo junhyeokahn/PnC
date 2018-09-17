@@ -1,8 +1,8 @@
-#include "FixedDracoPnC/TestSet/TestSet.hpp"
-#include "RobotSystem.hpp"
-#include "Utilities.hpp"
-#include "DataManager.hpp"
-#include "pseudo_inverse.hpp"
+#include "PnC/FixedDracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/pseudo_inverse.hpp"
 
 OSCTest::OSCTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner

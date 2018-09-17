@@ -1,7 +1,7 @@
-#include "DracoPnC/TestSet/TestSet.hpp"
-#include "RobotSystem.hpp"
-#include "Utilities.hpp"
-#include <MathmaticaDraco.h>
+#include "PnC/DracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/Utilities.hpp"
+#include "RobotSystem/RobotModel/Robot/Draco/DracoGen/kin_eigen/include/MathmaticaDraco.h"
 
 SymExpValidationTest::SymExpValidationTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner

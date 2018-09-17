@@ -1,5 +1,5 @@
-#include "CentroidPlanner.hpp"
-#include "Utilities.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp"
+#include "Utils/Utilities.hpp"
 
 using namespace myUtils;
 using namespace solver;

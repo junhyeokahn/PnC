@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "H_BaseRotX.h"
+#include "RobotSystem/RobotModel/Robot/Draco/DracoGen/kin_eigen/include/H_BaseRotX.h"
 
 #ifdef _MSC_VER
   #define INLINE __forceinline /* use __forceinline (VC++ specific) */

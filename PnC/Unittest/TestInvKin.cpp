@@ -8,18 +8,18 @@
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
 #include "drake/math/eigen_sparse_triplet.h"
-#include <Utilities.hpp>
+#include "Utils/Utilities.hpp"
 
-#include "eigen_matrix_compare.h"
+#include "Utils/eigen_matrix_compare.h"
 #include "Configuration.h"
-#include "RobotSystem.hpp"
+#include "RobotSystem/RobotSystem.hpp"
 
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/utils.hpp>
 #include <dart/utils/urdf/urdf.hpp>
 
-#include "BSplineBasic.h"
+#include "Utils/BSplineBasic.h"
 
 using Eigen::Vector2d;
 using Eigen::Vector3d;

@@ -1,5 +1,6 @@
-FILE(GLOB_RECURSE headers *.hpp)
+FILE(GLOB_RECURSE headers "*.hpp" "*.h")
 FILE(GLOB_RECURSE sources *.cpp)
+
 add_library (myUtils SHARED ${headers} ${sources})
 target_link_libraries(myUtils myYaml
                               drake::drake)
@@ -11,3 +12,6 @@ endif()
 if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(myUtils "${CMAKE_THREAD_LIBS_INIT}")
 endif()
+
+install(TARGETS myUtils DESTINATION "${INSTALL_LIB_DIR}")
+install(FILES ${headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils")

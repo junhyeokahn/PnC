@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Planner.hpp"
-#include "CentroidModel.hpp"
+#include "PnC/Planner.hpp"
+#include "RobotSystem/CentroidModel.hpp"
 #include "DynamicsState.hpp"
-#include "ContactPlanInterface.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp"
 #include "Configuration.h"
-#include "Clock.hpp"
-#include "solver/interface/Solver.hpp"
+#include "Utils/Clock.hpp"
+#include "ExternalSource/myOptimizer/ConicSolver/include/solver/interface/Solver.hpp"
 
 using namespace solver;
 using namespace myUtils;

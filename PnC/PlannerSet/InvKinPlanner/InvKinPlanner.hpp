@@ -1,12 +1,12 @@
 #pragma once
 
-#include "CentroidModel.hpp"
+#include "RobotSystem/CentroidModel.hpp"
 #include <array>
-#include "Planner.hpp"
-#include "Clock.hpp"
+#include "PnC/Planner.hpp"
+#include "Utils/Clock.hpp"
 #include "Configuration.h"
-#include "ContactPlanInterface.hpp"
-#include "BSplineBasic.h"
+#include "PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp"
+#include "Utils/BSplineBasic.h"
 
 #include <drake/common/find_resource.h>
 #include <drake/multibody/ik_options.h>

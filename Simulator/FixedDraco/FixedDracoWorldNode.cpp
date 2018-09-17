@@ -1,8 +1,8 @@
 #include "FixedDracoWorldNode.hpp"
-#include "FixedDracoPnC/FixedDracoInterface.hpp"
-#include "DataManager.hpp"
-#include "Utilities.hpp"
-#include "ParamHandler.hpp"
+#include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/ParamHandler.hpp"
 #include "Configuration.h"
 
 FixedDracoWorldNode::FixedDracoWorldNode(const dart::simulation::WorldPtr & world_,

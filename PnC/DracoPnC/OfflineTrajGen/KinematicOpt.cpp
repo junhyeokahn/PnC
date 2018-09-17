@@ -1,8 +1,8 @@
 #include <iostream>
-#include "InvKinPlanner.hpp"
+#include "PnC/PlannerSet/InvKinPlanner/InvKinPlanner.hpp"
 #include <memory>
 #include <Configuration.h>
-#include "Utilities.hpp"
+#include "Utils/Utilities.hpp"
 #include <vector>
 
 /*int main(int argc, char *argv[])*/

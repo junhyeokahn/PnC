@@ -1,10 +1,10 @@
-#include "RobotSystem.hpp"
-#include "CartPolePnC/CartPoleInterface.hpp"
-#include "CartPolePnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "PnC/CartPolePnC/CartPoleInterface.hpp"
+#include "PnC/CartPolePnC/TestSet/TestSet.hpp"
 #include "Configuration.h"
-#include "Utilities.hpp"
-#include "DataManager.hpp"
-#include "ParamHandler.hpp"
+#include "Utils/Utilities.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/ParamHandler.hpp"
 
 CartPoleInterface::CartPoleInterface(): Interface() {
     mRobot = new RobotSystem(1, THIS_COM"RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf");

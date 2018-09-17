@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Test.hpp"
+#include "PnC/Test.hpp"
 
 #include <drake/common/find_resource.h>
 #include <drake/multibody/ik_options.h>
@@ -10,7 +10,7 @@
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
 #include <memory>
-#include "BSplineBasic.h"
+#include "Utils/BSplineBasic.h"
 
 class InvKinTest: public Test
 {

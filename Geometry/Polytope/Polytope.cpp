@@ -1,4 +1,4 @@
-#include "Polytope.h"
+#include "Geometry/Polytope/Polytope.h"
 
 Polytope::Polytope()
     : matPtr_(nullptr)

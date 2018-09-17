@@ -1,10 +1,10 @@
-#include "DracoPnC/TestSet/TestSet.hpp"
-#include "RobotSystem.hpp"
-#include "Utilities.hpp"
-#include "WBLC.hpp"
-#include "WBLCContact.hpp"
-#include "pseudo_inverse.hpp"
-#include "DataManager.hpp"
+#include "PnC/DracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/Utilities.hpp"
+#include "PnC/WBC/WBLC/WBLC.hpp"
+#include "PnC/WBC/WBLC/WBLCContact.hpp"
+#include "Utils/pseudo_inverse.hpp"
+#include "Utils/DataManager.hpp"
 
 InvKinTest::InvKinTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner

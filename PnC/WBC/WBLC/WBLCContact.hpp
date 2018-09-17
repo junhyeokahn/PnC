@@ -1,7 +1,7 @@
 //#ifndef WBLCCONTACT_H
 //#define WBLCCONTACT_H
 
-//#include "Contact.hpp"
+//#include "PnC/Contact/Contact.hpp"
 
 //class RobotSystem;
 //class PointContact;
@@ -41,7 +41,7 @@
 
 #pragma once
 
-#include "Contact.hpp"
+#include "PnC/Contact/Contact.hpp"
 
 class RobotSystem;
 class PointContact;

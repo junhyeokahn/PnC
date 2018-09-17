@@ -7,3 +7,7 @@ if(MOSEK_FOUND)
                                       ${MOSEK_LIBRARIES})
     target_link_libraries(myPolytope myLownerJohnEllipsoid)
 endif()
+
+install(TARGETS myPolytope DESTINATION "${INSTALL_LIB_DIR}")
+install(FILES Polytope.h DESTINATION
+    "${INSTALL_INCLUDE_DIR}/Geometry/Polytope")

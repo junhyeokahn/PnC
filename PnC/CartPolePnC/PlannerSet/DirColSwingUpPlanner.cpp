@@ -1,6 +1,6 @@
-#include "CartPolePnC/PlannerSet/DirColSwingUpPlanner.hpp"
+#include "PnC/CartPolePnC/PlannerSet/DirColSwingUpPlanner.hpp"
 #include "Configuration.h"
-#include "Utilities.hpp"
+#include "Utils/Utilities.hpp"
 
 DirColSwingUpPlanner::DirColSwingUpPlanner() : Planner() {
     mTree = std::make_unique< RigidBodyTree<double> >();

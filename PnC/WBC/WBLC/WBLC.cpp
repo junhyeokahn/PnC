@@ -1,4 +1,4 @@
-#include "WBLC.hpp"
+#include "PnC/WBC/WBLC/WBLC.hpp"
 #include <Utils/Utilities.hpp>
 #include <Eigen/LU>
 #include <Eigen/SVD>

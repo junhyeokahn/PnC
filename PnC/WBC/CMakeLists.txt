@@ -1,8 +1,15 @@
-FILE(GLOB_RECURSE headers *.hpp)
 FILE(GLOB_RECURSE sources *.cpp)
+FILE(GLOB wbc_headers "*.hpp")
+FILE(GLOB wblc_headers "WBLC/*.hpp")
 
-add_library(myWBC SHARED ${sources} ${headers})
+add_library(myWBC SHARED ${sources} ${wbc_headers} ${wblc_headers})
 target_link_libraries(myWBC myUtils
                             myGoldfarb
                             myContact
                             myRobotSystem)
+
+install(TARGETS myWBC DESTINATION "${INSTALL_LIB_DIR}")
+install(FILES ${wbc_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/WBC")
+install(FILES ${wblc_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/WBC/WBLC")

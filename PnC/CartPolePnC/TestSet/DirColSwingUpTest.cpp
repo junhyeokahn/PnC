@@ -1,8 +1,8 @@
-#include "CartPolePnC/TestSet/TestSet.hpp"
-#include "CartPolePnC/PlannerSet/PlannerSet.hpp"
-#include "RobotSystem.hpp"
-#include "DataManager.hpp"
-#include "ParamHandler.hpp"
+#include "PnC/CartPolePnC/TestSet/TestSet.hpp"
+#include "PnC/CartPolePnC/PlannerSet/PlannerSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/ParamHandler.hpp"
 
 DirColSwingUpTest::DirColSwingUpTest(RobotSystem* robot_): Test(robot_) {
     mPlanner = new DirColSwingUpPlanner();

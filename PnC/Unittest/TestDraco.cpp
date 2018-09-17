@@ -8,9 +8,9 @@
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
 
-#include "eigen_matrix_compare.h"
+#include "Utils/eigen_matrix_compare.h"
 #include "Configuration.h"
-#include "RobotSystem.hpp"
+#include "RobotSystem/RobotSystem.hpp"
 
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>

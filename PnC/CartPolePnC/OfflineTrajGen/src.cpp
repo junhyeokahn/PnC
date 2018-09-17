@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <memory>
-#include "CartPolePnC/PlannerSet/PlannerSet.hpp"
-#include "ParamHandler.hpp"
+#include "PnC/CartPolePnC/PlannerSet/PlannerSet.hpp"
+#include "Utils/ParamHandler.hpp"
 #include "drake/solvers/mosek_solver.h"
 
 void planDirColSwingUp() {

@@ -5,7 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <Eigen/Eigen>
-#include "CentroidModel.hpp"
+#include "RobotSystem/CentroidModel.hpp"
 
 
 enum class ContactType { FreeContact = 0, FlatContact = 1, FullContact = 2 };

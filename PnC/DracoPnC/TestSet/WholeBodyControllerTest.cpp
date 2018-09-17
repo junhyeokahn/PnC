@@ -1,9 +1,9 @@
-#include "DracoPnC/TestSet/TestSet.hpp"
-#include "RobotSystem.hpp"
-#include "Task.hpp"
-#include "WBLC.hpp"
-#include "WBLCContact.hpp"
-#include "Utilities.hpp"
+#include "PnC/DracoPnC/TestSet/TestSet.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "PnC/WBC/Task.hpp"
+#include "PnC/WBC/WBLC/WBLC.hpp"
+#include "PnC/WBC/WBLC/WBLCContact.hpp"
+#include "Utils/Utilities.hpp"
 
 WholeBodyControllerTest::WholeBodyControllerTest(RobotSystem* robot_): Test(robot_) {
     // Choose Planner

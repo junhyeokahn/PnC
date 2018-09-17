@@ -1,5 +1,5 @@
-#include "InvKinPlanner.hpp"
-#include "Utilities.hpp"
+#include "PnC/PlannerSet/InvKinPlanner/InvKinPlanner.hpp"
+#include "Utils/Utilities.hpp"
 
 using namespace myUtils;
 

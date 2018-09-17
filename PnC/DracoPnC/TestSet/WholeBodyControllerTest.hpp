@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Test.hpp"
-#include "DracoPnC/DracoInterface.hpp"
-#include "BSplineBasic.h"
+#include "PnC/Test.hpp"
+#include "PnC/DracoPnC/DracoInterface.hpp"
+#include "Utils/BSplineBasic.h"
 
 class WBLC;
 class WBLC_ExtraData;

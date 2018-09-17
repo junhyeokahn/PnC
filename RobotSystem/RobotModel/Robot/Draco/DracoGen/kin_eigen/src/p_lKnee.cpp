@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "p_lKnee.h"
+#include "RobotSystem/RobotModel/Robot/Draco/DracoGen/kin_eigen/include/p_lKnee.h"
 
 #ifdef _MSC_VER
   #define INLINE __forceinline /* use __forceinline (VC++ specific) */

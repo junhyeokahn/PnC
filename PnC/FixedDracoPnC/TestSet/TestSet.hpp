@@ -1,3 +1,3 @@
-#include "FixedDracoPnC/TestSet/OSCTest.hpp"
-#include "FixedDracoPnC/TestSet/InvKinTest.hpp"
-#include "FixedDracoPnC/TestSet/JointTest.hpp"
+#include "PnC/FixedDracoPnC/TestSet/OSCTest.hpp"
+#include "PnC/FixedDracoPnC/TestSet/InvKinTest.hpp"
+#include "PnC/FixedDracoPnC/TestSet/JointTest.hpp"

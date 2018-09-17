@@ -4,7 +4,7 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include "FixedDracoWorldNode.hpp"
 #include "Configuration.h"
-#include "ParamHandler.hpp"
+#include "Utils/ParamHandler.hpp"
 
 void displayJointFrames(
     const dart::simulation::WorldPtr& world, 

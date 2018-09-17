@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "H_rHipRoll.h"
+#include "RobotSystem/RobotModel/Robot/Draco/DracoGen/kin_eigen/include/H_rHipRoll.h"
 
 #ifdef _MSC_VER
   #define INLINE __forceinline /* use __forceinline (VC++ specific) */

@@ -3,8 +3,8 @@
 
 #include <Utils/Utilities.hpp>
 #include <Utils/pseudo_inverse.hpp>
-#include "Task.hpp"
-#include "WBLCContact.hpp"
+#include "PnC/WBC/Task.hpp"
+#include "PnC/WBC/WBLC/WBLCContact.hpp"
 
 // Assume first 6 (or 3 in 2D case) joints are for the representation of 
 // a floating base.

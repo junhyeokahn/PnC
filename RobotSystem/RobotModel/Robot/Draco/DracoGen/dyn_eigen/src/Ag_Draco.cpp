@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "Ag_Draco.h"
+#include "RobotSystem/RobotModel/Robot/Draco/DracoGen/dyn_eigen/include/Ag_Draco.h"
 
 #ifdef _MSC_VER
   #define INLINE __forceinline /* use __forceinline (VC++ specific) */

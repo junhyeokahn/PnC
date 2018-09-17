@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interface.hpp"
+#include "PnC/Interface.hpp"
 
 class CartPoleSensorData
 {

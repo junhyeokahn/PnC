@@ -1,6 +1,6 @@
 #include <Eigen/Core>
-#include <cdd/src/setoper.h> // Must be included before cdd.h (wtf)
-#include <cdd/src/cdd.h>
+#include <ExternalSource/myCDD/src/setoper.h> // Must be included before cdd.h (wtf)
+#include <ExternalSource/myCDD/src/cdd.h>
 #include <utility>
 
 class Polytope {

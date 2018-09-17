@@ -1,7 +1,7 @@
-#include "Task.hpp"
-#include "RobotSystem.hpp"
-#include "DataManager.hpp"
-#include "Utilities.hpp"
+#include "PnC/WBC/Task.hpp"
+#include "RobotSystem/RobotSystem.hpp"
+#include "Utils/DataManager.hpp"
+#include "Utils/Utilities.hpp"
 #include <dart/dart.hpp>
 
 Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {

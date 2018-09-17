@@ -1,12 +1,12 @@
 #ifndef WHOLE_BODY_LOCOMOTION_CONTROL_H
 #define WHOLE_BODY_LOCOMOTION_CONTROL_H
 
-#include <WBC.hpp>
+#include "PnC/WBC/WBC.hpp"
 #include <Utils/Utilities.hpp>
-#include <Optimizer/Goldfarb/QuadProg++.hh>
+#include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
 
-#include <Task.hpp>
-#include "WBLCContact.hpp"
+#include "PnC/WBC/Task.hpp"
+#include "PnC/WBC/WBLC/WBLCContact.hpp"
 
 class WBLC_ExtraData{
     public:
