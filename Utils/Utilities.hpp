@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <fstream>
 #include <algorithm>
-#include <Configuration.h>
 #include <list>
 #include <Eigen/Dense>
-#include <ExternalSource/myYaml/include/myYaml/yaml.h>
+#include "Configuration.h"
+#include "ExternalSource/myYaml/include/myYaml/yaml.h"
 
 namespace myUtils
 {

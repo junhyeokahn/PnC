@@ -1,3 +1,4 @@
+#include "Configuration.h"
 #include "PnC/WBC/Task.hpp"
 #include "RobotSystem/RobotSystem.hpp"
 #include "Utils/DataManager.hpp"
@@ -145,7 +146,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             mTaskCmd[i] = acc_des_[i] +
                 mKp[i] * (pos_des_[i] - pos_act[i]) +
                 mKd[i] * (vel_des_[i] - vel_act[i]);
-            mErrSum[i] += (pos_des_[i] - pos_act[i]) * (1.0/1500.0);
+            mErrSum[i] += (pos_des_[i] - pos_act[i]) * SERVO_RATE;
             mErrSum[i] = myUtils::cropValue(mErrSum[i], -1., 1., "Joint Task");
             mTaskCmd[i] += mKi[i] * mErrSum[i];
         }
