@@ -15,54 +15,45 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
     mSkel = world_->getSkeleton("Draco");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-
-    ParamHandler handler(THIS_COM"Config/Draco/SIMULATION.yaml");
-    handler.getBoolean("IsVisualizeTrajectory", mIsVisualizeTrajectory);
-    if (mIsVisualizeTrajectory) {
-        std::cout << "[Trajectory Visualization]" << std::endl;
-        std::string tmp_string;
-        handler.getString("TrajectoryFile", tmp_string);
-        mTrajectoryFile =
-            THIS_COM"PnC/DracoPnC/OfflineTrajectoryGeneration/TrajectoriesBin/";
-        mTrajectoryFile += tmp_string;
-        myUtils::readFile(mTrajectoryFile, mFile);
-        mLine = new std::string[128];
-        mPos = Eigen::VectorXd::Zero(mDof);
-        mVel = Eigen::VectorXd::Zero(mDof);
-    }
+    YAML::Node simulation_cfg =
+        YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
+    myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
 }
 
-DracoWorldNode::~DracoWorldNode() {
-    delete mLine;
-}
+DracoWorldNode::~DracoWorldNode() {}
 
 void DracoWorldNode::customPreStep() {
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
-    myUtils::saveVector(mSkel->getPositions(), "q_worldnode");
-    myUtils::saveVector(mSkel->getVelocities(), "qdot_worldnode");
-    myUtils::saveVector(mSkel->getConstraintForces(), "frc_worldnode");
 
-    if (mIsVisualizeTrajectory) {
-        static int i = 0;
-        myUtils::splitString(mLine, mFile[i], "\t");
-        for (int j = 0; j < mDof; ++j) {
-            mPos[j] = std::stod(mLine[j + 1]);
-            mVel[j] = std::stod(mLine[j + 1 + mDof]);
-            mTorqueCommand[j] = 100. * (mPos[j] - mSensorData->q[j]) +
-                10. * (mVel[j] - mSensorData->qdot[j]);
-        }
-        ++i;
-        if (i == mFile.size())  exit(0);
-    } else {
-        mInterface->getCommand(mSensorData, mCommand);
-        mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
+    mInterface->getCommand(mSensorData, mCommand);
+    mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
 
-        // Inv Kin Test
-        //mSkel->setPositions(mCommand->q);
-        //mSkel->setVelocities(mCommand->qdot);
-        //mTorqueCommand.setZero();
+    static int count(0);
+    if (count*SERVO_RATE < mReleaseTime) {
+        _fixXY();
+        _fixRP();
     }
+    count++;
+
     //mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);
+}
+
+void DracoWorldNode::_fixXY() {
+    double kp(1500.); double kd(150.);
+    Eigen::VectorXd q = mSkel->getPositions();
+    Eigen::VectorXd qdot = mSkel->getVelocities();
+    for (int i = 0; i < 2; ++i) {
+        mTorqueCommand[i] = - (kp * q[i]) - (kd * qdot[i]);
+    }
+}
+
+void DracoWorldNode::_fixRP() {
+    double kp(5.0); double kd(0.5);
+    Eigen::VectorXd q = mSkel->getPositions();
+    Eigen::VectorXd qdot = mSkel->getVelocities();
+    for (int i = 4; i < 6; ++i) {
+        mTorqueCommand[i] = - (kp * q[i]) - (kd * qdot[i]);
+    }
 }

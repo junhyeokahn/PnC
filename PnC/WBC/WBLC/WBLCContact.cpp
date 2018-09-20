@@ -10,6 +10,7 @@ WBLCContact::WBLCContact(RobotSystem* robot_,
     mMu = mu_;
     mJc = Eigen::MatrixXd::Zero(6, mRobot->getNumDofs());
     mJcDotQDot = Eigen::VectorXd::Zero(6);
+    mIEqVec = Eigen::VectorXd::Zero(17);
 }
 
 WBLCContact::~WBLCContact() {}
@@ -67,4 +68,8 @@ Eigen::MatrixXd WBLCContact::getWrenchFace() {
     ret.block(1, 0, Uf.rows(), Uf.cols()) = Uf;
     ret(0, 5) = 1.0;
     return ret;
+}
+
+Eigen::VectorXd WBLCContact::getIeqVector() {
+    return mIEqVec;
 }

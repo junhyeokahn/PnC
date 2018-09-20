@@ -2,6 +2,7 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/utils.hpp>
 #include <dart/utils/urdf/urdf.hpp>
+#include "Utils/Utilities.hpp"
 #include "DracoWorldNode.hpp"
 #include "Configuration.h"
 #include "Utils/ParamHandler.hpp"
@@ -125,9 +126,10 @@ int main() {
     // ========================
     // Parse Yaml for Simulator
     // ========================
-    ParamHandler handler(THIS_COM"Config/Draco/SIMULATION.yaml");
+    YAML::Node simulation_cfg =
+        YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
     bool isRecord;
-    handler.getBoolean("IsRecord", isRecord);
+    myUtils::readParameter(simulation_cfg, "is_record", isRecord);
 
     // ================================
     // Generate world and add skeletons
@@ -143,7 +145,7 @@ int main() {
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/1500);
+    world->setTimeStep(1.0/1000.);
 
     // ====================
     // Display Joints Frame

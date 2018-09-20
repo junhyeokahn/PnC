@@ -19,14 +19,7 @@ private:
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
-
-    Eigen::VectorXd mInit;
-    bool mIsVisualizeTrajectory;
-    std::string mTrajectoryFile;
-    std::vector<std::string> mFile;
-    std::string* mLine;
-    Eigen::VectorXd mPos;
-    Eigen::VectorXd mVel;
+    double mReleaseTime;
 
 public:
     DracoWorldNode(const dart::simulation::WorldPtr & world,
@@ -34,4 +27,6 @@ public:
     virtual ~DracoWorldNode();
 
     void customPreStep() override;
+    void _fixXY();
+    void _fixRP();
 };

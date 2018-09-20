@@ -142,12 +142,12 @@
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
       </material>
     </visual>
-    <collision>
-      <origin xyz="0.015 0 -0.05" rpy="0 0 0" />
-      <geometry>
-        <box size="0.15 0.04 0.03"/>
-      </geometry>
-    </collision>
+    <!--<collision>-->
+      <!--<origin xyz="0.015 0 -0.05" rpy="0 0 0" />-->
+      <!--<geometry>-->
+        <!--<box size="0.15 0.04 0.03"/>-->
+      <!--</geometry>-->
+    <!--</collision>-->
   </link>
   <joint name="lAnkle" type="continuous">
     <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
