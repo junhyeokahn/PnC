@@ -12,12 +12,15 @@ FixedDracoInterface::FixedDracoInterface(): Interface() {
     _constructTest();
 
     DataManager* dataManager = DataManager::GetDataManager();
+    mJPosDes = Eigen::VectorXd::Zero(10); mJVelDes = Eigen::VectorXd::Zero(10);
+    mJTrqDes = Eigen::VectorXd::Zero(10); mJPosAct = Eigen::VectorXd::Zero(10);
+    mJVelAct = Eigen::VectorXd::Zero(10); mJTrqAct = Eigen::VectorXd::Zero(10);
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
     dataManager->RegisterData(&mJPosDes, VECT, "JPosDes", 10);
-    dataManager->RegisterData(&mJVelDes, VECT, "JPosDes", 10);
+    dataManager->RegisterData(&mJVelDes, VECT, "JVelDes", 10);
     dataManager->RegisterData(&mJTrqDes, VECT, "JTrqDes", 10);
     dataManager->RegisterData(&mJPosAct, VECT, "JPosAct", 10);
-    dataManager->RegisterData(&mJVelAct, VECT, "JPosAct", 10);
+    dataManager->RegisterData(&mJVelAct, VECT, "JVelAct", 10);
     dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10);
 
     printf("[Fixed Draco Interface] Constructed\n");
@@ -45,8 +48,12 @@ void FixedDracoInterface::getCommand(void* sensorData_, void* commandData_) {
     }
     mTime += SERVO_RATE;
 
-    mJPosDes = ((FixedDracoCommand*) commandData_)->q; mJVelDes = ((FixedDracoCommand*) commandData_)->qdot; mJTrqDes = ((FixedDracoCommand*) commandData_)->jtrq;
-    mJPosAct = ((FixedDracoCommand*) commandData_)->q; mJVelAct = ((FixedDracoCommand*) commandData_)->qdot; mJTrqAct = ((FixedDracoCommand*) commandData_)->jtrq;
+    mJPosDes = ((FixedDracoCommand*) commandData_)->q;
+    mJVelDes = ((FixedDracoCommand*) commandData_)->qdot;
+    mJTrqDes = ((FixedDracoCommand*) commandData_)->jtrq;
+    mJPosAct = data->q;
+    mJVelAct = data->qdot;
+    mJTrqAct = data->jtrq;
 }
 
 void FixedDracoInterface::_constructTest() {
