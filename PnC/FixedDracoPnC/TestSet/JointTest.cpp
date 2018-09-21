@@ -8,19 +8,6 @@ JointTest::JointTest(RobotSystem* robot_): Test(robot_) {
 
     // Choose Controller
 
-    // Debugging
-    q_des_debug = Eigen::VectorXd::Zero(10);
-    qdot_des_debug = Eigen::VectorXd::Zero(10);
-    qddot_des_debug = Eigen::VectorXd::Zero(10);
-    q_act_debug = Eigen::VectorXd::Zero(10);
-    qdot_act_debug = Eigen::VectorXd::Zero(10);
-    DataManager* dataManager = DataManager::GetDataManager();
-    dataManager->RegisterData(&q_des_debug, VECT, "q_des_debug", 10);
-    dataManager->RegisterData(&qdot_des_debug, VECT, "qdot_des_debug", 10);
-    dataManager->RegisterData(&qddot_des_debug, VECT, "qddot_des_debug", 10);
-    dataManager->RegisterData(&q_act_debug, VECT, "q_act_debug", 10);
-    dataManager->RegisterData(&qdot_act_debug, VECT, "qdot_act_debug", 10);
-
     printf("[Joint Test] Constructed\n");
 }
 
@@ -57,13 +44,6 @@ void JointTest::getTorqueInput(void * commandData_) {
             mKd[i] * (qdot_des[i] - mRobot->getQdot()[i]);
     }
     cmd->jtrq = mRobot->getMassMatrix() * qddot_des + mRobot->getGravity();
-
-    // Debugging
-    q_des_debug = cmd->q;
-    qdot_des_debug = cmd->qdot;
-    qddot_des_debug = qddot_des;
-    q_act_debug = mRobot->getQ();
-    qdot_act_debug = mRobot->getQdot();
 
 }
 

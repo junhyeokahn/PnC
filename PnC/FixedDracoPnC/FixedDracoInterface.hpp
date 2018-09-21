@@ -24,6 +24,13 @@ class FixedDracoInterface: public Interface
 protected:
     void _constructTest();
 
+    Eigen::VectorXd mJPosDes;
+    Eigen::VectorXd mJVelDes;
+    Eigen::VectorXd mJTrqDes;
+    Eigen::VectorXd mJPosAct;
+    Eigen::VectorXd mJVelAct;
+    Eigen::VectorXd mJTrqAct;
+
 public:
     FixedDracoInterface();
     virtual ~FixedDracoInterface();

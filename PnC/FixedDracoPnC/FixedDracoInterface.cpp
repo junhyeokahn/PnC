@@ -13,6 +13,12 @@ FixedDracoInterface::FixedDracoInterface(): Interface() {
 
     DataManager* dataManager = DataManager::GetDataManager();
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
+    dataManager->RegisterData(&mJPosDes, VECT, "JPosDes", 10);
+    dataManager->RegisterData(&mJVelDes, VECT, "JPosDes", 10);
+    dataManager->RegisterData(&mJTrqDes, VECT, "JTrqDes", 10);
+    dataManager->RegisterData(&mJPosAct, VECT, "JPosAct", 10);
+    dataManager->RegisterData(&mJVelAct, VECT, "JPosAct", 10);
+    dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10);
 
     printf("[Fixed Draco Interface] Constructed\n");
 }
@@ -38,6 +44,9 @@ void FixedDracoInterface::getCommand(void* sensorData_, void* commandData_) {
         mTest->getTorqueInput(commandData_);
     }
     mTime += SERVO_RATE;
+
+    mJPosDes = ((FixedDracoCommand*) commandData_)->q; mJVelDes = ((FixedDracoCommand*) commandData_)->qdot; mJTrqDes = ((FixedDracoCommand*) commandData_)->jtrq;
+    mJPosAct = ((FixedDracoCommand*) commandData_)->q; mJVelAct = ((FixedDracoCommand*) commandData_)->qdot; mJTrqAct = ((FixedDracoCommand*) commandData_)->jtrq;
 }
 
 void FixedDracoInterface::_constructTest() {

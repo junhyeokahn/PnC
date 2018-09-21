@@ -24,10 +24,4 @@ private:
     double mInterpolationDuration;
     double mTestInitTime;
 
-    // Debugging Data
-    Eigen::VectorXd q_des_debug;
-    Eigen::VectorXd qdot_des_debug;
-    Eigen::VectorXd qddot_des_debug;
-    Eigen::VectorXd q_act_debug;
-    Eigen::VectorXd qdot_act_debug;
 };

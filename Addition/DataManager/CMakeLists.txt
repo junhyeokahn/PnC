@@ -1,19 +1,27 @@
 project (Supervisor)
-cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.5.1)
 
 set (${PROJECT_NAME}_VERSION_NAME "star")
 set (${PROJECT_NAME}_VERSION_MAJOR 1)
 set (${PROJECT_NAME}_VERSION_MINOR 0)
 set (${PROJECT_NAME}_VERSION_PATCH 0)
 set (${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH})
+set(CMAKE_CXX_STANDARD 14)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug | Release | RelWithDebInfo | MinSizeRel" FORCE)
 endif()
 
-include(cmake/base.cmake)
-include(cmake/eigen.cmake)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-search_for_eigen()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake")
+# Drake
+set(drake_DIR /opt/drake/lib/cmake/drake)
+#set(drake_DIR
+    #${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
+find_package(drake CONFIG REQUIRED)
+if(NOT EIGEN_FOUND)
+  find_package(Eigen)
+endif()
+include_directories(${EIGEN_INCLUDE_DIRS})
+
 
 message ("")
 message ("-[ MAKE INFORMATION ]-----------------------------------------------------------")
@@ -25,31 +33,31 @@ message (" The install destination: ${CMAKE_INSTALL_PREFIX}")
 message ("--------------------------------------------------------------------------------")
 message ("")
 
-include_directories ("${PROJECT_SOURCE_DIR}/../../utils")
+include_directories ("${PROJECT_SOURCE_DIR}/../../Utils")
 include_directories ("${PROJECT_SOURCE_DIR}/../../ExternalSource")
 include_directories ("${PROJECT_SOURCE_DIR}/../../")
 
 set (headers
 DataSave.h
 data_protocol.h
-../../Utils/DartPThread.hpp
+../../Utils/DartpThread.hpp
 ../../Utils/comm_udp.hpp
-../../Utils/utilities.hpp
+../../Utils/Utilities.hpp
 ../../Utils/DataManager.hpp
 )
 
 set (sources
 DataSave.cpp
 Status_Display.cpp
-../../Utils/DartPThread.cpp
+../../Utils/DartpThread.cpp
 ../../Utils/comm_udp.cpp
-../../Utils/utilities.cpp
+../../Utils/Utilities.cpp
 ../../Utils/DataManager.cpp
 )
 
-link_directories("/usr/local/lib/")
-link_directories("/usr/lib/")
+#link_directories("/usr/local/lib/")
+#link_directories("/usr/lib/")
 
 add_executable(Status_Display ${sources} ${headers})
 # add_dependencies(Status_Display comm_comm)
-target_link_libraries(Status_Display pthread)
+target_link_libraries(Status_Display pthread drake::drake)

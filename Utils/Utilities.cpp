@@ -293,6 +293,7 @@ namespace myUtils {
             return value;
         }
     }
+
     void collectNonZeroIdxAndValue( const Eigen::MatrixXd A,
                                           Eigen::VectorXi & rows,
                                           Eigen::VectorXi & cols,
@@ -320,6 +321,7 @@ namespace myUtils {
             vals[i] = non_zero_val[i];
         }
     }
+
     bool isInBoundingBox( const Eigen::VectorXd & lb,
                           const Eigen::VectorXd & val,
                           const Eigen::VectorXd & ub) {
