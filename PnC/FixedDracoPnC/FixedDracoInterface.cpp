@@ -21,8 +21,7 @@ FixedDracoInterface::FixedDracoInterface(): Interface() {
     dataManager->RegisterData(&mJTrqDes, VECT, "JTrqDes", 10);
     dataManager->RegisterData(&mJPosAct, VECT, "JPosAct", 10);
     dataManager->RegisterData(&mJVelAct, VECT, "JVelAct", 10);
-    dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10);
-
+    dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10); 
     printf("[Fixed Draco Interface] Constructed\n");
 }
 

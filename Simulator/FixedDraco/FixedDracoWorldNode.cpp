@@ -27,6 +27,7 @@ FixedDracoWorldNode::~FixedDracoWorldNode() {
 void FixedDracoWorldNode::customPreStep() {
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
+    mSensorData->jtrq = mSkel->getForces();
 
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand = mCommand->jtrq;

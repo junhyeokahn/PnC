@@ -25,6 +25,7 @@ DracoWorldNode::~DracoWorldNode() {}
 void DracoWorldNode::customPreStep() {
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
+    mSensorData->jtrq = mSkel->getForces();
 
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
