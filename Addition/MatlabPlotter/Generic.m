@@ -8,7 +8,7 @@ addpath(fn_path)
 data_path = '/home/apptronik/Repository/PnC/ExperimentDataCheck';
 
 %%
-targetJointIdx = 6:10;
+targetJointIdx = 1:10;
 numJoint = 10;
 numTarget = length(targetJointIdx);
 fig = fn_open_figures(numTarget);
@@ -21,7 +21,7 @@ JPosAct = fn_read_file(data_path, 'JPosAct', numJoint);
 JVelAct = fn_read_file(data_path, 'JVelAct', numJoint);
 JTrqAct = fn_read_file(data_path, 'JTrqAct', numJoint);
 
-startIdx = 5;
+startIdx = 1;
 endIdx = length(Time)-5;
 %% Plot
 for i = 1:numTarget
