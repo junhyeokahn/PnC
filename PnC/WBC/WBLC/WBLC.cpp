@@ -123,7 +123,9 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
     Eigen::VectorXd delta(dim_first_task_);
     for(int i(0); i<dim_first_task_; ++i) { delta[i] = z[i]; }
     qddot_pre = qddot_pre + JtPreBar * (xddot + delta - JtDotQdot - Jt * qddot_pre);
-    qdot_pre = JtPreBar * (xdot);
+    qdot_pre = qdot_pre + JtPreBar * (xdot);
+    //std::cout << "delta" << std::endl;
+    //std::cout << delta << std::endl;
     _PrintDebug(12);
 
     // First Qddot is found

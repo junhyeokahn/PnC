@@ -50,6 +50,17 @@ void AdmittanceTest::getTorqueInput(void * commandData_) {
     mWBLC->MakeTorque(mTaskList, mContactList, cmd->jtrq, mWBLCExtraData);
     _WBLCpostProcess();
 
+    // Admittance
+    // Option 1
+    //Eigen::VectorXd qddot_des = mWBLC->getQddot();
+    //Eigen::VectorXd qdot_des = myUtils::eulerIntegration(mRobot->getQdot(), qddot_des, SERVO_RATE);
+    //Eigen::VectorXd q_des = myUtils::eulerIntegration(mRobot->getQ(), qdot_des, SERVO_RATE);
+    //cmd->q = q_des;
+    //cmd->qdot = qdot_des;
+    // Option 2 : seems different from option 1 due to delta
+    cmd->qdot = mWBLC->getQdot();
+    cmd->q = myUtils::doubleIntegration(mRobot->getQ(), mWBLC->getQdot(), mWBLC->getQddot(), SERVO_RATE);
+
 }
 
 void AdmittanceTest::_updateContact() {
@@ -128,7 +139,7 @@ void AdmittanceTest::_WBLCpreProcess() {
     mWBLCExtraData->cost_weight = Eigen::VectorXd::Zero(taskDim + contactDim);
 
     for(int i(0); i<taskDim; ++i) {
-        mWBLCExtraData->cost_weight[i] = 100.0;
+        mWBLCExtraData->cost_weight[i] = 1000000.0;
     }
     for(int i(0); i<contactDim; ++i){
         mWBLCExtraData->cost_weight[taskDim + i] = 1.0;

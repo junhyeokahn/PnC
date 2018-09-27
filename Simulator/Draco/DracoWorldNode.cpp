@@ -15,9 +15,15 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
     mSkel = world_->getSkeleton("Draco");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-    YAML::Node simulation_cfg =
-        YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
-    myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
+    try {
+        YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
+        YAML::Node control_cfg = simulation_cfg["control_configuration"];
+        myUtils::readParameter(control_cfg, "kp", mKp);
+        myUtils::readParameter(control_cfg, "kd", mKd);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
+    }
 }
 
 DracoWorldNode::~DracoWorldNode() {}
@@ -30,31 +36,11 @@ void DracoWorldNode::customPreStep() {
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
 
-    //static int count(0);
-    //if (count*SERVO_RATE < mReleaseTime) {
-        //_fixXY();
-        //_fixRP();
-    //}
-    //count++;
-
+    // Low level position control
+    for (int i = 0; i < 10; ++i) {
+        mTorqueCommand[i+6] += mKp[i] * (mCommand->q[i+6] - mSensorData->q[i+6]) +
+            mKd[i] * (mCommand->qdot[i+6] - mSensorData->qdot[i+6]);
+    }
     //mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);
-}
-
-void DracoWorldNode::_fixXY() {
-    double kp(1500.); double kd(150.);
-    Eigen::VectorXd q = mSkel->getPositions();
-    Eigen::VectorXd qdot = mSkel->getVelocities();
-    for (int i = 0; i < 2; ++i) {
-        mTorqueCommand[i] = - (kp * q[i]) - (kd * qdot[i]);
-    }
-}
-
-void DracoWorldNode::_fixRP() {
-    double kp(5.0); double kd(0.5);
-    Eigen::VectorXd q = mSkel->getPositions();
-    Eigen::VectorXd qdot = mSkel->getVelocities();
-    for (int i = 4; i < 6; ++i) {
-        mTorqueCommand[i] = - (kp * q[i]) - (kd * qdot[i]);
-    }
 }

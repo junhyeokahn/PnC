@@ -41,12 +41,6 @@ void FixedDracoWorldNode::customPreStep() {
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand = mCommand->jtrq;
 
-    // Inv Kin Test
-    //mTorqueCommand.setZero();
-    //mSkel->setPositions(mCommand->q);
-    //mSkel->setVelocities(mCommand->qdot);
-    //mSkel->setPositions(init_q);
-
     // Low level position control
     for (int i = 0; i < 10; ++i) {
         mTorqueCommand[i] += mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
