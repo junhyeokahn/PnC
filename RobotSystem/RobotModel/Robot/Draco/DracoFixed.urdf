@@ -102,7 +102,7 @@
   <link name="lHipPitch">
     <inertial>
       <origin xyz="0.0009 0.0066 -0.24" rpy="0 0 0" />
-      <mass value="6.0" />
+      <mass value="5.5" />
       <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
     <visual>
@@ -132,7 +132,7 @@
   <link name="lKnee">
     <inertial>
       <origin xyz="0.0161 0.0167 -0.275" rpy="0 0 0" />
-      <mass value="3.5" />
+      <mass value="3.0" />
       <inertia ixx="0.0224" ixy="0.0001" ixz="-0.0005" iyy="0.0240" iyz="0.0001" izz="0.0016" />
     </inertial>
     <visual>
@@ -162,7 +162,7 @@
   <link name="lAnkle">
     <inertial>
       <origin xyz="0.0108 0 -0.0443" rpy="0 0 0" />
-      <mass value="0.7" />
+      <mass value="0.4" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>
@@ -318,7 +318,7 @@
   <link name="rAnkle">
     <inertial>
       <origin xyz="0.0108 0 -0.0443" rpy="0 0 0" />
-      <mass value="0.7" />
+      <mass value="0.4" />
       <inertia ixx="0.0001" ixy="0.0001" ixz="0.0001" iyy="0.0001" iyz="0.0001" izz="0.0001" />
     </inertial>
     <visual>

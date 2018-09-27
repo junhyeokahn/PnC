@@ -44,6 +44,8 @@ void JointTest::getTorqueInput(void * commandData_) {
             mKd[i] * (qdot_des[i] - mRobot->getQdot()[i]);
     }
     cmd->jtrq = mRobot->getMassMatrix() * qddot_des + mRobot->getGravity();
+    //cmd->jtrq = mRobot->getGravity(); //TODO
+    cmd->jtrq[4] = 0.0; cmd->jtrq[9] = 0.0;
 
 }
 
