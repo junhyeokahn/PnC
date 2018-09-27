@@ -23,10 +23,10 @@ namespace myUtils
     Eigen::MatrixXd vStack(const Eigen::VectorXd & a_, const Eigen::VectorXd & b_);
     Eigen::MatrixXd deleteRow(const Eigen::MatrixXd & a_, int row);
     Eigen::MatrixXd deleteCol(const Eigen::MatrixXd & a_, int col);
+
     // ===========
     // Save Vector
     // ===========
-
     void saveVector(const Eigen::VectorXd & vec_,
                     std::string name_,
                     bool b_param = false);
@@ -58,7 +58,6 @@ namespace myUtils
     // ============
     // Pretty Print
     // ============
-
     void pretty_print(Eigen::VectorXd const & vv, std::ostream & os,
             std::string const & title,
             std::string const & prefix="", bool nonl = false);
@@ -103,4 +102,11 @@ namespace myUtils
     bool isInBoundingBox( const Eigen::VectorXd & lb,
                           const Eigen::VectorXd & val,
                           const Eigen::VectorXd & ub);
+    Eigen::VectorXd eulerIntegration( const Eigen::VectorXd & x,
+                                      const Eigen::VectorXd & xdot,
+                                      double dt );
+    Eigen::VectorXd doubleIntegration ( const Eigen::VectorXd & q,
+                                        const Eigen::VectorXd & alpha,
+                                        const Eigen::VectorXd & alphad,
+                                        double dt );
 } /* myUtils */

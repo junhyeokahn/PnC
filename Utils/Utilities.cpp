@@ -336,4 +336,21 @@ namespace myUtils {
         }
         return ret;
     }
+
+    Eigen::VectorXd eulerIntegration( const Eigen::VectorXd & x,
+                                      const Eigen::VectorXd & xdot,
+                                      double dt ) {
+        Eigen::VectorXd ret = x;
+        ret += xdot * dt;
+        return ret;
+    }
+
+    Eigen::VectorXd doubleIntegration( const Eigen::VectorXd & q,
+                                       const Eigen::VectorXd & alpha,
+                                       const Eigen::VectorXd & alphad,
+                                       double dt ) {
+        Eigen::VectorXd ret = q;
+        ret += alpha * dt + alphad * dt * dt * 0.5;
+        return ret;
+    }
 }

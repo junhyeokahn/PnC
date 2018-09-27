@@ -95,7 +95,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    int initPos(1); // 0 : Home, 1 : Bent
+    int initPos(2); // 0 : Home, 1 : Bent, 2 : Experiment
     Eigen::VectorXd q = robot->getPositions();
 
     switch (initPos) {
@@ -115,11 +115,35 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             q[lAnkleIdx] = M_PI/2 - M_PI/8;
             q[rAnkleIdx] = M_PI/2 - M_PI/8;
             break;
+        case 2:{
+            q[2] = 1.193;
+            double alpha(-M_PI/4.);
+            double beta(M_PI/5.5);
+            q[lHipPitchIdx] = alpha;
+            q[lKneeIdx] = beta-alpha;
+            q[rHipPitchIdx] = alpha;
+            q[rKneeIdx] = beta-alpha;
+            q[lAnkleIdx] = M_PI/2 - beta;
+            q[rAnkleIdx] = M_PI/2 - beta;
+            break;
+               }
         default:
             std::cout << "wrong initial pos case" << std::endl;
     }
 
     robot->setPositions(q);
+
+    /*
+    // com
+    std::cout << "com" << std::endl;
+    std::cout << robot->getCOM() << std::endl;
+
+    // foot
+    std::cout << "rAnkle" << std::endl;
+    std::cout << robot->getBodyNode("rAnkle")->getWorldTransform().translation() << std::endl;
+    std::cout << "lAnkle" << std::endl;
+    std::cout << robot->getBodyNode("lAnkle")->getWorldTransform().translation() << std::endl;
+    */
 }
 
 int main() {

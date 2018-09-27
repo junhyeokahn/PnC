@@ -1,0 +1,12 @@
+planner_configuration:
+
+  transition_time: 1.0
+  nominal_centroid_state: [0, 0, 0, 0.0754, 0.002, 0.788]
+  nominal_joint_state: [0, 0, -3.92699, 0.785398, 1.1781, 0, 0, -3.92699, 0.785398, 1.1781]
+
+control_configuration:
+
+  centroid_task_kp: [0, 0, 0, 200, 200, 200]
+  centroid_task_kd: [5, 5, 5, 5, 5, 5]
+  joint_task_kp: [100, 100, 100, 100, 70, 100, 100, 100, 100, 70]
+  joint_task_kd: [10, 10, 10, 10, 5, 10, 10, 10, 10, 5]

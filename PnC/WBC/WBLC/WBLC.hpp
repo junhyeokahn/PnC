@@ -32,6 +32,8 @@ class WBLC: public WBC{
                 const std::vector<WBLCContact*> & contact_list,
                 Eigen::VectorXd & cmd,
                 void* extra_input = NULL);
+        Eigen::VectorXd getQddot() { return mQddot; };
+        Eigen::VectorXd getQdot() { return mQdot; };
 
     private:
         void _SetInEqualityConstraint();
@@ -83,6 +85,8 @@ class WBLC: public WBC{
         void _PrintDebug(double i) {
             //printf("[WBLC] %f \n", i);
         }
+        Eigen::VectorXd mQddot;
+        Eigen::VectorXd mQdot;
 };
 
 #endif

@@ -75,14 +75,16 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
     // First Task Check
     Task* task = task_list[0];
     Eigen::MatrixXd Jt, JtPre, JtPreBar;
-    Eigen::VectorXd JtDotQdot, xddot, qddot_pre;
+    Eigen::VectorXd JtDotQdot, xdot, xddot, qddot_pre, qdot_pre;
     qddot_pre = JcN_Bar * ( - JcDotQdot_ );
+    qdot_pre = Eigen::VectorXd::Zero(num_qdot_);
 
     _PrintDebug(5);
     if(!task->IsTaskSet()){ printf("1st task is not set!\n"); exit(0); }
     task->getTaskJacobian(Jt);
     task->getTaskJacobianDotQdot(JtDotQdot);
-    task->getCommand(xddot);
+    task->getAccCommand(xddot);
+    task->getVelCommand(xdot);
     //myUtils::pretty_print(xddot, std::cout, "command");
     dim_first_task_ = task->getDims();
 
@@ -121,6 +123,7 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
     Eigen::VectorXd delta(dim_first_task_);
     for(int i(0); i<dim_first_task_; ++i) { delta[i] = z[i]; }
     qddot_pre = qddot_pre + JtPreBar * (xddot + delta - JtDotQdot - Jt * qddot_pre);
+    qdot_pre = JtPreBar * (xdot);
     _PrintDebug(12);
 
     // First Qddot is found
@@ -131,18 +134,22 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
         if(!task->IsTaskSet()){ printf("%d th task is not set!\n", i); exit(0); }
         task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
-        task->getCommand(xddot);
+        task->getAccCommand(xddot);
+        task->getVelCommand(xdot);
 
         JtPre = Jt * Npre;
         _WeightedInverse(JtPre, Ainv_, JtPreBar);
 
         qddot_pre = qddot_pre + JtPreBar * (xddot - JtDotQdot - Jt * qddot_pre);
+        qdot_pre = qdot_pre + JtPreBar * (xdot);
 
         Npre = Npre * (Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)
                 - JtPreBar * JtPre);
     }
     _PrintDebug(13);
     _GetSolution(qddot_pre, cmd);
+    mQddot = qddot_pre;
+    mQdot = qdot_pre;
     _PrintDebug(14);
 
     data_->opt_result_ = Eigen::VectorXd(dim_opt_);

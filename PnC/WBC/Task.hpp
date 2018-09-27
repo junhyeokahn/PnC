@@ -12,7 +12,8 @@ class Task{
         Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_="");
         virtual ~Task();
 
-        void getCommand(Eigen::VectorXd & taskCmd_) { taskCmd_ = mTaskCmd; }
+        void getAccCommand(Eigen::VectorXd & accCmd_) { accCmd_ = mAccCmd; }
+        void getVelCommand(Eigen::VectorXd & velCmd_) { velCmd_ = mVelCmd; }
         void getTaskJacobian(Eigen::MatrixXd & Jt_) { Jt_ = mJt; }
         void getTaskJacobianDotQdot(Eigen::VectorXd & JtDotQDot_) { JtDotQDot_ = mJtDotQDot; }
 
@@ -27,7 +28,7 @@ class Task{
                      const Eigen::VectorXd & kd_);
 
     private:
-        // Update mTaskCmd
+        // Update mAccCmd
         void _updateCommand(const Eigen::VectorXd & pos_des,
                             const Eigen::VectorXd & vel_des,
                             const Eigen::VectorXd & acc_des);
@@ -43,7 +44,8 @@ class Task{
         TaskType mTaskType;
         std::string mType;
         std::string mLinkName;
-        Eigen::VectorXd mTaskCmd;
+        Eigen::VectorXd mAccCmd;
+        Eigen::VectorXd mVelCmd;
         Eigen::VectorXd mJtDotQDot;
         Eigen::MatrixXd mJt;
 

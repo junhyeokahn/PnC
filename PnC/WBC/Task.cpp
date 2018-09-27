@@ -30,7 +30,8 @@ Task::Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_) {
         default:
             std::cout << "[Task] Type is not Specified" << std::endl;
     }
-    mTaskCmd = Eigen::VectorXd::Zero(mDim);
+    mAccCmd = Eigen::VectorXd::Zero(mDim);
+    mVelCmd = Eigen::VectorXd::Zero(mDim);
     mJt = Eigen::MatrixXd::Zero(mDim, mRobot->getNumDofs());
     mJtDotQDot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     mKp = Eigen::VectorXd::Zero(mDim);
@@ -90,7 +91,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
 
         for(int i(0); i < mDim; ++i){
-            mTaskCmd[i] = acc_des_[i]
+            mAccCmd[i] = acc_des_[i]
                 + mKp[i] * ori_err[i]
                 + mKd[i] * (vel_des_[i] - vel_act[i]);
         }
@@ -104,12 +105,10 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                      pos_act = mRobot->getQ().tail(mDim);
                                      vel_act = mRobot->getQdot().tail(mDim);
                                      for (int i = 0; i < mDim; ++i) {
-                                         mKp[i] = 150.;
+                                         mKp[i] = 100.;
                                          mKd[i] = 5.;
                                          mKi[i] = 0.;
                                      }
-                                     //mKi[2] = 100.; mKi[3] = 200.; mKi[4] = 400.;
-                                     //mKi[7] = 100.; mKi[8] = 200.; mKi[9] = 400.;
                                      break;
                                  }
             case TaskType::LINKXYZ:{
@@ -129,11 +128,11 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                         vel_act = mRobot->getCentroidVelocity();
                                         for (int i = 0; i < 3; ++i) {
                                             mKp[i] = 0.;
-                                            mKd[i] = 5.;
+                                            mKd[i] = 50.;
                                         }
                                         for (int i = 3; i < 6; ++i) {
                                             mKp[i] = 200.;
-                                            mKd[i] = 2.;
+                                            mKd[i] = 20.;
                                         }
                                         break;
                                     }
@@ -143,12 +142,10 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
 
         // Compute task command
         for (int i = 0; i < mDim; ++i) {
-            mTaskCmd[i] = acc_des_[i] +
+            mAccCmd[i] = acc_des_[i] +
                 mKp[i] * (pos_des_[i] - pos_act[i]) +
                 mKd[i] * (vel_des_[i] - vel_act[i]);
-            mErrSum[i] += (pos_des_[i] - pos_act[i]) * SERVO_RATE;
-            mErrSum[i] = myUtils::cropValue(mErrSum[i], -1., 1., "Joint Task");
-            mTaskCmd[i] += mKi[i] * mErrSum[i];
+            mVelCmd[i] = vel_des_[i] + mKp[i] * (pos_des_[i] - pos_act[i]); // TODO : is feedback needed?
         }
         _saveTask(pos_des_, vel_des_, pos_act, vel_act);
     }

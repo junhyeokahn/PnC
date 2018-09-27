@@ -30,12 +30,12 @@ void DracoWorldNode::customPreStep() {
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand.tail(mDof - 6) = mCommand->jtrq;
 
-    static int count(0);
-    if (count*SERVO_RATE < mReleaseTime) {
-        _fixXY();
-        _fixRP();
-    }
-    count++;
+    //static int count(0);
+    //if (count*SERVO_RATE < mReleaseTime) {
+        //_fixXY();
+        //_fixRP();
+    //}
+    //count++;
 
     //mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);

@@ -66,7 +66,9 @@ void DracoInterface::_constructTest() {
             mTest = new CentroidKinematicOptimizationTest(mRobot);
         } else if (tmp_string == "InvKinTest") {
             mTest = new InvKinTest(mRobot);
-        } else {
+        } else if (tmp_string == "AdmittanceTest") {
+            mTest = new AdmittanceTest(mRobot);
+        }else {
         printf("[Interface] There is no test matching test with the name\n");
         exit(0);
         }

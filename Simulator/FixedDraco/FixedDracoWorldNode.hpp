@@ -26,4 +26,6 @@ public:
     virtual ~FixedDracoWorldNode();
 
     void customPreStep() override;
+    Eigen::VectorXd mKp;
+    Eigen::VectorXd mKd;
 };
