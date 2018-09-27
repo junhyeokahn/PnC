@@ -1,10 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
+
 #include <Eigen/Dense>
+
 #include "Configuration.h"
 #include "Utils/Utilities.hpp"
-#include <memory>
+#include "Utils/Clock.hpp"
 
 class PlannerParameter
 {
@@ -22,16 +25,23 @@ private:
 class Planner
 {
 public:
-    Planner () : mDoPlan(true),
-                 isParamSet(false) {};
-    virtual ~Planner () {};
+    Planner () : mDoPlan(true), isParamSet(false)
+    {
+        mClock = new Clock();
+    };
+    virtual ~Planner () {
+        delete mClock;
+    };
 
     void getPlan( double time,
                   Eigen::VectorXd & pos,
                   Eigen::VectorXd & vel,
                   Eigen::VectorXd & trq ) {
         if (mDoPlan & isParamSet) {
+            mClock->start();
             _doPlan();
+            std::cout << "Computation Time For Planning : " << mClock->stop() <<
+                " (Seconds)" << std::endl;
             isParamSet = false;
             mDoPlan = false;
         } else if (mDoPlan & isParamSet) {
@@ -61,4 +71,5 @@ protected:
     virtual void _evalTrajectory( double time, Eigen::VectorXd & pos,
                                                Eigen::VectorXd & vel,
                                                Eigen::VectorXd & trq ) = 0;
+    Clock * mClock;
 };

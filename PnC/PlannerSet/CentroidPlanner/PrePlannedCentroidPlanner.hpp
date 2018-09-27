@@ -3,11 +3,11 @@
 #include "PnC/Planner.hpp"
 #include "Configuration.h"
 
-class PreComputedPlannerParameter : public PlannerParameter
+class PrePlannedCentroidPlannerParameter : public PlannerParameter
 {
 public:
-    PreComputedPlannerParameter () : PlannerParameter() {};
-    virtual ~PreComputedPlannerParameter () {};
+    PrePlannedCentroidPlannerParameter () : PlannerParameter() {};
+    virtual ~PrePlannedCentroidPlannerParameter () {};
 
     std::string trajectoryFile;
 
@@ -15,11 +15,11 @@ private:
     /* data */
 };
 
-class PreComputedPlanner : public Planner
+class PrePlannedCentroidPlanner : public Planner
 {
 public:
-    PreComputedPlanner ();
-    virtual ~PreComputedPlanner ();
+    PrePlannedCentroidPlanner ();
+    virtual ~PrePlannedCentroidPlanner ();
 
 private:
     /* data */
@@ -28,5 +28,5 @@ private:
                                   Eigen::VectorXd & pos,
                                   Eigen::VectorXd & vel,
                                   Eigen::VectorXd & trq);
-    std::shared_ptr<PreComputedPlannerParameter> mPreComputedParam;
+    std::shared_ptr<PrePlannedCentroidPlannerParameter> mPreComputedParam;
 };
