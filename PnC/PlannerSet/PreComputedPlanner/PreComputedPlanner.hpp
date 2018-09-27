@@ -9,6 +9,8 @@ public:
     PreComputedPlannerParameter () : PlannerParameter() {};
     virtual ~PreComputedPlannerParameter () {};
 
+    std::string trajectoryFile;
+
 private:
     /* data */
 };

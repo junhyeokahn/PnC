@@ -1,8 +1,11 @@
 planner_configuration:
 
   transition_time: 1.0
-  nominal_centroid_state: [0, 0, 0, 0.0754, 0.002, 0.788]
+  nominal_centroid_state: [0, 0, 0, 0.0754, 0.002, 0.66]
   nominal_joint_state: [0, 0, -3.92699, 0.785398, 1.1781, 0, 0, -3.92699, 0.785398, 1.1781]
+  sinusoid_amp: [0, 0, 0, 0, 0, 0.02]
+  sinusoid_mid: [0, 0, 0, 0.0754, 0.002, 0.66]
+  sinusoid_freq: [0, 0, 0, 0, 0, 0.5]
 
 control_configuration:
 

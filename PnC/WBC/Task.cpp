@@ -128,7 +128,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
                                         vel_act = mRobot->getCentroidVelocity();
                                         for (int i = 0; i < 3; ++i) {
                                             mKp[i] = 0.;
-                                            mKd[i] = 50.;
+                                            mKd[i] = 100.;
                                         }
                                         for (int i = 3; i < 6; ++i) {
                                             mKp[i] = 200.;

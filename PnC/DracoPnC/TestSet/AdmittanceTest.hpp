@@ -37,6 +37,9 @@ private:
     Eigen::VectorXd mNominalCentroidState;
     Eigen::VectorXd mNominalJointState;
     double mInterpolationDuration;
+    Eigen::VectorXd mAmp;
+    Eigen::VectorXd mMid;
+    Eigen::VectorXd mFreq;
 
     void _updateContact(); // update mContactList
     void _updateTask(); // update mTaskList

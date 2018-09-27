@@ -79,8 +79,8 @@ void AdmittanceTest::_updateTask() {
     Eigen::VectorXd centroid_pos_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
     Eigen::VectorXd centroid_vel_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
     Eigen::VectorXd centroid_acc_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
-    mNominalCentroidState.tail(3) = mTestInitCoMPos; //TODO
-     //mNominalCentroidState[5] += 0.03;
+    //mNominalCentroidState.tail(3) = mTestInitCoMPos; //TODO
+     //mNominalCentroidState[5] -= 0.03;
     if (t < mTestInitTime + mInterpolationDuration) {
         for (int i = 0; i < 3; ++i) {
             centroid_pos_des[i+3] = myUtils::smooth_changing(mTestInitCoMPos[i],
@@ -91,9 +91,12 @@ void AdmittanceTest::_updateTask() {
                     mNominalCentroidState[i+3], mInterpolationDuration, t);
         }
     } else {
-        centroid_pos_des = mNominalCentroidState;
-        centroid_vel_des.setZero();
-        centroid_vel_des.setZero();
+        myUtils::getSinusoidTrajectory(mTestInitTime + mInterpolationDuration,
+                mMid, mAmp, mFreq, t, centroid_pos_des, centroid_vel_des,
+                centroid_acc_des);
+        //centroid_pos_des = mNominalCentroidState;
+        //centroid_vel_des.setZero();
+        //centroid_vel_des.setZero();
     }
     mTaskList[0]->updateTaskSpec(centroid_pos_des, centroid_vel_des, centroid_acc_des);
 
@@ -118,10 +121,8 @@ void AdmittanceTest::_updateTask() {
         joint_vel_des.setZero();
         joint_acc_des.setZero();
     }
-    //mTaskList[1]->updateTaskSpec(joint_pos_des, joint_vel_des, joint_acc_des);
+    mTaskList[1]->updateTaskSpec(joint_pos_des, joint_vel_des, joint_acc_des); // Any way no left dimension
     Eigen::VectorXd vec_zero = Eigen::VectorXd::Zero(10);
-    mTaskList[1]->updateTaskSpec(mTestInitQ.tail(10), vec_zero, vec_zero);
-
 }
 
 void AdmittanceTest::_WBLCpreProcess() {
@@ -171,8 +172,12 @@ void AdmittanceTest::initialize() {
         myUtils::readParameter(control_cfg, "joint_task_kd", mJointTaskKd);
         YAML::Node planner_cfg = test_cfg["planner_configuration"];
         myUtils::readParameter(planner_cfg, "transition_time", mInterpolationDuration);
-        myUtils::readParameter(planner_cfg, "nominal_centroid_state", mNominalCentroidState);
+        myUtils::readParameter(planner_cfg, "sinusoid_mid", mNominalCentroidState);
         myUtils::readParameter(planner_cfg, "nominal_joint_state", mNominalJointState);
+        myUtils::readParameter(planner_cfg, "sinusoid_amp", mAmp);
+        myUtils::readParameter(planner_cfg, "sinusoid_mid", mMid);
+        myUtils::readParameter(planner_cfg, "sinusoid_freq", mFreq);
+
     }catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
     }
