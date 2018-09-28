@@ -28,7 +28,15 @@ class Task{
                      const Eigen::VectorXd & kd_);
 
     private:
-        // Update mAccCmd
+        /* Update mAccCmd, mVelCmd
+         * CENTROID :
+         *  p -- center of mass position
+         *  k -- angular momentum
+         *  l -- linear momentum
+         *  pos_des_ = [dummy , dummy , dummy ,  px   , py    , pz     ]
+         *  vel_des_ = [kx    , ky    , kz    ,  lx   , ly    , lz     ]
+         *  acc_des_ = [kx_dot, ky_dot, kz_dot, lx_dot, ly_dot, lz_dot ]
+         */
         void _updateCommand(const Eigen::VectorXd & pos_des,
                             const Eigen::VectorXd & vel_des,
                             const Eigen::VectorXd & acc_des);

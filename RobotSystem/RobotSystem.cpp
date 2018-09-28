@@ -39,6 +39,10 @@ Eigen::MatrixXd RobotSystem::getCentroidJacobian() {
     return mJcent;
 }
 
+Eigen::MatrixXd RobotSystem::getCentroidInertiaTimesJacobian() {
+    return mAcent;
+}
+
 Eigen::MatrixXd RobotSystem::getCentroidInertia() {
     return mIcent;
 }
@@ -76,6 +80,10 @@ Eigen::Vector6d RobotSystem::getBodyNodeCoMSpatialVelocity(const std::string & n
 
 Eigen::VectorXd RobotSystem::getCentroidVelocity() {
     return mJcent * mSkel->getVelocities();
+}
+
+Eigen::VectorXd RobotSystem::getCentroidMomentum() {
+    return mAcent * mSkel->getVelocities();
 }
 
 Eigen::MatrixXd RobotSystem::getCoMJacobian(dart::dynamics::Frame* wrt_) {
@@ -154,22 +162,6 @@ void RobotSystem::updateSystem(double time_,
     if (isUpdatingCentroid)  _updateCentroidFrame(q_, qdot_);
     mSkel->computeForwardKinematics();
 }
-
-//void RobotSystem::updateSystem(double time_,
-                               //const Eigen::VectorXd & q_,
-                               //const Eigen::VectorXd & qdot_,
-                               //const Eigen::VectorXd & qdot_prev_,
-                               //bool isUpdatingCentroid) {
-    //mTime = time_;
-    //mSkel->setPositions(q_);
-    //if (myUtils::isEqual(qdot_, qdot_prev_)) {
-        
-    //}
-    //mSkel->setVelocities(qdot_);
-    //if (isUpdatingCentroid)  _updateCentroidFrame(q_, qdot_);
-    //mSkel->computeForwardKinematics();
-//}
-
 
 void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd & q_,
                                        const Eigen::VectorXd & qdot_) {

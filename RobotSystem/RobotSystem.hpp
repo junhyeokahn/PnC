@@ -40,6 +40,7 @@ public:
     Eigen::VectorXd getCoriolis();
     Eigen::VectorXd getCoriolisGravity();
     Eigen::MatrixXd getCentroidJacobian();
+    Eigen::MatrixXd getCentroidInertiaTimesJacobian();
     Eigen::MatrixXd getCentroidInertia();
     Eigen::Vector3d getCoMPosition();
     Eigen::Vector3d getCoMVelocity();
@@ -67,6 +68,10 @@ public:
                            Eigen::Vector3d & size_,
                            Eigen::Isometry3d & iso_);
     Eigen::VectorXd getCentroidVelocity();
+    /*
+     * return h = [k, l];
+     */
+    Eigen::VectorXd getCentroidMomentum();
     Eigen::MatrixXd getCoMJacobian(dart::dynamics::Frame* wrt_
                                    =dart::dynamics::Frame::World());
     Eigen::MatrixXd getBodyNodeJacobian(const std::string & name_,
@@ -96,6 +101,7 @@ public:
     void setInitialConfiguration(const Eigen::VectorXd q) { mInitialConfiguration = q; };
     Eigen::VectorXd getInitialConfiguration() { return mInitialConfiguration; }
     double getTime() { return mTime; }
+    double getRobotMass() { return mSkel->getMass(); }
     int getNumDofs() { return mNumDof; };
     int getNumVirtualDofs() { return mNumVirtualDof; };
     int getNumActuatedDofs() { return mNumActuatedDof; };

@@ -98,7 +98,9 @@ void AdmittanceTest::_updateTask() {
         //centroid_vel_des.setZero();
         //centroid_vel_des.setZero();
     }
-    mTaskList[0]->updateTaskSpec(centroid_pos_des, centroid_vel_des, centroid_acc_des);
+    mTaskList[0]->updateTaskSpec(centroid_pos_des,
+                                 mRobot->getRobotMass() * centroid_vel_des,
+                                 mRobot->getRobotMass() * centroid_acc_des);
 
     ////////////////
     // 2. Joint Task

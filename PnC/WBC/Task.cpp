@@ -125,7 +125,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             case TaskType::CENTROID:{
                                         pos_act.head(3) = Eigen::VectorXd::Zero(3);
                                         pos_act.tail(3) = mRobot->getCoMPosition();
-                                        vel_act = mRobot->getCentroidVelocity();
+                                        vel_act = mRobot->getCentroidMomentum();
                                         for (int i = 0; i < 3; ++i) {
                                             mKp[i] = 0.;
                                             mKd[i] = 100.;
@@ -171,7 +171,7 @@ void Task::_updateJt() {
                                    break;
                                }
         case TaskType::CENTROID:{
-                                    mJt = mRobot->getCentroidJacobian();
+                                    mJt = mRobot->getCentroidInertiaTimesJacobian();
                                     break;
                                 }
         default:{
@@ -197,9 +197,10 @@ void Task::_updateJtDotQDot() {
                                    break;
                                }
         case TaskType::CENTROID:{
-                                    mJtDotQDot = mRobot->getCentroidJacobian() *
-                                        mRobot->getInvMassMatrix() *
-                                        mRobot->getCoriolis();
+                                    //mJtDotQDot = mRobot->getCentroidJacobian() *
+                                        //mRobot->getInvMassMatrix() *
+                                        //mRobot->getCoriolis();
+                                    mJtDotQDot.setZero(); // TODO : what is this
                                     break;
                                 }
         default:{
