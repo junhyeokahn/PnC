@@ -6,7 +6,31 @@
 #include "PnC/WBC/WBLC/WBLCContact.hpp"
 
 CentroidKinematicOptimizationTest::CentroidKinematicOptimizationTest(RobotSystem* robot_): Test(robot_) {
+    try {
+        YAML::Node test_cfg =
+            YAML::LoadFile(THIS_COM"Config/Draco/TEST/CENTROID_KINEMATIC_TEST.yaml");
+        YAML::Node control_cfg = test_cfg["control_configuration"];
+        myUtils::readParameter(control_cfg, "centroid_task_kp", mCentroidTaskKp);
+        myUtils::readParameter(control_cfg, "centroid_task_kd", mCentroidTaskKd);
+        myUtils::readParameter(control_cfg, "joint_task_kp", mJointTaskKp);
+        myUtils::readParameter(control_cfg, "joint_task_kd", mJointTaskKd);
+        YAML::Node planner_cfg = test_cfg["planner_configuration"];
+        myUtils::readParameter(planner_cfg, "transition_time", mInterpolationDuration);
+        myUtils::readParameter(planner_cfg, "nominal_centroid_state", mNominalCentroidState);
+        myUtils::readParameter(planner_cfg, "nominal_joint_state", mNominalJointState);
+        myUtils::readParameter(planner_cfg, "pre_planned_file", mPrePlannedFile);
+        myUtils::readParameter(planner_cfg, "foot_swing_height", mFootSwingHeight);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
+    }
+
     // Choose Planner
+    //mPlanner = new PrePlannedCentroidPlanner();
+    mPlanner = std::make_unique<PrePlannedCentroidPlanner>();
+    mPlanningParam = std::make_shared<PrePlannedCentroidPlannerParameter>();
+    mPlanningParam->trajectoryFile = THIS_COM+mPrePlannedFile;
+    mPlanningParam->swingHeight = mFootSwingHeight;
+    mPlanner->updatePlanningParameter(mPlanningParam);
 
     // Choose Controller
     std::vector<bool> act_list;
@@ -15,13 +39,26 @@ CentroidKinematicOptimizationTest::CentroidKinematicOptimizationTest(RobotSystem
         act_list[i] = false;
     mWBLC = new WBLC(act_list);
     mWBLCExtraData= new WBLC_ExtraData();
-    mJointTask = new Task(mRobot, TaskType::JOINT);
-    mTaskList.push_back(mJointTask);
+
     mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);
     mLfContact = new WBLCContact(mRobot, "lAnkle", 0.7);
     mContactList.clear();
     mContactList.push_back(mRfContact);
     mContactList.push_back(mLfContact);
+    mCentroidTask = new Task(mRobot, TaskType::CENTROID);
+    mCentroidTask->setGain(mCentroidTaskKp, mCentroidTaskKd);
+    mJointTask = new Task(mRobot, TaskType::JOINT);
+    mJointTask->setGain(mJointTaskKp, mJointTaskKd);
+    mTaskList.clear();
+    mTaskList.push_back(mCentroidTask);
+    mTaskList.push_back(mJointTask);
+    mCentroidPosDes = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    mCentroidVelDes = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    mCentroidAccDes = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
+    mJointPosDes = Eigen::VectorXd::Zero(mTaskList[1]->getDims());
+    mJointVelDes = Eigen::VectorXd::Zero(mTaskList[1]->getDims());
+    mJointAccDes = Eigen::VectorXd::Zero(mTaskList[1]->getDims());
+
     printf("[Centroid Kinematic Optimization Test] Constructed\n");
 }
 
@@ -31,6 +68,7 @@ CentroidKinematicOptimizationTest::~CentroidKinematicOptimizationTest() {
     delete mJointTask;
     delete mRfContact;
     delete mLfContact;
+    //delete mPlanner;
 }
 
 void CentroidKinematicOptimizationTest::getTorqueInput(void * commandData_) {
@@ -40,38 +78,72 @@ void CentroidKinematicOptimizationTest::getTorqueInput(void * commandData_) {
     cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
     cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
 
+    ///////////////////////////////////////////////////////////////////////////
     // Planner
+    ///////////////////////////////////////////////////////////////////////////
 
+    double t(mRobot->getTime());
+    // Centroid Task
+    if (t < mTestInitTime + mInterpolationDuration) {
+        for (int i = 0; i < 3; ++i) {
+            mCentroidPosDes[i+3] = myUtils::smooth_changing(mTestInitCoMPos[i],
+                    mNominalCentroidState[i+3], mInterpolationDuration, t);
+            mCentroidVelDes[i+3] = mRobot->getRobotMass() * myUtils::smooth_changing_vel(mTestInitCoMPos[i],
+                    mNominalCentroidState[i+3], mInterpolationDuration, t);
+            mCentroidAccDes[i+3] = mRobot->getRobotMass() * myUtils::smooth_changing_acc(mTestInitCoMPos[i],
+                    mNominalCentroidState[i+3], mInterpolationDuration, t);
+        }
+    } else {
+        mPlanner->getPlan( t - mTestInitTime - mInterpolationDuration,
+                mCentroidPosDes, mCentroidVelDes, mCentroidAccDes);
+        //mCentroidPosDes = mNominalCentroidState;
+        //mCentroidVelDes.setZero();
+        //mCentroidAccDes.setZero();
+    }
 
+    // 2. Joint Task
+    if(t < mTestInitTime + mInterpolationDuration) {
+        for (int i = 0; i < mTaskList[1]->getDims(); ++i) {
+            mJointPosDes[i] = myUtils::smooth_changing(mTestInitQ[i],
+                    mNominalJointState[i], mInterpolationDuration, t);
+            mJointVelDes[i] = myUtils::smooth_changing_vel(mTestInitQ[i],
+                    mNominalJointState[i], mInterpolationDuration, t);
+            mJointAccDes[i] = myUtils::smooth_changing_acc(mTestInitQ[i],
+                    mNominalJointState[i], mInterpolationDuration, t);
+        }
+    } else {
+        mJointPosDes = mNominalJointState;
+        mJointVelDes.setZero();
+        mJointAccDes.setZero();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Controller
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Whole Body Admitance Control
     _updateContact();
     _updateTask();
     _WBLCpreProcess();
     mWBLC->MakeTorque(mTaskList, mContactList, cmd->jtrq, mWBLCExtraData);
     _WBLCpostProcess();
+
+    // Admittance Option 1
+    //Eigen::VectorXd qddot_des = mWBLC->getQddot();
+    //Eigen::VectorXd qdot_des = myUtils::eulerIntegration(mRobot->getQdot(), qddot_des, SERVO_RATE);
+    //Eigen::VectorXd q_des = myUtils::eulerIntegration(mRobot->getQ(), qdot_des, SERVO_RATE);
+    //cmd->q = q_des;
+    //cmd->qdot = qdot_des;
+    // Admittance Option 2 : seems different from option 1 due to delta
+    cmd->qdot = mWBLC->getQdot();
+    cmd->q = myUtils::doubleIntegration(mRobot->getQ(), mWBLC->getQdot(), mWBLC->getQddot(), SERVO_RATE);
 }
 
 void CentroidKinematicOptimizationTest::initialize() {
-    mTestInitQ = mRobot->getQ();
-    mTestInitTime = mRobot->getTime();
-
     //Planner Initialize
-    try {
-        YAML::Node test_cfg = YAML::LoadFile(THIS_COM"Config/Draco/TEST/CENTROID_KINEMATIC_TEST.yaml");
-        YAML::Node initial_cfg = test_cfg["initial_configuration"];
-        myUtils::readParameter(initial_cfg, "transition_time", mInterpolationDuration);
-        myUtils::readParameter(initial_cfg, "joint_position", mInterpolationPosition);
-    }catch(std::runtime_error& e) {
-        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
-    }
-    double ini[30]; double fin[30]; double **middle_pt;
-    for (int i = 0; i < 30; ++i) {
-        ini[i] = 0.0; fin[i] = 0.0;
-    }
-    for (int i = 0; i < 10; ++i) {
-        ini[i] = mTestInitQ[i]; fin[i] = mInterpolationPosition[i];
-    }
-    mSpline.SetParam(ini, fin, middle_pt, mInterpolationDuration);
+    mTestInitQ = mRobot->getQ();
+    mTestInitCoMPos = mRobot->getCoMPosition();
+    mTestInitTime = mRobot->getTime();
 
     //Controller Initialize
 
@@ -79,10 +151,8 @@ void CentroidKinematicOptimizationTest::initialize() {
 }
 
 void CentroidKinematicOptimizationTest::_updateTask() {
-    Eigen::VectorXd pos = (mRobot->getInitialConfiguration()).tail(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd vel = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    Eigen::VectorXd acc = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-    mTaskList[0]->updateTaskSpec(pos, vel, acc);
+    mTaskList[0]->updateTaskSpec(mCentroidPosDes, mCentroidVelDes, mCentroidAccDes);
+    mTaskList[1]->updateTaskSpec(mJointPosDes, mJointVelDes, mJointAccDes); // Any way no left dimension
 }
 
 
@@ -107,14 +177,13 @@ void CentroidKinematicOptimizationTest::_WBLCpreProcess() {
     // cost setting
     int taskDim(0);
     int contactDim(0);
-    for (int i = 0; i < mTaskList.size(); ++i)
-        taskDim += mTaskList[i]->getDims();
+    taskDim += mTaskList[0]->getDims();
     for (int i = 0; i < mContactList.size(); ++i)
         contactDim += 6;
     mWBLCExtraData->cost_weight = Eigen::VectorXd::Zero(taskDim + contactDim);
 
     for(int i(0); i<taskDim; ++i) {
-        mWBLCExtraData->cost_weight[i] = 10000.0;
+        mWBLCExtraData->cost_weight[i] = 1000000.0;
     }
     for(int i(0); i<contactDim; ++i){
         mWBLCExtraData->cost_weight[taskDim + i] = 1.0;

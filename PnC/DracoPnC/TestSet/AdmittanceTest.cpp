@@ -12,7 +12,6 @@ AdmittanceTest::AdmittanceTest(RobotSystem* robot_) : Test(robot_) {
     act_list.resize(mRobot->getNumDofs(), true);
     for(int i(0); i < mRobot->getNumVirtualDofs(); ++i)
         act_list[i] = false;
-
     mWBLC = new WBLC(act_list);
     mWBLCExtraData= new WBLC_ExtraData();
     mRfContact = new WBLCContact(mRobot, "rAnkle", 0.7);
@@ -79,8 +78,6 @@ void AdmittanceTest::_updateTask() {
     Eigen::VectorXd centroid_pos_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
     Eigen::VectorXd centroid_vel_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
     Eigen::VectorXd centroid_acc_des = Eigen::VectorXd::Zero(mTaskList[0]->getDims());
-    //mNominalCentroidState.tail(3) = mTestInitCoMPos; //TODO
-     //mNominalCentroidState[5] -= 0.03;
     if (t < mTestInitTime + mInterpolationDuration) {
         for (int i = 0; i < 3; ++i) {
             centroid_pos_des[i+3] = myUtils::smooth_changing(mTestInitCoMPos[i],
@@ -94,9 +91,6 @@ void AdmittanceTest::_updateTask() {
         myUtils::getSinusoidTrajectory(mTestInitTime + mInterpolationDuration,
                 mMid, mAmp, mFreq, t, centroid_pos_des, centroid_vel_des,
                 centroid_acc_des);
-        //centroid_pos_des = mNominalCentroidState;
-        //centroid_vel_des.setZero();
-        //centroid_vel_des.setZero();
     }
     mTaskList[0]->updateTaskSpec(centroid_pos_des,
                                  mRobot->getRobotMass() * centroid_vel_des,

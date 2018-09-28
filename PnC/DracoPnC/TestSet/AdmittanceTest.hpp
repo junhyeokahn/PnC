@@ -29,6 +29,10 @@ private:
     WBLCContact* mLfContact;
     std::vector<Task*> mTaskList;
     std::vector<WBLCContact*> mContactList;
+    void _updateContact(); // update mContactList
+    void _updateTask(); // update mTaskList
+    void _WBLCpreProcess(); // Set dynamic properties and cost
+    void _WBLCpostProcess(); // unset task and contact
 
     Eigen::VectorXd mCentroidTaskKp;
     Eigen::VectorXd mCentroidTaskKd;
@@ -41,8 +45,4 @@ private:
     Eigen::VectorXd mMid;
     Eigen::VectorXd mFreq;
 
-    void _updateContact(); // update mContactList
-    void _updateTask(); // update mTaskList
-    void _WBLCpreProcess(); // Set dynamic properties and cost
-    void _WBLCpostProcess(); // unset task and contact
 };

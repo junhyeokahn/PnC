@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PnC/Test.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/PrePlannedCentroidPlanner.hpp"
 
 class WBLC;
 class WBLC_ExtraData;
@@ -17,19 +18,24 @@ public:
     virtual void initialize();
 
 private:
-    double mTestInitTime;
     Eigen::VectorXd mTestInitQ;
-    BS_Basic<10, 3, 0, 2, 2> mSpline;
-    double mInterpolationDuration;
-    Eigen::VectorXd mInterpolationPosition;
+    Eigen::VectorXd mTestInitCoMPos;
+    double mTestInitTime;
 
     // Planner
-    //Planner* planner;
+    //Planner* mPlanner;
+    std::unique_ptr<PrePlannedCentroidPlanner> mPlanner;
+    std::shared_ptr<PrePlannedCentroidPlannerParameter> mPlanningParam;
+    Eigen::VectorXd mNominalCentroidState;
+    Eigen::VectorXd mNominalJointState;
+    double mInterpolationDuration;
+    std::string mPrePlannedFile;
+    double mFootSwingHeight;
 
     // Controller
     WBLC* mWBLC;
     WBLC_ExtraData* mWBLCExtraData;
-    Task* mCoMTask;
+    Task* mCentroidTask;
     Task* mJointTask;
     WBLCContact* mRfContact;
     WBLCContact* mLfContact;
@@ -40,5 +46,15 @@ private:
     void _WBLCpreProcess(); // Set dynamic properties and cost
     void _WBLCpostProcess(); // unset task and contact
 
+    Eigen::VectorXd mCentroidTaskKp;
+    Eigen::VectorXd mCentroidTaskKd;
+    Eigen::VectorXd mJointTaskKp;
+    Eigen::VectorXd mJointTaskKd;
 
+    Eigen::VectorXd mCentroidPosDes;
+    Eigen::VectorXd mCentroidVelDes;
+    Eigen::VectorXd mCentroidAccDes;
+    Eigen::VectorXd mJointPosDes;
+    Eigen::VectorXd mJointVelDes;
+    Eigen::VectorXd mJointAccDes;
 };

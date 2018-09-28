@@ -750,12 +750,17 @@ void CentroidPlanner::_saveToFile(const DynamicsStateSequence& _ref_sequence) {
             qcqp_cfg["dynopt_params"]["robot_mass"] = mCentParam->robotMass;
             qcqp_cfg["dynopt_params"]["n_act_eefs"] = mCentParam->numActEEfs;
             qcqp_cfg["dynopt_params"]["ini_com"] = mCentParam->initialState.com;
+            qcqp_cfg["dynopt_params"]["ini_ang_mom"] = mCentParam->initialState.aMom;
+            qcqp_cfg["dynopt_params"]["ini_lin_mom"] = mCentParam->initialState.lMom;
             qcqp_cfg["dynopt_params"]["time_horizon"] = mCentParam->timeHorizon;
             qcqp_cfg["cntopt_params"] = cfg_pars["contact_plan"];
 
-            mCom.getGuessValue(mMatGuess);   qcqp_cfg["dynopt_params"]["com_motion"] = mMatGuess;
-            mLMom.getGuessValue(mMatGuess);  qcqp_cfg["dynopt_params"]["lin_mom"] = mMatGuess;
-            mAMom.getGuessValue(mMatGuess);  qcqp_cfg["dynopt_params"]["ang_mom"] = mMatGuess;
+            mCom.getGuessValue(mMatGuess);
+            qcqp_cfg["dynopt_params"]["com_motion"] = mMatGuess;
+            mLMom.getGuessValue(mMatGuess);
+            qcqp_cfg["dynopt_params"]["lin_mom"] = mMatGuess;
+            mAMom.getGuessValue(mMatGuess);
+            qcqp_cfg["dynopt_params"]["ang_mom"] = mMatGuess;
 
             // building momentum references
             for (int time_id=0; time_id<mCentParam->numTimeSteps; time_id++) { mMatGuess.col(time_id) = _ref_sequence.dynamicsStateSequence[time_id].com;  } qcqp_cfg["dynopt_params"]["com_motion_ref"] = mMatGuess;

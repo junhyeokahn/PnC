@@ -41,7 +41,7 @@ public:
             mClock->start();
             _doPlan();
             std::cout << "Computation Time For Planning : " << mClock->stop() <<
-                " (Seconds)" << std::endl;
+                " (ms)" << std::endl;
             isParamSet = false;
             mDoPlan = false;
         } else if (mDoPlan & isParamSet) {
