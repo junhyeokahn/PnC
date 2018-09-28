@@ -145,7 +145,7 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             mAccCmd[i] = acc_des_[i] +
                 mKp[i] * (pos_des_[i] - pos_act[i]) +
                 mKd[i] * (vel_des_[i] - vel_act[i]);
-            mVelCmd[i] = vel_des_[i] + mKp[i] * (pos_des_[i] - pos_act[i]); // TODO : is feedback needed?
+            mVelCmd[i] = vel_des_[i] + mKp[i] * (pos_des_[i] - pos_act[i]);
         }
         _saveTask(pos_des_, vel_des_, pos_act, vel_act);
     }

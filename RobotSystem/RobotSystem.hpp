@@ -22,10 +22,10 @@ protected:
 
     /*
      * Update Ig, Ag, Jg
-     * , where \dot{h} = I_{cm} * \dot{x}_{cm}
-     *                 = A_{cm} * \dot{q}
-     *          J_{cm} = I_{cm}^{-1} * A_{cm}
-     *    \dot{x}_{cm} = J_{cm} * \dot{q}
+     * , where h = [k, l]' = I_{cm} * \dot{x}_{cm}
+     *                     = A_{cm} * \dot{q}
+     *              J_{cm} = I_{cm}^{-1} * A_{cm}
+     *        \dot{x}_{cm} = J_{cm} * \dot{q}
      */
     void _updateCentroidFrame(const Eigen::VectorXd & q_,
                               const Eigen::VectorXd & qdot_);

@@ -3,7 +3,6 @@
 #include "RobotSystem/CentroidModel.hpp"
 #include <array>
 #include "PnC/Planner.hpp"
-#include "Utils/Clock.hpp"
 #include "Configuration.h"
 #include "PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp"
 #include "Utils/BSplineBasic.h"
