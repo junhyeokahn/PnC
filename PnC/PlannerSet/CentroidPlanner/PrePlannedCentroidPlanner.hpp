@@ -1,7 +1,5 @@
 #pragma once
-
-#include <array>
-
+#include <array> 
 #include "drake/common/trajectories/piecewise_polynomial.h"
 
 #include "RobotSystem/CentroidModel.hpp"
@@ -28,6 +26,11 @@ class PrePlannedCentroidPlanner : public Planner
 public:
     PrePlannedCentroidPlanner ();
     virtual ~PrePlannedCentroidPlanner ();
+
+    void getContactInfo(const double & time,
+                        std::array<bool, CentroidModel::numEEf> & activation_,
+                        std::array<double, CentroidModel::numEEf> & phase_,
+                        std::array<Eigen::Vector3d, CentroidModel::numEEf> & reaction_forces_);
 
 private:
     virtual void _doPlan();
@@ -80,4 +83,5 @@ private:
     drake::trajectories::PiecewisePolynomial<double> mLfPoly;
     drake::trajectories::PiecewisePolynomial<double> mLfdotPoly;
     drake::trajectories::PiecewisePolynomial<double> mLfddotPoly;
+
 };

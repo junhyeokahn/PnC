@@ -21,8 +21,8 @@ void PrePlannedCentroidPlanner::_doPlan() {
         mT.resize(dummyMat.cols()+1);
         mT[0] = 0.0;
         for (int i = 0; i < dummyMat.rows(); ++i) {
-            for (int j = 1; j < dummyMat.cols(); ++j) {
-                mT[j] = dummyMat(i, j);
+            for (int j = 0; j < dummyMat.cols(); ++j) {
+                mT[j+1] = dummyMat(i, j);
             }
         }
 
@@ -32,8 +32,8 @@ void PrePlannedCentroidPlanner::_doPlan() {
         mRDotDes.resize(dummyMat.cols()+1);
         mRDes[0] = mRIni;
         for (int i = 0; i < dummyMat.rows(); ++i) {
-            for (int j = 1; j < dummyMat.cols(); ++j) {
-                mRDes[j][i] = dummyMat(i, j);
+            for (int j = 0; j < dummyMat.cols(); ++j) {
+                mRDes[j+1][i] = dummyMat(i, j);
             }
         }
         for (int i = 0; i < mRDes.size(); ++i) {
@@ -48,7 +48,7 @@ void PrePlannedCentroidPlanner::_doPlan() {
         mLDes[0] = mLIni;
         for (int i = 0; i < dummyMat.rows(); ++i) {
             for (int j = 0; j < dummyMat.cols(); ++j) {
-                mLDes[j][i] = dummyMat(i, j);
+                mLDes[j+1][i] = dummyMat(i, j);
             }
         }
         for (int i = 0; i < mLDotDes.size(); ++i) {
@@ -64,7 +64,7 @@ void PrePlannedCentroidPlanner::_doPlan() {
         mKDes[0] = mKIni;
         for (int i = 0; i < dummyMat.rows(); ++i) {
             for (int j = 0; j < dummyMat.cols(); ++j) {
-                mKDes[j][i] = dummyMat(i, j);
+                mKDes[j+1][i] = dummyMat(i, j);
             }
         }
         for (int i = 0; i < mKDes.size(); ++i) {
@@ -142,7 +142,7 @@ void PrePlannedCentroidPlanner::_doPlan() {
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
     }
-    _debugTrajectory();
+    //_debugTrajectory();
     _generateCubicTrajectory();
 }
 
@@ -153,8 +153,9 @@ void PrePlannedCentroidPlanner::_generateCubicTrajectory() {
     mRfSolMat.resize(num_knot); mRfdotSolMat.resize(num_knot);
     mLfSolMat.resize(num_knot); mLfdotSolMat.resize(num_knot);
     for (int i = 0; i < num_knot; ++i) {
-        mKSolMat[i] = mKDes[i]; mKdotSolMat[i] = mKdotSolMat[i];
-        mRSolMat[i] = mRDes[i]; mRdotSolMat[i] = mRDotDes[i];
+        mKSolMat[i] = mKDes[i]; mKdotSolMat[i] = mKDotDes[i];
+        //mRSolMat[i] = mRDes[i]; mRdotSolMat[i] = mRDotDes[i];
+        mRSolMat[i] = mRDes[i]; mRdotSolMat[i] = mLDes[i]/mRobotMass; // little bit more smooth
         mRfSolMat[i] = mEEfPosDes[0][i]; mRfdotSolMat[i] = mEEfVelDes[0][i];
         mLfSolMat[i] = mEEfPosDes[1][i]; mLfdotSolMat[i] = mEEfVelDes[1][i];
     }
@@ -194,6 +195,27 @@ void PrePlannedCentroidPlanner::_evalTrajectory( double time,
         trq.segment(3, 3) = mRobotMass * mRddotPoly.value(time);
         trq.segment(6, 3) = mRfddotPoly.value(time);
         trq.segment(9, 3) = mLfddotPoly.value(time);
+    } else {
+        std::cout << "query wrong time" << std::endl;
+    }
+}
+
+void PrePlannedCentroidPlanner::getContactInfo(const double & time_,
+        std::array<bool, CentroidModel::numEEf> & act_,
+        std::array<double, CentroidModel::numEEf> & phase_,
+        std::array<Eigen::Vector3d, CentroidModel::numEEf> & rf_) {
+
+    for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
+        act_[eef_id] = false; phase_[eef_id] = 0.; rf_[eef_id].setZero();
+        for (int cnt_id = 0; cnt_id < mContactPlanInterface.contactsPerEndeff[eef_id]; ++cnt_id) {
+            double ini_time = mContactPlanInterface.contactSequence.eEfContacts[eef_id][cnt_id].timeIni;
+            double fin_time = mContactPlanInterface.contactSequence.eEfContacts[eef_id][cnt_id].timeIni;
+            if (ini_time <= time_ && time_ <= fin_time) {
+                act_[eef_id] = true;
+                phase_[eef_id] = (time_ - ini_time) / (fin_time - ini_time);
+                //rf_[eef_id] = ;
+            }
+        }
     }
 }
 

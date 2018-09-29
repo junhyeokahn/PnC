@@ -31,6 +31,8 @@ CentroidKinematicOptimizationTest::CentroidKinematicOptimizationTest(RobotSystem
     mPlanningParam->trajectoryFile = THIS_COM+mPrePlannedFile;
     mPlanningParam->swingHeight = mFootSwingHeight;
     mPlanner->updatePlanningParameter(mPlanningParam);
+    Eigen::VectorXd p, v, a;
+    mPlanner->getPlan(0.1, p, v, a);
 
     // Choose Controller
     std::vector<bool> act_list;
@@ -94,8 +96,13 @@ void CentroidKinematicOptimizationTest::getTorqueInput(void * commandData_) {
                     mNominalCentroidState[i+3], mInterpolationDuration, t);
         }
     } else {
+        Eigen::VectorXd p_ang_lin_rf_lf, v_ang_lin_rf_lf, a_ang_lin_rf_lf;
         mPlanner->getPlan( t - mTestInitTime - mInterpolationDuration,
-                mCentroidPosDes, mCentroidVelDes, mCentroidAccDes);
+                p_ang_lin_rf_lf, v_ang_lin_rf_lf, a_ang_lin_rf_lf);
+        mCentroidPosDes = p_ang_lin_rf_lf.segment(0, 6);
+        mCentroidVelDes = v_ang_lin_rf_lf.segment(0, 6);
+        mCentroidAccDes = a_ang_lin_rf_lf.segment(0, 6);
+        // foot task
         //mCentroidPosDes = mNominalCentroidState;
         //mCentroidVelDes.setZero();
         //mCentroidAccDes.setZero();
