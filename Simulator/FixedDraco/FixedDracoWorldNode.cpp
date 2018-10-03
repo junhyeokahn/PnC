@@ -37,6 +37,10 @@ void FixedDracoWorldNode::customPreStep() {
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
     mSensorData->jtrq = mSkel->getForces();
+    mSensorData->motorCurrent = Eigen::VectorXd::Zero(10);
+    mSensorData->busVoltage = Eigen::VectorXd::Zero(10);
+    mSensorData->busCurrent = Eigen::VectorXd::Zero(10);
+    mSensorData->temperature = Eigen::VectorXd::Zero(10);
 
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand = mCommand->jtrq;

@@ -110,9 +110,14 @@ void OSCTest::getTorqueInput(void * commandData_) {
     // Option 1 : integrate, integrate
     //cmd->qdot = myUtils::eulerIntegration( mRobot->getQdot(), qddot_des, SERVO_RATE );
     //cmd->q = myUtils::eulerIntegration( mRobot->getQ(), cmd->qdot, SERVO_RATE );
+    // TODO
+    cmd->q = mTestInitQ;
+    cmd->qdot.setZero();
+    //cmd->jtrq = mRobot->getMassMatrix() * qddot_des + mRobot->getGravity();
+    cmd->jtrq = mRobot->getMassMatrix() * qddot_des + mRobot->getGravity();
     // Option 2 : integrate
-    cmd->qdot = qdot_des;
-    cmd->q = myUtils::doubleIntegration(mRobot->getQ(), cmd->qdot, qddot_des, SERVO_RATE);
+    //cmd->qdot = qdot_des;
+    //cmd->q = myUtils::doubleIntegration(mRobot->getQ(), cmd->qdot, qddot_des, SERVO_RATE);
 
     rf_pos_des_debug = rf_pos_des;
     rf_vel_des_debug = rf_vel_des;
@@ -132,6 +137,9 @@ void OSCTest::initialize() {
         YAML::Node sinusoidal_cfg = test_cfg["sinusoidal_configuration"];
         myUtils::readParameter(sinusoidal_cfg, "transition_time", mInterpolationDuration);
         myUtils::readParameter(sinusoidal_cfg, "mid", mMid);
+        mMid = mTestInitRFPos;
+        mMid[0] += 0.02; //TODO
+        mMid[2] += 0.05;
         myUtils::readParameter(sinusoidal_cfg, "amp", mAmp);
         myUtils::readParameter(sinusoidal_cfg, "freq", mFreq);
         YAML::Node control_cfg= test_cfg["control_configuration"];

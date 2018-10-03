@@ -8,6 +8,10 @@ public:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
+    Eigen::VectorXd motorCurrent;
+    Eigen::VectorXd busVoltage;
+    Eigen::VectorXd busCurrent;
+    Eigen::VectorXd temperature;
 };
 
 class FixedDracoCommand
@@ -30,6 +34,10 @@ protected:
     Eigen::VectorXd mJPosAct;
     Eigen::VectorXd mJVelAct;
     Eigen::VectorXd mJTrqAct;
+    Eigen::VectorXd mMotorCurrent;
+    Eigen::VectorXd mBusVoltage;
+    Eigen::VectorXd mBusCurrent;
+    Eigen::VectorXd mTemperature;
 
 public:
     FixedDracoInterface();

@@ -15,13 +15,20 @@ FixedDracoInterface::FixedDracoInterface(): Interface() {
     mJPosDes = Eigen::VectorXd::Zero(10); mJVelDes = Eigen::VectorXd::Zero(10);
     mJTrqDes = Eigen::VectorXd::Zero(10); mJPosAct = Eigen::VectorXd::Zero(10);
     mJVelAct = Eigen::VectorXd::Zero(10); mJTrqAct = Eigen::VectorXd::Zero(10);
+    mMotorCurrent = Eigen::VectorXd::Zero(10); mBusVoltage = Eigen::VectorXd::Zero(10);
+    mBusCurrent = Eigen::VectorXd::Zero(10); mTemperature = Eigen::VectorXd::Zero(10);
+
     dataManager->RegisterData(&mTime, DOUBLE, "Time");
     dataManager->RegisterData(&mJPosDes, VECT, "JPosDes", 10);
     dataManager->RegisterData(&mJVelDes, VECT, "JVelDes", 10);
     dataManager->RegisterData(&mJTrqDes, VECT, "JTrqDes", 10);
     dataManager->RegisterData(&mJPosAct, VECT, "JPosAct", 10);
     dataManager->RegisterData(&mJVelAct, VECT, "JVelAct", 10);
-    dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10); 
+    dataManager->RegisterData(&mJTrqAct, VECT, "JTrqAct", 10);
+    dataManager->RegisterData(&mMotorCurrent, VECT, "motorCurrent", 10);
+    dataManager->RegisterData(&mBusVoltage, VECT, "BusVoltage", 10);
+    dataManager->RegisterData(&mBusCurrent, VECT, "BusCurrent", 10);
+    dataManager->RegisterData(&mTemperature, VECT, "Temperature", 10);
     printf("[Fixed Draco Interface] Constructed\n");
 }
 
@@ -53,6 +60,10 @@ void FixedDracoInterface::getCommand(void* sensorData_, void* commandData_) {
     mJPosAct = data->q;
     mJVelAct = data->qdot;
     mJTrqAct = data->jtrq;
+    mMotorCurrent = data->motorCurrent;
+    mBusVoltage = data->busVoltage;
+    mBusCurrent = data->busCurrent;
+    mTemperature = data->temperature;
 }
 
 void FixedDracoInterface::_constructTest() {

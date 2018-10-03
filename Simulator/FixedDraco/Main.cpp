@@ -142,7 +142,7 @@ int main() {
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(1.0/1500);
+    world->setTimeStep(SERVO_RATE);
 
     // ====================
     // Display Joints Frame
