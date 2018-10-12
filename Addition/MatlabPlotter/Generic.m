@@ -7,9 +7,14 @@ fn_path = '/home/apptronik/Repository/PnC/Addition/MatlabPlotter/functions';
 addpath(fn_path)
 data_path = '/home/apptronik/Repository/PnC/ExperimentDataCheck';
 
+fn_path = '/Users/junhyeokahn/Repository/PnC/Addition/MatlabPlotter/functions';
+addpath(fn_path)
+data_path = '/Users/junhyeokahn/Repository/PnC/ExperimentDataCheck';
+
+
 %%
 targetJointIdx = [1,2,3,4,5];
-targetJointIdx = 6:8;
+targetJointIdx = 1:10;
 numJoint = 10;
 numTarget = length(targetJointIdx);
 fig = fn_open_figures(numTarget);

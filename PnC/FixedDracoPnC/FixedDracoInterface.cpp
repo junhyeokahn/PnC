@@ -78,7 +78,10 @@ void FixedDracoInterface::_constructTest() {
             mTest = new InvKinTest(mRobot);
         } else if (tmp_string == "JointTest") {
             mTest = new JointTest(mRobot);
-        } else {
+        } else if (tmp_string == "AdmittanceTest") {
+            mTest = new AdmittanceTest(mRobot);
+        }
+        else {
         printf("[Interface] There is no test matching test with the name\n");
         exit(0);
         }

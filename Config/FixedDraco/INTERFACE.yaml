@@ -1,3 +1,4 @@
 #TestName: InvKinTest
-TestName: OSCTest
+#TestName: OSCTest
+TestName: AdmittanceTest
 #TestName: JointTest

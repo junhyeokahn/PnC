@@ -63,11 +63,11 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         std::cout << bn->getMass() << std::endl;
     }
 
-    for (int i = 0; i < robot->getNumJoints(); ++i) {
-        dart::dynamics::Joint* joint = robot->getJoint(i);
-        std::cout << i << "th" << std::endl;
-        std::cout << joint->getNumDofs() << std::endl;
-    }
+    //for (int i = 0; i < robot->getNumJoints(); ++i) {
+        //dart::dynamics::Joint* joint = robot->getJoint(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << joint->getNumDofs() << std::endl;
+    //}
 
     //for (int i = 0; i < robot->getNumDofs(); ++i) {
         //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
