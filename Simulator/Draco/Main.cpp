@@ -5,7 +5,6 @@
 #include "Utils/Utilities.hpp"
 #include "DracoWorldNode.hpp"
 #include "Configuration.h"
-#include "Utils/ParamHandler.hpp"
 
 void displayJointFrames(
     const dart::simulation::WorldPtr& world, 
@@ -86,7 +85,7 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     exit(0);
 }
 
-void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot){
 
     int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
     int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
@@ -95,27 +94,17 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    int initPos(2); // 0 : Home, 1 : Bent, 2 : Experiment
+    int initPos(2); // 0 : Home, 1 : Simulation, 2 : Experiment
     Eigen::VectorXd q = robot->getPositions();
 
     switch (initPos) {
-        case 0:
-            q[5] = 1.425;
-            //q[2] = 1.425;
+        case 0:{
+            q[2] = 1.425;
             q[lAnkleIdx] = M_PI/2;
             q[rAnkleIdx] = M_PI/2;
             break;
-        case 1:
-            //q[5] = 1.34;
-            q[2] = 1.335;
-            q[lHipPitchIdx] = -M_PI/8;
-            q[lKneeIdx] = M_PI/4;
-            q[rHipPitchIdx] = -M_PI/8;
-            q[rKneeIdx] = M_PI/4;
-            q[lAnkleIdx] = M_PI/2 - M_PI/8;
-            q[rAnkleIdx] = M_PI/2 - M_PI/8;
-            break;
-        case 2:{
+               }
+        case 1:{
             q[2] = 1.193;
             double alpha(-M_PI/4.);
             double beta(M_PI/5.5);
@@ -127,23 +116,25 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             q[rAnkleIdx] = M_PI/2 - beta;
             break;
                }
+        case 2:{
+            YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
+            double hanging_height(0.0);
+            myUtils::readParameter(simulation_cfg, "hanging_height", hanging_height);
+            q[2] = hanging_height;
+            q[lHipPitchIdx] = -0.5;
+            q[lKneeIdx] = 1.4;
+            q[lAnkleIdx] = 1.03;
+            q[rHipPitchIdx] = -0.5;
+            q[rKneeIdx] = 1.4;
+            q[rAnkleIdx] = 1.03;
+            break;
+               }
         default:
-            std::cout << "wrong initial pos case" << std::endl;
+            std::cout << "[wrong initial pos case] in Draco/Main.cpp" << std::endl;
     }
 
     robot->setPositions(q);
-
-    /*
-    // com
-    std::cout << "com" << std::endl;
-    std::cout << robot->getCOM() << std::endl;
-
-    // foot
-    std::cout << "rAnkle" << std::endl;
-    std::cout << robot->getBodyNode("rAnkle")->getWorldTransform().translation() << std::endl;
-    std::cout << "lAnkle" << std::endl;
-    std::cout << robot->getBodyNode("lAnkle")->getWorldTransform().translation() << std::endl;
-    */
 }
 
 int main() {
@@ -163,10 +154,12 @@ int main() {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
             THIS_COM"RobotSystem/RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
-            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoDebug.urdf");
+            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
+            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
+    ground->getBodyNode("ground_link")->setFrictionCoeff(100.);
+    robot->getBodyNode("torso")->setFrictionCoeff(100.);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
     world->setTimeStep(SERVO_RATE);

@@ -68,9 +68,11 @@ void DracoInterface::_constructTest() {
             mTest = new InvKinTest(mRobot);
         } else if (tmp_string == "AdmittanceTest") {
             mTest = new AdmittanceTest(mRobot);
-        }else {
-        printf("[Interface] There is no test matching test with the name\n");
-        exit(0);
+        } else if (tmp_string == "SteppingTest") {
+            mTest = new SteppingTest(mRobot);
+        } else {
+            printf("[Interface] There is no test matching test with the name\n");
+            exit(0);
         }
     }catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

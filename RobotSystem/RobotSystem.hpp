@@ -19,6 +19,7 @@ protected:
     Eigen::MatrixXd mIcent;
     Eigen::MatrixXd mJcent;
     Eigen::MatrixXd mAcent;
+    Eigen::VectorXd mJTrq;
 
     /*
      * Update Ig, Ag, Jg
@@ -94,6 +95,7 @@ public:
                       const Eigen::VectorXd & q_,
                       const Eigen::VectorXd & qdot_,
                       bool isUpdatingCentroid_ = true);
+    void updateJTrq(const Eigen::VectorXd & jtrq_) { mJTrq = jtrq_; }
 
     dart::dynamics::SkeletonPtr getSkeleton() { return mSkel; };
     Eigen::VectorXd getQ() { return mSkel->getPositions(); };
@@ -105,6 +107,7 @@ public:
     int getNumDofs() { return mNumDof; };
     int getNumVirtualDofs() { return mNumVirtualDof; };
     int getNumActuatedDofs() { return mNumActuatedDof; };
+    Eigen::VectorXd getJTrq() { return mJTrq; };
 
     Eigen::VectorXd rotateVector( const Eigen::VectorXd & vec );
     Eigen::MatrixXd rotateJacobian( const Eigen::MatrixXd & mat );

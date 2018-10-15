@@ -3,6 +3,7 @@
 #include "PnC/Test.hpp"
 #include "Utils/BSplineBasic.h"
 #include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
+#include <array>
 
 class AdmittanceTest: public Test
 {
@@ -32,6 +33,13 @@ private:
     bool mDoUpdate;
     bool mIsSaved;
 
-    std::vector< Eigen::MatrixXd > aug_T_j_com_list;
-    std::vector< Eigen::MatrixXd > aug_R_w_com_list;
+    std::vector< std::string > body_node_name;
+    std::array< std::vector<Eigen::MatrixXd>, 4> T_j_j_list;
+    std::array< std::vector<Eigen::MatrixXd>, 5> T_j_com_list;
+    std::array< std::vector<Eigen::MatrixXd>, 5> R_w_com_list;
+    std::array< std::vector<Eigen::VectorXd>, 5> torque_list;
+
+    bool mIsVirtualUpdated;
+    Eigen::VectorXd mVirtualJPos;
+    Eigen::VectorXd mVirtualJVel;
 };

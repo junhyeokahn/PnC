@@ -3,3 +3,4 @@
 #include "PnC/DracoPnC/TestSet/CentroidKinematicOptimizationTest.hpp"
 #include "PnC/DracoPnC/TestSet/InvKinTest.hpp"
 #include "PnC/DracoPnC/TestSet/AdmittanceTest.hpp"
+#include "PnC/DracoPnC/TestSet/SteppingTest.hpp"

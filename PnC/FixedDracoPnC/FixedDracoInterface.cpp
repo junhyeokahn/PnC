@@ -40,13 +40,13 @@ FixedDracoInterface::~FixedDracoInterface() {
 void FixedDracoInterface::getCommand(void* sensorData_, void* commandData_) {
     FixedDracoSensorData* data = (FixedDracoSensorData*) sensorData_;
     mRobot->updateSystem(mTime, data->q, data->qdot, false);
+    mRobot->updateJTrq(data->jtrq);
     if (mTime < mInitTime) {
         mRobot->setInitialConfiguration(data->q);
         FixedDracoCommand* cmd = (FixedDracoCommand*) commandData_;
         cmd->q = data->q;
         cmd->qdot = Eigen::VectorXd::Zero(mRobot->getNumDofs());
         cmd->jtrq = Eigen::VectorXd::Zero(mRobot->getNumActuatedDofs());
-        //if (!mTest->isInitialized) mTest->initialize();
     } else {
         if (!mTest->isInitialized) mTest->initialize();
         DataManager::GetDataManager()->start();

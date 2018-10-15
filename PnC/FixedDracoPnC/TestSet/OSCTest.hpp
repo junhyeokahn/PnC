@@ -33,4 +33,5 @@ private:
     Eigen::VectorXd rf_acc_des_debug;
     Eigen::VectorXd rf_pos_act_debug;
     Eigen::VectorXd rf_vel_act_debug;
+
 };

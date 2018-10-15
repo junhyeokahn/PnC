@@ -19,6 +19,7 @@ class FixedDracoCommand
 public:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
+    Eigen::VectorXd qddot;
     Eigen::VectorXd jtrq;
 };
 
@@ -39,8 +40,12 @@ protected:
     Eigen::VectorXd mBusCurrent;
     Eigen::VectorXd mTemperature;
 
+    Eigen::VectorXd mVirtualJPos;
+    Eigen::VectorXd mVirtualJVel;
+
 public:
     FixedDracoInterface();
     virtual ~FixedDracoInterface();
     virtual void getCommand(void* sensorData_, void* commandData_);
+
 };

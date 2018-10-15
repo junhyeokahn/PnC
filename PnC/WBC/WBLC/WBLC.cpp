@@ -83,8 +83,8 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
     if(!task->IsTaskSet()){ printf("1st task is not set!\n"); exit(0); }
     task->getTaskJacobian(Jt);
     task->getTaskJacobianDotQdot(JtDotQdot);
-    task->getAccCommand(xddot);
-    task->getVelCommand(xdot);
+    xddot = task->getAccCommand();
+    xdot = task->getVelCommand();
     //myUtils::pretty_print(xddot, std::cout, "command");
     dim_first_task_ = task->getDims();
 
@@ -136,8 +136,8 @@ void WBLC::MakeTorque(const std::vector<Task*> & task_list,
         if(!task->IsTaskSet()){ printf("%d th task is not set!\n", i); exit(0); }
         task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
-        task->getAccCommand(xddot);
-        task->getVelCommand(xdot);
+        xddot = task->getAccCommand();
+        xdot = task->getVelCommand();
 
         JtPre = Jt * Npre;
         _WeightedInverse(JtPre, Ainv_, JtPreBar);
@@ -240,7 +240,8 @@ void WBLC::_ContactBuilding(const std::vector<WBLCContact*> & contact_list){
 
     JcDotQdot_ = JcDotQdot;
     Uf_ = contact_list[0]->getWrenchFace();
-    uf_ieq_vec_ = Eigen::VectorXd::Zero(Uf_.rows());
+    //uf_ieq_vec_ = Eigen::VectorXd::Zero(Uf_.rows());
+    uf_ieq_vec_ = contact_list[0]->getInEqVector();
 
     dim_rf_ = Uf_.cols();
     dim_rf_cstr_ = Uf_.rows();
@@ -249,7 +250,8 @@ void WBLC::_ContactBuilding(const std::vector<WBLCContact*> & contact_list){
 
     for(int i(1); i<contact_list.size(); ++i){
         Uf = contact_list[i]->getWrenchFace();
-        uf_ieq_vec = Eigen::VectorXd::Zero(Uf_.rows());
+        //uf_ieq_vec = Eigen::VectorXd::Zero(Uf_.rows());
+        uf_ieq_vec = contact_list[i]->getInEqVector();
         Jc = contact_list[i]->getJc();
         JcDotQdot = contact_list[i]->getJcDotQDot();
         dim_new_rf = Uf.cols();

@@ -3,9 +3,9 @@ clc
 close all
 
 %% 
-fn_path = '/home/apptronik/Repository/PnC/Addition/MatlabPlotter/functions';
-addpath(fn_path)
-data_path = '/home/apptronik/Repository/PnC/ExperimentDataCheck';
+% fn_path = '/home/apptronik/Repository/PnC/Addition/MatlabPlotter/functions';
+% addpath(fn_path)
+% data_path = '/home/apptronik/Repository/PnC/ExperimentDataCheck';
 
 fn_path = '/Users/junhyeokahn/Repository/PnC/Addition/MatlabPlotter/functions';
 addpath(fn_path)
@@ -22,6 +22,8 @@ fig = fn_open_figures(numTarget);
 Time = fn_read_file(data_path, 'Time', 1);
 JPosDes = fn_read_file(data_path, 'JPosDes', numJoint);
 JVelDes = fn_read_file(data_path, 'JVelDes', numJoint);
+VirtualJPos = fn_read_file(data_path, 'VirtualJPos', numJoint);
+VirtualJVel = fn_read_file(data_path, 'VirtualJVel', numJoint);
 JTrqDes = fn_read_file(data_path, 'JTrqDes', numJoint);
 JPosAct = fn_read_file(data_path, 'JPosAct', numJoint);
 JVelAct = fn_read_file(data_path, 'JVelAct', numJoint);
@@ -40,6 +42,7 @@ for i = 1 : numTarget
     subplot(4,2,1)
     hold on
     plot(Time(startIdx:endIdx), JPosDes(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
+    plot(Time(startIdx:endIdx), VirtualJPos(targetJointIdx(i), startIdx:endIdx),'g', 'linewidth', 2);
     plot(Time(startIdx:endIdx), JPosAct(targetJointIdx(i), startIdx:endIdx),'b', 'linewidth', 1);
     hold off
     grid on
@@ -51,7 +54,9 @@ for i = 1 : numTarget
     subplot(4,2,3)
     hold on
     plot(Time(startIdx:endIdx), JVelDes(targetJointIdx(i), startIdx:endIdx),'r', 'linewidth', 3);
+    plot(Time(startIdx:endIdx), VirtualJVel(targetJointIdx(i), startIdx:endIdx),'g', 'linewidth', 2);
     plot(Time(startIdx:endIdx), JVelAct(targetJointIdx(i), startIdx:endIdx),'b', 'linewidth', 1);
+    title('joint vel')
     grid on
     hold off
     subplot(4,2,4)

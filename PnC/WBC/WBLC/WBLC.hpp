@@ -1,5 +1,4 @@
-#ifndef WHOLE_BODY_LOCOMOTION_CONTROL_H
-#define WHOLE_BODY_LOCOMOTION_CONTROL_H
+#pragma once
 
 #include "PnC/WBC/WBC.hpp"
 #include <Utils/Utilities.hpp>
@@ -88,5 +87,3 @@ class WBLC: public WBC{
         Eigen::VectorXd mQddot;
         Eigen::VectorXd mQdot;
 };
-
-#endif
