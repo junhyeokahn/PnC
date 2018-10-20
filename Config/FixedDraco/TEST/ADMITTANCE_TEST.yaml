@@ -1,7 +1,7 @@
 planning_configuration:
 
-  transition_time: 2.0
-  stay_time: 3.0
+  transition_time: 1.0
+  stay_time: 1.0
   joint_lb: [-0.76 , -0.47 , -1.2 , 0.   , 0.79 , -0.71 , -0.92 , -1.2 , 0.   , 0.79]
   joint_ub: [0.72  , 0.92  , 1.08 , 1.95 , 2.33 , 0.79  , 0.47  , 1.08 , 1.95 , 2.33]
 

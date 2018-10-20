@@ -32,12 +32,13 @@ private:
     void _collectData();
     bool mDoUpdate;
     bool mIsSaved;
+    bool mIsCollect;
 
     std::vector< std::string > body_node_name;
     std::array< std::vector<Eigen::MatrixXd>, 4> T_j_j_list;
     std::array< std::vector<Eigen::MatrixXd>, 5> T_j_com_list;
     std::array< std::vector<Eigen::MatrixXd>, 5> R_w_com_list;
-    std::array< std::vector<Eigen::VectorXd>, 5> torque_list;
+    std::vector< Eigen::VectorXd > torque_list;
 
     bool mIsVirtualUpdated;
     Eigen::VectorXd mVirtualJPos;

@@ -9,6 +9,7 @@ AdmittanceTest::AdmittanceTest(RobotSystem* robot_): Test(robot_),
                                                      mTransTime(0.0),
                                                      mStayTime(0.0),
                                                      mIsSaved(false),
+                                                     mIsCollect(true),
                                                      mTestInitTime(0.0),
                                                      mSplineInitTime(0.0),
                                                      mIsVirtualUpdated(false) {
@@ -80,15 +81,24 @@ void AdmittanceTest::getTorqueInput(void * commandData_) {
             myUtils::eulerIntegration(mVirtualJPos, cmd->qdot, SERVO_RATE);
     }
 
-    //Eigen::VectorXd nearly_zero = Eigen::VectorXd::Constant(10, 0.0001);
-    //if (myUtils::isInBoundingBox(-nearly_zero, mRobot->getQdot(), nearly_zero)) {
-        //_collectData();
-    //}
+    Eigen::VectorXd nearly_zero = Eigen::VectorXd::Constant(10, 0.001);
+    if (myUtils::isInBoundingBox(-nearly_zero, mRobot->getQdot(), nearly_zero) && mIsCollect) {
+        std::cout << "data collect" << std::endl;
+        _collectData();
+        Eigen::VectorXd trq = Eigen::VectorXd::Zero(5);
+        trq = cmd->jtrq.tail(5);
+        torque_list.push_back(trq);
+        mIsCollect = false;
+        //std::cout << "22" << std::endl;
+        //std::cout << trq[4] << std::endl;
+        //std::cout << mRobot->getGravity()[9] << std::endl;
+        //std::cout << trq[3] << std::endl;
+    }
 
-    //if (!mIsSaved && mRobot->getTime() > 20) {
-        //_dataSave();
-        //mIsSaved = true;
-    //}
+    if (!mIsSaved && mRobot->getTime() > 500) {
+        _dataSave();
+        mIsSaved = true;
+    }
 }
 
 void AdmittanceTest::initialize() {
@@ -117,6 +127,7 @@ void AdmittanceTest::initialize() {
 
 void AdmittanceTest::_updateSpline() {
 
+    mIsCollect = true;
     Eigen::VectorXd current_point = mRobot->getQ();
     mStayPosition = Eigen::VectorXd::Zero(mLb.size());
 
@@ -148,7 +159,6 @@ void AdmittanceTest::_collectData() {
     Eigen::MatrixXd T_j_j = Eigen::MatrixXd::Zero(4, 4);
     Eigen::MatrixXd T_j_com = Eigen::MatrixXd::Zero(4, 4);
     Eigen::MatrixXd R_w_com = Eigen::MatrixXd::Zero(3, 3);
-    Eigen::VectorXd trq = Eigen::VectorXd::Zero(5);
     for (int i = 0; i < 4; ++i) {
         T_j_j = (mRobot->getBodyNodeIsometry(body_node_name[i]).inverse() *
             mRobot->getBodyNodeIsometry(body_node_name[i+1])).matrix();
@@ -158,11 +168,42 @@ void AdmittanceTest::_collectData() {
         T_j_com = (mRobot->getBodyNodeIsometry(body_node_name[i]).inverse() *
             mRobot->getBodyNodeCoMIsometry(body_node_name[i])).matrix();
         R_w_com = mRobot->getBodyNodeCoMIsometry(body_node_name[i]).linear();
-        trq = mRobot->getJTrq().tail(5);
         T_j_com_list[i].push_back(T_j_com);
         R_w_com_list[i].push_back(R_w_com);
-        torque_list[i].push_back(trq);
     }
+    // analytic
+    //std::cout << "11" << std::endl;
+/*    Eigen::VectorXd mg_w(6);*/
+    //mg_w << 0, 0, 0, 0, 0, -0.4*9.81;
+    //Eigen::MatrixXd R_w_com_aug = Eigen::MatrixXd::Zero(6, 6);
+    //R_w_com_aug.block(0, 0, 3, 3) = R_w_com;
+    /*R_w_com_aug.block(3, 3, 3, 3) = R_w_com;*/
+
+    //Eigen::Isometry3d tmp = (mRobot->getBodyNodeIsometry(body_node_name[4]).inverse() *
+            //mRobot->getBodyNodeCoMIsometry(body_node_name[4]));
+    //std::cout << dart::math::getAdTMatrix(tmp.inverse()).transpose() * R_w_com_aug.transpose() * mg_w << std::endl;
+
+    //Eigen::VectorXd mg4_w(6), mg3_w(6);
+    //mg4_w<< 0, 0, 0, 0, 0, -0.4*9.81;
+    //mg3_w << 0, 0, 0, 0, 0, -3.1*9.81;
+
+    //Eigen::MatrixXd R_w_com4_aug = Eigen::MatrixXd::Zero(6, 6);
+    //R_w_com4_aug.block(0, 0, 3, 3) = mRobot->getBodyNodeCoMIsometry(body_node_name[4]).linear();
+    //R_w_com4_aug.block(3, 3, 3, 3) = mRobot->getBodyNodeCoMIsometry(body_node_name[4]).linear();
+
+    //Eigen::MatrixXd R_w_com3_aug = Eigen::MatrixXd::Zero(6, 6);
+    //R_w_com3_aug.block(0, 0, 3, 3) = mRobot->getBodyNodeCoMIsometry(body_node_name[3]).linear();
+    //R_w_com3_aug.block(3, 3, 3, 3) = mRobot->getBodyNodeCoMIsometry(body_node_name[3]).linear();
+
+    //Eigen::Isometry3d T34 = mRobot->getBodyNodeIsometry(body_node_name[3]).inverse() *
+        //mRobot->getBodyNodeIsometry(body_node_name[4]);
+    //Eigen::Isometry3d T3_com4 = T34 * (mRobot->getBodyNodeIsometry(body_node_name[4]).inverse() *
+            //mRobot->getBodyNodeCoMIsometry(body_node_name[4]));
+    //Eigen::Isometry3d T3_com3 = (mRobot->getBodyNodeIsometry(body_node_name[3]).inverse() *
+            //mRobot->getBodyNodeCoMIsometry(body_node_name[3]));
+    //std::cout << dart::math::getAdTMatrix(T3_com4.inverse()).transpose() * R_w_com4_aug.transpose() * mg4_w 
+        //+ dart::math::getAdTMatrix(T3_com3.inverse()).transpose() * R_w_com3_aug.transpose() * mg3_w<< std::endl;
+
 }
 
 void AdmittanceTest::_dataSave() {
@@ -180,14 +221,14 @@ void AdmittanceTest::_dataSave() {
                 sys_id_cfg["data"+std::to_string(i)][body_node_name[j]]["R_w_com"] =
                     R_w_com_list[j][i];
                 sys_id_cfg["data"+std::to_string(i)][body_node_name[j]]["torque"] =
-                    torque_list[j][i];
+                    torque_list[i][j];
             }
             sys_id_cfg["data"+std::to_string(i)][body_node_name[4]]["T_j_com"] =
                 T_j_com_list[4][i];
             sys_id_cfg["data"+std::to_string(i)][body_node_name[4]]["R_w_com"] =
                 R_w_com_list[4][i];
             sys_id_cfg["data"+std::to_string(i)][body_node_name[4]]["torque"] =
-                torque_list[4][i];
+                torque_list[i][4];
         }
 
         std::ofstream file_out(THIS_COM"Config/FixedDraco/SysID/MASS.yaml");

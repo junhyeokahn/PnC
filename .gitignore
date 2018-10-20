@@ -42,3 +42,4 @@ drake_binary
 *.pyc
 octave-workspace
 *.m~
+SysID

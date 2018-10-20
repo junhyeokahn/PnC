@@ -46,10 +46,10 @@ void FixedDracoWorldNode::customPreStep() {
     mTorqueCommand = mCommand->jtrq;
 
     // Low level position control
-    for (int i = 0; i < 10; ++i) {
-        mTorqueCommand[i] += mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
-            mKd[i] * (mCommand->qdot[i] - mSensorData->qdot[i]);
-    }
+    //for (int i = 0; i < 10; ++i) {
+        //mTorqueCommand[i] += mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
+            //mKd[i] * (mCommand->qdot[i] - mSensorData->qdot[i]);
+    //}
     //mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);
 }
