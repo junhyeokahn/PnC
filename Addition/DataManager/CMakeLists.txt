@@ -12,11 +12,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake")
-# Drake
-set(drake_DIR /opt/drake/lib/cmake/drake)
-#set(drake_DIR
-    #${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
-find_package(drake CONFIG REQUIRED)
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
 endif()
@@ -60,4 +55,4 @@ Status_Display.cpp
 
 add_executable(Status_Display ${sources} ${headers})
 # add_dependencies(Status_Display comm_comm)
-target_link_libraries(Status_Display pthread drake::drake)
+target_link_libraries(Status_Display pthread)

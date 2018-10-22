@@ -9,6 +9,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include "drake/math/eigen_sparse_triplet.h"
 #include "Utils/Utilities.hpp"
+#include "Utils/ThirdPartyUtilities.hpp"
 
 #include "Utils/eigen_matrix_compare.h"
 #include "Configuration.h"

@@ -95,10 +95,6 @@ namespace myUtils
                  const Eigen::VectorXd b,
                  const double threshold=0.00001);
     double cropValue(double value, double min, double max, std::string source);
-    void collectNonZeroIdxAndValue( const Eigen::MatrixXd A,
-                                          Eigen::VectorXi & rows,
-                                          Eigen::VectorXi & cols,
-                                          Eigen::VectorXd & vals);
     bool isInBoundingBox( const Eigen::VectorXd & lb,
                           const Eigen::VectorXd & val,
                           const Eigen::VectorXd & ub);

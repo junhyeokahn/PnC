@@ -1,6 +1,6 @@
 phase_configuration:
-    num_phase: 3
-    phase_duration: [1, 1, 500]
+    num_phase: 4
+    phase_duration: [1, 1, 1, 500]
     wait_time_between_phase: 0.5
     phase0:
         num_task: 1
@@ -12,11 +12,22 @@ phase_configuration:
         task0:
             type: centroid
             target: [0, 0, 0, 0, 0, 0.015]
+#    phase2:
+        #num_task: 1
+        #task0:
+            #type: com_rpy
+            #target: [0, 0, 0, 0, 0, 0, 1]
     phase2:
         num_task: 1
         task0:
-            type: com_rpy
-            target: [0, 0, 0, 0, 0, 0, 1]
+            type: centroid
+            target: [0, 0, 0, 0, 0, 0, -0.015]
+    phase3:
+        num_task: 1
+        task0:
+            type: centroid
+            target: [0, 0, 0, 0, 0, 0, 0]
+
 
 control_configuration:
 

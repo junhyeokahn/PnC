@@ -113,6 +113,8 @@ void SteppingTest::_updateContactListandTaskList() {
             mTargetCentroidTask.tail(3) += mRobot->getCoMPosition();
             mTaskList.push_back(mCentroidTask);
             std::cout << "[Centroid Task is Inserted]" << std::endl;
+            std::cout << "[Target]" << std::endl;
+            std::cout << mTargetCentroidTask << std::endl;
         } else if (task_type == "com_rpy") {
             myUtils::readParameter(task_cfg, "target", mTargetCoMRPYTask);
             mTargetCoMRPYTask.head(3) += mRobot->getCoMPosition();

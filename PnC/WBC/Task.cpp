@@ -174,11 +174,6 @@ void Task::_updateCommand(const Eigen::VectorXd & pos_des_,
             mAccCmd[i+3] = acc_des_[i+3] + mKp[i+3] * ori_err[i]
                 + mKd[i+3] *(vel_des_[i+3] - vel_act[i+3]);
         }
-        std::cout << "virtual" << std::endl;
-        std::cout << mRobot->getQ().segment(3, 3) << std::endl;
-        std::cout << "ori err" << std::endl;
-        std::cout << ori_err << std::endl;
-
     } else {
         // Set actual value & gains
         Eigen::VectorXd pos_act = Eigen::VectorXd::Zero(mDim);
