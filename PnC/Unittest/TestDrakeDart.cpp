@@ -140,7 +140,7 @@ TEST(TestDrakeDart, CentroidDynamics){
     q[7] = 1.2; qdot[11] = 1.;
     double tol = 0.00000001;
     cache->initialize(q, qdot); drake_model->doKinematics(*cache);
-    dart_model->updateSystem(0.0, q, qdot, true);
+    dart_model->updateSystem(q, qdot, true);
     EXPECT_TRUE(drake::CompareMatrices(drake_model->centroidalMomentumMatrix(*cache),
                 dart_model->getCentroidInertia()*dart_model->getCentroidJacobian(),
                 tol, drake::MatrixCompareType::absolute));

@@ -1,6 +1,3 @@
-#include "PnC/DracoPnC/TestSet/WholeBodyControllerTest.hpp"
-#include "PnC/DracoPnC/TestSet/SymExpValidationTest.hpp"
-#include "PnC/DracoPnC/TestSet/CentroidKinematicOptimizationTest.hpp"
-#include "PnC/DracoPnC/TestSet/InvKinTest.hpp"
-#include "PnC/DracoPnC/TestSet/AdmittanceTest.hpp"
-#include "PnC/DracoPnC/TestSet/SteppingTest.hpp"
+#include <PnC/DracoPnC/TestSet/JointTest.hpp>
+//#include <PnC/DracoPnC/TestSet/BodyTest.hpp>
+//#include <PnC/DracoPnC/TestSet/WalkingTest.hpp>

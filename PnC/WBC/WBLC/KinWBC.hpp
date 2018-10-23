@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include <PnC/WBC/WBLC/WBLCContact.hpp>
+#include <PnC/WBC/ContactSpec.hpp>
 #include <PnC/WBC/Task.hpp>
 
-class KinWBC{
+class KinWBC {
     public:
         KinWBC(const std::vector<bool> & act_joint);
         ~KinWBC(){}
@@ -13,16 +13,17 @@ class KinWBC{
         bool FindConfiguration(
                 const Eigen::VectorXd & curr_config,
                 const std::vector<Task*> & task_list,
-                const std::vector<WBLCContact*> & contact_list,
+                const std::vector<ContactSpec*> & contact_list,
                 Eigen::VectorXd & jpos_cmd,
                 Eigen::VectorXd & jvel_cmd,
                 Eigen::VectorXd & jacc_cmd);
 
         Eigen::MatrixXd Ainv_;
     private:
-        void _PseudoInverse(const Eigen::MatrixXd & J, Eigen::MatrixXd & Jinv);
-        void _BuildProjectionMatrix( const Eigen::MatrixXd & J,
-                                     Eigen::MatrixXd & N);
+        void _PseudoInverse(const Eigen::MatrixXd J, Eigen::MatrixXd & Jinv);
+        void _BuildProjectionMatrix(
+                const Eigen::MatrixXd & J,
+                Eigen::MatrixXd & N);
 
         double threshold_;
         int num_qdot_;

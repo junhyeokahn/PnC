@@ -39,7 +39,8 @@ ContactWrench::ContactWrench(const Eigen::Isometry3d & appliedFrame_,
                              const std::vector<PointContact*> & pointContactLists_) {
 
     mContactPointLists = pointContactLists_;
-    mPolytope = new Polytope();
+    //mPolytope = new Polytope();
+    mPolytope = new Polyhedron();
     mAppliedFrame = appliedFrame_;
     mNumContact = pointContactLists_.size();
     mV.resize(6, 4*mNumContact);
@@ -54,7 +55,8 @@ Eigen::MatrixXd ContactWrench::getWrenchSpan() {
 
 Eigen::MatrixXd ContactWrench::getWrenchFace(Eigen::Isometry3d wrt_) {
     _computeV();
-    mPolytope->hrep(mV.transpose(), Eigen::VectorXd::Zero(mV.cols()));
+    //mPolytope->hrep(mV.transpose(), Eigen::VectorXd::Zero(mV.cols()));
+    mPolytope->setVrep(mV.transpose(), Eigen::VectorXd::Zero(mV.cols()));
     mU = -mPolytope->hrep().first;
     Eigen::MatrixXd augR = Eigen::MatrixXd::Zero(6, 6);
     augR.block(0, 0, 3, 3) = wrt_.linear().transpose();

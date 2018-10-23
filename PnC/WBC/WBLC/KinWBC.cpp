@@ -8,20 +8,21 @@ KinWBC::KinWBC(const std::vector<bool> & act_joint):
 {
     num_qdot_ = act_joint.size();
 
-    act_jidx_.clear();
+    act_jidx_.clear(); 
     for(int i(0); i<num_qdot_; ++i){
         if(act_joint[i]){
             act_jidx_.push_back(i);
             ++num_act_joint_;
         }
     }
+    //dynacore::pretty_print(act_jidx_, "act jidx");
     I_mtx = Eigen::MatrixXd::Identity(num_qdot_, num_qdot_);
 }
 
 bool KinWBC::FindConfiguration(
         const Eigen::VectorXd & curr_config,
         const std::vector<Task*> & task_list,
-        const std::vector<WBLCContact*> & contact_list,
+        const std::vector<ContactSpec*> & contact_list,
         Eigen::VectorXd & jpos_cmd,
         Eigen::VectorXd & jvel_cmd,
         Eigen::VectorXd & jacc_cmd){
@@ -29,10 +30,10 @@ bool KinWBC::FindConfiguration(
     //printf("contact list size: %d\n", contact_list.size());
     // Contact Jacobian Setup
     Eigen::MatrixXd Jc, Jc_i;
-    Jc = contact_list[0]->getJc();
+    contact_list[0]->getContactJacobian(Jc);
     int num_rows = Jc.rows();
     for(int i(1); i<contact_list.size(); ++i){
-        Jc_i = contact_list[i]->getJc();
+        contact_list[i]->getContactJacobian(Jc_i);
         int num_new_rows = Jc_i.rows();
         Jc.conservativeResize(num_rows + num_new_rows, num_qdot_);
         Jc.block(num_rows, 0, num_new_rows, num_qdot_) = Jc_i;
@@ -45,7 +46,7 @@ bool KinWBC::FindConfiguration(
 
     Eigen::VectorXd delta_q, qdot, qddot, JtDotQdot;
     Eigen::MatrixXd Jt, JtPre, JtPre_pinv, N_nx, N_pre;
-
+    
     // First Task
     Task* task = task_list[0];
     task->getTaskJacobian(Jt);
@@ -53,9 +54,9 @@ bool KinWBC::FindConfiguration(
     JtPre = Jt * Nc;
     _PseudoInverse(JtPre, JtPre_pinv);
 
-    delta_q = JtPre_pinv * ( task->getPosErr() );
-    qdot = JtPre_pinv * ( task->getVelDes() );
-    qddot = JtPre_pinv * ( task->getAccDes() - JtDotQdot );
+    delta_q = JtPre_pinv * (task->pos_err);
+    qdot = JtPre_pinv * (task->vel_des);
+    qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
 
     Eigen::VectorXd prev_delta_q = delta_q;
     Eigen::VectorXd prev_qdot = qdot;
@@ -63,7 +64,7 @@ bool KinWBC::FindConfiguration(
 
     _BuildProjectionMatrix(JtPre, N_nx);
     N_pre = Nc * N_nx;
-
+   
     //vx xdot_c1 = Jc * delta_q;
     //dynacore::pretty_print(xdot_c1, std::cout, "1st contact vel");
     //dynacore::pretty_print(Jt, std::cout, "1st task Jt");
@@ -83,9 +84,9 @@ bool KinWBC::FindConfiguration(
         JtPre = Jt * N_pre;
 
         _PseudoInverse(JtPre, JtPre_pinv);
-        delta_q = prev_delta_q + JtPre_pinv * (task->getPosErr() - Jt * prev_delta_q);
-        qdot = prev_qdot + JtPre_pinv * (task->getVelDes() - Jt* prev_qdot);
-        qddot = prev_qddot + JtPre_pinv * (task->getAccDes() - JtDotQdot - Jt*prev_qddot);
+        delta_q = prev_delta_q + JtPre_pinv * (task->pos_err - Jt * prev_delta_q);
+        qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt* prev_qdot);
+        qddot = prev_qddot + JtPre_pinv * (task->acc_des - JtDotQdot - Jt*prev_qddot);
 
         //dynacore::pretty_print(Jt, std::cout, "2nd Jt");
         //dynacore::pretty_print(N_pre, std::cout, "N_pre");
@@ -110,16 +111,17 @@ bool KinWBC::FindConfiguration(
     return true;
 }
 
-void KinWBC::_BuildProjectionMatrix(const Eigen::MatrixXd & J,
+void KinWBC::_BuildProjectionMatrix(const Eigen::MatrixXd & J, 
                                     Eigen::MatrixXd & N){
     Eigen::MatrixXd J_pinv;
     _PseudoInverse(J, J_pinv);
     N = I_mtx  - J_pinv * J;
  }
 
-void KinWBC::_PseudoInverse(const Eigen::MatrixXd & J, Eigen::MatrixXd & Jinv){
+void KinWBC::_PseudoInverse(const Eigen::MatrixXd J, 
+        Eigen::MatrixXd & Jinv){
     myUtils::pseudoInverse(J, threshold_, Jinv);
-
+    
     //mx Lambda_inv = J * Ainv_ * J.transpose();
     //mx Lambda;
     //dynacore::pseudoInverse(Lambda_inv, threshold_, Lambda);

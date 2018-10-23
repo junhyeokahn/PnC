@@ -3,8 +3,8 @@
 
 #include <Utils/Utilities.hpp>
 #include <Utils/pseudo_inverse.hpp>
-#include "PnC/WBC/Task.hpp"
-#include "PnC/WBC/WBLC/WBLCContact.hpp"
+#include <PnC/WBC/Task.hpp>
+#include <PnC/WBC/ContactSpec.hpp>
 
 // Assume first 6 (or 3 in 2D case) joints are for the representation of 
 // a floating base.
@@ -46,14 +46,14 @@ class WBC{
     }
         virtual ~WBC(){}
 
-        virtual void UpdateSetting(const Eigen::MatrixXd & A,
+        virtual void updateSetting(const Eigen::MatrixXd & A,
                 const Eigen::MatrixXd & Ainv,
                 const Eigen::VectorXd & cori,
                 const Eigen::VectorXd & grav,
                 void* extra_setting = NULL) = 0;
 
-        virtual void MakeTorque(const std::vector<Task*> & task_list,
-                const std::vector<WBLCContact*> & contact_list,
+        virtual void makeTorque(const std::vector<Task*> & task_list,
+                const std::vector<ContactSpec*> & contact_list,
                 Eigen::VectorXd & cmd,
                 void* extra_input = NULL) =0;
 

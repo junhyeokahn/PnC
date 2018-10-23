@@ -15,7 +15,6 @@ protected:
     int mNumVirtualDof;
     int mNumActuatedDof;
     Eigen::VectorXd mInitialConfiguration;
-    double mTime;
     Eigen::MatrixXd mIcent;
     Eigen::MatrixXd mJcent;
     Eigen::MatrixXd mAcent;
@@ -90,8 +89,7 @@ public:
     Eigen::MatrixXd getBodyNodeCoMJacobianDot(const std::string & name_,
                                               dart::dynamics::Frame * wrt_
                                               =dart::dynamics::Frame::World());
-    void updateSystem(double time_,
-                      const Eigen::VectorXd & q_,
+    void updateSystem(const Eigen::VectorXd & q_,
                       const Eigen::VectorXd & qdot_,
                       bool isUpdatingCentroid_ = true);
 
@@ -100,7 +98,6 @@ public:
     Eigen::VectorXd getQdot() { return mSkel->getVelocities(); };
     void setInitialConfiguration(const Eigen::VectorXd q) { mInitialConfiguration = q; };
     Eigen::VectorXd getInitialConfiguration() { return mInitialConfiguration; }
-    double getTime() { return mTime; }
     double getRobotMass() { return mSkel->getMass(); }
     int getNumDofs() { return mNumDof; };
     int getNumVirtualDofs() { return mNumVirtualDof; };

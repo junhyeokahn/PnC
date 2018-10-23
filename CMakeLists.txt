@@ -71,6 +71,7 @@ add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 add_subdirectory(Geometry)
+add_subdirectory(Filter)
 
 ## ==================
 ## Configuration File

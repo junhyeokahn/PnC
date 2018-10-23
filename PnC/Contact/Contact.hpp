@@ -5,7 +5,8 @@
 #include <vector>
 #include <dart/dart.hpp>
 
-class Polytope;
+//class Polytope;
+class Polyhedron;
 
 class PointContact
 {
@@ -73,7 +74,8 @@ public:
 
 protected:
     std::vector<PointContact*> mContactPointLists;
-    Polytope* mPolytope;
+    //Polytope* mPolytope;
+    Polyhedron* mPolytope;
     Eigen::Isometry3d mAppliedFrame;
     int mNumContact;
     Eigen::MatrixXd mV;

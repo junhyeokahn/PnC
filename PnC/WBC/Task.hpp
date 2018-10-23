@@ -1,98 +1,70 @@
-#ifndef WBC_TASK
-#define WBC_TASK
+#pragma once
 
-#include <Eigen/Dense>
+#include <stdio.h>
 
-class RobotSystem;
-
-enum TaskType { JOINT, LINKXYZ, LINKRPY, CENTROID, BASERPZ, COMRPY };
+#include <RobotSystem/RobotSystem.hpp>
 
 class Task{
     public:
-        Task(RobotSystem* robot_, TaskType taskType_, std::string linkName_="");
-        virtual ~Task();
+        Task(RobotSystem* _robot, const int & _dim) {
+            robot_ = _robot;
+            b_set_task_ = false;
+            dim_task_ = _dim;
+            kp_ = Eigen::VectorXd::Zero(_dim);
+            kd_ = Eigen::VectorXd::Zero(_dim);
+            JtDotQdot_ = Eigen::VectorXd::Zero(_dim);
+            Jt_ = Eigen::MatrixXd::Zero(_dim, robot_->getNumDofs());
 
-        void getTaskJacobian(Eigen::MatrixXd & Jt_) { Jt_ = mJt; }
-        void getTaskJacobianDotQdot(Eigen::VectorXd & JtDotQDot_) { JtDotQDot_ = mJtDotQDot; }
+            op_cmd = Eigen::VectorXd::Zero(_dim);
 
-        void updateTaskSpec(const Eigen::VectorXd & pos_des,
-                            const Eigen::VectorXd & vel_des,
-                            const Eigen::VectorXd & acc_des);
+            pos_err = Eigen::VectorXd::Zero(_dim);
+            vel_des = Eigen::VectorXd::Zero(_dim);
+            acc_des = Eigen::VectorXd::Zero(_dim);
+        }
+        virtual ~Task() {}
 
-        bool IsTaskSet() { return mIsUpdated; }
-        int getDims() { return mDim; }
-        TaskType getType() { return mTaskType; }
-        void unsetTaskSpec() { mIsUpdated = false; }
-        void setGain(const Eigen::VectorXd & kp_,
-                     const Eigen::VectorXd & kd_);
+        void getCommand(Eigen::VectorXd & _op_cmd) { _op_cmd = op_cmd; }
+        void getTaskJacobian(Eigen::MatrixXd  & Jt){ Jt = Jt_; }
+        void getTaskJacobianDotQdot(Eigen::VectorXd & JtDotQdot) {
+            JtDotQdot = JtDotQdot_;
+        }
+        void setGain( const Eigen::VectorXd & _kp,
+                      const Eigen::VectorXd & _kd ) {
+            kp_ = _kp; kd_ = _kd;
+        }
 
-        Eigen::VectorXd getAccCommand() { return mAccCmd; }
-        Eigen::VectorXd getVelCommand() { return mVelCmd; }
-        Eigen::VectorXd getPosDes() { return mPosDes; }
-        Eigen::VectorXd getPosAcc() { return mPosAct; }
-        Eigen::VectorXd getPosErr() { return mPosErr; }
-        Eigen::VectorXd getVelDes() { return mVelDes; }
-        Eigen::VectorXd getVelAcc() { return mVelAct; }
-        Eigen::VectorXd getAccDes() { return mAccDes; }
-    private:
-        /* Update mAccCmd, mVelCmd
-         *
-         * CENTROID :
-         *  p -- center of mass position
-         *  k -- angular momentum
-         *  l -- linear momentum
-         *  pos_des_ = [dummy , dummy , dummy ,  px   , py    , pz     ]
-         *  vel_des_ = [kx    , ky    , kz    ,  lx   , ly    , lz     ]
-         *  acc_des_ = [kx_dot, ky_dot, kz_dot, lx_dot, ly_dot, lz_dot ]
-         *
-         * BASERPZ :
-         * pos_des_ = [x, w, z, w, z]
-         * vel_des_ = [roll, pitch, zdot]
-         * acc_des_ = [rolldot, pitchdot, zddot]
-         *
-         * COMRPY :
-         * p -- center of mass position
-         * pos_des_ = [px, py, pz, x, y, z, w]
-         * vel_des_ = [pdotx, pdoty, pdotz, rdot, pdot, ydot]
-         * acc_des_ = [pddotx, pddoty, pddotz, rddot, pddot, yddot]
-         */
-        void _updateCommand(const Eigen::VectorXd & pos_des,
-                            const Eigen::VectorXd & vel_des,
-                            const Eigen::VectorXd & acc_des);
-        // Update mJt
-        void _updateJt();
-        // Update mJtDotQDot
-        void _updateJtDotQDot();
-        void _saveTask(const Eigen::VectorXd & pos_des_,
-                       const Eigen::VectorXd & vel_des_,
-                       const Eigen::VectorXd & acc_des_,
-                       const Eigen::VectorXd & pos_,
-                       const Eigen::VectorXd & vel_);
+        bool updateTask(const Eigen::VectorXd & pos_des, const Eigen::VectorXd & vel_des, const Eigen::VectorXd & acc_des){
+            _UpdateTaskJacobian();
+            _UpdateTaskJDotQdot();
+            _UpdateCommand(pos_des, vel_des, acc_des);
+            b_set_task_ = true;
+            return true;
+        }
 
-        TaskType mTaskType;
-        std::string mLinkName;
-        std::string mTypeString;
-        Eigen::VectorXd mAccCmd;
-        Eigen::VectorXd mVelCmd;
-        Eigen::VectorXd mJtDotQDot;
-        Eigen::MatrixXd mJt;
+        bool isTaskSet(){ return b_set_task_; }
+        int getDim(){ return dim_task_; }
+        void unsetTask(){ b_set_task_ = false; }
 
-        bool mIsUpdated;
-        int mDim;
-        Eigen::VectorXd mKp;
-        Eigen::VectorXd mKd;
-        Eigen::VectorXd mKi;
-        Eigen::VectorXd mErrSum;
+        // For Dyn WBC
+        Eigen::VectorXd op_cmd;
+        // For Kin WBC
+        Eigen::VectorXd pos_err;
+        Eigen::VectorXd vel_des;
+        Eigen::VectorXd acc_des;
 
-        RobotSystem* mRobot;
+    protected:
+        virtual bool _UpdateCommand(const Eigen::VectorXd & pos_des,
+                                    const Eigen::VectorXd & vel_des,
+                                    const Eigen::VectorXd & acc_des) = 0;
+        virtual bool _UpdateTaskJacobian() = 0;
+        virtual bool _UpdateTaskJDotQdot() = 0;
 
-        // Variables for DataManager
-        Eigen::VectorXd mPosDes;
-        Eigen::VectorXd mVelDes;
-        Eigen::VectorXd mPosAct;
-        Eigen::VectorXd mVelAct;
-        Eigen::VectorXd mAccDes;
-        Eigen::VectorXd mPosErr;
+        RobotSystem* robot_;
+        bool b_set_task_;
+        int dim_task_;
+        Eigen::VectorXd kp_;
+        Eigen::VectorXd kd_;
+
+        Eigen::VectorXd JtDotQdot_;
+        Eigen::MatrixXd  Jt_;
 };
-
-#endif

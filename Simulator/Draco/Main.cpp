@@ -121,13 +121,10 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot){
             YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
             double hanging_height(0.0);
             myUtils::readParameter(simulation_cfg, "hanging_height", hanging_height);
+            Eigen::VectorXd init_config;
+            myUtils::readParameter(simulation_cfg, "initial_configuration", init_config);
             q[2] = hanging_height;
-            q[lHipPitchIdx] = -0.5;
-            q[lKneeIdx] = 1.4;
-            q[lAnkleIdx] = 1.03;
-            q[rHipPitchIdx] = -0.5;
-            q[rKneeIdx] = 1.4;
-            q[rAnkleIdx] = 1.03;
+            q.tail(10) = init_config;
             break;
                }
         default:

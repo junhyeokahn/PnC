@@ -1,5 +1,4 @@
-#ifndef INTERFACE_H
-#define INTERFACE_H
+#pragma once
 
 #include <Eigen/Dense>
 #include <memory>
@@ -10,17 +9,18 @@ class RobotSystem;
 class Interface
 {
 protected:
-    Test* mTest;
-    RobotSystem* mRobot;
-    double mTime;
-    double mInitTime;
+    Test* test_;
+    RobotSystem* robot_;
+    int count_;
+    double running_time_;
 
 public:
-    Interface(): mInitTime(0.007), mTime(0.0) {};
+    Interface() {
+        count_ = 0;
+        running_time_ = 0.;
+    }
     virtual ~Interface() {};
 
     // Get Command through Test
-    virtual void getCommand(void* sensorData_, void* commandData_) = 0;
+    virtual void getCommand(void* _sensor_data, void* _command_data) = 0;
 };
-
-#endif /* INTERFACE_H */

@@ -16,6 +16,9 @@ private:
     DracoSensorData* mSensorData;
     DracoCommand* mCommand;
 
+    void _get_imu_data( Eigen::VectorXd & ang_vel,
+                        Eigen::VectorXd & acc);
+
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;
     int mDof;

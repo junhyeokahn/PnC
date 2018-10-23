@@ -1,0 +1,18 @@
+start_phase: 0
+
+initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
+body_height: 1.0
+
+jpos_initialization_time: 4.0
+com_lifting_time: 3.0
+
+swing_time: 0.33
+st_transition_time: 0.03
+end_transition_time: 0.03
+stance_time: 0.01
+
+replanning: true
+transition_phase_mix_ratio: 0.2
+double_stance_mix_ratio: 0.0
+# contact_switch_check: false
+contact_switch_check: true
