@@ -5,6 +5,8 @@ FixedBodyContact::FixedBodyContact(RobotSystem* _robot) : ContactSpec(_robot, 6)
 {
   robot_ = _robot;
   Jc_ = Eigen::MatrixXd::Zero(dim_contact_, robot_->getNumDofs());
+
+  //printf("[Fixed Body Contact] Constructed\n");
 }
 
 FixedBodyContact::~FixedBodyContact(){ }
