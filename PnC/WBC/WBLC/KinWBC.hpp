@@ -17,8 +17,8 @@ class KinWBC {
                 Eigen::VectorXd & jpos_cmd,
                 Eigen::VectorXd & jvel_cmd,
                 Eigen::VectorXd & jacc_cmd);
-
         Eigen::MatrixXd Ainv_;
+
     private:
         void _PseudoInverse(const Eigen::MatrixXd J, Eigen::MatrixXd & Jinv);
         void _BuildProjectionMatrix(

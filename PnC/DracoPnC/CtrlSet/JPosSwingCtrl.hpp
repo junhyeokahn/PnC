@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <PnC/Controller.hpp>
 
@@ -9,10 +9,10 @@ class WBDC;
 class WBDC_ExtraData;
 
 
-class JPosCtrl: public Controller{
+class JPosSwingCtrl: public Controller{
     public:
-        JPosCtrl(RobotSystem* _robot);
-        virtual ~JPosCtrl();
+        JPosSwingCtrl(RobotSystem* _robot);
+        virtual ~JPosSwingCtrl();
 
         virtual void oneStep(void* cmd);
         virtual void firstVisit();

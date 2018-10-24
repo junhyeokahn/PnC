@@ -7,7 +7,7 @@
 #include <PnC/WBC/WBDC/WBDC.hpp>
 #include <Utils/DataManager.hpp>
 
-JPosCtrl::JPosCtrl(RobotSystem* _robot):Controller(_robot) {
+JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
 
     end_time_ = 1000.;
     b_jpos_set_ = false;
@@ -39,14 +39,14 @@ JPosCtrl::JPosCtrl(RobotSystem* _robot):Controller(_robot) {
     printf("[Joint Position Ctrl] Constructed\n");
 }
 
-JPosCtrl::~JPosCtrl(){
+JPosSwingCtrl::~JPosSwingCtrl(){
     delete jpos_task_;
     delete fixed_body_contact_;
     delete wbdc_;
     delete wbdc_data_;
 }
 
-void JPosCtrl::oneStep(void* _cmd){
+void JPosSwingCtrl::oneStep(void* _cmd){
     _PreProcessing_Command();
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
@@ -62,12 +62,12 @@ void JPosCtrl::oneStep(void* _cmd){
     _PostProcessing_Command();
 }
 
-void JPosCtrl::_jpos_ctrl_wbdc_rotor(Eigen::VectorXd & gamma){
+void JPosSwingCtrl::_jpos_ctrl_wbdc_rotor(Eigen::VectorXd & gamma){
     wbdc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     wbdc_->makeTorque(task_list_, contact_list_, gamma, wbdc_data_);
 }
 
-void JPosCtrl::_jpos_task_setup(){
+void JPosSwingCtrl::_jpos_task_setup(){
     Eigen::VectorXd jacc_des(robot_->getNumActuatedDofs()); jacc_des.setZero();
 
     double ramp_value(0.);
@@ -97,26 +97,26 @@ void JPosCtrl::_jpos_task_setup(){
     task_list_.push_back(jpos_task_);
 }
 
-void JPosCtrl::_fixed_body_contact_setup(){
+void JPosSwingCtrl::_fixed_body_contact_setup(){
     fixed_body_contact_->updateContactSpec();
     contact_list_.push_back(fixed_body_contact_);
 }
 
-void JPosCtrl::firstVisit(){
+void JPosSwingCtrl::firstVisit(){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     ctrl_start_time_ = sp_->curr_time;
 }
 
-void JPosCtrl::lastVisit(){  }
+void JPosSwingCtrl::lastVisit(){  }
 
-bool JPosCtrl::endOfPhase(){
+bool JPosSwingCtrl::endOfPhase(){
     if(state_machine_time_ > end_time_){
         return true;
     }
     return false;
 }
 
-void JPosCtrl::ctrlInitialization(const std::string & setting_file_name){
+void JPosSwingCtrl::ctrlInitialization(const std::string & setting_file_name){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
 
     try {

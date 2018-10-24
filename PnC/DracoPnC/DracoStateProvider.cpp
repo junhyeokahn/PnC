@@ -20,6 +20,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     est_mocap_body_vel.setZero();
     b_rfoot_contact = 0;
     b_lfoot_contact = 0;
+    //qddot_cmd = Eigen::VectorXd::Zero(16);
     reaction_forces = Eigen::VectorXd::Zero(10);
     led_kin_data = Eigen::VectorXd::Zero(9);
 

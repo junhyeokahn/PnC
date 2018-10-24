@@ -21,6 +21,6 @@ protected:
   void _ParameterSetting();
   virtual int _NextPhase(const int & phase);
 
-  Controller* jpos_ctrl_ini_;
-  Controller* jpos_ctrl_;
+  Controller* jpos_target_ctrl_;
+  Controller* jpos_swing_ctrl_;
 };

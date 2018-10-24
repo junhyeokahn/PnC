@@ -65,8 +65,7 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     if (task_type_ == BasicTaskType::LINKRPY) {
         // pos_err
         Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
-        Eigen::Quaternion<double> ori_act;
-        ori_act = robot_->getBodyNodeCoMIsometry(link_name_).linear();
+        Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry(link_name_).linear());
         Eigen::Quaternion<double> quat_ori_err;
         quat_ori_err = ori_des * (ori_act.inverse());
         Eigen::Vector3d ori_err;

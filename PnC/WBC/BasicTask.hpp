@@ -13,7 +13,7 @@ class BasicTask : public Task {
         virtual ~BasicTask() {};
 
     private:
-        /* Update mAccCmd, mVelCmd
+        /* Update op_cmd, pos_err, vel_des, acc_des
          *
          * CENTROID :
          *  p -- center of mass position

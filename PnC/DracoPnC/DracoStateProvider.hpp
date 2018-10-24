@@ -24,6 +24,7 @@ public:
   int b_rfoot_contact;
   int b_lfoot_contact;
 
+  Eigen::VectorXd qddot_cmd;
   Eigen::VectorXd reaction_forces;
 
   Eigen::Vector3d rfoot_pos;

@@ -6,6 +6,7 @@ RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
 
     Uf_ = Eigen::MatrixXd::Zero(18, dim_contact_);
     ieq_vec_ = Eigen::VectorXd::Zero(18);
+    max_Fz_ = 1000.;
     link_name_ = _link_name;
 
     Eigen::Vector3d size; Eigen::Isometry3d iso_world_to_contact_center;
@@ -15,19 +16,20 @@ RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
         - iso_world_to_bodynode.translation();
     vec_bodynode_to_contact_surface[2] -= size[2]/2;
 
-    std::cout << "[debugging] : body node to contact surface in rectangle" << std::endl; // TODO
-    std::cout << vec_bodynode_to_contact_surface << std::endl;
-
     printf("[Rectangle %s Contact Spec] is Constructed\n", link_name_.c_str());
 }
 
 bool RectangleContactSpec::_UpdateJc() {
-    robot_->getBodyNodeJacobian(link_name_, vec_bodynode_to_contact_surface);
+    Jc_ =
+        robot_->getBodyNodeJacobian(link_name_, vec_bodynode_to_contact_surface);
+    return true;
 }
 
 bool RectangleContactSpec::_UpdateJcDotQdot() {
-    robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface) *
+    JcDotQdot_ =
+        robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface) *
         robot_->getQdot();
+    return true;
 }
 
 bool RectangleContactSpec::_UpdateUf() {
@@ -88,4 +90,7 @@ bool RectangleContactSpec::_UpdateUf() {
 
 bool RectangleContactSpec::_UpdateInequalityVector() {
     ieq_vec_ = Eigen::VectorXd::Zero(18);
+    ieq_vec_[17] = -max_Fz_;
+
+    return true;
 }

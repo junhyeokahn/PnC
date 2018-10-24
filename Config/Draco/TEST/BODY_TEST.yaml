@@ -1,6 +1,7 @@
-initial_jpos: [0., 0., -1.1, 1.75, 0.85, 0., 0., -1.1, 1.75, 0.85]
-body_height: 1.0
-
+initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
 jpos_initialization_time: 5.0
+
+body_height: 1.0
 body_lifting_time: 3.0
+
 body_ctrl_time: 10000.0

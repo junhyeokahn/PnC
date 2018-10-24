@@ -135,7 +135,7 @@ void DracoInterface::_ParameterSetting(){
         if (test_name == "joint_test") {
             test_ = new JointTest(robot_);
         } else if (test_name == "body_test") {
-            //test_ = new BodyTest(robot_);
+            test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             //test_ = new WalkingTest(robot_);
         } else {
