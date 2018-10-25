@@ -45,6 +45,7 @@ void BasicAccumulation::setSensorData(const std::vector<double> & acc,
     // Perform orientation update via integration
     global_ori_quat_ = global_ori_quat_ * delta_quat_body;
     global_ori_ypr_ = dart::math::matrixToEulerZYX(global_ori_quat_.normalized().toRotationMatrix());
+    global_ori_ypr_dot_ = _so3_to_euler_zyx_dot(global_ori_ypr_, global_ang_vel_);
 
 }
 
@@ -81,6 +82,7 @@ void BasicAccumulation::_InitIMUOrientationEstimateFromGravity(){
     Eigen::Quaternion<double> local2Glob = quat_pitch * quat_roll;
     global_ori_quat_ = local2Glob.inverse();
     global_ori_ypr_ = dart::math::matrixToEulerZYX(global_ori_quat_.normalized().toRotationMatrix());
+    global_ori_ypr_dot_ = _so3_to_euler_zyx_dot(global_ori_ypr_, global_ang_vel_);
 
     ///////////////////////////////////////////////////////////////////
     //Eigen::Matrix3d Global_ori(global_ori_quat_);
@@ -88,4 +90,22 @@ void BasicAccumulation::_InitIMUOrientationEstimateFromGravity(){
     //dynacore::pretty_print(check_vec, std::cout, "check vec");
     //dynacore::pretty_print(g_B, std::cout, "g_B");
     //printf("pitch, roll: %f, %f\n", theta_pitch, theta_roll);
+}
+
+Eigen::Vector3d BasicAccumulation::_so3_to_euler_zyx_dot(const Eigen::Vector3d & _global_ori_ypr,
+                                                         const Eigen::Vector3d & _global_ang_vel) {
+    Eigen::MatrixXd so3_to_euler_zyx_dot_map(3, 3);
+    double x(_global_ori_ypr[2]);
+    double y(_global_ori_ypr[1]);
+    double z(_global_ori_ypr[0]);
+
+    if (y == M_PI/2.0) {
+        std::cout << "Singular at mapping from euler zyx to so3" << std::endl;
+        exit(0);
+    }
+
+    so3_to_euler_zyx_dot_map << cos(z)*sin(y)/cos(y) , sin(y)*sin(z)/cos(y) , 1 ,
+                                -sin(z)              , cos(z)               , 0 ,
+                                cos(z)/cos(y)        , sin(z)/cos(y)        , 0;
+    return so3_to_euler_zyx_dot_map * _global_ang_vel;
 }

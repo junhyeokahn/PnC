@@ -43,18 +43,18 @@ void DracoStateEstimator::initialization(DracoSensorData* data){
         imu_ang_vel[i] = data->imu_ang_vel[i];
     }
 
-    Eigen::Vector3d body_ori;
-    Eigen::Vector3d body_ang_vel;
+    Eigen::Vector3d global_euler_zyx;
+    Eigen::Vector3d global_euler_zyx_dot;
 
     ori_est_->estimatorInitialization(imu_acc, imu_ang_vel);
-    ori_est_->getEstimatedState(body_ori, body_ang_vel);
+    ori_est_->getEstimatedState(global_euler_zyx, global_euler_zyx_dot);
     //body_est_->Initialization(body_ori_);
 
-    curr_config_[3] = body_ori[0];
-    curr_config_[4] = body_ori[1];
-    curr_config_[5] = body_ori[2];
+    curr_config_[3] = global_euler_zyx[0];
+    curr_config_[4] = global_euler_zyx[1];
+    curr_config_[5] = global_euler_zyx[2];
 
-    for(int i(0); i<3; ++i)  curr_qdot_[i+3] = body_ang_vel[i];
+    for(int i(0); i<3; ++i)  curr_qdot_[i+3] = global_euler_zyx_dot[i];
 
     robot_->updateSystem(curr_config_, curr_qdot_, false);
 
@@ -105,19 +105,19 @@ void DracoStateEstimator::update(DracoSensorData* data){
         imu_ang_vel[i] = data->imu_ang_vel[i];
     }
 
-    Eigen::Vector3d body_ori;
-    Eigen::Vector3d body_ang_vel;
+    Eigen::Vector3d global_euler_zyx;
+    Eigen::Vector3d global_euler_zyx_dot;
 
     ori_est_->setSensorData( imu_acc, imu_ang_vel);
-    ori_est_->getEstimatedState(body_ori, body_ang_vel);
+    ori_est_->getEstimatedState(global_euler_zyx, global_euler_zyx_dot);
 
-    curr_config_[3] = body_ori[0];
-    curr_config_[4] = body_ori[1];
-    curr_config_[5] = body_ori[2];
+    curr_config_[3] = global_euler_zyx[0];
+    curr_config_[4] = global_euler_zyx[1];
+    curr_config_[5] = global_euler_zyx[2];
 
-    for(int i(0); i<3; ++i)  curr_qdot_[i+3] = body_ang_vel[i];
+    for(int i(0); i<3; ++i)  curr_qdot_[i+3] = global_euler_zyx_dot[i];
 
-    robot_->updateSystem(curr_config_, curr_qdot_, false);
+    robot_->updateSystem(curr_config_, curr_qdot_, true);
 
     //Eigen::VectorXd foot_pos =
         //robot_->getBodyNodeCoMIsometry(sp_->stance_foot).translation();

@@ -1,5 +1,5 @@
 initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
-jpos_initialization_time: 5.0
+jpos_initialization_time: 3.0
 
 body_height: 1.0
 body_lifting_time: 3.0

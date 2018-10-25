@@ -12,14 +12,14 @@ FootLinear::FootLinear(RobotSystem* robot,
 FootLinear::~FootLinear(){}
 
 bool FootLinear::_UpdateJc(){
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(link_name_);
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_);
     Jc_ = Jtmp.block(3, 0, 3, robot_->getNumDofs());
     return true;
 }
 
 bool FootLinear::_UpdateJcDotQdot(){
     Eigen::VectorXd JcDotQdot_tmp =
-        robot_->getBodyNodeJacobianDot(link_name_) * robot_->getQdot();
+        robot_->getBodyNodeCoMJacobianDot(link_name_) * robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
 
     // TODO: we do not consider local frame rotation acceleration
@@ -29,7 +29,7 @@ bool FootLinear::_UpdateJcDotQdot(){
 
 bool FootLinear::_UpdateUf(){
     Eigen::MatrixXd rot = Eigen::MatrixXd::Zero(3, 3);
-    rot = (robot_->getBodyNodeIsometry(link_name_).linear()).transpose();
+    rot = (robot_->getBodyNodeCoMIsometry(link_name_).linear()).transpose();
 
     Uf_ = Eigen::MatrixXd::Zero(6, dim_contact_);
     // Fx(1), Fy(2), Fz(3)

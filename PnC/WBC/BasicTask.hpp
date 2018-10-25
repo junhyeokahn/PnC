@@ -4,7 +4,7 @@
 
 #include <PnC/WBC/Task.hpp>
 
-enum BasicTaskType { JOINT, LINKXYZ, LINKRPY, CENTROID };
+enum BasicTaskType { JOINT, LINKXYZ, LINKORI, CENTROID };
 
 class BasicTask : public Task {
     public:
@@ -16,6 +16,11 @@ class BasicTask : public Task {
 
     private:
         /* Update op_cmd, pos_err, vel_des, acc_des
+         *
+         * LINKORI :
+         * pos_des_ = [quat_w, quat_x, quat_y, quat_z]
+         * vel_des_ = [w_x, w_y, w_z]
+         * acc_des_ = [a_x, a_y, a_z]
          *
          * CENTROID :
          *  p -- center of mass position

@@ -18,12 +18,12 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry("torso").linear());
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
-    Eigen::Vector3d ori_err;
-    ori_err = dart::math::quatToExp(quat_ori_err);
+    Eigen::Vector3d ori_err_so3;
+    ori_err_so3 = dart::math::quatToExp(quat_ori_err);
 
     // (Rx, Ry)
     for (int i = 0; i < 2; ++i) {
-        pos_err[i] = myUtils::bind_half_pi(ori_err[i]);
+        pos_err[i] = myUtils::bind_half_pi(ori_err_so3[i]);
         vel_des[i] = _vel_des[i];
         acc_des[i] = _acc_des[i];
     }

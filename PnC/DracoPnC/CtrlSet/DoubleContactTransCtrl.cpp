@@ -125,10 +125,10 @@ void DoubleContactTransCtrl::_task_setup(){
         printf("[Warning] The body height is not specified\n");
     }
 
-    pos_des[0] = des_quat.x();
-    pos_des[1] = des_quat.y();
-    pos_des[2] = des_quat.z();
-    pos_des[3] = des_quat.w();
+    pos_des[0] = des_quat.w();
+    pos_des[1] = des_quat.x();
+    pos_des[2] = des_quat.y();
+    pos_des[3] = des_quat.z();
 
     //pos_des[0] = base_ori_ini_.x();
     //pos_des[1] = base_ori_ini_.y();

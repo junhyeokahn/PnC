@@ -28,7 +28,7 @@ BasicTask::BasicTask( RobotSystem * _robot,
                 kd_[i] = 10.;
             }
             break;
-        case BasicTaskType::LINKRPY:
+        case BasicTaskType::LINKORI:
             assert(dim_task_ = 3);
             task_type_string_ = "LinkRPY";
             for (int i = 0; i < dim_task_; ++i) {
@@ -62,53 +62,53 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     vel_des = _vel_des; acc_des = _acc_des;
     Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
 
-    if (task_type_ == BasicTaskType::LINKRPY) {
-        // pos_err
-        Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
-        Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry(link_name_).linear());
-        Eigen::Quaternion<double> quat_ori_err;
-        quat_ori_err = ori_des * (ori_act.inverse());
-        Eigen::Vector3d ori_err;
-        ori_err = dart::math::quatToExp(quat_ori_err);
-        for (int i = 0; i < 3; ++i)
-            ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
-        pos_err = ori_err;
+    switch (task_type_) {
+        case BasicTaskType::LINKORI:{
+                                        // pos_err
+                                        Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
+                                        Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry(link_name_).linear());
+                                        Eigen::Quaternion<double> quat_ori_err;
+                                        quat_ori_err = ori_des * (ori_act.inverse());
+                                        Eigen::Vector3d ori_err;
+                                        ori_err = dart::math::quatToExp(quat_ori_err);
+                                        for (int i = 0; i < 3; ++i)
+                                            ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+                                        pos_err = ori_err;
 
-        // vel_act
-        vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_name_).head(3);
-    } else {
-        switch (task_type_) {
-            case BasicTaskType::JOINT:{
-                                          // pos_err
-                                          pos_err = _pos_des -
-                                              robot_->getQ().tail(dim_task_);
-                                          // vel_act
-                                          vel_act =
-                                              robot_->getQdot().tail(dim_task_);
-                                          break;
-                                      }
-            case BasicTaskType::LINKXYZ:{
-                                            // pos_err
-                                            pos_err = _pos_des -
-                                                robot_->getBodyNodeCoMIsometry(link_name_).translation();
-                                            // vel_act_
-                                            vel_act = robot_->
-                                                getBodyNodeCoMSpatialVelocity(link_name_).tail(3);
-                                            break;
-                                        }
-            case BasicTaskType::CENTROID:{
-                                             // pos_err
-                                             pos_err.head(3) =
-                                                 Eigen::VectorXd::Zero(3);
-                                             pos_err.tail(3) =
-                                                 _pos_des.tail(3) - robot_->getCoMPosition();
-                                             vel_act = robot_->getCentroidMomentum();
-                                             break;
-                                         }
-            default:
-                                         std::cout << "[BasicTask] Type is not Specified" << std::endl;
-        }
+                                        // vel_act
+                                        vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_name_).head(3);
+                                    }
+        case BasicTaskType::JOINT:{
+                                      // pos_err
+                                      pos_err = _pos_des -
+                                          robot_->getQ().tail(dim_task_);
+                                      // vel_act
+                                      vel_act =
+                                          robot_->getQdot().tail(dim_task_);
+                                      break;
+                                  }
+        case BasicTaskType::LINKXYZ:{
+                                        // pos_err
+                                        pos_err = _pos_des -
+                                            robot_->getBodyNodeCoMIsometry(link_name_).translation();
+                                        // vel_act_
+                                        vel_act = robot_->
+                                            getBodyNodeCoMSpatialVelocity(link_name_).tail(3);
+                                        break;
+                                    }
+        case BasicTaskType::CENTROID:{
+                                         // pos_err
+                                         pos_err.head(3) =
+                                             Eigen::VectorXd::Zero(3);
+                                         pos_err.tail(3) =
+                                             _pos_des.tail(3) - robot_->getCoMPosition();
+                                         vel_act = robot_->getCentroidMomentum();
+                                         break;
+                                     }
+        default:
+                                     std::cout << "[BasicTask] Type is not Specified" << std::endl;
     }
+    //}
 
     // op_cmd
     for(int i(0); i < dim_task_; ++i){
@@ -133,7 +133,7 @@ bool BasicTask::_UpdateTaskJacobian() {
                                                 3, 0, dim_task_, robot_->getNumDofs());
                                         break;
                                     }
-        case BasicTaskType::LINKRPY:{
+        case BasicTaskType::LINKORI:{
                                         Jt_ = (robot_->
                                                 getBodyNodeCoMJacobian(link_name_)).block(
                                                 0, 0, dim_task_, robot_->getNumDofs());
@@ -161,7 +161,7 @@ bool BasicTask::_UpdateTaskJDotQdot() {
                                             getBodyNodeCoMJacobianDot(link_name_).block(3, 0, dim_task_, robot_->getNumDofs());
                                         break;
                                     }
-        case BasicTaskType::LINKRPY:{
+        case BasicTaskType::LINKORI:{
                                         JtDotQdot_ = robot_->
                                             getBodyNodeCoMJacobianDot(link_name_).block(0, 0, dim_task_, robot_->getNumDofs());
                                         break;

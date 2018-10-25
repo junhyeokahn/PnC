@@ -49,9 +49,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
 DracoWorldNode::~DracoWorldNode() {}
 
 void DracoWorldNode::customPreStep() {
-    static int count_(0);
-    static double initial_x = (mSkel->getPositions())[0];
-    static double initial_y = (mSkel->getPositions())[1];
 
     mSensorData->q = mSkel->getPositions().tail(10);
     mSensorData->qdot = mSkel->getVelocities().tail(10);
@@ -70,33 +67,22 @@ void DracoWorldNode::customPreStep() {
     }
 
     // hold xy
-    if (count_*SERVO_RATE < mReleaseTime) {
-        mTorqueCommand[0] = 1000 * (initial_x - (mSkel->getPositions())[0])
-            -50 * (mSkel->getVelocities())[0] ;
-        mTorqueCommand[1] = 1000 * (initial_y - (mSkel->getPositions())[1])
-            -50 * (mSkel->getVelocities())[1] ;
-    } else {
+    _hold_xy();
 
-    }
-
-    //mTorqueCommand.setZero();
+    //mTorqueCommand.setZero(); //TODO
     mSkel->setForces(mTorqueCommand);
 
-    count_++;
 }
 
 void DracoWorldNode::_get_imu_data( Eigen::VectorXd & ang_vel,
                                     Eigen::VectorXd & acc) {
-    ang_vel = mSkel->getBodyNode("torso")->getSpatialVelocity(dart::dynamics::Frame::World(), dart::dynamics::Frame::World()).head(3);
+    Eigen::VectorXd ang_vel_local = mSkel->getBodyNode("torso")->getSpatialVelocity(dart::dynamics::Frame::World(), mSkel->getBodyNode("torso")).head(3);
+    ang_vel = ang_vel_local;
     Eigen::MatrixXd rot_world_torso(3, 3);
     rot_world_torso = mSkel->getBodyNode("torso")->getWorldTransform().linear();
-    Eigen::Vector3d global_grav(0, 0, -9.81);
+    Eigen::Vector3d global_grav(0, 0, 9.81);
     Eigen::Vector3d local_grav = rot_world_torso.transpose() * global_grav;
     acc = local_grav;
-    //std::cout << "Acc" << std::endl;
-    //std::cout << acc << std::endl;
-    //std::cout << "Ang Vel" << std::endl;
-    //std::cout << ang_vel << std::endl;
 }
 
 void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
@@ -110,8 +96,33 @@ void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
         lfoot_contact = true;
         //printf("left contact\n");
     }else { lfoot_contact = false; }
-    if (fabs(rfoot_pos[2])<0.029  ){
+    if (fabs(rfoot_pos[2])<0.029){
         rfoot_contact = true;
         //printf("right contact\n");
     } else { rfoot_contact = false; }
+}
+
+void DracoWorldNode::_hold_xy() {
+    static int count_(0);
+
+    static double des_x = (mSkel->getPositions())[0];
+    static double des_y = (mSkel->getPositions())[1];
+    double act_x = mSkel->getPositions()[0];
+    double act_xdot = mSkel->getVelocities()[0];
+    double act_y = mSkel->getPositions()[1];
+    double act_ydot = mSkel->getVelocities()[1];
+
+    if ((double)count_*SERVO_RATE < mReleaseTime) {
+        mTorqueCommand[0] = 1000 * (des_x - act_x)
+            -50 * act_xdot ;
+        mTorqueCommand[1] = 1000 * (- act_y)
+            -50 * act_ydot ;
+    } else {
+        static bool first__ = true;
+        if (first__) {
+            std::cout << "[Release]" << std::endl;
+            first__ = false;
+        }
+    }
+    count_++;
 }

@@ -109,7 +109,7 @@ int WalkingTest::_NextPhase(const int & phase){
         sp_->stance_foot = "lAnkle";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeIsometry("lAnkle").translation();
+        next_local_frame_location = robot_->getBodyNodeCoMIsometry("lAnkle").translation();
         sp_->global_pos_local += next_local_frame_location;
     }
     if(phase == WkPhase::double_contact_2){
@@ -119,7 +119,7 @@ int WalkingTest::_NextPhase(const int & phase){
         sp_->stance_foot = "rAnkle";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeIsometry("rAnkle").translation();
+        next_local_frame_location = robot_->getBodyNodeCoMIsometry("rAnkle").translation();
         sp_->global_pos_local += next_local_frame_location;
     }
     sp_->num_step_copy = num_step_;

@@ -23,11 +23,14 @@ class BasicAccumulation{
         }
 
         void getEstimatedState(
-                Eigen::Vector3d _global_ori_ypr,
-                Eigen::Vector3d _global_ang_vel) {
+                Eigen::Vector3d & _global_ori_ypr,
+                Eigen::Vector3d & _global_ang_ypr_dot) {
             _global_ori_ypr = global_ori_ypr_;
-            _global_ang_vel = global_ang_vel_;
+            _global_ang_ypr_dot = global_ori_ypr_dot_;
         }
+
+        Eigen::Vector3d _so3_to_euler_zyx_dot(const Eigen::Vector3d & _global_ori_ypr,
+                                              const Eigen::Vector3d & _global_ang_vel);
 
     protected:
         double cutoff_freq_;
@@ -36,5 +39,6 @@ class BasicAccumulation{
         void _InitIMUOrientationEstimateFromGravity();
         Eigen::Quaternion<double> global_ori_quat_;
         Eigen::Vector3d global_ori_ypr_;
+        Eigen::Vector3d global_ori_ypr_dot_;
         Eigen::Vector3d  global_ang_vel_;
 };
