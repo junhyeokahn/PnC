@@ -4,10 +4,10 @@
 
 class RobotSystem;
 
-class TorsoRPZTask: public Task{
+class BodyRPZTask: public Task{
     public:
-        TorsoRPZTask(RobotSystem*);
-        virtual ~TorsoRPZTask();
+        BodyRPZTask(RobotSystem*);
+        virtual ~BodyRPZTask();
 
     protected:
         /* Update pos_err, vel_des, acc_des

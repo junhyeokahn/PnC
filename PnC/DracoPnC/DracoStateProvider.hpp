@@ -20,6 +20,7 @@ public:
   Eigen::Vector3d global_pos_local;
   Eigen::Vector2d des_location;
   Eigen::Vector2d est_mocap_body_vel;
+  Eigen::VectorXd des_jpos_prev;
 
   int b_rfoot_contact;
   int b_lfoot_contact;
@@ -33,6 +34,8 @@ public:
   Eigen::Vector3d lfoot_vel;
 
   Eigen::VectorXd led_kin_data;
+
+  int num_step_copy;
 
   void saveCurrentData();
 private:

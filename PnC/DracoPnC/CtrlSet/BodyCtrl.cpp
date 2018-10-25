@@ -7,7 +7,7 @@
 #include <Utils/DataManager.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
-BodyRPZCtrl::BodyRPZCtrl(RobotSystem* robot) : Controller(robot) {
+BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
     end_time_ = 1000.;
     ctrl_start_time_ = 0.;
@@ -23,7 +23,7 @@ BodyRPZCtrl::BodyRPZCtrl(RobotSystem* robot) : Controller(robot) {
     selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
 
-    body_rpz_task_ = new TorsoRPZTask(robot);
+    body_rpz_task_ = new BodyRPZTask(robot);
 
     rfoot_contact_ = new FootLinear(robot_, "rAnkle", 0.3);
     lfoot_contact_ = new FootLinear(robot_, "lAnkle", 0.3);
@@ -50,7 +50,7 @@ BodyRPZCtrl::BodyRPZCtrl(RobotSystem* robot) : Controller(robot) {
     printf("[Body RPZ Ctrl] Constructed\n");
 }
 
-BodyRPZCtrl::~BodyRPZCtrl(){
+BodyCtrl::~BodyCtrl(){
     delete body_rpz_task_;
     delete wblc_;
     delete wblc_data_;
@@ -58,7 +58,7 @@ BodyRPZCtrl::~BodyRPZCtrl(){
     delete lfoot_contact_;
 }
 
-void BodyRPZCtrl::oneStep(void* _cmd){
+void BodyCtrl::oneStep(void* _cmd){
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -74,7 +74,7 @@ void BodyRPZCtrl::oneStep(void* _cmd){
     _PostProcessing_Command();
 }
 
-void BodyRPZCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
+void BodyCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     // WBLC
     Eigen::MatrixXd A_rotor = A_;
     for (int i(0); i<robot_->getNumActuatedDofs(); ++i){
@@ -99,7 +99,7 @@ void BodyRPZCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     sp_->reaction_forces = wblc_data_->Fr_;
 }
 
-void BodyRPZCtrl::_body_task_setup(){
+void BodyCtrl::_body_task_setup(){
     des_jpos_ = jpos_ini_;
     des_jvel_.setZero();
     des_jacc_.setZero();
@@ -153,12 +153,12 @@ void BodyRPZCtrl::_body_task_setup(){
     //dynacore::pretty_print(des_jvel_, std::cout, "des jvel");
     //dynacore::pretty_print(des_jacc_, std::cout, "des jacc");
     //
-    //dynacore::Vect3 com_pos;
+    //Eigen::Vector3d com_pos;
     //robot_->getCoMPosition(com_pos);
     //dynacore::pretty_print(com_pos, std::cout, "com_pos");
 }
 
-void BodyRPZCtrl::_double_contact_setup(){
+void BodyCtrl::_double_contact_setup(){
     rfoot_contact_->updateContactSpec();
     lfoot_contact_->updateContactSpec();
 
@@ -166,22 +166,23 @@ void BodyRPZCtrl::_double_contact_setup(){
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BodyRPZCtrl::firstVisit(){
+void BodyCtrl::firstVisit(){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     ctrl_start_time_ = sp_->curr_time;
 
-    ini_body_pos_ = robot_->getBodyNodeIsometry("torso").translation();
+    //ini_body_pos_ = robot_->getBodyNodeIsometry("torso").translation();
+    ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
 }
 
-void BodyRPZCtrl::lastVisit(){  }
+void BodyCtrl::lastVisit(){  }
 
-bool BodyRPZCtrl::endOfPhase(){
+bool BodyCtrl::endOfPhase(){
     if(state_machine_time_ > end_time_){
         return true;
     }
     return false;
 }
-void BodyRPZCtrl::ctrlInitialization(const std::string & setting_file_name){
+void BodyCtrl::ctrlInitialization(const std::string & setting_file_name){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     try {
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");

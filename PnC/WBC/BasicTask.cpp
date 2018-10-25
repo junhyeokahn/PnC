@@ -117,6 +117,7 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
             + kd_[i] * (vel_des[i] - vel_act[i]);
     }
 
+    return true;
 }
 
 bool BasicTask::_UpdateTaskJacobian() {
@@ -146,6 +147,7 @@ bool BasicTask::_UpdateTaskJacobian() {
                     std::cout << "[BasicTask] Type is not Specified" << std::endl;
                 }
     }
+    return true;
 }
 
 bool BasicTask::_UpdateTaskJDotQdot() {
@@ -175,4 +177,5 @@ bool BasicTask::_UpdateTaskJDotQdot() {
                     std::cout << "[BasicTask] Type is not Specified" << std::endl;
                 }
     }
+    return true;
 }

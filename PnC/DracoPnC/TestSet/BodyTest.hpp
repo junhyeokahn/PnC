@@ -23,5 +23,5 @@ class BodyTest: public Test{
 
         Controller* jpos_target_ctrl_;
         Controller* body_lift_ctrl_;
-        Controller* body_rpz_ctrl_;
+        Controller* body_ctrl_;
 };

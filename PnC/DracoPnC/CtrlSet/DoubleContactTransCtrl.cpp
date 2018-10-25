@@ -6,7 +6,7 @@
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 
-BodyLiftCtrl::BodyLiftCtrl(RobotSystem* robot) : Controller(robot) {
+DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(robot) {
 
     b_set_height_target_ = false;
     end_time_ = 100.;
@@ -16,7 +16,7 @@ BodyLiftCtrl::BodyLiftCtrl(RobotSystem* robot) : Controller(robot) {
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    body_rpz_task_ = new TorsoRPZTask(robot);
+    body_rpz_task_ = new BodyRPZTask(robot);
 
     selected_jidx_.clear();
     selected_jidx_.push_back(robot_->getJointIdx("rHipYaw"));
@@ -48,7 +48,7 @@ BodyLiftCtrl::BodyLiftCtrl(RobotSystem* robot) : Controller(robot) {
     printf("[Body Lift Ctrl] Constructed\n");
 }
 
-BodyLiftCtrl::~BodyLiftCtrl(){
+DoubleContactTransCtrl::~DoubleContactTransCtrl(){
     delete body_rpz_task_;
     delete rfoot_contact_;
     delete lfoot_contact_;
@@ -57,23 +57,30 @@ BodyLiftCtrl::~BodyLiftCtrl(){
     delete wblc_data_;
 }
 
-void BodyLiftCtrl::oneStep(void* _cmd){
+void DoubleContactTransCtrl::oneStep(void* _cmd){
+    std::cout << "1" << std::endl;
     _PreProcessing_Command();
+    std::cout << "2" << std::endl;
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma;
     _contact_setup();
+    std::cout << "3" << std::endl;
     _task_setup();
+    std::cout << "4" << std::endl;
     _compute_torque_wblc(gamma);
+    std::cout << "5" << std::endl;
 
     for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
         ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
         ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
         ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
+    std::cout << "6" << std::endl;
     _PostProcessing_Command();
+    std::cout << "7" << std::endl;
 }
 
-void BodyLiftCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
+void DoubleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     Eigen::MatrixXd A_rotor = A_;
     for (int i(0); i<robot_->getNumActuatedDofs(); ++i){
         A_rotor(i + robot_->getNumVirtualDofs(), i + robot_->getNumVirtualDofs())
@@ -95,7 +102,7 @@ void BodyLiftCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     sp_->reaction_forces = wblc_data_->Fr_;
 }
 
-void BodyLiftCtrl::_task_setup(){
+void DoubleContactTransCtrl::_task_setup(){
     des_jpos_ = ini_jpos_;
     des_jvel_.setZero();
     des_jacc_.setZero();
@@ -153,7 +160,7 @@ void BodyLiftCtrl::_task_setup(){
     //dynacore::pretty_print(des_jacc_, std::cout, "des_jacc");
 }
 
-void BodyLiftCtrl::_contact_setup(){
+void DoubleContactTransCtrl::_contact_setup(){
     //((SingleContact*)rfoot_contact_)->setMaxFz(
         //min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_) );
     //((SingleContact*)lfoot_contact_)->setMaxFz(
@@ -172,23 +179,25 @@ void BodyLiftCtrl::_contact_setup(){
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BodyLiftCtrl::firstVisit(){
-    ini_base_height_ = robot_->getQ()[2];
+void DoubleContactTransCtrl::firstVisit(){
+    //ini_base_height_ = robot_->getQ()[2];
+    ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
     ctrl_start_time_ = sp_->curr_time;
-    base_pos_ini_ = sp_->q.head(3);
-    base_ori_ini_ = robot_->getBodyNodeIsometry("torso").linear();
+    //base_pos_ini_ = sp_->q.head(3);
+    base_pos_ini_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    base_ori_ini_ = robot_->getBodyNodeCoMIsometry("torso").linear();
 }
 
-void BodyLiftCtrl::lastVisit(){
+void DoubleContactTransCtrl::lastVisit(){
 }
 
-bool BodyLiftCtrl::endOfPhase(){
+bool DoubleContactTransCtrl::endOfPhase(){
     if(state_machine_time_ > end_time_){
         return true;
     }
     return false;
 }
-void BodyLiftCtrl::ctrlInitialization(const std::string & setting_file_name){
+void DoubleContactTransCtrl::ctrlInitialization(const std::string & setting_file_name){
     ini_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     try {
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");

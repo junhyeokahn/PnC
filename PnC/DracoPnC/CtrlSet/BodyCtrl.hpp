@@ -9,10 +9,10 @@ class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
 
-class BodyRPZCtrl: public Controller{
+class BodyCtrl: public Controller{
     public:
-        BodyRPZCtrl(RobotSystem* );
-        virtual ~BodyRPZCtrl();
+        BodyCtrl(RobotSystem* );
+        virtual ~BodyCtrl();
 
         virtual void oneStep(void* _cmd);
         virtual void firstVisit();

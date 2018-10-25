@@ -2,20 +2,20 @@
 #include <Configuration.h>
 #include <Utils/Utilities.hpp>
 
-TorsoRPZTask::TorsoRPZTask(RobotSystem* robot):Task(robot, 3)
+BodyRPZTask::BodyRPZTask(RobotSystem* robot):Task(robot, 3)
 {
     Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
     JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
 }
 
-TorsoRPZTask::~TorsoRPZTask(){}
+BodyRPZTask::~BodyRPZTask(){}
 
-bool TorsoRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
+bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
         const Eigen::VectorXd & _vel_des,
         const Eigen::VectorXd & _acc_des) {
 
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
-    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeIsometry("torso").linear());
+    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry("torso").linear());
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
     Eigen::Vector3d ori_err;
@@ -35,17 +35,18 @@ bool TorsoRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     return true;
 }
 
-bool TorsoRPZTask::_UpdateTaskJacobian(){
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian("torso");
+bool BodyRPZTask::_UpdateTaskJacobian(){
+    //Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian("torso");
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian("torso");
     // (Rx, Ry)
     Jt_.block(0,0, 2, robot_->getNumDofs()) = Jtmp.block(0,0, 2, robot_->getNumDofs());
     // (Z)
-    Jt_(2, 2) = 1.;
+    Jt_.block(2, 0, 2, robot_->getNumDofs()) = Jtmp.block(0, 5, 1, robot_->getNumDofs());
 
     return true;
 }
 
-bool TorsoRPZTask::_UpdateTaskJDotQdot(){
+bool BodyRPZTask::_UpdateTaskJDotQdot(){
     JtDotQdot_.setZero();
     return true;
 }
