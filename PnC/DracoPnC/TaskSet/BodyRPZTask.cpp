@@ -41,7 +41,8 @@ bool BodyRPZTask::_UpdateTaskJacobian(){
     // (Rx, Ry)
     Jt_.block(0,0, 2, robot_->getNumDofs()) = Jtmp.block(0,0, 2, robot_->getNumDofs());
     // (Z)
-    Jt_.block(2, 0, 2, robot_->getNumDofs()) = Jtmp.block(0, 5, 1, robot_->getNumDofs());
+    Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(0, 5, 1, robot_->getNumDofs());
+    std::cout << Jt_ << std::endl;
 
     return true;
 }
