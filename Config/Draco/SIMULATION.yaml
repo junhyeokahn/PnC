@@ -3,6 +3,7 @@ is_record: false
 hanging_height: 0.8
 
 release_time: 70
+#release_time: 0
 
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
 

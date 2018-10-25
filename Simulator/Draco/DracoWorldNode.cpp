@@ -58,6 +58,7 @@ void DracoWorldNode::customPreStep() {
     mSensorData->jtrq = mSkel->getForces().tail(10);
 
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
+    _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
 
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand.tail(10) = mCommand->jtrq;
@@ -96,4 +97,21 @@ void DracoWorldNode::_get_imu_data( Eigen::VectorXd & ang_vel,
     //std::cout << acc << std::endl;
     //std::cout << "Ang Vel" << std::endl;
     //std::cout << ang_vel << std::endl;
+}
+
+void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
+                                          bool & lfoot_contact) {
+    Eigen::VectorXd rfoot_pos = mSkel->getBodyNode("rAnkle")->getCOM();
+    Eigen::VectorXd lfoot_pos = mSkel->getBodyNode("lAnkle")->getCOM();
+    //std::cout << rfoot_pos << std::endl;
+    //std::cout << lfoot_pos << std::endl;
+    //exit(0);
+    if(  fabs(lfoot_pos[2]) < 0.029){
+        lfoot_contact = true;
+        //printf("left contact\n");
+    }else { lfoot_contact = false; }
+    if (fabs(rfoot_pos[2])<0.029  ){
+        rfoot_contact = true;
+        //printf("right contact\n");
+    } else { rfoot_contact = false; }
 }

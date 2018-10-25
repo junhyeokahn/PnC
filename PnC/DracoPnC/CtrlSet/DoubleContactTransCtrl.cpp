@@ -58,26 +58,19 @@ DoubleContactTransCtrl::~DoubleContactTransCtrl(){
 }
 
 void DoubleContactTransCtrl::oneStep(void* _cmd){
-    std::cout << "1" << std::endl;
     _PreProcessing_Command();
-    std::cout << "2" << std::endl;
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma;
     _contact_setup();
-    std::cout << "3" << std::endl;
     _task_setup();
-    std::cout << "4" << std::endl;
     _compute_torque_wblc(gamma);
-    std::cout << "5" << std::endl;
 
     for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
         ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
         ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
         ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
-    std::cout << "6" << std::endl;
     _PostProcessing_Command();
-    std::cout << "7" << std::endl;
 }
 
 void DoubleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){

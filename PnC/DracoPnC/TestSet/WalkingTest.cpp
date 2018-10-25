@@ -82,7 +82,7 @@ WalkingTest::~WalkingTest(){
 }
 
 void WalkingTest::TestInitialization(){
-    reversal_planner_->PlannerInitialization("VELOCITY_REVERSAL_PLANNER.yaml");
+    reversal_planner_->PlannerInitialization("VELOCITY_REVERSAL_PLANNER");
     // Yaml file name
     jpos_ctrl_->ctrlInitialization("JOINT_CTRL");
     body_up_ctrl_->ctrlInitialization("DOUBLE_CONTACT_TRANS_CTRL");
@@ -137,7 +137,7 @@ void WalkingTest::_SettingParameter(){
 
         double tmp; bool b_tmp; Eigen::VectorXd tmp_vec; std::string tmp_str;
 
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALING_TEST.yaml");
+        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_TEST.yaml");
 
         myUtils::readParameter(cfg, "start_phase", phase_);
 
@@ -176,7 +176,7 @@ void WalkingTest::_SettingParameter(){
         ((SingleContactTransCtrl*)left_swing_start_trans_ctrl_)->setTransitionTime(tmp);
         ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)->setTransitionTime(tmp);
 
-        myUtils::readParameter(cfg, "replanning", tmp);
+        myUtils::readParameter(cfg, "replanning", b_tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setReplanning(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setReplanning(b_tmp);
 
@@ -188,7 +188,7 @@ void WalkingTest::_SettingParameter(){
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setTransitionPhaseRatio(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setTransitionPhaseRatio(tmp);
 
-        myUtils::readParameter(cfg, "contact_switch_check", tmp);
+        myUtils::readParameter(cfg, "contact_switch_check", b_tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setContactSwitchCheck(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setContactSwitchCheck(b_tmp);
 

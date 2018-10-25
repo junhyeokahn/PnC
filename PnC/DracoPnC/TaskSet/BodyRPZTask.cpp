@@ -39,10 +39,10 @@ bool BodyRPZTask::_UpdateTaskJacobian(){
     //Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian("torso");
     Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian("torso");
     // (Rx, Ry)
-    Jt_.block(0,0, 2, robot_->getNumDofs()) = Jtmp.block(0,0, 2, robot_->getNumDofs());
+    Jt_.block(0 ,0 , 2, robot_->getNumDofs()) = Jtmp.block(0, 0, 2, robot_->getNumDofs());
     // (Z)
-    Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(0, 5, 1, robot_->getNumDofs());
-    std::cout << Jt_ << std::endl;
+    //Jt_(2, 2) = 1.0;
+    Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(5, 0, 1, robot_->getNumDofs());
 
     return true;
 }

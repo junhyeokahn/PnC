@@ -20,7 +20,7 @@ JointTest::~JointTest(){
 }
 
 void JointTest::TestInitialization(){
-    jpos_target_ctrl_->ctrlInitialization("JOINT_TARGET_CTRL");
+    jpos_target_ctrl_->ctrlInitialization("JOINT_CTRL");
     jpos_swing_ctrl_->ctrlInitialization("JOINT_SWING_CTRL");
     std::cout << "[Joint Test] Initialized" << std::endl;
 }

@@ -63,9 +63,9 @@ void DracoStateEstimator::initialization(DracoSensorData* data){
     //Eigen::VectorXd foot_vel =
         //robot_->getBodyNodeCoMSpatialVelocity(sp_->stance_foot).tail(3);
     Eigen::VectorXd foot_pos =
-        robot_->getBodyNodeIsometry(sp_->stance_foot).translation();
+        robot_->getBodyNodeCoMIsometry(sp_->stance_foot).translation();
     Eigen::VectorXd foot_vel =
-        robot_->getBodyNodeSpatialVelocity(sp_->stance_foot).tail(3);
+        robot_->getBodyNodeCoMSpatialVelocity(sp_->stance_foot).tail(3);
 
     curr_config_[0] = -foot_pos[0];
     curr_config_[1] = -foot_pos[1];
@@ -124,9 +124,9 @@ void DracoStateEstimator::update(DracoSensorData* data){
     //Eigen::VectorXd foot_vel =
         //robot_->getBodyNodeCoMSpatialVelocity(sp_->stance_foot).tail(3);
     Eigen::VectorXd foot_pos =
-        robot_->getBodyNodeIsometry(sp_->stance_foot).translation();
+        robot_->getBodyNodeCoMIsometry(sp_->stance_foot).translation();
     Eigen::VectorXd foot_vel =
-        robot_->getBodyNodeSpatialVelocity(sp_->stance_foot).tail(3);
+        robot_->getBodyNodeCoMSpatialVelocity(sp_->stance_foot).tail(3);
 
     curr_config_[0] = -foot_pos[0];
     curr_config_[1] = -foot_pos[1];

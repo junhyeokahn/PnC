@@ -209,7 +209,7 @@ void Reversal_LIPM_Planner::_StepLengthCheck(Eigen::Vector3d & target_loc, const
 
 void Reversal_LIPM_Planner::PlannerInitialization(const std::string & file){
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/PLANNER/"+file+".yaml");
+        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/PLANNER/WALKING/"+file+".yaml");
         myUtils::readParameter(cfg, "t_prime", t_prime_);
         myUtils::readParameter(cfg, "kappa", kappa_);
         myUtils::readParameter(cfg, "x_step_length_limit", x_step_length_limit_);

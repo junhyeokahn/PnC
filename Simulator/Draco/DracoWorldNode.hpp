@@ -18,6 +18,7 @@ private:
 
     void _get_imu_data( Eigen::VectorXd & ang_vel,
                         Eigen::VectorXd & acc);
+    void _check_foot_contact( bool & rfoot_contact, bool & lfoot_contact );
 
     dart::dynamics::SkeletonPtr mSkel;
     Eigen::VectorXd mTorqueCommand;
