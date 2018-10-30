@@ -175,6 +175,8 @@ void WalkingTest::_SettingParameter(){
         ((SingleContactTransCtrl*)right_swing_end_trans_ctrl_)->setTransitionTime(tmp);
         ((SingleContactTransCtrl*)left_swing_start_trans_ctrl_)->setTransitionTime(tmp);
         ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)->setTransitionTime(tmp);
+        ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyTransitionTime(tmp);
+        ((SwingPlanningCtrl*)left_swing_ctrl_)->notifyTransitionTime(tmp);
 
         myUtils::readParameter(cfg, "replanning", b_tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setReplanning(b_tmp);

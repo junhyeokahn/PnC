@@ -50,7 +50,6 @@ protected:
   std::vector<double> kappa_;
   std::vector<double> x_step_length_limit_;
   std::vector<double> y_step_length_limit_;
-
   std::vector<double> com_vel_limit_;
 
   double omega_;

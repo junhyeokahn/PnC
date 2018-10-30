@@ -149,10 +149,10 @@ void BodyFootPlanningCtrl::_task_setup(){
     Eigen::VectorXd vel_des(6); vel_des.setZero();
     Eigen::VectorXd acc_des(6); acc_des.setZero();
 
-    pos_des[0] = des_quat.x();
-    pos_des[1] = des_quat.y();
-    pos_des[2] = des_quat.z();
-    pos_des[3] = des_quat.w();
+    pos_des[0] = des_quat.w();
+    pos_des[1] = des_quat.x();
+    pos_des[2] = des_quat.y();
+    pos_des[3] = des_quat.z();
 
     pos_des[4] = 0.;
     pos_des[5] = ini_body_pos_[1];
@@ -241,6 +241,7 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
 
         // com_pos[i] = sp_->jjpos_body_pos_[i] + body_pt_offset_[i];
     }
+
     printf("planning com state: %f, %f, %f, %f\n",
             com_pos[0], com_pos[1],
             com_vel[0], com_vel[1]);
@@ -278,13 +279,14 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     for(int i(0); i<2; ++i){
         target_loc[i] += foot_landing_offset_[i];
     }
-    //myUtils::pretty_print(target_loc, std::cout, "next foot loc");
+    myUtils::pretty_print(target_loc, std::cout, "next foot loc");
 }
 
 void BodyFootPlanningCtrl::firstVisit(){
     b_replaned_ = false;
     ini_config_ = sp_->q;
-    ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    //ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    ini_body_pos_ = sp_->q.head(3);
     ini_foot_pos_ = robot_->getBodyNodeCoMIsometry(swing_foot_).translation();
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
@@ -354,8 +356,8 @@ bool BodyFootPlanningCtrl::endOfPhase(){
 }
 
 void BodyFootPlanningCtrl::ctrlInitialization(const std::string & setting_file_name){
-    //ini_base_height_ = sp_->q[2];
-    ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
+    ini_base_height_ = sp_->q[2];
+    //ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
     try {
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
         myUtils::readParameter(cfg, "kp", Kp_);

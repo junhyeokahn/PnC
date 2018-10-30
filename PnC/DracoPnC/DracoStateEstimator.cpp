@@ -117,7 +117,7 @@ void DracoStateEstimator::update(DracoSensorData* data){
 
     for(int i(0); i<3; ++i)  curr_qdot_[i+3] = global_euler_zyx_dot[i];
 
-    robot_->updateSystem(curr_config_, curr_qdot_, true);
+    robot_->updateSystem(curr_config_, curr_qdot_, false);
 
     //Eigen::VectorXd foot_pos =
         //robot_->getBodyNodeCoMIsometry(sp_->stance_foot).translation();

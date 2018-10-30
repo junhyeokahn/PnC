@@ -124,10 +124,10 @@ void BodyCtrl::_body_task_setup(){
     else body_height_cmd = ini_body_height_;
 
     // Orientation
-    pos_des[0] = des_quat.x();
-    pos_des[1] = des_quat.y();
-    pos_des[2] = des_quat.z();
-    pos_des[3] = des_quat.w();
+    pos_des[0] = des_quat.w();
+    pos_des[1] = des_quat.x();
+    pos_des[2] = des_quat.y();
+    pos_des[3] = des_quat.z();
 
     // Position
     pos_des[4] = 0.;
@@ -149,7 +149,7 @@ void BodyCtrl::_body_task_setup(){
             des_jpos_, des_jvel_, des_jacc_);
 
     //dynacore::pretty_print(jpos_ini_, std::cout, "jpos ini");
-    //dynacore::pretty_print(des_jpos_, std::cout, "des jpos");
+    //myUtils::pretty_print(des_jpos_, std::cout, "des jpos");
     //dynacore::pretty_print(des_jvel_, std::cout, "des jvel");
     //dynacore::pretty_print(des_jacc_, std::cout, "des jacc");
     //
@@ -167,11 +167,17 @@ void BodyCtrl::_double_contact_setup(){
 }
 
 void BodyCtrl::firstVisit(){
+    // TODO
+    myUtils::pretty_print(sp_->q, std::cout, "q");
+    myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
+    exit(0);
+    // TODO
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     ctrl_start_time_ = sp_->curr_time;
 
+    ini_body_pos_ = robot_->getQ().head(3);
     //ini_body_pos_ = robot_->getBodyNodeIsometry("torso").translation();
-    ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    //ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
 }
 
 void BodyCtrl::lastVisit(){  }

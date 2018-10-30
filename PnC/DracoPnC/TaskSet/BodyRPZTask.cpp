@@ -23,7 +23,8 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 
     // (Rx, Ry)
     for (int i = 0; i < 2; ++i) {
-        pos_err[i] = myUtils::bind_half_pi(ori_err_so3[i]);
+        //pos_err[i] = myUtils::bind_half_pi(ori_err_so3[i]);
+        pos_err[i] = (ori_err_so3[i]);
         vel_des[i] = _vel_des[i];
         acc_des[i] = _acc_des[i];
     }
@@ -31,6 +32,10 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     pos_err[2] = _pos_des[6] - (robot_->getQ())[2];
     vel_des[2] = vel_des[5];
     acc_des[2] = acc_des[5];
+
+    //myUtils::pretty_print(des_ori, std::cout, "ori_des");
+    //myUtils::pretty_print(ori_act, std::cout, "ori_act");
+    //myUtils::pretty_print(pos_err, std::cout, "pos_err");
 
     return true;
 }
@@ -41,8 +46,8 @@ bool BodyRPZTask::_UpdateTaskJacobian(){
     // (Rx, Ry)
     Jt_.block(0 ,0 , 2, robot_->getNumDofs()) = Jtmp.block(0, 0, 2, robot_->getNumDofs());
     // (Z)
-    //Jt_(2, 2) = 1.0;
-    Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(5, 0, 1, robot_->getNumDofs());
+    Jt_(2, 2) = 1.0;
+    //Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(5, 0, 1, robot_->getNumDofs());
 
     return true;
 }

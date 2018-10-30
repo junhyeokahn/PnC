@@ -71,7 +71,6 @@ void DracoWorldNode::customPreStep() {
 
     //mTorqueCommand.setZero(); //TODO
     mSkel->setForces(mTorqueCommand);
-
 }
 
 void DracoWorldNode::_get_imu_data( Eigen::VectorXd & ang_vel,
@@ -113,14 +112,22 @@ void DracoWorldNode::_hold_xy() {
     double act_ydot = mSkel->getVelocities()[1];
 
     if ((double)count_*SERVO_RATE < mReleaseTime) {
-        mTorqueCommand[0] = 1000 * (des_x - act_x)
-            -50 * act_xdot ;
-        mTorqueCommand[1] = 1000 * (- act_y)
-            -50 * act_ydot ;
+        mTorqueCommand[0] = 2500 * (des_x - act_x)
+            -100 * act_xdot ;
+        mTorqueCommand[1] = 1500 * (- act_y)
+            -100 * act_ydot ;
     } else {
         static bool first__ = true;
         if (first__) {
             std::cout << "[Release]" << std::endl;
+            //std::cout << "Des x" << std::endl;
+            //std::cout << des_x << std::endl;
+            //std::cout << "Des y" << std::endl;
+            //std::cout << des_y << std::endl;
+            //std::cout << "Act x" << std::endl;
+            //std::cout << act_x << std::endl;
+            //std::cout << "Act y" << std::endl;
+            //std::cout << act_y << std::endl;
             first__ = false;
         }
     }

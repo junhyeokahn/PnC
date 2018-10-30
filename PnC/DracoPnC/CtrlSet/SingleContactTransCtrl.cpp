@@ -127,10 +127,10 @@ void SingleContactTransCtrl::_task_setup(){
     Eigen::VectorXd vel_des(6); vel_des.setZero();
     Eigen::VectorXd acc_des(6); acc_des.setZero();
 
-    pos_des[0] = des_quat.x();
-    pos_des[1] = des_quat.y();
-    pos_des[2] = des_quat.z();
-    pos_des[3] = des_quat.w();
+    pos_des[0] = des_quat.w();
+    pos_des[1] = des_quat.x();
+    pos_des[2] = des_quat.y();
+    pos_des[3] = des_quat.z();
 
     pos_des[4] = 0.;
     pos_des[5] = ini_base_pos_[1];
@@ -219,7 +219,8 @@ void SingleContactTransCtrl::firstVisit(){
     // printf("[Transition] Start\n");
     ctrl_start_time_ = sp_->curr_time;
 
-    ini_base_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    //ini_base_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    ini_base_pos_ = sp_->q.head(3);
 }
 
 void SingleContactTransCtrl::lastVisit(){

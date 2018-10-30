@@ -65,6 +65,11 @@ namespace myUtils
             std::string const & title,
             std::string const & prefix ="",
             bool vecmode = false, bool nonl = false);
+    void pretty_print( Eigen::Quaternion<double> const & qq, std::ostream & os,
+            std::string const & title,
+            std::string const & prefix="", bool nonl = false);
+    void pretty_print( Eigen::Vector3d const & vv, std::ostream & os,
+            std::string const & title, std::string const & prefix="", bool nonl = false);
     std::string pretty_string(Eigen::VectorXd const & vv);
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);

@@ -130,11 +130,6 @@ void DoubleContactTransCtrl::_task_setup(){
     pos_des[2] = des_quat.y();
     pos_des[3] = des_quat.z();
 
-    //pos_des[0] = base_ori_ini_.x();
-    //pos_des[1] = base_ori_ini_.y();
-    //pos_des[2] = base_ori_ini_.z();
-    //pos_des[3] = base_ori_ini_.w();
-
     pos_des[4] = base_pos_ini_[0];
     pos_des[5] = base_pos_ini_[1];
     pos_des[6] = base_height_cmd;
@@ -173,11 +168,15 @@ void DoubleContactTransCtrl::_contact_setup(){
 }
 
 void DoubleContactTransCtrl::firstVisit(){
-    //ini_base_height_ = robot_->getQ()[2];
-    ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
+    // TODO
+    myUtils::pretty_print(sp_->q, std::cout, "q");
+    myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
+    // TODO
+    ini_base_height_ = robot_->getQ()[2];
+    //ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
     ctrl_start_time_ = sp_->curr_time;
-    //base_pos_ini_ = sp_->q.head(3);
-    base_pos_ini_ = robot_->getBodyNodeCoMIsometry("torso").translation();
+    base_pos_ini_ = robot_->getQ().head(3);
+    //base_pos_ini_ = robot_->getBodyNodeCoMIsometry("torso").translation();
     base_ori_ini_ = robot_->getBodyNodeCoMIsometry("torso").linear();
 }
 

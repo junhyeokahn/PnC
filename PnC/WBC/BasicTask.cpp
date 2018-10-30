@@ -158,12 +158,12 @@ bool BasicTask::_UpdateTaskJDotQdot() {
                                   }
         case BasicTaskType::LINKXYZ:{
                                         JtDotQdot_ = robot_->
-                                            getBodyNodeCoMJacobianDot(link_name_).block(3, 0, dim_task_, robot_->getNumDofs());
+                                            getBodyNodeCoMJacobianDot(link_name_).block(3, 0, dim_task_, robot_->getNumDofs()) * robot_->getQdot();
                                         break;
                                     }
         case BasicTaskType::LINKORI:{
                                         JtDotQdot_ = robot_->
-                                            getBodyNodeCoMJacobianDot(link_name_).block(0, 0, dim_task_, robot_->getNumDofs());
+                                            getBodyNodeCoMJacobianDot(link_name_).block(0, 0, dim_task_, robot_->getNumDofs()) * robot_->getQdot();
                                         break;
                                     }
         case BasicTaskType::CENTROID:{
