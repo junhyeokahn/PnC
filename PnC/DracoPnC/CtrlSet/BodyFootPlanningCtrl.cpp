@@ -210,6 +210,7 @@ void BodyFootPlanningCtrl::_task_setup(){
 
 void BodyFootPlanningCtrl::_CheckPlanning(){
     if( (state_machine_time_ > 0.5 * end_time_) && b_replanning_ && !b_replaned_) {
+
         Eigen::Vector3d target_loc;
         _Replanning(target_loc);
 
@@ -234,12 +235,7 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     // TEST
     for(int i(0); i<2; ++i){
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
-        // TEST jpos update must be true
-        // com_pos[i] = sp_->jjpos_body_pos_[i] + body_pt_offset_[i];
-        // com_pos[i] += body_pt_offset_[i];
         com_vel[i] = sp_->qdot[i];
-
-        // com_pos[i] = sp_->jjpos_body_pos_[i] + body_pt_offset_[i];
     }
 
     printf("planning com state: %f, %f, %f, %f\n",
@@ -280,6 +276,12 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
         target_loc[i] += foot_landing_offset_[i];
     }
     myUtils::pretty_print(target_loc, std::cout, "next foot loc");
+    //TODO
+    //myUtils::pretty_print(sp_->q, std::cout, "q");
+    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
+    //exit(0);
+    //TODO
+
 }
 
 void BodyFootPlanningCtrl::firstVisit(){
@@ -310,6 +312,11 @@ void BodyFootPlanningCtrl::firstVisit(){
     input_state[1] = ini_com_pos_[1];
     input_state[2] = com_vel[0];   input_state[3] = com_vel[1];
 
+    //TODO
+    //myUtils::pretty_print(sp_->q, std::cout, "q");
+    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
+    //exit(0);
+    //TODO
 }
 
 void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d & offset){

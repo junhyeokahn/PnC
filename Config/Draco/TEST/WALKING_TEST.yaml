@@ -1,10 +1,11 @@
 start_phase: 0
 
-initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
+#initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
+initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
 body_height: 1.0
 
 jpos_initialization_time: 4.0
-com_lifting_time: 3.0
+com_lifting_time: 4.0
 
 swing_time: 0.33
 st_transition_time: 0.03

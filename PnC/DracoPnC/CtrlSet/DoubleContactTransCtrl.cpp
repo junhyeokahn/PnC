@@ -169,8 +169,8 @@ void DoubleContactTransCtrl::_contact_setup(){
 
 void DoubleContactTransCtrl::firstVisit(){
     // TODO
-    myUtils::pretty_print(sp_->q, std::cout, "q");
-    myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
+    //myUtils::pretty_print(sp_->q, std::cout, "q");
+    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
     // TODO
     ini_base_height_ = robot_->getQ()[2];
     //ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
