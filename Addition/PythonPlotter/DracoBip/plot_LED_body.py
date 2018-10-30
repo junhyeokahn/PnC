@@ -73,7 +73,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
         plt.plot(data_x, data_body_global[st_idx:end_idx,i-1], "b-")
-        # plt.plot(data_x, data_global_pos_offset[st_idx:end_idx,i-1], "crimson")
+        plt.plot(data_x, data_global_pos_offset[st_idx:end_idx,i-1], "crimson")
 
         plt.grid(True)
         for j in phseChange:
