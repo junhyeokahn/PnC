@@ -17,7 +17,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     col_index = starting_col_index
     row_index = starting_row_index
 
-    file_path = os.getcwd() + "/../../../experiment_data_check/"
+    file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 ## read files
     data_cmd = \
             np.genfromtxt(file_path+'command.txt', delimiter=None, dtype=(float))

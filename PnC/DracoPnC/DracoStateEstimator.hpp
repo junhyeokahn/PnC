@@ -28,9 +28,17 @@ class DracoStateEstimator{
 
         Eigen::VectorXd curr_config_;
         Eigen::VectorXd curr_qdot_;
+        Eigen::Vector3d global_euler_zyx_;
+        Eigen::Vector3d global_euler_zyx_dot_;
 
         BasicAccumulation* ori_est_;
         BodyEstimator* body_est_;
         filter* mocap_x_vel_est_;
         filter* mocap_y_vel_est_;
+        filter* x_vel_est_;
+        filter* y_vel_est_;
+
+        void _JointUpdate(DracoSensorData* data);
+        void _ConfigurationAndModelUpdate();
+        void _FootContactUpdate(DracoSensorData* data);
 };

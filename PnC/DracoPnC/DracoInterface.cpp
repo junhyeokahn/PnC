@@ -72,6 +72,7 @@ void DracoInterface::getCommand( void* _data, void* _command){
     running_time_ = (double)(count_) * SERVO_RATE;
     ++count_;
     sp_->curr_time = running_time_;
+    sp_->phase_copy = test_->getPhase();
 }
 
 bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd){

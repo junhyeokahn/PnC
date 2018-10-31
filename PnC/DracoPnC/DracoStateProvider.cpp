@@ -46,6 +46,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&rfoot_vel, VECT3, "rfoot_vel", 3); 
     data_manager->RegisterData(&lfoot_vel, VECT3, "lfoot_vel", 3); 
 
+    data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3); 
+    data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3); 
+    data_manager->RegisterData(&com_vel, VECT3, "est_com_vel", 3); 
+
     data_manager->RegisterData(&est_mocap_body_vel, VECT2, "est_mocap_body_vel",2);
     printf("[Draco StateProvider] Constructed\n");
 }

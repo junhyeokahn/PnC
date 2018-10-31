@@ -130,6 +130,7 @@ class AverageFilter: public filter
         virtual void input(double input_value);
         virtual double output(void);
         virtual void clear(void);
+        void initialization(double);
     private:
         double est_value_;
         double dt_;

@@ -91,14 +91,18 @@ void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
     //std::cout << rfoot_pos << std::endl;
     //std::cout << lfoot_pos << std::endl;
     //exit(0);
-    if(  fabs(lfoot_pos[2]) < 0.029){
+    if (fabs(lfoot_pos[2]) < 0.029){
         lfoot_contact = true;
         //printf("left contact\n");
-    }else { lfoot_contact = false; }
+    } else {
+        lfoot_contact = false;
+    }
     if (fabs(rfoot_pos[2])<0.029){
         rfoot_contact = true;
         //printf("right contact\n");
-    } else { rfoot_contact = false; }
+    } else {
+        rfoot_contact = false;
+    }
 }
 
 void DracoWorldNode::_hold_xy() {

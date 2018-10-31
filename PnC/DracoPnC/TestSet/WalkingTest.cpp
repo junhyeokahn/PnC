@@ -111,6 +111,7 @@ int WalkingTest::_NextPhase(const int & phase){
         // Global Frame Update
         next_local_frame_location = robot_->getBodyNodeCoMIsometry("lAnkle").translation();
         sp_->global_pos_local += next_local_frame_location;
+        myUtils::pretty_print(sp_->global_pos_local, std::cout, "****lstance");
     }
     if(phase == WkPhase::double_contact_2){
         ++num_step_;
@@ -121,6 +122,7 @@ int WalkingTest::_NextPhase(const int & phase){
         // Global Frame Update
         next_local_frame_location = robot_->getBodyNodeCoMIsometry("rAnkle").translation();
         sp_->global_pos_local += next_local_frame_location;
+        myUtils::pretty_print(sp_->global_pos_local, std::cout, "****rstance");
     }
     sp_->num_step_copy = num_step_;
 

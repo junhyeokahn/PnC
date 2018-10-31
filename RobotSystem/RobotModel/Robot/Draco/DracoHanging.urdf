@@ -98,7 +98,6 @@
       </material>
     </visual>
     <collision>
-      <!--<origin xyz="0 0 -0.795" rpy="0 0 0" />-->
       <origin xyz="0 0 -0.815" rpy="0 0 0" />
       <geometry>
         <cylinder radius="0.1" length="0.02"/>

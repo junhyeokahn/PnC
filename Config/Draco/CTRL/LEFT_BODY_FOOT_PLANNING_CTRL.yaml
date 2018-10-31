@@ -1,6 +1,6 @@
 planner_name: velocity_reversal_lipm
 swing_height: 0.12
-push_down_height: 0.01
+push_down_height: 0.0
 default_target_foot_location: [-0.0, 0.13, 0.0]
 
 kp: [ 150 , 150 , 150 , 150 , 150 , 150 , 150 , 150 , 200, 150 ]
@@ -10,5 +10,5 @@ kd: [ 8   , 8   , 8   , 8   , 8   , 8   , 8   , 8   , 8   , 8 ]
 #body_pt_offset: [-0.027, 0.00]
 #foot_landing_offset: [-0.1, -0.00]
 
-body_pt_offset: [0.0, 0.0]
+body_pt_offset: [-0.05, 0.0]
 foot_landing_offset: [0., 0.0]
