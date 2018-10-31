@@ -27,6 +27,8 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
         np.genfromtxt(file_path+'com_vel.txt', delimiter=None, dtype=(float)) ##
     data_config = \
         np.genfromtxt(file_path+'config.txt', delimiter=None, dtype=(float))
+    data_config_dot = \
+        np.genfromtxt(file_path+'qdot.txt', delimiter=None, dtype=(float))
     # foot data #
     data_rfoot_contact = \
         np.genfromtxt(file_path+'rfoot_contact.txt', delimiter=None, dtype=(float))
@@ -40,7 +42,7 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
         np.genfromtxt(file_path+'lfoot_pos.txt', delimiter=None, dtype=(float))
     data_lfoot_pos_des = \
         np.genfromtxt(file_path+'lfoot_pos_des.txt', delimiter=None, dtype=(float))
-    data_phse = \
+    data_phase = \
         np.genfromtxt(file_path+'phase.txt', delimiter=None, dtype=(float))
     data_planner = \
         np.genfromtxt(file_path+'planner_data.txt', delimiter=None, dtype=(float))
@@ -54,14 +56,14 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
     phase_swing_end_trans_idx = []
     phase_double_idx = []
 
-    for i in range(len(data_phse)-1):
-            if data_phse[i] != data_phse[i+1] and (data_phse[i+1]== 3 or data_phse[i+1] == 7):
+    for i in range(len(data_phase)-1):
+            if data_phase[i] != data_phase[i+1] and (data_phase[i+1]== 3 or data_phase[i+1] == 7):
                 phase_swing_st_trans_idx.append(i+1)
-            elif data_phse[i] != data_phse[i+1] and (data_phse[i+1]== 4 or data_phse[i+1] == 8):
+            elif data_phase[i] != data_phase[i+1] and (data_phase[i+1]== 4 or data_phase[i+1] == 8):
                 phase_swing_st_idx.append(i+1)
-            elif data_phse[i] != data_phse[i+1] and (data_phse[i+1]== 5 or data_phse[i+1] == 9):
+            elif data_phase[i] != data_phase[i+1] and (data_phase[i+1]== 5 or data_phase[i+1] == 9):
                 phase_swing_end_trans_idx.append(i+1)
-            elif data_phse[i] != data_phse[i+1] and (data_phse[i+1]== 6 or data_phse[i+1] == 2):
+            elif data_phase[i] != data_phase[i+1] and (data_phase[i+1]== 6 or data_phase[i+1] == 2):
                 phase_double_idx.append(i+1)
             else:
                 pass
@@ -81,9 +83,10 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
 
     data_com_pos_global = data_com_pos + data_global_pos_offset
     data_body_global = data_config[:,0:3] + data_global_pos_offset
-    x_pos_offset = 0.0
+    right_base_pos_offset = [-0.05, 0]
+    left_base_pos_offset = [-0.05, 0]
     st_step = 0
-    num_steps = 2
+    num_steps = 6
 
     lin_width = 3
     fig_width = 480
@@ -127,20 +130,38 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
         plot_axis = 0
 
         ## Phase trajectory #############
-        plt.plot(data_com_pos_global[swing_st_idx:swing_end_idx, plot_axis], \
-                data_com_vel[swing_st_idx:swing_end_idx, plot_axis], \
+        # COM
+        # plt.plot(data_com_pos_global[swing_st_idx:swing_end_idx, plot_axis], \
+                # data_com_vel[swing_st_idx:swing_end_idx, plot_axis], \
+                # linewidth=lin_width, color='blue')
+        # plt.scatter(data_com_pos_global[swing_st_idx-1, plot_axis], \
+                # data_com_vel[swing_st_idx-1, plot_axis], \
+                # s = 80, facecolors='blue', edgecolor='blue')
+        # plt.plot(data_com_pos_global[double_st_idx:double_end_idx, plot_axis], \
+                # data_com_vel[double_st_idx:double_end_idx, plot_axis], \
+                # linewidth=lin_width, color='black')
+        # plt.plot(data_com_pos_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                # data_com_vel[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                # linewidth=lin_width, color='indigo')
+        # plt.scatter(data_com_pos_global[nx_swing_end_idx-1, plot_axis], \
+                # data_com_vel[nx_swing_end_idx-1, plot_axis], \
+                # s = 80, facecolors='indigo', edgecolor='indigo')
+
+        # BASE
+        plt.plot(data_body_global[swing_st_idx:swing_end_idx, plot_axis], \
+                data_config_dot[swing_st_idx:swing_end_idx, plot_axis], \
                 linewidth=lin_width, color='blue')
-        plt.scatter(data_com_pos_global[swing_st_idx-1, plot_axis], \
-                data_com_vel[swing_st_idx-1, plot_axis], \
+        plt.scatter(data_body_global[swing_st_idx-1, plot_axis], \
+                data_config_dot[swing_st_idx-1, plot_axis], \
                 s = 80, facecolors='blue', edgecolor='blue')
-        plt.plot(data_com_pos_global[double_st_idx:double_end_idx, plot_axis], \
-                data_com_vel[double_st_idx:double_end_idx, plot_axis], \
+        plt.plot(data_body_global[double_st_idx:double_end_idx, plot_axis], \
+                data_config_dot[double_st_idx:double_end_idx, plot_axis], \
                 linewidth=lin_width, color='black')
-        plt.plot(data_com_pos_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
-                data_com_vel[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+        plt.plot(data_body_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                data_config_dot[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
                 linewidth=lin_width, color='indigo')
-        plt.scatter(data_com_pos_global[nx_swing_end_idx-1, plot_axis], \
-                data_com_vel[nx_swing_end_idx-1, plot_axis], \
+        plt.scatter(data_body_global[nx_swing_end_idx-1, plot_axis], \
+                data_config_dot[nx_swing_end_idx-1, plot_axis], \
                 s = 80, facecolors='indigo', edgecolor='indigo')
 
         ## End of Phase trajectory #############
@@ -156,10 +177,10 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
 
         ### planner choice #########################################################
         # planning start com state
-        plt.scatter(data_planner[st_step+i, plot_axis] + x_pos_offset, \
+        plt.scatter(data_planner[st_step+i, plot_axis], \
                 data_planner[st_step+i, 2 + plot_axis], \
                 s = 90, facecolors='none', edgecolor='sienna')
-        plt.scatter(data_planner[st_step+i, 4 + plot_axis] + x_pos_offset, data_planner[st_step+i, 6 + plot_axis], \
+        plt.scatter(data_planner[st_step+i, 4 + plot_axis], data_planner[st_step+i, 6 + plot_axis], \
                 s = 60, facecolors='none', edgecolor='green')
         # Foot location
         plt.scatter(data_planner[st_step + i, 8], 0, s=80, facecolors='none',\
@@ -181,25 +202,41 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
         plt.get_current_fig_manager().window.wm_geometry(fig_size_loc)
         plt.grid(True)
         plot_axis = 1
-        # current swing
-        plt.plot(data_com_pos_global[swing_st_idx:swing_end_idx, plot_axis], \
-                data_com_vel[swing_st_idx:swing_end_idx, plot_axis], \
-                linewidth=lin_width, color='blue')
-        plt.scatter(data_com_pos_global[swing_st_idx-1, plot_axis], \
-                data_com_vel[swing_st_idx-1, plot_axis], \
-                s = 80, facecolors='blue', edgecolor='blue')
-        # double
-        plt.plot(data_com_pos_global[double_st_idx:double_end_idx, plot_axis], \
-                data_com_vel[double_st_idx:double_end_idx, plot_axis], \
-                linewidth=lin_width, color='black')
 
-        # next swing
-        plt.plot(data_com_pos_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
-                data_com_vel[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+        # COM
+#         plt.plot(data_com_pos_global[swing_st_idx:swing_end_idx, plot_axis], \
+                # data_com_vel[swing_st_idx:swing_end_idx, plot_axis], \
+                # linewidth=lin_width, color='blue')
+        # plt.scatter(data_com_pos_global[swing_st_idx-1, plot_axis], \
+                # data_com_vel[swing_st_idx-1, plot_axis], \
+                # s = 80, facecolors='blue', edgecolor='blue')
+        # plt.plot(data_com_pos_global[double_st_idx:double_end_idx, plot_axis], \
+                # data_com_vel[double_st_idx:double_end_idx, plot_axis], \
+                # linewidth=lin_width, color='black')
+        # plt.plot(data_com_pos_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                # data_com_vel[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                # linewidth=lin_width, color='indigo')
+        # plt.scatter(data_com_pos_global[nx_swing_end_idx-1, plot_axis], \
+                # data_com_vel[nx_swing_end_idx-1, plot_axis], \
+                # s = 80, facecolors='indigo', edgecolor='indigo')
+
+        #BASE
+        plt.plot(data_body_global[swing_st_idx:swing_end_idx, plot_axis], \
+                data_config_dot[swing_st_idx:swing_end_idx, plot_axis], \
+                linewidth=lin_width, color='blue')
+        plt.scatter(data_body_global[swing_st_idx-1, plot_axis], \
+                data_config_dot[swing_st_idx-1, plot_axis], \
+                s = 80, facecolors='blue', edgecolor='blue')
+        plt.plot(data_body_global[double_st_idx:double_end_idx, plot_axis], \
+                data_config_dot[double_st_idx:double_end_idx, plot_axis], \
+                linewidth=lin_width, color='black')
+        plt.plot(data_body_global[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
+                data_config_dot[nx_swing_st_idx:nx_swing_end_idx, plot_axis], \
                 linewidth=lin_width, color='indigo')
-        plt.scatter(data_com_pos_global[nx_swing_end_idx-1, plot_axis], \
-                data_com_vel[nx_swing_end_idx-1, plot_axis], \
+        plt.scatter(data_body_global[nx_swing_end_idx-1, plot_axis], \
+                data_config_dot[nx_swing_end_idx-1, plot_axis], \
                 s = 80, facecolors='indigo', edgecolor='indigo')
+
 
         ## Estimated (DHKim)
         #current swing

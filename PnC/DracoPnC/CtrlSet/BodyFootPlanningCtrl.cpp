@@ -259,20 +259,20 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
 
 
     Eigen::Vector3d global_com_pos = com_pos + sp_->global_pos_local;
-    myUtils::pretty_print(global_com_pos, std::cout, "***planning com pos global");
-    myUtils::pretty_print(com_vel, std::cout, "***planning com vel global");
+    //myUtils::pretty_print(global_com_pos, std::cout, "***planning com pos global");
+    //myUtils::pretty_print(com_vel, std::cout, "***planning com vel global");
 
     planner_->getNextFootLocation(global_com_pos,
             com_vel,
             target_loc,
             &pl_param, &pl_output);
 
-    myUtils::pretty_print(target_loc, std::cout, "***next foot global");
+    //myUtils::pretty_print(target_loc, std::cout, "***next foot global");
     Eigen::VectorXd ss_global(4);
     for (int i = 0; i < 4; ++i) {
         ss_global[i] = pl_output.switching_state[i];
     }
-    myUtils::pretty_print(ss_global, std::cout, "***planned ss global");
+    //myUtils::pretty_print(ss_global, std::cout, "***planned ss global");
     // Time Modification
     replan_moment_ = state_machine_time_;
     end_time_ += pl_output.time_modification;
@@ -285,12 +285,6 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
         target_loc[i] += foot_landing_offset_[i];
     }
     myUtils::pretty_print(target_loc, std::cout, "next foot loc");
-    //TODO
-    //myUtils::pretty_print(sp_->q, std::cout, "q");
-    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
-    //exit(0);
-    //TODO
-
 }
 
 void BodyFootPlanningCtrl::firstVisit(){

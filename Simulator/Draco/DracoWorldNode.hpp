@@ -34,4 +34,5 @@ public:
     void customPreStep() override;
     Eigen::VectorXd mKp;
     Eigen::VectorXd mKd;
+    Eigen::VectorXd q_sim_;
 };

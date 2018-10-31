@@ -44,6 +44,10 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & world_,
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
     }
+
+    DataManager* data_manager = DataManager::GetDataManager();
+    q_sim_ = Eigen::VectorXd::Zero(16);
+    data_manager->RegisterData(&q_sim_, VECT, "q_sim", 16);
 }
 
 DracoWorldNode::~DracoWorldNode() {}
@@ -51,6 +55,7 @@ DracoWorldNode::~DracoWorldNode() {}
 void DracoWorldNode::customPreStep() {
 
     mSensorData->q = mSkel->getPositions().tail(10);
+    q_sim_ = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities().tail(10);
     mSensorData->jtrq = mSkel->getForces().tail(10);
 

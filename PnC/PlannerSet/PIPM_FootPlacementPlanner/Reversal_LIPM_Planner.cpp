@@ -14,8 +14,8 @@ Reversal_LIPM_Planner::Reversal_LIPM_Planner():
     x_step_length_limit_.resize(2);
     y_step_length_limit_.resize(2);
     com_vel_limit_.resize(2);
-
 }
+
 Reversal_LIPM_Planner::~Reversal_LIPM_Planner(){
 
 }
