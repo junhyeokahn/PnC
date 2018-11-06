@@ -1,4 +1,4 @@
-#include <Utils/ThirdPartyUtilities.hpp>
+#include <Utils/ThirdPartyUtils/ThirdPartyUtilities.hpp>
 #include <drake/math/eigen_sparse_triplet.h>
 
 namespace myUtils

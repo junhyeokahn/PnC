@@ -1,5 +1,5 @@
 #pragma once
-#include <array> 
+#include <array>
 #include "drake/common/trajectories/piecewise_polynomial.h"
 
 #include "RobotSystem/CentroidModel.hpp"

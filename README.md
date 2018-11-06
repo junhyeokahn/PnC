@@ -1,25 +1,11 @@
 # Planning and Control Algorithms for Robotics
 PnC is a C++ library designed for generating trajectories for a robot system
-and stabilizing the system over the trajectories. It is built on mathmatical
-programming in [Drake](https://github.com/junhyeokahn/drake) and multi body
-dynamics algorithm in [Dart](https://github.com/junhyeokahn/dart).
-
-## Featured Algorithms
-
-### Mathmatical Programming
-- Sum of Squares
-- Direct Transcription
-- Direct Collocation
-- [Constrained Direct Collocation](https://github.com/DAIRLab/dairlib-public)
-- [Embedded Conic Solver](https://github.com/embotech/ecos) using [Sparse Matrix Routines](http://www.suitesparse.com)
-
-### Trajectory Planning
-- [Inverse Kinematics](https://github.com/junhyeokahn/dart)
-- [Centroid Dyanimcs Planning for Humanoid](https://arxiv.org/pdf/1709.09265.pdf)
-
-### Stabilizing Controller
-- [Linear Quadratic Regulator](https://github.com/RobotLocomotion/drake)
-- [Whole Body Controller](https://arxiv.org/pdf/1807.01222.pdf)
+and stabilizing the system over the trajectories. It provides interface to the
+real hardware as well as simulation
+environment([Dart](https://github.com/junhyeokahn/dart),
+[Drake](https://github.com/junhyeokahn/drake)) and enables to communicate with
+the reinforcement learning package(
+[baseline](https://github.com/openai/baselines)).
 
 ## Run the Code
 
@@ -30,13 +16,18 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 ```
 
 ### Install Required Dependancies
-- [Dart 6.4.0](https://github.com/junhyeokahn/dart)
+- [Dart 6.5.0](https://github.com/junhyeokahn/dart)
 ```
 $ cd 'your workspace' && git clone https://github.com/junhyeokahn/dart.git
 $ cd dart && git checkout release-6.4
 $ mkdir build && cd build && cmake .. && make -j
 $ sudo make install
 ```
+
+### Install Optional Dependancies
+- [Gurobi](http://www.gurobi.com/)
+- [Mosek](https://www.mosek.com/)
+- [Snopt](http://ccom.ucsd.edu/~optimizers)
 - [Drake](https://github.com/junhyeokahn/drake)
 ```
 $ cd 'your workspace' && git clone https://github.com/junhyeokahn/drake.git
@@ -49,11 +40,6 @@ Alternatively, you could also do
 ```
 $ cd PnC && source ./install.sh
 ```
-
-### Install Optional Dependancies
-- [Gurobi](http://www.gurobi.com/)
-- [Mosek](https://www.mosek.com/)
-- [Snopt](http://ccom.ucsd.edu/~optimizers)
 
 ### Compile the Code
 ```

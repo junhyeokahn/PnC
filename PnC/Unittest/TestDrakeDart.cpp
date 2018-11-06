@@ -8,7 +8,7 @@
 #include <drake/multibody/rigid_body_ik.h>
 #include <drake/multibody/rigid_body_tree.h>
 
-#include "Utils/eigen_matrix_compare.h"
+#include "Utils/ThirdPartyUtils/eigen_matrix_compare.h"
 #include "Configuration.h"
 #include "RobotSystem/RobotSystem.hpp"
 

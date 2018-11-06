@@ -8,8 +8,10 @@ list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/OfflineTrajGen/CentroidDynO
                          ${CMAKE_CURRENT_SOURCE_DIR}/OfflineTrajGen/KinematicOpt.cpp)
 
 add_library(DracoPnC SHARED ${sources})
-target_link_libraries(DracoPnC drake::drake
-                               ${DART_LIBRARIES}
+if(USE_DRAKE)
+  target_link_libraries(DracoPnC drake::drake)
+endif()
+target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
                                myWBC

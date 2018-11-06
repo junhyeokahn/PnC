@@ -10,7 +10,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_DISABLE_WERROR True)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ## ===========
 ## Build Setup
@@ -26,11 +26,27 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 find_package(DART 6.5 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
+# Pybind11
+#set(USE_PYBIND11 False)
+set(USE_PYBIND11 True)
+if(USE_PYBIND11)
+  message("-- Enable Pybind11")
+  find_package(PythonAnaconda)
+else()
+  message("-- Disable Pybind11")
+endif()
+
 # Drake
-#set(drake_DIR /opt/drake/lib/cmake/drake)
-set(drake_DIR
-    ${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
-find_package(drake CONFIG REQUIRED)
+set(USE_DRAKE False)
+#set(USE_DRAKE True)
+if(USE_DRAKE)
+  message("-- Enable Drake")
+  #set(drake_DIR /opt/drake/lib/cmake/drake)
+  set(drake_DIR ${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
+  find_package(drake CONFIG REQUIRED)
+else()
+  message("-- Disable Drake")
+endif()
 
 # Eigen
 if(NOT EIGEN_FOUND)
