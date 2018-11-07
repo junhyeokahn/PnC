@@ -1,2 +1,2 @@
-pybind11_add_module(DracoInterfacePy DracoInterfacePy.cpp)
-target_link_libraries(DracoInterfacePy PRIVATE DracoPnC)
+pybind11_add_module(DracoInterface DracoInterfacePy.cpp)
+target_link_libraries(DracoInterface PRIVATE DracoPnC)

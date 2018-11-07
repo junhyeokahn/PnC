@@ -22,8 +22,8 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    rfoot_contact_ = new FootLinear(robot_, "rAnkle", 0.3);
-    lfoot_contact_ = new FootLinear(robot_, "lAnkle", 0.3);
+    rfoot_contact_ = new PointContact(robot_, "rAnkle", 0.3);
+    lfoot_contact_ = new PointContact(robot_, "lAnkle", 0.3);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     selected_jidx_.clear();
@@ -56,7 +56,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
         }
         wblc_data_->W_rf_[lfoot_contact_->getFzIndex() + jidx_offset] = 0.5;
 
-        ((FootLinear*)lfoot_contact_)->setMaxFz(0.0001);
+        ((PointContact*)lfoot_contact_)->setMaxFz(0.0001);
         kin_wbc_contact_list_.push_back(rfoot_contact_);
     }
     else if(swing_foot == "rAnkle") {
@@ -66,7 +66,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
         }
         wblc_data_->W_rf_[rfoot_contact_->getFzIndex() + jidx_offset] = 0.5;
 
-        ((FootLinear*)rfoot_contact_)->setMaxFz(0.0001);
+        ((PointContact*)rfoot_contact_)->setMaxFz(0.0001);
         kin_wbc_contact_list_.push_back(lfoot_contact_);
     }
 

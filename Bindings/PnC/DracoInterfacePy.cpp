@@ -24,7 +24,7 @@ class PyInterface : public Interface
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(DracoInterfacePy, m)
+PYBIND11_MODULE(DracoInterface, m)
 {
   py::class_<Interface, PyInterface>(m, "Interface")
     .def(py::init<>())

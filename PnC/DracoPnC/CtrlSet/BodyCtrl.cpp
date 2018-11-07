@@ -25,8 +25,8 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
     body_rpz_task_ = new BodyRPZTask(robot);
 
-    rfoot_contact_ = new FootLinear(robot_, "rAnkle", 0.3);
-    lfoot_contact_ = new FootLinear(robot_, "lAnkle", 0.3);
+    rfoot_contact_ = new PointContact(robot_, "rAnkle", 0.3);
+    lfoot_contact_ = new PointContact(robot_, "lAnkle", 0.3);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     std::vector<bool> act_list;

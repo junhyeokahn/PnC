@@ -29,8 +29,8 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
 
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
-    rfoot_contact_ = new FootLinear(robot_, "rAnkle", 0.3);
-    lfoot_contact_ = new FootLinear(robot_, "lAnkle", 0.3);
+    rfoot_contact_ = new PointContact(robot_, "rAnkle", 0.3);
+    lfoot_contact_ = new PointContact(robot_, "lAnkle", 0.3);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     std::vector<bool> act_list;
@@ -202,7 +202,7 @@ void SingleContactTransCtrl::_contact_setup(){
         }
         wblc_data_->W_rf_[lfoot_contact_->getFzIndex() + jidx_offset] = rf_weight_z;
 
-        ((FootLinear*)lfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContact*)lfoot_contact_)->setMaxFz(upper_lim);
     }
     else if(moving_foot_ == "rAnkle") {
         for(int i(0); i<rfoot_contact_->getDim(); ++i){
@@ -211,7 +211,7 @@ void SingleContactTransCtrl::_contact_setup(){
         }
         wblc_data_->W_rf_[rfoot_contact_->getFzIndex() + jidx_offset] = rf_weight_z;
 
-        ((FootLinear*)rfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContact*)rfoot_contact_)->setMaxFz(upper_lim);
     }
 }
 

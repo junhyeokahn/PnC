@@ -4,15 +4,16 @@
 
 class RobotSystem;
 
-class FootLinear: public ContactSpec{
+class LineContact: public ContactSpec{
     public:
-        FootLinear(RobotSystem* robot, const std::string& _link_name, const double & _mu);
-        virtual ~FootLinear();
+        LineContact(RobotSystem* robot, const std::string& _link_name, const double & _mu, const double & _gamma);
+        virtual ~LineContact();
 
         void setMaxFz(double max_fz){ max_Fz_ = max_fz; }
 
     protected:
         double mu_;
+        double gamma_;
         double max_Fz_;
         std::string link_name_;
 

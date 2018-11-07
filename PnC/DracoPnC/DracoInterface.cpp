@@ -139,7 +139,10 @@ void DracoInterface::_ParameterSetting(){
             test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
-        } else {
+        } else if (test_name == "rl_walking_test") {
+            test_ = new RLWalkingTest(robot_);
+        }
+        else {
             printf("[Draco Interface] There is no test matching test with the name\n");
             exit(0);
         }

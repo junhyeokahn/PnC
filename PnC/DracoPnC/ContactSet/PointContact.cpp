@@ -1,7 +1,7 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 
-FootLinear::FootLinear(RobotSystem* robot,
+PointContact::PointContact(RobotSystem* robot,
         const std::string & _link_name,
         const double & _mu) : ContactSpec(robot, 3) {
     link_name_ = _link_name;
@@ -9,15 +9,15 @@ FootLinear::FootLinear(RobotSystem* robot,
     mu_ = _mu;
 }
 
-FootLinear::~FootLinear(){}
+PointContact::~PointContact(){}
 
-bool FootLinear::_UpdateJc(){
+bool PointContact::_UpdateJc(){
     Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_);
     Jc_ = Jtmp.block(3, 0, 3, robot_->getNumDofs());
     return true;
 }
 
-bool FootLinear::_UpdateJcDotQdot(){
+bool PointContact::_UpdateJcDotQdot(){
     Eigen::VectorXd JcDotQdot_tmp =
         robot_->getBodyNodeCoMJacobianDot(link_name_) * robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
@@ -27,12 +27,12 @@ bool FootLinear::_UpdateJcDotQdot(){
     return true;
 }
 
-bool FootLinear::_UpdateUf(){
+bool PointContact::_UpdateUf(){
     Eigen::MatrixXd rot = Eigen::MatrixXd::Zero(3, 3);
     rot = (robot_->getBodyNodeCoMIsometry(link_name_).linear()).transpose();
 
     Uf_ = Eigen::MatrixXd::Zero(6, dim_contact_);
-    // Fx(1), Fy(2), Fz(3)
+    // Fx(0), Fy(1), Fz(2)
 
     // Linear
     Uf_(0, 2) = 1.;  // Fz >= 0
@@ -50,7 +50,7 @@ bool FootLinear::_UpdateUf(){
     return true;
 }
 
-bool FootLinear::_UpdateInequalityVector(){
+bool PointContact::_UpdateInequalityVector(){
     ieq_vec_ = Eigen::VectorXd::Zero(6);
     ieq_vec_[5] = -max_Fz_;
     return true;
