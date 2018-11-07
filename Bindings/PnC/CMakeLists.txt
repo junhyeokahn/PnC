@@ -1,0 +1,2 @@
+pybind11_add_module(DracoInterfacePy DracoInterfacePy.cpp)
+target_link_libraries(DracoInterfacePy PRIVATE DracoPnC)

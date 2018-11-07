@@ -10,7 +10,8 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_DISABLE_WERROR True)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 ## ===========
 ## Build Setup
@@ -88,6 +89,9 @@ add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 add_subdirectory(Geometry)
 add_subdirectory(Filter)
+if(USE_PYBIND11)
+  add_subdirectory(Bindings)
+endif()
 
 ## ==================
 ## Configuration File
