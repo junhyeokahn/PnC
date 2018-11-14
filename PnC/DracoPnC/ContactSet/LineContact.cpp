@@ -24,6 +24,7 @@ bool LineContact::_UpdateJcDotQdot(){
         robot_->getBodyNodeCoMJacobianDot(link_name_) * robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
 
+    JcDotQdot_.setZero();
     return true;
 }
 

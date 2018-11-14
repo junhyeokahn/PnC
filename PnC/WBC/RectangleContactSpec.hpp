@@ -7,7 +7,6 @@ class RobotSystem;
 class RectangleContactSpec : public ContactSpec
 {
 private:
-    RobotSystem* robot_;
     std::string linkName_;
 
     virtual bool _UpdateJc();

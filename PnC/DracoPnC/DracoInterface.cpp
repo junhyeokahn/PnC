@@ -141,6 +141,8 @@ void DracoInterface::_ParameterSetting(){
             test_ = new WalkingTest(robot_);
         } else if (test_name == "rl_walking_test") {
             test_ = new RLWalkingTest(robot_);
+        } else if (test_name == "balancing_test") {
+            test_ = new BalancingTest(robot_);
         }
         else {
             printf("[Draco Interface] There is no test matching test with the name\n");

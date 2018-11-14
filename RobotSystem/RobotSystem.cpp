@@ -140,6 +140,10 @@ void RobotSystem::getContactAspects(const std::string & linkName_,
                                     Eigen::Vector3d & size_,
                                     Eigen::Isometry3d & iso_) {
 
+    mSkel->getBodyNode(linkName_)->
+        getShapeNodesWith<dart::dynamics::CollisionAspect>();
+    mSkel->getBodyNode(linkName_)->
+        getShapeNodesWith<dart::dynamics::CollisionAspect>().front();
     dart::dynamics::ShapeNode* sn = mSkel->getBodyNode(linkName_)->
         getShapeNodesWith<dart::dynamics::CollisionAspect>().front();
     auto shape = sn->getShape();

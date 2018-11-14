@@ -16,7 +16,7 @@ RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
         - iso_world_to_bodynode.translation();
     vec_bodynode_to_contact_surface[2] -= size[2]/2;
 
-    printf("[Rectangle %s Contact Spec] is Constructed\n", link_name_.c_str());
+    //printf("[Rectangle %s Contact Spec] is Constructed\n", link_name_.c_str());
 }
 
 bool RectangleContactSpec::_UpdateJc() {
@@ -29,6 +29,7 @@ bool RectangleContactSpec::_UpdateJcDotQdot() {
     JcDotQdot_ =
         robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface) *
         robot_->getQdot();
+    JcDotQdot_.setZero();
     return true;
 }
 

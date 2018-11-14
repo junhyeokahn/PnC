@@ -25,8 +25,12 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
     body_rpz_task_ = new BodyRPZTask(robot);
 
-    rfoot_contact_ = new PointContact(robot_, "rAnkle", 0.3);
-    lfoot_contact_ = new PointContact(robot_, "lAnkle", 0.3);
+    rfoot_contact_ = new PointContact(robot_, "rAnkle", 30);
+    lfoot_contact_ = new PointContact(robot_, "lAnkle", 30);
+    //rfoot_contact_ = new LineContact(robot_, "rAnkle", 3, 3);
+    //lfoot_contact_ = new LineContact(robot_, "lAnkle", 3, 3);
+    //rfoot_contact_ = new RectangleContactSpec(robot_, "rAnkle", 5);
+    //lfoot_contact_ = new RectangleContactSpec(robot_, "lAnkle", 5);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     std::vector<bool> act_list;
@@ -148,10 +152,10 @@ void BodyCtrl::_body_task_setup(){
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,
             des_jpos_, des_jvel_, des_jacc_);
 
-    //dynacore::pretty_print(jpos_ini_, std::cout, "jpos ini");
+    //myUtils::pretty_print(jpos_ini_, std::cout, "jpos ini");
     //myUtils::pretty_print(des_jpos_, std::cout, "des jpos");
-    //dynacore::pretty_print(des_jvel_, std::cout, "des jvel");
-    //dynacore::pretty_print(des_jacc_, std::cout, "des jacc");
+    //myUtils::pretty_print(des_jvel_, std::cout, "des jvel");
+    //myUtils::pretty_print(des_jacc_, std::cout, "des jacc");
     //
     //Eigen::Vector3d com_pos;
     //robot_->getCoMPosition(com_pos);
