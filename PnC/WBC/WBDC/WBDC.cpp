@@ -118,9 +118,11 @@ void WBDC::makeTorque(const std::vector<Task*> & task_list,
 
     // Optimization
     double f = solve_quadprog(G, g0, CE, ce0, CI, ci0, z);
+    _PrintDebug(14);
     Eigen::VectorXd delta(dim_first_task_);
     for(int i(0); i<dim_first_task_; ++i) { delta[i] = z[i]; }
     qddot_pre = qddot_pre + JtPreBar * (xddot + delta - JtDotQdot - Jt * qddot_pre);
+    _PrintDebug(15);
 
     // First Qddot is found
     // Stack The last Task
@@ -140,13 +142,16 @@ void WBDC::makeTorque(const std::vector<Task*> & task_list,
         Npre = Npre * ( Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)
                 - JtPreBar * JtPre);
     }
+    _PrintDebug(16);
 
     _GetSolution(qddot_pre, cmd);
 
+    _PrintDebug(17);
     data_->opt_result_ = Eigen::VectorXd(dim_opt_);
     for(int i(0); i<dim_opt_; ++i){
         data_->opt_result_[i] = z[i];
     }
+    _PrintDebug(18);
     //std::cout << "f: " << f << std::endl;
     //std::cout << "x: " << z << std::endl;
     //std::cout << "cmd: "<<cmd<<std::endl;
@@ -200,7 +205,6 @@ void WBDC::makeTorque(const std::vector<Task*> & task_list,
     //   std::cout<<ci0<<std::endl;
     // }
 
-    _PrintDebug(14);
 }
 
 void WBDC::_SetInEqualityConstraint(){
@@ -269,7 +273,6 @@ void WBDC::_ContactBuilding(const std::vector<ContactSpec*> & contact_list){
         dim_rf_ += dim_new_rf;
         dim_rf_cstr_ += dim_new_rf_cstr;
     }
-    // printf("dim rf: %i, dim rf constr: %i \n", dim_rf_, dim_rf_cstr_);
     // myUtils::pretty_print(Jc_, std::cout, "WBDC: Jc");
     // myUtils::pretty_print(JcDotQdot_, std::cout, "WBDC: JcDot Qdot");
     // myUtils::pretty_print(Uf_, std::cout, "WBDC: Uf");

@@ -5,3 +5,5 @@
 #include <PnC/DracoPnC/CtrlSet/BodyFootPlanningCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/SwingPlanningCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/SingleContactTransCtrl.hpp>
+
+#include <PnC/DracoPnC/CtrlSet/BalancingCtrl.hpp>

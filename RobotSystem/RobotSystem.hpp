@@ -10,14 +10,13 @@
 class RobotSystem
 {
 protected:
-    dart::dynamics::SkeletonPtr mSkel;
-    int mNumDof;
-    int mNumVirtualDof;
-    int mNumActuatedDof;
-    Eigen::VectorXd mInitialConfiguration;
-    Eigen::MatrixXd mIcent;
-    Eigen::MatrixXd mJcent;
-    Eigen::MatrixXd mAcent;
+    dart::dynamics::SkeletonPtr skel_ptr_;
+    int num_dof_;
+    int num_virtual_dof_;
+    int num_actuated_dof_;
+    Eigen::MatrixXd I_cent_;
+    Eigen::MatrixXd J_cent_;
+    Eigen::MatrixXd A_cent_;
 
     /*
      * Update Ig, Ag, Jg
@@ -93,15 +92,13 @@ public:
                       const Eigen::VectorXd & qdot_,
                       bool isUpdatingCentroid_ = true);
 
-    dart::dynamics::SkeletonPtr getSkeleton() { return mSkel; };
-    Eigen::VectorXd getQ() { return mSkel->getPositions(); };
-    Eigen::VectorXd getQdot() { return mSkel->getVelocities(); };
-    void setInitialConfiguration(const Eigen::VectorXd q) { mInitialConfiguration = q; };
-    Eigen::VectorXd getInitialConfiguration() { return mInitialConfiguration; }
-    double getRobotMass() { return mSkel->getMass(); }
-    int getNumDofs() { return mNumDof; };
-    int getNumVirtualDofs() { return mNumVirtualDof; };
-    int getNumActuatedDofs() { return mNumActuatedDof; };
+    dart::dynamics::SkeletonPtr getSkeleton() { return skel_ptr_; };
+    Eigen::VectorXd getQ() { return skel_ptr_->getPositions(); };
+    Eigen::VectorXd getQdot() { return skel_ptr_->getVelocities(); };
+    double getRobotMass() { return skel_ptr_->getMass(); }
+    int getNumDofs() { return num_dof_; };
+    int getNumVirtualDofs() { return num_virtual_dof_; };
+    int getNumActuatedDofs() { return num_actuated_dof_; };
 
     Eigen::VectorXd rotateVector( const Eigen::VectorXd & vec );
     Eigen::MatrixXd rotateJacobian( const Eigen::MatrixXd & mat );

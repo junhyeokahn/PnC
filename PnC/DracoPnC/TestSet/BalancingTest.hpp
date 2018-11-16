@@ -11,7 +11,6 @@ enum BalancingTestPhase{
     NUM_BT_PHASE
 };
 
-// Test wbdc, line contact, surface contact, com task, centroid task
 class BalancingTest: public Test{
     public:
         BalancingTest(RobotSystem* );
@@ -24,5 +23,5 @@ class BalancingTest: public Test{
 
         Controller* jpos_target_ctrl_;
         Controller* body_lift_ctrl_;
-        Controller* body_ctrl_;
+        Controller* balancing_ctrl_;
 };

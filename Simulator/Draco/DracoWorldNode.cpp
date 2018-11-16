@@ -70,6 +70,8 @@ void DracoWorldNode::customPreStep() {
         mTorqueCommand[i+6] += mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
             mKd[i] * (mCommand->qdot[i] - mSensorData->qdot[i]);
     }
+    //myUtils::pretty_print(mCommand->q, std::cout, "cmd q");
+    //myUtils::pretty_print(mSensorData->q, std::cout, "data q");
 
     // hold xy
     _hold_xy();
