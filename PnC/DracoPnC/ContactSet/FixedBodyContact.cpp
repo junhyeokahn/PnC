@@ -30,3 +30,7 @@ bool FixedBodyContact::_UpdateInequalityVector(){
   ieq_vec_ = Eigen::VectorXd::Zero(1);
   return true;
 }
+
+bool FixedBodyContact::_UpdateContactGeometry(){
+    return true;
+}

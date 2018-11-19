@@ -47,22 +47,29 @@ Eigen::MatrixXd RobotSystem::getCentroidInertia() {
     return I_cent_;
 }
 
-Eigen::Vector3d RobotSystem::getCoMPosition() {
-    return skel_ptr_->getCOM();
+Eigen::Vector3d RobotSystem::getCoMPosition(dart::dynamics::Frame* wrt_) {
+    return skel_ptr_->getCOM(wrt_);
 }
 
-Eigen::Vector3d RobotSystem::getCoMVelocity() {
-    return skel_ptr_->getCOMLinearVelocity();
+Eigen::Vector3d RobotSystem::getCoMVelocity(dart::dynamics::Frame* rl_,
+                                            dart::dynamics::Frame* wrt_) {
+    return skel_ptr_->getCOMLinearVelocity(rl_, wrt_);
 }
 
-Eigen::Isometry3d RobotSystem::getBodyNodeIsometry(const std::string & name_) {
-    return skel_ptr_->getBodyNode(name_)->getWorldTransform();
+Eigen::Isometry3d RobotSystem::getBodyNodeIsometry(const std::string & name_,
+                                                   dart::dynamics::Frame* wrt_) {
+    //return skel_ptr_->getBodyNode(name_)->getWorldTransform();
+    return skel_ptr_->getBodyNode(name_)->getTransform(wrt_);
 }
 
-Eigen::Isometry3d RobotSystem::getBodyNodeCoMIsometry(const std::string & name_) {
+Eigen::Isometry3d RobotSystem::getBodyNodeCoMIsometry(const std::string & name_,
+                                                      dart::dynamics::Frame* wrt_) {
+    //Eigen::Isometry3d ret = Eigen::Isometry3d::Identity();
+    //ret.linear() = skel_ptr_->getBodyNode(name_)->getWorldTransform().linear();
+    //ret.translation() = skel_ptr_->getBodyNode(name_)->getCOM();
     Eigen::Isometry3d ret = Eigen::Isometry3d::Identity();
-    ret.linear() = skel_ptr_->getBodyNode(name_)->getWorldTransform().linear();
-    ret.translation() = skel_ptr_->getBodyNode(name_)->getCOM();
+    ret.linear() = getBodyNodeIsometry(name_, wrt_).linear();
+    ret.translation() = skel_ptr_->getBodyNode(name_)->getCOM(wrt_);
     return ret;
 }
 
@@ -136,24 +143,19 @@ int RobotSystem::getDofIdx(const std::string & dofName_) {
     return skel_ptr_->getDof(dofName_)->getIndexInSkeleton();
 }
 
-void RobotSystem::getContactAspects(const std::string & linkName_,
-                                    Eigen::Vector3d & size_,
-                                    Eigen::Isometry3d & iso_) {
+Eigen::Isometry3d RobotSystem::getBodyNodeCollisionIsometry(const std::string & linkName_,
+                                               dart::dynamics::Frame* wrt_) {
+    Eigen::Isometry3d T_wrt_bodynode = getBodyNodeIsometry(linkName_, wrt_);
 
-    skel_ptr_->getBodyNode(linkName_)->
-        getShapeNodesWith<dart::dynamics::CollisionAspect>();
-    skel_ptr_->getBodyNode(linkName_)->
-        getShapeNodesWith<dart::dynamics::CollisionAspect>().front();
     dart::dynamics::ShapeNode* sn = skel_ptr_->getBodyNode(linkName_)->
         getShapeNodesWith<dart::dynamics::CollisionAspect>().front();
-    auto shape = sn->getShape();
-    auto box = std::static_pointer_cast<dart::dynamics::BoxShape>(shape);
-    size_ = box->getSize();
-    Eigen::Isometry3d Tgb = getBodyNodeIsometry(linkName_);
-    Eigen::Isometry3d Tbc;
-    Tbc.translation() = sn->getRelativeTranslation();
-    Tbc.linear() = sn->getRelativeRotation();
-    iso_ = Tgb * Tbc;
+    Eigen::Isometry3d T_bodynode_collision;
+    T_bodynode_collision.translation() = sn->getRelativeTranslation();
+    T_bodynode_collision.linear() = sn->getRelativeRotation();
+
+    Eigen::Isometry3d ret;
+    ret = T_wrt_bodynode * T_bodynode_collision;
+    return ret;
 }
 
 void RobotSystem::updateSystem(const Eigen::VectorXd & q_,
@@ -193,34 +195,11 @@ void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd & q_,
     J_cent_ = I_cent_.inverse() * A_cent_;
 }
 
-//For debugging puropse
-Eigen::VectorXd RobotSystem::rotateVector( const Eigen::VectorXd & vec ) {
-
-    Eigen::VectorXd ret1 = vec;
-    Eigen::Isometry3d iso_gl = skel_ptr_->getRootBodyNode()->getWorldTransform();
-    Eigen::MatrixXd augR = Eigen::MatrixXd::Zero(6, 6);
-    augR.block(0, 0, 3, 3) = Eigen::MatrixXd::Identity(3, 3);
-    augR.block(3, 3, 3, 3) = iso_gl.linear();
-    ret1.head(6) = augR * vec.head(6);
-    Eigen::VectorXd ret = ret1;
-    (ret.head(6)).tail(3) = ret1.head(3);
-    ret.head(3) = (ret1.head(6)).tail(3);
-    return ret;
-}
-
-Eigen::MatrixXd RobotSystem::rotateJacobian( const Eigen::MatrixXd & jac) {
-
-    // rotate root
-    Eigen::Isometry3d iso_gl = skel_ptr_->getRootBodyNode()->getWorldTransform();
-    Eigen::MatrixXd ret1 = jac;
-    Eigen::MatrixXd augR = Eigen::MatrixXd::Zero(6, 6);
-    augR.block(0, 0, 3, 3) = Eigen::MatrixXd::Identity(3, 3);
-    augR.block(3, 3, 3, 3) = (iso_gl.linear()).transpose();
-    ret1.block(0, 0, 6, 6) = ret1.block(0, 0, 6, 6) * augR;
-
-    // switch rot & lin
-    Eigen::MatrixXd ret = ret1;
-    ret.block(0, 0, 6, 3) = ret1.block(0, 3, 6, 3);
-    ret.block(0, 3, 6, 3) = ret1.block(0, 0, 6, 3);
-    return ret;
+Eigen::Vector3d RobotSystem::getBodyNodeCollisionShape(const std::string & linkName_) {
+    dart::dynamics::ShapeNode* sn = skel_ptr_->getBodyNode(linkName_)->
+        getShapeNodesWith<dart::dynamics::CollisionAspect>().front();
+    auto shape = sn->getShape();
+    auto box = std::static_pointer_cast<dart::dynamics::BoxShape>(shape);
+    Eigen::Vector3d size = box->getSize();
+    return size;
 }

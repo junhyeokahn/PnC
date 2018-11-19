@@ -11,6 +11,7 @@ public:
   virtual ~FixedBodyContact();
 
 protected:
+  virtual bool _UpdateContactGeometry();
   virtual bool _UpdateJc();
   virtual bool _UpdateJcDotQdot();
   virtual bool _UpdateUf();

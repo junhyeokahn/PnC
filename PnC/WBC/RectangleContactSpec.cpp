@@ -4,45 +4,46 @@ RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
                                            const std::string & _link_name,
                                            const double & _mu ) : ContactSpec(_robot, 6) {
 
+    mu_ = _mu;
     Uf_ = Eigen::MatrixXd::Zero(18, dim_contact_);
     ieq_vec_ = Eigen::VectorXd::Zero(18);
     max_Fz_ = 1000.;
     link_name_ = _link_name;
-
-    Eigen::Vector3d size; Eigen::Isometry3d iso_world_to_contact_center;
-    robot_->getContactAspects(link_name_, size, iso_world_to_contact_center);
-    Eigen::Isometry3d iso_world_to_bodynode = robot_->getBodyNodeIsometry(link_name_);
-    vec_bodynode_to_contact_surface = iso_world_to_contact_center.translation()
-        - iso_world_to_bodynode.translation();
-    vec_bodynode_to_contact_surface[2] -= size[2]/2;
+    box_size_ = robot_->getBodyNodeCollisionShape(_link_name);
 
     //printf("[Rectangle %s Contact Spec] is Constructed\n", link_name_.c_str());
 }
 
+bool RectangleContactSpec::_UpdateContactGeometry() {
+    iso_world_to_contact_center_ = robot_->getBodyNodeCollisionIsometry(link_name_);
+    Eigen::VectorXd tmp = iso_world_to_contact_center_.translation();
+    vec_bodynode_to_contact_surface_ = robot_->getBodyNodeCollisionIsometry(link_name_, robot_->getBodyNode(link_name_)).translation();
+    vec_bodynode_to_contact_surface_[2] -= box_size_[2]/2;
+    return true;
+}
+
 bool RectangleContactSpec::_UpdateJc() {
     Jc_ =
-        robot_->getBodyNodeJacobian(link_name_, vec_bodynode_to_contact_surface);
+        robot_->getBodyNodeJacobian(link_name_, vec_bodynode_to_contact_surface_);
     return true;
 }
 
 bool RectangleContactSpec::_UpdateJcDotQdot() {
     JcDotQdot_ =
-        robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface) *
+        robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface_) *
         robot_->getQdot();
-    JcDotQdot_.setZero();
+    //JcDotQdot_.setZero();
     return true;
 }
 
 bool RectangleContactSpec::_UpdateUf() {
 
-    Eigen::Vector3d size; Eigen::Isometry3d iso_world_to_contact_center;
-    robot_->getContactAspects(link_name_, size, iso_world_to_contact_center);
-
-    double x(size[0]); double y(size[1]);
+    double x(box_size_[0]/2); double y(box_size_[1]/2);
     Eigen::MatrixXd aug_rot = Eigen::MatrixXd::Zero(6, 6);
-    aug_rot.block(0, 0, 3, 3) = (iso_world_to_contact_center.linear()).transpose();
-    aug_rot.block(3, 3, 3, 3) = (iso_world_to_contact_center.linear()).transpose();
+    aug_rot.block(0, 0, 3, 3) = (iso_world_to_contact_center_.linear()).transpose();
+    aug_rot.block(3, 3, 3, 3) = (iso_world_to_contact_center_.linear()).transpose();
 
+    Uf_.setZero();
     Uf_(0, 5) = 1.;
 
     Uf_(1, 3) = 1. ; Uf_(1, 5) = mu_;

@@ -73,3 +73,7 @@ bool LineContact::_UpdateInequalityVector(){
     ieq_vec_[9] = -max_Fz_;
     return true;
 }
+
+bool LineContact::_UpdateContactGeometry(){
+    return true;
+}

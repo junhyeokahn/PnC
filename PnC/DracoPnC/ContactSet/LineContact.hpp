@@ -17,6 +17,7 @@ class LineContact: public ContactSpec{
         double max_Fz_;
         std::string link_name_;
 
+        virtual bool _UpdateContactGeometry();
         virtual bool _UpdateJc();
         virtual bool _UpdateJcDotQdot();
         virtual bool _UpdateUf();

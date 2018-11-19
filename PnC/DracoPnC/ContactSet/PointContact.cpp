@@ -55,3 +55,7 @@ bool PointContact::_UpdateInequalityVector(){
     ieq_vec_[5] = -max_Fz_;
     return true;
 }
+
+bool PointContact::_UpdateContactGeometry() {
+    return true;
+}
