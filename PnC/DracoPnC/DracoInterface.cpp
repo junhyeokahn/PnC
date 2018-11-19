@@ -13,17 +13,26 @@
 DracoInterface::DracoInterface() : Interface()
 {
     robot_ = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
+
     test_cmd_ = new DracoCommand();
+    test_cmd_->turn_off = false;
+    test_cmd_->q = Eigen::VectorXd::Zero(10);
+    test_cmd_->qdot = Eigen::VectorXd::Zero(10);
+    test_cmd_->jtrq = Eigen::VectorXd::Zero(10);
+
     state_estimator_ = new DracoStateEstimator(robot_);
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
     waiting_count_ = 10;
+
     cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
     data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
     stop_test_ = false;
 
 
