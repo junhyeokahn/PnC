@@ -35,7 +35,7 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 
     //myUtils::pretty_print(des_ori, std::cout, "ori_des");
     //myUtils::pretty_print(ori_act, std::cout, "ori_act");
-    //myUtils::pretty_print(pos_err, std::cout, "pos_err");
+    //myUtils::pretty_print(pos_err, std::cout, "pos_err in bodyrpz");
 
     return true;
 }

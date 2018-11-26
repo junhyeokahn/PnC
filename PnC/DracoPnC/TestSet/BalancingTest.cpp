@@ -10,10 +10,12 @@ BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     jpos_target_ctrl_ = new JPosTargetCtrl(robot);
     body_lift_ctrl_ = new DoubleContactTransCtrl(robot);
     balancing_ctrl_ = new BalancingCtrl(robot);
+    kin_balancing_ctrl_ = new KinBalancingCtrl(robot);
 
     state_list_.push_back(jpos_target_ctrl_);
     state_list_.push_back(body_lift_ctrl_);
-    state_list_.push_back(balancing_ctrl_);
+    //state_list_.push_back(balancing_ctrl_);
+    state_list_.push_back(kin_balancing_ctrl_);
 
     _SettingParameter();
 
@@ -31,6 +33,7 @@ void BalancingTest::TestInitialization() {
     jpos_target_ctrl_->ctrlInitialization("JOINT_CTRL");
     body_lift_ctrl_->ctrlInitialization("DOUBLE_CONTACT_TRANS_CTRL");
     balancing_ctrl_->ctrlInitialization("BALANCING_CTRL");
+    kin_balancing_ctrl_->ctrlInitialization("KIN_BALANCING_CTRL");
 }
 
 int BalancingTest::_NextPhase(const int & phase) {
@@ -61,8 +64,11 @@ void BalancingTest::_SettingParameter() {
 
         myUtils::readParameter(cfg, "balancing_ctrl_time", tmp_val);
         ((BalancingCtrl*)balancing_ctrl_)->setBalancingTime(tmp_val);
+        ((KinBalancingCtrl*)kin_balancing_ctrl_)->setBalancingTime(tmp_val);
         myUtils::readParameter(cfg, "interpolation_time", tmp_val);
         ((BalancingCtrl*)balancing_ctrl_)->setInterpolationTime(tmp_val);
+        ((KinBalancingCtrl*)kin_balancing_ctrl_)->setInterpolationTime(tmp_val);
+
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

@@ -15,8 +15,11 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    //contact
     rfoot_contact_ = new RectangleContactSpec(robot_, "rAnkle", 3.0);
     lfoot_contact_ = new RectangleContactSpec(robot_, "lAnkle", 3.0);
+    //rfoot_contact_ = new PointContact(robot_, "rAnkle", 3.0);
+    //lfoot_contact_ = new PointContact(robot_, "lAnkle", 3.0);
     contact_list_.clear();
     contact_list_.push_back(rfoot_contact_);
     contact_list_.push_back(lfoot_contact_);
@@ -138,10 +141,11 @@ void BalancingCtrl::firstVisit() {
     Eigen::VectorXd rfoot_pos = robot_->getBodyNodeIsometry("rAnkle").translation();
     Eigen::VectorXd lfoot_pos = robot_->getBodyNodeIsometry("lAnkle").translation();
 
+    // TODO
     goal_com_pos_ = (rfoot_pos + lfoot_pos) / 2.0;
     //goal_com_pos_[0] += 0.015;
     goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
-    //goal_com_pos_ = ini_com_pos_; // TODO
+    //goal_com_pos_ = ini_com_pos_;
     myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
     myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");
     myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com");

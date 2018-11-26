@@ -7,3 +7,4 @@
 #include <PnC/DracoPnC/CtrlSet/SingleContactTransCtrl.hpp>
 
 #include <PnC/DracoPnC/CtrlSet/BalancingCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/KinBalancingCtrl.hpp>
