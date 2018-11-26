@@ -103,13 +103,6 @@ void BalancingCtrl::_task_setup(){
     centroid_acc_des_.setZero();
     double d_ary[3];
     if (state_machine_time_ < interpolation_dur_) {
-/*        spline_.getCurvePoint(state_machine_time_, d_ary);*/
-        //for (int i = 0; i < 3; ++i) { centroid_pos_des_[i+3] = d_ary[i]; }
-        //spline_.getCurveDerPoint(state_machine_time_, 1, d_ary);
-        //for (int i = 0; i < 3; ++i) { centroid_vel_des_[i+3] = robot_->getRobotMass() * d_ary[i]; }
-        //spline_.getCurveDerPoint(state_machine_time_, 2, d_ary);
-        /*for (int i = 0; i < 3; ++i) { centroid_acc_des_[i+3] = robot_->getRobotMass() * d_ary[i]; }*/
-
         for (int i = 0; i < 3; ++i) {
             centroid_pos_des_[i+3] = myUtils::smooth_changing(ini_com_pos_[i],
                     goal_com_pos_[i], interpolation_dur_, state_machine_time_);
@@ -146,8 +139,8 @@ void BalancingCtrl::firstVisit() {
     Eigen::VectorXd lfoot_pos = robot_->getBodyNodeIsometry("lAnkle").translation();
 
     goal_com_pos_ = (rfoot_pos + lfoot_pos) / 2.0;
-    goal_com_pos_[0] += 0.015;
-    goal_com_pos_[2] = ini_com_pos_[2];
+    //goal_com_pos_[0] += 0.015;
+    goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
     //goal_com_pos_ = ini_com_pos_; // TODO
     myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
     myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");

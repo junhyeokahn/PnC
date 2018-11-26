@@ -19,9 +19,11 @@ private:
     void _get_imu_data( Eigen::VectorXd & ang_vel,
                         Eigen::VectorXd & acc);
     void _check_foot_contact( bool & rfoot_contact, bool & lfoot_contact );
+    void _check_collision();
     void _hold_xy();
 
     dart::dynamics::SkeletonPtr mSkel;
+    dart::dynamics::SkeletonPtr mGround;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
     double mReleaseTime;
@@ -35,4 +37,6 @@ public:
     Eigen::VectorXd mKp;
     Eigen::VectorXd mKd;
     Eigen::VectorXd q_sim_;
+
+    dart::simulation::WorldPtr world_;
 };
