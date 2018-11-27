@@ -7,6 +7,7 @@ PointContact::PointContact(RobotSystem* robot,
     link_name_ = _link_name;
     max_Fz_ = 1000.;
     mu_ = _mu;
+    printf("[[[Point Contact]]] Constructed\n");
 }
 
 PointContact::~PointContact(){}

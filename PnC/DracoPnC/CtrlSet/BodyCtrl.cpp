@@ -51,7 +51,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    printf("[Body RPZ Ctrl] Constructed\n");
+    printf("[[Body RPZ Ctrl]] Constructed\n");
 }
 
 BodyCtrl::~BodyCtrl(){

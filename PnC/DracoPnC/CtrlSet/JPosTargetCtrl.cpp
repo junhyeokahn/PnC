@@ -31,7 +31,7 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    printf( "[Joint Pos Target Ctrl] Constructed \n" );
+    printf( "[[Joint Pos Target Ctrl]] Constructed \n" );
 }
 
 JPosTargetCtrl::~JPosTargetCtrl(){

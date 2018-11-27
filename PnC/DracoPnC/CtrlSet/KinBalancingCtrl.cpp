@@ -57,7 +57,7 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
 
     DataManager* data_manager = DataManager::GetDataManager();
 
-    printf("[Kin Balancing Ctrl] Constructed\n");
+    printf("[[Kin Balancing Ctrl]] Constructed\n");
 }
 
 KinBalancingCtrl::~KinBalancingCtrl(){

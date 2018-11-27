@@ -36,7 +36,7 @@ JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    printf("[Joint Position Ctrl] Constructed\n");
+    printf("[[Joint Position Ctrl]] Constructed\n");
 }
 
 JPosSwingCtrl::~JPosSwingCtrl(){

@@ -68,7 +68,7 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     data_manager->RegisterData(&centroid_vel_act_, VECT, "centroid_vel_act", 6);
     data_manager->RegisterData(&centroid_acc_act_, VECT, "centroid_acc_act", 6);
 
-    printf("[Balancing Ctrl] Constructed\n");
+    printf("[[Balancing Ctrl]] Constructed\n");
 }
 
 BalancingCtrl::~BalancingCtrl(){

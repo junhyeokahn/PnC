@@ -9,6 +9,7 @@ LineContact::LineContact(RobotSystem* robot,
     max_Fz_ = 1000.;
     mu_ = _mu;
     gamma_ = _gamma;
+    printf("[[[Line Contact]]] Constructed\n");
 }
 
 LineContact::~LineContact(){}

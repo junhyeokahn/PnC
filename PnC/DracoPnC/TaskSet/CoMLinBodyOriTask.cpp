@@ -10,6 +10,7 @@ CoMLinBodyOriTask::CoMLinBodyOriTask(RobotSystem* robot):Task(robot, 6)
         kp_[i] = 100.;
         kd_[i] = 10.;
     }
+    printf("[[[CoM Linear Body Ori Task]]] Constructed\n");
 }
 
 CoMLinBodyOriTask::~CoMLinBodyOriTask(){}

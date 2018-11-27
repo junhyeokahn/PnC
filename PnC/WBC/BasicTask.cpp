@@ -59,7 +59,7 @@ BasicTask::BasicTask( RobotSystem * _robot,
         default:
             std::cout << "[BasicTask] Type is not Specified" << std::endl;
     }
-    printf("[Basic Task %s] is Constructed\n", task_type_string_.c_str());
+    printf("[[[Basic Task %s]]] is Constructed\n", task_type_string_.c_str());
 }
 
 bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,

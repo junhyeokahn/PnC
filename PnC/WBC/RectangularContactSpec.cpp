@@ -11,7 +11,7 @@ RectangularContactSpec::RectangularContactSpec(RobotSystem* _robot,
     link_name_ = _link_name;
     box_size_ = robot_->getBodyNodeCollisionShape(_link_name);
 
-    printf("[%s Rectangular Contact Spec] is Constructed\n", link_name_.c_str());
+    printf("[[[%s Rectangular Contact]]] Constructed\n", link_name_.c_str());
 }
 
 bool RectangularContactSpec::_UpdateContactGeometry() {

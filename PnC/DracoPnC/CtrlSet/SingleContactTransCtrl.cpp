@@ -57,7 +57,7 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-    //printf("[Transition Controller] Constructed\n");
+    printf("[[Single Transition Controller]] Constructed\n");
 }
 
 SingleContactTransCtrl::~SingleContactTransCtrl(){

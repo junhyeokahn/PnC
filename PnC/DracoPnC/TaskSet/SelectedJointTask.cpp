@@ -11,6 +11,7 @@ SelectedJointTask::SelectedJointTask(RobotSystem* _robot, const std::vector<int>
     for(int i(0); i<selected_jidx_.size(); ++i){
         Jt_(i, selected_jidx_[i]) = 1.;
     }
+    printf("[[[Selected Joint Task]]] Constructed\n");
 }
 
 SelectedJointTask::~SelectedJointTask(){}

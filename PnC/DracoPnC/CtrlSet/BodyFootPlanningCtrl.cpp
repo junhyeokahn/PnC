@@ -82,7 +82,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     for(size_t i = 0; i < 3; i++){
         min_jerk_offset_.push_back(new MinJerk_OneDimension());
     }
-    printf("[Body Foot Planning Controller] Constructed\n");
+    printf("[[Body Foot Planning Controller]] Constructed\n");
 }
 
 void BodyFootPlanningCtrl::oneStep(void* _cmd){

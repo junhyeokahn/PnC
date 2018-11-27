@@ -45,7 +45,7 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    printf("[Double Contact Transition Ctrl] Constructed\n");
+    printf("[[Double Contact Transition Ctrl]] Constructed\n");
 }
 
 DoubleContactTransCtrl::~DoubleContactTransCtrl(){
