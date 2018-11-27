@@ -88,7 +88,7 @@ namespace myUtils
     void pretty_print(const std::vector<double> & _vec, const char* title);
     void pretty_print(const std::vector<int> & _vec, const char* title);
     void pretty_constructor(const int& _num_tab, const std::string& _name);
-    void color_print(const myColor & _color, const std::string& _name);
+    void color_print(const myColor & _color, const std::string& _name, bool line_change=true);
     std::string pretty_string(Eigen::VectorXd const & vv);
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);

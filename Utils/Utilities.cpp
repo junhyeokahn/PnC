@@ -116,11 +116,13 @@ namespace myUtils {
     }
 
     void pretty_constructor(const int& _num_tab, const std::string& _name) {
+        myColor color;
+        color_print(myColor::BoldCyan, "|", false);
+        std::string content = " ";
+        int space_to_go(0);
         if (_num_tab != 0) {
-            std::string content = "";
-            for (int i = 0; i < _num_tab; ++i) {content += "\t";}
+            for (int i = 0; i < _num_tab; ++i) {content += "    ";}
             content = content + "||--" + _name;
-            myColor color;
             switch (_num_tab) {
                 case 1:
                     color = myColor::BoldGreen;
@@ -135,16 +137,21 @@ namespace myUtils {
                     color = myColor::BoldMagneta;
                     break;
                 default:
-                    std::cout << "no such color" << std::endl;
+                    std::cout << "no such color in pretty_constructor" << std::endl;
                     exit(0);
             }
-            color_print(color, content);
         } else {
-            color_print(myColor::BoldRed, _name);
+            content += _name;
+            color = myColor::BoldRed;
         }
+            space_to_go = 78 - content.length();
+            //std::cout << space_to_go << std::endl;
+            for (int i = 0; i < space_to_go; ++i) { content += " "; }
+            color_print(color, content, false);
+            color_print(myColor::BoldCyan, "|");
     }
 
-    void color_print(const myColor & _color, const std::string& _name){
+    void color_print(const myColor & _color, const std::string& _name, bool line_change){
         switch (_color) {
             case Red:
                 printf("\033[0;31m");
@@ -186,7 +193,8 @@ namespace myUtils {
                 std::cout << "No Such Color" << std::endl;
                 exit(0);
         }
-        printf("%s\n", _name.c_str());
+        if (line_change) printf("%s\n", _name.c_str());
+        else printf("%s", _name.c_str());
         printf("\033[0m");
     }
 
