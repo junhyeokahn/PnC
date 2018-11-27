@@ -4,13 +4,13 @@
 
 CoMLinBodyOriTask::CoMLinBodyOriTask(RobotSystem* robot):Task(robot, 6)
 {
+    myUtils::pretty_constructor(3, "CoM Lin Body Ori Task");
     Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
     JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
     for (int i = 0; i < dim_task_; ++i) {
         kp_[i] = 100.;
         kd_[i] = 10.;
     }
-    printf("[[[CoM Linear Body Ori Task]]] Constructed\n");
 }
 
 CoMLinBodyOriTask::~CoMLinBodyOriTask(){}

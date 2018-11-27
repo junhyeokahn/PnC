@@ -3,6 +3,7 @@
 #include "filters.hpp"
 #include <stdio.h>
 #include <stdlib.h>
+#include <Utils/Utilities.hpp>
 
 #define BUDDA_Q_SCALE 6.f
 
@@ -389,6 +390,7 @@ float CFilterButterworth24db::Run(float input)
 AverageFilter::AverageFilter(double dt, double t_const, double limit):
     dt_(dt), t_const_(t_const), limit_(limit)
 {
+    myUtils::pretty_constructor(2, "Average Filter");
     est_value_ = 0.;
 }
 

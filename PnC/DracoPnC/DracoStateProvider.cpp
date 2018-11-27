@@ -8,6 +8,7 @@ DracoStateProvider* DracoStateProvider::getStateProvider(RobotSystem* _robot){
 }
 
 DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
+    myUtils::pretty_constructor(1, "State Provider");
 
     robot_ = _robot;
     stance_foot = "lAnkle";
@@ -51,7 +52,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&com_vel, VECT3, "est_com_vel", 3); 
 
     data_manager->RegisterData(&est_mocap_body_vel, VECT2, "est_mocap_body_vel",2);
-    printf("[Draco StateProvider] Constructed\n");
 }
 
 void DracoStateProvider::saveCurrentData(){

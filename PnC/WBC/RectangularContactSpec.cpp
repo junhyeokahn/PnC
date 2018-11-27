@@ -3,15 +3,13 @@
 RectangularContactSpec::RectangularContactSpec(RobotSystem* _robot,
                                            const std::string & _link_name,
                                            const double & _mu ) : ContactSpec(_robot, 6) {
-
+    myUtils::pretty_constructor(3, _link_name + " Rectangular Contact");
     mu_ = _mu;
     Uf_ = Eigen::MatrixXd::Zero(18, dim_contact_);
     ieq_vec_ = Eigen::VectorXd::Zero(18);
     max_Fz_ = 1000.;
     link_name_ = _link_name;
     box_size_ = robot_->getBodyNodeCollisionShape(_link_name);
-
-    printf("[[[%s Rectangular Contact]]] Constructed\n", link_name_.c_str());
 }
 
 bool RectangularContactSpec::_UpdateContactGeometry() {

@@ -2,6 +2,8 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 
 JointTest::JointTest(RobotSystem* robot) : Test(robot){
+    myUtils::pretty_constructor(1, "Joint Test");
+
     phase_ = 0;
     state_list_.clear();
 
@@ -12,7 +14,6 @@ JointTest::JointTest(RobotSystem* robot) : Test(robot){
     state_list_.push_back(jpos_swing_ctrl_);
 
     _ParameterSetting();
-    printf("[Joint Test] Constructed\n");
 }
 JointTest::~JointTest(){
     delete jpos_target_ctrl_;

@@ -5,8 +5,10 @@
 #include <Utils/Utilities.hpp>
 
 WBLC::WBLC(const std::vector<bool> & act_list,
-        const Eigen::MatrixXd * Jci): 
+        const Eigen::MatrixXd * Jci):
     WBC(act_list, Jci){
+
+    myUtils::pretty_constructor(3, "WBLC");
     Sf_ = Eigen::MatrixXd::Zero(6, num_qdot_);
     Sf_.block(0,0, 6, 6).setIdentity();
 

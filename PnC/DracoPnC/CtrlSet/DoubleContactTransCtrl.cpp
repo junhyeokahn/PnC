@@ -7,6 +7,7 @@
 #include <PnC/WBC/WBLC/WBLC.hpp>
 
 DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "Double Contact Transition Ctrl");
 
     b_set_height_target_ = false;
     end_time_ = 100.;
@@ -44,8 +45,6 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    printf("[[Double Contact Transition Ctrl]] Constructed\n");
 }
 
 DoubleContactTransCtrl::~DoubleContactTransCtrl(){

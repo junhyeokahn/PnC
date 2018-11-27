@@ -22,6 +22,8 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     Kp_(robot_->getNumActuatedDofs()),
     Kd_(robot_->getNumActuatedDofs())
 {
+    myUtils::pretty_constructor(2, "Single Contact Trans Ctrl");
+
     base_task_ = new BodyRPZTask(robot);
 
     selected_jidx_.clear();
@@ -57,7 +59,6 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-    printf("[[Single Transition Controller]] Constructed\n");
 }
 
 SingleContactTransCtrl::~SingleContactTransCtrl(){

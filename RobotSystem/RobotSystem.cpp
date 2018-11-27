@@ -3,6 +3,8 @@
 #include "Utils/Utilities.hpp"
 
 RobotSystem::RobotSystem(int numVirtual_, std::string file) {
+    myUtils::pretty_constructor(1, "Robot Model");
+
     dart::utils::DartLoader urdfLoader;
     skel_ptr_ = urdfLoader.parseSkeleton(file);
     num_dof_ = skel_ptr_->getNumDofs();
@@ -11,7 +13,6 @@ RobotSystem::RobotSystem(int numVirtual_, std::string file) {
     I_cent_ = Eigen::MatrixXd::Zero(6, 6);
     J_cent_ = Eigen::MatrixXd::Zero(6, num_dof_);
     A_cent_ = Eigen::MatrixXd::Zero(6, num_dof_);
-    printf("[Robot Model] Constructed\n");
 }
 
 RobotSystem::~RobotSystem() {}

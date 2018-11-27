@@ -7,6 +7,7 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "Balancing Ctrl");
 
     end_time_ = 1000.;
     ctrl_start_time_ = 0.;
@@ -67,8 +68,6 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     data_manager->RegisterData(&centroid_pos_act_, VECT, "centroid_pos_act", 6);
     data_manager->RegisterData(&centroid_vel_act_, VECT, "centroid_vel_act", 6);
     data_manager->RegisterData(&centroid_acc_act_, VECT, "centroid_acc_act", 6);
-
-    printf("[[Balancing Ctrl]] Constructed\n");
 }
 
 BalancingCtrl::~BalancingCtrl(){

@@ -8,6 +8,7 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "Body Ctrl");
 
     end_time_ = 1000.;
     ctrl_start_time_ = 0.;
@@ -50,8 +51,6 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    printf("[[Body RPZ Ctrl]] Constructed\n");
 }
 
 BodyCtrl::~BodyCtrl(){

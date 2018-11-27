@@ -8,6 +8,8 @@
 #include <RobotSystem/RobotSystem.hpp>
 
 DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
+    myUtils::pretty_constructor(1, "State Estimator");
+
     robot_ = robot;
     sp_ = DracoStateProvider::getStateProvider(robot_);
     curr_config_ = Eigen::VectorXd::Zero(robot_->getNumDofs());

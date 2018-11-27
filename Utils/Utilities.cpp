@@ -115,6 +115,81 @@ namespace myUtils {
         pretty_print((Eigen::MatrixXd const &) vv, os, title, prefix, true, nonl);
     }
 
+    void pretty_constructor(const int& _num_tab, const std::string& _name) {
+        if (_num_tab != 0) {
+            std::string content = "";
+            for (int i = 0; i < _num_tab; ++i) {content += "\t";}
+            content = content + "||--" + _name;
+            myColor color;
+            switch (_num_tab) {
+                case 1:
+                    color = myColor::BoldGreen;
+                    break;
+                case 2:
+                    color = myColor::BoldYellow;
+                    break;
+                case 3:
+                    color = myColor::BoldBlue;
+                    break;
+                case 4:
+                    color = myColor::BoldMagneta;
+                    break;
+                default:
+                    std::cout << "no such color" << std::endl;
+                    exit(0);
+            }
+            color_print(color, content);
+        } else {
+            color_print(myColor::BoldRed, _name);
+        }
+    }
+
+    void color_print(const myColor & _color, const std::string& _name){
+        switch (_color) {
+            case Red:
+                printf("\033[0;31m");
+                break;
+            case BoldRed:
+                printf("\033[1;31m");
+                break;
+            case Green:
+                printf("\033[0;32m");
+                break;
+            case BoldGreen:
+                printf("\033[1;32m");
+                break;
+            case Yellow:
+                printf("\033[0;33m");
+                break;
+            case BoldYellow:
+                printf("\033[1;33m");
+                break;
+            case Blue:
+                printf("\033[0;34m");
+                break;
+            case BoldBlue:
+                printf("\033[1;34m");
+                break;
+            case Magneta:
+                printf("\033[0;35m");
+                break;
+            case BoldMagneta:
+                printf("\033[1;35m");
+                break;
+            case Cyan:
+                printf("\033[0;36m");
+                break;
+            case BoldCyan:
+                printf("\033[1;36m");
+                break;
+            default:
+                std::cout << "No Such Color" << std::endl;
+                exit(0);
+        }
+        printf("%s\n", _name.c_str());
+        printf("\033[0m");
+    }
+
     void pretty_print(const std::vector<double> & _vec, const char* title){
         std::printf("%s: ", title);
         for( int i(0); i< _vec.size(); ++i){

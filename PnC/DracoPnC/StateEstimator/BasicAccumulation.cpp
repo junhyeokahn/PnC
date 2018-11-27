@@ -6,6 +6,7 @@
 #include <PnC/DracoPnC/StateEstimator/BasicAccumulation.hpp>
 
 BasicAccumulation::BasicAccumulation():filtered_acc_(3){
+    myUtils::pretty_constructor(2, "Basic Accumulation");
     global_ori_quat_.w() = 1.;
     global_ori_quat_.x() = 0.;
     global_ori_quat_.y() = 0.;

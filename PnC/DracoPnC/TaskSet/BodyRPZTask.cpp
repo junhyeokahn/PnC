@@ -4,9 +4,10 @@
 
 BodyRPZTask::BodyRPZTask(RobotSystem* robot):Task(robot, 3)
 {
+    myUtils::pretty_constructor(3, "Body Rx Ry Z Task");
+
     Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
     JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
-    printf("[[[Body Rx Ry Z Task]]] Constructed\n");
 }
 
 BodyRPZTask::~BodyRPZTask(){}

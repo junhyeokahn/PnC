@@ -8,6 +8,7 @@
 #include <Utils/DataManager.hpp>
 
 JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
+    myUtils::pretty_constructor(2, "JPos Ctrl");
 
     end_time_ = 1000.;
     b_jpos_set_ = false;
@@ -35,8 +36,6 @@ JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
         Eigen::VectorXd::Constant(fixed_body_contact_->getDim(), 0.1);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    printf("[[Joint Position Ctrl]] Constructed\n");
 }
 
 JPosSwingCtrl::~JPosSwingCtrl(){

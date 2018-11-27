@@ -7,6 +7,8 @@
 #include <Utils/Utilities.hpp>
 
 JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
+    myUtils::pretty_constructor(2, "JPos Target Ctrl");
+
     jpos_target_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     end_time_ = 1000.0;
     ctrl_start_time_ = 0.0;
@@ -30,8 +32,6 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
         Eigen::VectorXd::Constant(fixed_body_contact_->getDim(), 0.1);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    printf( "[[Joint Pos Target Ctrl]] Constructed \n" );
 }
 
 JPosTargetCtrl::~JPosTargetCtrl(){

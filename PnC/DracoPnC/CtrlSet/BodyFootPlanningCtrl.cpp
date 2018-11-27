@@ -13,6 +13,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
                                            std::string swing_foot,
                                            FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner) {
+        myUtils::pretty_constructor(2, "Body Foot Planning Ctrl");
 
     push_down_height_ = 0.;
     des_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -82,7 +83,6 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     for(size_t i = 0; i < 3; i++){
         min_jerk_offset_.push_back(new MinJerk_OneDimension());
     }
-    printf("[[Body Foot Planning Controller]] Constructed\n");
 }
 
 void BodyFootPlanningCtrl::oneStep(void* _cmd){

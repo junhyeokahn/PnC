@@ -7,6 +7,7 @@ KinWBC::KinWBC(const std::vector<bool> & act_joint):
     //threshold_(0.001)
     threshold_(0.005)
 {
+    myUtils::pretty_constructor(3, "Kin WBC");
     num_qdot_ = act_joint.size();
 
     act_jidx_.clear();

@@ -5,11 +5,11 @@ LineContact::LineContact(RobotSystem* robot,
                          const std::string & _link_name,
                          const double & _mu,
                          const double & _gamma) : ContactSpec(robot, 5) {
+    myUtils::pretty_constructor(3, _link_name + " Line Contact");
     link_name_ = _link_name;
     max_Fz_ = 1000.;
     mu_ = _mu;
     gamma_ = _gamma;
-    printf("[[[Line Contact]]] Constructed\n");
 }
 
 LineContact::~LineContact(){}

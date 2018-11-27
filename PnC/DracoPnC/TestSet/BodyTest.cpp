@@ -3,6 +3,7 @@
 #include <RobotSystem/RobotSystem.hpp>
 
 BodyTest::BodyTest(RobotSystem* robot) : Test(robot) {
+    myUtils::pretty_constructor(1, "Body Test");
 
     phase_ = BodyCtrlPhase::BC_initial_jpos;
     state_list_.clear();
@@ -16,8 +17,6 @@ BodyTest::BodyTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(body_ctrl_);
 
     _SettingParameter();
-
-    printf("[Body Test] Constructed\n");
 }
 
 BodyTest::~BodyTest() {

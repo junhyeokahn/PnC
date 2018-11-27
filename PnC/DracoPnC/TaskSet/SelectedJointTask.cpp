@@ -4,6 +4,7 @@
 SelectedJointTask::SelectedJointTask(RobotSystem* _robot, const std::vector<int> & selected_jidx):
     Task(_robot, selected_jidx.size())
 {
+    myUtils::pretty_constructor(3, "Selected Joint Task");
     selected_jidx_ = selected_jidx;
     Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
     JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
@@ -11,7 +12,6 @@ SelectedJointTask::SelectedJointTask(RobotSystem* _robot, const std::vector<int>
     for(int i(0); i<selected_jidx_.size(); ++i){
         Jt_(i, selected_jidx_[i]) = 1.;
     }
-    printf("[[[Selected Joint Task]]] Constructed\n");
 }
 
 SelectedJointTask::~SelectedJointTask(){}

@@ -6,6 +6,8 @@
 #include <Eigen/Dense>
 #include <stdio.h>
 
+#include <Utils/Utilities.hpp>
+
 class RobotSystem
 {
 protected:

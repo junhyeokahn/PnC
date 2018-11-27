@@ -8,6 +8,7 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "Kin Balancing Ctrl");
 
     end_time_ = 1000.;
     ctrl_start_time_ = 0.;
@@ -56,8 +57,6 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
     DataManager* data_manager = DataManager::GetDataManager();
-
-    printf("[[Kin Balancing Ctrl]] Constructed\n");
 }
 
 KinBalancingCtrl::~KinBalancingCtrl(){

@@ -3,6 +3,7 @@
 #include <RobotSystem/RobotSystem.hpp>
 
 BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
+    myUtils::pretty_constructor(1, "Balancing Test");
 
     phase_ = BodyCtrlPhase::BC_initial_jpos;
     state_list_.clear();
@@ -18,8 +19,6 @@ BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(kin_balancing_ctrl_);
 
     _SettingParameter();
-
-    printf("[Balancing Test] Constructed\n");
 }
 
 BalancingTest::~BalancingTest() {

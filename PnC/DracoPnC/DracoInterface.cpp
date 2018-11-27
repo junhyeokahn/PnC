@@ -12,6 +12,11 @@
 
 DracoInterface::DracoInterface() : Interface()
 {
+    std::string border = "=";
+    for (int i = 0; i < 79; ++i) { border += "=";}
+    myUtils::color_print(myColor::BoldCyan, border);
+    myUtils::pretty_constructor(0, "Draco Interface");
+
     robot_ = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
 
     test_cmd_ = new DracoCommand();
@@ -46,7 +51,7 @@ DracoInterface::DracoInterface() : Interface()
 
     _ParameterSetting();
 
-    printf("[Draco Interface] Contruct\n");
+    myUtils::color_print(myColor::BoldCyan, border);
 }
 
 DracoInterface::~DracoInterface(){

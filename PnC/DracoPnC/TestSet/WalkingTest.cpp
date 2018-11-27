@@ -7,6 +7,7 @@
 #include <Utils/DataManager.hpp>
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
+    myUtils::pretty_constructor(1, "Walking Test");
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
     sp_->stance_foot = "lAnkle";
@@ -71,8 +72,6 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     DataManager::GetDataManager()->RegisterData(
             &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_acc_des_),
             VECT3, "lfoot_acc_des", 3);
-
-    printf("[Walking Config Test] Constructed\n");
 }
 
 WalkingTest::~WalkingTest(){

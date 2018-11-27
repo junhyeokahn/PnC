@@ -4,10 +4,11 @@
 PointContact::PointContact(RobotSystem* robot,
         const std::string & _link_name,
         const double & _mu) : ContactSpec(robot, 3) {
+
+    myUtils::pretty_constructor(3, _link_name+" Point Contact");
     link_name_ = _link_name;
     max_Fz_ = 1000.;
     mu_ = _mu;
-    printf("[[[Point Contact]]] Constructed\n");
 }
 
 PointContact::~PointContact(){}

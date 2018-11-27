@@ -9,6 +9,21 @@
 #include "Configuration.h"
 #include "ExternalSource/myYaml/include/myYaml/yaml.h"
 
+enum myColor {
+    Red=0,
+    BoldRed=1,
+    Green=2,
+    BoldGreen=3,
+    Yellow=4,
+    BoldYellow=5,
+    Blue=6,
+    BoldBlue=7,
+    Magneta=8,
+    BoldMagneta=9,
+    Cyan=10,
+    BoldCyan=11
+};
+
 namespace myUtils
 {
     // =============
@@ -72,9 +87,12 @@ namespace myUtils
             std::string const & title, std::string const & prefix="", bool nonl = false);
     void pretty_print(const std::vector<double> & _vec, const char* title);
     void pretty_print(const std::vector<int> & _vec, const char* title);
+    void pretty_constructor(const int& _num_tab, const std::string& _name);
+    void color_print(const myColor & _color, const std::string& _name);
     std::string pretty_string(Eigen::VectorXd const & vv);
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);
+
 
     // ===========================
     // Simple Trajectory Generator
