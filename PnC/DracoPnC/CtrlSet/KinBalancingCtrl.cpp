@@ -25,6 +25,8 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 3.0);
     //rfoot_contact_ = new PointContact(robot_, "rAnkle", 3.0);
     //lfoot_contact_ = new PointContact(robot_, "lAnkle", 3.0);
+    //rfoot_contact_ = new LineContact(robot_, "rAnkle", 3., 3.);
+    //lfoot_contact_ = new LineContact(robot_, "lAnkle", 3., 3.);
     contact_list_.clear();
     contact_list_.push_back(rfoot_contact_);
     contact_list_.push_back(lfoot_contact_);

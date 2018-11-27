@@ -17,6 +17,7 @@ bool RectangularContactSpec::_UpdateContactGeometry() {
     Eigen::VectorXd tmp = iso_world_to_contact_center_.translation();
     vec_bodynode_to_contact_surface_ = robot_->getBodyNodeCollisionIsometry(link_name_, robot_->getBodyNode(link_name_)).translation();
     vec_bodynode_to_contact_surface_[2] -= box_size_[2]/2;
+
     return true;
 }
 
