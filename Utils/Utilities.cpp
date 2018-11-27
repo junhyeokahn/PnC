@@ -115,6 +115,22 @@ namespace myUtils {
         pretty_print((Eigen::MatrixXd const &) vv, os, title, prefix, true, nonl);
     }
 
+    void pretty_print(const std::vector<double> & _vec, const char* title){
+        std::printf("%s: ", title);
+        for( int i(0); i< _vec.size(); ++i){
+            std::printf("% 6.4f, \t", _vec[i]);
+        }
+        std::printf("\n");
+    }
+
+    void pretty_print(const std::vector<int> & _vec, const char* title){
+        std::printf("%s: ", title);
+        for( int i(0); i< _vec.size(); ++i){
+            std::printf("%d, \t", _vec[i]);
+        }
+        std::printf("\n");
+    }
+
     void pretty_print(Eigen::MatrixXd const & mm, std::ostream & os,
             std::string const & title, std::string const & prefix,
             bool vecmode, bool nonl) {

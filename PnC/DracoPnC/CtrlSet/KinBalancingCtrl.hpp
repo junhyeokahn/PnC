@@ -41,9 +41,8 @@ class KinBalancingCtrl: public Controller{
         ContactSpec* rfoot_contact_;
         ContactSpec* lfoot_contact_;
 
-        Task* body_rpz_task_;
-        std::vector<int> selected_jidx_;
-        Task* selected_joint_task_;
+        Task* com_task_;
+        Task* torso_ori_task_;
 
         KinWBC* kin_wbc_;
         WBLC* wblc_;

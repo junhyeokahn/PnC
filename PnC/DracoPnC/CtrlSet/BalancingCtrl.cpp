@@ -16,8 +16,8 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     //contact
-    rfoot_contact_ = new RectangleContactSpec(robot_, "rAnkle", 3.0);
-    lfoot_contact_ = new RectangleContactSpec(robot_, "lAnkle", 3.0);
+    rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 3.0);
+    lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 3.0);
     //rfoot_contact_ = new PointContact(robot_, "rAnkle", 3.0);
     //lfoot_contact_ = new PointContact(robot_, "lAnkle", 3.0);
     contact_list_.clear();

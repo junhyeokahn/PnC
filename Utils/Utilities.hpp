@@ -70,6 +70,8 @@ namespace myUtils
             std::string const & prefix="", bool nonl = false);
     void pretty_print( Eigen::Vector3d const & vv, std::ostream & os,
             std::string const & title, std::string const & prefix="", bool nonl = false);
+    void pretty_print(const std::vector<double> & _vec, const char* title);
+    void pretty_print(const std::vector<int> & _vec, const char* title);
     std::string pretty_string(Eigen::VectorXd const & vv);
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);

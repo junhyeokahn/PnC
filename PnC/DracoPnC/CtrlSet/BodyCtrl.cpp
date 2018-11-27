@@ -29,8 +29,8 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_contact_ = new PointContact(robot_, "lAnkle", 30);
     //rfoot_contact_ = new LineContact(robot_, "rAnkle", 3, 3);
     //lfoot_contact_ = new LineContact(robot_, "lAnkle", 3, 3);
-    //rfoot_contact_ = new RectangleContactSpec(robot_, "rAnkle", 5);
-    //lfoot_contact_ = new RectangleContactSpec(robot_, "lAnkle", 5);
+    //rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 5);
+    //lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 5);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     std::vector<bool> act_list;

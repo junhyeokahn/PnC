@@ -1,6 +1,6 @@
-#include <PnC/WBC/RectangleContactSpec.hpp>
+#include <PnC/WBC/RectangularContactSpec.hpp>
 
-RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
+RectangularContactSpec::RectangularContactSpec(RobotSystem* _robot,
                                            const std::string & _link_name,
                                            const double & _mu ) : ContactSpec(_robot, 6) {
 
@@ -11,10 +11,10 @@ RectangleContactSpec::RectangleContactSpec(RobotSystem* _robot,
     link_name_ = _link_name;
     box_size_ = robot_->getBodyNodeCollisionShape(_link_name);
 
-    //printf("[Rectangle %s Contact Spec] is Constructed\n", link_name_.c_str());
+    printf("[%s Rectangular Contact Spec] is Constructed\n", link_name_.c_str());
 }
 
-bool RectangleContactSpec::_UpdateContactGeometry() {
+bool RectangularContactSpec::_UpdateContactGeometry() {
     iso_world_to_contact_center_ = robot_->getBodyNodeCollisionIsometry(link_name_);
     Eigen::VectorXd tmp = iso_world_to_contact_center_.translation();
     vec_bodynode_to_contact_surface_ = robot_->getBodyNodeCollisionIsometry(link_name_, robot_->getBodyNode(link_name_)).translation();
@@ -22,13 +22,13 @@ bool RectangleContactSpec::_UpdateContactGeometry() {
     return true;
 }
 
-bool RectangleContactSpec::_UpdateJc() {
+bool RectangularContactSpec::_UpdateJc() {
     Jc_ =
         robot_->getBodyNodeJacobian(link_name_, vec_bodynode_to_contact_surface_);
     return true;
 }
 
-bool RectangleContactSpec::_UpdateJcDotQdot() {
+bool RectangularContactSpec::_UpdateJcDotQdot() {
     JcDotQdot_ =
         robot_->getBodyNodeJacobianDot(link_name_, vec_bodynode_to_contact_surface_) *
         robot_->getQdot();
@@ -36,7 +36,7 @@ bool RectangleContactSpec::_UpdateJcDotQdot() {
     return true;
 }
 
-bool RectangleContactSpec::_UpdateUf() {
+bool RectangularContactSpec::_UpdateUf() {
 
     double x(box_size_[0]/2); double y(box_size_[1]/2);
     Eigen::MatrixXd aug_rot = Eigen::MatrixXd::Zero(6, 6);
@@ -90,7 +90,7 @@ bool RectangleContactSpec::_UpdateUf() {
     return true;
 }
 
-bool RectangleContactSpec::_UpdateInequalityVector() {
+bool RectangularContactSpec::_UpdateInequalityVector() {
     ieq_vec_ = Eigen::VectorXd::Zero(18);
     ieq_vec_[17] = -max_Fz_;
 

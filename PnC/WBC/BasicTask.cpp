@@ -48,10 +48,18 @@ BasicTask::BasicTask( RobotSystem * _robot,
                 kd_[i] = 20.;
             }
             break;
+        case BasicTaskType::COM:
+            assert(dim_task_ = 3);
+            task_type_string_ = "CoM";
+            for (int i = 0; i < 3; ++i) {
+                kp_[i] = 150.;
+                kd_[i] = 10.;
+            }
+            break;
         default:
             std::cout << "[BasicTask] Type is not Specified" << std::endl;
     }
-    //printf("[Basic Task %s] is Constructed\n", task_type_string_.c_str());
+    printf("[Basic Task %s] is Constructed\n", task_type_string_.c_str());
 }
 
 bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
@@ -71,12 +79,15 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
                                         quat_ori_err = ori_des * (ori_act.inverse());
                                         Eigen::Vector3d ori_err;
                                         ori_err = dart::math::quatToExp(quat_ori_err);
-                                        for (int i = 0; i < 3; ++i)
-                                            ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+                                        for (int i = 0; i < 3; ++i){
+                                            //ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+                                        }
                                         pos_err = ori_err;
 
                                         // vel_act
                                         vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_name_).head(3);
+                                        //myUtils::pretty_print(pos_err, std::cout, "pos_err in ori");
+                                        break;
                                     }
         case BasicTaskType::JOINT:{
                                       // pos_err
@@ -91,7 +102,7 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
                                         // pos_err
                                         pos_err = _pos_des -
                                             robot_->getBodyNodeCoMIsometry(link_name_).translation();
-                                        // vel_act_
+                                        // vel_act
                                         vel_act = robot_->
                                             getBodyNodeCoMSpatialVelocity(link_name_).tail(3);
                                         break;
@@ -102,13 +113,21 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
                                              Eigen::VectorXd::Zero(3);
                                          pos_err.tail(3) =
                                              _pos_des.tail(3) - robot_->getCoMPosition();
+                                        // vel_act
                                          vel_act = robot_->getCentroidMomentum();
                                          break;
                                      }
+        case BasicTaskType::COM:{
+                                    // pos_err
+                                    pos_err = _pos_des - robot_->getCoMPosition();
+                                    // vel_act
+                                    vel_act = robot_->getCoMVelocity();
+                                    //myUtils::pretty_print(pos_err, std::cout, "pos_err in COM");
+                                    break;
+                                }
         default:
                                      std::cout << "[BasicTask] Type is not Specified" << std::endl;
     }
-    //}
 
     // op_cmd
     for(int i(0); i < dim_task_; ++i){
@@ -143,6 +162,10 @@ bool BasicTask::_UpdateTaskJacobian() {
                                          Jt_ = robot_->getCentroidInertiaTimesJacobian();
                                          break;
                                      }
+        case BasicTaskType::COM:{
+                                    Jt_ = robot_->getCoMJacobian().block(3, 0, dim_task_, robot_->getNumDofs());
+                                    break;
+                                }
         default:{
                     std::cout << "[BasicTask] Type is not Specified" << std::endl;
                 }
@@ -170,9 +193,13 @@ bool BasicTask::_UpdateTaskJDotQdot() {
                                          //JtDotQdot_ = robot_->getCentroidJacobian() *
                                          //robot_->getInvMassMatrix() *
                                          //robot_->getCoriolis();
-                                         JtDotQdot_.setZero(); // TODO : what is this
+                                         JtDotQdot_.setZero(); // TODO : what this should be
                                          break;
                                      }
+        case BasicTaskType::COM:{
+                                    JtDotQdot_.setZero();
+                                    break;
+                                }
         default:{
                     std::cout << "[BasicTask] Type is not Specified" << std::endl;
                 }

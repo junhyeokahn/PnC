@@ -4,7 +4,7 @@
 
 class RobotSystem;
 
-class RectangleContactSpec : public ContactSpec
+class RectangularContactSpec : public ContactSpec
 {
 private:
     std::string linkName_;
@@ -16,10 +16,10 @@ private:
     virtual bool _UpdateInequalityVector();
 
 public:
-    RectangleContactSpec(RobotSystem * _robot,
+    RectangularContactSpec(RobotSystem * _robot,
                           const std::string & _link_name,
                           const double & _mu );
-    virtual ~RectangleContactSpec() {};
+    virtual ~RectangularContactSpec() {};
 
     void setMaxFz(double max_fz) { max_Fz_ = max_fz; }
 

@@ -16,13 +16,7 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 ```
 
 ### Install Required Dependancies
-- [Dart 6.5.0](https://github.com/junhyeokahn/dart)
-```
-$ cd 'your workspace' && git clone https://github.com/junhyeokahn/dart.git
-$ cd dart && git checkout release-6.4
-$ mkdir build && cd build && cmake .. && make -j
-$ sudo make install
-```
+- [Dart 6.5.0](https://dartsim.github.io/install_dart_on_mac.html)
 
 ### Install Optional Dependancies
 - [Gurobi](http://www.gurobi.com/)

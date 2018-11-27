@@ -20,8 +20,8 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
     des_jacc_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // contact
-    rfoot_contact_ = new RectangleContactSpec(robot_, "rAnkle", 3.0);
-    lfoot_contact_ = new RectangleContactSpec(robot_, "lAnkle", 3.0);
+    rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 3.0);
+    lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 3.0);
     //rfoot_contact_ = new PointContact(robot_, "rAnkle", 3.0);
     //lfoot_contact_ = new PointContact(robot_, "lAnkle", 3.0);
     contact_list_.clear();
@@ -31,13 +31,10 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
 
     // task
     task_list_.clear();
-    selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getJointIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
-    selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
-    //task_list_.push_back(selected_joint_task_);
-    body_rpz_task_ = new BodyRPZTask(robot);
-    task_list_.push_back(body_rpz_task_);
+    com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
+    task_list_.push_back(com_task_);
+    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, "torso");
+    task_list_.push_back(torso_ori_task_);
 
     // wblc
     std::vector<bool> act_list;
@@ -64,7 +61,10 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
 }
 
 KinBalancingCtrl::~KinBalancingCtrl(){
-    delete body_rpz_task_;
+    //delete body_rpz_task_;
+    //delete com_lin_body_ori_task_;
+    delete com_task_;
+    delete torso_ori_task_;
     delete wblc_;
     delete wblc_data_;
     delete rfoot_contact_;
@@ -117,37 +117,32 @@ void KinBalancingCtrl::_task_setup(){
     des_jvel_.setZero();
     des_jacc_.setZero();
 
-    Eigen::VectorXd jpos_des(2); jpos_des.setZero();
-    Eigen::VectorXd jvel_des(2); jvel_des.setZero();
-    Eigen::VectorXd jacc_des(2); jacc_des.setZero();
+    Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
-    selected_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
+    com_pos_des = goal_com_pos_;
+    com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
+    task_list_.push_back(com_task_);
 
-    // Set Desired Orientation
+    Eigen::VectorXd torso_ori_pos_des = Eigen::VectorXd::Zero(4);
+    Eigen::VectorXd torso_ori_vel_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd torso_ori_acc_des = Eigen::VectorXd::Zero(3);
     Eigen::Quaternion<double> des_quat( 1, 0, 0, 0 );
 
-    Eigen::VectorXd pos_des(7); pos_des.setZero();
-    Eigen::VectorXd vel_des(6); vel_des.setZero();
-    Eigen::VectorXd acc_des(6); acc_des.setZero();
-
-    // Orientation
-    pos_des[0] = des_quat.w();
-    pos_des[1] = des_quat.x();
-    pos_des[2] = des_quat.y();
-    pos_des[3] = des_quat.z();
-
-    // Position
-    pos_des[4] = goal_com_pos_[0];
-    pos_des[5] = goal_com_pos_[1];
-    pos_des[6] = goal_com_pos_[2];
-
-    body_rpz_task_->updateTask(pos_des, vel_des, acc_des);
-
-    //task_list_.push_back(selected_joint_task_);
-    task_list_.push_back(body_rpz_task_);
+    torso_ori_pos_des[0] = des_quat.w();
+    torso_ori_pos_des[1] = des_quat.x();
+    torso_ori_pos_des[2] = des_quat.y();
+    torso_ori_pos_des[3] = des_quat.z();
+    torso_ori_task_->updateTask(torso_ori_pos_des, torso_ori_vel_des, torso_ori_acc_des);
+    task_list_.push_back(torso_ori_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,
             des_jpos_, des_jvel_, des_jacc_);
+
+    //myUtils::pretty_print(des_jpos_, std::cout, "des_jpos");
+    //Eigen::VectorXd act_jpos = (sp_->q).tail(robot_->getNumActuatedDofs());
+    //myUtils::pretty_print(act_jpos, std::cout, "act_jpos");
 }
 
 void KinBalancingCtrl::_contact_setup(){
@@ -170,7 +165,7 @@ void KinBalancingCtrl::firstVisit() {
     //goal_com_pos_[0] += 0.015;
     goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
     goal_com_pos_ = ini_com_pos_;
-    goal_com_pos_[2] = sp_->q[2];
+    //goal_com_pos_[2] = sp_->q[2];
     myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
     myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");
     myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com");
