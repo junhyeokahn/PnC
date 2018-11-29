@@ -3,8 +3,8 @@
 PointContactSpec::PointContactSpec(RobotSystem* robot,
         const std::string & _link_name,
         const double & _mu) : ContactSpec(robot, 3) {
-
     myUtils::pretty_constructor(3, _link_name+" Point Contact");
+
     link_name_ = _link_name;
     max_Fz_ = 1000.;
     mu_ = _mu;
@@ -59,7 +59,7 @@ bool PointContactSpec::_UpdateInequalityVector(){
 FixedBodyContactSpec::FixedBodyContactSpec(RobotSystem* _robot) : ContactSpec(_robot, 6)
 {
     myUtils::pretty_constructor(3, "Fixed Body Contact");
-    robot_ = _robot;
+
     Jc_ = Eigen::MatrixXd::Zero(dim_contact_, robot_->getNumDofs());
 }
 

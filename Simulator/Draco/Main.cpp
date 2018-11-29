@@ -199,10 +199,13 @@ int main() {
     world->addSkeleton(ground);
     world->addSkeleton(robot);
     // Friction Coefficient
-    ground->getBodyNode("ground_link")->setFrictionCoeff(100.);
-    robot->getBodyNode("torso")->setFrictionCoeff(100.);
-    robot->getBodyNode("rAnkle")->setFrictionCoeff(100.);
-    robot->getBodyNode("lAnkle")->setFrictionCoeff(100.);
+    double friction(100.);
+    ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
+    robot->getBodyNode("torso")->setFrictionCoeff(friction);
+    robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
+    robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
+    robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
+    robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
     world->setTimeStep(SERVO_RATE);

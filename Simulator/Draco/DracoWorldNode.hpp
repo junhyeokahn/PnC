@@ -21,12 +21,18 @@ private:
     void _check_foot_contact( bool & rfoot_contact, bool & lfoot_contact );
     void _check_collision();
     void _hold_xy();
+    void _hold_rot();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
     double mReleaseTime;
+    double pulling_back_time_;
+    double pulling_back_distance_;
+
+    int count_;
+    double t_;
 
 public:
     DracoWorldNode(const dart::simulation::WorldPtr & world,

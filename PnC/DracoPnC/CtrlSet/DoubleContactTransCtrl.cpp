@@ -91,6 +91,11 @@ void DoubleContactTransCtrl::oneStep(void* _cmd){
         ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
     _PostProcessing_Command();
+
+    //TODO : debugging purpose
+    myUtils::saveVector(gamma, "gamma_debug");
+    myUtils::saveVector(des_jpos_, "des_jpos_debug");
+    myUtils::saveVector(des_jvel_, "des_jvel_debug");
 }
 
 void DoubleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
@@ -195,6 +200,18 @@ void DoubleContactTransCtrl::firstVisit(){
     base_pos_ini_ = robot_->getQ().head(3);
     //base_pos_ini_ = robot_->getBodyNodeCoMIsometry("torso").translation();
     base_ori_ini_ = robot_->getBodyNodeCoMIsometry("torso").linear();
+
+    // Test
+    std::cout << "Initial Contact Positions at Double Contact Trans Ctrl" << std::endl;
+    Eigen::VectorXd rfoot_front_pos = robot_->getBodyNodeIsometry("rFootFront").translation();
+    Eigen::VectorXd rfoot_back_pos = robot_->getBodyNodeIsometry("rFootBack").translation();
+    Eigen::VectorXd lfoot_front_pos = robot_->getBodyNodeIsometry("lFootFront").translation();
+    Eigen::VectorXd lfoot_back_pos = robot_->getBodyNodeIsometry("lFootBack").translation();
+    myUtils::pretty_print(rfoot_front_pos, std::cout, "rfoot_front_pos");
+    myUtils::pretty_print(rfoot_back_pos, std::cout, "rfoot_back_pos");
+    myUtils::pretty_print(lfoot_front_pos, std::cout, "lfoot_front_pos");
+    myUtils::pretty_print(lfoot_back_pos, std::cout, "lfoot_back_pos");
+    //exit(0);
 }
 
 void DoubleContactTransCtrl::lastVisit(){
