@@ -54,6 +54,42 @@ public:
     DracoWorldNode* worldnode_;
 };
 
+void _addFootCollisionObject(dart::dynamics::SkeletonPtr robot) {
+    using namespace dart::dynamics;
+    using namespace dart::simulation;
+
+    WeldJoint::Properties properties;
+    Inertia inertia(0.00001,
+            0., 0., 0.,
+            0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001);
+    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    ShapePtr shape = std::make_shared<EllipsoidShape>(0.06*Eigen::Vector3d::Ones());
+
+    // right foot front
+    properties.mName = "rFootFront1";
+    tf.translation() = Eigen::Vector3d(0.08, 0, -0.044)/2.0;
+    properties.mT_ParentBodyToJoint = tf;
+    properties.mT_ChildBodyToJoint = tf.inverse();
+
+    BodyNode* rfoot_front_bn = robot->createJointAndBodyNodePair<WeldJoint>(
+            robot->getBodyNode("rAnkle"), properties, BodyNode::AspectProperties("rFootFront1")).second;
+    rfoot_front_bn->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(shape);
+    rfoot_front_bn->setInertia(inertia);
+    rfoot_front_bn->setRestitutionCoeff(0.6);
+
+    // right foot back
+    properties.mName = "rFootBack1";
+    tf.translation() = Eigen::Vector3d(-0.05, 0, -0.044)/2.0;
+    properties.mT_ParentBodyToJoint = tf;
+    properties.mT_ChildBodyToJoint = tf.inverse();
+
+    BodyNode* rfoot_back_bn = robot->createJointAndBodyNodePair<WeldJoint>(
+            robot->getBodyNode("rAnkle"), properties, BodyNode::AspectProperties("rFootBack1")).second;
+    rfoot_back_bn->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(shape);
+    rfoot_back_bn->setInertia(inertia);
+    rfoot_back_bn->setRestitutionCoeff(0.6);
+}
+
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 
     //for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
@@ -69,18 +105,22 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         //std::cout << joint->getNumDofs() << std::endl;
     //}
 
-    for (int i = 0; i < robot->getNumDofs(); ++i) {
-        dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-        std::cout << i << "th" << std::endl;
-        std::cout << dof->getName() << std::endl;
+    //for (int i = 0; i < robot->getNumDofs(); ++i) {
+        //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << dof->getName() << std::endl;
         //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
-        std::cout << dof->getCoulombFriction() << std::endl;
-    }
+        //std::cout << dof->getCoulombFriction() << std::endl;
+    //}
 
-    //std::cout << robot->getNumDofs() << std::endl;
+    std::cout << "num dof" << std::endl;
+    std::cout << robot->getNumDofs() << std::endl;
     //std::cout << robot->getNumJoints() << std::endl;
-    //std::cout << robot->getMassMatrix().rows() << std::endl;
+    std::cout << "mass mat row" << std::endl;
+    std::cout << robot->getMassMatrix().rows() << std::endl;
     //std::cout << robot->getMassMatrix().cols() << std::endl;
+    std::cout << "q" << std::endl;
+    std::cout << robot->getPositions() << std::endl;
 
     exit(0);
 }
@@ -100,8 +140,10 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot){
     switch (initPos) {
         case 0:{
             q[2] = 1.425;
-            q[lAnkleIdx] = M_PI/2;
-            q[rAnkleIdx] = M_PI/2;
+            q[lAnkleIdx] = 0.;
+            q[rAnkleIdx] = 0.;
+            //q[lAnkleIdx] = M_PI/2;
+            //q[rAnkleIdx] = M_PI/2;
             break;
                }
         case 1:{
@@ -151,7 +193,8 @@ int main() {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
             THIS_COM"RobotSystem/RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
+            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
+            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
             //THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
@@ -168,6 +211,11 @@ int main() {
     // Display Joints Frame
     // ====================
     //displayJointFrames(world, robot);
+
+    // ====================
+    // Add Collision Object
+    // ====================
+    //_addFootCollisionObject(robot);
 
     // =====================
     // Initial configuration

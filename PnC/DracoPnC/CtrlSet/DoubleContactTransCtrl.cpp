@@ -17,6 +17,7 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    // task
     body_rpz_task_ = new BodyRPZTask(robot);
 
     selected_jidx_.clear();
@@ -24,14 +25,29 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
 
-    rfoot_contact_ = new PointContact(robot_, "rAnkle", 0.3);
-    lfoot_contact_ = new PointContact(robot_, "lAnkle", 0.3);
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    // contact
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
+    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
+    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    contact_list_.clear();
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
+
+    fz_idx_in_cost_.clear();
+    dim_contact_ = 0;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        fz_idx_in_cost_.push_back(dim_contact_ + contact_list_[i]->getFzIndex());
+        dim_contact_ += contact_list_[i]->getDim();
+    }
 
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for(int i(0); i<robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
 
+    // wbc
     kin_wbc_ = new KinWBC(act_list);
     wblc_ = new WBLC(act_list);
 
@@ -39,8 +55,9 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(robot_->getNumDofs(), 100.0);
     wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 1.0);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] = 0.01;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        wblc_data_->W_rf_[fz_idx_in_cost_[i]] = 0.01;
+    }
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), -100.);
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
@@ -49,8 +66,12 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
 
 DoubleContactTransCtrl::~DoubleContactTransCtrl(){
     delete body_rpz_task_;
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
+
     delete wblc_;
     delete kin_wbc_;
     delete wblc_data_;
@@ -148,29 +169,26 @@ void DoubleContactTransCtrl::_task_setup(){
 }
 
 void DoubleContactTransCtrl::_contact_setup(){
-    //((SingleContact*)rfoot_contact_)->setMaxFz(
-        //min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_) );
-    //((SingleContact*)lfoot_contact_)->setMaxFz(
-        //min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_) );
+    double upper_lim(100.);
+    upper_lim = min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_);
 
-    ((PointContact*)rfoot_contact_)->setMaxFz(
-        min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_) );
-    ((PointContact*)lfoot_contact_)->setMaxFz(
-        min_rf_z_ + state_machine_time_/end_time_ * (max_rf_z_ - min_rf_z_) );
+    ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(upper_lim);
+    ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
+    ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
+    ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
 
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
 
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
-
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 }
 
 void DoubleContactTransCtrl::firstVisit(){
-    // TODO
-    //myUtils::pretty_print(sp_->q, std::cout, "q");
-    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
-    // TODO
     ini_base_height_ = robot_->getQ()[2];
     //ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
     ctrl_start_time_ = sp_->curr_time;

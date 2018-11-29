@@ -30,7 +30,6 @@ public:
     void unsetContact(){ b_set_contact_ = false; }
 
     bool updateContactSpec(){
-        _UpdateContactGeometry();
         _UpdateJc();
         _UpdateJcDotQdot();
         _UpdateUf();
@@ -46,7 +45,6 @@ public:
     int getFzIndex(){ return idx_Fz_; }
 
 protected:
-    virtual bool _UpdateContactGeometry() = 0; // Update contact surface info
     virtual bool _UpdateJc() = 0;
     virtual bool _UpdateJcDotQdot() = 0;
     virtual bool _UpdateUf() = 0;

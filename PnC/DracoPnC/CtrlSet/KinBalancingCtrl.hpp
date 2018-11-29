@@ -9,7 +9,6 @@ class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
 
-// TODO : test wbdc, line contact, surface contact, com task, centroid task
 class KinBalancingCtrl: public Controller{
     public:
         KinBalancingCtrl(RobotSystem* );
@@ -37,9 +36,12 @@ class KinBalancingCtrl: public Controller{
         double interpolation_dur_;
         double end_time_;
         int dim_contact_;
+        std::vector<int> fz_idx_in_cost_;
 
-        ContactSpec* rfoot_contact_;
-        ContactSpec* lfoot_contact_;
+        ContactSpec* rfoot_front_contact_;
+        ContactSpec* lfoot_front_contact_;
+        ContactSpec* rfoot_back_contact_;
+        ContactSpec* lfoot_back_contact_;
 
         Task* com_task_;
         Task* torso_ori_task_;

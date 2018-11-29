@@ -95,18 +95,18 @@ void DracoWorldNode::_get_imu_data( Eigen::VectorXd & ang_vel,
 
 void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
                                           bool & lfoot_contact) {
-    Eigen::VectorXd rfoot_pos = mSkel->getBodyNode("rAnkle")->getCOM();
-    Eigen::VectorXd lfoot_pos = mSkel->getBodyNode("lAnkle")->getCOM();
-    //std::cout << rfoot_pos << std::endl;
-    //std::cout << lfoot_pos << std::endl;
+    Eigen::VectorXd r_contact_pos = (mSkel->getBodyNode("rFootFront")->getCOM() + mSkel->getBodyNode("rFootBack")->getCOM()) / 2.0;
+    Eigen::VectorXd l_contact_pos = (mSkel->getBodyNode("lFootFront")->getCOM() + mSkel->getBodyNode("lFootBack")->getCOM()) / 2.0;
+    //std::cout << r_contact_pos << std::endl;
+    //std::cout << l_contact_pos << std::endl;
     //exit(0);
-    if (fabs(lfoot_pos[2]) < 0.0252){
+    if (fabs(l_contact_pos[2]) < 0.032){
         lfoot_contact = true;
         //printf("left contact\n");
     } else {
         lfoot_contact = false;
     }
-    if (fabs(rfoot_pos[2])<0.0252){
+    if (fabs(r_contact_pos[2])<0.032){
         rfoot_contact = true;
         //printf("right contact\n");
     } else {

@@ -33,6 +33,8 @@ class SingleContactTransCtrl: public Controller{
         double ini_base_height_;
         Eigen::Vector3d ini_base_pos_;
         int dim_contact_;
+        // [right_front, right_back, left_front, left_back]
+        std::vector<int> fz_idx_in_cost_;
 
         double end_time_;
         std::string moving_foot_;
@@ -44,9 +46,12 @@ class SingleContactTransCtrl: public Controller{
         Task* base_task_;
         Task* selected_joint_task_;
 
+        ContactSpec* rfoot_front_contact_;
+        ContactSpec* lfoot_front_contact_;
+        ContactSpec* rfoot_back_contact_;
+        ContactSpec* lfoot_back_contact_;
+
         KinWBC* kin_wbc_;
-        ContactSpec* rfoot_contact_;
-        ContactSpec* lfoot_contact_;
         WBLC* wblc_;
         WBLC_ExtraData* wblc_data_;
 

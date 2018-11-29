@@ -7,7 +7,7 @@
 #include <Utils/DataManager.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
-BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
+BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
     myUtils::pretty_constructor(2, "Body Ctrl");
 
     end_time_ = 1000.;
@@ -19,6 +19,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    // task
     selected_jidx_.clear();
     selected_jidx_.push_back(robot_->getJointIdx("rHipYaw"));
     selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
@@ -26,14 +27,25 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
     body_rpz_task_ = new BodyRPZTask(robot);
 
-    rfoot_contact_ = new PointContact(robot_, "rAnkle", 30);
-    lfoot_contact_ = new PointContact(robot_, "lAnkle", 30);
-    //rfoot_contact_ = new LineContact(robot_, "rAnkle", 3, 3);
-    //lfoot_contact_ = new LineContact(robot_, "lAnkle", 3, 3);
-    //rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 5);
-    //lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 5);
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    // contactk
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
+    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
+    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
 
+    contact_list_.clear();
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
+    fz_idx_in_cost_.clear();
+    dim_contact_ = 0;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        fz_idx_in_cost_.push_back(dim_contact_ + contact_list_[i]->getFzIndex());
+        dim_contact_ += contact_list_[i]->getDim();
+    }
+
+    // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for(int i(0); i<robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
@@ -45,8 +57,9 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(robot_->getNumDofs(), 100.0);
     wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 0.1);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] = 0.01;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        wblc_data_->W_rf_[fz_idx_in_cost_[i]] = 0.01;
+    }
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), -100.);
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
@@ -55,10 +68,14 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
 
 BodyCtrl::~BodyCtrl(){
     delete body_rpz_task_;
+
     delete wblc_;
     delete wblc_data_;
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
 }
 
 void BodyCtrl::oneStep(void* _cmd){
@@ -162,11 +179,15 @@ void BodyCtrl::_body_task_setup(){
 }
 
 void BodyCtrl::_double_contact_setup(){
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 }
 
 void BodyCtrl::firstVisit(){

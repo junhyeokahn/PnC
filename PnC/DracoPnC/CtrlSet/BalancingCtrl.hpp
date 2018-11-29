@@ -30,8 +30,10 @@ class BalancingCtrl: public Controller{
         double interpolation_dur_;
         double end_time_;
 
-        ContactSpec* rfoot_contact_;
-        ContactSpec* lfoot_contact_;
+        ContactSpec* rfoot_front_contact_;
+        ContactSpec* lfoot_front_contact_;
+        ContactSpec* rfoot_back_contact_;
+        ContactSpec* lfoot_back_contact_;
 
         Task* centroid_task_;
         Eigen::VectorXd centroid_pos_des_;

@@ -2,7 +2,7 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/WBC/BasicTask.hpp>
-#include <PnC/DracoPnC/ContactSet/FixedBodyContact.hpp>
+#include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
 #include <Utils/Utilities.hpp>
 
@@ -16,7 +16,7 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
     des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     jpos_task_ = new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
-    fixed_body_contact_ = new FixedBodyContact(robot_);
+    fixed_body_contact_ = new FixedBodyContactSpec(robot_);
 
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);

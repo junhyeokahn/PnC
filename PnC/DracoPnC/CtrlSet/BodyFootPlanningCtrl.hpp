@@ -27,8 +27,12 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         Eigen::Vector3d initial_target_loc_;
 
         int dim_contact_;
-        ContactSpec* rfoot_contact_;
-        ContactSpec* lfoot_contact_;
+        // [right_front, right_back, left_front, left_back]
+        std::vector<int> fz_idx_in_cost_;
+        ContactSpec* rfoot_front_contact_;
+        ContactSpec* lfoot_front_contact_;
+        ContactSpec* rfoot_back_contact_;
+        ContactSpec* lfoot_back_contact_;
 
         void _CheckPlanning();
         void _Replanning(Eigen::Vector3d & target_loc);

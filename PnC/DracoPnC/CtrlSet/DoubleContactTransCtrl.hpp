@@ -33,14 +33,18 @@ class DoubleContactTransCtrl: public Controller{
         double max_rf_z_;
         double min_rf_z_;
         int dim_contact_;
+        // [right_front, right_back, left_front, left_back]
+        std::vector<int> fz_idx_in_cost_;
 
         std::vector<int> selected_jidx_;
         Task* body_rpz_task_;
         Task* selected_joint_task_;
 
-        ContactSpec* rfoot_contact_;
-        ContactSpec* lfoot_contact_;
-        ContactSpec* double_contact_;
+        ContactSpec* rfoot_front_contact_;
+        ContactSpec* lfoot_front_contact_;
+        ContactSpec* rfoot_back_contact_;
+        ContactSpec* lfoot_back_contact_;
+
         KinWBC* kin_wbc_;
         WBLC* wblc_;
         WBLC_ExtraData* wblc_data_;

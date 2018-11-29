@@ -17,13 +17,15 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     //contact
-    rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 3.0);
-    lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 3.0);
-    //rfoot_contact_ = new PointContact(robot_, "rAnkle", 3.0);
-    //lfoot_contact_ = new PointContact(robot_, "lAnkle", 3.0);
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
+    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
+    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
     contact_list_.clear();
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 
     centroid_task_ = new BasicTask(robot_, BasicTaskType::CENTROID, 6);
     task_list_.clear();
@@ -72,10 +74,14 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
 
 BalancingCtrl::~BalancingCtrl(){
     delete centroid_task_;
+
     delete wbdc_;
     delete wbdc_data_;
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
 }
 
 void BalancingCtrl::oneStep(void* _cmd) {
@@ -123,12 +129,16 @@ void BalancingCtrl::_task_setup(){
     centroid_vel_act_ = robot_->getCentroidMomentum();
 }
 
-void BalancingCtrl::_contact_setup(){
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
+void BalancingCtrl::_contact_setup() {
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 }
 
 void BalancingCtrl::firstVisit() {

@@ -17,7 +17,7 @@ DracoInterface::DracoInterface() : Interface()
     myUtils::color_print(myColor::BoldCyan, border);
     myUtils::pretty_constructor(0, "Draco Interface");
 
-    robot_ = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
+    robot_ = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
 
     test_cmd_ = new DracoCommand();
     test_cmd_->turn_off = false;

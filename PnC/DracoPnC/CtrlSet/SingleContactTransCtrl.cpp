@@ -24,6 +24,7 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
 {
     myUtils::pretty_constructor(2, "Single Contact Trans Ctrl");
 
+    // task
     base_task_ = new BodyRPZTask(robot);
 
     selected_jidx_.clear();
@@ -32,15 +33,25 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
 
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
 
-    rfoot_contact_ = new PointContact(robot_, "rAnkle", 30);
-    lfoot_contact_ = new PointContact(robot_, "lAnkle", 30);
-    //rfoot_contact_ = new LineContact(robot_, "rAnkle", 3, 3);
-    //lfoot_contact_ = new LineContact(robot_, "lAnkle", 3, 3);
-    //rfoot_contact_ = new RectangularContactSpec(robot_, "rAnkle", 5);
-    //lfoot_contact_ = new RectangularContactSpec(robot_, "lAnkle", 5);
+    // contact
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
+    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
+    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    contact_list_.clear();
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    fz_idx_in_cost_.clear();
+    dim_contact_ = 0;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        fz_idx_in_cost_.push_back(dim_contact_ + contact_list_[i]->getFzIndex());
+        dim_contact_ += contact_list_[i]->getDim();
+    }
 
+    // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for(int i(0); i<robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
@@ -51,8 +62,9 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(robot_->getNumDofs(), 100.0);
     wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 1.0);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] = 0.01;
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        wblc_data_->W_rf_[fz_idx_in_cost_[i]] = 0.01;
+    }
 
     // torque limit default setting
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), -100.);
@@ -63,8 +75,12 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
 
 SingleContactTransCtrl::~SingleContactTransCtrl(){
     delete base_task_;
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+    delete selected_joint_task_;
+
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -194,31 +210,39 @@ void SingleContactTransCtrl::_contact_setup(){
         rf_weight_z = (alpha) * 0.5 + (1. - alpha) * 0.01;
         foot_weight = 0.001 * (alpha)  + 1000. * (1. - alpha);
     }
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 
     int jidx_offset(0);
     if(moving_foot_ == "lAnkle") {
-        jidx_offset = rfoot_contact_->getDim();
-        for(int i(0); i<lfoot_contact_->getDim(); ++i){
+        jidx_offset = rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim();
+        for(int i(0); i<lfoot_front_contact_->getDim()+lfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
-        wblc_data_->W_rf_[lfoot_contact_->getFzIndex() + jidx_offset] = rf_weight_z;
+        wblc_data_->W_rf_[fz_idx_in_cost_[2]] = rf_weight_z;
+        wblc_data_->W_rf_[fz_idx_in_cost_[3]] = rf_weight_z;
 
-        ((PointContact*)lfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
     }
     else if(moving_foot_ == "rAnkle") {
-        for(int i(0); i<rfoot_contact_->getDim(); ++i){
+        for(int i(0); i<rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
-        wblc_data_->W_rf_[rfoot_contact_->getFzIndex() + jidx_offset] = rf_weight_z;
+        wblc_data_->W_rf_[fz_idx_in_cost_[0]] = rf_weight_z;
+        wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
 
-        ((PointContact*)rfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
     }
 }
 
