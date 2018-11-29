@@ -23,6 +23,11 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 ## ==========
 ## Dependancy
 ## ==========
+
+# System
+include_directories("/usr/local/include")
+link_directories("/usr/local/lib")
+
 # Dart
 find_package(DART 6.5 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
