@@ -1,6 +1,6 @@
 #test_name: joint_test
-#test_name: body_test
-test_name: walking_test
+test_name: body_test
+#test_name: walking_test
 #test_name: rl_walking_test
 #test_name: balancing_test
 
