@@ -4,8 +4,7 @@ and stabilizing the system over the trajectories. It provides interface to the
 real hardware as well as simulation
 environment([Dart](https://github.com/junhyeokahn/dart),
 [Drake](https://github.com/junhyeokahn/drake)) and enables to communicate with
-the reinforcement learning package(
-[baseline](https://github.com/openai/baselines)).
+the reinforcement learning package([baseline](https://github.com/openai/baselines)).
 
 ## Run the Code
 
@@ -39,5 +38,5 @@ $ cd PnC && source ./install.sh
 ```
 $ mkdir build && cd build && cmake..
 $ make -j
-$ ./run_draco
+$ ./bin/run_draco
 ```
