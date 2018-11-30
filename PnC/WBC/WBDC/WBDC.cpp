@@ -139,6 +139,8 @@ void WBDC::makeTorque(const std::vector<Task*> & task_list,
         _WeightedInverse(JtPre, Ainv_, JtPreBar);
 
         qddot_pre = qddot_pre + JtPreBar * (xddot - JtDotQdot - Jt * qddot_pre);
+        //std::cout << i << " th task additional acceleration" << std::endl;
+        //std::cout << JtPreBar * (xddot - JtDotQdot - Jt * qddot_pre) << std::endl;
 
         Npre = Npre * ( Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)
                 - JtPreBar * JtPre);

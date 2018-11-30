@@ -175,10 +175,9 @@ void KinBalancingCtrl::firstVisit() {
     Eigen::VectorXd lfoot_pos = robot_->getBodyNodeIsometry("lAnkle").translation();
     // TODO
     goal_com_pos_ = (rfoot_pos + lfoot_pos) / 2.0;
-    //goal_com_pos_[0] += 0.015;
-    goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
-    goal_com_pos_ = ini_com_pos_;
-    //goal_com_pos_[2] = sp_->q[2];
+    goal_com_pos_[2] = ini_com_pos_[2];
+    //goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
+    //goal_com_pos_ = ini_com_pos_;
     myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
     myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");
     myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com");

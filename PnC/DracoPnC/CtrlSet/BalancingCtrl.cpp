@@ -27,6 +27,7 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
 
+    // task
     centroid_task_ = new BasicTask(robot_, BasicTaskType::CENTROID, 6);
     task_list_.clear();
     task_list_.push_back(centroid_task_);
@@ -37,6 +38,9 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     centroid_vel_act_ = Eigen::VectorXd::Zero(centroid_task_->getDim());
     centroid_acc_act_ = Eigen::VectorXd::Zero(centroid_task_->getDim());
 
+    joint_task_ = new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumDofs());
+
+    // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for(int i(0); i < robot_->getNumVirtualDofs(); ++i)
@@ -74,6 +78,7 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
 
 BalancingCtrl::~BalancingCtrl(){
     delete centroid_task_;
+    delete joint_task_;
 
     delete wbdc_;
     delete wbdc_data_;
@@ -127,6 +132,11 @@ void BalancingCtrl::_task_setup(){
 
     centroid_pos_act_.tail(3) = robot_->getCoMPosition();
     centroid_vel_act_ = robot_->getCentroidMomentum();
+
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    joint_task_->updateTask(ini_jpos_, zero_vec, zero_vec);
+    task_list_.push_back(joint_task_);
+
 }
 
 void BalancingCtrl::_contact_setup() {
@@ -144,6 +154,8 @@ void BalancingCtrl::_contact_setup() {
 void BalancingCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
 
+    ini_jpos_ = sp_->q.tail(robot_->getNumDofs());
+
     ini_com_pos_ = robot_->getCoMPosition();
     ini_com_vel_ = robot_->getCoMVelocity();
 
@@ -152,8 +164,9 @@ void BalancingCtrl::firstVisit() {
 
     // TODO
     goal_com_pos_ = (rfoot_pos + lfoot_pos) / 2.0;
+    goal_com_pos_[2] = ini_com_pos_[2];
     //goal_com_pos_[0] += 0.015;
-    goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
+    //goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
     //goal_com_pos_ = ini_com_pos_;
     myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
     myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");

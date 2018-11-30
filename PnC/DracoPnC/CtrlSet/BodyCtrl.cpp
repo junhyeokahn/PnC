@@ -20,11 +20,6 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // task
-    selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getDofIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getDofIdx("lHipYaw"));
-    selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
-
     body_rpz_task_ = new BodyRPZTask(robot);
 
     // contactk
@@ -124,12 +119,6 @@ void BodyCtrl::_body_task_setup(){
     des_jvel_.setZero();
     des_jacc_.setZero();
 
-    Eigen::VectorXd jpos_des(2); jpos_des.setZero();
-    Eigen::VectorXd jvel_des(2); jvel_des.setZero();
-    Eigen::VectorXd jacc_des(2); jacc_des.setZero();
-
-    selected_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
-
     // Calculate IK for a desired height and orientation.
     double body_height_cmd;
 
@@ -162,7 +151,6 @@ void BodyCtrl::_body_task_setup(){
 
     body_rpz_task_->updateTask(pos_des, vel_des, acc_des);
 
-    task_list_.push_back(selected_joint_task_);
     task_list_.push_back(body_rpz_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,

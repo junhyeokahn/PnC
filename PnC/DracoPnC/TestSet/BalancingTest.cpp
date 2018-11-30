@@ -2,6 +2,9 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 
+//#define DYNAMIC_BALANCING true
+#define DYNAMIC_BALANCING false
+
 BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Balancing Test");
 
@@ -10,13 +13,19 @@ BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
 
     jpos_target_ctrl_ = new JPosTargetCtrl(robot);
     body_lift_ctrl_ = new DoubleContactTransCtrl(robot);
-    balancing_ctrl_ = new BalancingCtrl(robot);
-    kin_balancing_ctrl_ = new KinBalancingCtrl(robot);
+    if (DYNAMIC_BALANCING) {
+        balancing_ctrl_ = new BalancingCtrl(robot);
+    } else {
+        kin_balancing_ctrl_ = new KinBalancingCtrl(robot);
+    }
 
     state_list_.push_back(jpos_target_ctrl_);
     state_list_.push_back(body_lift_ctrl_);
-    //state_list_.push_back(balancing_ctrl_);
-    state_list_.push_back(kin_balancing_ctrl_);
+    if (DYNAMIC_BALANCING) {
+        state_list_.push_back(balancing_ctrl_);
+    } else {
+        state_list_.push_back(kin_balancing_ctrl_);
+    }
 
     _SettingParameter();
 }
@@ -31,8 +40,11 @@ void BalancingTest::TestInitialization() {
     // Yaml file name
     jpos_target_ctrl_->ctrlInitialization("JOINT_CTRL");
     body_lift_ctrl_->ctrlInitialization("DOUBLE_CONTACT_TRANS_CTRL");
-    balancing_ctrl_->ctrlInitialization("BALANCING_CTRL");
-    kin_balancing_ctrl_->ctrlInitialization("KIN_BALANCING_CTRL");
+    if (DYNAMIC_BALANCING) {
+        balancing_ctrl_->ctrlInitialization("BALANCING_CTRL");
+    } else {
+        kin_balancing_ctrl_->ctrlInitialization("KIN_BALANCING_CTRL");
+    }
 }
 
 int BalancingTest::_NextPhase(const int & phase) {
@@ -62,11 +74,17 @@ void BalancingTest::_SettingParameter() {
         ((DoubleContactTransCtrl*)body_lift_ctrl_)->setStanceTime(tmp_val);
 
         myUtils::readParameter(cfg, "balancing_ctrl_time", tmp_val);
-        ((BalancingCtrl*)balancing_ctrl_)->setBalancingTime(tmp_val);
-        ((KinBalancingCtrl*)kin_balancing_ctrl_)->setBalancingTime(tmp_val);
+        if (DYNAMIC_BALANCING) {
+            ((BalancingCtrl*)balancing_ctrl_)->setBalancingTime(tmp_val);
+        } else {
+            ((KinBalancingCtrl*)kin_balancing_ctrl_)->setBalancingTime(tmp_val);
+        }
         myUtils::readParameter(cfg, "interpolation_time", tmp_val);
-        ((BalancingCtrl*)balancing_ctrl_)->setInterpolationTime(tmp_val);
-        ((KinBalancingCtrl*)kin_balancing_ctrl_)->setInterpolationTime(tmp_val);
+        if (DYNAMIC_BALANCING) {
+            ((BalancingCtrl*)balancing_ctrl_)->setInterpolationTime(tmp_val);
+        } else {
+            ((KinBalancingCtrl*)kin_balancing_ctrl_)->setInterpolationTime(tmp_val);
+        }
 
 
     } catch(std::runtime_error& e) {

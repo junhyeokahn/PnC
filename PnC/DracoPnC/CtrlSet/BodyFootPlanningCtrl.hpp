@@ -48,9 +48,7 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         void _GetBsplineSwingTrajectory();
         std::vector<ContactSpec*> kin_wbc_contact_list_;
 
-        std::vector<int> selected_jidx_;
         Task* base_task_;
-        Task* selected_joint_task_;
         Task* foot_task_;
 
         KinWBC* kin_wbc_;

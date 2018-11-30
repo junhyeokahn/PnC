@@ -27,12 +27,6 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     // task
     base_task_ = new BodyRPZTask(robot);
 
-    selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getDofIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getDofIdx("lHipYaw"));
-
-    selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
-
     // contact
     rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
     rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
@@ -75,7 +69,6 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
 
 SingleContactTransCtrl::~SingleContactTransCtrl(){
     delete base_task_;
-    delete selected_joint_task_;
 
     delete rfoot_front_contact_;
     delete rfoot_back_contact_;
@@ -137,12 +130,6 @@ void SingleContactTransCtrl::_task_setup(){
     double base_height_cmd = ini_base_height_;
     if(b_set_height_target_) base_height_cmd = des_base_height_;
 
-    Eigen::VectorXd jpos_des(2); jpos_des.setZero();
-    Eigen::VectorXd jvel_des(2); jvel_des.setZero();
-    Eigen::VectorXd jacc_des(2); jacc_des.setZero();
-
-    selected_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
-
     // Orientation
     Eigen::Quaternion<double> des_quat(1, 0, 0, 0);
 
@@ -161,7 +148,6 @@ void SingleContactTransCtrl::_task_setup(){
 
     base_task_->updateTask(pos_des, vel_des, acc_des);
 
-    task_list_.push_back(selected_joint_task_);
     task_list_.push_back(base_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,

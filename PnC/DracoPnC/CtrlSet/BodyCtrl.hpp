@@ -40,9 +40,7 @@ class BodyCtrl: public Controller{
         // [right_front, right_back, left_front, left_back]
         std::vector<int> fz_idx_in_cost_;
 
-        std::vector<int> selected_jidx_;
         Task* body_rpz_task_;
-        Task* selected_joint_task_;
 
         ContactSpec* rfoot_front_contact_;
         ContactSpec* lfoot_front_contact_;

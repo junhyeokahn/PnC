@@ -36,6 +36,8 @@ class BalancingCtrl: public Controller{
         ContactSpec* lfoot_back_contact_;
 
         Task* centroid_task_;
+        Task* joint_task_;
+
         Eigen::VectorXd centroid_pos_des_;
         Eigen::VectorXd centroid_vel_des_;
         Eigen::VectorXd centroid_acc_des_;
@@ -57,6 +59,8 @@ class BalancingCtrl: public Controller{
         Eigen::VectorXd goal_com_pos_;
         Eigen::VectorXd goal_com_vel_;
         BS_Basic<3, 3, 0, 2, 2> spline_;
+
+        Eigen::VectorXd ini_jpos_;
 
         DracoStateProvider* sp_;
 };

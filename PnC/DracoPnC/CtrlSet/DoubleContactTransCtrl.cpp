@@ -20,11 +20,6 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     // task
     body_rpz_task_ = new BodyRPZTask(robot);
 
-    selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getDofIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getDofIdx("lHipYaw"));
-    selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
-
     // contact
     rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
     rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
@@ -127,12 +122,6 @@ void DoubleContactTransCtrl::_task_setup(){
      // Calculate IK for a desired height and orientation.
     double base_height_cmd;
 
-    Eigen::VectorXd jpos_des(2); jpos_des.setZero();
-    Eigen::VectorXd jvel_des(2); jvel_des.setZero();
-    Eigen::VectorXd jacc_des(2); jacc_des.setZero();
-
-    selected_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
-
     // Set Desired Orientation
     Eigen::Quaternion<double> des_quat( 1, 0, 0, 0 );
 
@@ -161,7 +150,6 @@ void DoubleContactTransCtrl::_task_setup(){
 
     body_rpz_task_->updateTask(pos_des, vel_des, acc_des);
 
-    task_list_.push_back(selected_joint_task_);
     task_list_.push_back(body_rpz_task_);
 
     kin_wbc_->Ainv_ = Ainv_;
@@ -201,16 +189,15 @@ void DoubleContactTransCtrl::firstVisit(){
     //base_pos_ini_ = robot_->getBodyNodeCoMIsometry("torso").translation();
     base_ori_ini_ = robot_->getBodyNodeCoMIsometry("torso").linear();
 
-    // Test
-    std::cout << "Initial Contact Positions at Double Contact Trans Ctrl" << std::endl;
-    Eigen::VectorXd rfoot_front_pos = robot_->getBodyNodeIsometry("rFootFront").translation();
-    Eigen::VectorXd rfoot_back_pos = robot_->getBodyNodeIsometry("rFootBack").translation();
-    Eigen::VectorXd lfoot_front_pos = robot_->getBodyNodeIsometry("lFootFront").translation();
-    Eigen::VectorXd lfoot_back_pos = robot_->getBodyNodeIsometry("lFootBack").translation();
-    myUtils::pretty_print(rfoot_front_pos, std::cout, "rfoot_front_pos");
-    myUtils::pretty_print(rfoot_back_pos, std::cout, "rfoot_back_pos");
-    myUtils::pretty_print(lfoot_front_pos, std::cout, "lfoot_front_pos");
-    myUtils::pretty_print(lfoot_back_pos, std::cout, "lfoot_back_pos");
+    //std::cout << "Initial Contact Positions at Double Contact Trans Ctrl" << std::endl;
+    //Eigen::VectorXd rfoot_front_pos = robot_->getBodyNodeIsometry("rFootFront").translation();
+    //Eigen::VectorXd rfoot_back_pos = robot_->getBodyNodeIsometry("rFootBack").translation();
+    //Eigen::VectorXd lfoot_front_pos = robot_->getBodyNodeIsometry("lFootFront").translation();
+    //Eigen::VectorXd lfoot_back_pos = robot_->getBodyNodeIsometry("lFootBack").translation();
+    //myUtils::pretty_print(rfoot_front_pos, std::cout, "rfoot_front_pos");
+    //myUtils::pretty_print(rfoot_back_pos, std::cout, "rfoot_back_pos");
+    //myUtils::pretty_print(lfoot_front_pos, std::cout, "lfoot_front_pos");
+    //myUtils::pretty_print(lfoot_back_pos, std::cout, "lfoot_back_pos");
     //exit(0);
 }
 

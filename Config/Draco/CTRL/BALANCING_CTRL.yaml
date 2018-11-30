@@ -1,2 +1,4 @@
 centroid_task_kp: [0, 0, 0, 200, 200, 200]
-centroid_task_kd: [20, 20, 20, 20, 20, 20]
+#centroid_task_kd: [20, 20, 20, 20, 20, 20]
+#centroid_task_kd: [50, 50, 50, 50, 50, 50]
+centroid_task_kd: [100, 100, 100, 50, 50, 50]
