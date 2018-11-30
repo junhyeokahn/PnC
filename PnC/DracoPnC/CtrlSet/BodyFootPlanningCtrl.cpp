@@ -25,8 +25,8 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
 
     // task
     selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getJointIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
+    selected_jidx_.push_back(robot_->getDofIdx("rHipYaw"));
+    selected_jidx_.push_back(robot_->getDofIdx("lHipYaw"));
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
 
     foot_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot);

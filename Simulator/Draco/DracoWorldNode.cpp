@@ -132,7 +132,7 @@ void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
 void DracoWorldNode::_hold_rot() {
     Eigen::VectorXd q = mSkel->getPositions();
     Eigen::VectorXd v = mSkel->getVelocities();
-    double kp(500); double kd(50);
+    double kp(200); double kd(5);
     mTorqueCommand[3] = kp * (-q[3]) + kd * (-v[3]);
     mTorqueCommand[4] = kp * (-q[4]) + kd * (-v[4]);
     mTorqueCommand[5] = kp * (-q[5]) + kd * (-v[5]);

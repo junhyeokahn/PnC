@@ -28,8 +28,8 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     base_task_ = new BodyRPZTask(robot);
 
     selected_jidx_.clear();
-    selected_jidx_.push_back(robot_->getJointIdx("rHipYaw"));
-    selected_jidx_.push_back(robot_->getJointIdx("lHipYaw"));
+    selected_jidx_.push_back(robot_->getDofIdx("rHipYaw"));
+    selected_jidx_.push_back(robot_->getDofIdx("lHipYaw"));
 
     selected_joint_task_ = new SelectedJointTask(robot_, selected_jidx_);
 
@@ -170,7 +170,7 @@ void SingleContactTransCtrl::_task_setup(){
     // TEST
     if(b_increase_){
         if(moving_foot_ == "rAnkle"){
-            int swing_jidx = robot_->getJointIdx("rHipYaw") - robot_->getNumVirtualDofs();
+            int swing_jidx = robot_->getDofIdx("rHipYaw") - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
             for(int i(0); i < 5; ++i){
@@ -180,7 +180,7 @@ void SingleContactTransCtrl::_task_setup(){
              }
         }
         else if(moving_foot_ == "lAnkle"){
-            int swing_jidx = robot_->getJointIdx("lHipYaw") - robot_->getNumVirtualDofs();
+            int swing_jidx = robot_->getDofIdx("lHipYaw") - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
             for(int i(0); i < 5; ++i){

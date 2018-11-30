@@ -60,8 +60,6 @@ bool KinWBC::FindConfiguration(
     qdot = JtPre_pinv * (task->vel_des);
     qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
 
-    //myUtils::pretty_print(delta_q, std::cout, "delta_q");
-
     Eigen::VectorXd prev_delta_q = delta_q;
     Eigen::VectorXd prev_qdot = qdot;
     Eigen::VectorXd prev_qddot = qddot;
@@ -69,18 +67,18 @@ bool KinWBC::FindConfiguration(
     _BuildProjectionMatrix(JtPre, N_nx);
     N_pre = Nc * N_nx;
 
-    //vx xdot_c1 = Jc * delta_q;
-    //dynacore::pretty_print(xdot_c1, std::cout, "1st contact vel");
-    //dynacore::pretty_print(Jt, std::cout, "1st task Jt");
-    //dynacore::pretty_print(Jc, std::cout, "Jc");
-    //dynacore::pretty_print(Nc, std::cout, "Nc");
-    //std::cout << "0 th" << std::endl;
+    //myUtils::color_print(myColor::Red, "======== 0 ========");
+    //Eigen::VectorXd xdot_c = Jc * delta_q;
+    //myUtils::pretty_print(xdot_c, std::cout, "contact vel");
+    //myUtils::pretty_print(Jt, std::cout, "task Jt");
+    //myUtils::pretty_print(Jc, std::cout, "Jc");
+    //myUtils::pretty_print(Nc, std::cout, "Nc");
     //myUtils::pretty_print(JtPre, std::cout, "JtNc");
     //myUtils::pretty_print(JtPre_pinv, std::cout, "JtNc_inv");
     //myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
     //myUtils::pretty_print(delta_q, std::cout, "delta q");
-    //mx test = Jt * N_pre;
-    //dynacore::pretty_print(test, std::cout, "Jt1N1");
+    //Eigen::MatrixXd test = Jt * N_pre;
+    //myUtils::pretty_print(test, std::cout, "Jt1N1");
 
     for (int i(1); i<task_list.size(); ++i){
         task = task_list[i];
@@ -94,13 +92,15 @@ bool KinWBC::FindConfiguration(
         qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt* prev_qdot);
         qddot = prev_qddot + JtPre_pinv * (task->acc_des - JtDotQdot - Jt*prev_qddot);
 
-        //dynacore::pretty_print(Jt, std::cout, "2nd Jt");
-        //dynacore::pretty_print(N_pre, std::cout, "N_pre");
-        //std::cout << "1 th" << std::endl;
+        //myUtils::color_print(myColor::Red, "======== " + std::to_string(i) + " ========");
+        //myUtils::pretty_print(Jt, std::cout, "Jt");
+        //myUtils::pretty_print(N_pre, std::cout, "N_pre");
         //myUtils::pretty_print(JtPre, std::cout, "JtPre");
         //myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
         //myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
         //myUtils::pretty_print(delta_q, std::cout, "delta q");
+        //xdot_c = Jc * delta_q;
+        //myUtils::pretty_print(xdot_c, std::cout, "contact vel");
 
         // For the next task
         _BuildProjectionMatrix(JtPre, N_nx);
@@ -109,8 +109,8 @@ bool KinWBC::FindConfiguration(
         prev_qdot = qdot;
         prev_qddot = qddot;
     }
-    //vx xdot_c = Jc * delta_q;
-    //dynacore::pretty_print(xdot_c, std::cout, "contact vel");
+    //xdot_c = Jc * delta_q;
+    //myUtils::pretty_print(xdot_c, std::cout, "contact vel");
     for(int i(0); i<num_act_joint_; ++i){
         jpos_cmd[i] = curr_config[act_jidx_[i]] + delta_q[act_jidx_[i]];
         jvel_cmd[i] = qdot[act_jidx_[i]];

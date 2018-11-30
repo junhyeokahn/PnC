@@ -105,13 +105,13 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
         //std::cout << joint->getNumDofs() << std::endl;
     //}
 
-    //for (int i = 0; i < robot->getNumDofs(); ++i) {
-        //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-        //std::cout << i << "th" << std::endl;
-        //std::cout << dof->getName() << std::endl;
-        //std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
-        //std::cout << dof->getCoulombFriction() << std::endl;
-    //}
+    for (int i = 0; i < robot->getNumDofs(); ++i) {
+        dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        std::cout << i << "th" << std::endl;
+        std::cout << dof->getName() << std::endl;
+        std::cout << "child body node name : " << dof->getChildBodyNode()->getName() << std::endl;
+        std::cout << dof->getCoulombFriction() << std::endl;
+    }
 
     std::cout << "num dof" << std::endl;
     std::cout << robot->getNumDofs() << std::endl;
