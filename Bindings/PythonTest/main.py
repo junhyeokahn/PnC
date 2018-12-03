@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/Users/junhyeokahn/Repository/PnC/build/lib')
+
 import DracoInterface
 import numpy as np
 
