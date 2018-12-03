@@ -134,13 +134,13 @@ void Reversal_LIPM_Planner::_StepLengthCheck(Eigen::Vector3d & target_loc,
   double x_step_length (target_loc[0] - stance_foot[0]);
   if(x_step_length < x_step_length_limit_[0]){
     target_loc[0] = stance_foot[0] + x_step_length_limit_[0];
-    printf("x step length hit min: %f\n", x_step_length);
-    printf("new x step: %f, %f \n", target_loc[0], stance_foot[0]);
+    myUtils::color_print(myColor::BoldRed, "x step length hit min: " + std::to_string(x_step_length), true);
+    myUtils::color_print(myColor::BoldRed, "new x step: (" + std::to_string(target_loc[0]) + ", " + std::to_string(stance_foot[0]) + ")", true);
   }
   if(x_step_length > x_step_length_limit_[1]){
     target_loc[0] = stance_foot[0] + x_step_length_limit_[1];
-    printf("x step length hit max: %f\n", x_step_length);
-    printf("new x step: %f, %f \n", target_loc[0], stance_foot[0]);
+    myUtils::color_print(myColor::BoldRed, "x step length hit max: " + std::to_string(x_step_length), true);
+    myUtils::color_print(myColor::BoldRed, "new x step: ("+ std::to_string(target_loc[0]) + ", " + std::to_string(stance_foot[0]) + ")", true);
   }
 
   // Y limit check
@@ -148,31 +148,27 @@ void Reversal_LIPM_Planner::_StepLengthCheck(Eigen::Vector3d & target_loc,
   if(b_positive_sidestep){ // move to left
     if(y_step_length < y_step_length_limit_[0]){
       target_loc[1] = stance_foot[1] + y_step_length_limit_[0];
-      printf("y step length hit min: %f\n", y_step_length);
-      printf("new y step (target loc, stance foot): %f, %f \n",
-              target_loc[1], stance_foot[1]);
+      myUtils::color_print(myColor::BoldRed, "y step length hit min: " + std::to_string(y_step_length), true);
+      myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
     }
 
     if(y_step_length > y_step_length_limit_[1]){
       target_loc[1] = stance_foot[1] + y_step_length_limit_[1];
-      printf("y step length hit max: %f\n", y_step_length);
-      printf("new y step (target loc, stance foot): %f, %f \n",
-              target_loc[1], stance_foot[1]);
+      myUtils::color_print(myColor::BoldRed, "y step length hit max: " + std::to_string(y_step_length), true);
+      myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
     }
 
   } else { // move to right
     if(-y_step_length < y_step_length_limit_[0]){
       target_loc[1] = stance_foot[1] - y_step_length_limit_[0];
-      printf("y step length hit min: %f\n", y_step_length);
-      printf("new y step (target loc, stance foot): %f, %f \n",
-              target_loc[1], stance_foot[1]);
+      myUtils::color_print(myColor::BoldRed, "y step length hit min: " + std::to_string(y_step_length), true);
+      myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
     }
 
     if(-y_step_length > y_step_length_limit_[1]){
       target_loc[1] = stance_foot[1] - y_step_length_limit_[1];
-      printf("y step length hit max: %f\n", y_step_length);
-      printf("new y step (target loc, stance foot): %f, %f \n",
-              target_loc[1], stance_foot[1]);
+      myUtils::color_print(myColor::BoldRed, "y step length hit max: " + std::to_string(y_step_length), true);
+      myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
     }
 
   }

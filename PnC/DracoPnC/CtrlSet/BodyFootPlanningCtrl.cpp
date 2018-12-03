@@ -303,7 +303,7 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     for(int i(0); i<2; ++i){
         target_loc[i] += foot_landing_offset_[i];
     }
-    myUtils::pretty_print(target_loc, std::cout, "next foot loc");
+    myUtils::pretty_print(target_loc, std::cout, "next foot location");
 }
 
 void BodyFootPlanningCtrl::firstVisit(){

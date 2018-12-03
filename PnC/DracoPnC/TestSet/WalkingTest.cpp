@@ -98,7 +98,7 @@ void WalkingTest::TestInitialization(){
 
 int WalkingTest::_NextPhase(const int & phase){
     int next_phase = phase + 1;
-    myUtils::color_print(myColor::BoldRed, "[Phase " + std::to_string(next_phase) + "]");
+    myUtils::color_print(myColor::BoldGreen, "[Phase " + std::to_string(next_phase) + "]");
     Eigen::Vector3d next_local_frame_location;
 
     if(phase == WkPhase::double_contact_1) {
