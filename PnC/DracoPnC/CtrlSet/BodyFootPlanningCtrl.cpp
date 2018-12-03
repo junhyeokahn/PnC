@@ -24,7 +24,8 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // task
-    foot_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot);
+    //foot_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot);
+    foot_task_ = new LineFootTask(robot_, swing_foot);
     base_task_ = new BodyRPZTask(robot_);
 
     // contact
@@ -64,7 +65,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
 
     kin_wbc_contact_list_.clear();
     int jidx_offset(0);
-    if(swing_foot == "lAnkle") {
+    if(swing_foot == "lFoot") {
         jidx_offset = rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim();
         for(int i(0); i<lfoot_front_contact_->getDim()+lfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
@@ -77,7 +78,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
         kin_wbc_contact_list_.push_back(rfoot_front_contact_);
         kin_wbc_contact_list_.push_back(rfoot_back_contact_);
     }
-    else if(swing_foot == "rAnkle") {
+    else if(swing_foot == "rFoot") {
         for(int i(0); i<rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
             wblc_data_->W_xddot_[i + jidx_offset] = 0.0001;
@@ -204,13 +205,18 @@ void BodyFootPlanningCtrl::_task_setup(){
             -push_down_height_ - 0.1*(state_machine_time_ - end_time_);
     }
 
-    Eigen::VectorXd foot_pos_des(foot_task_->getDim()); foot_pos_des.setZero();
-    Eigen::VectorXd foot_vel_des(foot_task_->getDim()); foot_vel_des.setZero();
-    Eigen::VectorXd foot_acc_des(foot_task_->getDim()); foot_acc_des.setZero();
+    Eigen::VectorXd foot_pos_des(7); foot_pos_des.setZero();
+    Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();
+    Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
 
-    foot_pos_des = curr_foot_pos_des_;
-    foot_vel_des = curr_foot_vel_des_;
-    foot_acc_des = curr_foot_acc_des_;
+    foot_pos_des[0] = des_quat.w();
+    foot_pos_des[1] = des_quat.x();
+    foot_pos_des[2] = des_quat.y();
+    foot_pos_des[3] = des_quat.z();
+
+    foot_pos_des.tail(3) = curr_foot_pos_des_;
+    foot_vel_des.tail(3) = curr_foot_vel_des_;
+    foot_acc_des.tail(3) = curr_foot_acc_des_;
 
     foot_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
 
@@ -246,10 +252,10 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
 
     // TEST
-    for(int i(0); i<2; ++i){
-        com_pos[i] = sp_->q[i] + body_pt_offset_[i];
-        com_vel[i] = sp_->qdot[i];
-    }
+    //for(int i(0); i<2; ++i){
+        //com_pos[i] = sp_->q[i] + body_pt_offset_[i];
+        //com_vel[i] = sp_->qdot[i];
+    //}
 
     printf("planning com state: %f, %f, %f, %f\n",
             com_pos[0], com_pos[1],
@@ -265,7 +271,7 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     pl_param.des_loc = sp_->des_location;
     pl_param.stance_foot_loc = sp_->global_pos_local;
 
-    if(swing_foot_ == "lAnkle")
+    if(swing_foot_ == "lFoot")
         pl_param.b_positive_sidestep = true;
     else
         pl_param.b_positive_sidestep = false;
@@ -303,9 +309,8 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
 void BodyFootPlanningCtrl::firstVisit(){
     b_replaned_ = false;
     ini_config_ = sp_->q;
-    //ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
     ini_body_pos_ = sp_->q.head(3);
-    ini_foot_pos_ = robot_->getBodyNodeCoMIsometry(swing_foot_).translation();
+    ini_foot_pos_ = robot_->getBodyNodeIsometry(swing_foot_ + "Center").translation();
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
     replan_moment_ = 0.;
@@ -363,10 +368,10 @@ bool BodyFootPlanningCtrl::endOfPhase(){
     // Swing foot contact = END
     if(b_contact_switch_check_){
         bool contact_happen(false);
-        if(swing_foot_ == "lAnkle" && sp_->b_lfoot_contact){
+        if(swing_foot_ == "lFoot" && sp_->b_lfoot_contact){
             contact_happen = true;
         }
-        if(swing_foot_ == "rAnkle" && sp_->b_rfoot_contact){
+        if(swing_foot_ == "rFoot" && sp_->b_rfoot_contact){
             contact_happen = true;
         }
         if(state_machine_time_ > end_time_ * 0.5 && contact_happen){
@@ -380,7 +385,6 @@ bool BodyFootPlanningCtrl::endOfPhase(){
 
 void BodyFootPlanningCtrl::ctrlInitialization(const std::string & setting_file_name){
     ini_base_height_ = sp_->q[2];
-    //ini_base_height_ = (robot_->getBodyNodeCoMIsometry("torso").translation())[2];
     try {
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
         myUtils::readParameter(cfg, "kp", Kp_);

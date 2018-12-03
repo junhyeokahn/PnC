@@ -13,8 +13,7 @@ PointContactSpec::PointContactSpec(RobotSystem* robot,
 PointContactSpec::~PointContactSpec(){}
 
 bool PointContactSpec::_UpdateJc(){
-    //Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_, robot_->getBodyNode(link_name_));
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_);
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_, robot_->getBodyNode(link_name_));
     Jc_ = Jtmp.block(3, 0, 3, robot_->getNumDofs());
     return true;
 }

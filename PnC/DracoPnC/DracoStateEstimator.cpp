@@ -113,10 +113,15 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
     for(int i(0); i<3; ++i)  curr_qdot_[i+3] = global_euler_zyx_dot_[i];
 
     robot_->updateSystem(curr_config_, curr_qdot_, false);
-    Eigen::VectorXd foot_pos =
-        robot_->getBodyNodeCoMIsometry(sp_->stance_foot).translation();
-    Eigen::VectorXd foot_vel =
-        robot_->getBodyNodeCoMSpatialVelocity(sp_->stance_foot).tail(3);
+    Eigen::VectorXd foot_pos;
+    Eigen::VectorXd foot_vel;
+    if (sp_->stance_foot == "rFoot") {
+        foot_pos = robot_->getBodyNodeIsometry("rFootCenter").translation();
+        foot_vel = robot_->getBodyNodeSpatialVelocity("rFootCenter").tail(3);
+    } else {
+        foot_pos = robot_->getBodyNodeIsometry("lFootCenter").translation();
+        foot_vel = robot_->getBodyNodeSpatialVelocity("lFootCenter").tail(3);
+    }
 
     curr_config_[0] = -foot_pos[0];
     curr_config_[1] = -foot_pos[1];

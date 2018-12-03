@@ -28,10 +28,10 @@ public:
   Eigen::VectorXd qddot_cmd;
   Eigen::VectorXd reaction_forces;
 
-  Eigen::Vector3d rfoot_pos;
-  Eigen::Vector3d lfoot_pos;
-  Eigen::Vector3d rfoot_vel;
-  Eigen::Vector3d lfoot_vel;
+  Eigen::Vector3d rfoot_contact_center_pos;
+  Eigen::Vector3d lfoot_contact_center_pos;
+  Eigen::Vector3d rfoot_contact_center_vel;
+  Eigen::Vector3d lfoot_contact_center_vel;
 
   Eigen::VectorXd led_kin_data;
 

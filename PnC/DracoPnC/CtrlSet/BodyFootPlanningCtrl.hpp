@@ -14,7 +14,10 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         virtual ~BodyFootPlanningCtrl();
         virtual void oneStep(void* _cmd);
         virtual void firstVisit();
-        virtual void lastVisit(){ sp_->des_jpos_prev = des_jpos_; }
+        virtual void lastVisit(){
+            sp_->des_jpos_prev = des_jpos_;
+            //std::cout << "[BodyFootPlanning] End "<< std::endl;
+        }
         virtual bool endOfPhase();
 
         virtual void ctrlInitialization(const std::string & setting_file_name);

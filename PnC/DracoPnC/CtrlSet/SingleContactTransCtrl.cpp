@@ -123,6 +123,8 @@ void SingleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
 
     sp_->qddot_cmd = wblc_data_->qddot_;
     sp_->reaction_forces = wblc_data_->Fr_;
+
+    //myUtils::pretty_print(wblc_data_->Fr_, std::cout, "reaction force");
 }
 
 void SingleContactTransCtrl::_task_setup(){
@@ -155,7 +157,7 @@ void SingleContactTransCtrl::_task_setup(){
 
     // TEST
     if(b_increase_){
-        if(moving_foot_ == "rAnkle"){
+        if(moving_foot_ == "rFoot"){
             int swing_jidx = robot_->getDofIdx("rHipYaw") - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
@@ -165,7 +167,7 @@ void SingleContactTransCtrl::_task_setup(){
                     (1. - h)*sp_->des_jpos_prev[swing_jidx + i];
              }
         }
-        else if(moving_foot_ == "lAnkle"){
+        else if(moving_foot_ == "lFoot"){
             int swing_jidx = robot_->getDofIdx("lHipYaw") - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
@@ -207,7 +209,7 @@ void SingleContactTransCtrl::_contact_setup(){
     contact_list_.push_back(lfoot_back_contact_);
 
     int jidx_offset(0);
-    if(moving_foot_ == "lAnkle") {
+    if(moving_foot_ == "lFoot") {
         jidx_offset = rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim();
         for(int i(0); i<lfoot_front_contact_->getDim()+lfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
@@ -219,7 +221,7 @@ void SingleContactTransCtrl::_contact_setup(){
         ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
         ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
     }
-    else if(moving_foot_ == "rAnkle") {
+    else if(moving_foot_ == "rFoot") {
         for(int i(0); i<rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
@@ -242,7 +244,7 @@ void SingleContactTransCtrl::firstVisit(){
 
 void SingleContactTransCtrl::lastVisit(){
     sp_->des_jpos_prev = des_jpos_;
-    // printf("[Transition] End\n");
+     //printf("[Single Transition] End\n");
 }
 
 bool SingleContactTransCtrl::endOfPhase(){

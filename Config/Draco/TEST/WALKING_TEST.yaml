@@ -1,8 +1,11 @@
 start_phase: 0
 
-#initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
-initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0., -0.8, 1.6, 0.81]
-body_height: 1.0
+initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
+#initial_jpos: [0. , 0. , -0.8 , 1.6 , 0.81 , 0. , 0. , -0.8 , 1.6 , 0.81]
+#body_height: 1.0
+#com_height_for_omega: 0.77
+body_height: 0.95
+com_height_for_omega: 0.73
 
 jpos_initialization_time: 4.0
 com_lifting_time: 4.0

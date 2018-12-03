@@ -92,6 +92,7 @@ void DracoWorldNode::customPreStep() {
         }
     }
 
+    //mTorqueCommand.setZero(); // TODO
     mSkel->setForces(mTorqueCommand);
 
     count_++;
@@ -153,8 +154,8 @@ void DracoWorldNode::_hold_xy() {
         static double interp_init_time = t_;
         static double ini_des_x = des_x;
         static double ini_des_y = des_y;
-        static double final_des_x = ( (mSkel->getBodyNode("rFootFront")->getCOM())[0] + (mSkel->getBodyNode("rFootBack")->getCOM())[0] + (mSkel->getBodyNode("lFootFront")->getCOM())[0] + (mSkel->getBodyNode("lFootBack")->getCOM())[0] ) / 4.0 - pulling_back_distance_; // Try to mimic in Experiment
-        static double final_des_y = ( (mSkel->getBodyNode("rFootFront")->getCOM())[1] + (mSkel->getBodyNode("rFootBack")->getCOM())[1] + (mSkel->getBodyNode("lFootFront")->getCOM())[1] + (mSkel->getBodyNode("lFootBack")->getCOM())[1] ) / 4.0;
+        static double final_des_x = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[0] + (mSkel->getBodyNode("lFootCenter")->getCOM())[0] ) / 2.0 - pulling_back_distance_; // Try to mimic in Experiment
+        static double final_des_y = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[1] + (mSkel->getBodyNode("lFootCenter")->getCOM())[1] ) / 2.0;
 
         des_x = myUtils::smooth_changing(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);
         des_xdot = myUtils::smooth_changing_vel(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);

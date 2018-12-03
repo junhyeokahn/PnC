@@ -11,7 +11,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     myUtils::pretty_constructor(1, "State Provider");
 
     robot_ = _robot;
-    stance_foot = "lAnkle";
+    stance_foot = "lFoot";
     curr_time = 0.;
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
@@ -22,13 +22,13 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     b_rfoot_contact = 0;
     b_lfoot_contact = 0;
     //qddot_cmd = Eigen::VectorXd::Zero(16);
-    reaction_forces = Eigen::VectorXd::Zero(10);
+    reaction_forces = Eigen::VectorXd::Zero(12);
     led_kin_data = Eigen::VectorXd::Zero(9);
 
-    rfoot_pos.setZero();
-    lfoot_pos.setZero();
-    rfoot_vel.setZero();
-    lfoot_vel.setZero();
+    rfoot_contact_center_pos.setZero();
+    lfoot_contact_center_pos.setZero();
+    rfoot_contact_center_vel.setZero();
+    lfoot_contact_center_vel.setZero();
 
     DataManager* data_manager = DataManager::GetDataManager();
 
@@ -40,12 +40,12 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&b_rfoot_contact, INT, "rfoot_contact", 1);
     data_manager->RegisterData(&b_lfoot_contact, INT, "lfoot_contact", 1);
 
-    data_manager->RegisterData(&reaction_forces, VECT, "reaction_force", 10);
+    data_manager->RegisterData(&reaction_forces, VECT, "reaction_force", 12);
 
-    data_manager->RegisterData(&rfoot_pos, VECT3, "rfoot_pos", 3); 
-    data_manager->RegisterData(&lfoot_pos, VECT3, "lfoot_pos", 3); 
-    data_manager->RegisterData(&rfoot_vel, VECT3, "rfoot_vel", 3); 
-    data_manager->RegisterData(&lfoot_vel, VECT3, "lfoot_vel", 3); 
+    data_manager->RegisterData(&rfoot_contact_center_pos, VECT3, "rfoot_contact_center_pos", 3); 
+    data_manager->RegisterData(&lfoot_contact_center_pos, VECT3, "lfoot_contact_center_pos", 3); 
+    data_manager->RegisterData(&rfoot_contact_center_vel, VECT3, "rfoot_contact_center_vel", 3); 
+    data_manager->RegisterData(&lfoot_contact_center_vel, VECT3, "lfoot_contact_center_vel", 3); 
 
     data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3); 
     data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3); 
@@ -55,8 +55,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 }
 
 void DracoStateProvider::saveCurrentData(){
-    rfoot_pos = robot_->getBodyNodeCoMIsometry("rAnkle").translation();
-    lfoot_pos = robot_->getBodyNodeCoMIsometry("lAnkle").translation();
-    rfoot_vel = robot_->getBodyNodeCoMSpatialVelocity("rAnkle").tail(3);
-    lfoot_vel = robot_->getBodyNodeCoMSpatialVelocity("lAnkle").tail(3);
+    rfoot_contact_center_pos = robot_->getBodyNodeIsometry("rFootCenter").translation();
+    lfoot_contact_center_pos = robot_->getBodyNodeIsometry("lFootCenter").translation();
+    rfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity("rFootCenter").tail(3);
+    lfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity("lFootCenter").tail(3);
 }

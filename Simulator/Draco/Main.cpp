@@ -122,6 +122,9 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     std::cout << "q" << std::endl;
     std::cout << robot->getPositions() << std::endl;
 
+    std::cout << "robot total mass" << std::endl;
+    std::cout << robot->getMass() << std::endl;
+
     exit(0);
 }
 
@@ -193,9 +196,7 @@ int main() {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
             THIS_COM"RobotSystem/RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoHanging.urdf");
             THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
-            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/Draco.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
     // Friction Coefficient

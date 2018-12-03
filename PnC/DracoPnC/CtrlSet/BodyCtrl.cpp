@@ -33,6 +33,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
     contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
+
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
     for (int i = 0; i < contact_list_.size(); ++i) {
@@ -97,8 +98,6 @@ void BodyCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
             += sp_->rotor_inertia[i];
     }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
-
-    std::vector<Task*> dummy_task_list_;
 
     wblc_->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
     Eigen::VectorXd des_jacc_cmd = des_jacc_
@@ -166,7 +165,7 @@ void BodyCtrl::_body_task_setup(){
     //dynacore::pretty_print(com_pos, std::cout, "com_pos");
 }
 
-void BodyCtrl::_double_contact_setup(){
+void BodyCtrl::_double_contact_setup() {
     rfoot_front_contact_->updateContactSpec();
     rfoot_back_contact_->updateContactSpec();
     lfoot_front_contact_->updateContactSpec();
@@ -183,11 +182,13 @@ void BodyCtrl::firstVisit(){
     ctrl_start_time_ = sp_->curr_time;
 
     ini_body_pos_ = robot_->getQ().head(3);
-    //ini_body_pos_ = robot_->getBodyNodeIsometry("torso").translation();
-    //ini_body_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
 }
 
-void BodyCtrl::lastVisit(){  }
+void BodyCtrl::lastVisit(){ 
+    std::cout << "CoM Position @ Last visit in Body Ctrl" << std::endl;
+    std::cout << robot_->getCoMPosition() << std::endl;
+    //exit(0);
+}
 
 bool BodyCtrl::endOfPhase(){
     if(state_machine_time_ > end_time_){

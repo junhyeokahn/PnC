@@ -171,15 +171,15 @@ void KinBalancingCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
     ini_com_pos_ = robot_->getCoMPosition();
 
-    Eigen::VectorXd rfoot_pos = robot_->getBodyNodeIsometry("rAnkle").translation();
-    Eigen::VectorXd lfoot_pos = robot_->getBodyNodeIsometry("lAnkle").translation();
+    Eigen::VectorXd rfoot_contact_pos = (robot_->getBodyNodeIsometry("rFootFront").translation() + robot_->getBodyNodeIsometry("rFootBack").translation())/2.0;
+    Eigen::VectorXd lfoot_contact_pos = (robot_->getBodyNodeIsometry("lFootFront").translation() + robot_->getBodyNodeIsometry("lFootBack").translation())/2.0;
     // TODO
-    goal_com_pos_ = (rfoot_pos + lfoot_pos) / 2.0;
+    goal_com_pos_ = (rfoot_contact_pos + lfoot_contact_pos) / 2.0;
     goal_com_pos_[2] = ini_com_pos_[2];
     //goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
     //goal_com_pos_ = ini_com_pos_;
-    myUtils::pretty_print(rfoot_pos , std::cout, "rfoot_pos");
-    myUtils::pretty_print(lfoot_pos , std::cout, "lfoot_pos");
+    myUtils::pretty_print(rfoot_contact_pos , std::cout, "rfoot_contact_pos");
+    myUtils::pretty_print(lfoot_contact_pos , std::cout, "lfoot_contact_pos");
     myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com");
     myUtils::pretty_print(goal_com_pos_, std::cout, "goal_com");
 }

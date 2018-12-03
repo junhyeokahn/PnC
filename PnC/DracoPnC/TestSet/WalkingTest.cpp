@@ -10,7 +10,7 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
-    sp_->stance_foot = "lAnkle";
+    sp_->stance_foot = "lFoot";
     sp_->global_pos_local[1] = 0.15;
     reversal_planner_ = new Reversal_LIPM_Planner();
     phase_ = WkPhase::initiation;
@@ -22,20 +22,20 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     body_fix_ctrl_ = new BodyCtrl(robot);
     // Swing Controller Selection
     right_swing_ctrl_ =
-        new BodyFootPlanningCtrl(robot_, "rAnkle", reversal_planner_);
+        new BodyFootPlanningCtrl(robot_, "rFoot", reversal_planner_);
     left_swing_ctrl_ =
-        new BodyFootPlanningCtrl(robot_, "lAnkle", reversal_planner_);
+        new BodyFootPlanningCtrl(robot_, "lFoot", reversal_planner_);
 
     // Right
     right_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rAnkle", false);
+        new SingleContactTransCtrl(robot, "rFoot", false);
     right_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rAnkle", true);
+        new SingleContactTransCtrl(robot, "rFoot", true);
     // Left
     left_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lAnkle", false);
+        new SingleContactTransCtrl(robot, "lFoot", false);
     left_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lAnkle", true);
+        new SingleContactTransCtrl(robot, "lFoot", true);
 
 
     _SettingParameter();
@@ -98,28 +98,29 @@ void WalkingTest::TestInitialization(){
 
 int WalkingTest::_NextPhase(const int & phase){
     int next_phase = phase + 1;
-    printf("next phase: %i\n", next_phase);
+    myUtils::color_print(myColor::BoldRed, "[Phase " + std::to_string(next_phase) + "]");
     Eigen::Vector3d next_local_frame_location;
 
     if(phase == WkPhase::double_contact_1) {
         ++num_step_;
-        printf("%i th step:\n", num_step_);
-        // printf("One swing done: Next Right Leg Swing\n");
-        sp_->stance_foot = "lAnkle";
+        printf("%i th step : ", num_step_);
+        printf("Right Leg Swing\n");
+        sp_->stance_foot = "lFoot";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeCoMIsometry("lAnkle").translation();
+        next_local_frame_location = robot_->getBodyNodeIsometry("lFootCenter").translation();
         sp_->global_pos_local += next_local_frame_location;
         //myUtils::pretty_print(sp_->global_pos_local, std::cout, "****lstance");
     }
     if(phase == WkPhase::double_contact_2){
         ++num_step_;
-        printf("%i th step:\n", num_step_);
+        printf("%i th step : ", num_step_);
+        printf("Left Leg Swing\n");
 
-        sp_->stance_foot = "rAnkle";
+        sp_->stance_foot = "rFoot";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeCoMIsometry("rAnkle").translation();
+        next_local_frame_location = robot_->getBodyNodeIsometry("rFootCenter").translation();
         sp_->global_pos_local += next_local_frame_location;
         //myUtils::pretty_print(sp_->global_pos_local, std::cout, "****rstance");
     }
@@ -154,7 +155,9 @@ void WalkingTest::_SettingParameter(){
         ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
-        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
+
+        myUtils::readParameter(cfg, "com_height_for_omega", tmp);
+        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp); // TODO
 
         myUtils::readParameter(cfg, "jpos_initialization_time", tmp);
         ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);

@@ -102,15 +102,6 @@ void JPosSwingCtrl::_fixed_body_contact_setup(){
 }
 
 void JPosSwingCtrl::firstVisit(){
-    // TODO
-    //myUtils::pretty_print(sp_->q, std::cout, "q");
-    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
-    //Eigen::VectorXd com = robot_->getCoMPosition();
-    //myUtils::pretty_print(com, std::cout, "com");
-    //Eigen::MatrixXd rf_ori = robot_->getBodyNodeIsometry("rAnkle").linear();
-    //myUtils::pretty_print(rf_ori, std::cout, "rf_ori");
-    //exit(0);
-    // TODO
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     ctrl_start_time_ = sp_->curr_time;
 }
