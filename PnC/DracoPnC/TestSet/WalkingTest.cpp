@@ -157,7 +157,7 @@ void WalkingTest::_SettingParameter(){
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
 
         myUtils::readParameter(cfg, "com_height_for_omega", tmp);
-        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp); // TODO
+        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
 
         myUtils::readParameter(cfg, "jpos_initialization_time", tmp);
         ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);

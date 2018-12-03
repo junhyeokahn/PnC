@@ -64,10 +64,10 @@ void Reversal_LIPM_Planner::getNextFootLocation(
   while(check_switch != 0){
     if(check_switch > 0){ // Too small velocity increase time
       new_swing_time *= 1.1;
-      printf("Too small velocity.. increase time: %f\n", new_swing_time);
+      myUtils::color_print(myColor::BoldRed, "Too small velocity.. increase swing time: " + std::to_string(new_swing_time), true);
     } else{ // Too larget velocity decrease time
       new_swing_time *= 0.9;
-      printf("Too large velocity.. decrease time: %f\n", new_swing_time);
+      myUtils::color_print(myColor::BoldRed, "Too small velocity.. decrease swing time: " + std::to_string(new_swing_time), true);
     }
     _computeSwitchingState(new_swing_time, com_pos, com_vel, _input->stance_foot_loc, switch_state);
 
@@ -179,7 +179,7 @@ void Reversal_LIPM_Planner::_StepLengthCheck(Eigen::Vector3d & target_loc, const
   double x_step_length (target_loc[0] - switch_state[0][0]);
   if(x_step_length < x_step_length_limit_[0]){
     target_loc[0] = switch_state[0][0] + x_step_length_limit_[0];
-    printf("x step length hit minimum: %f\n", x_step_length);
+    printf("x step length hit min: %f\n", x_step_length);
     printf("new x step: %f, %f \n", target_loc[0], switch_state[0][0]);
   }
   if(x_step_length > x_step_length_limit_[1]){

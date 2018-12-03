@@ -1,8 +1,7 @@
 planner_name: velocity_reversal_lipm
 swing_height: 0.12
 push_down_height: 0.05
-default_target_foot_location: [-0.0, 0.13, 0.0]
-#default_target_foot_location: [-0.0, 0.14, 0.0]
+default_target_foot_location: [0.0, 0.13, 0.0]
 
 kp: [ 150 , 200 , 150 , 200 , 150 , 150 , 200 , 150 , 150 , 150 ]
 kd: [ 8   , 10  , 8   , 8   , 8   , 8   , 10  , 8   , 8   , 8 ]

@@ -332,12 +332,6 @@ void BodyFootPlanningCtrl::firstVisit(){
     input_state[0] = ini_com_pos_[0];
     input_state[1] = ini_com_pos_[1];
     input_state[2] = com_vel[0];   input_state[3] = com_vel[1];
-
-    //TODO
-    //myUtils::pretty_print(sp_->q, std::cout, "q");
-    //myUtils::pretty_print(sp_->qdot, std::cout, "qdot");
-    //exit(0);
-    //TODO
 }
 
 void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d & offset){
