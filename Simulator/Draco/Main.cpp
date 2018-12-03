@@ -199,14 +199,23 @@ int main() {
             THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
-    // Friction Coefficient
-    double friction(100.);
+
+    // ==================================
+    // Friction & Restitution Coefficient
+    // ==================================
+    double friction(100.); double restit(0.0);
     ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
     robot->getBodyNode("torso")->setFrictionCoeff(friction);
     robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
+
+    robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
+    robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
+    robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
+    robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
+
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
     world->setTimeStep(SERVO_RATE);
@@ -225,18 +234,6 @@ int main() {
     // Initial configuration
     // =====================
     _setInitialConfiguration(robot);
-
-    ////////////
-    // Collision
-    ////////////
-
-    //auto cd = world->getConstraintSolver()->getCollisionDetector();
-    //std::cout << cd->getType() << std::endl;
-    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getPrimitiveShapeType() << std::endl;
-    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getContactPointComputationMethod() << std::endl;
-    //static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->setPrimitiveShapeType(dart::collision::FCLCollisionDetector::PRIMITIVE);
-    //std::cout << static_cast<dart::collision::FCLCollisionDetector*>(cd.get())->getPrimitiveShapeType() << std::endl;
-    //exit(0);
 
     // ================
     // Print Model Info
@@ -288,8 +285,8 @@ int main() {
         viewer.record(THIS_COM"/ExperimentVideo");
     }
 
-    //viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    viewer.setUpViewInWindow(1440, 0, 500, 500);
+    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    //viewer.setUpViewInWindow(1440, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3( 5.14,  2.28, 3.0)*0.8,
             ::osg::Vec3( 0.0,  0.2, 0.5),

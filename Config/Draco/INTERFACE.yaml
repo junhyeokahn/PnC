@@ -1,7 +1,6 @@
 #test_name: joint_test
 #test_name: body_test
 test_name: walking_test
-#test_name: rl_walking_test
 #test_name: balancing_test
 
 jpos_max: [0.72, 0.92, 1.08, 1.95, 2.33, 0.79, 0.47, 1.08, 1.95, 2.33]

@@ -2,8 +2,8 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 
-//#define DYNAMIC_BALANCING true
-#define DYNAMIC_BALANCING false
+#define DYNAMIC_BALANCING true
+//#define DYNAMIC_BALANCING false
 
 BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Balancing Test");
