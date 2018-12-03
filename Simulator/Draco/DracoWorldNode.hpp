@@ -33,6 +33,7 @@ private:
 
     int count_;
     double t_;
+    bool b_check_collision_;
 
 public:
     DracoWorldNode(const dart::simulation::WorldPtr & world,

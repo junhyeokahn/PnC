@@ -43,6 +43,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
+        myUtils::readParameter(simulation_cfg, "check_collision", b_check_collision_);
         myUtils::readParameter(simulation_cfg, "pulling_back_time", pulling_back_time_);
         myUtils::readParameter(simulation_cfg, "pulling_back_distance", pulling_back_distance_);
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
@@ -69,7 +70,7 @@ void DracoWorldNode::customPreStep() {
 
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
-    //_check_collision();
+    if (b_check_collision_) { _check_collision(); }
 
     mInterface->getCommand(mSensorData, mCommand);
     mTorqueCommand.tail(10) = mCommand->jtrq;
@@ -177,9 +178,11 @@ void DracoWorldNode::_check_collision() {
     dart::collision::CollisionResult result;
     bool collision = groundCol->collide(robotCol.get(), option, &result);
     auto colliding_body_nodes_list = result.getCollidingBodyNodes();
-    std::cout << "collision size" << std::endl;
-    std::cout << colliding_body_nodes_list.size() << std::endl;
 
-    for (auto bn : colliding_body_nodes_list)
-        std::cout << bn->getName() << std::endl;
+    for (auto bn : colliding_body_nodes_list){
+        if (t_ > mReleaseTime && bn->getName() == "torso") {
+            std::cout << "Torso Collision Happen" << std::endl;
+            exit(0);
+        }
+    }
 }

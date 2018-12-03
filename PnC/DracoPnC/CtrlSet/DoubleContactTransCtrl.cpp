@@ -119,6 +119,7 @@ void DoubleContactTransCtrl::_task_setup(){
     des_jpos_ = ini_jpos_;
     des_jvel_.setZero();
     des_jacc_.setZero();
+
      // Calculate IK for a desired height and orientation.
     double base_height_cmd;
 
@@ -155,10 +156,10 @@ void DoubleContactTransCtrl::_task_setup(){
     kin_wbc_->Ainv_ = Ainv_;
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,
             des_jpos_, des_jvel_, des_jacc_);
-    //dynacore::pretty_print(sp_->q, std::cout, "curr_config");
-    //dynacore::pretty_print(des_jpos_, std::cout, "des_jpos");
-    //dynacore::pretty_print(des_jvel_, std::cout, "des_jvel");
-    //dynacore::pretty_print(des_jacc_, std::cout, "des_jacc");
+    //myUtils::pretty_print(sp_->q, std::cout, "curr_config");
+    //myUtils::pretty_print(des_jpos_, std::cout, "des_jpos");
+    //myUtils::pretty_print(des_jvel_, std::cout, "des_jvel");
+    //myUtils::pretty_print(des_jacc_, std::cout, "des_jacc");
 }
 
 void DoubleContactTransCtrl::_contact_setup(){

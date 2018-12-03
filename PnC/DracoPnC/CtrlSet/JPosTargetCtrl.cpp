@@ -15,9 +15,13 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
     des_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    // task
     jpos_task_ = new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
+
+    // contact
     fixed_body_contact_ = new FixedBodyContactSpec(robot_);
 
+    // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for(int i(0); i<robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
@@ -36,7 +40,9 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
 
 JPosTargetCtrl::~JPosTargetCtrl(){
     delete jpos_task_;
+
     delete fixed_body_contact_;
+
     delete wbdc_;
     delete wbdc_data_;
 }

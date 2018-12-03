@@ -3,7 +3,7 @@ initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
 #initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0., -0.8, 1.6, 0.81]
 jpos_initialization_time: 4.0
 
-body_height: 1.0
+body_height: 0.9
 body_lifting_time: 4.0
 
 body_ctrl_time: 10000.0

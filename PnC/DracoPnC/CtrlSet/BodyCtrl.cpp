@@ -65,6 +65,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
 BodyCtrl::~BodyCtrl(){
     delete body_rpz_task_;
 
+    delete kin_wbc_;
     delete wblc_;
     delete wblc_data_;
 
