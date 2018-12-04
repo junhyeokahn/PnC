@@ -26,6 +26,7 @@ def main():
     draco_command.qdot = np.zeros(10)
     draco_command.jtrq = np.zeros(10)
     draco_interface.getCommand(draco_sensor_data, draco_command)
+
     __import__('ipdb').set_trace()
     print("Done")
 

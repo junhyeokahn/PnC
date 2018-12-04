@@ -21,7 +21,7 @@
     <parent link="world" />
     <child link="basePosX" />
     <axis xyz="1 0 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+    <limit effort="150.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
   <link name="basePosY">
@@ -36,7 +36,7 @@
     <parent link="basePosX" />
     <child link="basePosY" />
     <axis xyz="0 1 0" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+    <limit effort="150.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
   <link name="basePosZ">
@@ -51,7 +51,7 @@
     <parent link="basePosY" />
     <child link="basePosZ" />
     <axis xyz="0 0 1" />
-    <limit effort="100.0" velocity="100.0" lower="-200." upper="200." />
+    <limit effort="150.0" velocity="100.0" lower="-200." upper="200." />
   </joint>
 
   <link name="baseRotZ">
@@ -133,7 +133,7 @@
     <parent link="torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <limit effort="150" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
   <transmission name="lHipYaw" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipYaw"/>
@@ -163,7 +163,7 @@
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-0.52" upper="1.04" velocity="25.0"/>
+    <limit effort="150" lower="-0.52" upper="1.04" velocity="25.0"/>
   </joint>
   <transmission name="lHipRoll" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipRoll"/>
@@ -193,7 +193,7 @@
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <limit effort="150" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
   <transmission name="lHipPitch" type="transmission_interface/SimpleTransmission">
     <actuator name="lHipPitch"/>
@@ -223,7 +223,7 @@
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
+    <limit effort="150" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
   <transmission name="lKnee" type="transmission_interface/SimpleTransmission">
     <actuator name="lKnee"/>
@@ -253,7 +253,7 @@
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
+    <limit effort="150" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
   <transmission name="lAnkle" type="transmission_interface/SimpleTransmission">
     <actuator name="lAnkle"/>
@@ -352,7 +352,7 @@
     <parent link="torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <limit effort="150" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
   <transmission name="rHipYaw" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipYaw"/>
@@ -382,7 +382,7 @@
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
-    <limit effort="40" lower="-1.04" upper="0.52" velocity="25.0"/>
+    <limit effort="150" lower="-1.04" upper="0.52" velocity="25.0"/>
   </joint>
   <transmission name="rHipRoll" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipRoll"/>
@@ -412,7 +412,7 @@
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="-1.04" upper="1.04" velocity="25.0"/>
+    <limit effort="150" lower="-1.04" upper="1.04" velocity="25.0"/>
   </joint>
   <transmission name="rHipPitch" type="transmission_interface/SimpleTransmission">
     <actuator name="rHipPitch"/>
@@ -442,7 +442,7 @@
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.0" upper="2.13" velocity="25.0"/>
+    <limit effort="150" lower="0.0" upper="2.13" velocity="25.0"/>
   </joint>
   <transmission name="rKnee" type="transmission_interface/SimpleTransmission">
     <actuator name="rKnee"/>
@@ -472,7 +472,7 @@
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />
-    <limit effort="40" lower="0.901" upper="2.44" velocity="25.0"/>
+    <limit effort="150" lower="0.901" upper="2.44" velocity="25.0"/>
   </joint>
   <transmission name="rAnkle" type="transmission_interface/SimpleTransmission">
     <actuator name="rAnkle"/>
