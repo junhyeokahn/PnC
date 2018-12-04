@@ -18,6 +18,8 @@ public:
     Eigen::VectorXd bus_voltage;
     Eigen::VectorXd bus_current;
     Eigen::VectorXd rotor_inertia;
+    Eigen::VectorXd rfoot_ati;
+    Eigen::VectorXd lfoot_ati;
     bool rfoot_contact;
     bool lfoot_contact;
 };
