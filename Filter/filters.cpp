@@ -394,7 +394,7 @@ AverageFilter::AverageFilter(double dt, double t_const, double limit):
     est_value_ = 0.;
 }
 
-AverageFilter::~AverageFilter(){ est_value_ = 0; }
+AverageFilter::~AverageFilter(){}
 void AverageFilter::initialization(double _val) {est_value_ = _val;}
 void AverageFilter::clear(){ est_value_ = 0.; }
 void AverageFilter::input(double input){
