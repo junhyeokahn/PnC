@@ -27,18 +27,12 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contactk
-    //rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 0.3);
-    //rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 0.3);
-    //lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 0.3);
-    //lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 0.3);
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
+    rfoot_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
+    lfoot_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
 
     contact_list_.clear();
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
@@ -76,10 +70,8 @@ BodyCtrl::~BodyCtrl(){
     delete wblc_;
     delete wblc_data_;
 
-    delete rfoot_front_contact_;
-    //delete rfoot_back_contact_;
-    delete lfoot_front_contact_;
-    //delete lfoot_back_contact_;
+    delete rfoot_contact_;
+    delete lfoot_contact_;
 }
 
 void BodyCtrl::oneStep(void* _cmd){
@@ -121,7 +113,6 @@ void BodyCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     for (int i = 0; i < wblc_data_->Fr_.size(); ++i) {
         sp_->reaction_forces[i] = wblc_data_->Fr_[i];
     }
-    //sp_->reaction_forces = wblc_data_->Fr_;
 }
 
 void BodyCtrl::_body_task_setup(){
@@ -185,15 +176,11 @@ void BodyCtrl::_body_task_setup(){
 }
 
 void BodyCtrl::_double_contact_setup() {
-    rfoot_front_contact_->updateContactSpec();
-    //rfoot_back_contact_->updateContactSpec();
-    lfoot_front_contact_->updateContactSpec();
-    //lfoot_back_contact_->updateContactSpec();
+    rfoot_contact_->updateContactSpec();
+    lfoot_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 }
 
 void BodyCtrl::firstVisit(){

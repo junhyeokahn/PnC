@@ -37,17 +37,15 @@ class BodyCtrl: public Controller{
         int trj_type_;
         double end_time_;
         int dim_contact_;
-        // [right_front, right_back, left_front, left_back]
+        // [right_center, left_center]
         std::vector<int> fz_idx_in_cost_;
 
         std::vector<int> selected_jidx_;
         Task* selected_joint_task_;
         Task* body_rpz_task_;
 
-        ContactSpec* rfoot_front_contact_;
-        ContactSpec* lfoot_front_contact_;
-        ContactSpec* rfoot_back_contact_;
-        ContactSpec* lfoot_back_contact_;
+        ContactSpec* rfoot_contact_;
+        ContactSpec* lfoot_contact_;
 
         KinWBC* kin_wbc_;
         WBLC* wblc_;

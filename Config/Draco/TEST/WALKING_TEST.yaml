@@ -13,12 +13,6 @@ st_transition_time: 0.03
 end_transition_time: 0.03
 stance_time: 0.01
 
-#swing_time: 0.83
-#st_transition_time: 0.23
-#end_transition_time: 0.23
-#stance_time: 0.31
-
-
 #replanning: true
 replanning: false
 transition_phase_mix_ratio: 0.2

@@ -24,8 +24,6 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // task
-    //foot_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot);
-    //foot_task_ = new LineFootTask(robot_, swing_foot);
     selected_jidx_.resize(2);
     selected_jidx_[0] = robot->getDofIdx("rHipYaw");
     selected_jidx_[1] = robot->getDofIdx("lHipYaw");
@@ -34,17 +32,11 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     base_task_ = new BodyRPZTask(robot_);
 
     // contact
-    //rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
-    //rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
-    //lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
-    //lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
+    rfoot_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
+    lfoot_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
     contact_list_.clear();
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
@@ -73,32 +65,25 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     kin_wbc_contact_list_.clear();
     int jidx_offset(0);
     if(swing_foot == "lFoot") {
-        jidx_offset = rfoot_front_contact_->getDim();
-        for(int i(0); i<lfoot_front_contact_->getDim(); ++i){
+        jidx_offset = rfoot_contact_->getDim();
+        for(int i(0); i<lfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
             wblc_data_->W_xddot_[i + jidx_offset] = 0.001;
         }
-        //wblc_data_->W_rf_[fz_idx_in_cost_[2]] = 0.5;
         wblc_data_->W_rf_[fz_idx_in_cost_[1]] = 0.5;
-        ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(0.0001);
-        //((PointContactSpec*)lfoot_back_contact_)->setMaxFz(0.0001);
-        kin_wbc_contact_list_.push_back(rfoot_front_contact_);
-        //kin_wbc_contact_list_.push_back(rfoot_back_contact_);
+        ((PointContactSpec*)lfoot_contact_)->setMaxFz(0.0001);
+        kin_wbc_contact_list_.push_back(rfoot_contact_);
     }
     else if(swing_foot == "rFoot") {
-        for(int i(0); i<rfoot_front_contact_->getDim(); ++i){
+        for(int i(0); i<rfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
             wblc_data_->W_xddot_[i + jidx_offset] = 0.0001;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[0]] = 0.5;
-        //wblc_data_->W_rf_[fz_idx_in_cost_[1]] = 0.5;
 
-        ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(0.0001);
-        //((PointContactSpec*)rfoot_back_contact_)->setMaxFz(0.0001);
-        kin_wbc_contact_list_.push_back(lfoot_front_contact_);
-        //kin_wbc_contact_list_.push_back(lfoot_back_contact_);
+        ((PointContactSpec*)rfoot_contact_)->setMaxFz(0.0001);
+        kin_wbc_contact_list_.push_back(lfoot_contact_);
     }
-
 
     // Create Minimum jerk objects
     for(size_t i = 0; i < 3; i++){
@@ -125,15 +110,11 @@ void BodyFootPlanningCtrl::oneStep(void* _cmd){
 }
 
 void BodyFootPlanningCtrl::_contact_setup(){
-    rfoot_front_contact_->updateContactSpec();
-    //rfoot_back_contact_->updateContactSpec();
-    lfoot_front_contact_->updateContactSpec();
-    //lfoot_back_contact_->updateContactSpec();
+    rfoot_contact_->updateContactSpec();
+    lfoot_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 }
 
 void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
@@ -167,7 +148,6 @@ void BodyFootPlanningCtrl::_task_setup(){
     // Body height
     double base_height_cmd = ini_base_height_;
     if(b_set_height_target_) base_height_cmd = des_body_height_;
-   //base_height_cmd = 0.98;
 
     Eigen::VectorXd yaw_pos = Eigen::VectorXd::Zero(2);
     Eigen::VectorXd yaw_vel = Eigen::VectorXd::Zero(2);
@@ -187,16 +167,16 @@ void BodyFootPlanningCtrl::_task_setup(){
     pos_des[2] = des_quat.y();
     pos_des[3] = des_quat.z();
 
-    pos_des[4] = 0.;
-    pos_des[5] = ini_body_pos_[1];
+    pos_des[4] = 0.; //not used
+    pos_des[5] = 0.; //not used
     pos_des[6] = base_height_cmd;
 
     base_task_->updateTask(pos_des, vel_des, acc_des);
 
     /////// Foot Pos Task Setup
     _CheckPlanning();
-    _GetSinusoidalSwingTrajectory();
-    //_GetBsplineSwingTrajectory();
+    //_GetSinusoidalSwingTrajectory();
+    _GetBsplineSwingTrajectory();
 
     double traj_time = state_machine_time_ - half_swing_time_;
     if(state_machine_time_ > half_swing_time_){
@@ -319,7 +299,6 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
 void BodyFootPlanningCtrl::firstVisit(){
     b_replaned_ = false;
     ini_config_ = sp_->q;
-    //ini_body_pos_ = sp_->q.head(3);
     ini_foot_pos_ = robot_->getBodyNodeIsometry(swing_foot_ + "Center").translation();
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
@@ -425,10 +404,8 @@ BodyFootPlanningCtrl::~BodyFootPlanningCtrl(){
     delete wblc_;
     delete wblc_data_;
 
-    delete rfoot_front_contact_;
-    //delete rfoot_back_contact_;
-    delete lfoot_front_contact_;
-    //delete lfoot_back_contact_;
+    delete rfoot_contact_;
+    delete lfoot_contact_;
 
     for (int i = 0; i < min_jerk_offset_.size(); ++i)
         delete min_jerk_offset_[i];

@@ -34,17 +34,11 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contact
-    //rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
-    //rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
-    //lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
-    //lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
+    rfoot_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
+    lfoot_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
     contact_list_.clear();
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
@@ -79,10 +73,8 @@ SingleContactTransCtrl::~SingleContactTransCtrl(){
     delete base_task_;
     delete selected_joint_task_;
 
-    delete rfoot_front_contact_;
-    //delete rfoot_back_contact_;
-    delete lfoot_front_contact_;
-    //delete lfoot_back_contact_;
+    delete rfoot_contact_;
+    delete lfoot_contact_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -215,47 +207,35 @@ void SingleContactTransCtrl::_contact_setup(){
         rf_weight_z = (alpha) * 0.5 + (1. - alpha) * 0.01;
         foot_weight = 0.001 * (alpha)  + 1000. * (1. - alpha);
     }
-    rfoot_front_contact_->updateContactSpec();
-    //rfoot_back_contact_->updateContactSpec();
-    lfoot_front_contact_->updateContactSpec();
-    //lfoot_back_contact_->updateContactSpec();
+    rfoot_contact_->updateContactSpec();
+    lfoot_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_front_contact_);
-    //contact_list_.push_back(rfoot_back_contact_);
-    contact_list_.push_back(lfoot_front_contact_);
-    //contact_list_.push_back(lfoot_back_contact_);
+    contact_list_.push_back(rfoot_contact_);
+    contact_list_.push_back(lfoot_contact_);
 
     int jidx_offset(0);
     if(moving_foot_ == "lFoot") {
-        jidx_offset = rfoot_front_contact_->getDim();
-        for(int i(0); i<lfoot_front_contact_->getDim(); ++i){
+        jidx_offset = rfoot_contact_->getDim();
+        for(int i(0); i<lfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
-        //wblc_data_->W_rf_[fz_idx_in_cost_[3]] = rf_weight_z;
-
-        ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
-        //((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)lfoot_contact_)->setMaxFz(upper_lim);
     }
     else if(moving_foot_ == "rFoot") {
-        for(int i(0); i<rfoot_front_contact_->getDim(); ++i){
+        for(int i(0); i<rfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[0]] = rf_weight_z;
-        //wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
-
-        ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(upper_lim);
-        //((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)rfoot_contact_)->setMaxFz(upper_lim);
     }
 }
 
 void SingleContactTransCtrl::firstVisit(){
     // printf("[Transition] Start\n");
     ctrl_start_time_ = sp_->curr_time;
-
-    //ini_base_pos_ = robot_->getBodyNodeCoMIsometry("torso").translation();
     ini_base_pos_ = sp_->q.head(3);
 }
 

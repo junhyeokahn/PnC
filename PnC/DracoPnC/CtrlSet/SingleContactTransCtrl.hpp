@@ -46,10 +46,8 @@ class SingleContactTransCtrl: public Controller{
         Task* selected_joint_task_;
         Task* base_task_;
 
-        ContactSpec* rfoot_front_contact_;
-        ContactSpec* lfoot_front_contact_;
-        ContactSpec* rfoot_back_contact_;
-        ContactSpec* lfoot_back_contact_;
+        ContactSpec* rfoot_contact_;
+        ContactSpec* lfoot_contact_;
 
         KinWBC* kin_wbc_;
         WBLC* wblc_;

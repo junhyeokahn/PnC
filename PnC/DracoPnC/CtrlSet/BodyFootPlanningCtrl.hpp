@@ -30,10 +30,8 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         int dim_contact_;
         // [right_front, right_back, left_front, left_back]
         std::vector<int> fz_idx_in_cost_;
-        ContactSpec* rfoot_front_contact_;
-        ContactSpec* lfoot_front_contact_;
-        ContactSpec* rfoot_back_contact_;
-        ContactSpec* lfoot_back_contact_;
+        ContactSpec* rfoot_contact_;
+        ContactSpec* lfoot_contact_;
 
         void _CheckPlanning();
         void _Replanning(Eigen::Vector3d & target_loc);
@@ -62,17 +60,14 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         Eigen::VectorXd Kp_;
         Eigen::VectorXd Kd_;
 
-        Eigen::Vector3d ini_body_pos_;
         Eigen::Vector3d ini_com_pos_;
         Eigen::Vector3d ini_foot_pos_;
 
         Eigen::VectorXd ini_config_;
 
         std::vector<double> foot_landing_offset_;
-        //Eigen::Vector2d body_pt_offset_;
-        //Eigen::Vector3d default_target_loc_;
 
-         Eigen::VectorXd body_pt_offset_;
+        Eigen::VectorXd body_pt_offset_;
         Eigen::VectorXd default_target_loc_;
 
        std::vector<MinJerk_OneDimension*> min_jerk_offset_;

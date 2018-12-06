@@ -387,6 +387,7 @@ float CFilterButterworth24db::Run(float input)
 
     return output;
 }
+
 AverageFilter::AverageFilter(double dt, double t_const, double limit):
     dt_(dt), t_const_(t_const), limit_(limit)
 {
@@ -395,11 +396,15 @@ AverageFilter::AverageFilter(double dt, double t_const, double limit):
 }
 
 AverageFilter::~AverageFilter(){}
+
 void AverageFilter::initialization(double _val) {est_value_ = _val;}
+
 void AverageFilter::clear(){ est_value_ = 0.; }
+
 void AverageFilter::input(double input){
     double update_value = input - est_value_;
     if(fabs(update_value) > limit_){ update_value = 0.; }
     est_value_ += (dt_/(dt_ + t_const_))*update_value;
 }
+
 double AverageFilter::output(){ return est_value_; }
