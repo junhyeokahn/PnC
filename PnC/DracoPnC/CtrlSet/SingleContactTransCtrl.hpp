@@ -42,6 +42,8 @@ class SingleContactTransCtrl: public Controller{
         double max_rf_z_;
         double min_rf_z_;
 
+        std::vector<int> selected_jidx_;
+        Task* selected_joint_task_;
         Task* base_task_;
 
         ContactSpec* rfoot_front_contact_;

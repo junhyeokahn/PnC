@@ -20,6 +20,7 @@ class SwingPlanningCtrl:public Controller{
             replan_moment_(0.),
             ctrl_start_time_(0.),
             half_swing_time_(0.15),
+            b_set_height_target_(false),
             b_contact_switch_check_(false){
                 curr_foot_pos_des_.setZero();
                 curr_foot_vel_des_.setZero();

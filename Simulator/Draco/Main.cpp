@@ -197,7 +197,8 @@ int main() {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
             THIS_COM"RobotSystem/RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
+            //THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
+            THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollisionSim.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 

@@ -42,10 +42,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     data_manager->RegisterData(&reaction_forces, VECT, "reaction_force", 12);
 
-    data_manager->RegisterData(&rfoot_contact_center_pos, VECT3, "rfoot_contact_center_pos", 3); 
-    data_manager->RegisterData(&lfoot_contact_center_pos, VECT3, "lfoot_contact_center_pos", 3); 
-    data_manager->RegisterData(&rfoot_contact_center_vel, VECT3, "rfoot_contact_center_vel", 3); 
-    data_manager->RegisterData(&lfoot_contact_center_vel, VECT3, "lfoot_contact_center_vel", 3); 
+    data_manager->RegisterData(&rfoot_contact_center_pos, VECT3, "rfoot_cp", 3); 
+    data_manager->RegisterData(&lfoot_contact_center_pos, VECT3, "lfoot_cp", 3); 
+    data_manager->RegisterData(&rfoot_contact_center_vel, VECT3, "rfoot_cv", 3); 
+    data_manager->RegisterData(&lfoot_contact_center_vel, VECT3, "lfoot_cv", 3); 
 
     data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3); 
     data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3); 

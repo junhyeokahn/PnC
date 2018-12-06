@@ -20,23 +20,31 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     des_jvel_(robot_->getNumActuatedDofs()),
     des_jacc_(robot_->getNumActuatedDofs()),
     Kp_(robot_->getNumActuatedDofs()),
-    Kd_(robot_->getNumActuatedDofs())
+    Kd_(robot_->getNumActuatedDofs()),
+    max_rf_z_(100.),
+    min_rf_z_(3.)
 {
     myUtils::pretty_constructor(2, "Single Contact Trans Ctrl");
 
     // task
     base_task_ = new BodyRPZTask(robot);
+    selected_jidx_.resize(2);
+    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
+    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contact
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
-    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
-    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    //rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
+    //rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
+    //lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
+    //lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
-    contact_list_.push_back(rfoot_back_contact_);
+    //contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
-    contact_list_.push_back(lfoot_back_contact_);
+    //contact_list_.push_back(lfoot_back_contact_);
 
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
@@ -69,11 +77,12 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
 
 SingleContactTransCtrl::~SingleContactTransCtrl(){
     delete base_task_;
+    delete selected_joint_task_;
 
     delete rfoot_front_contact_;
-    delete rfoot_back_contact_;
+    //delete rfoot_back_contact_;
     delete lfoot_front_contact_;
-    delete lfoot_back_contact_;
+    //delete lfoot_back_contact_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -122,7 +131,7 @@ void SingleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
     //dynacore::pretty_print(gamma, std::cout, "gamma");
 
     sp_->qddot_cmd = wblc_data_->qddot_;
-    sp_->reaction_forces = wblc_data_->Fr_;
+    for(int i(0); i<dim_contact_; ++i)    sp_->reaction_forces[i] = wblc_data_->Fr_[i];
 
     //myUtils::pretty_print(wblc_data_->Fr_, std::cout, "reaction force");
 }
@@ -131,6 +140,12 @@ void SingleContactTransCtrl::_task_setup(){
     // Body height
     double base_height_cmd = ini_base_height_;
     if(b_set_height_target_) base_height_cmd = des_base_height_;
+
+    Eigen::VectorXd yaw_pos = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd yaw_vel = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd yaw_acc = Eigen::VectorXd::Zero(2);
+
+    selected_joint_task_->updateTask(yaw_pos, yaw_vel, yaw_acc);
 
     // Orientation
     Eigen::Quaternion<double> des_quat(1, 0, 0, 0);
@@ -150,6 +165,8 @@ void SingleContactTransCtrl::_task_setup(){
 
     base_task_->updateTask(pos_des, vel_des, acc_des);
 
+    // task push back
+    task_list_.push_back(selected_joint_task_);
     task_list_.push_back(base_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,
@@ -199,38 +216,38 @@ void SingleContactTransCtrl::_contact_setup(){
         foot_weight = 0.001 * (alpha)  + 1000. * (1. - alpha);
     }
     rfoot_front_contact_->updateContactSpec();
-    rfoot_back_contact_->updateContactSpec();
+    //rfoot_back_contact_->updateContactSpec();
     lfoot_front_contact_->updateContactSpec();
-    lfoot_back_contact_->updateContactSpec();
+    //lfoot_back_contact_->updateContactSpec();
 
     contact_list_.push_back(rfoot_front_contact_);
-    contact_list_.push_back(rfoot_back_contact_);
+    //contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
-    contact_list_.push_back(lfoot_back_contact_);
+    //contact_list_.push_back(lfoot_back_contact_);
 
     int jidx_offset(0);
     if(moving_foot_ == "lFoot") {
-        jidx_offset = rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim();
-        for(int i(0); i<lfoot_front_contact_->getDim()+lfoot_back_contact_->getDim(); ++i){
+        jidx_offset = rfoot_front_contact_->getDim();
+        for(int i(0); i<lfoot_front_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
-        wblc_data_->W_rf_[fz_idx_in_cost_[2]] = rf_weight_z;
-        wblc_data_->W_rf_[fz_idx_in_cost_[3]] = rf_weight_z;
+        wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
+        //wblc_data_->W_rf_[fz_idx_in_cost_[3]] = rf_weight_z;
 
         ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
-        ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
+        //((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
     }
     else if(moving_foot_ == "rFoot") {
-        for(int i(0); i<rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim(); ++i){
+        for(int i(0); i<rfoot_front_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[0]] = rf_weight_z;
-        wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
+        //wblc_data_->W_rf_[fz_idx_in_cost_[1]] = rf_weight_z;
 
         ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(upper_lim);
-        ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
+        //((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
     }
 }
 

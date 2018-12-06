@@ -32,8 +32,8 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
     }
     // (Z)
     pos_err[2] = _pos_des[6] - (robot_->getQ())[2];
-    vel_des[2] = vel_des[5];
-    acc_des[2] = acc_des[5];
+    vel_des[2] = _vel_des[5];
+    acc_des[2] = _acc_des[5];
 
     //myUtils::pretty_print(des_ori, std::cout, "ori_des");
     //myUtils::pretty_print(ori_act, std::cout, "ori_act");

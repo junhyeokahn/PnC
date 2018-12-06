@@ -6,15 +6,17 @@ PointContactSpec::PointContactSpec(RobotSystem* robot,
     myUtils::pretty_constructor(3, _link_name+" Point Contact");
 
     link_name_ = _link_name;
-    max_Fz_ = 1000.;
+    max_Fz_ = 500.;
     mu_ = _mu;
 }
 
 PointContactSpec::~PointContactSpec(){}
 
 bool PointContactSpec::_UpdateJc(){
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_, robot_->getBodyNode(link_name_));
+    //Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_, robot_->getBodyNode(link_name_));
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(link_name_);
     Jc_ = Jtmp.block(3, 0, 3, robot_->getNumDofs());
+    //myUtils::pretty_print(Jc_, std::cout, link_name_ + " contact jacobian");
     return true;
 }
 

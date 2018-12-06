@@ -2,7 +2,7 @@ start_phase: 0
 
 initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
 
-body_height: 0.95
+body_height: 0.98
 com_height_for_omega: 0.739
 
 jpos_initialization_time: 4.0
@@ -13,7 +13,15 @@ st_transition_time: 0.03
 end_transition_time: 0.03
 stance_time: 0.01
 
-replanning: true
+#swing_time: 0.83
+#st_transition_time: 0.23
+#end_transition_time: 0.23
+#stance_time: 0.31
+
+
+#replanning: true
+replanning: false
 transition_phase_mix_ratio: 0.2
 double_stance_mix_ratio: 0.0
-contact_switch_check: true
+#contact_switch_check: true
+contact_switch_check: false

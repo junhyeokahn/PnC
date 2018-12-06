@@ -17,7 +17,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     row_index = starting_row_index
 
     ## read files --------------------------------------------------------------------
-    file_path = os.getcwd() + "/../../../experiment_data_check/"
+    file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 
     data_motor_current = \
             np.genfromtxt(file_path+'motor_current.txt', delimiter=None, dtype=(float))

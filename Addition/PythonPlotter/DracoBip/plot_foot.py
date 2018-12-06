@@ -23,20 +23,20 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     data_rfoot_pos_des = \
             np.genfromtxt(file_path+'rfoot_pos_des.txt', delimiter=None, dtype=(float))
     data_rfoot_pos = \
-            np.genfromtxt(file_path+'rfoot_pos.txt', delimiter=None, dtype=(float))
+            np.genfromtxt(file_path+'rfoot_cp.txt', delimiter=None, dtype=(float))
     data_lfoot_pos_des = \
             np.genfromtxt(file_path+'lfoot_pos_des.txt', delimiter=None, dtype=(float))
     data_lfoot_pos = \
-            np.genfromtxt(file_path+'lfoot_pos.txt', delimiter=None, dtype=(float))
+            np.genfromtxt(file_path+'lfoot_cp.txt', delimiter=None, dtype=(float))
 
     data_rfoot_vel_des = \
             np.genfromtxt(file_path+'rfoot_vel_des.txt', delimiter=None, dtype=(float))
     data_rfoot_vel = \
-            np.genfromtxt(file_path+'rfoot_vel.txt', delimiter=None, dtype=(float))
+            np.genfromtxt(file_path+'rfoot_cv.txt', delimiter=None, dtype=(float))
     data_lfoot_vel_des = \
             np.genfromtxt(file_path+'lfoot_vel_des.txt', delimiter=None, dtype=(float))
     data_lfoot_vel = \
-            np.genfromtxt(file_path+'lfoot_vel.txt', delimiter=None, dtype=(float))
+            np.genfromtxt(file_path+'lfoot_cv.txt', delimiter=None, dtype=(float))
 
 
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))

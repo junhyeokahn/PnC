@@ -21,18 +21,24 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
 
     // task
     body_rpz_task_ = new BodyRPZTask(robot);
+    selected_jidx_.resize(2);
+    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
+    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contactk
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
-    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
-    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    //rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 0.3);
+    //rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 0.3);
+    //lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 0.3);
+    //lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 0.3);
+    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootCenter", 0.3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootCenter", 0.3);
 
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
-    contact_list_.push_back(rfoot_back_contact_);
+    //contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
-    contact_list_.push_back(lfoot_back_contact_);
+    //contact_list_.push_back(lfoot_back_contact_);
 
     fz_idx_in_cost_.clear();
     dim_contact_ = 0;
@@ -64,15 +70,16 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
 
 BodyCtrl::~BodyCtrl(){
     delete body_rpz_task_;
+    delete selected_joint_task_;
 
     delete kin_wbc_;
     delete wblc_;
     delete wblc_data_;
 
     delete rfoot_front_contact_;
-    delete rfoot_back_contact_;
+    //delete rfoot_back_contact_;
     delete lfoot_front_contact_;
-    delete lfoot_back_contact_;
+    //delete lfoot_back_contact_;
 }
 
 void BodyCtrl::oneStep(void* _cmd){
@@ -111,13 +118,22 @@ void BodyCtrl::_compute_torque_wblc(Eigen::VectorXd & gamma){
             gamma, wblc_data_);
 
     sp_->qddot_cmd = wblc_data_->qddot_;
-    sp_->reaction_forces = wblc_data_->Fr_;
+    for (int i = 0; i < wblc_data_->Fr_.size(); ++i) {
+        sp_->reaction_forces[i] = wblc_data_->Fr_[i];
+    }
+    //sp_->reaction_forces = wblc_data_->Fr_;
 }
 
 void BodyCtrl::_body_task_setup(){
     des_jpos_ = jpos_ini_;
     des_jvel_.setZero();
     des_jacc_.setZero();
+
+    Eigen::VectorXd yaw_pos = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd yaw_vel = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd yaw_acc = Eigen::VectorXd::Zero(2);
+
+    selected_joint_task_->updateTask(yaw_pos, yaw_vel, yaw_acc);
 
     // Calculate IK for a desired height and orientation.
     double body_height_cmd;
@@ -151,6 +167,8 @@ void BodyCtrl::_body_task_setup(){
 
     body_rpz_task_->updateTask(pos_des, vel_des, acc_des);
 
+    // task push back
+    task_list_.push_back(selected_joint_task_);
     task_list_.push_back(body_rpz_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_,
@@ -168,14 +186,14 @@ void BodyCtrl::_body_task_setup(){
 
 void BodyCtrl::_double_contact_setup() {
     rfoot_front_contact_->updateContactSpec();
-    rfoot_back_contact_->updateContactSpec();
+    //rfoot_back_contact_->updateContactSpec();
     lfoot_front_contact_->updateContactSpec();
-    lfoot_back_contact_->updateContactSpec();
+    //lfoot_back_contact_->updateContactSpec();
 
     contact_list_.push_back(rfoot_front_contact_);
-    contact_list_.push_back(rfoot_back_contact_);
+    //contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
-    contact_list_.push_back(lfoot_back_contact_);
+    //contact_list_.push_back(lfoot_back_contact_);
 }
 
 void BodyCtrl::firstVisit(){

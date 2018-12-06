@@ -22,11 +22,9 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
 
         virtual void ctrlInitialization(const std::string & setting_file_name);
     protected:
-        double waiting_time_limit_;
         double ini_base_height_;
         int swing_leg_jidx_;
         double push_down_height_; // push foot below the ground at landing
-        Eigen::Vector3d default_target_loc_;
         Eigen::Vector3d initial_target_loc_;
 
         int dim_contact_;
@@ -51,6 +49,8 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         void _GetBsplineSwingTrajectory();
         std::vector<ContactSpec*> kin_wbc_contact_list_;
 
+        std::vector<int> selected_jidx_;
+        Task* selected_joint_task_;
         Task* base_task_;
         Task* foot_task_;
 
@@ -65,12 +65,16 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         Eigen::Vector3d ini_body_pos_;
         Eigen::Vector3d ini_com_pos_;
         Eigen::Vector3d ini_foot_pos_;
-        Eigen::Vector2d body_pt_offset_;
 
         Eigen::VectorXd ini_config_;
 
         std::vector<double> foot_landing_offset_;
+        //Eigen::Vector2d body_pt_offset_;
+        //Eigen::Vector3d default_target_loc_;
 
-        std::vector<MinJerk_OneDimension*> min_jerk_offset_;
+         Eigen::VectorXd body_pt_offset_;
+        Eigen::VectorXd default_target_loc_;
+
+       std::vector<MinJerk_OneDimension*> min_jerk_offset_;
         BS_Basic<3, 3, 1, 2, 2> foot_traj_;
 };

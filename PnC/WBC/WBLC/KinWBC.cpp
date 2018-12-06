@@ -78,6 +78,7 @@ bool KinWBC::FindConfiguration(
     //myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
     //myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
     //myUtils::pretty_print(delta_q, std::cout, "delta q");
+    //myUtils::pretty_print(qddot, std::cout, "qddot");
     //Eigen::MatrixXd test = Jt * N_pre;
     //myUtils::pretty_print(test, std::cout, "Jt1N1");
     //Eigen::JacobiSVD< Eigen::MatrixXd > svd1(JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);

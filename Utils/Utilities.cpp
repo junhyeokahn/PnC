@@ -413,7 +413,7 @@ namespace myUtils {
             if (lb[i] <= val[i] && val[i] <= ub[i]) {
 
             } else {
-                //std::cout << i << " th : lb = " << lb[i] << " val = " << val[i] << " ub = " << ub[i] << std::endl;
+                std::cout << i << " th : lb = " << lb[i] << " val = " << val[i] << " ub = " << ub[i] << std::endl;
                 ret = false;
             }
         }

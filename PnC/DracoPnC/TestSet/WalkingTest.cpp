@@ -137,7 +137,7 @@ int WalkingTest::_NextPhase(const int & phase){
 void WalkingTest::_SettingParameter(){
     try {
 
-        double tmp; bool b_tmp; Eigen::VectorXd tmp_vec; std::string tmp_str;
+        double tmp; bool b_tmp; Eigen::VectorXd tmp_vec(10); std::string tmp_str;
 
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_TEST.yaml");
 

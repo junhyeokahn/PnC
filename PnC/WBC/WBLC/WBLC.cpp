@@ -263,11 +263,11 @@ void WBLC::_GetSolution(Eigen::VectorXd & cmd){
     data_->qddot_ = qddot_ + delta_qddot;
     cmd = Sa_ * tau;
 
-    //dynacore::pretty_print(qddot_, std::cout, "qddot_");
-    //dynacore::pretty_print(delta_qddot, std::cout, "delta_qddot");
-    //dynacore::pretty_print(data_->Fr_, std::cout, "Fr");
-    //dynacore::pretty_print(tau, std::cout, "total tau");
-    //vx x_check = Jc_ * (qddot_ + delta_qddot)  + JcDotQdot_;
+    //myUtils::pretty_print(qddot_, std::cout, "qddot_");
+    //myUtils::pretty_print(delta_qddot, std::cout, "delta_qddot");
+    //myUtils::pretty_print(data_->Fr_, std::cout, "Fr");
+    //myUtils::pretty_print(tau, std::cout, "total tau");
+    //Eigen::VectorXd x_check = Jc_ * (qddot_ + delta_qddot)  + JcDotQdot_;
     //dynacore::pretty_print(x_check, std::cout, "x check");
 }
 

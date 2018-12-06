@@ -112,7 +112,7 @@ bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd){
 }
 
 void DracoInterface::_SetStopCommand( DracoSensorData* data,
-                                          DracoCommand* cmd){
+                                      DracoCommand* cmd){
     for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
         cmd->jtrq[i] = 0.;
         cmd->q[i] = data->q[i];

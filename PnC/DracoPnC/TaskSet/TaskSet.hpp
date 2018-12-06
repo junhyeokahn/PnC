@@ -3,3 +3,4 @@
 #include <PnC/DracoPnC/TaskSet/BodyRPZTask.hpp>
 #include <PnC/DracoPnC/TaskSet/CoMLinBodyOriTask.hpp>
 #include <PnC/DracoPnC/TaskSet/LineFootTask.hpp>
+#include <PnC/DracoPnC/TaskSet/PitchFootTask.hpp>
