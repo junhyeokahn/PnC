@@ -242,10 +242,11 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
 
     // TEST
-    //for(int i(0); i<2; ++i){
-        //com_pos[i] = sp_->q[i] + body_pt_offset_[i];
-        //com_vel[i] = sp_->qdot[i];
-    //}
+    for(int i(0); i<2; ++i){
+        com_pos[i] = sp_->q[i] + body_pt_offset_[i];
+        //com_pos[i] += body_pt_offset_[i];
+        com_vel[i] = sp_->qdot[i];
+    }
 
     printf("planning com state: %f, %f, %f, %f\n",
             com_pos[0], com_pos[1],

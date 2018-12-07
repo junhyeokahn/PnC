@@ -52,6 +52,8 @@ bool PitchFootTask::_UpdateTaskJacobian(){
     // (x, y, z)
     Jt_.block(1, 0, 3, robot_->getNumDofs()) = Jtmp.block(3, 0, 3, robot_->getNumDofs());
 
+
+    Jt_.block(0, 0, 4, robot_->getNumVirtualDofs()) = Eigen::MatrixXd::Zero(4, robot_->getNumVirtualDofs());
     return true;
 }
 

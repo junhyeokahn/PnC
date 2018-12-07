@@ -205,7 +205,8 @@ int main() {
     // ==================================
     // Friction & Restitution Coefficient
     // ==================================
-    double friction(100.); double restit(0.0);
+    //double friction(100.); double restit(0.0);
+    double friction(10.); double restit(0.0);
     ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
     robot->getBodyNode("torso")->setFrictionCoeff(friction);
     robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
@@ -213,6 +214,7 @@ int main() {
     robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
 
+    ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
     robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
@@ -264,7 +266,7 @@ int main() {
     // ================
     osg::ref_ptr<DracoWorldNode> node
         = new DracoWorldNode(world, msm);
-    node->setNumStepsPerCycle(30);
+    node->setNumStepsPerCycle(60);
 
     // =====================
     // Create and Set Viewer

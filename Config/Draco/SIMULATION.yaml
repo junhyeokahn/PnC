@@ -3,7 +3,8 @@ is_record: false
 hanging_height: 0.83
 
 #release_time: 7.9
-release_time: 7000.9
+release_time: 4.
+#release_time: 7000.9
 check_collision: true
 pulling_back_time: 2.0
 pulling_back_distance: 0.088
@@ -11,5 +12,8 @@ pulling_back_distance: 0.088
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
 
 control_configuration:
-  kp: [30 , 50 , 70 , 70 , 10 , 30 , 50 , 70 , 70 , 10]
+  #kp: [30 , 50 , 70 , 70 , 10 , 30 , 50 , 70 , 70 , 10]
+  #kd: [3  , 5  , 7  , 7  , 1  , 3  , 5  , 7  , 7  , 1]
+
+  kp: [120 , 100 , 100 , 100 , 20 , 100 , 100 , 100 , 100 , 20]
   kd: [3  , 5  , 7  , 7  , 1  , 3  , 5  , 7  , 7  , 1]

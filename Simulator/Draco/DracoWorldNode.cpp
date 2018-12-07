@@ -5,6 +5,8 @@
 #include "Utils/ParamHandler.hpp"
 #include "Configuration.h"
 
+#include "Utils/Clock.hpp"
+
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgShadow::MinimalShadowMap * msm) :
     dart::gui::osg::WorldNode(_world, msm),
     count_(0),
@@ -72,7 +74,11 @@ void DracoWorldNode::customPreStep() {
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
     if (b_check_collision_) { _check_collision(); }
 
+    //Clock clock;
+    //clock.start();
     mInterface->getCommand(mSensorData, mCommand);
+    //printf("time: %f\n", clock.stop()); 
+
     mTorqueCommand.tail(10) = mCommand->jtrq;
 
     // Low level position control
@@ -94,7 +100,7 @@ void DracoWorldNode::customPreStep() {
     }
 
     //mTorqueCommand.setZero(); // TODO
-    mSkel->setForces(mTorqueCommand);
+    mSkel->setForces(mTorqueCommand); 
 
     count_++;
 }
@@ -150,19 +156,19 @@ void DracoWorldNode::_hold_xy() {
     Eigen::VectorXd q = mSkel->getPositions();
     Eigen::VectorXd v = mSkel->getVelocities();
 
-    if (t_ > mReleaseTime - pulling_back_time_) {
+    //if (t_ > mReleaseTime - pulling_back_time_) {
 
-        static double interp_init_time = t_;
-        static double ini_des_x = des_x;
-        static double ini_des_y = des_y;
-        static double final_des_x = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[0] + (mSkel->getBodyNode("lFootCenter")->getCOM())[0] ) / 2.0 - pulling_back_distance_; // Try to mimic in Experiment
-        static double final_des_y = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[1] + (mSkel->getBodyNode("lFootCenter")->getCOM())[1] ) / 2.0;
+        //static double interp_init_time = t_;
+        //static double ini_des_x = des_x;
+        //static double ini_des_y = des_y;
+        //static double final_des_x = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[0] + (mSkel->getBodyNode("lFootCenter")->getCOM())[0] ) / 2.0 - pulling_back_distance_; // Try to mimic in Experiment
+        //static double final_des_y = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[1] + (mSkel->getBodyNode("lFootCenter")->getCOM())[1] ) / 2.0;
 
-        des_x = myUtils::smooth_changing(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);
-        des_xdot = myUtils::smooth_changing_vel(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);
-        des_y = myUtils::smooth_changing(ini_des_y, final_des_y, pulling_back_time_, t_ - interp_init_time);
-        des_ydot = myUtils::smooth_changing_vel(ini_des_y, final_des_y, pulling_back_time_, t_ - interp_init_time);
-   }
+        //des_x = myUtils::smooth_changing(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);
+        //des_xdot = myUtils::smooth_changing_vel(ini_des_x, final_des_x, pulling_back_time_, t_ - interp_init_time);
+        //des_y = myUtils::smooth_changing(ini_des_y, final_des_y, pulling_back_time_, t_ - interp_init_time);
+        //des_ydot = myUtils::smooth_changing_vel(ini_des_y, final_des_y, pulling_back_time_, t_ - interp_init_time);
+   //}
 
     double kp(1500); double kd(100);
 
