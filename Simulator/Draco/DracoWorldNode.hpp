@@ -8,6 +8,7 @@
 class Interface;
 class DracoSensorData;
 class DracoCommand;
+class DracoLedPosAnnouncer;
 
 class DracoWorldNode : public dart::gui::osg::WorldNode
 {
@@ -46,4 +47,6 @@ public:
     Eigen::VectorXd q_sim_;
 
     dart::simulation::WorldPtr world_;
+
+    DracoLedPosAnnouncer* led_pos_announcer_;
 };

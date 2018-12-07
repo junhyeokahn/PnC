@@ -1,4 +1,5 @@
 #include "DracoWorldNode.hpp"
+#include "DracoLedPosAnnouncer.hpp"
 #include "PnC/DracoPnC/DracoInterface.hpp"
 #include "Utils/DataManager.hpp"
 #include "Utils/Utilities.hpp"
@@ -12,7 +13,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
     count_(0),
     t_(0.0)
 {
-
     world_ = _world;
 
     mInterface = new DracoInterface();
@@ -37,6 +37,9 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
     mCommand->qdot = Eigen::VectorXd::Zero(10);
     mCommand->jtrq = Eigen::VectorXd::Zero(10);
 
+    led_pos_announcer_ = new DracoLedPosAnnouncer(world_);
+    led_pos_announcer_->start();
+
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
     mDof = mSkel->getNumDofs();
@@ -60,7 +63,12 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
     data_manager->RegisterData(&q_sim_, VECT, "q_sim", 16);
 }
 
-DracoWorldNode::~DracoWorldNode() {}
+DracoWorldNode::~DracoWorldNode() {
+    delete mInterface;
+    delete mSensorData;
+    delete mCommand;
+    delete led_pos_announcer_;
+}
 
 void DracoWorldNode::customPreStep() {
     t_ = (double)count_*SERVO_RATE;
@@ -107,10 +115,10 @@ void DracoWorldNode::customPreStep() {
 
 void DracoWorldNode::_get_imu_data( Eigen::VectorXd & ang_vel,
                                     Eigen::VectorXd & acc) {
-    Eigen::VectorXd ang_vel_local = mSkel->getBodyNode("torso")->getSpatialVelocity(dart::dynamics::Frame::World(), mSkel->getBodyNode("torso")).head(3);
+    Eigen::VectorXd ang_vel_local = mSkel->getBodyNode("Torso")->getSpatialVelocity(dart::dynamics::Frame::World(), mSkel->getBodyNode("Torso")).head(3);
     ang_vel = ang_vel_local;
     Eigen::MatrixXd rot_world_torso(3, 3);
-    rot_world_torso = mSkel->getBodyNode("torso")->getWorldTransform().linear();
+    rot_world_torso = mSkel->getBodyNode("Torso")->getWorldTransform().linear();
     Eigen::Vector3d global_grav(0, 0, 9.81);
     Eigen::Vector3d local_grav = rot_world_torso.transpose() * global_grav;
     acc = local_grav;
@@ -186,7 +194,7 @@ void DracoWorldNode::_check_collision() {
     auto colliding_body_nodes_list = result.getCollidingBodyNodes();
 
     for (auto bn : colliding_body_nodes_list){
-        if (t_ > mReleaseTime && bn->getName() == "torso") {
+        if (t_ > mReleaseTime && bn->getName() == "Torso") {
             std::cout << "Torso Collision Happen" << std::endl;
             exit(0);
         }

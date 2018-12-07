@@ -14,6 +14,8 @@ DracoMoCapManager::DracoMoCapManager(RobotSystem* robot):DartpThread(),
     initialization_duration_(0.5),
     b_update_call_(false)
 {
+    myUtils::pretty_constructor(3, "Motion Capture Manager");
+
     healthy_led_list_.resize(NUM_MARKERS);
 
     imu_body_ori_.w() = 1.0;
@@ -37,14 +39,19 @@ DracoMoCapManager::DracoMoCapManager(RobotSystem* robot):DartpThread(),
         body_led1_filter_.push_back(new digital_lp_filter(2.*M_PI*50, SERVO_RATE));
         body_led2_filter_.push_back(new digital_lp_filter(2.*M_PI*50, SERVO_RATE));
     }
+}
 
-    printf("[Mo Cap Manager] Constructed\n");
+DracoMoCapManager::~DracoMoCapManager() {
+    for (int i = 0; i < 3; ++i) {
+        delete body_led0_filter_[i];
+        delete body_led1_filter_[i];
+        delete body_led2_filter_[i];
+    }
 }
 
 void DracoMoCapManager::run(){
     draco_message dracobip_msg;
     int count(0);
-
 
     while(true){
         ++count;
@@ -65,58 +72,56 @@ void DracoMoCapManager::run(){
         }
         _UpdateLEDPosData(dracobip_msg);
 
-        //if(count% 500 == 0){ _print_message(dracobip_msg); }
+        //if(count% 500 == 0){ _Print_message(dracobip_msg); }
     }
 }
 void DracoMoCapManager::_CoordinateUpdate(draco_message & msg) {
-    //double start_idx = dracobip_link::LED_BODY_0;
-    //double len_to_virtual = 77;
+    double len_to_virtual = 77;
 
-    //for (int i = 0; i < NUM_MARKERS; ++i) {
-        //if(marker_cond_[i] > 0){
-            //healthy_led_list_[i][0] = msg.data[3*i];
-            //healthy_led_list_[i][1] = msg.data[3*i + 1];
-            //healthy_led_list_[i][2] = msg.data[3*i + 2];
-        //}
-    //}
+    for (int i = 0; i < NUM_MARKERS; ++i) {
+        if(marker_cond_[i] > 0){
+            healthy_led_list_[i][0] = msg.data[3*i];
+            healthy_led_list_[i][1] = msg.data[3*i + 1];
+            healthy_led_list_[i][2] = msg.data[3*i + 2];
+        }
+    }
 
-    //if(!b_update_call_){
-        //R_coord_ = _GetOrientation(healthy_led_list_[dracobip_link::LED_BODY_0-start_idx],
-                //healthy_led_list_[dracobip_link::LED_BODY_1-start_idx],
-                //healthy_led_list_[dracobip_link::LED_BODY_2-start_idx]);
-         //Eigen::Matrix3d Body_rot(imu_body_ori_);
-         //R_coord_ = R_coord_ * Body_rot;
-    //}
-    //Eigen::Vector3d local_pos;
-    //offset_ = healthy_led_list_[0];
+    if(!b_update_call_){
+        R_coord_ = _GetOrientation(healthy_led_list_[MocapLed::cTorsoLed],
+                healthy_led_list_[MocapLed::lTorsoLed],
+                healthy_led_list_[MocapLed::rTorsoLed]); // R_torso_global(mocap)
+         Eigen::Matrix3d Body_rot(imu_body_ori_);
+         R_coord_ = R_coord_ * Body_rot;
+    }
+    Eigen::Vector3d local_pos;
+    offset_ = healthy_led_list_[0];
      //dynacore::pretty_print(R_coord_, std::cout, "R coord");
-    //for (int i = 0; i < NUM_MARKERS; ++i) {
-        //local_pos = R_coord_*(healthy_led_list_[i] - offset_);
+    for (int i = 0; i < NUM_MARKERS; ++i) {
+        local_pos = R_coord_*(healthy_led_list_[i] - offset_);
 
-        //msg.data[3*i] = local_pos[0];
-        //msg.data[3*i + 1] = local_pos[1];
-        //msg.data[3*i + 2] = local_pos[2];
-    //}
+        msg.data[3*i] = local_pos[0];
+        msg.data[3*i + 1] = local_pos[1];
+        msg.data[3*i + 2] = local_pos[2];
+    }
 }
 
 void DracoMoCapManager::_CoordinateChange(draco_message & msg) {
-    //double start_idx = dracobip_link::LED_BODY_0;
-    //std::vector< Eigen::Vector3d > led_list;
-    //led_list.resize(NUM_MARKERS);
-    //for (int i = 0; i < NUM_MARKERS; ++i) {
-        //led_list[i][0] = msg.data[3*i];
-        //led_list[i][1] = msg.data[3*i + 1];
-        //led_list[i][2] = msg.data[3*i + 2];
-    //}
+    std::vector< Eigen::Vector3d > led_list;
+    led_list.resize(NUM_MARKERS);
+    for (int i = 0; i < NUM_MARKERS; ++i) {
+        led_list[i][0] = msg.data[3*i];
+        led_list[i][1] = msg.data[3*i + 1];
+        led_list[i][2] = msg.data[3*i + 2];
+    }
 
-    //Eigen::Vector3d local_pos;
-    //for (int i = 0; i < NUM_MARKERS; ++i) {
-        //local_pos = R_coord_*(led_list[i] - offset_);
+    Eigen::Vector3d local_pos;
+    for (int i = 0; i < NUM_MARKERS; ++i) {
+        local_pos = R_coord_*(led_list[i] - offset_);
 
-        //msg.data[3*i] = local_pos[0];
-        //msg.data[3*i + 1] = local_pos[1];
-        //msg.data[3*i + 2] = local_pos[2];
-    //}
+        msg.data[3*i] = local_pos[0];
+        msg.data[3*i + 1] = local_pos[1];
+        msg.data[3*i + 2] = local_pos[2];
+    }
 }
 
 Eigen::MatrixXd DracoMoCapManager::_GetOrientation(const Eigen::Vector3d &b0_raw,
@@ -150,7 +155,7 @@ Eigen::MatrixXd DracoMoCapManager::_GetOrientation(const Eigen::Vector3d &b0_raw
     z_coord = x_coord.cross(y_coord);
     z_coord /= sqrt(z_coord[0]*z_coord[0] + z_coord[1]*z_coord[1] +
             z_coord[2] * z_coord[2]);
-    Eigen::MatrixXd R(3, 3);
+    Eigen::MatrixXd R(3, 3); // R_global_torso
     R << x_coord[0], y_coord[0], z_coord[0],
     x_coord[1], y_coord[1], z_coord[1],
     x_coord[2], y_coord[2], z_coord[2];
@@ -158,9 +163,9 @@ Eigen::MatrixXd DracoMoCapManager::_GetOrientation(const Eigen::Vector3d &b0_raw
 
     Eigen::Matrix3d R_mat = R;
     Eigen::Quaternion<double> quat(R_mat);
-    body_quat_ = quat;
+    body_quat_ = quat; // R_global(mocap)_torso
 
-    return R.transpose();
+    return R.transpose(); // R_torso_global(global)
 }
 
 void DracoMoCapManager::_Print_message(const draco_message & msg){
@@ -177,12 +182,12 @@ void DracoMoCapManager::_Print_message(const draco_message & msg){
     }
 }
 
-void DracoMoCapManager::_UpdateLEDPosData(const draco_message & msg){
+void DracoMoCapManager::_UpdateLEDPosData(const draco_message & msg) {
 
     led_kin_data_ = sp_->led_kin_data;
 
     int led_number(0);
-    for(int i(0); i<3*NUM_MARKERS; ++i){
+    for(int i(0); i<3*NUM_MARKERS; ++i) {
         if (msg.visible[led_number] > 0) {
             led_pos_data_[i] = msg.data[i] * 0.001;
         }

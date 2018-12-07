@@ -28,8 +28,9 @@ class DracoStateEstimator{
 
         Eigen::VectorXd curr_config_;
         Eigen::VectorXd curr_qdot_;
-        Eigen::Vector3d global_euler_zyx_;
-        Eigen::Vector3d global_euler_zyx_dot_;
+        Eigen::Vector3d global_body_euler_zyx_;
+        Eigen::Quaternion<double> global_body_quat_;
+        Eigen::Vector3d global_body_euler_zyx_dot_;
 
         BasicAccumulation* ori_est_;
         BodyEstimator* body_est_;

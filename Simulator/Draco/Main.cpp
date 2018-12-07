@@ -188,6 +188,8 @@ int main() {
         YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
     bool isRecord;
     myUtils::readParameter(simulation_cfg, "is_record", isRecord);
+    int num_steps_per_cycle;
+    myUtils::readParameter(simulation_cfg, "num_steps_per_cycle", num_steps_per_cycle);
 
     // ================================
     // Generate world and add skeletons
@@ -205,16 +207,16 @@ int main() {
     // ==================================
     // Friction & Restitution Coefficient
     // ==================================
-    //double friction(100.); double restit(0.0);
     double friction(10.); double restit(0.0);
     ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
-    robot->getBodyNode("torso")->setFrictionCoeff(friction);
+    robot->getBodyNode("Torso")->setFrictionCoeff(friction);
     robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
 
     ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
+    robot->getBodyNode("Torso")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
     robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
@@ -266,7 +268,7 @@ int main() {
     // ================
     osg::ref_ptr<DracoWorldNode> node
         = new DracoWorldNode(world, msm);
-    node->setNumStepsPerCycle(60);
+    node->setNumStepsPerCycle(num_steps_per_cycle);
 
     // =====================
     // Create and Set Viewer

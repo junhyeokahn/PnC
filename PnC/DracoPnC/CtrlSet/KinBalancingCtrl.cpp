@@ -24,7 +24,7 @@ KinBalancingCtrl::KinBalancingCtrl(RobotSystem* robot) : Controller(robot) {
     task_list_.clear();
     com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     task_list_.push_back(com_task_);
-    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, "torso");
+    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, "Torso");
     task_list_.push_back(torso_ori_task_);
 
     // contact

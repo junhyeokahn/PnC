@@ -193,7 +193,7 @@ void DoubleContactTransCtrl::firstVisit(){
     ini_base_height_ = robot_->getQ()[2];
     ctrl_start_time_ = sp_->curr_time;
     base_pos_ini_ = robot_->getQ().head(3);
-    base_ori_ini_ = robot_->getBodyNodeCoMIsometry("torso").linear();
+    base_ori_ini_ = robot_->getBodyNodeCoMIsometry("Torso").linear();
 }
 
 void DoubleContactTransCtrl::lastVisit(){

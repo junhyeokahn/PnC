@@ -251,7 +251,7 @@ bool SingleContactTransCtrl::endOfPhase(){
     return false;
 }
 void SingleContactTransCtrl::ctrlInitialization(const std::string & setting_file_name){
-    ini_base_height_ = robot_->getBodyNodeCoMIsometry("torso").translation()[2];
+    ini_base_height_ = robot_->getBodyNodeCoMIsometry("Torso").translation()[2];
     try {
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
         myUtils::readParameter(cfg, "kp", Kp_);

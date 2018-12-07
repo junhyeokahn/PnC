@@ -19,6 +19,7 @@ public:
 
   Eigen::Vector3d global_pos_local;
   Eigen::Vector2d des_location;
+  Eigen::Vector3d est_mocap_body_pos;
   Eigen::Vector2d est_mocap_body_vel;
   Eigen::VectorXd des_jpos_prev;
 

@@ -1,4 +1,5 @@
 is_record: false
+num_steps_per_cycle: 30
 
 hanging_height: 0.83
 

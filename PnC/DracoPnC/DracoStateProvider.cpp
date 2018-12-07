@@ -18,6 +18,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     rotor_inertia = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     global_pos_local.setZero();
     des_location.setZero();
+    est_mocap_body_pos.setZero();
     est_mocap_body_vel.setZero();
     b_rfoot_contact = 0;
     b_lfoot_contact = 0;
@@ -51,6 +52,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3); 
     data_manager->RegisterData(&com_vel, VECT3, "est_com_vel", 3); 
 
+    data_manager->RegisterData(&est_mocap_body_pos, VECT3, "est_mocap_body_pos",3);
     data_manager->RegisterData(&est_mocap_body_vel, VECT2, "est_mocap_body_vel",2);
 }
 

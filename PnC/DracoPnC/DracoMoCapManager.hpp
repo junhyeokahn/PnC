@@ -15,26 +15,26 @@ class RobotSystem;
 #define NUM_MARKERS 13
 
 typedef struct{
-    // float condition[NUM_MARKERS];
-    double data[NUM_MARKERS * 3];
-}message;
-////////////////////////////////////////////
-typedef struct{
     int visible[NUM_MARKERS];
     double data[NUM_MARKERS*3];
 }draco_message;
 
+enum MocapLed {
+    cTorsoLed= 0,
+    lTorsoLed= 1,
+    rTorsoLed= 2
+};
 
 class DracoMoCapManager: public DartpThread{
     public:
         friend class BodyEstimator;
 
         DracoMoCapManager(RobotSystem* );
-        virtual ~DracoMoCapManager(){}
+        virtual ~DracoMoCapManager();
 
         virtual void run(void);
 
-        Eigen::Quaternion<double>  body_quat_;
+        Eigen::Quaternion<double>  body_quat_; // R_global(mocap)_torso
         void CoordinateUpdateCall(){ b_update_call_ = true; }
 
     protected:
@@ -56,7 +56,8 @@ class DracoMoCapManager: public DartpThread{
         void _UpdateLEDPosData(const draco_message & msg);
         void _CoordinateUpdate(draco_message & msg);
         void _CoordinateChange(draco_message & msg);
-        Eigen::MatrixXd _GetOrientation(const Eigen::Vector3d &, 
+        // R_torso_global(mocap)
+        Eigen::MatrixXd _GetOrientation(const Eigen::Vector3d &,
                 const Eigen::Vector3d &, const Eigen::Vector3d &);
 
         int socket_;
@@ -69,5 +70,5 @@ class DracoMoCapManager: public DartpThread{
         int lfoot_idx;
         int rfoot_idx;
 
-        const RobotSystem* robot_;
+        RobotSystem* robot_;
 };

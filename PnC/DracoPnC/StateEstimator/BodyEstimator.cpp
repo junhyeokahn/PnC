@@ -5,6 +5,8 @@
 
 BodyEstimator::BodyEstimator(RobotSystem* robot)
 {
+    myUtils::pretty_constructor(2, "Body Estimator");
+
     mocap_manager_ = new DracoMoCapManager(robot);
     mocap_manager_->start();
 
@@ -21,11 +23,13 @@ BodyEstimator::BodyEstimator(RobotSystem* robot)
 
 BodyEstimator::~BodyEstimator(){
     delete mocap_manager_;
+    for (int i = 0; i < 3; ++i) {
+        delete vel_filter_[i];
+    }
 }
 
 void BodyEstimator::getMoCapBodyPos(const Eigen::Quaternion<double>& body_ori,
-        Eigen::Vector3d & local_body_pos){
-
+        Eigen::Vector3d & local_body_pos) {
 
     // Body LED offset accunt
     Eigen::Matrix3d Body_rot(body_ori);
@@ -35,8 +39,8 @@ void BodyEstimator::getMoCapBodyPos(const Eigen::Quaternion<double>& body_ori,
     local_body_pos += Body_rot * body_led_offset;
 }
 
-void BodyEstimator::Update(){
-    for(int i(0); i<3; ++i){
+void BodyEstimator::Update() {
+    for(int i(0); i<3; ++i) {
         vel_filter_[i]->input(mocap_manager_->led_pos_data_[i]);
         body_led_vel_[i] = vel_filter_[i]->output();
     }
