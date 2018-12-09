@@ -28,6 +28,8 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
     mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
     mSensorData->bus_current = Eigen::VectorXd::Zero(10);
     mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
+    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
+    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
     mSensorData->rfoot_contact = false;
     mSensorData->lfoot_contact = false;
 
@@ -81,6 +83,7 @@ void DracoWorldNode::customPreStep() {
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
     if (b_check_collision_) { _check_collision(); }
+    //_get_ati_data();
 
     //Clock clock;
     //clock.start();

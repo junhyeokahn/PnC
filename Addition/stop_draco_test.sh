@@ -10,4 +10,3 @@ kill $(pgrep Status_Display)
 
 echo 'turn off controller'
 kill $(pgrep roslaunch)
-

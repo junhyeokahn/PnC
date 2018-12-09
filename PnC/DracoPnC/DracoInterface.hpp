@@ -55,6 +55,8 @@ protected:
     Eigen::VectorXd data_torque_;
     Eigen::VectorXd data_temperature_;
     Eigen::VectorXd data_motor_current_;
+    Eigen::VectorXd rfoot_ati_;
+    Eigen::VectorXd lfoot_ati_;
 
     // safety
     Eigen::VectorXd jpos_max_;

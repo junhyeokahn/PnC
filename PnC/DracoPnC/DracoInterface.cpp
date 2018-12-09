@@ -37,6 +37,8 @@ DracoInterface::DracoInterface() : Interface()
     data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    rfoot_ati_ = Eigen::VectorXd::Zero(6);
+    lfoot_ati_ = Eigen::VectorXd::Zero(6);
 
     stop_test_ = false;
 
@@ -48,6 +50,8 @@ DracoInterface::DracoInterface() : Interface()
     DataManager::GetDataManager()->RegisterData(&data_torque_, VECT, "torque", robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&data_temperature_, VECT, "temperature", robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&data_motor_current_, VECT, "motor_current", robot_->getNumActuatedDofs());
+    DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati", 6);
+    DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati", 6);
 
     _ParameterSetting();
 
@@ -82,6 +86,8 @@ void DracoInterface::getCommand( void* _data, void* _command){
         data_temperature_[i] = data->temperature[i];
         data_motor_current_[i] = data->motor_current[i];
     }
+    rfoot_ati_ = data->rfoot_ati;
+    lfoot_ati_ = data->lfoot_ati;
 
     running_time_ = (double)(count_) * SERVO_RATE;
     ++count_;
