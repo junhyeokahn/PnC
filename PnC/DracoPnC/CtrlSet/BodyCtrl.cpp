@@ -51,7 +51,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
 
     wblc_data_ = new WBLC_ExtraData();
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(robot_->getNumDofs(), 100.0);
-    wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 0.1);
+    wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 1.0);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
     for (int i = 0; i < contact_list_.size(); ++i) {
         wblc_data_->W_rf_[fz_idx_in_cost_[i]] = 0.01;

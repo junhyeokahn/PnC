@@ -91,7 +91,7 @@ void DracoMoCapManager::_CoordinateUpdate(draco_message & msg) {
                 healthy_led_list_[MocapLed::lTorsoLed],
                 healthy_led_list_[MocapLed::rTorsoLed]); // R_torso_global(mocap)
          Eigen::Matrix3d Body_rot(imu_body_ori_);
-         R_coord_ = R_coord_ * Body_rot;
+         R_coord_ = Body_rot * R_coord_ ;
     }
     Eigen::Vector3d local_pos;
     offset_ = healthy_led_list_[0];

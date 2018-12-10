@@ -77,7 +77,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     else if(swing_foot == "rFoot") {
         for(int i(0); i<rfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
-            wblc_data_->W_xddot_[i + jidx_offset] = 0.0001;
+            wblc_data_->W_xddot_[i + jidx_offset] = 0.001;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[0]] = 0.5;
 
@@ -245,7 +245,8 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
     for(int i(0); i<2; ++i){
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
         //com_pos[i] += body_pt_offset_[i];
-        com_vel[i] = sp_->qdot[i];
+        //com_vel[i] = sp_->qdot[i];
+        com_vel[i] = sp_->est_mocap_body_vel[i];
     }
 
     printf("planning com state: %f, %f, %f, %f\n",

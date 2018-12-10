@@ -6,21 +6,28 @@ body_height: 1.0
 #com_height_for_omega: 0.739
 com_height_for_omega: 1.0
 
-#jpos_initialization_time: 4.0
-#com_lifting_time: 4.0
-
 jpos_initialization_time: 2.0
 com_lifting_time: 2.0
 
 
 swing_time: 0.33
-st_transition_time: 0.03
-end_transition_time: 0.03
+st_transition_time: 0.05
+end_transition_time: 0.05
 stance_time: 0.01
 
-replanning: true
-#replanning: false
+#swing_time: 0.28
+#st_transition_time: 0.025
+#end_transition_time: 0.025
+#stance_time: 0.01
+
+#swing_time: 0.45
+#st_transition_time: 0.08
+#end_transition_time: 0.08
+#stance_time: 0.015
+
+#replanning: true
+replanning: false
 transition_phase_mix_ratio: 0.0
 double_stance_mix_ratio: 0.0
-contact_switch_check: true
-#contact_switch_check: false
+#contact_switch_check: true
+contact_switch_check: false

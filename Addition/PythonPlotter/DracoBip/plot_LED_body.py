@@ -100,7 +100,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
         plt.plot(data_x, data_q[st_idx:end_idx,i-1], "b-")
-        
+
         plt.grid(True)
         for j in phseChange:
             # phase line
@@ -122,6 +122,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
         plt.plot(data_x, data_qdot[st_idx:end_idx,i-1], "b")
+        if i != 3:
+            plt.plot(data_x, data_est_mocap_body_vel[st_idx:end_idx,i-1], color="crimson", linewidth=2)
 
         if i != 3:
             plt.plot(data_x, data_est_mocap_body_vel[st_idx:end_idx,i-1], "r")
