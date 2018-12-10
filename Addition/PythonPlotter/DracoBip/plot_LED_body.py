@@ -39,6 +39,10 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     # np.genfromtxt(file_path+'ekf_o_r.txt', delimiter=None, dtype=(float))
     # data_ekf_body_vel = \
     # np.genfromtxt(file_path+'ekf_o_v.txt', delimiter=None, dtype=(float))
+
+    data_est_mocap_body_vel = \
+    np.genfromtxt(file_path+'est_mocap_body_vel.txt', delimiter=None, dtype=(float))
+
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
 
     data_body_ori = np.zeros(shape = (len(data_x), 3))
@@ -118,6 +122,9 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
         plt.plot(data_x, data_qdot[st_idx:end_idx,i-1], "b")
+
+        if i != 3:
+            plt.plot(data_x, data_est_mocap_body_vel[st_idx:end_idx,i-1], "r")
 
         plt.grid(True)
         for j in phseChange:
