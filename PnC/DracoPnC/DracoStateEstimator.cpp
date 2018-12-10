@@ -118,6 +118,7 @@ void DracoStateEstimator::_JointUpdate(DracoSensorData* data) {
         curr_config_[robot_->getNumVirtualDofs() + i] = data->q[i];
         curr_qdot_[robot_->getNumVirtualDofs() + i] = data->qdot[i];
     }
+    sp_->rotor_inertia = data->rotor_inertia;
 }
 
 void DracoStateEstimator::_ConfigurationAndModelUpdate() {

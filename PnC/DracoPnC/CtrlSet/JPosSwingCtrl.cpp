@@ -62,6 +62,16 @@ void JPosSwingCtrl::oneStep(void* _cmd){
 }
 
 void JPosSwingCtrl::_jpos_ctrl_wbdc_rotor(Eigen::VectorXd & gamma){
+    // Add rotor inertia
+    //static int count__(0);
+    //count__ ++;
+    //if (count__ % 100 == 0) {
+        //myUtils::pretty_print(A_, std::cout, "mass matrix before adding rotor inertia");
+    //}
+    for (int i = 0; i < robot_->getNumActuatedDofs(); ++i) {
+        A_(i + robot_->getNumVirtualDofs(), i + robot_->getNumVirtualDofs())
+            += sp_->rotor_inertia[i];
+    }
     wbdc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     wbdc_->makeTorque(task_list_, contact_list_, gamma, wbdc_data_);
 }

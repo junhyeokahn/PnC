@@ -36,6 +36,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&curr_time, DOUBLE, "time");
     data_manager->RegisterData(&q, VECT, "config", robot_->getNumDofs());
     data_manager->RegisterData(&qdot, VECT, "qdot", robot_->getNumDofs());
+    data_manager->RegisterData(&rotor_inertia, VECT, "rotor_inertia", robot_->getNumActuatedDofs());
     data_manager->RegisterData(&global_pos_local, VECT3, "global_pos_local", 3);
 
     data_manager->RegisterData(&b_rfoot_contact, INT, "rfoot_contact", 1);

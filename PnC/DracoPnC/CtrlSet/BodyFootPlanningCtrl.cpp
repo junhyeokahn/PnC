@@ -77,7 +77,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     else if(swing_foot == "rFoot") {
         for(int i(0); i<rfoot_contact_->getDim(); ++i){
             wblc_data_->W_rf_[i + jidx_offset] = 5.0;
-            wblc_data_->W_xddot_[i + jidx_offset] = 0.0001;
+            wblc_data_->W_xddot_[i + jidx_offset] = 0.001;
         }
         wblc_data_->W_rf_[fz_idx_in_cost_[0]] = 0.5;
 
