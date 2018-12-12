@@ -215,12 +215,22 @@ int main() {
     robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
     robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
 
+    robot->getBodyNode("rFootFront2")->setFrictionCoeff(friction);
+    robot->getBodyNode("rFootBack2")->setFrictionCoeff(friction);
+    robot->getBodyNode("lFootFront2")->setFrictionCoeff(friction);
+    robot->getBodyNode("lFootBack2")->setFrictionCoeff(friction);
+
     ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
     robot->getBodyNode("Torso")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
     robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
     robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
     robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
+
+    robot->getBodyNode("rFootFront2")->setRestitutionCoeff(restit);
+    robot->getBodyNode("rFootBack2")->setRestitutionCoeff(restit);
+    robot->getBodyNode("lFootFront2")->setRestitutionCoeff(restit);
+    robot->getBodyNode("lFootBack2")->setRestitutionCoeff(restit);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -229,7 +239,7 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    displayJointFrames(world, robot);
+    //displayJointFrames(world, robot);
 
     // ====================
     // Add Collision Object

@@ -406,6 +406,7 @@ bool BodyFootPlanningCtrl::endOfPhase(){
         //printf("\n");
         return true;
     }
+    bool contact_check_with_ankle(true);
     // Swing foot contact = END
     if(b_contact_switch_check_){
         bool contact_happen(false);
@@ -421,8 +422,10 @@ bool BodyFootPlanningCtrl::endOfPhase(){
             return true;
         }
     }
+    if(!b_contact_switch_check_){
+        contact_check_with_ankle = false; 
+    }
 
-    bool contact_check_with_ankle(true);
     if (contact_check_with_ankle) {
         bool contact_happen_by_ankle(false);
         if (swing_foot_ == "rFoot") {
