@@ -53,7 +53,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     phseChange = []
     for i in range(0,len(data_x)-1):
         if data_phse[i] != data_phse[i+1]:
-            phseChange.append(i)
+            phseChange.append(i+1)
         else:
             pass
 
