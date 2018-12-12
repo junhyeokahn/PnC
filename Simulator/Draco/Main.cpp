@@ -229,7 +229,7 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    //displayJointFrames(world, robot);
+    displayJointFrames(world, robot);
 
     // ====================
     // Add Collision Object

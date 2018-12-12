@@ -4,7 +4,7 @@
 #include <Configuration.h>
 
 #define IP_ADDR_MYSELF "127.0.0.1"
-#define IP_JUNHYEOK "192.168.0.59"
+#define IP_JUNHYEOK "192.168.0.151"
 #define PORT_DATA_SETUP        61124
 #define PORT_DATA_RECEIVE      61125
 

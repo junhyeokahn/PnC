@@ -310,12 +310,6 @@
       <mass value="0.00001" />
       <inertia ixx="0.00001" ixy="0.00001" ixz="0.00001" iyy="0.00001" iyz="0.00001" izz="0.00001" />
     </inertial>
-    <!--<visual>-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<geometry>-->
-        <!--<sphere radius="0.03"/>-->
-      <!--</geometry>-->
-    <!--</visual>-->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -325,7 +319,6 @@
   </link>
   <joint name="lFootFront" type="fixed">
     <origin xyz="0.08 0 -0.044" rpy="0 0 0" />
-    <!--<origin xyz="0.001 0 -0.044" rpy="0 0 0" />-->
     <parent link="lAnkle" />
     <child link="lFootFront" />
   </joint>
@@ -336,12 +329,6 @@
       <mass value="0.00001" />
       <inertia ixx="0.00001" ixy="0.00001" ixz="0.00001" iyy="0.00001" iyz="0.00001" izz="0.00001" />
     </inertial>
-    <!--<visual>-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<geometry>-->
-        <!--<sphere radius="0.03"/>-->
-      <!--</geometry>-->
-    <!--</visual>-->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -351,7 +338,6 @@
   </link>
   <joint name="lFootBack" type="fixed">
     <origin xyz="-0.05 0 -0.044" rpy="0 0 0" />
-    <!--<origin xyz="-0.001 0 -0.044" rpy="0 0 0" />-->
     <parent link="lAnkle" />
     <child link="lFootBack" />
   </joint>
@@ -370,8 +356,10 @@
     <!--</visual>-->
   </link>
   <joint name="lFootCenter" type="fixed">
-    <origin xyz="0.015 0 -0.059" rpy="0 0 0" />
-    <parent link="lAnkle" />
+    <!--<origin xyz="0.015 0 -0.059" rpy="0 0 0" />-->
+    <origin xyz="0.026 0.0168 -0.48" rpy="0 0 0" />
+    <!--<parent link="lAnkle" />-->
+    <parent link="lKnee" />
     <child link="lFootCenter" />
   </joint>
 
@@ -531,12 +519,6 @@
       <mass value="0.00001" />
       <inertia ixx="0.00001" ixy="0.00001" ixz="0.00001" iyy="0.00001" iyz="0.00001" izz="0.00001" />
     </inertial>
-    <!--<visual>-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<geometry>-->
-        <!--<sphere radius="0.03"/>-->
-      <!--</geometry>-->
-    <!--</visual>-->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -546,7 +528,6 @@
   </link>
   <joint name="rFootFront" type="fixed">
     <origin xyz="0.08 0 -0.044" rpy="0 0 0" />
-    <!--<origin xyz="0.001 0 -0.044" rpy="0 0 0" />-->
     <parent link="rAnkle" />
     <child link="rFootFront" />
   </joint>
@@ -557,12 +538,6 @@
       <mass value="0.00001" />
       <inertia ixx="0.00001" ixy="0.00001" ixz="0.00001" iyy="0.00001" iyz="0.00001" izz="0.00001" />
     </inertial>
-    <!--<visual>-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<geometry>-->
-        <!--<sphere radius="0.03"/>-->
-      <!--</geometry>-->
-    <!--</visual>-->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -572,7 +547,6 @@
   </link>
   <joint name="rFootBack" type="fixed">
     <origin xyz="-0.05 0 -0.044" rpy="0 0 0" />
-    <!--<origin xyz="-0.001 0 -0.044" rpy="0 0 0" />-->
     <parent link="rAnkle" />
     <child link="rFootBack" />
   </joint>
@@ -583,16 +557,12 @@
       <mass value="0.00001" />
       <inertia ixx="0.00001" ixy="0.00001" ixz="0.00001" iyy="0.00001" iyz="0.00001" izz="0.00001" />
     </inertial>
-    <!--<visual>-->
-      <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
-      <!--<geometry>-->
-        <!--<sphere radius="0.01"/>-->
-      <!--</geometry>-->
-    <!--</visual>-->
   </link>
   <joint name="rFootCenter" type="fixed">
-    <origin xyz="0.015 0 -0.059" rpy="0 0 0" />
-    <parent link="rAnkle" />
+    <!--<origin xyz="0.015 0 -0.059" rpy="0 0 0" />-->
+    <origin xyz="0.026 -0.0168 -0.48" rpy="0 0 0" />
+    <!--<parent link="rAnkle" />-->
+    <parent link="rKnee" />
     <child link="rFootCenter" />
   </joint>
 </robot>
