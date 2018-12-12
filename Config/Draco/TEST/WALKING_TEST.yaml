@@ -11,8 +11,8 @@ com_lifting_time: 2.0
 
 
 swing_time: 0.33
-st_transition_time: 0.05
-end_transition_time: 0.05
+st_transition_time: 0.03
+end_transition_time: 0.03
 stance_time: 0.01
 
 #swing_time: 0.28
@@ -27,7 +27,7 @@ stance_time: 0.01
 
 #replanning: true
 replanning: false
-transition_phase_mix_ratio: 0.0
+transition_phase_mix_ratio: 0.3
 double_stance_mix_ratio: 0.0
 #contact_switch_check: true
 contact_switch_check: false

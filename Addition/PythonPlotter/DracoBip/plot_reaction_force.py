@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-file_path = os.getcwd() + "/../../../experiment_data_check/"
+file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 dim_single_rf = 5
 ## read files
 data_rf_cmd = \
