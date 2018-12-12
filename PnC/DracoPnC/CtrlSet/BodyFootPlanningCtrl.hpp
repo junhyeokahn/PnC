@@ -50,7 +50,8 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         std::vector<int> selected_jidx_;
         Task* selected_joint_task_;
         Task* base_task_;
-        Task* foot_task_;
+        Task* foot_pitch_task_;
+        Task* foot_point_task_;
 
         KinWBC* kin_wbc_;
         Eigen::VectorXd des_jpos_;
@@ -64,6 +65,9 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         Eigen::Vector3d ini_foot_pos_;
 
         Eigen::VectorXd ini_config_;
+
+        double ini_ankle_;
+        double fin_ankle_;
 
         std::vector<double> foot_landing_offset_;
 

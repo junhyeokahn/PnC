@@ -150,6 +150,7 @@ bool BasicTask::_UpdateTaskJacobian() {
                                         Jt_ = (robot_->
                                                 getBodyNodeCoMJacobian(link_name_)).block(
                                                 3, 0, dim_task_, robot_->getNumDofs());
+                                        //myUtils::pretty_print(Jt_, std::cout, "jacobian");
                                         break;
                                     }
         case BasicTaskType::LINKORI:{
