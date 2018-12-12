@@ -1,5 +1,5 @@
 planner_name: velocity_reversal_lipm
-swing_height: 0.12
+swing_height: 0.11
 push_down_height: 0.0
 default_target_foot_location: [0.0, -0.11, 0.0]
 
@@ -9,7 +9,7 @@ default_target_foot_location: [0.0, -0.11, 0.0]
 kp: [100 , 150 , 150 , 150 , 5 , 100 , 250 , 250 , 200 , 5 ]
 kd: [4   , 6   , 6   , 6   , 0 , 4   , 8   , 8   , 8   , 0  ]
 
-body_pt_offset: [-0.155, 0.00]
+body_pt_offset: [-0.04, 0.0]
 foot_landing_offset: [0., 0.]
 
 fin_ankle: 1.3

@@ -422,7 +422,7 @@ bool BodyFootPlanningCtrl::endOfPhase(){
             return true;
         }
     }
-    if(!b_contact_switch_check_){
+    if(b_contact_switch_check_){
         contact_check_with_ankle = false; 
     }
 
