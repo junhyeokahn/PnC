@@ -110,9 +110,17 @@ bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd){
         else cmd_jvel_[i] = test_cmd->qdot[i];
 
         // Torque limit
-        if(test_cmd->jtrq[i] > jtrq_max_[i]) over_limit = true;
-        else if(test_cmd->jtrq[i] < jtrq_min_[i]) over_limit = true;
-        else cmd_jtrq_[i] = test_cmd->jtrq[i];
+        if(test_cmd->jtrq[i] > jtrq_max_[i]) {
+            //over_limit = true;
+            test_cmd->jtrq[i] = jtrq_max_[i];
+            cmd_jtrq_[i] = test_cmd->jtrq[i];
+        } else if(test_cmd->jtrq[i] < jtrq_min_[i]) {
+            //over_limit = true;
+            test_cmd->jtrq[i] = jtrq_min_[i];
+            cmd_jtrq_[i] = test_cmd->jtrq[i];
+        }  else {
+            cmd_jtrq_[i] = test_cmd->jtrq[i];
+        }
     }
     return over_limit;
 }

@@ -68,6 +68,9 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
 
         double ini_ankle_;
         double fin_ankle_;
+        double switch_vel_threshold_;
+        double fin_foot_z_vel_;
+        double fin_foot_z_acc_;
 
         std::vector<double> foot_landing_offset_;
 

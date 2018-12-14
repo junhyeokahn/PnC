@@ -150,6 +150,8 @@ bool BasicTask::_UpdateTaskJacobian() {
                                         Jt_ = (robot_->
                                                 getBodyNodeCoMJacobian(link_name_)).block(
                                                 3, 0, dim_task_, robot_->getNumDofs());
+                                        Jt_.block(0, 0, 3, robot_->getNumVirtualDofs()) =
+                                            Eigen::MatrixXd::Zero(3, robot_->getNumVirtualDofs());
                                         //myUtils::pretty_print(Jt_, std::cout, "jacobian");
                                         break;
                                     }

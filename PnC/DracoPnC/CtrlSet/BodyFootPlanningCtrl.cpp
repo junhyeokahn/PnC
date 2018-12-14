@@ -24,6 +24,9 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     ini_ankle_ = 0.;
     fin_ankle_ = 0.;
+    fin_foot_z_vel_ = 0.;
+    fin_foot_z_acc_ = 0.;
+    switch_vel_threshold_ = 0;
 
     // task
 /*    selected_jidx_.resize(2);*/
@@ -429,11 +432,11 @@ bool BodyFootPlanningCtrl::endOfPhase(){
     if (contact_check_with_ankle) {
         bool contact_happen_by_ankle(false);
         if (swing_foot_ == "rFoot") {
-            if (sp_->qdot[robot_->getDofIdx("rAnkle")] < -1.5) {
+            if (sp_->qdot[robot_->getDofIdx("rAnkle")] < switch_vel_threshold_) {
                 contact_happen_by_ankle = true;
             }
         } else {
-            if (sp_->qdot[robot_->getDofIdx("lAnkle")] < -1.5) {
+            if (sp_->qdot[robot_->getDofIdx("lAnkle")] < switch_vel_threshold_) {
                 contact_happen_by_ankle = true;
             }
         }
@@ -460,6 +463,9 @@ void BodyFootPlanningCtrl::ctrlInitialization(const std::string & setting_file_n
         myUtils::readParameter(cfg, "foot_landing_offset", foot_landing_offset_);
 
         myUtils::readParameter(cfg, "fin_ankle", fin_ankle_);
+        myUtils::readParameter(cfg, "switch_vel_threshold", switch_vel_threshold_);
+        myUtils::readParameter(cfg, "fin_foot_z_vel", fin_foot_z_vel_);
+        myUtils::readParameter(cfg, "fin_foot_z_acc", fin_foot_z_acc_);
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);
@@ -557,8 +563,8 @@ void BodyFootPlanningCtrl::_SetBspline(
         middle_pt[0][i] = middle_pos[i];
     }
     // TEST
-    fin[5] = -0.5;
-    fin[8] = 5.;
+    fin[5] = fin_foot_z_vel_;
+    fin[8] = fin_foot_z_acc_;
     foot_traj_.SetParam(init, fin, middle_pt, end_time_);
 
     delete [] *middle_pt;

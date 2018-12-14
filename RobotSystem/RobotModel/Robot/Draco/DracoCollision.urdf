@@ -85,7 +85,7 @@
   <link name="Torso">
     <inertial>
       <origin xyz="-0.0133907728940907 0.000753510365864796 0.10783" rpy="0 0 0" />
-      <mass value="9.67" />
+      <mass value="10.0" />
       <inertia ixx="0.0585154591166426" ixy="-9.46724624145663E-05" ixz="-0.00614431919973963" iyy="0.0651574953784801" iyz="-0.000230611945696951" izz="0.0178352105631859" />
     </inertial>
     <visual>
@@ -217,7 +217,7 @@
   <link name="lHipPitch">
     <inertial>
       <origin xyz="0.0009 0.0066 -0.24" rpy="0 0 0" />
-      <mass value="6.0" />
+      <mass value="9.0" />
       <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
     <visual>
@@ -356,10 +356,9 @@
     <!--</visual>-->
   </link>
   <joint name="lFootCenter" type="fixed">
-    <origin xyz="0.02 0 -0.059" rpy="0 0 0" />
-    <!--<origin xyz="0.026 0.0168 -0.48" rpy="0 0 0" />-->
+    <!--<origin xyz="0.02 0 -0.059" rpy="0 0 0" />-->
+    <origin xyz="0 0 -0.03" rpy="0 0 0" />
     <parent link="lAnkle" />
-    <!--<parent link="lKnee" />-->
     <child link="lFootCenter" />
   </joint>
 
@@ -426,7 +425,7 @@
   <link name="rHipPitch">
     <inertial>
       <origin xyz="0.0009 0.0066 -0.24" rpy="0 0 0" />
-      <mass value="6.0" />
+      <mass value="9.0" />
       <inertia ixx="0.0555" ixy="0.0001" ixz="0.0039" iyy="0.0595" iyz="0.0001" izz="0.0059" />
     </inertial>
     <visual>
@@ -559,10 +558,9 @@
     </inertial>
   </link>
   <joint name="rFootCenter" type="fixed">
-    <origin xyz="0.02 0 -0.059" rpy="0 0 0" />
-    <!--<origin xyz="0.026 -0.0168 -0.48" rpy="0 0 0" />-->
+    <!--<origin xyz="0.02 0 -0.059" rpy="0 0 0" />-->
+    <origin xyz="0 0 -0.03" rpy="0 0 0" />
     <parent link="rAnkle" />
-    <!--<parent link="rKnee" />-->
     <child link="rFootCenter" />
   </joint>
 </robot>

@@ -78,7 +78,8 @@ void BasicAccumulation::_InitIMUOrientationEstimateFromGravity(){
     double theta_roll = acos(inner);
     if(g_B[1]>0) theta_roll *= (-1.);
 
-    Eigen::Quaternion<double> quat_pitch(dart::math::eulerYZXToMatrix( Eigen::Vector3d(0., theta_pitch, 0.)));
+    //Eigen::Quaternion<double> quat_pitch(dart::math::eulerYZXToMatrix( Eigen::Vector3d(0., theta_pitch, 0.)));
+    Eigen::Quaternion<double> quat_pitch(dart::math::eulerYZXToMatrix( Eigen::Vector3d(theta_pitch, 0., 0.)));
     Eigen::Quaternion<double> quat_roll(dart::math::eulerYZXToMatrix( Eigen::Vector3d(0., 0., theta_roll)));
     Eigen::Quaternion<double> local2Glob = quat_pitch * quat_roll;
     global_ori_quat_ = local2Glob.inverse();
