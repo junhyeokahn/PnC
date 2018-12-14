@@ -16,6 +16,6 @@ mkdir -p ${TARGET_DIR}/${FOLDER_NAME}
 #rsync -rv --exclude=.DS_Store ${PATH_PACKAGE}/ExperimentDataCheck/*.txt ${TARGET_DIR}/${FOLDER_NAME}/
 
 #rsync -r --exclude=.DS_Store ${PATH_PACKAGE}/Config/Draco/* ${TARGET_DIR}/${FOLDER_NAME}/Config/
-rsync -r --exclude=.DS_Store ${PATH_PACKAGE}/ExperimentData/*.txt ${PATH_PACKAGE}/ExperimentDataCheck/
-rsync -r --exclude=.DS_Store ${PATH_PACKAGE}/ExperimentData/*.txt ${TARGET_DIR}/${FOLDER_NAME}/
-rm ${PATH_PACKAGE}/ExperimentData/*
+rsync -r --exclude=.DS_Store ${PATH_PACKAGE}/ExperimentData/* ${PATH_PACKAGE}/ExperimentDataCheck/
+rsync -r --exclude=.DS_Store ${PATH_PACKAGE}/ExperimentData/* ${TARGET_DIR}/${FOLDER_NAME}/
+rm -rf ${PATH_PACKAGE}/ExperimentData/*
