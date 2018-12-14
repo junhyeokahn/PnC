@@ -31,6 +31,9 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     rfoot_contact_center_vel.setZero();
     lfoot_contact_center_vel.setZero();
 
+    first_LED_x = 0.;
+    first_LED_y = 0.;
+
     DataManager* data_manager = DataManager::GetDataManager();
 
     data_manager->RegisterData(&curr_time, DOUBLE, "time");

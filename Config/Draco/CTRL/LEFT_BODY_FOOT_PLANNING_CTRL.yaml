@@ -3,10 +3,10 @@ swing_height: 0.11
 push_down_height: 0.0
 default_target_foot_location: [-0.03, 0.11, 0.0]
 
-kp: [80 , 150 , 150 , 150 , 5 , 80 , 150 , 150 , 150 , 5 ]
+kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
 kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
 
-body_pt_offset: [0.06, 0.0]
+body_pt_offset: [0.06, 0.00]
 foot_landing_offset: [0., 0.]
 
 fin_ankle: 1.4

@@ -197,4 +197,7 @@ void DracoMoCapManager::_UpdateLEDPosData(const draco_message & msg) {
             ++led_number;
         }
     }
+
+    sp_->first_LED_x = led_pos_data_[0];
+    sp_->first_LED_y = led_pos_data_[1];
 }

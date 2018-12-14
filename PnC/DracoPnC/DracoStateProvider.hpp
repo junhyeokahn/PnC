@@ -43,6 +43,9 @@ public:
   int num_step_copy;
   int phase_copy;
 
+  double first_LED_x;
+  double first_LED_y;
+
   void saveCurrentData();
 private:
   DracoStateProvider(RobotSystem* _robot);
