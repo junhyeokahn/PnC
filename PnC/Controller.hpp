@@ -4,6 +4,7 @@
 #include <RobotSystem/RobotSystem.hpp>
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
+#include <Utils/Utilities.hpp>
 
 class Controller{
 public:
@@ -17,7 +18,7 @@ public:
   virtual void firstVisit() = 0;
   virtual void lastVisit() = 0;
   virtual bool endOfPhase() = 0;
-  virtual void ctrlInitialization(const std::string & setting_file_name) = 0;
+  virtual void ctrlInitialization(const YAML::Node& node) = 0;
 
 protected:
   // TODO : replace it with utils

@@ -44,4 +44,6 @@ protected:
   Controller* left_swing_start_trans_ctrl_;
   Controller* left_swing_ctrl_;
   Controller* left_swing_end_trans_ctrl_;
+
+  YAML::Node cfg_;
 };

@@ -23,4 +23,6 @@ protected:
 
   Controller* jpos_target_ctrl_;
   Controller* jpos_swing_ctrl_;
+
+  YAML::Node cfg_;
 };

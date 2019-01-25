@@ -125,14 +125,13 @@ bool JPosSwingCtrl::endOfPhase(){
     return false;
 }
 
-void JPosSwingCtrl::ctrlInitialization(const std::string & setting_file_name){
+void JPosSwingCtrl::ctrlInitialization(const YAML::Node& node){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
 
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
         Eigen::VectorXd kp, kd;
-        myUtils::readParameter(cfg, "kp", kp);
-        myUtils::readParameter(cfg, "kd", kd);
+        myUtils::readParameter(node, "kp", kp);
+        myUtils::readParameter(node, "kd", kd);
         jpos_task_->setGain(kp, kd);
     }catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

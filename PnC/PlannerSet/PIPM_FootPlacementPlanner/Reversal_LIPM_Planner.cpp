@@ -208,19 +208,18 @@ void Reversal_LIPM_Planner::_StepLengthCheck(Eigen::Vector3d & target_loc, const
   }
 }
 
-void Reversal_LIPM_Planner::PlannerInitialization(const std::string & file){
+void Reversal_LIPM_Planner::PlannerInitialization(const YAML::Node & node){
     try {
         Eigen::VectorXd tmp;
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/PLANNER/WALKING/"+file+".yaml");
-        myUtils::readParameter(cfg, "t_prime", tmp);
+        myUtils::readParameter(node, "t_prime", tmp);
         for (int i = 0; i < 2; ++i) {t_prime_[i] = tmp[i];}
-        myUtils::readParameter(cfg, "kappa", tmp);
+        myUtils::readParameter(node, "kappa", tmp);
         for (int i = 0; i < 2; ++i) {kappa_[i] = tmp[i];}
-        myUtils::readParameter(cfg, "x_step_length_limit", tmp);
+        myUtils::readParameter(node, "x_step_length_limit", tmp);
         for (int i = 0; i < 2; ++i) {x_step_length_limit_[i] = tmp[i];}
-        myUtils::readParameter(cfg, "y_step_length_limit", tmp);
+        myUtils::readParameter(node, "y_step_length_limit", tmp);
         for (int i = 0; i < 2; ++i) {y_step_length_limit_[i] = tmp[i];}
-        myUtils::readParameter(cfg, "com_velocity_limit", tmp);
+        myUtils::readParameter(node, "com_velocity_limit", tmp);
         for (int i = 0; i < 2; ++i) {com_vel_limit_[i] = tmp[i];}
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

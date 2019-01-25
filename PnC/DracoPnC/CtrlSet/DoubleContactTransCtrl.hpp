@@ -18,7 +18,7 @@ class DoubleContactTransCtrl: public Controller{
         virtual void firstVisit();
         virtual void lastVisit();
         virtual bool endOfPhase();
-        virtual void ctrlInitialization(const std::string & setting_file_name);
+        virtual void ctrlInitialization(const YAML::Node& node);
 
         void setStanceTime(double stance_time){ end_time_ = stance_time; }
         void setStanceHeight(double height) {

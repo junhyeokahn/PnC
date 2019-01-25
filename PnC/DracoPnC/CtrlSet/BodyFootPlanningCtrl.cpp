@@ -450,22 +450,21 @@ bool BodyFootPlanningCtrl::endOfPhase(){
     return false;
 }
 
-void BodyFootPlanningCtrl::ctrlInitialization(const std::string & setting_file_name){
+void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node){
     ini_base_height_ = sp_->q[2];
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
-        myUtils::readParameter(cfg, "kp", Kp_);
-        myUtils::readParameter(cfg, "kd", Kd_);
-        myUtils::readParameter(cfg, "swing_height", swing_height_);
-        myUtils::readParameter(cfg, "push_down_height", push_down_height_);
-        myUtils::readParameter(cfg, "default_target_foot_location", default_target_loc_);
-        myUtils::readParameter(cfg, "body_pt_offset", body_pt_offset_);
-        myUtils::readParameter(cfg, "foot_landing_offset", foot_landing_offset_);
+        myUtils::readParameter(node, "kp", Kp_);
+        myUtils::readParameter(node, "kd", Kd_);
+        myUtils::readParameter(node, "swing_height", swing_height_);
+        myUtils::readParameter(node, "push_down_height", push_down_height_);
+        myUtils::readParameter(node, "default_target_foot_location", default_target_loc_);
+        myUtils::readParameter(node, "body_pt_offset", body_pt_offset_);
+        myUtils::readParameter(node, "foot_landing_offset", foot_landing_offset_);
 
-        myUtils::readParameter(cfg, "fin_ankle", fin_ankle_);
-        myUtils::readParameter(cfg, "switch_vel_threshold", switch_vel_threshold_);
-        myUtils::readParameter(cfg, "fin_foot_z_vel", fin_foot_z_vel_);
-        myUtils::readParameter(cfg, "fin_foot_z_acc", fin_foot_z_acc_);
+        myUtils::readParameter(node, "fin_ankle", fin_ankle_);
+        myUtils::readParameter(node, "switch_vel_threshold", switch_vel_threshold_);
+        myUtils::readParameter(node, "fin_foot_z_vel", fin_foot_z_vel_);
+        myUtils::readParameter(node, "fin_foot_z_acc", fin_foot_z_acc_);
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);

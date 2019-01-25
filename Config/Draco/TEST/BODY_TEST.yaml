@@ -1,8 +1,24 @@
-#initial_jpos: [0., -0.08, -1.05, 1.51, 0.85, 0., 0.08, -1.05, 1.51, 0.85]
-initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
-jpos_initialization_time: 2.0
+test_configuration:
+    initial_jpos: [0., -0.08, -0.8, 1.6, 0.81, 0., 0.08, -0.8, 1.6, 0.81]
+    jpos_initialization_time: 2.0
 
-body_height: 1.0
-body_lifting_time: 2.0
+    body_height: 1.0
+    body_lifting_time: 2.0
 
-body_ctrl_time: 10000.0
+    body_ctrl_time: 10000.0
+
+control_configuration:
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 50. , 100 , 100 , 100 , 100 , 50. ]
+        kd: [3   , 3   , 3   , 3   , 1.   , 3   , 3   , 3   , 3   , 1.  ]
+
+    double_contact_trans_ctrl:
+        max_rf_z: 300.0
+        min_rf_z: 5.0
+
+        kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
+        kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
+
+    body_ctrl:
+        kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
+        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]

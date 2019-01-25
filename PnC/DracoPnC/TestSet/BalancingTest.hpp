@@ -25,4 +25,6 @@ class BalancingTest: public Test{
         Controller* body_lift_ctrl_;
         Controller* balancing_ctrl_;
         Controller* kin_balancing_ctrl_;
+
+        YAML::Node cfg_;
 };

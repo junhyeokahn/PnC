@@ -19,7 +19,7 @@ class SingleContactTransCtrl: public Controller{
         virtual void lastVisit();
         virtual bool endOfPhase();
 
-        virtual void ctrlInitialization(const std::string & setting_file_name);
+        virtual void ctrlInitialization(const YAML::Node& node);
 
         void setTransitionTime(double time){ end_time_ = time; }
         void setStanceHeight(double height) {

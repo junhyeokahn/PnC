@@ -20,7 +20,7 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         }
         virtual bool endOfPhase();
 
-        virtual void ctrlInitialization(const std::string & setting_file_name);
+        virtual void ctrlInitialization(const YAML::Node& node);
     protected:
         double ini_base_height_;
         int swing_leg_jidx_;

@@ -1,9 +1,9 @@
 #pragma once
+#include <vector>
 
 #include <Eigen/Dense>
 
 #include <PnC/FootStepPlanner.hpp>
-#include <vector>
 
 class ParamReversalPL{
 public:
@@ -24,7 +24,7 @@ public:
   Reversal_LIPM_Planner();
   virtual ~Reversal_LIPM_Planner();
 
-  virtual void PlannerInitialization(const std::string & setting_file);
+  virtual void PlannerInitialization(const YAML::Node & node);
 
   virtual void getNextFootLocation(const Eigen::Vector3d & com_pos,
                                    const Eigen::Vector3d & com_vel,

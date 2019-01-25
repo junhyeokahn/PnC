@@ -8,6 +8,8 @@
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
+    cfg_ = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_EXP_TEST.yaml");
+
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
     sp_->stance_foot = "lFoot";
@@ -81,19 +83,19 @@ WalkingTest::~WalkingTest(){
 }
 
 void WalkingTest::TestInitialization(){
-    reversal_planner_->PlannerInitialization("VELOCITY_REVERSAL_PLANNER");
-    // Yaml file name
-    jpos_ctrl_->ctrlInitialization("JOINT_CTRL");
-    body_up_ctrl_->ctrlInitialization("DOUBLE_CONTACT_TRANS_CTRL");
-    body_fix_ctrl_->ctrlInitialization("BODY_CTRL");
-    // Transition
-    right_swing_start_trans_ctrl_->ctrlInitialization("SINGLE_CONTACT_TRANS_CTRL");
-    right_swing_end_trans_ctrl_->ctrlInitialization("SINGLE_CONTACT_TRANS_CTRL");
-    left_swing_start_trans_ctrl_->ctrlInitialization("SINGLE_CONTACT_TRANS_CTRL");
-    left_swing_end_trans_ctrl_->ctrlInitialization("SINGLE_CONTACT_TRANS_CTRL");
-    // Swing
-    right_swing_ctrl_->ctrlInitialization("RIGHT_BODY_FOOT_PLANNING_CTRL");
-    left_swing_ctrl_->ctrlInitialization("LEFT_BODY_FOOT_PLANNING_CTRL");
+    reversal_planner_->PlannerInitialization(cfg_["planner_configuration"]["velocity_reversal_pln"]);
+
+    jpos_ctrl_->ctrlInitialization(cfg_["control_configuration"]["joint_position_ctrl"]);
+    body_up_ctrl_->ctrlInitialization(cfg_["control_configuration"]["double_contact_trans_ctrl"]);
+    body_fix_ctrl_->ctrlInitialization(cfg_["control_configuration"]["body_ctrl"]);
+
+    right_swing_start_trans_ctrl_->ctrlInitialization(cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+    right_swing_end_trans_ctrl_->ctrlInitialization(cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+    left_swing_start_trans_ctrl_->ctrlInitialization(cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+    left_swing_end_trans_ctrl_->ctrlInitialization(cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+
+    right_swing_ctrl_->ctrlInitialization(cfg_["control_configuration"]["right_body_foot_planning_ctrl"]);
+    left_swing_ctrl_->ctrlInitialization(cfg_["control_configuration"]["left_body_foot_planning_ctrl"]);
 }
 
 int WalkingTest::_NextPhase(const int & phase){
@@ -146,14 +148,14 @@ void WalkingTest::_SettingParameter(){
 
         double tmp; bool b_tmp; Eigen::VectorXd tmp_vec(10); std::string tmp_str;
 
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_TEST.yaml");
+        YAML::Node test_cfg = cfg_["test_configuration"];
 
-        myUtils::readParameter(cfg, "start_phase", phase_);
+        myUtils::readParameter(test_cfg, "start_phase", phase_);
 
-        myUtils::readParameter(cfg, "initial_jpos", tmp_vec);
+        myUtils::readParameter(test_cfg, "initial_jpos", tmp_vec);
         ((JPosTargetCtrl*)jpos_ctrl_)->setTargetPosition(tmp_vec);
 
-        myUtils::readParameter(cfg, "body_height", tmp);
+        myUtils::readParameter(test_cfg, "body_height", tmp);
         ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceHeight(tmp);
         ((BodyCtrl*)body_fix_ctrl_)->setStanceHeight(tmp);
         ((SingleContactTransCtrl*)right_swing_start_trans_ctrl_)->setStanceHeight(tmp);
@@ -163,25 +165,25 @@ void WalkingTest::_SettingParameter(){
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
 
-        myUtils::readParameter(cfg, "com_height_for_omega", tmp);
+        myUtils::readParameter(test_cfg, "com_height_for_omega", tmp);
         ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
 
-        myUtils::readParameter(cfg, "jpos_initialization_time", tmp);
+        myUtils::readParameter(test_cfg, "jpos_initialization_time", tmp);
         ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);
 
-        myUtils::readParameter(cfg, "com_lifting_time", tmp);
+        myUtils::readParameter(test_cfg, "com_lifting_time", tmp);
         ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceTime(tmp);
 
-        myUtils::readParameter(cfg, "stance_time", tmp);
+        myUtils::readParameter(test_cfg, "stance_time", tmp);
         ((BodyCtrl*)body_fix_ctrl_)->setStanceTime(tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyStanceTime(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->notifyStanceTime(tmp);
 
-        myUtils::readParameter(cfg, "swing_time", tmp);
+        myUtils::readParameter(test_cfg, "swing_time", tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setSwingTime(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setSwingTime(tmp);
 
-        myUtils::readParameter(cfg, "st_transition_time", tmp);
+        myUtils::readParameter(test_cfg, "st_transition_time", tmp);
         ((SingleContactTransCtrl*)right_swing_start_trans_ctrl_)->setTransitionTime(tmp);
         ((SingleContactTransCtrl*)right_swing_end_trans_ctrl_)->setTransitionTime(tmp);
         ((SingleContactTransCtrl*)left_swing_start_trans_ctrl_)->setTransitionTime(tmp);
@@ -189,19 +191,19 @@ void WalkingTest::_SettingParameter(){
         ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyTransitionTime(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->notifyTransitionTime(tmp);
 
-        myUtils::readParameter(cfg, "replanning", b_tmp);
+        myUtils::readParameter(test_cfg, "replanning", b_tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setReplanning(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setReplanning(b_tmp);
 
-        myUtils::readParameter(cfg, "double_stance_mix_ratio", tmp);
+        myUtils::readParameter(test_cfg, "double_stance_mix_ratio", tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setDoubleStanceRatio(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setDoubleStanceRatio(tmp);
 
-        myUtils::readParameter(cfg, "transition_phase_mix_ratio", tmp);
+        myUtils::readParameter(test_cfg, "transition_phase_mix_ratio", tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setTransitionPhaseRatio(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setTransitionPhaseRatio(tmp);
 
-        myUtils::readParameter(cfg, "contact_switch_check", b_tmp);
+        myUtils::readParameter(test_cfg, "contact_switch_check", b_tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setContactSwitchCheck(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setContactSwitchCheck(b_tmp);
 

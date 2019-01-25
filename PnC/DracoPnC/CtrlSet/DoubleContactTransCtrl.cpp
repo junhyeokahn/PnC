@@ -205,14 +205,13 @@ bool DoubleContactTransCtrl::endOfPhase(){
     }
     return false;
 }
-void DoubleContactTransCtrl::ctrlInitialization(const std::string & setting_file_name){
+void DoubleContactTransCtrl::ctrlInitialization(const YAML::Node& node){
     ini_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
-        myUtils::readParameter(cfg, "kp", Kp_);
-        myUtils::readParameter(cfg, "kd", Kd_);
-        myUtils::readParameter(cfg, "max_rf_z", max_rf_z_);
-        myUtils::readParameter(cfg, "min_rf_z", min_rf_z_);
+        myUtils::readParameter(node, "kp", Kp_);
+        myUtils::readParameter(node, "kd", Kd_);
+        myUtils::readParameter(node, "max_rf_z", max_rf_z_);
+        myUtils::readParameter(node, "min_rf_z", min_rf_z_);
     }catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);

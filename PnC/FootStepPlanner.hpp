@@ -2,12 +2,14 @@
 
 #include <string>
 
+#include <Utils/Utilities.hpp>
+
 class FootStepPlanner{
 public:
   FootStepPlanner(){}
   virtual ~FootStepPlanner(){}
 
-  virtual void PlannerInitialization(const std::string & _setting_file) = 0;
+  virtual void PlannerInitialization(const YAML::Node & node) = 0;
   virtual void getNextFootLocation(const Eigen::Vector3d & com_pos,
                                    const Eigen::Vector3d & com_vel,
                                    Eigen::Vector3d & target_loc,

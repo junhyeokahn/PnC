@@ -202,12 +202,11 @@ bool BodyCtrl::endOfPhase(){
     }
     return false;
 }
-void BodyCtrl::ctrlInitialization(const std::string & setting_file_name){
+void BodyCtrl::ctrlInitialization(const YAML::Node& node){
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(), robot_->getNumActuatedDofs());
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/Draco/CTRL/"+setting_file_name+".yaml");
-        myUtils::readParameter(cfg, "kp", Kp_);
-        myUtils::readParameter(cfg, "kd", Kd_);
+        myUtils::readParameter(node, "kp", Kp_);
+        myUtils::readParameter(node, "kd", Kd_);
     }catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);
