@@ -85,8 +85,8 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
     data_body_global = data_config[:,0:3] + data_global_pos_offset
     right_base_pos_offset = [-0.05, 0]
     left_base_pos_offset = [-0.05, 0]
-    st_step = 60
-    num_steps = 6
+    st_step = 10
+    num_steps = 10
 
     lin_width = 3
     fig_width = 480
