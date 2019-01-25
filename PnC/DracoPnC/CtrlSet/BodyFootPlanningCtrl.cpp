@@ -29,12 +29,11 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     switch_vel_threshold_ = 0;
 
     // task
-/*    selected_jidx_.resize(2);*/
+    //selected_jidx_.resize(2);
     //selected_jidx_[0] = robot->getDofIdx("rHipYaw");
     //selected_jidx_[1] = robot->getDofIdx("lHipYaw");
-    /*selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);*/
+    //selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
-    // TEST
     selected_jidx_.resize(3);
     selected_jidx_[0] = robot->getDofIdx("rHipYaw");
     selected_jidx_[1] = robot->getDofIdx("lHipYaw");
@@ -45,8 +44,9 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     }
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
-    foot_pitch_task_ = new PitchFootTask(robot_, swing_foot);
-    foot_point_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot+"Center");
+    //foot_pitch_task_ = new PitchFootTask(robot_, swing_foot);
+    //foot_point_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, swing_foot+"Center");
+    foot_point_task_ = new IsolatedPointFootTask(robot_, swing_foot+"Center");
     base_task_ = new BodyRPZTask(robot_);
 
     // contact
@@ -231,22 +231,22 @@ void BodyFootPlanningCtrl::_task_setup(){
     }
 
     //// Foot Pitch Task
-    Eigen::VectorXd foot_pos_des(7); foot_pos_des.setZero();
-    Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();
-    Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
+    //Eigen::VectorXd foot_pos_des(7); foot_pos_des.setZero();
+    //Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();
+    //Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
 
-    foot_pos_des[0] = des_quat.w();
-    foot_pos_des[1] = des_quat.x();
-    foot_pos_des[2] = des_quat.y();
-    foot_pos_des[3] = des_quat.z();
+    //foot_pos_des[0] = des_quat.w();
+    //foot_pos_des[1] = des_quat.x();
+    //foot_pos_des[2] = des_quat.y();
+    //foot_pos_des[3] = des_quat.z();
 
-    for(int i(0); i<3; ++i){
-        foot_pos_des[i+4] = curr_foot_pos_des_[i];
-        foot_vel_des[i+3] = curr_foot_vel_des_[i];
-        foot_acc_des[i+3] = curr_foot_acc_des_[i];
+    //for(int i(0); i<3; ++i){
+        //foot_pos_des[i+4] = curr_foot_pos_des_[i];
+        //foot_vel_des[i+3] = curr_foot_vel_des_[i];
+        //foot_acc_des[i+3] = curr_foot_acc_des_[i];
 
-    }
-    foot_pitch_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
+    //}
+    //foot_pitch_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
 
     //// Point Foot Task
     Eigen::VectorXd point_foot_pos_des = Eigen::VectorXd::Zero(3);
@@ -481,7 +481,7 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node){
 
 BodyFootPlanningCtrl::~BodyFootPlanningCtrl(){
     delete base_task_;
-    delete foot_pitch_task_;
+    //delete foot_pitch_task_;
     delete foot_point_task_;
 
     delete kin_wbc_;

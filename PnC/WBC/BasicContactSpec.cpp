@@ -48,7 +48,7 @@ bool PointContactSpec::_UpdateUf(){
     // Upper bound of vertical directional reaction force
     Uf_(5, 2) = -1.;  // -Fz >= -max_Fz_
 
-    //Uf_ *= rot; // TODO
+    Uf_ *= rot;
     return true;
 }
 

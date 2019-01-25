@@ -188,6 +188,8 @@ int main() {
         YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
     bool isRecord;
     myUtils::readParameter(simulation_cfg, "is_record", isRecord);
+    bool b_display_joint_frame;
+    myUtils::readParameter(simulation_cfg, "display_joint_frame", b_display_joint_frame);
     int num_steps_per_cycle;
     myUtils::readParameter(simulation_cfg, "num_steps_per_cycle", num_steps_per_cycle);
 
@@ -239,7 +241,8 @@ int main() {
     // ====================
     // Display Joints Frame
     // ====================
-    //displayJointFrames(world, robot);
+    if (b_display_joint_frame)
+        displayJointFrames(world, robot);
 
     // ====================
     // Add Collision Object

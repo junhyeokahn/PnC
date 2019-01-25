@@ -35,6 +35,7 @@ public:
 
     dart::dynamics::SkeletonPtr getSkeleton() { return skel_ptr_; };
     dart::dynamics::BodyNodePtr getBodyNode(const std::string & _link_name) { return skel_ptr_->getBodyNode(_link_name); }
+
     Eigen::VectorXd getQ() { return skel_ptr_->getPositions(); };
     Eigen::VectorXd getQdot() { return skel_ptr_->getVelocities(); };
     double getRobotMass() { return skel_ptr_->getMass(); }

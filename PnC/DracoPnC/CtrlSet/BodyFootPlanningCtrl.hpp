@@ -50,7 +50,7 @@ class BodyFootPlanningCtrl:public SwingPlanningCtrl{
         std::vector<int> selected_jidx_;
         Task* selected_joint_task_;
         Task* base_task_;
-        Task* foot_pitch_task_;
+        //Task* foot_pitch_task_;
         Task* foot_point_task_;
 
         KinWBC* kin_wbc_;

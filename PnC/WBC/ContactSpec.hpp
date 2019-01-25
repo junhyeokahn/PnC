@@ -7,6 +7,7 @@
 #include <Utils/Utilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 
+//! Contact Frame's z-axis should correspond normal vector to the ground
 
 class ContactSpec {
 public:
