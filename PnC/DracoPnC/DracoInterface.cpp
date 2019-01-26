@@ -18,6 +18,7 @@ DracoInterface::DracoInterface() : Interface()
     myUtils::pretty_constructor(0, "Draco Interface");
 
     robot_ = new RobotSystem(6, THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
+    //robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
     test_cmd_->turn_off = false;

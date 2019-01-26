@@ -6,8 +6,6 @@
 #include "Utils/ParamHandler.hpp"
 #include "Configuration.h"
 
-#include "Utils/Clock.hpp"
-
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgShadow::MinimalShadowMap * msm) :
     dart::gui::osg::WorldNode(_world, msm),
     count_(0),
@@ -51,6 +49,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
             YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
         myUtils::readParameter(simulation_cfg, "check_collision", b_check_collision_);
+        myUtils::readParameter(simulation_cfg, "print_computation_time", b_print_computation_time);
         myUtils::readParameter(simulation_cfg, "pulling_back_time", pulling_back_time_);
         myUtils::readParameter(simulation_cfg, "pulling_back_distance", pulling_back_distance_);
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
@@ -85,10 +84,15 @@ void DracoWorldNode::customPreStep() {
     if (b_check_collision_) { _check_collision(); }
     //_get_ati_data();
 
-    //Clock clock;
-    //clock.start();
+    if (b_print_computation_time) {
+        clock_.start();
+    }
+
     mInterface->getCommand(mSensorData, mCommand);
-    //printf("time: %f\n", clock.stop()); 
+
+    if (b_print_computation_time) {
+        printf("time: %f\n", clock_.stop()); 
+    }
 
     mTorqueCommand.tail(10) = mCommand->jtrq;
 

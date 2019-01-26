@@ -2,6 +2,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/DataManager.hpp>
@@ -22,8 +23,8 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){
     // task
     body_rpz_task_ = new BodyRPZTask(robot);
     selected_jidx_.resize(2);
-    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
-    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_jidx_[0] = DracoDoF::rHipYaw;
+    selected_jidx_[1] = DracoDoF::lHipYaw;
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contactk

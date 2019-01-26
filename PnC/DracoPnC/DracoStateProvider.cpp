@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Utils/DataManager.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 
@@ -61,8 +62,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 }
 
 void DracoStateProvider::saveCurrentData(){
-    rfoot_contact_center_pos = robot_->getBodyNodeIsometry("rFootCenter").translation();
-    lfoot_contact_center_pos = robot_->getBodyNodeIsometry("lFootCenter").translation();
-    rfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity("rFootCenter").tail(3);
-    lfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity("lFootCenter").tail(3);
+    rfoot_contact_center_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+    lfoot_contact_center_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
+    rfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity(DracoBodyNode::rFootCenter).tail(3);
+    lfoot_contact_center_vel = robot_->getBodyNodeSpatialVelocity(DracoBodyNode::lFootCenter).tail(3);
 }

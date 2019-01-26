@@ -1,5 +1,6 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
@@ -22,8 +23,8 @@ DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(
     // task
     body_rpz_task_ = new BodyRPZTask(robot);
     selected_jidx_.resize(2);
-    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
-    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_jidx_[0] = DracoDoF::rHipYaw;
+    selected_jidx_[1] = DracoDoF::lHipYaw;
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contact
@@ -193,7 +194,7 @@ void DoubleContactTransCtrl::firstVisit(){
     ini_base_height_ = robot_->getQ()[2];
     ctrl_start_time_ = sp_->curr_time;
     base_pos_ini_ = robot_->getQ().head(3);
-    base_ori_ini_ = robot_->getBodyNodeCoMIsometry("Torso").linear();
+    base_ori_ini_ = robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear();
 }
 
 void DoubleContactTransCtrl::lastVisit(){

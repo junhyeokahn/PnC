@@ -3,6 +3,7 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <Utils/DataManager.hpp>
 
@@ -110,7 +111,7 @@ int WalkingTest::_NextPhase(const int & phase){
         sp_->stance_foot = "lFoot";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeIsometry("lFootCenter").translation();
+        next_local_frame_location = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
         sp_->global_pos_local += next_local_frame_location;
         //myUtils::pretty_print(sp_->global_pos_local, std::cout, "****lstance");
     }
@@ -122,7 +123,7 @@ int WalkingTest::_NextPhase(const int & phase){
         sp_->stance_foot = "rFoot";
 
         // Global Frame Update
-        next_local_frame_location = robot_->getBodyNodeIsometry("rFootCenter").translation();
+        next_local_frame_location = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
         sp_->global_pos_local += next_local_frame_location;
         //myUtils::pretty_print(sp_->global_pos_local, std::cout, "****rstance");
     }

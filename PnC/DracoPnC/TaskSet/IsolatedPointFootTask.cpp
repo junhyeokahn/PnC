@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
 #include <Utils/Utilities.hpp>
 
@@ -25,11 +26,20 @@ bool IsolatedPointFootTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 
     vel_des = _vel_des; acc_des = _acc_des;
     Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
-    pos_err = _pos_des -
-        robot_->getBodyNodeCoMIsometry(link_name_).translation();
-    // vel_act
-    vel_act = robot_->
-        getBodyNodeCoMSpatialVelocity(link_name_).tail(3);
+    if (link_name_ == "rFootCenter") {
+        pos_err = _pos_des -
+            robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+        vel_act = robot_->
+            getBodyNodeCoMSpatialVelocity(DracoBodyNode::rFootCenter).tail(3);
+    } else if (link_name_ == "lFootCenter") {
+         pos_err = _pos_des -
+            robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+        vel_act = robot_->
+            getBodyNodeCoMSpatialVelocity(DracoBodyNode::lFootCenter).tail(3);
+    } else {
+        std::cout << "Wrong Name" << std::endl;
+        exit(0);
+    }
 
     // op_cmd
     for(int i(0); i < dim_task_; ++i){
@@ -41,9 +51,18 @@ bool IsolatedPointFootTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 }
 
 bool IsolatedPointFootTask::_UpdateTaskJacobian(){
-    Jt_ = (robot_->
-            getBodyNodeCoMJacobian(link_name_)).block(
-            3, 0, dim_task_, robot_->getNumDofs());
+    if (link_name_ == "rFootCenter") {
+        Jt_ = (robot_->
+                getBodyNodeCoMJacobian(DracoBodyNode::rFootCenter)).block(
+                3, 0, dim_task_, robot_->getNumDofs());
+    } else if (link_name_ == "lFootCenter") {
+        Jt_ = (robot_->
+                getBodyNodeCoMJacobian(DracoBodyNode::lFootCenter)).block(
+                3, 0, dim_task_, robot_->getNumDofs());
+    } else {
+        std::cout << "Wrong Name" << std::endl;
+        exit(0);
+    }
     // isolate virtual joint
     Jt_.block(0, 0, 3, robot_->getNumVirtualDofs()) =
         Eigen::MatrixXd::Zero(3, robot_->getNumVirtualDofs());
@@ -52,7 +71,16 @@ bool IsolatedPointFootTask::_UpdateTaskJacobian(){
 }
 
 bool IsolatedPointFootTask::_UpdateTaskJDotQdot(){
-    JtDotQdot_ = robot_->
-        getBodyNodeCoMJacobianDot(link_name_).block(3, 0, dim_task_, robot_->getNumDofs()) * robot_->getQdot();
+    if (link_name_ == "rFootCenter") {
+        JtDotQdot_ = robot_->
+            getBodyNodeCoMJacobianDot(DracoBodyNode::rFootCenter).block(3, 0, dim_task_, robot_->getNumDofs()) * robot_->getQdot();
+    } else if (link_name_ == "lFootCenter") {
+        JtDotQdot_ = robot_->
+            getBodyNodeCoMJacobianDot(DracoBodyNode::lFootCenter).block(3, 0, dim_task_, robot_->getNumDofs()) * robot_->getQdot();
+    } else {
+        std::cout << "Wrong Name" << std::endl;
+        exit(0);
+    }
+
     return true;
 }

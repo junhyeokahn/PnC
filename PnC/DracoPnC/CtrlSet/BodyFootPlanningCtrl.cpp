@@ -2,6 +2,7 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
@@ -35,8 +36,8 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     //selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     selected_jidx_.resize(3);
-    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
-    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_jidx_[0] = DracoDoF::rHipYaw;
+    selected_jidx_[1] = DracoDoF::lHipYaw;
     if (swing_foot == "lFoot") {
         selected_jidx_[2] = robot->getDofIdx("lAnkle");
     } else {
@@ -356,7 +357,14 @@ void BodyFootPlanningCtrl::firstVisit(){
 
     ini_ankle_ = sp_->q[selected_jidx_[2]];
 
-    ini_foot_pos_ = robot_->getBodyNodeIsometry(swing_foot_ + "Center").translation();
+    if (swing_foot_ == "rFoot") {
+        ini_foot_pos_ = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+    } else if (swing_foot_ == "lFoot") {
+        ini_foot_pos_ = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
+    } else {
+        std::cout << "Wrong swing foot" << std::endl;
+        exit(0);
+    }
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
     replan_moment_ = 0.;
@@ -432,11 +440,11 @@ bool BodyFootPlanningCtrl::endOfPhase(){
     if (contact_check_with_ankle) {
         bool contact_happen_by_ankle(false);
         if (swing_foot_ == "rFoot") {
-            if (sp_->qdot[robot_->getDofIdx("rAnkle")] < switch_vel_threshold_) {
+            if (sp_->qdot[DracoDoF::rAnkle] < switch_vel_threshold_) {
                 contact_happen_by_ankle = true;
             }
         } else {
-            if (sp_->qdot[robot_->getDofIdx("lAnkle")] < switch_vel_threshold_) {
+            if (sp_->qdot[DracoDoF::lAnkle] < switch_vel_threshold_) {
                 contact_happen_by_ankle = true;
             }
         }

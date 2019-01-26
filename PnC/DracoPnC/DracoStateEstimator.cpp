@@ -1,6 +1,7 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Utils/Utilities.hpp>
 #include <PnC/DracoPnC/StateEstimator/BasicAccumulation.hpp>
 #include <PnC/DracoPnC/StateEstimator/BodyEstimator.hpp>
@@ -133,11 +134,11 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
     Eigen::VectorXd foot_pos;
     Eigen::VectorXd foot_vel;
     if (sp_->stance_foot == "rFoot") {
-        foot_pos = robot_->getBodyNodeIsometry("rFootCenter").translation();
-        foot_vel = robot_->getBodyNodeSpatialVelocity("rFootCenter").tail(3);
+        foot_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+        foot_vel = robot_->getBodyNodeSpatialVelocity(DracoBodyNode::rFootCenter).tail(3);
     } else {
-        foot_pos = robot_->getBodyNodeIsometry("lFootCenter").translation();
-        foot_vel = robot_->getBodyNodeSpatialVelocity("lFootCenter").tail(3);
+        foot_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
+        foot_vel = robot_->getBodyNodeSpatialVelocity(DracoBodyNode::lFootCenter).tail(3);
     }
 
     curr_config_[0] = -foot_pos[0];

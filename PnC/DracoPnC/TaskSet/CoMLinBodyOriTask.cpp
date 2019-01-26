@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
 #include <Utils/Utilities.hpp>
 
@@ -20,7 +21,7 @@ bool CoMLinBodyOriTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
         const Eigen::VectorXd & _acc_des) {
 
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
-    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry("Torso").linear());
+    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
     Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
@@ -34,7 +35,7 @@ bool CoMLinBodyOriTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
         vel_des[i] = _vel_des[i];
         acc_des[i] = _acc_des[i];
     }
-    vel_act.head(3) = (robot_->getBodyNodeCoMSpatialVelocity("Torso")).head(3);
+    vel_act.head(3) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
 
     // (X, Y, Z)
     for (int i = 0; i < 3; ++i) {
@@ -58,7 +59,7 @@ bool CoMLinBodyOriTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 }
 
 bool CoMLinBodyOriTask::_UpdateTaskJacobian(){
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian("Torso");
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(DracoBodyNode::Torso);
     // (Rx, Ry, Rz)
     Jt_.block(0 ,0 , 3, robot_->getNumDofs()) = Jtmp.block(0, 0, 3, robot_->getNumDofs());
     // (X, Y, Z)

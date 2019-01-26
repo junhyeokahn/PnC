@@ -2,6 +2,7 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <Utils/Utilities.hpp>
@@ -29,8 +30,8 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     // task
     base_task_ = new BodyRPZTask(robot);
     selected_jidx_.resize(2);
-    selected_jidx_[0] = robot->getDofIdx("rHipYaw");
-    selected_jidx_[1] = robot->getDofIdx("lHipYaw");
+    selected_jidx_[0] = DracoDoF::rHipYaw;
+    selected_jidx_[1] = DracoDoF::lHipYaw;
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // contact
@@ -251,7 +252,7 @@ bool SingleContactTransCtrl::endOfPhase(){
     return false;
 }
 void SingleContactTransCtrl::ctrlInitialization(const YAML::Node& node){
-    ini_base_height_ = robot_->getBodyNodeCoMIsometry("Torso").translation()[2];
+    ini_base_height_ = robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).translation()[2];
     try {
         myUtils::readParameter(node, "kp", Kp_);
         myUtils::readParameter(node, "kd", Kd_);

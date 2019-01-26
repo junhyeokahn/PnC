@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
 #include <Utils/Utilities.hpp>
 
@@ -17,7 +18,7 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
         const Eigen::VectorXd & _acc_des) {
 
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2], _pos_des[3]);
-    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry("Torso").linear());
+    Eigen::Quaternion<double> ori_act(robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
     Eigen::Vector3d ori_err_so3;
@@ -43,8 +44,8 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
 }
 
 bool BodyRPZTask::_UpdateTaskJacobian(){
-    //Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian("Torso");
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian("Torso");
+    //Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(DracoBodyNode::Torso);
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(DracoBodyNode::Torso);
     // (Rx, Ry)
     Jt_.block(0 ,0 , 2, robot_->getNumDofs()) = Jtmp.block(0, 0, 2, robot_->getNumDofs());
     // (Z)

@@ -5,6 +5,8 @@
 #include <osgShadow/LightSpacePerspectiveShadowMap>
 #include <Eigen/Dense>
 
+#include "Utils/Clock.hpp"
+
 class Interface;
 class DracoSensorData;
 class DracoCommand;
@@ -35,6 +37,7 @@ private:
     int count_;
     double t_;
     bool b_check_collision_;
+    bool b_print_computation_time;
 
 public:
     DracoWorldNode(const dart::simulation::WorldPtr & world,
@@ -49,4 +52,5 @@ public:
     dart::simulation::WorldPtr world_;
 
     DracoLedPosAnnouncer* led_pos_announcer_;
+    Clock clock_;
 };

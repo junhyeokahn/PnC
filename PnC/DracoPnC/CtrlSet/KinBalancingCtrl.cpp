@@ -1,5 +1,6 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
@@ -171,8 +172,8 @@ void KinBalancingCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
     ini_com_pos_ = robot_->getCoMPosition();
 
-    Eigen::VectorXd rfoot_contact_pos = (robot_->getBodyNodeIsometry("rFootFront").translation() + robot_->getBodyNodeIsometry("rFootBack").translation())/2.0;
-    Eigen::VectorXd lfoot_contact_pos = (robot_->getBodyNodeIsometry("lFootFront").translation() + robot_->getBodyNodeIsometry("lFootBack").translation())/2.0;
+    Eigen::VectorXd rfoot_contact_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+    Eigen::VectorXd lfoot_contact_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
     // TODO
     goal_com_pos_ = (rfoot_contact_pos + lfoot_contact_pos) / 2.0;
     goal_com_pos_[2] = ini_com_pos_[2];

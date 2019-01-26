@@ -35,9 +35,11 @@ public:
 
     dart::dynamics::SkeletonPtr getSkeleton() { return skel_ptr_; };
     dart::dynamics::BodyNodePtr getBodyNode(const std::string & _link_name) { return skel_ptr_->getBodyNode(_link_name); }
+    dart::dynamics::BodyNodePtr getBodyNode(const int & _bn_idx) { return skel_ptr_->getBodyNode(_bn_idx); }
 
     Eigen::VectorXd getQ() { return skel_ptr_->getPositions(); };
     Eigen::VectorXd getQdot() { return skel_ptr_->getVelocities(); };
+    void printRobotInfo();
     double getRobotMass() { return skel_ptr_->getMass(); }
     int getNumDofs() { return num_dof_; };
     int getNumVirtualDofs() { return num_virtual_dof_; };
@@ -75,10 +77,6 @@ public:
     Eigen::Isometry3d getBodyNodeCoMIsometry(const std::string & name_,
                                              dart::dynamics::Frame* wrt_
                                              =dart::dynamics::Frame::World());
-    Eigen::Isometry3d getBodyNodeCollisionIsometry(const std::string & name_,
-                                                   dart::dynamics::Frame* wrt_
-                                                   =dart::dynamics::Frame::World());
-    Eigen::Vector3d getBodyNodeCollisionShape(const std::string & _link_name);
     Eigen::Vector6d getBodyNodeSpatialVelocity(const std::string & name_,
                                                dart::dynamics::Frame* rl_
                                                =dart::dynamics::Frame::World(),
@@ -106,4 +104,36 @@ public:
                                               dart::dynamics::Frame * wrt_
                                               =dart::dynamics::Frame::World());
 
+    Eigen::Isometry3d getBodyNodeIsometry(const int & _bn_idx,
+                                          dart::dynamics::Frame* wrt_
+                                          =dart::dynamics::Frame::World());
+    Eigen::Isometry3d getBodyNodeCoMIsometry(const int & _bn_idx,
+                                             dart::dynamics::Frame* wrt_
+                                             =dart::dynamics::Frame::World());
+    Eigen::Vector6d getBodyNodeSpatialVelocity(const int & _bn_idx,
+                                               dart::dynamics::Frame* rl_
+                                               =dart::dynamics::Frame::World(),
+                                               dart::dynamics::Frame* wrt_
+                                               =dart::dynamics::Frame::World());
+    Eigen::Vector6d getBodyNodeCoMSpatialVelocity(const int & _bn_idx,
+                                                  dart::dynamics::Frame* rl_
+                                                  =dart::dynamics::Frame::World(),
+                                                  dart::dynamics::Frame* wrt_
+                                                  =dart::dynamics::Frame::World());
+    Eigen::MatrixXd getBodyNodeJacobian(const int & _bn_idx,
+                                        Eigen::Vector3d localOffset_
+                                        =Eigen::Vector3d::Zero(3),
+                                        dart::dynamics::Frame * wrt_
+                                        =dart::dynamics::Frame::World());
+    Eigen::MatrixXd getBodyNodeJacobianDot(const int & _bn_idx,
+                                           Eigen::Vector3d localOffset_
+                                           =Eigen::Vector3d::Zero(3),
+                                           dart::dynamics::Frame * wrt_
+                                           =dart::dynamics::Frame::World());
+    Eigen::MatrixXd getBodyNodeCoMJacobian(const int & _bn_idx,
+                                           dart::dynamics::Frame * wrt_
+                                           =dart::dynamics::Frame::World());
+    Eigen::MatrixXd getBodyNodeCoMJacobianDot(const int & _bn_idx,
+                                              dart::dynamics::Frame * wrt_
+                                              =dart::dynamics::Frame::World());
 };
