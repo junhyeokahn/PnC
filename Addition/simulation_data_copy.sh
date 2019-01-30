@@ -2,7 +2,7 @@
 PATH_PACKAGE=$(pwd)
 
 # Move experiment data to the other folder to plot data
-#rm $PATH_PACKAGE/ExperimentDataCheck/*
+rm $PATH_PACKAGE/ExperimentDataCheck/*
 cp $PATH_PACKAGE/../ExperimentData/* $PATH_PACKAGE/../ExperimentDataCheck/
 
 # Make video

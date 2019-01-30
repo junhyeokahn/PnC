@@ -8,8 +8,8 @@
 #define PORT_DATA_SETUP        61124
 #define PORT_DATA_RECEIVE      61125
 
-//#define IP_ADDR IP_ADDR_MYSELF
-#define IP_ADDR IP_JUNHYEOK
+#define IP_ADDR IP_ADDR_MYSELF
+//#define IP_ADDR IP_JUNHYEOK
 
 #define MAX_NUM_DATA 100
 

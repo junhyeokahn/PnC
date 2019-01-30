@@ -166,9 +166,9 @@ void SingleContactTransCtrl::_task_setup(){
             des_jpos_, des_jvel_, des_jacc_);
 
     // TEST
-    if(b_increase_){
+    if(b_increase_) {
         if(moving_foot_ == "rFoot"){
-            int swing_jidx = robot_->getDofIdx("rHipYaw") - robot_->getNumVirtualDofs();
+            int swing_jidx = DracoDoF::rHipYaw - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
             for(int i(0); i < 5; ++i){
@@ -178,7 +178,7 @@ void SingleContactTransCtrl::_task_setup(){
              }
         }
         else if(moving_foot_ == "lFoot"){
-            int swing_jidx = robot_->getDofIdx("lHipYaw") - robot_->getNumVirtualDofs();
+            int swing_jidx = DracoDoF::lHipYaw - robot_->getNumVirtualDofs();
             double h(state_machine_time_/end_time_);
 
             for(int i(0); i < 5; ++i){

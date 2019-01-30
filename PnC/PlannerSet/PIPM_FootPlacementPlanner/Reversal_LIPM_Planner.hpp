@@ -11,6 +11,7 @@ public:
   Eigen::Vector2d  des_loc;
   Eigen::Vector3d stance_foot_loc;
   bool b_positive_sidestep;
+  double yaw_angle;
 };
 
 class OutputReversalPL{
@@ -19,7 +20,7 @@ public:
   double switching_state[4];
 };
 
-class Reversal_LIPM_Planner: public FootStepPlanner{
+class Reversal_LIPM_Planner: public FootStepPlanner {
 public:
   Reversal_LIPM_Planner();
   virtual ~Reversal_LIPM_Planner();
@@ -51,6 +52,7 @@ protected:
   std::vector<double> x_step_length_limit_;
   std::vector<double> y_step_length_limit_;
   std::vector<double> com_vel_limit_;
+  Eigen::MatrixXd R_w_t_;
 
   double omega_;
   bool b_set_omega_;
@@ -63,9 +65,12 @@ protected:
   void _StepLengthCheck( Eigen::Vector3d & target_loc,
                         const std::vector< Eigen::Vector2d > & switching_state);
   void _StepLengthCheck( Eigen::Vector3d & target_loc,
-                        bool b_positive_sidestep,
-                        const Eigen::Vector3d & stance_foot);
-
+                         bool b_positive_sidestep,
+                         const Eigen::Vector3d & stance_foot);
+  void _StepLengthCheckConsideringRotation( Eigen::Vector3d & target_loc,
+                                            bool b_positive_sidestep,
+                                            const Eigen::Vector3d & stance_foot);
+  void _UpdateRotation( double yaw_angle );
   int _check_switch_velocity(const std::vector< Eigen::Vector2d > & switch_state);
 
 };

@@ -1,0 +1,97 @@
+test_configuration:
+    start_phase: 0
+
+    initial_jpos: [0., -0.1, -0.9, 1.7, 0.71, 0., 0.08, -0.9, 1.7, 0.71]
+
+    body_height: 0.98
+    com_height_for_omega: 1.0
+
+    jpos_initialization_time: 2.0
+    com_lifting_time: 2.0
+
+
+    swing_time: 0.33
+    st_transition_time: 0.03
+    end_transition_time: 0.03
+    stance_time: 0.01
+
+    #swing_time: 0.28
+    #st_transition_time: 0.025
+    #end_transition_time: 0.025
+    #stance_time: 0.01
+
+    replanning: true
+    #replanning: false
+    transition_phase_mix_ratio: 0.2
+    double_stance_mix_ratio: 0.0
+    contact_switch_check: true
+    #contact_switch_check: false
+
+control_configuration:
+
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 50. , 100 , 100 , 100 , 100 , 50. ]
+        kd: [3   , 3   , 3   , 3   , 1.   , 3   , 3   , 3   , 3   , 1.  ]
+
+    double_contact_trans_ctrl:
+        max_rf_z: 300.0
+        min_rf_z: 5.0
+
+        kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
+        kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
+
+    body_ctrl:
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
+
+    single_contact_trans_ctrl:
+        max_rf_z: 550
+        min_rf_z: 0
+
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
+
+    left_body_foot_planning_ctrl:
+        planner_name: velocity_reversal_lipm
+        swing_height: 0.15
+        push_down_height: 0.0
+        default_target_foot_location: [0.0, 0.15, 0.0]
+
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
+
+        body_pt_offset: [-0.11, 0.00]
+        foot_landing_offset: [0., 0.]
+
+        fin_ankle: 1.4
+        switch_vel_threshold: -2.8
+
+        fin_foot_z_vel: -0.5
+        fin_foot_z_acc: 5.0
+
+    right_body_foot_planning_ctrl:
+        planner_name: velocity_reversal_lipm
+        swing_height: 0.15
+        push_down_height: 0.0
+        default_target_foot_location: [0.0, -0.15, 0.0]
+
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
+
+        body_pt_offset: [-0.11, 0.0]
+        foot_landing_offset: [0., 0.]
+
+        fin_ankle: 1.4
+        switch_vel_threshold: -2.8
+
+        fin_foot_z_vel: -0.5
+        fin_foot_z_acc: 5.0
+
+planner_configuration:
+
+    velocity_reversal_pln:
+        x_step_length_limit: [-0.4, 0.4]
+        y_step_length_limit: [0.20, 0.65]
+        com_velocity_limit: [0.0, 1.3]
+        t_prime: [0.21 , 0.20]
+        kappa: [-0.08, -0.13]

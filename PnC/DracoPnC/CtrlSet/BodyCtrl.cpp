@@ -192,8 +192,8 @@ void BodyCtrl::firstVisit(){
 }
 
 void BodyCtrl::lastVisit(){ 
-    std::cout << "CoM Position @ Last visit in Body Ctrl" << std::endl;
-    std::cout << robot_->getCoMPosition() << std::endl;
+    //std::cout << "CoM Position @ Last visit in Body Ctrl" << std::endl;
+    //std::cout << robot_->getCoMPosition() << std::endl;
     //exit(0);
 }
 

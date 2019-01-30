@@ -135,7 +135,9 @@ void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
                                           bool & lfoot_contact) {
     Eigen::VectorXd r_contact_pos = (mSkel->getBodyNode("rFootFront")->getCOM() + mSkel->getBodyNode("rFootBack")->getCOM()) / 2.0;
     Eigen::VectorXd l_contact_pos = (mSkel->getBodyNode("lFootFront")->getCOM() + mSkel->getBodyNode("lFootBack")->getCOM()) / 2.0;
+    //std::cout << "right" << std::endl;
     //std::cout << r_contact_pos << std::endl;
+    //std::cout << "left" << std::endl;
     //std::cout << l_contact_pos << std::endl;
     //exit(0);
     if (fabs(l_contact_pos[2]) < 0.032){
@@ -144,7 +146,7 @@ void DracoWorldNode::_check_foot_contact( bool & rfoot_contact,
     } else {
         lfoot_contact = false;
     }
-    if (fabs(r_contact_pos[2])<0.032){
+    if (fabs(r_contact_pos[2]) < 0.032){
         rfoot_contact = true;
         //printf("right contact\n");
     } else {

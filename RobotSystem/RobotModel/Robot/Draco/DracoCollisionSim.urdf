@@ -172,7 +172,7 @@
   </link>
   <joint name="lHipYaw" type="revolute">
     <origin xyz="-0.0222 0.0870 0.0" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="Torso" />
     <child link="lHipYaw" />
     <axis xyz="0 0 1" />
@@ -202,7 +202,7 @@
   </link>
   <joint name="lHipRoll" type="revolute">
     <origin xyz="0 0.07 -0.02" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="lHipYaw" />
     <child link="lHipRoll" />
     <axis xyz="1 0 0" />
@@ -232,7 +232,7 @@
   </link>
   <joint name="lHipPitch" type="revolute">
     <origin xyz="0 0.010 -0.065" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="lHipRoll" />
     <child link="lHipPitch" />
     <axis xyz="0 1 0" />
@@ -262,7 +262,7 @@
   </link>
   <joint name="lKnee" type="revolute">
     <origin xyz="0 -0.0168 -0.48" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="lHipPitch" />
     <child link="lKnee" />
     <axis xyz="0 1 0" />
@@ -292,7 +292,7 @@
   </link>
   <joint name="lAnkle" type="revolute">
     <origin xyz="0.0011 0.0168 -0.48" rpy="0 -1.57 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="lKnee" />
     <child link="lAnkle" />
     <axis xyz="0 1 0" />
@@ -441,7 +441,7 @@
   </link>
   <joint name="rHipYaw" type="revolute">
     <origin xyz="-0.0222 -0.0870 0.0" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="Torso" />
     <child link="rHipYaw" />
     <axis xyz="0 0 1" />
@@ -471,7 +471,7 @@
   </link>
   <joint name="rHipRoll" type="revolute">
     <origin xyz="0 -0.07 -0.02" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="rHipYaw" />
     <child link="rHipRoll" />
     <axis xyz="1 0 0" />
@@ -501,7 +501,7 @@
   </link>
   <joint name="rHipPitch" type="revolute">
     <origin xyz="0 -0.01 -0.065" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="rHipRoll" />
     <child link="rHipPitch" />
     <axis xyz="0 1 0" />
@@ -531,7 +531,7 @@
   </link>
   <joint name="rKnee" type="revolute">
     <origin xyz="0 0.01675 -0.48" rpy="0 0 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="rHipPitch" />
     <child link="rKnee" />
     <axis xyz="0 1 0" />
@@ -561,7 +561,7 @@
   </link>
   <joint name="rAnkle" type="revolute">
     <origin xyz="0.0011 -0.0168 -0.48" rpy="0 -1.57 0" />
-    <dynamics damping="0.5" />
+    <dynamics damping="1.0" />
     <parent link="rKnee" />
     <child link="rAnkle" />
     <axis xyz="0 1 0" />

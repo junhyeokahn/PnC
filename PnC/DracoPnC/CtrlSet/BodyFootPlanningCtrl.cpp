@@ -315,6 +315,7 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d & target_loc){
 
     pl_param.des_loc = sp_->des_location;
     pl_param.stance_foot_loc = sp_->global_pos_local;
+    pl_param.yaw_angle = sp_->q[DracoDoF::baseRotZ];
 
     if(swing_foot_ == "lFoot")
         pl_param.b_positive_sidestep = true;

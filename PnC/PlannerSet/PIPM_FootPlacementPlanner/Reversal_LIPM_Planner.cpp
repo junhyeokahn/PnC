@@ -14,6 +14,7 @@ Reversal_LIPM_Planner::Reversal_LIPM_Planner():
     x_step_length_limit_.resize(2);
     y_step_length_limit_.resize(2);
     com_vel_limit_.resize(2);
+    R_w_t_ = Eigen::MatrixXd::Identity(2, 2);
 }
 
 Reversal_LIPM_Planner::~Reversal_LIPM_Planner(){
@@ -47,6 +48,7 @@ void Reversal_LIPM_Planner::getNextFootLocation(
   }
   ParamReversalPL* _input = ((ParamReversalPL*) additional_input);
   OutputReversalPL* _output = ((OutputReversalPL*) additional_output);
+  _UpdateRotation(_input->yaw_angle);
 
   std::vector<Eigen::Vector2d> switch_state(2);
   _computeSwitchingState(_input-> swing_time, com_pos, com_vel,
@@ -86,7 +88,8 @@ void Reversal_LIPM_Planner::getNextFootLocation(
   target_loc[2] = 0.;
 
   // _StepLengthCheck(target_loc, switch_state);
-  _StepLengthCheck(target_loc, _input->b_positive_sidestep, _input->stance_foot_loc);
+  //_StepLengthCheck(target_loc, _input->b_positive_sidestep, _input->stance_foot_loc);
+  _StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep, _input->stance_foot_loc);
 
 
   // save data
@@ -243,4 +246,65 @@ void Reversal_LIPM_Planner::CheckEigenValues(double swing_time){
     std::cout<<eivals<<std::endl;
   }
 
+}
+
+void Reversal_LIPM_Planner::_UpdateRotation(double yaw_angle) {
+    R_w_t_(0, 0) = cos(yaw_angle);
+    R_w_t_(1, 0) = sin(yaw_angle);
+    R_w_t_(1, 0) = -sin(yaw_angle);
+    R_w_t_(1, 1) = cos(yaw_angle);
+}
+
+void Reversal_LIPM_Planner::_StepLengthCheckConsideringRotation(Eigen::Vector3d & target_loc,
+                                                                bool b_positive_sidestep,
+                                                                const Eigen::Vector3d & stance_foot){
+    Eigen::Vector2d stance_foot_in_torso, target_loc_in_torso, v_stance_target_in_torso;
+    stance_foot_in_torso << stance_foot[0], stance_foot[1];
+    stance_foot_in_torso = R_w_t_.transpose() * stance_foot_in_torso;
+    target_loc_in_torso << target_loc[0], target_loc[1];
+    target_loc_in_torso = R_w_t_.transpose() * target_loc_in_torso;
+    v_stance_target_in_torso = target_loc_in_torso - stance_foot_in_torso;
+
+  // X limit check
+  if(v_stance_target_in_torso[0] < x_step_length_limit_[0]){
+    target_loc_in_torso[0] = stance_foot_in_torso[0] + x_step_length_limit_[0];
+    myUtils::color_print(myColor::BoldRed, "x step length hit min: " + std::to_string(v_stance_target_in_torso[0]), true);
+    //myUtils::color_print(myColor::BoldRed, "new x step: (" + std::to_string(target_loc[0]) + ", " + std::to_string(stance_foot[0]) + ")", true);
+  }
+  if(v_stance_target_in_torso[0] > x_step_length_limit_[1]){
+    target_loc_in_torso[0] = stance_foot_in_torso[0] + x_step_length_limit_[1];
+    myUtils::color_print(myColor::BoldRed, "x step length hit max: " + std::to_string(v_stance_target_in_torso[0]), true);
+    //myUtils::color_print(myColor::BoldRed, "new x step: ("+ std::to_string(target_loc[0]) + ", " + std::to_string(stance_foot[0]) + ")", true);
+  }
+
+  // Y limit check
+  if(b_positive_sidestep){ // move to left
+    if(v_stance_target_in_torso[1] < y_step_length_limit_[0]){
+      target_loc_in_torso[1] = stance_foot_in_torso[1] + y_step_length_limit_[0];
+      myUtils::color_print(myColor::BoldRed, "y step length hit min: " + std::to_string(v_stance_target_in_torso[1]), true);
+      //myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
+    }
+
+    if(v_stance_target_in_torso[1] > y_step_length_limit_[1]){
+      target_loc_in_torso[1] = stance_foot_in_torso[1] + y_step_length_limit_[1];
+      myUtils::color_print(myColor::BoldRed, "y step length hit max: " + std::to_string(v_stance_target_in_torso[1]), true);
+      //myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
+    }
+
+  } else { // move to right
+    if(-v_stance_target_in_torso[1] < y_step_length_limit_[0]){
+      target_loc_in_torso[1] = stance_foot_in_torso[1] - y_step_length_limit_[0];
+      myUtils::color_print(myColor::BoldRed, "y step length hit min: " + std::to_string(v_stance_target_in_torso[1]), true);
+      //myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
+    }
+
+    if(-v_stance_target_in_torso[1] > y_step_length_limit_[1]){
+      target_loc_in_torso[1] = stance_foot_in_torso[1] - y_step_length_limit_[1];
+      myUtils::color_print(myColor::BoldRed, "y step length hit max: " + std::to_string(v_stance_target_in_torso[1]), true);
+      //myUtils::color_print(myColor::BoldRed, "new y step: ("+ std::to_string(target_loc[1]) + ", " + std::to_string(stance_foot[1]) + ")", true);
+    }
+
+  }
+  target_loc[0] = (R_w_t_ * target_loc_in_torso)[0];
+  target_loc[1] = (R_w_t_ * target_loc_in_torso)[1];
 }
