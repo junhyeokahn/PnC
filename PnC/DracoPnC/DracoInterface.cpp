@@ -61,6 +61,7 @@ DracoInterface::DracoInterface() : Interface()
 
 DracoInterface::~DracoInterface(){
     delete test_;
+    delete test_cmd_;
     delete state_estimator_;
     delete robot_;
 }

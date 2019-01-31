@@ -77,9 +77,17 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
 }
 
 RLWalkingTest::~RLWalkingTest(){
-    for(int i(0); i<state_list_.size(); ++i){
-        delete state_list_[i];
-    }
+    delete jpos_ctrl_;
+    delete body_up_ctrl_;
+    delete right_swing_start_trans_ctrl_;
+    delete right_swing_ctrl_;
+    delete right_swing_end_trans_ctrl_;
+    delete body_fix_ctrl_;
+    delete left_swing_start_trans_ctrl_;
+    delete left_swing_ctrl_;
+    delete left_swing_end_trans_ctrl_;
+
+    delete reversal_planner_;
 }
 
 void RLWalkingTest::TestInitialization(){

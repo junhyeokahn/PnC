@@ -45,6 +45,8 @@ PYBIND11_MODULE(DracoInterface, m)
       .def_readwrite("bus_voltage", &DracoSensorData::bus_voltage)
       .def_readwrite("bus_current", &DracoSensorData::bus_current)
       .def_readwrite("rotor_inertia", &DracoSensorData::rotor_inertia)
+      .def_readwrite("rfoot_ati", &DracoSensorData::rfoot_ati)
+      .def_readwrite("lfoot_ati", &DracoSensorData::lfoot_ati)
       .def_readwrite("rfoot_contact", &DracoSensorData::rfoot_contact)
       .def_readwrite("lfoot_contact", &DracoSensorData::lfoot_contact);
 

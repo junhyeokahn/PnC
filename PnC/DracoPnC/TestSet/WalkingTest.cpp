@@ -55,7 +55,6 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(left_swing_ctrl_);
     state_list_.push_back(left_swing_end_trans_ctrl_);
 
-
     DataManager::GetDataManager()->RegisterData(
             &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_pos_des_),
             VECT3, "rfoot_pos_des", 3);
@@ -79,9 +78,17 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 }
 
 WalkingTest::~WalkingTest(){
-    for(int i(0); i<state_list_.size(); ++i){
-        delete state_list_[i];
-    }
+    delete jpos_ctrl_;
+    delete body_up_ctrl_;
+    delete right_swing_start_trans_ctrl_;
+    delete right_swing_ctrl_;
+    delete right_swing_end_trans_ctrl_;
+    delete body_fix_ctrl_;
+    delete left_swing_start_trans_ctrl_;
+    delete left_swing_ctrl_;
+    delete left_swing_end_trans_ctrl_;
+
+    delete reversal_planner_;
 }
 
 void WalkingTest::TestInitialization(){

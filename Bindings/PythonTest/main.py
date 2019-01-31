@@ -19,15 +19,18 @@ def main():
     draco_sensor_data.bus_voltage = np.zeros(10)
     draco_sensor_data.bus_current = np.zeros(10)
     draco_sensor_data.rotor_inertia = np.zeros(10)
+    draco_sensor_data.rfoot_ati = np.zeros(6)
+    draco_sensor_data.lfoot_ati = np.zeros(6)
     draco_sensor_data.rfoot_contact = True
     draco_sensor_data.lfoot_contact = True
     draco_command.turn_off = False
     draco_command.q = np.zeros(10)
     draco_command.qdot = np.zeros(10)
     draco_command.jtrq = np.zeros(10)
-    draco_interface.getCommand(draco_sensor_data, draco_command)
 
-    __import__('ipdb').set_trace()
+    for i in range(10):
+        draco_interface.getCommand(draco_sensor_data, draco_command)
+
     print("Done")
 
 

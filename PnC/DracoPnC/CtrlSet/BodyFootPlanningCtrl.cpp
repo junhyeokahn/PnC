@@ -489,6 +489,7 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node){
 }
 
 BodyFootPlanningCtrl::~BodyFootPlanningCtrl(){
+    delete selected_joint_task_;
     delete base_task_;
     //delete foot_pitch_task_;
     delete foot_point_task_;
