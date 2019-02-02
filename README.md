@@ -1,10 +1,6 @@
 # Planning and Control Algorithms for Robotics
 PnC is a C++ library designed for generating trajectories for a robot system
-and stabilizing the system over the trajectories. It provides interface to the
-real hardware as well as simulation
-environment([Dart](https://github.com/junhyeokahn/dart),
-[Drake](https://github.com/junhyeokahn/drake)) and enables to communicate with
-the reinforcement learning package([Baseline](https://github.com/openai/baselines)).
+and stabilizing the system over the trajectories.
 
 ## Run the Code
 
@@ -15,24 +11,13 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 ```
 
 ### Install Required Dependancies
-- [Dart 6.5.0](https://dartsim.github.io/install_dart_on_mac.html)
+- [Dart 6.8.0](https://dartsim.github.io/install_dart_on_mac.html)
 
 ### Install Optional Dependancies
+- [TensorFlow](https://www.tensorflow.org/)
 - [Gurobi](http://www.gurobi.com/)
 - [Mosek](https://www.mosek.com/)
 - [Snopt](http://ccom.ucsd.edu/~optimizers)
-- [Drake](https://github.com/junhyeokahn/drake)
-```
-$ cd 'your workspace' && git clone https://github.com/junhyeokahn/drake.git
-$ cd drake && ./setup/mac/install_prereqs.sh
-$ rm -rf ../drake-build && mkdir ../drake-build && cd ../drake-build
-$ cmake -DWITH_GUROBI=ON -DWITH_MOSEK=ON -DWITH_SNOPT=ON ../drake # Configure Gurobi, Mosek or Snopt if needed
-$ make
-```
-Alternatively, you could also do
-```
-$ cd PnC && source ./install.sh
-```
 
 ### Compile the Code
 ```

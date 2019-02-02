@@ -29,7 +29,7 @@ include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
 # Dart
-find_package(DART 6.5 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+find_package(DART 6.8 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Pybind11
@@ -39,18 +39,6 @@ if(USE_PYBIND11)
   find_package(PythonAnaconda)
 else()
   message("-- Disable Pybind11")
-endif()
-
-# Drake
-set(USE_DRAKE False)
-#set(USE_DRAKE True)
-if(USE_DRAKE)
-  message("-- Enable Drake")
-  #set(drake_DIR /opt/drake/lib/cmake/drake)
-  set(drake_DIR ${CMAKE_SOURCE_DIR}/../drake-build/install/lib/cmake/drake)
-  find_package(drake CONFIG REQUIRED)
-else()
-  message("-- Disable Drake")
 endif()
 
 # Eigen
