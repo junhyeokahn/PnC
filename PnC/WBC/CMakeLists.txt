@@ -9,7 +9,6 @@ add_library(myWBC SHARED ${sources}
                          ${wbdc_headers})
 target_link_libraries(myWBC myUtils
                             myGoldfarb
-                            myContact
                             myRobotSystem)
 
 install(TARGETS myWBC DESTINATION "${INSTALL_LIB_DIR}")

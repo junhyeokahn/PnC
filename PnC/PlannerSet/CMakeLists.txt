@@ -18,7 +18,6 @@ if(USE_DRAKE)
 endif()
 
 target_link_libraries(myPlanner myUtils
-                                myContact
                                 myConicSolver
                                 myRobotSystem)
 

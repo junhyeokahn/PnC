@@ -1,5 +1,4 @@
 add_subdirectory(DracoPnC)
-add_subdirectory(Contact)
 add_subdirectory(WBC)
 add_subdirectory(PlannerSet)
 if(GTEST_FOUND)
