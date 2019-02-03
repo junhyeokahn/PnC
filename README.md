@@ -14,10 +14,8 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 - [Dart 6.8.0](https://dartsim.github.io/install_dart_on_mac.html)
 
 ### Install Optional Dependancies
-- [TensorFlow](https://www.tensorflow.org/)
-- [Gurobi](http://www.gurobi.com/)
-- [Mosek](https://www.mosek.com/)
-- [Snopt](http://ccom.ucsd.edu/~optimizers)
+- [TensorFlow](https://www.tensorflow.org/), [Baseline](https://stable-baselines.readthedocs.io/en/master/index.html) for Reinforcement Learning
+- [Gurobi](http://www.gurobi.com/), [Mosek](https://www.mosek.com/), [Snopt](http://ccom.ucsd.edu/~optimizers) for Optimal control
 
 ### Compile the Code
 ```
