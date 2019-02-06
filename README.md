@@ -16,6 +16,7 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 ### Install Optional Dependancies
 - [TensorFlow](https://www.tensorflow.org/), [Baseline](https://stable-baselines.readthedocs.io/en/master/index.html) for Reinforcement Learning
 - [Gurobi](http://www.gurobi.com/), [Mosek](https://www.mosek.com/), [Snopt](http://ccom.ucsd.edu/~optimizers) for Optimal control
+- [zmq](https://github.com/junhyeokahn/libzmq) with [cppzmq](https://github.com/junhyeokahn/cppzmq) and [pyzmq](https://github.com/junhyeokahn/pyzmq)
 
 ### Compile the Code
 ```
