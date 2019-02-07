@@ -1,4 +1,5 @@
 add_subdirectory(DracoPnC)
+add_subdirectory(CartPolePnC)
 add_subdirectory(WBC)
 add_subdirectory(PlannerSet)
 if(GTEST_FOUND)

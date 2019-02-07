@@ -3,7 +3,6 @@
 #include "PnC/DracoPnC/DracoInterface.hpp"
 #include "Utils/DataManager.hpp"
 #include "Utils/Utilities.hpp"
-#include "Utils/ParamHandler.hpp"
 #include "Configuration.h"
 
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgShadow::MinimalShadowMap * msm) :
