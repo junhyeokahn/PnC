@@ -4,6 +4,7 @@
 
 CartPoleInterface::CartPoleInterface() : Interface() {
     // build neural net policy
+    // construct msg, socket
 }
 
 CartPoleInterface::~CartPoleInterface() {}

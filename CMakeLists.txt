@@ -92,6 +92,7 @@ add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 add_subdirectory(Filter)
+add_subdirectory(Messages)
 
 if(USE_PYBIND11)
   add_subdirectory(Bindings)

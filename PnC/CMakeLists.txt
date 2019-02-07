@@ -1,7 +1,11 @@
 add_subdirectory(DracoPnC)
-add_subdirectory(CartPolePnC)
 add_subdirectory(WBC)
 add_subdirectory(PlannerSet)
+
+if(ZMQ_FOUND AND Protobuf_FOUND)
+    add_subdirectory(CartPolePnC)
+endif()
+
 if(GTEST_FOUND)
   add_subdirectory(Unittest)
 endif()
