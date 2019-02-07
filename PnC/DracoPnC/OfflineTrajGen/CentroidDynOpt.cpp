@@ -2,7 +2,7 @@
 #include "PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp"
 #include <memory>
 #include "Configuration.h"
-#include "Utils/Utilities.hpp"
+#include "Utils/IO/IOUtilities.hpp"
 #include <vector>
 
 int main(int argc, char *argv[])

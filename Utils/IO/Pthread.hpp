@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
  
-class DartpThread{
+class Pthread{
 protected:
     pthread_t sejong_thread;
     bool firstLoopFlag;
@@ -18,8 +18,8 @@ protected:
     bool isFirstLoop();
 
 public:
-    DartpThread();
-    virtual ~DartpThread(void);
+    Pthread();
+    virtual ~Pthread(void);
     virtual void run(void) = 0;
 
     void start();

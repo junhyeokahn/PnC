@@ -6,6 +6,7 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 DoubleContactTransCtrl::DoubleContactTransCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "Double Contact Transition Ctrl");

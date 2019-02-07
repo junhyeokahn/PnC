@@ -4,7 +4,8 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/DataManager.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {

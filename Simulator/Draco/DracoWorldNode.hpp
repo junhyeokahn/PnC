@@ -5,7 +5,7 @@
 #include <osgShadow/LightSpacePerspectiveShadowMap>
 #include <Eigen/Dense>
 
-#include "Utils/Clock.hpp"
+#include "Utils/General/Clock.hpp"
 
 class Interface;
 class DracoSensorData;

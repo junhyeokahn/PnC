@@ -1,8 +1,8 @@
 #ifndef WHOLE_BODY_CONTROLLER
 #define WHOLE_BODY_CONTROLLER
 
-#include <Utils/Utilities.hpp>
-#include <Utils/pseudo_inverse.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
 

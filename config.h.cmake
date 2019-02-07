@@ -3,5 +3,6 @@
 
 #define THIS_COM "@THIS_COM@"
 #define SERVO_RATE (1.0/1000.0)
+#define RL_LOCAL_HOST "tcp://127.0.0.1:5557"
 
 #endif

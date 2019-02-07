@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <zmq.hpp>
 
 #include "PnC/Interface.hpp"
 
@@ -25,5 +26,6 @@ public:
     virtual void getCommand(void * _sensor_data, void * _command_data);
 
 private:
-    /* data */
+    zmq::context_t * context_;
+    zmq::socket_t * publisher_;
 };

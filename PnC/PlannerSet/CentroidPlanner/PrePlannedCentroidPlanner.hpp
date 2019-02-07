@@ -6,7 +6,7 @@
 #include "PnC/Planner.hpp"
 #include "Configuration.h"
 #include "PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp"
-#include "Utils/BSplineBasic.h"
+#include "Utils/Math/BSplineBasic.h"
 
 class PrePlannedCentroidPlannerParameter : public PlannerParameter
 {

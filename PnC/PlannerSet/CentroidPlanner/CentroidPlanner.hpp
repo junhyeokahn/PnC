@@ -2,10 +2,10 @@
 
 #include "PnC/Planner.hpp"
 #include "RobotSystem/CentroidModel.hpp"
-#include "DynamicsState.hpp"
+#include "PnC/PlannerSet/CentroidPlanner/DynamicsState.hpp"
 #include "PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp"
 #include "Configuration.h"
-#include "Utils/Clock.hpp"
+#include "Utils/General/Clock.hpp"
 #include "ExternalSource/myOptimizer/ConicSolver/include/solver/interface/Solver.hpp"
 
 using namespace solver;

@@ -5,7 +5,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");

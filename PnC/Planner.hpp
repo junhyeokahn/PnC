@@ -6,8 +6,8 @@
 #include <Eigen/Dense>
 
 #include "Configuration.h"
-#include "Utils/Utilities.hpp"
-#include "Utils/Clock.hpp"
+#include "Utils/IO/IOUtilities.hpp"
+#include "Utils/General/Clock.hpp"
 
 class PlannerParameter
 {

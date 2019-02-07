@@ -1,8 +1,8 @@
 #include "DracoWorldNode.hpp"
 #include "DracoLedPosAnnouncer.hpp"
 #include "PnC/DracoPnC/DracoInterface.hpp"
-#include "Utils/DataManager.hpp"
-#include "Utils/Utilities.hpp"
+#include "Utils/IO/DataManager.hpp"
+#include "Utils/IO/IOUtilities.hpp"
 #include "Configuration.h"
 
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgShadow::MinimalShadowMap * msm) :

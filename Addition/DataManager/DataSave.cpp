@@ -1,11 +1,11 @@
 #include "DataSave.h"
 
 #include <iostream>
-#include <Utils/comm_udp.hpp>
-#include <Utils/Utilities.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/comm_udp.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/IO/DataManager.hpp>
 
-DataSave::DataSave(bool b_verbose):DartpThread(), socket1_(0), socket2_(0){
+DataSave::DataSave(bool b_verbose):Pthread(), socket1_(0), socket2_(0){
   b_verbose_= b_verbose;
   if(b_verbose_) printf("verbose mode\n");
   else printf("quiet mode\n");

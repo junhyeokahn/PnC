@@ -1,7 +1,7 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Configuration.h>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 IsolatedPointFootTask::IsolatedPointFootTask(RobotSystem* robot,
                            const std::string & _link_name):Task(robot, 3)

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 
 //! Contact Frame's z-axis should correspond normal vector to the ground

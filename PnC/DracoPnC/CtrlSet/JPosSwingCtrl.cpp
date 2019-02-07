@@ -5,7 +5,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
     myUtils::pretty_constructor(2, "JPos Ctrl");

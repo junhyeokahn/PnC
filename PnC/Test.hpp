@@ -4,8 +4,8 @@
 
 #include <Configuration.h>
 #include <PnC/Controller.hpp>
-#include <Utils/DataManager.hpp>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/DataManager.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 class Controller;
 class RobotSystem;

@@ -1,7 +1,7 @@
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <Configuration.h>
 #include <Eigen/Eigenvalues>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 Reversal_LIPM_Planner::Reversal_LIPM_Planner():
   FootStepPlanner(),

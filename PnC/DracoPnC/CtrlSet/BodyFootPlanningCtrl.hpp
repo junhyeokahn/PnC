@@ -2,8 +2,8 @@
 
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <Utils/minjerk_one_dim.hpp>
-#include <Utils/BSplineBasic.h>
+#include <Utils/Math/minjerk_one_dim.hpp>
+#include <Utils/Math/BSplineBasic.h>
 
 class KinWBC;
 

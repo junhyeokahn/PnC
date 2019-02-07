@@ -1,6 +1,6 @@
 #include <PnC/WBC/WBLC/KinWBC.hpp>
-#include <Utils/Utilities.hpp>
-#include <Utils/pseudo_inverse.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 
 KinWBC::KinWBC(const std::vector<bool> & act_joint):
     num_act_joint_(0),

@@ -1,4 +1,4 @@
-#include <Utils/minjerk_one_dim.hpp>
+#include <Utils/Math/minjerk_one_dim.hpp>
 
 // Empty Constructor
 MinJerk_OneDimension::MinJerk_OneDimension(){

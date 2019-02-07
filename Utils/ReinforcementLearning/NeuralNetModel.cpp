@@ -1,4 +1,4 @@
-#include "Utils/NeuralNetModel.hpp"
+#include "Utils/ReinforcementLearning/NeuralNetModel.hpp"
 
 Layer::Layer(Eigen::MatrixXd weight, Eigen::VectorXd bias, ActivationFunction act_fn) {
     weight_ = weight;
@@ -11,14 +11,12 @@ Layer::Layer(Eigen::MatrixXd weight, Eigen::VectorXd bias, ActivationFunction ac
 Layer::~Layer() {}
 
 Eigen::VectorXd Layer::GetOutput(const Eigen::VectorXd & input) {
-    Eigen::VectorXd ret = Eigen::VectorXd::Zero(num_output_);
-
-    return ret;
+    return input * weight_ + bias_;
 }
 
 NeuralNetModel::NeuralNetModel(std::vector<Layer> layers) {
     layers_ = layers;
-    num_hidden_layer_ = layers.size();
+    num_layer_ = layers.size();
     num_input_ = layers[0].GetNumInput();
     num_output_ = layers.back().GetNumOutput();
 }
@@ -26,7 +24,9 @@ NeuralNetModel::NeuralNetModel(std::vector<Layer> layers) {
 NeuralNetModel::~NeuralNetModel() {}
 
 Eigen::VectorXd NeuralNetModel::GetOutput( const Eigen::VectorXd & input ) {
-    Eigen::VectorXd ret = Eigen::VectorXd::Zero(num_output_);
-
+    Eigen::VectorXd ret = input;
+    for (int i = 0; i < num_layer_; ++i) {
+        ret = (layers_[i]).GetOutput(ret);
+    }
     return ret;
 }

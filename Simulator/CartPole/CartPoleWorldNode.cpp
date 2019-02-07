@@ -1,7 +1,7 @@
 #include "CartPoleWorldNode.hpp"
 #include "PnC/CartPolePnC/CartPoleInterface.hpp"
-#include "Utils/DataManager.hpp"
-#include "Utils/Utilities.hpp"
+#include "Utils/IO/DataManager.hpp"
+#include "Utils/IO/IOUtilities.hpp"
 #include "Configuration.h"
 
 CartPoleWorldNode::CartPoleWorldNode(const dart::simulation::WorldPtr & world_,

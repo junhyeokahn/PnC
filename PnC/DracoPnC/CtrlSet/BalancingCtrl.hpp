@@ -1,7 +1,7 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
-#include "Utils/BSplineBasic.h"
+#include "Utils/Math/BSplineBasic.h"
 
 class DracoStateProvider;
 class RobotSystem;

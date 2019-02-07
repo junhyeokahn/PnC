@@ -6,7 +6,8 @@
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 

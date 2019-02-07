@@ -1,10 +1,10 @@
 #ifndef DATA_SAVE
 #define DATA_SAVE
 
-#include <Utils/DartpThread.hpp>
+#include <Utils/IO/Pthread.hpp>
 #include "data_protocol.h"
 
-class DataSave: public DartpThread{
+class DataSave: public Pthread{
 public:
     DataSave(bool b_verbose);
     virtual ~DataSave();

@@ -1,11 +1,11 @@
 #include <Configuration.h>
-#include <Utils/comm_udp.hpp>
-#include <Utils/Utilities.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/comm_udp.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/IO/DataManager.hpp>
 #include <PnC/DracoPnC/DracoMoCapManager.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 
-DracoMoCapManager::DracoMoCapManager(RobotSystem* robot):DartpThread(),
+DracoMoCapManager::DracoMoCapManager(RobotSystem* robot):Pthread(),
     socket_(0),
     led_pos_data_(3*NUM_MARKERS),
     led_kin_data_(3*NUM_MARKERS),

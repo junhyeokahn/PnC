@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Utils/DartpThread.hpp>
+#include <Utils/IO/Pthread.hpp>
 #include <PnC/DracoPnC/StateEstimator/BodyEstimator.hpp>
 #include <Filters/Basic/filters.hpp>
 
@@ -25,7 +25,7 @@ enum MocapLed {
     rTorsoLed= 2
 };
 
-class DracoMoCapManager: public DartpThread{
+class DracoMoCapManager: public Pthread{
     public:
         friend class BodyEstimator;
 

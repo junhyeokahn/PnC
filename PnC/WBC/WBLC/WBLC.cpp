@@ -2,7 +2,7 @@
 #include <Eigen/SVD>
 
 #include <PnC/WBC/WBLC/WBLC.hpp>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 WBLC::WBLC(const std::vector<bool> & act_list,
         const Eigen::MatrixXd * Jci):

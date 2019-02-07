@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Utils/pseudo_inverse.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 class Controller{
 public:

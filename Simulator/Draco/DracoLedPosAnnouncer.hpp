@@ -5,10 +5,10 @@
 
 #include <dart/dart.hpp>
 
-#include <Utils/DartpThread.hpp>
+#include <Utils/IO/Pthread.hpp>
 #include <PnC/DracoPnC/DracoMoCapManager.hpp>
 
-class DracoLedPosAnnouncer: public DartpThread{
+class DracoLedPosAnnouncer: public Pthread{
 public:
 
     DracoLedPosAnnouncer(dart::simulation::WorldPtr _world);

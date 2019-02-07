@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils/Utilities.hpp"
+#include "Utils/IO/IOUtilities.hpp"
 
 /*! \enum ActivationFunction
  *
@@ -40,6 +40,6 @@ public:
 private:
     int num_input_;
     int num_output_;
-    int num_hidden_layer_;
+    int num_layer_;
     std::vector<Layer> layers_;
 };

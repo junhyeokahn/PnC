@@ -5,7 +5,7 @@
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/DataManager.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot){

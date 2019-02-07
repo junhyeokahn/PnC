@@ -35,19 +35,19 @@ include_directories ("${PROJECT_SOURCE_DIR}/../../")
 set (headers
 DataSave.h
 data_protocol.h
-../../Utils/DartpThread.hpp
-../../Utils/comm_udp.hpp
-../../Utils/Utilities.hpp
-../../Utils/DataManager.hpp
+../../Utils/IO/Pthread.hpp
+../../Utils/IO/comm_udp.hpp
+../../Utils/IO/IOUtilities.hpp
+../../Utils/IO/DataManager.hpp
 )
 
 set (sources
 DataSave.cpp
 Status_Display.cpp
-../../Utils/DartpThread.cpp
-../../Utils/comm_udp.cpp
-../../Utils/Utilities.cpp
-../../Utils/DataManager.cpp
+../../Utils/IO/Pthread.cpp
+../../Utils/IO/comm_udp.cpp
+../../Utils/IO/IOUtilities.cpp
+../../Utils/IO/DataManager.cpp
 )
 
 #link_directories("/usr/local/lib/")

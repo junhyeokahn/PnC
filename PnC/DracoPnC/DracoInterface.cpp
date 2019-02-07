@@ -2,9 +2,9 @@
 #include <math.h>
 #include <string>
 #include <PnC/DracoPnC/DracoInterface.hpp>
-#include <Utils/Utilities.hpp>
-#include <Utils/pseudo_inverse.hpp>
-#include <Utils/DataManager.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
+#include <Utils/IO/DataManager.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <RobotSystem/RobotSystem.hpp>

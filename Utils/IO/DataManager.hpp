@@ -2,7 +2,7 @@
 #define DATA_MANAGER
 
 #include <Addition/DataManager/data_protocol.h>
-#include <Utils/DartpThread.hpp>
+#include <Utils/IO/Pthread.hpp>
 #include <vector>
 #include <string>
 #include <Eigen/Dense>
@@ -17,7 +17,7 @@ enum DATA_Type{
     VECT
 };
 
-class DataManager: public DartpThread{
+class DataManager: public Pthread{
 public:
     static DataManager* GetDataManager();
     virtual ~DataManager();

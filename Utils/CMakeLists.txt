@@ -1,7 +1,15 @@
-FILE(GLOB my_utils_headers "*.hpp" "*.h")
-FILE(GLOB my_utils_sources "*.cpp")
+FILE(GLOB_RECURSE sources "*.cpp")
+FILE(GLOB general_headers "General/*.hpp")
+FILE(GLOB io_headers "*.hpp")
+FILE(GLOB math_headers "*.hpp" "*.h")
+FILE(GLOB rl_headers "*.hpp")
 
-add_library(myUtils SHARED ${my_utils_headers} ${my_utils_sources})
+if(NOT ZMQ_FOUND)
+    list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/IO/ZmqUtilities.cpp)
+    list(REMOVE_ITEM io_headers ${CMAKE_CURRENT_SOURCE_DIR}/IO/ZmqUtilities.hpp)
+endif()
+
+add_library(myUtils SHARED  ${sources})
 target_link_libraries(myUtils myYaml)
 
 find_package(Threads REQUIRED)
@@ -13,4 +21,8 @@ if(CMAKE_THREAD_LIBS_INIT)
 endif()
 
 install(TARGETS myUtils DESTINATION "${INSTALL_LIB_DIR}")
-install(FILES ${my_utils_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils")
+install(FILES ${general_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/General")
+install(FILES ${general_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/General")
+install(FILES ${io_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/IO")
+install(FILES ${math_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Math")
+install(FILES ${rl_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/ReinforcementLearning")

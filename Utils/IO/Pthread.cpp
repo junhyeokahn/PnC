@@ -1,30 +1,30 @@
-#include "DartpThread.hpp"
+#include "Utils/IO/Pthread.hpp"
 #include <iostream>
 
-DartpThread::DartpThread() :
+Pthread::Pthread() :
     sejong_thread(),
     firstLoopFlag(false),
     isRunning(false)
 {}
 
-DartpThread::~DartpThread()
+Pthread::~Pthread()
 {
     pthread_cancel(sejong_thread);
     pthread_join(sejong_thread, NULL);
 }
-void DartpThread::terminate()
+void Pthread::terminate()
 {
     printf("terminating thread\n");
     isRunning = false;
 }
-bool DartpThread::isFirstLoop()
+bool Pthread::isFirstLoop()
 {
     return firstLoopFlag;
 }
 
 void *runThread(void * arg)
 {
-    ((DartpThread*) arg)->run();
+    ((Pthread*) arg)->run();
     return NULL;
 }
 
@@ -32,7 +32,7 @@ void sigint(int signo)
 {
     (void) signo;
 }
-void DartpThread::start()
+void Pthread::start()
 {
     if(!isRunning){
         sigset_t sigset, oldset;

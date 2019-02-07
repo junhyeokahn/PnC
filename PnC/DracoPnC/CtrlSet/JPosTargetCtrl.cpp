@@ -4,7 +4,8 @@
 #include <PnC/WBC/BasicTask.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
-#include <Utils/Utilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(2, "JPos Target Ctrl");

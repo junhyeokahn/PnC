@@ -1,6 +1,5 @@
 #include "RobotSystem/RobotSystem.hpp"
 #include <chrono>
-#include "Utils/Utilities.hpp"
 
 RobotSystem::RobotSystem(int numVirtual_, std::string file) {
     myUtils::pretty_constructor(1, "Robot Model");
