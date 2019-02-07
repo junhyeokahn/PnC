@@ -91,12 +91,17 @@ add_subdirectory(RobotSystem)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
-add_subdirectory(Filter)
+add_subdirectory(Filters)
 add_subdirectory(Messages)
 
 if(USE_PYBIND11)
   add_subdirectory(Bindings)
 endif()
+
+if(GTEST_FOUND)
+  add_subdirectory(UnitTest)
+endif()
+
 
 ##=============================================================================
 ## Configuration File

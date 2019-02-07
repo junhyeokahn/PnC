@@ -12,7 +12,7 @@ target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
                                myWBC
-                               myFilter
+                               myFilters
                                myPlanner)
 
 install(TARGETS DracoPnC DESTINATION "${INSTALL_LIB_DIR}")

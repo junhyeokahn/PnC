@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Filter/filters.hpp>
+#include <Filters/Basic/filters.hpp>
 
 class BasicAccumulation{
     public:
