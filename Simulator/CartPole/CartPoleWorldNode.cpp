@@ -4,10 +4,8 @@
 #include "Utils/IO/IOUtilities.hpp"
 #include "Configuration.h"
 
-CartPoleWorldNode::CartPoleWorldNode(const dart::simulation::WorldPtr & world_,
-                                     osgShadow::MinimalShadowMap * msm) :
-    dart::gui::osg::WorldNode(world_, msm) {
-
+CartPoleWorldNode::CartPoleWorldNode(const dart::simulation::WorldPtr & world_, osgShadow::MinimalShadowMap * msm) : dart::gui::osg::WorldNode(world_, msm)
+{
     interface_ = new CartPoleInterface();
     sensor_data_ = new CartPoleSensorData();
     cmd_ = new CartPoleCommand();

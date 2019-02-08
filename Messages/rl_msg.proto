@@ -4,25 +4,26 @@ package RL;
 
 message DataSet {
     uint32 count = 1;
-    repeated float joint_position = 2;
-    repeated float joint_velocity = 3;
+    float reward = 2;
+    repeated float joint_position = 3;
+    repeated float joint_velocity = 4;
+    float joint_torque = 5;
 }
 
 message PolicyParam {
 
     message Layer {
-        uint32 num_node = 1;
-        uint32 num_input = 2;
-        uint32 num_output = 3;
-        repeated float weight = 4;
-        repeated float bias = 5;
-        ActivationFunction act_fn = 6;
+        uint32 num_input = 1;
+        uint32 num_output = 2;
+        repeated float weight = 3;
+        repeated float bias = 4;
+        ActivationFunction act_fn = 5;
     }
 
     enum ActivationFunction {
-        NONE = 0;
-        TANH = 1;
-        RELU = 2;
+        None = 0;
+        Tanh = 1;
+        ReLU = 2;
     }
 
     repeated Layer layers = 1;

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Utils/IO/IOUtilities.hpp"
+#include <Eigen/Dense>
+#include <vector>
+#include <iostream>
 
 /*! \enum ActivationFunction
  *
  *  Detailed description
  */
-enum ActivationFunction { 
+enum ActivationFunction {
     None = 0,
     Tanh = 1,
     ReLU = 2

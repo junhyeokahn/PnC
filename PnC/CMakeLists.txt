@@ -4,6 +4,7 @@ add_subdirectory(PlannerSet)
 
 if(ZMQ_FOUND AND Protobuf_FOUND)
     add_subdirectory(CartPolePnC)
+    add_subdirectory(ReinforcementLearning)
 endif()
 
 file(GLOB pnc_headers "*.hpp")

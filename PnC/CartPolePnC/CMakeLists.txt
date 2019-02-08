@@ -6,5 +6,6 @@ target_link_libraries(CartPolePnC ${DART_LIBRARIES}
                                   myRobotSystem
                                   myUtils
                                   RLProtobuf
+                                  myRL
                                   ${Protobuf_LIBRARIES}
                                   ${ZMQ_LIBRARIES})

@@ -1,4 +1,4 @@
-#include "Utils/ReinforcementLearning/NeuralNetModel.hpp"
+#include "PnC/ReinforcementLearning/NeuralNetModel.hpp"
 
 Layer::Layer(Eigen::MatrixXd weight, Eigen::VectorXd bias, ActivationFunction act_fn) {
     weight_ = weight;

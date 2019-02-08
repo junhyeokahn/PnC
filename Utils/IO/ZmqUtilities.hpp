@@ -4,7 +4,7 @@
 
 namespace myUtils
 {
-    static std::string s_recv (zmq::socket_t & socket) {
+    static std::string StringRecv (zmq::socket_t & socket) {
 
         zmq::message_t message;
         socket.recv(&message);
@@ -13,12 +13,30 @@ namespace myUtils
     }
 
     //  Convert string to 0MQ string and send to socket
-    static bool s_send (zmq::socket_t & socket, const std::string & string) {
+    static bool StringSend (zmq::socket_t & socket, const std::string & string) {
 
         zmq::message_t message(string.size());
         memcpy (message.data(), string.data(), string.size());
 
         bool rc = socket.send (message);
         return (rc);
+    }
+
+    // cpp send hello.
+    // when python gets connected and recv hello, then req world
+    // when cpp get req, rep dummy and break
+    static void PairAndSync( zmq::socket_t & pub_socket, zmq::socket_t & rep_socket, int num_subscriber )
+    {
+        int num_connected(0);
+        while(true)
+        {
+            StringSend(pub_socket, "hello");
+            if(StringRecv(rep_socket) == "world")
+            {
+                ++num_connected;
+                if (num_subscriber == num_connected) { break; }
+            };
+            StringSend(rep_socket, "");
+        }
     }
 } /* myUtils */
