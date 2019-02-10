@@ -1,16 +1,17 @@
 syntax = "proto3";
 
-package RL;
+package CartPole;
 
 message DataSet {
     uint32 count = 1;
-    float reward = 2;
-    repeated float joint_position = 3;
-    repeated float joint_velocity = 4;
-    float joint_torque = 5;
+    bool done = 2;
+    float reward = 3;
+    repeated float observation = 4;
 }
 
-message PolicyParam {
+message StochasticPolicyParam {
+
+    repeated Layer layers = 1;
 
     message Layer {
         uint32 num_input = 1;
@@ -20,13 +21,12 @@ message PolicyParam {
         ActivationFunction act_fn = 5;
     }
 
+    repeated float logstd = 2;
+
     enum ActivationFunction {
         None = 0;
         Tanh = 1;
         ReLU = 2;
     }
-
-    repeated Layer layers = 1;
-
 }
 

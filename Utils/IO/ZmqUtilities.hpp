@@ -28,15 +28,17 @@ namespace myUtils
     static void PairAndSync( zmq::socket_t & pub_socket, zmq::socket_t & rep_socket, int num_subscriber )
     {
         int num_connected(0);
+        int i(0);
         while(true)
         {
             StringSend(pub_socket, "hello");
-            if(StringRecv(rep_socket) == "world")
-            {
+            if(StringRecv(rep_socket) == "world") {
                 ++num_connected;
+                StringSend(rep_socket, "");
                 if (num_subscriber == num_connected) { break; }
-            };
-            StringSend(rep_socket, "");
+            } else {
+                StringSend(rep_socket, "");
+            }
         }
     }
 } /* myUtils */

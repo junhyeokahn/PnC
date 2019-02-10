@@ -4,18 +4,19 @@ import paramiko
 class ProcessManager(object):
 
     def __init__(self, ip, username, password, execute_cmd, exit_cmd):
+
         self.ssh = paramiko.SSHClient()
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh.connect(ip, username=username, password=password)
         self.execute_cmd = execute_cmd
         self.exit_cmd = exit_cmd
 
-        exit()
+        # self.quit_process()
 
-    def execute(self):
+    def execute_process(self):
         self.ssh.exec_command(self.execute_cmd)
 
-    def exit(self):
+    def quit_process(self):
         self.ssh.exec_command(self.exit_cmd)
 
     def close(self):

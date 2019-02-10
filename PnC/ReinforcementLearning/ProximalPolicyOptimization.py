@@ -37,7 +37,7 @@ class PPO(ActorCriticRLModel):
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param policy_kwargs: (dict) additional arguments to be passed to the policy on creation
     """
-    def __init__(self, policy, env, gamma=0.99, timesteps_per_actorbatch=256, clip_param=0.2, entcoeff=0.01,
+    def __init__(self, policy, env, data_generator, gamma=0.99, timesteps_per_actorbatch=256, clip_param=0.2, entcoeff=0.01,
                  optim_epochs=4, optim_stepsize=1e-3, optim_batchsize=64, lam=0.95, adam_epsilon=1e-5,
                  schedule='linear', verbose=0, tensorboard_log=None, _init_setup_model=True, policy_kwargs=None):
 
@@ -55,6 +55,7 @@ class PPO(ActorCriticRLModel):
         self.adam_epsilon = adam_epsilon
         self.schedule = schedule
         self.tensorboard_log = tensorboard_log
+        self.data_generator = data_generator
 
         self.graph = None
         self.sess = None
@@ -135,6 +136,7 @@ class PPO(ActorCriticRLModel):
                     tf.summary.scalar('loss', total_loss)
 
                     self.params = tf_util.get_trainable_vars("model")
+                    self.policy_param = tf_util.get_trainable_vars("model/pi")
 
                     self.assign_old_eq_new = tf_util.function(
                         [], [], updates=[tf.assign(oldv, newv) for (oldv, newv) in
@@ -181,7 +183,7 @@ class PPO(ActorCriticRLModel):
                 self.adam.sync()
 
                 # Prepare for rollouts
-                seg_gen = traj_segment_generator(self.policy_pi, self.env, self.timesteps_per_actorbatch)
+                # seg_gen = traj_segment_generator(self.policy_pi, self.env, self.timesteps_per_actorbatch)
 
                 episodes_so_far = 0
                 timesteps_so_far = 0
@@ -213,7 +215,8 @@ class PPO(ActorCriticRLModel):
 
                     logger.log("********** Iteration %i ************" % iters_so_far)
 
-                    seg = seg_gen.__next__()
+                    # seg = seg_gen.__next__()
+                    seg = self.data_generator.get_data_segment(self.sess.run(self.policy_param))
                     add_vtarg_and_adv(seg, self.gamma, self.lam)
 
                     # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))

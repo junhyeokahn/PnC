@@ -34,5 +34,10 @@ private:
     std::vector<Layer> layers_;
     NeuralNetModel* nn_policy_;
 
+    Eigen::VectorXd obs_lower_bound_;
+    Eigen::VectorXd obs_upper_bound_;
+    Eigen::VectorXd action_lower_bound_;
+    Eigen::VectorXd action_upper_bound_;
+
     void SendRLDataSet_(CartPoleSensorData* data, CartPoleCommand* cmd);
 };

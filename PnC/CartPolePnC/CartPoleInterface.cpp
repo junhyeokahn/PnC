@@ -5,40 +5,63 @@
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
 #include <Configuration.h>
 #include <Utils/IO/ZmqUtilities.hpp>
-#include <rl_msg.pb.h>
+#include <Utils/IO/IOUtilities.hpp>
+#include <cart_pole_msg.pb.h>
 
 CartPoleInterface::CartPoleInterface() : Interface()
 {
+    // =========================================================================
+    // Construct zmq socket and connect
+    // =========================================================================
     context_ = new zmq::context_t(1);
     data_socket_ = new zmq::socket_t(*context_, ZMQ_PUB);
     policy_socket_ = new zmq::socket_t(*context_, ZMQ_REP);
-    // Construct zmq publisher
     data_socket_->bind(IP_RL_SUB_PUB);
     policy_socket_->bind(IP_RL_REQ_REP);
     myUtils::PairAndSync(*data_socket_, *policy_socket_, 1);
 
-    // build neural net policy
-    // TODO double check Constrution, Output of NN model
+    // =========================================================================
+    // Build neural net policy
+    // =========================================================================
     zmq::message_t zmq_msg;
-    RL::PolicyParam pb_policy_param;
+    CartPole::StochasticPolicyParam pb_policy_param;
+    std::cout << "waiting policy data" << std::endl;
     policy_socket_->recv(&zmq_msg);
+    myUtils::StringSend(*policy_socket_, "");
+    std::cout << "got policy data" << std::endl;
     pb_policy_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
     layers_.clear();
     for (int idx_layer = 0; idx_layer < pb_policy_param.layers_size(); ++idx_layer) {
         int num_input(pb_policy_param.layers(idx_layer).num_input());
         int num_output(pb_policy_param.layers(idx_layer).num_output());
         ActivationFunction act_fn(static_cast<ActivationFunction>(pb_policy_param.layers(idx_layer).act_fn()));
-        Eigen::MatrixXd weight(num_input, num_output);
-        Eigen::VectorXd bias(num_output);
-        for (int idx_weight = 0; idx_weight < num_input * num_output; ++idx_weight) {
-            weight << pb_policy_param.layers(idx_layer).weight(idx_weight);
+        Eigen::MatrixXd weight = Eigen::MatrixXd::Zero(num_input, num_output);
+        Eigen::MatrixXd bias = Eigen::MatrixXd::Zero(1, num_output);
+
+        for (int row_idx = 0; row_idx < num_input; ++row_idx) {
+            for (int col_idx = 0; col_idx < num_output; ++col_idx) {
+                weight(row_idx, col_idx) = pb_policy_param.layers(idx_layer).weight(row_idx * num_output + col_idx);
+            }
         }
         for (int idx_bias = 0; idx_bias < num_output; ++idx_bias) {
-            bias << pb_policy_param.layers(idx_layer).bias(idx_bias);
+            bias(0, idx_bias) = pb_policy_param.layers(idx_layer).bias(idx_bias);
         }
         layers_.push_back(Layer(weight, bias, act_fn));
     }
     nn_policy_ = new NeuralNetModel(layers_);
+
+    // =========================================================================
+    // Parse RL config
+    // =========================================================================
+    try {
+        YAML::Node rl_cfg = YAML::LoadFile(THIS_COM"Config/CartPole/RL.yaml");
+        myUtils::readParameter(rl_cfg["env"], "obs_lower_bound", obs_lower_bound_);
+        myUtils::readParameter(rl_cfg["env"], "obs_upper_bound", obs_upper_bound_);
+        myUtils::readParameter(rl_cfg["env"], "action_lower_bound", action_lower_bound_);
+        myUtils::readParameter(rl_cfg["env"], "action_upper_bound", action_upper_bound_);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
+    }
 }
 
 CartPoleInterface::~CartPoleInterface() {
@@ -53,6 +76,9 @@ void CartPoleInterface::getCommand( void* _data, void* _cmd ) {
     CartPoleCommand* cmd = ((CartPoleCommand*) _cmd);
     CartPoleSensorData* data = ((CartPoleSensorData*) _data);
 
+    // TODO
+    //Eigen::VectorXd obs;
+    //cmd->jtrq = (nn_policy_->GetOutPut(obs))[0];
     cmd->jtrq = 0.;
 
     SendRLDataSet_(data, cmd);
@@ -61,24 +87,33 @@ void CartPoleInterface::getCommand( void* _data, void* _cmd ) {
 }
 
 void CartPoleInterface::SendRLDataSet_(CartPoleSensorData* data, CartPoleCommand* cmd) {
-    RL::DataSet pb_data_set;
+    /////////////////////////////////
+    // Serialize dataset via protobuf
+    /////////////////////////////////
+    CartPole::DataSet pb_data_set;
     // set count
     pb_data_set.set_count(count_);
-    // set reward
+    // set done TODO
+    bool done(false);
+    pb_data_set.set_done(done);
+    // set reward TODO
     float reward(0.0);
     pb_data_set.set_reward(reward);
-    // set joint position, velocity, torque
+    // set observation, (jpos, jvel, jtrq) \in R^{5}
     for (int i = 0; i < data->q.size(); ++i) {
-        pb_data_set.add_joint_position(data->q[i]);
+        pb_data_set.add_observation(data->q[i]);
     }
     for (int i = 0; i < data->qdot.size(); ++i) {
-        pb_data_set.add_joint_velocity(data->qdot[i]);
+        pb_data_set.add_observation(data->qdot[i]);
     }
-    pb_data_set.set_joint_torque(cmd->jtrq);
+    pb_data_set.add_observation(cmd->jtrq);
 
     std::string pb_data_set_serialized;
     pb_data_set.SerializeToString(&pb_data_set_serialized);
 
+    ///////////////////////
+    // Send message via zmq
+    ///////////////////////
     zmq::message_t zmq_msg(pb_data_set_serialized.size());
     memcpy ((void *) zmq_msg.data(), pb_data_set_serialized.c_str(),
             pb_data_set_serialized.size());
