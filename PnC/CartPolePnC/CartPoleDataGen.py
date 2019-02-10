@@ -31,8 +31,8 @@ class CartPoleDataGen(object):
         self.policy_socket = self.context.socket(zmq.REQ)
         self.policy_socket.connect(IP_RL_REQ_REP)
 
-    def get_data_segment(self, policy):
-        # self.process_manager.execute_process()
+    def run_experiment(self, policy):
+        self.process_manager.execute_process()
         self.pair_and_sync()
         # ======================================================================
         # send policy
@@ -56,13 +56,27 @@ class CartPoleDataGen(object):
         pb_policy_param_serialized = pb_policy_param.SerializeToString()
         self.policy_socket.send(pb_policy_param_serialized)
         self.policy_socket.recv()
-        # ======================================================================
-        # get data
-        # ======================================================================
-        pb_data_set = DataSet()
-        print("wait for learning data")
-        zmq_msg = self.data_socket.recv()
-        pb_data_set.ParseFromString(zmq_msg)
+
+    def get_data_segment(self, policy):
+        self.run_experiment(policy);
+        ob_list = []
+        rew_list = []
+        while(True):
+            pb_data_set = DataSet()
+            print("receiving data set")
+            zmq_msg = self.data_socket.recv()
+
+            pb_data_set.ParseFromString(zmq_msg)
+            rew_list.append(pb_data_set.reward)
+            ob_list.append(pb_data_set.observation)
+            if (len(ob_list) <= self.horizon):
+                if pb_data_set.done:
+                    self.process_manager.quit_process()
+                    time.sleep(0.5)
+                    self.run_experiment(policy)
+            else:
+                break;
+
 
         # return {"ob": observation}
         pass

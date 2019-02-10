@@ -25,10 +25,9 @@ CartPoleInterface::CartPoleInterface() : Interface()
     // =========================================================================
     zmq::message_t zmq_msg;
     CartPole::StochasticPolicyParam pb_policy_param;
-    std::cout << "waiting policy data" << std::endl;
+    std::cout << "receiving policy data" << std::endl;
     policy_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_socket_, "");
-    std::cout << "got policy data" << std::endl;
     pb_policy_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
     layers_.clear();
     for (int idx_layer = 0; idx_layer < pb_policy_param.layers_size(); ++idx_layer) {
@@ -87,17 +86,25 @@ void CartPoleInterface::getCommand( void* _data, void* _cmd ) {
 }
 
 void CartPoleInterface::SendRLDataSet_(CartPoleSensorData* data, CartPoleCommand* cmd) {
-    /////////////////////////////////
+    // =========================================================================
     // Serialize dataset via protobuf
-    /////////////////////////////////
+    // =========================================================================
     CartPole::DataSet pb_data_set;
     // set count
     pb_data_set.set_count(count_);
-    // set done TODO
+    // set done
     bool done(false);
+    if ( (data->q[0] < obs_lower_bound_[0]) ||
+         (data->q[0] > obs_upper_bound_[0]) ||
+         (data->q[1] < obs_lower_bound_[2]) ||
+         (data->q[1] > obs_upper_bound_[2]) )
+    {
+        done = true;
+    }
     pb_data_set.set_done(done);
-    // set reward TODO
+    // set reward
     float reward(0.0);
+    if (!done) { reward = 1.0; }
     pb_data_set.set_reward(reward);
     // set observation, (jpos, jvel, jtrq) \in R^{5}
     for (int i = 0; i < data->q.size(); ++i) {
@@ -106,14 +113,13 @@ void CartPoleInterface::SendRLDataSet_(CartPoleSensorData* data, CartPoleCommand
     for (int i = 0; i < data->qdot.size(); ++i) {
         pb_data_set.add_observation(data->qdot[i]);
     }
-    pb_data_set.add_observation(cmd->jtrq);
 
     std::string pb_data_set_serialized;
     pb_data_set.SerializeToString(&pb_data_set_serialized);
 
-    ///////////////////////
+    // =========================================================================
     // Send message via zmq
-    ///////////////////////
+    // =========================================================================
     zmq::message_t zmq_msg(pb_data_set_serialized.size());
     memcpy ((void *) zmq_msg.data(), pb_data_set_serialized.c_str(),
             pb_data_set_serialized.size());

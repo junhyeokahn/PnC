@@ -4,10 +4,6 @@
 #include <vector>
 #include <iostream>
 
-/*! \enum ActivationFunction
- *
- *  Detailed description
- */
 enum ActivationFunction {
     None = 0,
     Tanh = 1,

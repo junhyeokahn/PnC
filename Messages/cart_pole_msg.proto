@@ -3,7 +3,7 @@ syntax = "proto3";
 package CartPole;
 
 message DataSet {
-    uint32 count = 1;
+    int32 count = 1;
     bool done = 2;
     float reward = 3;
     repeated float observation = 4;

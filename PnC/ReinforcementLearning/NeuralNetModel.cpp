@@ -20,7 +20,7 @@ Eigen::MatrixXd Layer::GetOutput(const Eigen::MatrixXd & input) {
         aug_bias.block(i, 0, 1, num_output_) = bias_;
     }
     Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(num_data, num_output_);
-    ret = input * weight_ + bias_;
+    ret = input * weight_ + aug_bias;
     switch (act_fn_) {
         case ActivationFunction::None:
             return ret;
