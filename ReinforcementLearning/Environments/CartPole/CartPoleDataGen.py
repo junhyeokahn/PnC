@@ -146,7 +146,7 @@ class CartPoleDataGen(object):
         vpred_list = np.array(vpred_list)
         action_list = np.array(action_list)
         prev_action_list = np.array(prev_action_list)
-        nextvpred = vpred_list * done_list
+        nextvpred = vpred_list[-1] * ( 1 - done_list[-1] )
 
         if ep_ret_list == 0:
             current_it_timesteps = current_it_len
@@ -155,7 +155,7 @@ class CartPoleDataGen(object):
 
         return {'ob': ob_list, 'rew': rew_list, 'true_rew': true_rew_list,
                 'vpred': vpred_list, 'ac': action_list, 'prevac':prev_action_list,
-                'nextvpred': vpred_list*done_list, 'ep_rets':ep_ret_list,'ep_lens':ep_len_list,
+                'nextvpred': nextvpred, 'ep_rets':ep_ret_list,'ep_lens':ep_len_list,
                 'ep_true_rets':ep_true_ret_list, 'total_timestep':current_it_timesteps}
 
     def pair_and_sync(self):
