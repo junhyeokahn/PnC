@@ -32,6 +32,7 @@ class CartPoleDataGen(object):
         self.policy_socket.connect(IP_RL_REQ_REP)
 
     def run_experiment(self, policy):
+        print("Run Exp")
         self.process_manager.execute_process()
         self.pair_and_sync()
         # ======================================================================
@@ -63,18 +64,19 @@ class CartPoleDataGen(object):
         rew_list = []
         while(True):
             pb_data_set = DataSet()
-            print("receiving data set")
             zmq_msg = self.data_socket.recv()
 
             pb_data_set.ParseFromString(zmq_msg)
+            print(pb_data_set.count)
             rew_list.append(pb_data_set.reward)
             ob_list.append(pb_data_set.observation)
-            if (len(ob_list) <= self.horizon):
+            if (len(ob_list) < self.horizon):
                 if pb_data_set.done:
                     self.process_manager.quit_process()
                     time.sleep(0.5)
                     self.run_experiment(policy)
             else:
+                __import__('ipdb').set_trace()
                 break;
 
 

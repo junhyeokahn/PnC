@@ -1,7 +1,7 @@
 #include <cmath>
 #include <random>
 
-#include "PnC/ReinforcementLearning/NeuralNetModel.hpp"
+#include "PnC/NeuralNetwork/NeuralNetModel.hpp"
 
 Layer::Layer(Eigen::MatrixXd weight, Eigen::MatrixXd bias, ActivationFunction act_fn) {
     weight_ = weight;

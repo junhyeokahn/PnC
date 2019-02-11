@@ -1,10 +1,8 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <zmq.hpp>
 
 #include <PnC/Interface.hpp>
-#include <PnC/ReinforcementLearning/NeuralNetModel.hpp>
 
 class CartPoleSensorData
 {
@@ -26,18 +24,7 @@ public:
     virtual ~CartPoleInterface ();
     virtual void getCommand(void * _sensor_data, void * _command_data);
 
+    void ParameterSetting_();
+
 private:
-    zmq::context_t *context_;
-    zmq::socket_t *data_socket_;
-    zmq::socket_t *policy_socket_;
-
-    std::vector<Layer> layers_;
-    NeuralNetModel* nn_policy_;
-
-    Eigen::VectorXd obs_lower_bound_;
-    Eigen::VectorXd obs_upper_bound_;
-    Eigen::VectorXd action_lower_bound_;
-    Eigen::VectorXd action_upper_bound_;
-
-    void SendRLDataSet_(CartPoleSensorData* data, CartPoleCommand* cmd);
 };

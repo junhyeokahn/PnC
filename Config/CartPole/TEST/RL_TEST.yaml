@@ -1,0 +1,26 @@
+test_configuration:
+    duration: 1000000
+
+control_configuration:
+    nn_ctrl:
+
+        # ======================================================================
+        # Observation
+        # [cart position, pole position, cart velocity, pole velocity]
+        # ======================================================================
+        obs_lower_bound  : [-5 , -0.785 , -10 , -5]
+        obs_upper_bound  : [5  , 0.785  , 10  , 5]
+
+        # ======================================================================
+        # Action
+        # [cart force]
+        # ======================================================================
+        action_lower_bound : -10
+        action_upper_bound : 10
+
+        # ======================================================================
+        # Terminate condition
+        # ======================================================================
+
+        #terminate_state_lower_bound: []
+        #terminate_state_upper_bound: []

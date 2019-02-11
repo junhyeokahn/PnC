@@ -1,5 +1,6 @@
 is_record: false
-num_steps_per_cycle: 1
+num_steps_per_cycle: 30
 display_joint_frame: false
+show_viewer: false
 
 print_computation_time: false

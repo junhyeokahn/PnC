@@ -1,9 +1,9 @@
 import yaml
 import sys
 import os
-sys.path.append(os.getcwd() + '/PnC/ReinforcementLearning')
-sys.path.append(os.getcwd() + '/PnC/ReinforcementLearning/GymEnv')
-sys.path.append(os.getcwd() + '/PnC/CartPolePnC')
+sys.path.append(os.getcwd() + '/ReinforcementLearning')
+sys.path.append(os.getcwd() + '/ReinforcementLearning/Environments/CartPole')
+sys.path.append(os.getcwd() + '/ReinforcementLearning/Algorithms')
 sys.path.append(os.getcwd() + '/build/Messages')
 
 from ProximalPolicyOptimization import PPO
