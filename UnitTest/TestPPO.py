@@ -17,6 +17,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     env = CartPoleEnv()
-    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, 256)
-    model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear', verbose=0)
+    num_batch = 5
+    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch)
+    model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
+            verbose=0, timesteps_per_actorbatch=num_batch)
     model.learn(total_timesteps=10000)

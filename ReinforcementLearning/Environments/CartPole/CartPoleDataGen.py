@@ -2,6 +2,7 @@ import zmq
 import sys
 import os
 import time
+import numpy as np
 
 from ProcessManager import ProcessManager
 from cart_pole_msg_pb2 import *
@@ -28,21 +29,22 @@ class CartPoleDataGen(object):
         self.data_socket = self.context.socket(zmq.SUB)
         self.data_socket.connect(IP_RL_SUB_PUB)
         self.data_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-        self.policy_socket = self.context.socket(zmq.REQ)
-        self.policy_socket.connect(IP_RL_REQ_REP)
+        self.policy_valfn_socket = self.context.socket(zmq.REQ)
+        self.policy_valfn_socket.connect(IP_RL_REQ_REP)
 
-    def run_experiment(self, policy):
+    def run_experiment(self, policy_param, valfn_param):
         print("Run Exp")
+        self.process_manager.quit_process()
+        time.sleep(0.5)
         self.process_manager.execute_process()
         self.pair_and_sync()
         # ======================================================================
         # send policy
         # ======================================================================
-        pb_policy_param = StochasticPolicyParam()
-        layer = []
-        for l_idx in range(int((len(policy)-1)/2)):
-            weight = policy[2*l_idx]
-            bias = policy[2*l_idx+1]
+        pb_policy_param = NeuralNetworkParam()
+        for l_idx in range(int((len(policy_param)-1)/2)):
+            weight = policy_param[2*l_idx]
+            bias = policy_param[2*l_idx+1]
             layer = pb_policy_param.layers.add()
             layer.num_input = weight.shape[0]
             layer.num_output = weight.shape[1]
@@ -51,37 +53,110 @@ class CartPoleDataGen(object):
                     layer.weight.append(weight[w_row, w_col])
             for b_idx in range(bias.shape[0]):
                 layer.bias.append(bias[b_idx])
-            layer.act_fn = StochasticPolicyParam.Tanh
-        for action_idx in range(policy[-1].shape[0]):
-            pb_policy_param.logstd.append((policy[-1])[action_idx])
+            layer.act_fn = NeuralNetworkParam.Tanh
+        pb_policy_param.stochastic = True
+        for action_idx in range(policy_param[-1].shape[0]):
+            pb_policy_param.logstd.append((policy_param[-1])[action_idx])
         pb_policy_param_serialized = pb_policy_param.SerializeToString()
-        self.policy_socket.send(pb_policy_param_serialized)
-        self.policy_socket.recv()
+        self.policy_valfn_socket.send(pb_policy_param_serialized)
+        self.policy_valfn_socket.recv()
 
-    def get_data_segment(self, policy):
-        self.run_experiment(policy);
+        # ======================================================================
+        # send value functions
+        # ======================================================================
+        pb_valfn_param = NeuralNetworkParam()
+        for l_idx in range(int((len(valfn_param))/2)):
+            weight = valfn_param[2*l_idx]
+            bias = valfn_param[2*l_idx+1]
+            layer = pb_valfn_param.layers.add()
+            layer.num_input = weight.shape[0]
+            layer.num_output = weight.shape[1]
+            for w_row in range(weight.shape[0]):
+                for w_col in range(weight.shape[1]):
+                    layer.weight.append(weight[w_row, w_col])
+            for b_idx in range(bias.shape[0]):
+                layer.bias.append(bias[b_idx])
+            if l_idx == int((len(valfn_param))/2)-1:
+                layer.act_fn = NeuralNetworkParam.NONE
+            else:
+                layer.act_fn = NeuralNetworkParam.Tanh
+        pb_policy_param.stochastic = False
+        pb_valfn_param_serialized = pb_valfn_param.SerializeToString()
+        self.policy_valfn_socket.send(pb_valfn_param_serialized)
+        self.policy_valfn_socket.recv()
+
+    def get_data_segment(self, sess, tf_policy_var, tf_valfn_var):
+        policy_param = sess.run(tf_policy_var)
+        valfn_param = sess.run(tf_valfn_var)
+        self.run_experiment(policy_param, valfn_param);
         ob_list = []
         rew_list = []
-        while(True):
-            pb_data_set = DataSet()
-            zmq_msg = self.data_socket.recv()
+        true_rew_list = []
+        vpred_list = []
+        action_list = []
+        prev_action_list = []
+        prev_action = 0
+        done_list = []
 
-            pb_data_set.ParseFromString(zmq_msg)
-            print(pb_data_set.count)
-            rew_list.append(pb_data_set.reward)
-            ob_list.append(pb_data_set.observation)
+        cur_ep_ret = 0  # return in current episode
+        current_it_len = 0  # len of current iteration
+        cur_ep_true_ret = 0
+        ep_true_ret_list = []
+        ep_ret_list = []  # returns of completed episodes in this segment
+        ep_len_list = []  # Episode lengths
+
+        while(True):
+
             if (len(ob_list) < self.horizon):
+                pb_data_set = DataSet()
+                zmq_msg = self.data_socket.recv()
+                pb_data_set.ParseFromString(zmq_msg)
+                rew_list.append(pb_data_set.reward)
+                true_rew_list.append(pb_data_set.reward)
+                ob_list.append(pb_data_set.observation)
+                vpred_list.append(pb_data_set.vpred)
+                done_list.append(pb_data_set.done)
+                action_list.append(pb_data_set.action)
+                prev_action_list.append(prev_action)
+                prev_action = pb_data_set.action
+
+                cur_ep_ret += pb_data_set.reward
+                current_it_len = pb_data_set.count
+                cur_ep_true_ret += pb_data_set.reward
+
                 if pb_data_set.done:
+                    ep_ret_list.append(cur_ep_ret)
+                    ep_true_ret_list.append(cur_ep_true_ret)
+                    ep_len_list.append(current_it_len)
+                    cur_ep_ret = 0
+                    cur_ep_true_ret = 0
+                    current_it_len = 0
+
                     self.process_manager.quit_process()
                     time.sleep(0.5)
-                    self.run_experiment(policy)
+                    self.run_experiment(policy_param, valfn_param)
+
             else:
-                __import__('ipdb').set_trace()
+                self.process_manager.quit_process()
                 break;
 
+        ob_list = np.array(ob_list)
+        rew_list = np.array(rew_list)
+        true_rew_list = np.array(true_rew_list)
+        vpred_list = np.array(vpred_list)
+        action_list = np.array(action_list)
+        prev_action_list = np.array(prev_action_list)
+        nextvpred = vpred_list * done_list
 
-        # return {"ob": observation}
-        pass
+        if ep_ret_list == 0:
+            current_it_timesteps = current_it_len
+        else:
+            current_it_timesteps = sum(ep_len_list) + current_it_len
+
+        return {'ob': ob_list, 'rew': rew_list, 'true_rew': true_rew_list,
+                'vpred': vpred_list, 'ac': action_list, 'prevac':prev_action_list,
+                'nextvpred': vpred_list*done_list, 'ep_rets':ep_ret_list,'ep_lens':ep_len_list,
+                'ep_true_rets':ep_true_ret_list, 'total_timestep':current_it_timesteps}
 
     def pair_and_sync(self):
         while True:
@@ -89,12 +164,12 @@ class CartPoleDataGen(object):
                 zmq_msg = self.data_socket.recv(zmq.DONTWAIT)
             except zmq.ZMQError as e:
                 if e.errno == zmq.EAGAIN:
-                    self.policy_socket.send(b"nope")
-                    self.policy_socket.recv()
+                    self.policy_valfn_socket.send(b"nope")
+                    self.policy_valfn_socket.recv()
                 else:
                     raise
             else:
-                self.policy_socket.send(b"world")
-                self.policy_socket.recv()
+                self.policy_valfn_socket.send(b"world")
+                self.policy_valfn_socket.recv()
                 break;
         print("Sockets are all paired and synced")

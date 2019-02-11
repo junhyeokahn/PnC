@@ -6,10 +6,12 @@ message DataSet {
     int32 count = 1;
     bool done = 2;
     float reward = 3;
-    repeated float observation = 4;
+    float vpred = 4;
+    float action = 5;
+    repeated float observation = 6;
 }
 
-message StochasticPolicyParam {
+message NeuralNetworkParam {
 
     repeated Layer layers = 1;
 
@@ -21,12 +23,12 @@ message StochasticPolicyParam {
         ActivationFunction act_fn = 5;
     }
 
-    repeated float logstd = 2;
+    bool stochastic = 2;
+    repeated float logstd = 3;
 
     enum ActivationFunction {
-        None = 0;
+        NONE = 0;
         Tanh = 1;
         ReLU = 2;
     }
 }
-

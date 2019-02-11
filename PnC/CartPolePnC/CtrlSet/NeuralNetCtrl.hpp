@@ -4,6 +4,7 @@
 #include <zmq.hpp>
 #include <PnC/NeuralNetwork/NeuralNetModel.hpp>
 
+class CartPoleCommand;
 class RobotSystem;
 
 class NeuralNetCtrl: public Controller{
@@ -24,15 +25,16 @@ class NeuralNetCtrl: public Controller{
 
         zmq::context_t *context_;
         zmq::socket_t *data_socket_;
-        zmq::socket_t *policy_socket_;
+        zmq::socket_t *policy_valfn_socket_;
 
         std::vector<Layer> layers_;
         NeuralNetModel* nn_policy_;
+        NeuralNetModel* nn_valfn_;
 
         Eigen::VectorXd obs_lower_bound_;
         Eigen::VectorXd obs_upper_bound_;
         Eigen::VectorXd action_lower_bound_;
         Eigen::VectorXd action_upper_bound_;
 
-        void SendRLData_();
+        void SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd);
 };

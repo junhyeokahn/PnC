@@ -137,6 +137,7 @@ class PPO(ActorCriticRLModel):
 
                     self.params = tf_util.get_trainable_vars("model")
                     self.policy_param = tf_util.get_trainable_vars("model/pi")
+                    self.valfn_param = tf_util.get_trainable_vars("model/vf")
 
                     self.assign_old_eq_new = tf_util.function(
                         [], [], updates=[tf.assign(oldv, newv) for (oldv, newv) in
@@ -216,7 +217,16 @@ class PPO(ActorCriticRLModel):
                     logger.log("********** Iteration %i ************" % iters_so_far)
 
                     # seg = seg_gen.__next__()
-                    seg = self.data_generator.get_data_segment(self.sess.run(self.policy_param))
+                    seg = self.data_generator.get_data_segment(self.sess, self.policy_param, self.valfn_param)
+                    ## TEST : nn check
+                    # obs = seg['ob']
+                    # py_pol, py_val, _, _ = self.step(obs, deterministic=True)
+                    # print(py_pol)
+                    # print(seg['ac'])
+                    # print(py_val)
+                    # print(seg['vpred'])
+                    # __import__('ipdb').set_trace()
+                    ## TEST
                     add_vtarg_and_adv(seg, self.gamma, self.lam)
 
                     # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))

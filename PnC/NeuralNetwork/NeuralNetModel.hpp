@@ -32,16 +32,20 @@ private:
 class NeuralNetModel
 {
 public:
+    NeuralNetModel (std::vector<Layer> layers, Eigen::MatrixXd logstd);
     NeuralNetModel (std::vector<Layer> layers);
     virtual ~NeuralNetModel ();
 
     Eigen::MatrixXd GetOutput( const Eigen::MatrixXd & input );
+    int GetNumInput() { return num_input_; }
+    int GetNumOutput() { return num_output_; }
 
-    Eigen::MatrixXd GetOutput( const Eigen::MatrixXd & input,
-                               const Eigen::MatrixXd & logstd );
 private:
     int num_input_;
     int num_output_;
     int num_layer_;
     std::vector<Layer> layers_;
+    bool b_stochastic_;
+    Eigen::MatrixXd logstd_;
+    Eigen::MatrixXd std_;
 };
