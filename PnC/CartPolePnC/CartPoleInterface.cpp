@@ -51,7 +51,9 @@ void CartPoleInterface::ParameterSetting_(){
         YAML::Node cfg = YAML::LoadFile(THIS_COM"Config/CartPole/INTERFACE.yaml");
         std::string test_name = myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "rl_test") {
+#if HAS_RL_DEP
             test_ = new RLTest(robot_);
+#endif
         } else if (test_name == "basic_test") {
             test_ = new BasicTest(robot_);
         } else {

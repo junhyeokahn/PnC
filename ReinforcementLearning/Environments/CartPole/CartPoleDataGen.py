@@ -153,7 +153,7 @@ class CartPoleDataGen(object):
         else:
             current_it_timesteps = sum(ep_len_list) + current_it_len
 
-        return {'ob': ob_list, 'rew': rew_list, 'true_rew': true_rew_list,
+        return {'ob': ob_list, 'rew': rew_list, 'dones':done_list, 'true_rew': true_rew_list,
                 'vpred': vpred_list, 'ac': action_list, 'prevac':prev_action_list,
                 'nextvpred': nextvpred, 'ep_rets':ep_ret_list,'ep_lens':ep_len_list,
                 'ep_true_rets':ep_true_ret_list, 'total_timestep':current_it_timesteps}

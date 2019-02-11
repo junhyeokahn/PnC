@@ -7,4 +7,6 @@
 #define IP_RL_SUB_PUB "tcp://127.0.0.1:5557"
 #define IP_RL_REQ_REP "tcp://127.0.0.1:5558"
 
+#define HAS_RL_DEP @HAS_RL_DEP@
+
 #endif
