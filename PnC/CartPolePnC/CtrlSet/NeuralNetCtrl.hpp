@@ -34,8 +34,15 @@ class NeuralNetCtrl: public Controller{
 
         Eigen::VectorXd obs_lower_bound_;
         Eigen::VectorXd obs_upper_bound_;
+        Eigen::VectorXd terminate_obs_lower_bound_;
+        Eigen::VectorXd terminate_obs_upper_bound_;
         Eigen::VectorXd action_lower_bound_;
         Eigen::VectorXd action_upper_bound_;
 
         void SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd);
+
+        double alive_bonus_;
+        double pole_cost_;
+        double cart_cost_;
+        double quad_input_cost_;
 };

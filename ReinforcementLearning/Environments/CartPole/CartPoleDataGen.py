@@ -11,18 +11,17 @@ class CartPoleDataGen(object):
     def __init__(self, ip, username, password, horizon, verbose=0):
         self.process_manager = ProcessManager(ip, username, password, \
                 'cd ~/Repository/PnC/build/bin && ./run_cart_pole', \
-                'pkill cart_pole')
+                'pkill cart_pole', verbose = verbose)
         self.horizon = horizon
         self.verbose = verbose
 
-        fileHandler = open ("Configuration.h", "r")
+        fileHandler = open ("PnC/CartPolePnC/CartPoleDefinition.hpp", "r")
         listOfLines = fileHandler.readlines()
         for line in listOfLines:
-            if len(line.split(' ')) > 1:
-                if line.split(' ')[1] == 'IP_RL_REQ_REP':
-                    IP_RL_REQ_REP = line.split(' ')[2].split('\n')[0].split('"')[1]
-                if line.split(' ')[1] == 'IP_RL_SUB_PUB':
-                    IP_RL_SUB_PUB = line.split(' ')[2].split('\n')[0].split('"')[1]
+            if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpSubPub':
+                IP_RL_SUB_PUB= line.split(' ')[-1].split('\n')[0].split('"')[1]
+            if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpReqRep':
+                IP_RL_REQ_REP= line.split(' ')[-1].split('\n')[0].split('"')[1]
         fileHandler.close()
 
         # Constructe zmq socket and connect
@@ -59,7 +58,7 @@ class CartPoleDataGen(object):
         pb_policy_param_serialized = pb_policy_param.SerializeToString()
         self.policy_valfn_socket.send(pb_policy_param_serialized)
         self.policy_valfn_socket.recv()
-        if self.verbose == 1:
+        if self.verbose >= 1:
             print("[[Policy is set]]")
 
         # ======================================================================
@@ -85,7 +84,7 @@ class CartPoleDataGen(object):
         pb_valfn_param_serialized = pb_valfn_param.SerializeToString()
         self.policy_valfn_socket.send(pb_valfn_param_serialized)
         self.policy_valfn_socket.recv()
-        if self.verbose == 1:
+        if self.verbose >= 1:
             print("[[Value function is set]]")
 
     def get_data_segment(self, sess, tf_policy_var, tf_valfn_var):
@@ -163,7 +162,7 @@ class CartPoleDataGen(object):
         else:
             current_it_timesteps = sum(ep_len_list) + current_it_len
 
-        if self.verbose == 2:
+        if self.verbose >= 2:
             print("=======================data generation========================")
             print("current_it_timesteps")
             print(current_it_timesteps)
@@ -192,5 +191,5 @@ class CartPoleDataGen(object):
                 self.policy_valfn_socket.send(b"world")
                 self.policy_valfn_socket.recv()
                 break;
-        if self.verbose == 1 :
+        if self.verbose >= 1 :
             print("[[Sockets are all paired and synced]]")

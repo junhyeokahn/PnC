@@ -2,6 +2,7 @@
 
 #include <Utils/IO/Pthread.hpp>
 #include <PnC/DracoPnC/StateEstimator/BodyEstimator.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Filters/Basic/filters.hpp>
 
 class DracoStateProvider;

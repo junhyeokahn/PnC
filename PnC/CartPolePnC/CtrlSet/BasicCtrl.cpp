@@ -1,5 +1,6 @@
 #include <PnC/CartPolePnC/CtrlSet/BasicCtrl.hpp>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
+#include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 #include <Configuration.h>
@@ -26,7 +27,7 @@ void BasicCtrl::lastVisit(){
 }
 
 bool BasicCtrl::endOfPhase(){
-    if(ctrl_count_ * SERVO_RATE > duration_){
+    if(ctrl_count_ * CartPoleAux::ServoRate > duration_){
         return true;
     }
     return false;

@@ -15,12 +15,19 @@ control_configuration:
         # Action
         # [cart force]
         # ======================================================================
-        action_lower_bound : -10
-        action_upper_bound : 10
+        action_lower_bound : -50
+        action_upper_bound : 50
+
+        # ======================================================================
+        # Cost
+        # ======================================================================
+        alive_bonus: 6
+        pole_cost: 1
+        cart_cost: 0.01
+        quad_input_cost: 0.01
 
         # ======================================================================
         # Terminate condition
         # ======================================================================
-
-        #terminate_state_lower_bound: []
-        #terminate_state_upper_bound: []
+        terminate_obs_lower_bound: [-5 , -0.785 , -10 , -5]
+        terminate_obs_upper_bound: [5  , 0.785  , 10  , 5]

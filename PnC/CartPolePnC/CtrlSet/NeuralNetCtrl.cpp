@@ -1,5 +1,6 @@
 #include <PnC/CartPolePnC/CtrlSet/NeuralNetCtrl.hpp>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
+#include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 #include <Utils/IO/ZmqUtilities.hpp>
@@ -18,8 +19,8 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     context_ = new zmq::context_t(1);
     data_socket_ = new zmq::socket_t(*context_, ZMQ_PUB);
     policy_valfn_socket_ = new zmq::socket_t(*context_, ZMQ_REP);
-    data_socket_->bind(IP_RL_SUB_PUB);
-    policy_valfn_socket_->bind(IP_RL_REQ_REP);
+    data_socket_->bind(std::string(CartPoleAux::IpSubPub));
+    policy_valfn_socket_->bind(std::string(CartPoleAux::IpReqRep));
     myUtils::PairAndSync(*data_socket_, *policy_valfn_socket_, 1);
 
     // =========================================================================
@@ -116,22 +117,29 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd){
     // Serialize dataset via protobuf
     // =========================================================================
     CartPole::DataSet pb_data_set;
+
     // set count
     pb_data_set.set_count(ctrl_count_);
+
     // set done
     bool done(false);
-    if ( (obs(0, 0) < obs_lower_bound_[0]) ||
-         (obs(0, 1) > obs_upper_bound_[0]) ||
-         (obs(0, 2) < obs_lower_bound_[1]) ||
-         (obs(0, 3) > obs_upper_bound_[1]) )
+    if ( (obs(0, 0) < terminate_obs_lower_bound_[0]) ||
+         (obs(0, 1) > terminate_obs_upper_bound_[0]) ||
+         (obs(0, 2) < terminate_obs_lower_bound_[1]) ||
+         (obs(0, 3) > terminate_obs_upper_bound_[1]) )
     {
         done = true;
     }
     pb_data_set.set_done(done);
-    // set reward
+
+    // set reward : alive bonus - pole angle - cart pos - torque usage
     float reward(0.0);
-    if (!done) { reward = 1.0; }
+    if (!done) { reward += alive_bonus_; }
+    reward -= cart_cost_ * std::abs(obs(0, 0));
+    reward -= pole_cost_ * std::abs(obs(0, 1));
+    reward -= quad_input_cost_ * cmd->jtrq * cmd->jtrq;
     pb_data_set.set_reward(reward);
+
     // set observation, (jpos, jvel) \in R^{4}
     for (int i = 0; i < 2; ++i) {
         pb_data_set.add_observation(robot_->getQ()[i]);
@@ -139,8 +147,10 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd){
     for (int i = 0; i < 2; ++i) {
         pb_data_set.add_observation(robot_->getQdot()[i]);
     }
+
     // set action
     pb_data_set.set_action(cmd->jtrq);
+
     // set vpred
     pb_data_set.set_vpred((nn_valfn_->GetOutput(obs))(0, 0));
 
@@ -163,7 +173,7 @@ void NeuralNetCtrl::lastVisit(){
 }
 
 bool NeuralNetCtrl::endOfPhase(){
-    if(ctrl_count_ * SERVO_RATE > duration_){
+    if(ctrl_count_ * CartPoleAux::ServoRate > duration_){
         return true;
     }
     return false;
@@ -173,9 +183,15 @@ void NeuralNetCtrl::ctrlInitialization(const YAML::Node& node){
     try {
         myUtils::readParameter(node, "obs_lower_bound", obs_lower_bound_);
         myUtils::readParameter(node, "obs_upper_bound", obs_upper_bound_);
+        myUtils::readParameter(node, "terminate_obs_lower_bound", terminate_obs_lower_bound_);
+        myUtils::readParameter(node, "terminate_obs_upper_bound", terminate_obs_upper_bound_);
         myUtils::readParameter(node, "action_lower_bound", action_lower_bound_);
         myUtils::readParameter(node, "action_upper_bound", action_upper_bound_);
         myUtils::readParameter(node, "timesteps_per_actorbatch", timesteps_per_actorbatch_);
+        myUtils::readParameter(node, "alive_bonus", alive_bonus_);
+        myUtils::readParameter(node, "pole_cost", pole_cost_);
+        myUtils::readParameter(node, "cart_cost", cart_cost_);
+        myUtils::readParameter(node, "quad_input_cost", quad_input_cost_);
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);

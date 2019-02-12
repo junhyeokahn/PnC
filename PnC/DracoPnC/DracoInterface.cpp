@@ -2,6 +2,7 @@
 #include <math.h>
 #include <string>
 #include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
 #include <Utils/IO/DataManager.hpp>
@@ -91,7 +92,7 @@ void DracoInterface::getCommand( void* _data, void* _command){
     rfoot_ati_ = data->rfoot_ati;
     lfoot_ati_ = data->lfoot_ati;
 
-    running_time_ = (double)(count_) * SERVO_RATE;
+    running_time_ = (double)(count_) * DracoAux::ServoRate;
     ++count_;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();

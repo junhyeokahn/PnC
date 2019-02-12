@@ -4,6 +4,7 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <PnC/DracoPnC/StateEstimator/BasicAccumulation.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
 
 BasicAccumulation::BasicAccumulation():filtered_acc_(3){
     myUtils::pretty_constructor(2, "Basic Accumulation");
@@ -15,7 +16,7 @@ BasicAccumulation::BasicAccumulation():filtered_acc_(3){
 
     cutoff_freq_ = 2.0* M_PI *1.0; // 1Hz // (2*pi*frequency) rads/s
     for(int i(0); i<3; ++i){
-        filtered_acc_[i] = new digital_lp_filter(cutoff_freq_, SERVO_RATE);
+        filtered_acc_[i] = new digital_lp_filter(cutoff_freq_, DracoAux::ServoRate);
     }
     global_ang_vel_.setZero();
 }
@@ -38,7 +39,7 @@ void BasicAccumulation::setSensorData(const std::vector<double> & acc,
     for(size_t i = 0; i < 3; i++){
         body_omega[i] = ang_vel[i];
     }
-    Eigen::Quaternion<double> delta_quat_body = dart::math::expToQuat(body_omega*SERVO_RATE);
+    Eigen::Quaternion<double> delta_quat_body = dart::math::expToQuat(body_omega*DracoAux::ServoRate);
 
     Eigen::MatrixXd R_global_to_imu = global_ori_quat_.normalized().toRotationMatrix();
     global_ang_vel_ = R_global_to_imu * body_omega;

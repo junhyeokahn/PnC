@@ -192,6 +192,8 @@ int main() {
     myUtils::readParameter(simulation_cfg, "display_joint_frame", b_display_joint_frame);
     int num_steps_per_cycle;
     myUtils::readParameter(simulation_cfg, "num_steps_per_cycle", num_steps_per_cycle);
+    double servo_rate;
+    myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
 
     // ================================
     // Generate world and add skeletons
@@ -236,7 +238,7 @@ int main() {
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
-    world->setTimeStep(SERVO_RATE);
+    world->setTimeStep(servo_rate);
 
     // ====================
     // Display Joints Frame

@@ -8,7 +8,8 @@
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgShadow::MinimalShadowMap * msm) :
     dart::gui::osg::WorldNode(_world, msm),
     count_(0),
-    t_(0.0)
+    t_(0.0),
+    servo_rate_(0.001)
 {
     world_ = _world;
 
@@ -46,6 +47,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr & _world, osgSha
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM"Config/Draco/SIMULATION.yaml");
+        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
         myUtils::readParameter(simulation_cfg, "check_collision", b_check_collision_);
         myUtils::readParameter(simulation_cfg, "print_computation_time", b_print_computation_time);
@@ -71,7 +73,7 @@ DracoWorldNode::~DracoWorldNode() {
 }
 
 void DracoWorldNode::customPreStep() {
-    t_ = (double)count_*SERVO_RATE;
+    t_ = (double)count_*servo_rate_;
 
     mSensorData->q = mSkel->getPositions().tail(10);
     q_sim_ = mSkel->getPositions();

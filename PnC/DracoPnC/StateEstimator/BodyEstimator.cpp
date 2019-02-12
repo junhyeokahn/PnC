@@ -14,7 +14,7 @@ BodyEstimator::BodyEstimator(RobotSystem* robot)
 
     body_led_vel_.setZero();
     for(int i(0); i<3 ; ++i){
-        vel_filter_.push_back(new deriv_lp_filter(2.*50.*M_PI, SERVO_RATE));
+        vel_filter_.push_back(new deriv_lp_filter(2.*50.*M_PI, DracoAux::ServoRate));
     }
 
     DataManager::GetDataManager()->RegisterData(&body_led_vel_, VECT3, "Body_LED_vel", 3);

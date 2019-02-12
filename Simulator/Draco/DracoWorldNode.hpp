@@ -38,6 +38,7 @@ private:
     double t_;
     bool b_check_collision_;
     bool b_print_computation_time;
+    double servo_rate_;
 
 public:
     DracoWorldNode(const dart::simulation::WorldPtr & world,

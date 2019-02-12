@@ -35,9 +35,9 @@ DracoMoCapManager::DracoMoCapManager(RobotSystem* robot):Pthread(),
     sp_ = DracoStateProvider::getStateProvider(robot);
 
     for(int i(0); i<3; ++i){
-        body_led0_filter_.push_back(new digital_lp_filter(2.*M_PI*50, SERVO_RATE));
-        body_led1_filter_.push_back(new digital_lp_filter(2.*M_PI*50, SERVO_RATE));
-        body_led2_filter_.push_back(new digital_lp_filter(2.*M_PI*50, SERVO_RATE));
+        body_led0_filter_.push_back(new digital_lp_filter(2.*M_PI*50, DracoAux::ServoRate));
+        body_led1_filter_.push_back(new digital_lp_filter(2.*M_PI*50, DracoAux::ServoRate));
+        body_led2_filter_.push_back(new digital_lp_filter(2.*M_PI*50, DracoAux::ServoRate));
     }
 }
 

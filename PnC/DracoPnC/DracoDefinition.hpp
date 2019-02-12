@@ -48,3 +48,8 @@ namespace DracoDoF
     constexpr int rKnee = 14;
     constexpr int rAnkle = 15;
 } /* DracoDoF */
+
+namespace DracoAux
+{
+    constexpr double ServoRate = 1.0/1000.0;
+}

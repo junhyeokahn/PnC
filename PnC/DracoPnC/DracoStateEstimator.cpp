@@ -20,10 +20,10 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     global_body_euler_zyx_dot_.setZero();
     ori_est_ = new BasicAccumulation();
 
-    mocap_x_vel_est_ = new AverageFilter(SERVO_RATE, 0.01, 1.0);
-    mocap_y_vel_est_ = new AverageFilter(SERVO_RATE, 0.01, 1.5);
-    x_vel_est_ = new AverageFilter(SERVO_RATE, 0.01, 1.0);
-    y_vel_est_ = new AverageFilter(SERVO_RATE, 0.01, 1.5);
+    mocap_x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
+    mocap_y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
+    x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
+    y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     body_est_ = new BodyEstimator(robot);
 }
 

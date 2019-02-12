@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
+#include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <Configuration.h>
 #include <Utils/IO/IOUtilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
@@ -42,7 +43,7 @@ void CartPoleInterface::getCommand( void* _data, void* _cmd ) {
     robot_->updateSystem(data->q, data->qdot, false);
     test_->getCommand(cmd);
 
-    running_time_ = (double)(count_) * SERVO_RATE;
+    running_time_ = (double)(count_) * CartPoleAux::ServoRate;
     ++count_;
 }
 
