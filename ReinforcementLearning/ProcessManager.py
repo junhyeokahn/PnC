@@ -11,37 +11,18 @@ class ProcessManager(object):
         self.execute_cmd = execute_cmd
         self.exit_cmd = exit_cmd
 
-        # self.quit_process()
+        self.quit_process()
 
     def execute_process(self):
+        # print("[[Execute Process]]")
         self.ssh.exec_command(self.execute_cmd)
+        time.sleep(0.5)
 
     def quit_process(self):
+        # print("[[Quit Process]]")
         self.ssh.exec_command(self.exit_cmd)
+        time.sleep(0.5)
 
     def close(self):
         if ssh is not None:
             ssh.close()
-
-
-def main(args):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(args.ip, username=args.username, password=args.password)
-
-    # ssh.exec_command("cd ~/Repository/PnC/build/bin && ./run_cart_pole")
-    # ssh.exec_command("pkill cart_pole")
-
-    if ssh is not None:
-        ssh.close()
-
-if __name__ == "__main__":
-
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="localhost")
-    parser.add_argument("--username", type=str, default="junhyeokahn")
-    parser.add_argument("--password", type=str)
-    args = parser.parse_args()
-
-    main(args)

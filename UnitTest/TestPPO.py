@@ -16,9 +16,13 @@ if __name__ == '__main__':
     parser.add_argument("--password", type=str)
     args = parser.parse_args()
 
+    cfg_path = os.getcwd() + '/Config/CartPole/TEST/RL_TEST.yaml'
+    with open(cfg_path) as f:
+        config = yaml.safe_load(f)
+        num_batch = config['control_configuration']['nn_ctrl']['timesteps_per_actorbatch']
+
     env = CartPoleEnv()
-    num_batch = 5
-    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch)
+    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch, verbose=0)
     model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
-            verbose=0, timesteps_per_actorbatch=num_batch)
+            verbose=1, timesteps_per_actorbatch=num_batch)
     model.learn(total_timesteps=10000)

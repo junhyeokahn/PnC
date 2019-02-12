@@ -22,6 +22,7 @@ class NeuralNetCtrl: public Controller{
     protected:
         double duration_;
         int ctrl_count_;
+        int timesteps_per_actorbatch_;
 
         zmq::context_t *context_;
         zmq::socket_t *data_socket_;

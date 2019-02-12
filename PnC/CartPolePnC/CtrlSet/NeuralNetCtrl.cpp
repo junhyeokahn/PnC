@@ -10,6 +10,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
 
     duration_ = 100000;
     ctrl_count_ = 0;
+    timesteps_per_actorbatch_ = 256;
 
     // =========================================================================
     // Construct zmq socket and connect
@@ -26,7 +27,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     // =========================================================================
     zmq::message_t zmq_msg;
     CartPole::NeuralNetworkParam pb_policy_param;
-    std::cout << "receiving policy data" << std::endl;
+    //std::cout << "receiving policy data" << std::endl;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_policy_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -48,17 +49,17 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
         }
         layers_.push_back(Layer(weight, bias, act_fn));
     }
-    //if (pb_policy_param.stochastic()) {
-        //Eigen::MatrixXd logstd = Eigen::MatrixXd::Zero(1, pb_policy_param.logstd_size());
-        //for (int output_idx = 0; output_idx < pb_policy_param.logstd_size(); ++output_idx) {
-            //logstd(0, output_idx) = pb_policy_param.logstd(output_idx);
-        //}
-        //nn_policy_ = new NeuralNetModel(layers_, logstd);
-    //} else {
-        //nn_policy_ = new NeuralNetModel(layers_);
-    //}
-    //// TEST
-    nn_policy_ = new NeuralNetModel(layers_);
+    if (pb_policy_param.stochastic()) {
+        Eigen::MatrixXd logstd = Eigen::MatrixXd::Zero(1, pb_policy_param.logstd_size());
+        for (int output_idx = 0; output_idx < pb_policy_param.logstd_size(); ++output_idx) {
+            logstd(0, output_idx) = pb_policy_param.logstd(output_idx);
+        }
+        nn_policy_ = new NeuralNetModel(layers_, logstd);
+    } else {
+        nn_policy_ = new NeuralNetModel(layers_);
+    }
+    //// TEST with stochastic
+    //nn_policy_ = new NeuralNetModel(layers_);
     //// TEST
 
     // =========================================================================
@@ -66,7 +67,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     // =========================================================================
     //zmq::message_t zmq_msg; //do i need another zmq_msg?
     CartPole::NeuralNetworkParam pb_valfn_param;
-    std::cout << "receiving value function data" << std::endl;
+    //std::cout << "receiving value function data" << std::endl;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_valfn_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -104,7 +105,9 @@ void NeuralNetCtrl::oneStep(void* _cmd){
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0], robot_->getQdot()[1];
     ((CartPoleCommand*)_cmd)->jtrq = (nn_policy_->GetOutput(obs))(0, 0);
     //((CartPoleCommand*)_cmd)->jtrq = 0.;
-    SendRLData_(obs, (CartPoleCommand*)_cmd);
+    if (ctrl_count_ < timesteps_per_actorbatch_) {
+        SendRLData_(obs, (CartPoleCommand*)_cmd);
+    }
     ++ctrl_count_;
 }
 
@@ -172,6 +175,7 @@ void NeuralNetCtrl::ctrlInitialization(const YAML::Node& node){
         myUtils::readParameter(node, "obs_upper_bound", obs_upper_bound_);
         myUtils::readParameter(node, "action_lower_bound", action_lower_bound_);
         myUtils::readParameter(node, "action_upper_bound", action_upper_bound_);
+        myUtils::readParameter(node, "timesteps_per_actorbatch", timesteps_per_actorbatch_);
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
         exit(0);

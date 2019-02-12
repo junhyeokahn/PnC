@@ -3,7 +3,7 @@ test_configuration:
 
 control_configuration:
     nn_ctrl:
-
+        timesteps_per_actorbatch: 256
         # ======================================================================
         # Observation
         # [cart position, pole position, cart velocity, pole velocity]

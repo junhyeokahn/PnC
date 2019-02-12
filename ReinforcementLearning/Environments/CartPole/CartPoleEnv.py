@@ -16,8 +16,7 @@ class CartPoleEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        # cfg_path = os.getcwd() + '/Config/CartPole/TEST/RL_TEST.yaml'
-        cfg_path = '/Users/junhyeokahn/Repository/PnC/Config/CartPole/TEST/RL_TEST.yaml'
+        cfg_path = os.getcwd() + '/Config/CartPole/TEST/RL_TEST.yaml'
         with open(cfg_path) as f:
             config = yaml.safe_load(f)
             action_lower_bound = config['control_configuration']['nn_ctrl']['action_lower_bound']

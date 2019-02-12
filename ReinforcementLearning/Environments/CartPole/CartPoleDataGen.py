@@ -8,11 +8,12 @@ from ProcessManager import ProcessManager
 from cart_pole_msg_pb2 import *
 
 class CartPoleDataGen(object):
-    def __init__(self, ip, username, password, horizon):
+    def __init__(self, ip, username, password, horizon, verbose=0):
         self.process_manager = ProcessManager(ip, username, password, \
                 'cd ~/Repository/PnC/build/bin && ./run_cart_pole', \
                 'pkill cart_pole')
         self.horizon = horizon
+        self.verbose = verbose
 
         fileHandler = open ("Configuration.h", "r")
         listOfLines = fileHandler.readlines()
@@ -33,9 +34,7 @@ class CartPoleDataGen(object):
         self.policy_valfn_socket.connect(IP_RL_REQ_REP)
 
     def run_experiment(self, policy_param, valfn_param):
-        print("Run Exp")
         self.process_manager.quit_process()
-        time.sleep(0.5)
         self.process_manager.execute_process()
         self.pair_and_sync()
         # ======================================================================
@@ -60,6 +59,8 @@ class CartPoleDataGen(object):
         pb_policy_param_serialized = pb_policy_param.SerializeToString()
         self.policy_valfn_socket.send(pb_policy_param_serialized)
         self.policy_valfn_socket.recv()
+        if self.verbose == 1:
+            print("[[Policy is set]]")
 
         # ======================================================================
         # send value functions
@@ -84,11 +85,14 @@ class CartPoleDataGen(object):
         pb_valfn_param_serialized = pb_valfn_param.SerializeToString()
         self.policy_valfn_socket.send(pb_valfn_param_serialized)
         self.policy_valfn_socket.recv()
+        if self.verbose == 1:
+            print("[[Value function is set]]")
 
     def get_data_segment(self, sess, tf_policy_var, tf_valfn_var):
         policy_param = sess.run(tf_policy_var)
         valfn_param = sess.run(tf_valfn_var)
         self.run_experiment(policy_param, valfn_param);
+        count_list = []
         ob_list = []
         rew_list = []
         true_rew_list = []
@@ -104,6 +108,8 @@ class CartPoleDataGen(object):
         ep_true_ret_list = []
         ep_ret_list = []  # returns of completed episodes in this segment
         ep_len_list = []  # Episode lengths
+
+        b_first = True
 
         while(True):
 
@@ -121,8 +127,13 @@ class CartPoleDataGen(object):
                 prev_action = pb_data_set.action
 
                 cur_ep_ret += pb_data_set.reward
+                count_list.append(pb_data_set.count)
                 current_it_len = pb_data_set.count
                 cur_ep_true_ret += pb_data_set.reward
+                if b_first:
+                    if pb_data_set.count != 0:
+                        print("[[Error]] Count does not start from zero!!")
+                    b_first = False
 
                 if pb_data_set.done:
                     ep_ret_list.append(cur_ep_ret)
@@ -133,7 +144,6 @@ class CartPoleDataGen(object):
                     current_it_len = 0
 
                     self.process_manager.quit_process()
-                    time.sleep(0.5)
                     self.run_experiment(policy_param, valfn_param)
 
             else:
@@ -144,14 +154,24 @@ class CartPoleDataGen(object):
         rew_list = np.array(rew_list)
         true_rew_list = np.array(true_rew_list)
         vpred_list = np.array(vpred_list)
-        action_list = np.array(action_list)
-        prev_action_list = np.array(prev_action_list)
+        action_list = np.array(action_list).reshape([self.horizon, 1])
+        prev_action_list = np.array(prev_action_list).reshape([self.horizon, 1])
         nextvpred = vpred_list[-1] * ( 1 - done_list[-1] )
 
         if ep_ret_list == 0:
             current_it_timesteps = current_it_len
         else:
             current_it_timesteps = sum(ep_len_list) + current_it_len
+
+        if self.verbose == 2:
+            print("=======================data generation========================")
+            print("current_it_timesteps")
+            print(current_it_timesteps)
+            print("current_it_len")
+            print(current_it_len)
+            print("count list")
+            print(count_list)
+            print("=======================data generation========================")
 
         return {'ob': ob_list, 'rew': rew_list, 'dones':done_list, 'true_rew': true_rew_list,
                 'vpred': vpred_list, 'ac': action_list, 'prevac':prev_action_list,
@@ -172,4 +192,5 @@ class CartPoleDataGen(object):
                 self.policy_valfn_socket.send(b"world")
                 self.policy_valfn_socket.recv()
                 break;
-        print("Sockets are all paired and synced")
+        if self.verbose == 1 :
+            print("[[Sockets are all paired and synced]]")
