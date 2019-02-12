@@ -15,10 +15,10 @@ class ProcessManager(object):
         self.quit_process()
 
     def execute_process(self):
+        time.sleep(0.5)
         if self.verbose >= 1:
              print("[[Execute Process]]")
         self.ssh.exec_command(self.execute_cmd)
-        time.sleep(0.5)
 
     def quit_process(self):
         if self.verbose >= 1:

@@ -8,6 +8,7 @@ from ProcessManager import ProcessManager
 from cart_pole_msg_pb2 import *
 
 class CartPoleDataGen(object):
+    # verbose = 0 (quite), 1 (process monitor), 2 (data)
     def __init__(self, ip, username, password, horizon, verbose=0):
         self.process_manager = ProcessManager(ip, username, password, \
                 'cd ~/Repository/PnC/build/bin && ./run_cart_pole', \
@@ -19,21 +20,30 @@ class CartPoleDataGen(object):
         listOfLines = fileHandler.readlines()
         for line in listOfLines:
             if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpSubPub':
-                IP_RL_SUB_PUB= line.split(' ')[-1].split('\n')[0].split('"')[1]
+                self.IP_RL_SUB_PUB = line.split(' ')[-1].split('\n')[0].split('"')[1]
             if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpReqRep':
-                IP_RL_REQ_REP= line.split(' ')[-1].split('\n')[0].split('"')[1]
+                self.IP_RL_REQ_REP = line.split(' ')[-1].split('\n')[0].split('"')[1]
         fileHandler.close()
 
-        # Constructe zmq socket and connect
+    def construct_zmq_sockets(self):
+        if self.verbose >= 1:
+            print("[[Socket created]]")
         self.context = zmq.Context()
         self.data_socket = self.context.socket(zmq.SUB)
-        self.data_socket.connect(IP_RL_SUB_PUB)
+        self.data_socket.connect(self.IP_RL_SUB_PUB)
         self.data_socket.setsockopt_string(zmq.SUBSCRIBE, "")
         self.policy_valfn_socket = self.context.socket(zmq.REQ)
-        self.policy_valfn_socket.connect(IP_RL_REQ_REP)
+        self.policy_valfn_socket.connect(self.IP_RL_REQ_REP)
+
+    def close_zmq_sockets(self):
+        if self.verbose >= 1:
+            print("[[Socket destroyed]]")
+        self.context.destroy()
+        if not (self.context.closed):
+            print("[[Error]] Socket is not closed correctly!!")
+            exit()
 
     def run_experiment(self, policy_param, valfn_param):
-        self.process_manager.quit_process()
         self.process_manager.execute_process()
         self.pair_and_sync()
         # ======================================================================
@@ -90,7 +100,10 @@ class CartPoleDataGen(object):
     def get_data_segment(self, sess, tf_policy_var, tf_valfn_var):
         policy_param = sess.run(tf_policy_var)
         valfn_param = sess.run(tf_valfn_var)
+
+        self.construct_zmq_sockets()
         self.run_experiment(policy_param, valfn_param);
+
         count_list = []
         ob_list = []
         rew_list = []
@@ -116,38 +129,45 @@ class CartPoleDataGen(object):
                 pb_data_set = DataSet()
                 zmq_msg = self.data_socket.recv()
                 pb_data_set.ParseFromString(zmq_msg)
-                rew_list.append(pb_data_set.reward)
-                true_rew_list.append(pb_data_set.reward)
-                ob_list.append(pb_data_set.observation)
-                vpred_list.append(pb_data_set.vpred)
-                done_list.append(pb_data_set.done)
-                action_list.append(pb_data_set.action)
-                prev_action_list.append(prev_action)
-                prev_action = pb_data_set.action
 
-                cur_ep_ret += pb_data_set.reward
-                count_list.append(pb_data_set.count)
-                current_it_len = pb_data_set.count
-                cur_ep_true_ret += pb_data_set.reward
-                if b_first:
-                    if pb_data_set.count != 0:
-                        print("[[Error]] Count does not start from zero!!")
-                    b_first = False
+                if pb_data_set.ListFields() == []:
+                    print("Null Data received and ignore")
+                else:
+                    rew_list.append(pb_data_set.reward)
+                    true_rew_list.append(pb_data_set.reward)
+                    ob_list.append(pb_data_set.observation)
+                    vpred_list.append(pb_data_set.vpred)
+                    done_list.append(pb_data_set.done)
+                    action_list.append(pb_data_set.action)
+                    prev_action_list.append(prev_action)
+                    prev_action = pb_data_set.action
 
-                if pb_data_set.done:
-                    ep_ret_list.append(cur_ep_ret)
-                    ep_true_ret_list.append(cur_ep_true_ret)
-                    ep_len_list.append(current_it_len)
-                    cur_ep_ret = 0
-                    cur_ep_true_ret = 0
-                    current_it_len = 0
+                    cur_ep_ret += pb_data_set.reward
+                    count_list.append(pb_data_set.count)
+                    current_it_len = pb_data_set.count
+                    cur_ep_true_ret += pb_data_set.reward
+                    if b_first:
+                        if pb_data_set.count != 0:
+                            print("[[Error]] Count does not start from zero!!")
+                            exit()
+                        b_first = False
 
-                    self.process_manager.quit_process()
-                    self.run_experiment(policy_param, valfn_param)
+                    if pb_data_set.done:
+                        ep_ret_list.append(cur_ep_ret)
+                        ep_true_ret_list.append(cur_ep_true_ret)
+                        ep_len_list.append(current_it_len)
+                        cur_ep_ret = 0
+                        cur_ep_true_ret = 0
+                        current_it_len = 0
+
+                        self.process_manager.quit_process()
+                        self.construct_zmq_sockets()
+                        self.run_experiment(policy_param, valfn_param)
 
             else:
-                self.process_manager.quit_process()
                 break;
+
+        self.process_manager.quit_process()
 
         ob_list = np.array(ob_list)
         rew_list = np.array(rew_list)
@@ -163,14 +183,20 @@ class CartPoleDataGen(object):
             current_it_timesteps = sum(ep_len_list) + current_it_len
 
         if self.verbose >= 2:
-            print("=======================data generation========================")
-            print("current_it_timesteps")
-            print(current_it_timesteps)
-            print("current_it_len")
-            print(current_it_len)
+            print("======================= Data ========================")
+            # print("current_it_timesteps")
+            # print(current_it_timesteps)
+            # print("current_it_len")
+            # print(current_it_len)
             print("count list")
             print(count_list)
-            print("=======================data generation========================")
+            print("ep_ret_list")
+            print(ep_ret_list)
+            print("ep_len_list")
+            print(ep_len_list)
+            print("done list")
+            print(done_list)
+            print("======================= Data ========================")
 
         return {'ob': ob_list, 'rew': rew_list, 'dones':done_list, 'true_rew': true_rew_list,
                 'vpred': vpred_list, 'ac': action_list, 'prevac':prev_action_list,

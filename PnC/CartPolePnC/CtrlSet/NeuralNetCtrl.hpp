@@ -45,4 +45,5 @@ class NeuralNetCtrl: public Controller{
         double pole_cost_;
         double cart_cost_;
         double quad_input_cost_;
+        bool b_done_before_;
 };

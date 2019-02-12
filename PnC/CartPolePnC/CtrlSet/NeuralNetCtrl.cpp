@@ -12,6 +12,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     duration_ = 100000;
     ctrl_count_ = 0;
     timesteps_per_actorbatch_ = 256;
+    b_done_before_ = false;
 
     // =========================================================================
     // Construct zmq socket and connect
@@ -106,8 +107,10 @@ void NeuralNetCtrl::oneStep(void* _cmd){
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0], robot_->getQdot()[1];
     ((CartPoleCommand*)_cmd)->jtrq = (nn_policy_->GetOutput(obs))(0, 0);
     //((CartPoleCommand*)_cmd)->jtrq = 0.;
-    if (ctrl_count_ < timesteps_per_actorbatch_) {
+    if (ctrl_count_ < timesteps_per_actorbatch_ && !b_done_before_) {
         SendRLData_(obs, (CartPoleCommand*)_cmd);
+    } else {
+        //context_->close();
     }
     ++ctrl_count_;
 }
@@ -129,6 +132,7 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd){
          (obs(0, 3) > terminate_obs_upper_bound_[1]) )
     {
         done = true;
+        b_done_before_ = true;
     }
     pb_data_set.set_done(done);
 

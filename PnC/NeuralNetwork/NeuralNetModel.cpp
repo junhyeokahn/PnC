@@ -1,6 +1,5 @@
 #include <cmath>
-#include <random>
-
+#include <random> 
 #include "PnC/NeuralNetwork/NeuralNetModel.hpp"
 
 Layer::Layer(Eigen::MatrixXd weight, Eigen::MatrixXd bias, ActivationFunction act_fn) {
