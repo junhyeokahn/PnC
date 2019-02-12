@@ -5,6 +5,7 @@
 #include "Utils/IO/IOUtilities.hpp"
 #include "CartPoleWorldNode.hpp"
 #include "Configuration.h"
+#include <random>
 
 void displayJointFrames(
     const dart::simulation::WorldPtr& world, 
@@ -94,10 +95,30 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot){
+    YAML::Node simulation_cfg =
+        YAML::LoadFile(THIS_COM"Config/CartPole/SIMULATION.yaml");
+    Eigen::VectorXd init_state_lower_bound, init_state_upper_bound;
+    myUtils::readParameter(simulation_cfg, "init_state_lower_bound", init_state_lower_bound);
+    myUtils::readParameter(simulation_cfg, "init_state_upper_bound", init_state_upper_bound);
+
     Eigen::VectorXd q = robot->getPositions();
-    q[0] = 0.;
-    q[1] = 0.1;
+    Eigen::VectorXd qdot = robot->getVelocities();
+
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+
+    for (int i = 0; i < 2; ++i) {
+        std::uniform_real_distribution<> dis(init_state_lower_bound[i], init_state_upper_bound[i]);
+        q[i] = dis(gen);
+    }
+    for (int i = 0; i < 2; ++i) {
+        std::uniform_real_distribution<> dis(init_state_lower_bound[i+2], init_state_upper_bound[i+2]);
+        qdot[i] = dis(gen);
+    }
     robot->setPositions(q);
+    robot->setVelocities(qdot);
+    myUtils::pretty_print(q, std::cout, "q");
+    myUtils::pretty_print(qdot, std::cout, "qdot");
 }
 
 int main() {

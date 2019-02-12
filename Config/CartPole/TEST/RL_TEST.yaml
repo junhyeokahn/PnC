@@ -29,5 +29,5 @@ control_configuration:
         # ======================================================================
         # Terminate condition
         # ======================================================================
-        terminate_obs_lower_bound: [-5 , -0.785 , -10 , -5]
-        terminate_obs_upper_bound: [5  , 0.785  , 10  , 5]
+        terminate_obs_lower_bound: [-5 , -0.2, -10 , -5]
+        terminate_obs_upper_bound: [5  , 0.2, 10  , 5]

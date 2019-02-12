@@ -22,7 +22,7 @@ if __name__ == '__main__':
         num_batch = config['control_configuration']['nn_ctrl']['timesteps_per_actorbatch']
 
     env = CartPoleEnv()
-    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch, verbose=2)
+    cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch, verbose=0)
     model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
             verbose=1, timesteps_per_actorbatch=num_batch)
     model.learn(total_timesteps=10000)

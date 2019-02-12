@@ -140,7 +140,7 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd){
     reward -= quad_input_cost_ * cmd->jtrq * cmd->jtrq;
     pb_data_set.set_reward(reward);
 
-    // set observation, (jpos, jvel) \in R^{4}
+    // set observation, (cart pos, pole angle, cart vel, pole ang vel) \in R^{4}
     for (int i = 0; i < 2; ++i) {
         pb_data_set.add_observation(robot_->getQ()[i]);
     }
