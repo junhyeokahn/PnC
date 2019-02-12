@@ -109,10 +109,10 @@ endif()
 ## Configuration File
 ##=============================================================================
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
-if (Protobuf_FOUND AND Protobuf_FOUND)
-    SET (HAS_RL_DEP TRUE)
+if (ZMQ_FOUND AND Protobuf_FOUND)
+    SET (HAS_RL_DEP true)
 else()
-    SET (HAS_RL_DEP FALSE)
+    SET (HAS_RL_DEP false)
 endif()
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
 install(FILES ${PROJECT_SOURCE_DIR}/Configuration.h DESTINATION "${INSTALL_INCLUDE_DIR}")

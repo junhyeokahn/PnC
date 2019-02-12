@@ -231,6 +231,7 @@ class PPO(ActorCriticRLModel):
 
                     # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
                     obs_ph, action_ph, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
+                    __import__('ipdb').set_trace()
 
                     # true_rew is the reward without discount
                     if writer is not None:

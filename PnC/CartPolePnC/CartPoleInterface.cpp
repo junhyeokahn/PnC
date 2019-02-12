@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <chrono>
 #include <thread>
-
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
 #include <Configuration.h>
 #include <Utils/IO/IOUtilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 #include <PnC/CartPolePnC/TestSet/RLTest.hpp>
 #include <PnC/CartPolePnC/TestSet/BasicTest.hpp>
+#include <Configuration.h>
 
 CartPoleInterface::CartPoleInterface() : Interface()
 {
@@ -53,6 +53,8 @@ void CartPoleInterface::ParameterSetting_(){
         if (test_name == "rl_test") {
 #if HAS_RL_DEP
             test_ = new RLTest(robot_);
+#else
+            std::cout << "Dependancies for Reinforcement Learning is not found" << std::endl;
 #endif
         } else if (test_name == "basic_test") {
             test_ = new BasicTest(robot_);
