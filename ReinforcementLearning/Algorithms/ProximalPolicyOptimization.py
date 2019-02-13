@@ -15,6 +15,8 @@ from stable_baselines.common.mpi_moments import mpi_moments
 from stable_baselines.trpo_mpi.utils import traj_segment_generator, add_vtarg_and_adv, flatten_lists
 from stable_baselines.a2c.utils import total_episode_reward_logger
 
+from ruamel.yaml import YAML
+
 class PPO(ActorCriticRLModel):
     """
     Proximal Policy Optimization algorithm (MPI version).
@@ -345,6 +347,50 @@ class PPO(ActorCriticRLModel):
 
         params = self.sess.run(self.params)
 
-        __import__('ipdb').set_trace()
         self._save_to_file(save_path, data=data, params=params)
         ## TODO : Save models as a txt file as well for cpp
+
+        policy_param = self.sess.run(self.policy_param)
+        val_fn_param = self.sess.run(self.valfn_param)
+
+        if (len(policy_param) % 2 == 0):
+            p_b_stochastic = False
+            p_num_layer = (int) (len(policy_param) / 2)
+        else:
+            p_b_stochastic = True
+            p_num_layer = (int) ((len(policy_param)-1) / 2)
+
+        if (len(val_fn_param) % 2 == 0):
+            v_b_stochastic = False
+            v_num_layer = (int) (len(val_fn_param) / 2)
+        else:
+            v_b_stochastic = True
+            v_num_layer = (int) ((len(val_fn_param)-1) / 2)
+
+        pol_params = {}
+        pol_params['b_stochastic'] = p_b_stochastic
+        pol_params['num_layer'] = p_num_layer
+        for layer_idx in range(p_num_layer):
+            pol_params['w'+str(layer_idx)] = policy_param[2*layer_idx].tolist()
+            pol_params['b'+str(layer_idx)] = policy_param[2*layer_idx+1].tolist()
+            pol_params['act_fn'] = 1
+        if p_b_stochastic:
+            pol_params['logstd'] = policy_param[-1].tolist()
+
+        valfn_params = {}
+        valfn_params['b_stochastic'] = v_b_stochastic
+        valfn_params['num_layer'] = v_num_layer
+        for layer_idx in range(p_num_layer):
+            valfn_params['w'+str(layer_idx)] = val_fn_param[2*layer_idx].tolist()
+            valfn_params['b'+str(layer_idx)] = val_fn_param[2*layer_idx+1].tolist()
+            if not (layer_idx == (v_num_layer - 1)):
+                valfn_params['act_fn'] = 1
+        if v_b_stochastic:
+            valfn_params['logstd'] = val_fn_param[-1].tolist()
+
+        data = {"pol_params": pol_params, "valfn_params": valfn_params}
+        with open(save_path + '.yml', 'w') as f:
+            yaml = YAML()
+            yaml.dump(data, f)
+
+        __import__('ipdb').set_trace()

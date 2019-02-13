@@ -7,6 +7,7 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 #include <PnC/CartPolePnC/TestSet/RLTest.hpp>
+#include <PnC/CartPolePnC/TestSet/PolicyTest.hpp>
 #include <PnC/CartPolePnC/TestSet/BasicTest.hpp>
 #include <Configuration.h>
 
@@ -57,6 +58,8 @@ void CartPoleInterface::ParameterSetting_(){
 #else
             std::cout << "Dependancies for Reinforcement Learning is not found" << std::endl;
 #endif
+        } else if (test_name == "policy_test") {
+            test_ = new PolicyTest(robot_);
         } else if (test_name == "basic_test") {
             test_ = new BasicTest(robot_);
         } else {

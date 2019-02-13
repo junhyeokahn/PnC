@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
+#include <Utils/IO/IOUtilities.hpp>
 
 enum ActivationFunction {
     None = 0,
@@ -32,8 +33,10 @@ private:
 class NeuralNetModel
 {
 public:
-    NeuralNetModel (std::vector<Layer> layers, Eigen::MatrixXd logstd);
     NeuralNetModel (std::vector<Layer> layers);
+    NeuralNetModel (std::vector<Layer> layers, Eigen::MatrixXd logstd);
+    NeuralNetModel (const YAML::Node& node);
+
     virtual ~NeuralNetModel ();
 
     Eigen::MatrixXd GetOutput( const Eigen::MatrixXd & input );
@@ -41,6 +44,9 @@ public:
     int GetNumOutput() { return num_output_; }
 
 private:
+    void Initialize_(std::vector<Layer> layers,
+                     bool b_stoch=false,
+                     Eigen::MatrixXd logstd = Eigen::MatrixXd::Zero(1, 1));
     int num_input_;
     int num_output_;
     int num_layer_;
