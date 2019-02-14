@@ -15,6 +15,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--password", type=str)
+    # parser.add_argument("--model_dir", type=str)
     args = parser.parse_args()
 
     cfg_path = os.getcwd() + '/Config/CartPole/TEST/RL_TEST.yaml'
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
             verbose=1, timesteps_per_actorbatch=num_batch,
             tensorboard_log=save_path)
-    model.learn(total_timesteps=10000)
+    model.learn(total_timesteps=1e6)
 
     # Save the model
     model.save(save_path, dir_name, new_dir = False)

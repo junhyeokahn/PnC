@@ -428,6 +428,8 @@ class PPO(ActorCriticRLModel):
             yaml = YAML()
             yaml.dump(data, f)
 
+        print("[[Model is Saved]]")
+
         #### TEST
         # obs = np.array([[0]])
         # while(True):

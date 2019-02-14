@@ -19,9 +19,9 @@ class CartPoleDataGen(object):
         fileHandler = open ("PnC/CartPolePnC/CartPoleDefinition.hpp", "r")
         listOfLines = fileHandler.readlines()
         for line in listOfLines:
-            if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpSubPub':
+            if (len(line.split(' ')) > 3) and line.split(' ')[2] == 'IpSubPub[]':
                 self.IP_RL_SUB_PUB = line.split(' ')[-1].split('\n')[0].split('"')[1]
-            if (len(line.split(' ')) > 5) and line.split(' ')[6] == 'IpReqRep':
+            if (len(line.split(' ')) > 3) and line.split(' ')[2] == 'IpReqRep[]':
                 self.IP_RL_REQ_REP = line.split(' ')[-1].split('\n')[0].split('"')[1]
         fileHandler.close()
 

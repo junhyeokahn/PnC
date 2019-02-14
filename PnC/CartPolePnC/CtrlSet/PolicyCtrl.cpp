@@ -24,16 +24,18 @@ void PolicyCtrl::oneStep(void* _cmd) {
         robot_->getQdot()[1];
     Eigen::MatrixXd act = nn_policy_->GetOutput(obs);
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
+    ((CartPoleCommand*)_cmd)->jtrq = act(0, 0);
 
     //// TEST
     // std::cout << "=============================================" <<
-    // std::endl; myUtils::pretty_print(act, std::cout, "act");
+    // std::endl;
+    // myUtils::pretty_print(act, std::cout, "act");
     // myUtils::pretty_print(val, std::cout, "val");
+    // myUtils::pretty_print(robot_->getQ(), std::cout, "q");
+    // myUtils::pretty_print(obs, std::cout, "obs");
     // std::cout << "=============================================" <<
     // std::endl;
     //// TEST
-
-    ((CartPoleCommand*)_cmd)->jtrq = act(0, 0);
 
     ++ctrl_count_;
 }
