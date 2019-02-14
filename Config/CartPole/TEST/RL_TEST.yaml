@@ -8,8 +8,8 @@ control_configuration:
         # Observation
         # [cart position, pole position, cart velocity, pole velocity]
         # ======================================================================
-        obs_lower_bound  : [-5 , -0.785 , -10 , -5]
-        obs_upper_bound  : [5  , 0.785  , 10  , 5]
+        obs_lower_bound  : [-10 , -0.785 , -10 , -5]
+        obs_upper_bound  : [10  , 0.785  , 10  , 5]
 
         # ======================================================================
         # Action
@@ -31,5 +31,5 @@ control_configuration:
         # ======================================================================
         #terminate_obs_lower_bound: [-5 , -0.1, -10 , -5]
         #terminate_obs_upper_bound: [5  , 0.1, 10  , 5]
-        terminate_obs_lower_bound: [-5 , -0.2 , -10 , -5]
-        terminate_obs_upper_bound: [5  , 0.2  , 10  , 5]
+        terminate_obs_lower_bound: [-5 , -0.5 , -10 , -5]
+        terminate_obs_upper_bound: [5  , 0.5  , 10  , 5]

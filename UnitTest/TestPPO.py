@@ -25,16 +25,19 @@ if __name__ == '__main__':
     env = CartPoleEnv()
     cart_pole_data_gen = CartPoleDataGen('localhost', 'junhyeokahn', args.password, num_batch, verbose=0)
 
+    # Path for logging
+    save_path = os.getcwd() + '/ReinforcementLearning/Environments/CartPole/Log'
+    dir_name = 'PPO'
+
     # Train the model
+#     model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
+            # verbose=1, timesteps_per_actorbatch=num_batch)
+    # model.learn(total_timesteps=10000)
     model = PPO('MlpPolicy', env, cart_pole_data_gen, schedule='linear',
-            verbose=1, timesteps_per_actorbatch=num_batch)
-    model.learn(total_timesteps=10000)
+            verbose=1, timesteps_per_actorbatch=num_batch,
+            tensorboard_log=save_path)
+    model.learn(total_timesteps=1000)
 
 
     # Save the model
-    model_dir = os.getcwd() + '/ReinforcementLearning/Environments/CartPole/Model/'
-    date_dir = str(datetime.datetime.now())
-    file_name = '/model'
-    if not os.path.exists(model_dir + date_dir):
-        os.makedirs(model_dir + date_dir)
-    model.save(model_dir + date_dir + file_name)
+    model.save(save_path, dir_name, new_dir = False)

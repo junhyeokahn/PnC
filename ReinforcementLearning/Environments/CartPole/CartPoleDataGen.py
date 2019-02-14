@@ -177,6 +177,7 @@ class CartPoleDataGen(object):
         action_list = np.array(action_list).reshape([self.horizon, 1])
         prev_action_list = np.array(prev_action_list).reshape([self.horizon, 1])
         nextvpred = vpred_list[-1] * ( 1 - done_list[-1] )
+        done_list = np.array(done_list)
 
         if ep_ret_list == 0:
             current_it_timesteps = current_it_len

@@ -16,6 +16,8 @@ from stable_baselines.trpo_mpi.utils import traj_segment_generator, add_vtarg_an
 from stable_baselines.a2c.utils import total_episode_reward_logger
 
 from ruamel.yaml import YAML
+import glob
+import os
 
 class PPO(ActorCriticRLModel):
     """
@@ -175,7 +177,7 @@ class PPO(ActorCriticRLModel):
                 self.compute_losses = tf_util.function([obs_ph, old_pi.obs_ph, action_ph, atarg, ret, lrmult],
                                                        losses)
 
-    def learn(self, total_timesteps, callback=None, seed=None, log_interval=100, tb_log_name="PPO1"):
+    def learn(self, total_timesteps, callback=None, seed=None, log_interval=100, tb_log_name="PPO"):
         with SetVerbosity(self.verbose), TensorboardWriter(self.graph, self.tensorboard_log, tb_log_name) as writer:
             self._setup_learn(seed)
 
@@ -324,7 +326,33 @@ class PPO(ActorCriticRLModel):
 
         return self
 
-    def save(self, save_path):
+    def get_latest_run_id(self, save_path, dir_name):
+        """
+        returns the latest run number for the given log name and log path,
+        by finding the greatest number in the directories.
+
+        :return: (int) latest run number
+        """
+        max_run_id = 0
+        for path in glob.glob(save_path + "/{}_[0-9]*".format(dir_name)):
+            file_name = path.split("/")[-1]
+            ext = file_name.split("_")[-1]
+            if dir_name == "_".join(file_name.split("_")[:-1]) and ext.isdigit() and int(ext) > max_run_id:
+                max_run_id = int(ext)
+        return max_run_id
+
+    def save(self, save_path, dir_name, new_dir=True):
+
+        latest_run_id = self.get_latest_run_id(save_path, dir_name)
+        if new_dir:
+            latest_run_id = latest_run_id + 1
+        save_path = os.path.join(save_path, "{}_{}".format(dir_name, latest_run_id))
+
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+        final_path = save_path + "/model"
+
         data = {
             "gamma": self.gamma,
             "timesteps_per_actorbatch": self.timesteps_per_actorbatch,
@@ -347,7 +375,7 @@ class PPO(ActorCriticRLModel):
 
         params = self.sess.run(self.params)
 
-        self._save_to_file(save_path, data=data, params=params)
+        self._save_to_file(final_path, data=data, params=params)
 
         policy_param = self.sess.run(self.policy_param)
         val_fn_param = self.sess.run(self.valfn_param)
@@ -396,7 +424,7 @@ class PPO(ActorCriticRLModel):
             valfn_params['logstd'] = val_fn_param[-1].tolist()
 
         data = {"pol_params": pol_params, "valfn_params": valfn_params}
-        with open(save_path + '.yaml', 'w') as f:
+        with open(final_path + '.yaml', 'w') as f:
             yaml = YAML()
             yaml.dump(data, f)
 

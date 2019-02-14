@@ -1,5 +1,5 @@
 is_record: false
-num_steps_per_cycle: 30
+num_steps_per_cycle: 1
 servo_rate: 0.01 # !! This should be match with controller servo rate !!
 display_joint_frame: false
 show_viewer: true
