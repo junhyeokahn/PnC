@@ -21,6 +21,7 @@ public:
     int GetNumOutput() { return num_output_; }
     Eigen::MatrixXd GetWeight() { return weight_; }
     Eigen::MatrixXd GetBias() { return bias_; }
+    ActivationFunction GetActivationFunction() { return act_fn_; }
 
 private:
     Eigen::MatrixXd weight_;
@@ -39,9 +40,12 @@ public:
 
     virtual ~NeuralNetModel ();
 
+    std::vector<Layer> GetLayers() { return layers_; }
     Eigen::MatrixXd GetOutput( const Eigen::MatrixXd & input );
+    Eigen::MatrixXd GetOutput( const Eigen::MatrixXd & input, int idx );
     int GetNumInput() { return num_input_; }
     int GetNumOutput() { return num_output_; }
+    void PrintInfo();
 
 private:
     void Initialize_(std::vector<Layer> layers,

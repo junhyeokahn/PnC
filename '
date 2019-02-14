@@ -400,12 +400,10 @@ class PPO(ActorCriticRLModel):
             yaml = YAML()
             yaml.dump(data, f)
 
-        #### TEST
-        # obs = np.array([[0]])
-        # while(True):
-            # __import__('ipdb').set_trace()
-            # first = np.tanh( np.matmul(obs, policy_param[0]) + policy_param[1].reshape(1, policy_param[1].shape[0] ) )
-            # second = np.tanh( np.matmul(first, policy_param[2]) + policy_param[3].reshape(1, policy_param[3].shape[0]) )
-            # third = np.tanh( np.matmul(second, policy_param[4]) + policy_param[5].reshape(1, policy_param[5].shape[0]) )
-            # self.step(obs, deterministic=True)
-        #### TEST
+        obs = np.array([[0]])
+        while(True):
+            __import__('ipdb').set_trace()
+            first = np.tanh( np.matmul(obs, policy_param[0]) + policy_param[1].reshape(1, policy_param[1].shape[0] ) )
+            second = np.tanh( np.matmul(first, policy_param[2]) + policy_param[3].reshape(1, policy_param[3].shape[0]) )
+            third = np.tanh( np.matmul(second, policy_param[4]) + policy_param[5].reshape(1, policy_param[5].shape[0]) )
+            self.step(obs, deterministic=True)

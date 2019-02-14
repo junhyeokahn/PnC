@@ -18,8 +18,21 @@ PolicyCtrl::~PolicyCtrl(){
     delete nn_valfn_;
 }
 
-void PolicyCtrl::oneStep(void* _cmd){
-    ((CartPoleCommand*)_cmd)->jtrq = 0.;
+void PolicyCtrl::oneStep(void* _cmd) {
+    Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
+    obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0], robot_->getQdot()[1];
+    Eigen::MatrixXd act = nn_policy_->GetOutput(obs);
+    Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
+
+    //// TEST
+    //std::cout << "=============================================" << std::endl;
+    //myUtils::pretty_print(act, std::cout, "act");
+    //myUtils::pretty_print(val, std::cout, "val");
+    //std::cout << "=============================================" << std::endl;
+    //// TEST
+
+    ((CartPoleCommand*)_cmd)->jtrq = act(0, 0);
+
     ++ctrl_count_;
 }
 
@@ -39,8 +52,8 @@ bool PolicyCtrl::endOfPhase(){
 void PolicyCtrl::ctrlInitialization(const YAML::Node& node){
 }
 
-void PolicyCtrl::setModelPath(std::string model_path){
-    YAML::Node cfg = YAML::LoadFile(model_path);
+void PolicyCtrl::setModelPath(std::string model_path) {
+    YAML::Node cfg = YAML::LoadFile(model_path + "/model.yaml");
     nn_policy_ = new NeuralNetModel(cfg["pol_params"]);
     nn_valfn_ = new NeuralNetModel(cfg["valfn_params"]);
 }

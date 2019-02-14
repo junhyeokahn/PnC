@@ -25,23 +25,18 @@ class CartPoleDataGen(object):
                 self.IP_RL_REQ_REP = line.split(' ')[-1].split('\n')[0].split('"')[1]
         fileHandler.close()
 
+        if self.verbose >= 1:
+            print("[[Context created]]")
+        self.context = zmq.Context.instance()
+
     def construct_zmq_sockets(self):
         if self.verbose >= 1:
             print("[[Socket created]]")
-        self.context = zmq.Context()
         self.data_socket = self.context.socket(zmq.SUB)
-        self.data_socket.connect(self.IP_RL_SUB_PUB)
         self.data_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+        self.data_socket.connect(self.IP_RL_SUB_PUB)
         self.policy_valfn_socket = self.context.socket(zmq.REQ)
         self.policy_valfn_socket.connect(self.IP_RL_REQ_REP)
-
-    def close_zmq_sockets(self):
-        if self.verbose >= 1:
-            print("[[Socket destroyed]]")
-        self.context.destroy()
-        if not (self.context.closed):
-            print("[[Error]] Socket is not closed correctly!!")
-            exit()
 
     def run_experiment(self, policy_param, valfn_param):
         self.process_manager.execute_process()
@@ -61,8 +56,14 @@ class CartPoleDataGen(object):
                     layer.weight.append(weight[w_row, w_col])
             for b_idx in range(bias.shape[0]):
                 layer.bias.append(bias[b_idx])
-            layer.act_fn = NeuralNetworkParam.Tanh
+            if l_idx == int((len(policy_param)-1)/2) - 1:
+                layer.act_fn = NeuralNetworkParam.NONE
+            else:
+                layer.act_fn = NeuralNetworkParam.Tanh
         pb_policy_param.stochastic = True
+        #### TEST
+        # pb_policy_param.stochastic = False
+        #### TEST
         for action_idx in range(policy_param[-1].shape[0]):
             pb_policy_param.logstd.append((policy_param[-1])[action_idx])
         pb_policy_param_serialized = pb_policy_param.SerializeToString()

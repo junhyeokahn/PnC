@@ -117,8 +117,8 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot){
     }
     robot->setPositions(q);
     robot->setVelocities(qdot);
-    myUtils::pretty_print(q, std::cout, "q");
-    myUtils::pretty_print(qdot, std::cout, "qdot");
+    //myUtils::pretty_print(q, std::cout, "q");
+    //myUtils::pretty_print(qdot, std::cout, "qdot");
 }
 
 int main() {

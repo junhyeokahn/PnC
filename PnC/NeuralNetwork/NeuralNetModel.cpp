@@ -60,7 +60,7 @@ NeuralNetModel::NeuralNetModel (const YAML::Node& node) {
         for (int idx_layer = 0; idx_layer < num_layer; ++idx_layer) {
             myUtils::readParameter(node, "w"+std::to_string(idx_layer), w);
             myUtils::readParameter(node, "b"+std::to_string(idx_layer), b);
-            myUtils::readParameter(node, "act_fn", act_fn);
+            myUtils::readParameter(node, "act_fn"+std::to_string(idx_layer), act_fn);
             layers.push_back(Layer(w, b, static_cast<ActivationFunction>(act_fn)));
         }
         if (b_stochastic) {
@@ -82,6 +82,20 @@ NeuralNetModel::NeuralNetModel(std::vector<Layer> layers) {
 }
 
 NeuralNetModel::~NeuralNetModel() {}
+
+Eigen::MatrixXd NeuralNetModel::GetOutput( const Eigen::MatrixXd & input, int ith ) {
+    Eigen::MatrixXd ret = input;
+    if (ith > num_layer_) {
+        std::cout << "[[Error]] Wrong output layer idx!!" << std::endl;
+        exit(0);
+    }
+
+    for (int i = 0; i < ith; ++i) {
+        ret = (layers_[i]).GetOutput(ret);
+    }
+
+    return ret;
+}
 
 Eigen::MatrixXd NeuralNetModel::GetOutput( const Eigen::MatrixXd & input) {
 
@@ -116,5 +130,17 @@ void NeuralNetModel::Initialize_( std::vector<Layer> layers, bool b_stoch, Eigen
         for (int i = 0; i < num_output_; ++i) {
             std_(0, i) = std::exp(logstd_(0, i));
         }
+    }
+}
+
+void NeuralNetModel::PrintInfo() {
+    std::cout << "Num Layer : " << num_layer_ << std::endl;
+    for (int i = 0; i < num_layer_; ++i) {
+        std::cout << i << " th Layer : (" << layers_[i].GetNumInput() << ", " << layers_[i].GetNumOutput() << ") with Activation type::" << layers_[i].GetActivationFunction() << std::endl;
+        myUtils::pretty_print(layers_[i].GetWeight(), std::cout, "w");
+        myUtils::pretty_print(layers_[i].GetBias(), std::cout, "b");
+    }
+    if (b_stochastic_) {
+        myUtils::pretty_print(logstd_, std::cout, "logstd");
     }
 }

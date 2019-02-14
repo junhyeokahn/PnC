@@ -29,7 +29,6 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     // =========================================================================
     zmq::message_t zmq_msg;
     CartPole::NeuralNetworkParam pb_policy_param;
-    //std::cout << "receiving policy data" << std::endl;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_policy_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -60,16 +59,11 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     } else {
         nn_policy_ = new NeuralNetModel(layers_);
     }
-    //// TEST with stochastic
-    //nn_policy_ = new NeuralNetModel(layers_);
-    //// TEST
 
     // =========================================================================
     // Build neural net value function
     // =========================================================================
-    //zmq::message_t zmq_msg; //do i need another zmq_msg?
     CartPole::NeuralNetworkParam pb_valfn_param;
-    //std::cout << "receiving value function data" << std::endl;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_valfn_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -91,7 +85,15 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
         }
         layers_.push_back(Layer(weight, bias, act_fn));
     }
-    nn_valfn_ = new NeuralNetModel(layers_);
+    if (pb_valfn_param.stochastic()) {
+        Eigen::MatrixXd logstd = Eigen::MatrixXd::Zero(1, pb_valfn_param.logstd_size());
+        for (int output_idx = 0; output_idx < pb_valfn_param.logstd_size(); ++output_idx) {
+            logstd(0, output_idx) = pb_valfn_param.logstd(output_idx);
+        }
+        nn_valfn_ = new NeuralNetModel(layers_, logstd);
+    } else {
+        nn_valfn_ = new NeuralNetModel(layers_);
+    }
 }
 
 NeuralNetCtrl::~NeuralNetCtrl(){
@@ -146,10 +148,10 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd){
 
     // set observation, (cart pos, pole angle, cart vel, pole ang vel) \in R^{4}
     for (int i = 0; i < 2; ++i) {
-        pb_data_set.add_observation(robot_->getQ()[i]);
+        pb_data_set.add_observation(obs(0, i));
     }
     for (int i = 0; i < 2; ++i) {
-        pb_data_set.add_observation(robot_->getQdot()[i]);
+        pb_data_set.add_observation(obs(0, i+2));
     }
 
     // set action
