@@ -5,7 +5,7 @@ file(GLOB cartpole_ctrlset_headers "TestSet/*.hpp")
 
 if( NOT (ZMQ_FOUND AND Protobuf_FOUND) )
     list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/TestSet/RLTest.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/Learning.cpp)
+                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/LearningCtrl.cpp)
 endif()
 
 add_library(CartPolePnC SHARED ${sources})
