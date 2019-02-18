@@ -13,7 +13,7 @@ test_configuration:
     # ==========================================================================
     action_lower_bound : [-1]
     action_upper_bound : [1]
-    action_scale : 50
+    action_scale : 10
     reward_scale: 1
 
     # ======================================================================
@@ -31,7 +31,8 @@ control_configuration:
             ip_control_pc: "localhost"
             ip_sub_pub_prefix: "tcp://127.0.0.1:50"
             ip_req_rep_prefix: "tcp://127.0.0.1:51"
-            username: 'junhyeokahn'
+            #username: 'junhyeokahn'
+            username: 'junhyeok'
             execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_cart_pole"
             exit_cmd: "pkill -f 'cart_pole"
 

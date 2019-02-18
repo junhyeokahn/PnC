@@ -8,7 +8,7 @@ if [ "$(uname)" == "Darwin" ]; then
     echo "# ==================================================================="
     echo "# Install TensorFlow"
     echo "# ==================================================================="
-    pip install tensorflow &&
+    conda install tensorflow &&
 
     echo "# ==================================================================="
     echo "# Install Protobuf"
@@ -31,7 +31,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo "# ==================================================================="
     echo "# Install TensorFlow"
     echo "# ==================================================================="
-    pip install tensorflow-gpu &&
+    conda install tensorflow-gpu &&
 
     echo "# ==================================================================="
     echo "# Install Protobuf"
@@ -56,6 +56,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     sudo make install &&
     sudo ldconfig &&
     ldconfig -p | grep zmq
+
+    cd ~/Repository && git clone https://github.com/zeromq/cppzmq.git &&
+    cd cppzmq && mkdir build && cd build && cmake .. && sudo make -j4 install &&
 
     # Expected
     ############################################################
