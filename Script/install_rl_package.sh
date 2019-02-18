@@ -8,7 +8,7 @@ if [ "$(uname)" == "Darwin" ]; then
     echo "# ==================================================================="
     echo "# Install TensorFlow"
     echo "# ==================================================================="
-    pip install tesnorflow
+    pip install tensorflow
 
     echo "# ==================================================================="
     echo "# Install Protobuf"
@@ -31,7 +31,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo "# ==================================================================="
     echo "# Install TensorFlow"
     echo "# ==================================================================="
-    pip install tesnorflow-gpu
+    pip install tensorflow-gpu
 
     echo "# ==================================================================="
     echo "# Install Protobuf"
@@ -67,11 +67,11 @@ fi
 echo "# ==================================================================="
 echo "# Install Gym"
 echo "# ==================================================================="
-cd ${PATH_PACKAGE}/ReinforcementLearning/gym && pip intall -e .
+cd ${PATH_PACKAGE}/ReinforcementLearning/gym && pip install -e .
 
 echo "# ==================================================================="
 echo "# Install Baseline"
 echo "# ==================================================================="
-cd ${PATH_PACKAGE}/ReinforcementLearning/baselines && pip intall -e .
+cd ${PATH_PACKAGE}/ReinforcementLearning/baselines && pip install -e .
 
 cd ${PATH_PACKAGE}
