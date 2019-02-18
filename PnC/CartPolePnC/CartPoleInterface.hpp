@@ -13,6 +13,7 @@ class CartPoleSensorData {
 class CartPoleCommand {
    public:
     double jtrq;
+    double jtrq_mean;
     double neglogp;
 };
 

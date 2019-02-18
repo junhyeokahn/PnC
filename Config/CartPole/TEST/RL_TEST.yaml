@@ -11,9 +11,10 @@ test_configuration:
     # Action
     # [cart force]
     # ==========================================================================
-    action_lower_bound : -1
-    action_upper_bound : 1
+    action_lower_bound : [-1]
+    action_upper_bound : [1]
     action_scale : 50
+    reward_scale: 1
 
     # ======================================================================
     # Terminate condition
@@ -34,11 +35,11 @@ control_configuration:
             execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_cart_pole"
             exit_cmd: "pkill -f 'cart_pole"
 
-        cost:
-            alive_bonus: 1
-            pole_cost: 1
-            cart_cost: 0.01
-            quad_input_cost: 0.01
+        reward:
+            alive_reward: 1
+            pole_reward: 1
+            cart_reward: 0.01
+            quad_input_reward: 0.01
 
 
     test_ctrl:

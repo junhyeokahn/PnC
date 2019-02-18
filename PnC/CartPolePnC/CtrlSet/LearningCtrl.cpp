@@ -12,7 +12,6 @@ LearningCtrl::LearningCtrl(RobotSystem* _robot, int mpi_idx, int env_idx)
 
     duration_ = 100000;
     ctrl_count_ = 0;
-    b_done_before_ = false;
 
     // =========================================================================
     // Construct zmq socket and connect
@@ -67,17 +66,13 @@ LearningCtrl::LearningCtrl(RobotSystem* _robot, int mpi_idx, int env_idx)
         }
         layers_.push_back(Layer(weight, bias, act_fn));
     }
-    if (pb_policy_param.stochastic()) {
-        Eigen::VectorXd logstd =
-            Eigen::VectorXd::Zero(pb_policy_param.logstd_size());
-        for (int output_idx = 0; output_idx < pb_policy_param.logstd_size();
-             ++output_idx) {
-            logstd(output_idx) = pb_policy_param.logstd(output_idx);
-        }
-        nn_policy_ = new NeuralNetModel(layers_, logstd);
-    } else {
-        nn_policy_ = new NeuralNetModel(layers_);
+    Eigen::VectorXd logstd =
+        Eigen::VectorXd::Zero(pb_policy_param.logstd_size());
+    for (int output_idx = 0; output_idx < pb_policy_param.logstd_size();
+         ++output_idx) {
+        logstd(output_idx) = pb_policy_param.logstd(output_idx);
     }
+    nn_policy_ = new NeuralNetModel(layers_, logstd);
 
     // =========================================================================
     // Build neural net value function
@@ -108,17 +103,7 @@ LearningCtrl::LearningCtrl(RobotSystem* _robot, int mpi_idx, int env_idx)
         }
         layers_.push_back(Layer(weight, bias, act_fn));
     }
-    if (pb_valfn_param.stochastic()) {
-        Eigen::MatrixXd logstd =
-            Eigen::MatrixXd::Zero(1, pb_valfn_param.logstd_size());
-        for (int output_idx = 0; output_idx < pb_valfn_param.logstd_size();
-             ++output_idx) {
-            logstd(0, output_idx) = pb_valfn_param.logstd(output_idx);
-        }
-        nn_valfn_ = new NeuralNetModel(layers_, logstd);
-    } else {
-        nn_valfn_ = new NeuralNetModel(layers_);
-    }
+    nn_valfn_ = new NeuralNetModel(layers_);
 }
 
 LearningCtrl::~LearningCtrl() {
@@ -134,15 +119,21 @@ void LearningCtrl::oneStep(void* _cmd) {
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0],
         robot_->getQdot()[1];
 
-    std::pair<Eigen::MatrixXd, Eigen::VectorXd> action_neglogp_pair =
-        nn_policy_->GetOutputAndNegLogP(obs);
+    Eigen::MatrixXd output;
+    Eigen::MatrixXd mean;
+    Eigen::VectorXd neglogp;
+    nn_policy_->GetOutput(obs, output, mean, neglogp);
 
-    Eigen::MatrixXd action = action_neglogp_pair.first;
-    Eigen::VectorXd neglogp = action_neglogp_pair.second;
-    ((CartPoleCommand*)_cmd)->jtrq = action(0, 0);
+    ((CartPoleCommand*)_cmd)->jtrq = myUtils::cropValue(
+        output(0, 0), action_lower_bound_[0], action_upper_bound_[0], "jtrq");
+    ((CartPoleCommand*)_cmd)->jtrq_mean = mean(0, 0);
     ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
 
     SendRLData_(obs, (CartPoleCommand*)_cmd);
+
+    // scale the action for actual robot
+    ((CartPoleCommand*)_cmd)->jtrq *= action_scale_;
+
     ++ctrl_count_;
 }
 
@@ -162,18 +153,18 @@ void LearningCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
         (obs(0, 2) < terminate_obs_lower_bound_[1]) ||
         (obs(0, 3) > terminate_obs_upper_bound_[1])) {
         done = true;
-        b_done_before_ = true;
     }
     pb_data_set.set_done(done);
 
     // set reward : alive bonus - pole angle - cart pos - torque usage
     float reward(0.0);
     if (!done) {
-        reward += alive_bonus_;
+        reward += alive_reward_;
     }
-    reward -= cart_cost_ * std::abs(obs(0, 0));
-    reward -= pole_cost_ * std::abs(obs(0, 1));
-    reward -= quad_input_cost_ * cmd->jtrq * cmd->jtrq;
+    reward -= cart_reward_ * std::abs(obs(0, 0));
+    reward -= pole_reward_ * std::abs(obs(0, 1));
+    reward -= quad_input_reward_ * cmd->jtrq * cmd->jtrq;
+    reward *= reward_scale_;
     pb_data_set.set_reward(reward);
 
     // set observation, (cart pos, pole angle, cart vel, pole ang vel) \in R^{4}
@@ -186,6 +177,9 @@ void LearningCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
 
     // set action
     pb_data_set.add_action(cmd->jtrq);
+
+    // set action
+    pb_data_set.add_action_mean(cmd->jtrq_mean);
 
     // set neglogpacs
     pb_data_set.set_neglogp(cmd->neglogp);
@@ -218,11 +212,11 @@ bool LearningCtrl::endOfPhase() {
 
 void LearningCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
-        myUtils::readParameter(node["cost"], "alive_bonus", alive_bonus_);
-        myUtils::readParameter(node["cost"], "pole_cost", pole_cost_);
-        myUtils::readParameter(node["cost"], "cart_cost", cart_cost_);
-        myUtils::readParameter(node["cost"], "quad_input_cost",
-                               quad_input_cost_);
+        myUtils::readParameter(node["reward"], "alive_reward", alive_reward_);
+        myUtils::readParameter(node["reward"], "pole_reward", pole_reward_);
+        myUtils::readParameter(node["reward"], "cart_reward", cart_reward_);
+        myUtils::readParameter(node["reward"], "quad_input_reward",
+                               quad_input_reward_);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

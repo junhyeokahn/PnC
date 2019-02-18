@@ -1,4 +1,5 @@
 #include <Utils/Math/MathUtilities.hpp>
+#include <cassert>
 #include <cmath>
 
 namespace myUtils {
@@ -79,6 +80,40 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
     Eigen::VectorXd ret = q;
     ret += alpha * dt + alphad * dt * dt * 0.5;
     return ret;
+}
+
+double cropValue(double value, double min, double max, std::string source) {
+    assert(min < max);
+    if (value > max) {
+        printf("%s: %f is cropped to %f.\n", source.c_str(), value, max);
+        value = max;
+    }
+    if (value < min) {
+        printf("%s: %f is cropped to %f.\n", source.c_str(), value, min);
+        value = min;
+    }
+    return value;
+}
+
+Eigen::VectorXd cropVector(Eigen::VectorXd value, Eigen::VectorXd min,
+                           Eigen::VectorXd max, std::string source) {
+    assert(value.size() = min.size());
+    assert(value.size() = max.size());
+    int n_data = value.size();
+
+    for (int i = 0; i < n_data; ++i) {
+        if (value[i] > max[i]) {
+            printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
+                   max[i]);
+            value[i] = max[i];
+        }
+        if (value[i] < min[i]) {
+            printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
+                   min[i]);
+            value[i] = min[i];
+        }
+    }
+    return value;
 }
 
 }  // namespace myUtils

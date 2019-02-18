@@ -8,8 +8,9 @@ message DataSet {
     float reward = 3;
     float value = 4;
     repeated float action = 5;
-    float neglogp = 6;
-    repeated float observation = 7;
+    repeated float action_mean = 6;
+    float neglogp = 7;
+    repeated float observation = 8;
 }
 
 message NeuralNetworkParam {

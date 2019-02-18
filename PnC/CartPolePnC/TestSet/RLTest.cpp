@@ -66,6 +66,10 @@ void RLTest::_ParameterSetting() {
         ((LearningCtrl*)learning_ctrl_)->setActLowerBound(tmp_vec);
         myUtils::readParameter(test_cfg, "action_upper_bound", tmp_vec);
         ((LearningCtrl*)learning_ctrl_)->setActUpperBound(tmp_vec);
+        myUtils::readParameter(test_cfg, "action_scale", tmp_val);
+        ((LearningCtrl*)learning_ctrl_)->setActScale(tmp_val);
+        myUtils::readParameter(test_cfg, "reward_scale", tmp_val);
+        ((LearningCtrl*)learning_ctrl_)->setRewScale(tmp_val);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

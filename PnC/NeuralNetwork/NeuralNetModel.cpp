@@ -127,13 +127,14 @@ Eigen::MatrixXd NeuralNetModel::GetOutput(const Eigen::MatrixXd& input) {
     return ret;
 }
 
-std::pair<Eigen::MatrixXd, Eigen::VectorXd> NeuralNetModel::GetOutputAndNegLogP(
-    const Eigen::MatrixXd& input) {
+void NeuralNetModel::GetOutput(const Eigen::MatrixXd& _input,
+                               Eigen::MatrixXd& _output, Eigen::MatrixXd& _mean,
+                               Eigen::VectorXd& _neglogp) {
     assert(b_stochastic_);
 
-    int num_data(input.rows());
-    Eigen::MatrixXd mean = input;
-    Eigen::MatrixXd output = input;
+    int num_data(_input.rows());
+    Eigen::MatrixXd mean = _input;
+    Eigen::MatrixXd output = Eigen::MatrixXd::Zero(num_data, num_output_);
     Eigen::VectorXd neglogp = Eigen::VectorXd::Zero(num_data);
     for (int i = 0; i < num_layer_; ++i) {
         mean = (layers_[i]).GetOutput(mean);
@@ -161,7 +162,9 @@ std::pair<Eigen::MatrixXd, Eigen::VectorXd> NeuralNetModel::GetOutputAndNegLogP(
             neglogp(data_idx) + 0.5 * log(2 * M_PI) * num_output_;
     }
 
-    return std::make_pair(output, neglogp);
+    _output = output;
+    _mean = mean;
+    _neglogp = neglogp;
 }
 
 void NeuralNetModel::Initialize_(std::vector<Layer> layers, bool b_stoch,

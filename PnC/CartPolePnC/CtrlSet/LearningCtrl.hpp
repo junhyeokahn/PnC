@@ -33,6 +33,8 @@ class LearningCtrl : public Controller {
     void setActUpperBound(const Eigen::VectorXd& ub) {
         action_upper_bound_ = ub;
     }
+    void setActScale(double scale) { action_scale_ = scale; }
+    void setRewScale(double scale) { reward_scale_ = scale; }
 
    protected:
     double duration_;
@@ -57,9 +59,10 @@ class LearningCtrl : public Controller {
 
     void SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd);
 
-    double alive_bonus_;
-    double pole_cost_;
-    double cart_cost_;
-    double quad_input_cost_;
-    bool b_done_before_;
+    double alive_reward_;
+    double pole_reward_;
+    double cart_reward_;
+    double quad_input_reward_;
+    double reward_scale_;
+    double action_scale_;
 };
