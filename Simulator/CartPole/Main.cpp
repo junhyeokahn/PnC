@@ -126,7 +126,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     // myUtils::pretty_print(qdot, std::cout, "qdot");
 }
 
-int main() {
+int main(int argc, char** argv) {
     // ========================
     // Parse Yaml for Simulator
     // ========================
@@ -194,7 +194,13 @@ int main() {
     // ================
     // Wrap a worldnode
     // ================
-    osg::ref_ptr<CartPoleWorldNode> node = new CartPoleWorldNode(world, msm);
+    osg::ref_ptr<CartPoleWorldNode> node;
+    if (argc > 1) {
+        node = new CartPoleWorldNode(world, msm, std::stoi(argv[1]),
+                                     std::stoi(argv[2]));
+    } else {
+        node = new CartPoleWorldNode(world, msm);
+    }
     node->setNumStepsPerCycle(num_steps_per_cycle);
 
     // =====================

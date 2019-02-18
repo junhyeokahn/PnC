@@ -1,34 +1,46 @@
-#include <cart_pole_msg.pb.h>
+#include <rl_msg.pb.h>
 #include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
-#include <PnC/CartPolePnC/CtrlSet/NeuralNetCtrl.hpp>
+#include <PnC/CartPolePnC/CtrlSet/LearningCtrl.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/IO/ZmqUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
-    myUtils::pretty_constructor(2, "NN Ctrl");
+LearningCtrl::LearningCtrl(RobotSystem* _robot, int mpi_idx, int env_idx)
+    : Controller(_robot) {
+    myUtils::pretty_constructor(2, "Learning Ctrl");
 
     duration_ = 100000;
     ctrl_count_ = 0;
-    timesteps_per_actorbatch_ = 256;
     b_done_before_ = false;
 
     // =========================================================================
     // Construct zmq socket and connect
     // =========================================================================
+    std::string ip_sub_pub, ip_req_rep;
+    YAML::Node yaml_cfg =
+        YAML::LoadFile(THIS_COM "Config/CartPole/TEST/RL_TEST.yaml");
+    myUtils::readParameter(
+        yaml_cfg["control_configuration"]["learning_ctrl"]["protocol"],
+        "ip_sub_pub_prefix", ip_sub_pub);
+    myUtils::readParameter(
+        yaml_cfg["control_configuration"]["learning_ctrl"]["protocol"],
+        "ip_req_rep_prefix", ip_req_rep);
+
     context_ = new zmq::context_t(1);
     data_socket_ = new zmq::socket_t(*context_, ZMQ_PUB);
     policy_valfn_socket_ = new zmq::socket_t(*context_, ZMQ_REP);
-    data_socket_->bind(std::string(CartPoleAux::IpSubPub));
-    policy_valfn_socket_->bind(std::string(CartPoleAux::IpReqRep));
+    ip_sub_pub += std::to_string(mpi_idx) + std::to_string(env_idx);
+    ip_req_rep += std::to_string(mpi_idx) + std::to_string(env_idx);
+    data_socket_->bind(ip_sub_pub);
+    policy_valfn_socket_->bind(ip_req_rep);
     myUtils::PairAndSync(*data_socket_, *policy_valfn_socket_, 1);
 
     // =========================================================================
     // Build neural net policy
     // =========================================================================
     zmq::message_t zmq_msg;
-    CartPole::NeuralNetworkParam pb_policy_param;
+    RL::NeuralNetworkParam pb_policy_param;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_policy_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -56,11 +68,11 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
         layers_.push_back(Layer(weight, bias, act_fn));
     }
     if (pb_policy_param.stochastic()) {
-        Eigen::MatrixXd logstd =
-            Eigen::MatrixXd::Zero(1, pb_policy_param.logstd_size());
+        Eigen::VectorXd logstd =
+            Eigen::VectorXd::Zero(pb_policy_param.logstd_size());
         for (int output_idx = 0; output_idx < pb_policy_param.logstd_size();
              ++output_idx) {
-            logstd(0, output_idx) = pb_policy_param.logstd(output_idx);
+            logstd(output_idx) = pb_policy_param.logstd(output_idx);
         }
         nn_policy_ = new NeuralNetModel(layers_, logstd);
     } else {
@@ -70,7 +82,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     // =========================================================================
     // Build neural net value function
     // =========================================================================
-    CartPole::NeuralNetworkParam pb_valfn_param;
+    RL::NeuralNetworkParam pb_valfn_param;
     policy_valfn_socket_->recv(&zmq_msg);
     myUtils::StringSend(*policy_valfn_socket_, "");
     pb_valfn_param.ParseFromArray(zmq_msg.data(), zmq_msg.size());
@@ -109,7 +121,7 @@ NeuralNetCtrl::NeuralNetCtrl(RobotSystem* _robot) : Controller(_robot) {
     }
 }
 
-NeuralNetCtrl::~NeuralNetCtrl() {
+LearningCtrl::~LearningCtrl() {
     delete context_;
     delete data_socket_;
     delete policy_valfn_socket_;
@@ -117,23 +129,28 @@ NeuralNetCtrl::~NeuralNetCtrl() {
     delete nn_valfn_;
 }
 
-void NeuralNetCtrl::oneStep(void* _cmd) {
+void LearningCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0],
         robot_->getQdot()[1];
-    ((CartPoleCommand*)_cmd)->jtrq = (nn_policy_->GetOutput(obs))(0, 0);
-    if (ctrl_count_ < timesteps_per_actorbatch_ && !b_done_before_) {
-        SendRLData_(obs, (CartPoleCommand*)_cmd);
-    } else {
-    }
+
+    std::pair<Eigen::MatrixXd, Eigen::VectorXd> action_neglogp_pair =
+        nn_policy_->GetOutputAndNegLogP(obs);
+
+    Eigen::MatrixXd action = action_neglogp_pair.first;
+    Eigen::VectorXd neglogp = action_neglogp_pair.second;
+    ((CartPoleCommand*)_cmd)->jtrq = action(0, 0);
+    ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
+
+    SendRLData_(obs, (CartPoleCommand*)_cmd);
     ++ctrl_count_;
 }
 
-void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
+void LearningCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
     // =========================================================================
     // Serialize dataset via protobuf
     // =========================================================================
-    CartPole::DataSet pb_data_set;
+    RL::DataSet pb_data_set;
 
     // set count
     pb_data_set.set_count(ctrl_count_);
@@ -168,10 +185,13 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
     }
 
     // set action
-    pb_data_set.set_action(cmd->jtrq);
+    pb_data_set.add_action(cmd->jtrq);
+
+    // set neglogpacs
+    pb_data_set.set_neglogp(cmd->neglogp);
 
     // set vpred
-    pb_data_set.set_vpred((nn_valfn_->GetOutput(obs))(0, 0));
+    pb_data_set.set_value((nn_valfn_->GetOutput(obs))(0, 0));
 
     std::string pb_data_set_serialized;
     pb_data_set.SerializeToString(&pb_data_set_serialized);
@@ -185,33 +205,25 @@ void NeuralNetCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
     data_socket_->send(zmq_msg);
 }
 
-void NeuralNetCtrl::firstVisit() {}
+void LearningCtrl::firstVisit() {}
 
-void NeuralNetCtrl::lastVisit() {}
+void LearningCtrl::lastVisit() {}
 
-bool NeuralNetCtrl::endOfPhase() {
+bool LearningCtrl::endOfPhase() {
     if (ctrl_count_ * CartPoleAux::ServoRate > duration_) {
         return true;
     }
     return false;
 }
 
-void NeuralNetCtrl::ctrlInitialization(const YAML::Node& node) {
+void LearningCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
-        myUtils::readParameter(node, "obs_lower_bound", obs_lower_bound_);
-        myUtils::readParameter(node, "obs_upper_bound", obs_upper_bound_);
-        myUtils::readParameter(node, "terminate_obs_lower_bound",
-                               terminate_obs_lower_bound_);
-        myUtils::readParameter(node, "terminate_obs_upper_bound",
-                               terminate_obs_upper_bound_);
-        myUtils::readParameter(node, "action_lower_bound", action_lower_bound_);
-        myUtils::readParameter(node, "action_upper_bound", action_upper_bound_);
-        myUtils::readParameter(node, "timesteps_per_actorbatch",
-                               timesteps_per_actorbatch_);
-        myUtils::readParameter(node, "alive_bonus", alive_bonus_);
-        myUtils::readParameter(node, "pole_cost", pole_cost_);
-        myUtils::readParameter(node, "cart_cost", cart_cost_);
-        myUtils::readParameter(node, "quad_input_cost", quad_input_cost_);
+        myUtils::readParameter(node["cost"], "alive_bonus", alive_bonus_);
+        myUtils::readParameter(node["cost"], "pole_cost", pole_cost_);
+        myUtils::readParameter(node["cost"], "cart_cost", cart_cost_);
+        myUtils::readParameter(node["cost"], "quad_input_cost",
+                               quad_input_cost_);
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

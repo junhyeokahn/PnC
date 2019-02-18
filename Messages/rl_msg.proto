@@ -1,18 +1,18 @@
 syntax = "proto3";
 
-package CartPole;
+package RL;
 
 message DataSet {
     int32 count = 1;
     bool done = 2;
     float reward = 3;
-    float vpred = 4;
-    float action = 5;
-    repeated float observation = 6;
+    float value = 4;
+    repeated float action = 5;
+    float neglogp = 6;
+    repeated float observation = 7;
 }
 
 message NeuralNetworkParam {
-
     repeated Layer layers = 1;
 
     message Layer {
@@ -30,5 +30,6 @@ message NeuralNetworkParam {
         NONE = 0;
         Tanh = 1;
         ReLU = 2;
+        LeakyReLU = 3;
     }
 }

@@ -43,5 +43,4 @@ drake_binary
 __pycache__
 octave-workspace
 *.m~
-SysID
-Log
+RLData

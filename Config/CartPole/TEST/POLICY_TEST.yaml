@@ -1,3 +1,0 @@
-test_configuration:
-    duration: 1000000
-    model_path: "PPO_2"
