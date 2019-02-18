@@ -34,7 +34,6 @@ class LearningCtrl : public Controller {
         action_upper_bound_ = ub;
     }
     void setActScale(double scale) { action_scale_ = scale; }
-    void setRewScale(double scale) { reward_scale_ = scale; }
 
    protected:
     double duration_;

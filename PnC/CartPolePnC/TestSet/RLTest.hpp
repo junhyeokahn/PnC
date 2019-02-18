@@ -19,6 +19,8 @@ class RLTest : public Test {
     virtual int _NextPhase(const int& phase);
 
     Controller* learning_ctrl_;
+    Controller* policy_ctrl_;
 
     YAML::Node cfg_;
+    bool b_learning_;
 };

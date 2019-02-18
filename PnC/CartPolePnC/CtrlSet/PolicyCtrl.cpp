@@ -22,20 +22,19 @@ void PolicyCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0],
         robot_->getQdot()[1];
-    Eigen::MatrixXd act = nn_policy_->GetOutput(obs);
-    Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
-    ((CartPoleCommand*)_cmd)->jtrq = act(0, 0);
 
-    //// TEST
-    // std::cout << "=============================================" <<
-    // std::endl;
-    // myUtils::pretty_print(act, std::cout, "act");
-    // myUtils::pretty_print(val, std::cout, "val");
-    // myUtils::pretty_print(robot_->getQ(), std::cout, "q");
-    // myUtils::pretty_print(obs, std::cout, "obs");
-    // std::cout << "=============================================" <<
-    // std::endl;
-    //// TEST
+    Eigen::MatrixXd output;
+    Eigen::MatrixXd mean;
+    Eigen::VectorXd neglogp;
+    nn_policy_->GetOutput(obs, output, mean, neglogp);
+
+    ((CartPoleCommand*)_cmd)->jtrq = myUtils::cropValue(
+        output(0, 0), action_lower_bound_[0], action_upper_bound_[0], "jtrq");
+    ((CartPoleCommand*)_cmd)->jtrq_mean = mean(0, 0);
+    ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
+
+    // scale the action for actual robot
+    ((CartPoleCommand*)_cmd)->jtrq *= action_scale_;
 
     ++ctrl_count_;
 }
@@ -51,13 +50,12 @@ bool PolicyCtrl::endOfPhase() {
     return false;
 }
 
-void PolicyCtrl::ctrlInitialization(const YAML::Node& node) {}
-
-void PolicyCtrl::setModelPath(std::string model_path) {
-    std::string final_path =
-        THIS_COM "/ReinforcementLearning/Environments/CartPole/Log/" +
-        model_path + "/model.yaml";
-    YAML::Node cfg = YAML::LoadFile(final_path);
-    nn_policy_ = new NeuralNetModel(cfg["pol_params"]);
-    nn_valfn_ = new NeuralNetModel(cfg["valfn_params"]);
+void PolicyCtrl::ctrlInitialization(const YAML::Node& node) {
+    std::string model_folder;
+    myUtils::readParameter(node, "model_path", model_folder);
+    std::string model_dir =
+        THIS_COM "RLData/CartPole/" + model_folder + "/model.yaml";
+    YAML::Node model_cfg = YAML::LoadFile(model_dir);
+    nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
+    nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
 }

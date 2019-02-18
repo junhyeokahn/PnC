@@ -17,7 +17,21 @@ class PolicyCtrl : public Controller {
     virtual void ctrlInitialization(const YAML::Node& node);
 
     void setDuration(double time) { duration_ = time; }
-    void setModelPath(std::string model_path);
+    void setObsLowerBound(const Eigen::VectorXd& lb) { obs_lower_bound_ = lb; }
+    void setObsUpperBound(const Eigen::VectorXd& ub) { obs_upper_bound_ = ub; }
+    void setTerminateObsLowerBound(const Eigen::VectorXd& lb) {
+        terminate_obs_lower_bound_ = lb;
+    }
+    void setTerminateObsUpperBound(const Eigen::VectorXd& ub) {
+        terminate_obs_upper_bound_ = ub;
+    }
+    void setActLowerBound(const Eigen::VectorXd& lb) {
+        action_lower_bound_ = lb;
+    }
+    void setActUpperBound(const Eigen::VectorXd& ub) {
+        action_upper_bound_ = ub;
+    }
+    void setActScale(double scale) { action_scale_ = scale; }
 
    protected:
     double duration_;
@@ -25,4 +39,13 @@ class PolicyCtrl : public Controller {
 
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
+
+    Eigen::VectorXd obs_lower_bound_;
+    Eigen::VectorXd obs_upper_bound_;
+    Eigen::VectorXd terminate_obs_lower_bound_;
+    Eigen::VectorXd terminate_obs_upper_bound_;
+    Eigen::VectorXd action_lower_bound_;
+    Eigen::VectorXd action_upper_bound_;
+
+    double action_scale_;
 };

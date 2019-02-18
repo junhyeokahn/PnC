@@ -50,9 +50,8 @@ Eigen::MatrixXd Layer::GetOutput(const Eigen::MatrixXd& input) {
     return ret;
 }
 
-NeuralNetModel::NeuralNetModel(const YAML::Node& node) {
+NeuralNetModel::NeuralNetModel(const YAML::Node& node, bool b_stochastic) {
     int num_layer;
-    bool b_stochastic;
     Eigen::MatrixXd w, b, logstd;
     std::vector<Layer> layers;
     layers.clear();
@@ -60,7 +59,6 @@ NeuralNetModel::NeuralNetModel(const YAML::Node& node) {
 
     try {
         myUtils::readParameter(node, "num_layer", num_layer);
-        myUtils::readParameter(node, "b_stochastic", b_stochastic);
         for (int idx_layer = 0; idx_layer < num_layer; ++idx_layer) {
             myUtils::readParameter(node, "w" + std::to_string(idx_layer), w);
             myUtils::readParameter(node, "b" + std::to_string(idx_layer), b);

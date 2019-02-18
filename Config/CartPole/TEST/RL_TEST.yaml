@@ -14,7 +14,6 @@ test_configuration:
     action_lower_bound : [-1]
     action_upper_bound : [1]
     action_scale : 10
-    reward_scale: 1
 
     # ======================================================================
     # Terminate condition
@@ -31,8 +30,8 @@ control_configuration:
             ip_control_pc: "localhost"
             ip_sub_pub_prefix: "tcp://127.0.0.1:50"
             ip_req_rep_prefix: "tcp://127.0.0.1:51"
-            #username: 'junhyeokahn'
-            username: 'junhyeok'
+            username: 'junhyeokahn'
+            #username: 'junhyeok'
             execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_cart_pole"
             exit_cmd: "pkill -f 'cart_pole"
 
@@ -41,7 +40,8 @@ control_configuration:
             pole_reward: 1
             cart_reward: 0.01
             quad_input_reward: 0.01
+            reward_scale: 1
 
 
-    test_ctrl:
-        model_path: "dummy_for_now"
+    policy_ctrl:
+        model_path: "ppo_4"

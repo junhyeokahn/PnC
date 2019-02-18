@@ -31,7 +31,7 @@ class NeuralNetModel {
    public:
     NeuralNetModel(std::vector<Layer> layers);
     NeuralNetModel(std::vector<Layer> layers, Eigen::VectorXd logstd);
-    NeuralNetModel(const YAML::Node& node);
+    NeuralNetModel(const YAML::Node& node, bool b_stochastic);
 
     virtual ~NeuralNetModel();
 

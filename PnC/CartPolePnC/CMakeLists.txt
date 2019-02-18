@@ -8,7 +8,7 @@ if( NOT (ZMQ_FOUND AND Protobuf_FOUND) )
                              ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/LearningCtrl.cpp)
 endif()
 
-add_library(CartPolePnC SHARED ${sources})
+add_library(CartPolePnC ${sources})
 target_link_libraries(CartPolePnC ${DART_LIBRARIES}
                                   myRobotSystem
                                   myUtils

@@ -118,7 +118,6 @@ void LearningCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     obs << robot_->getQ()[0], robot_->getQ()[1], robot_->getQdot()[0],
         robot_->getQdot()[1];
-
     Eigen::MatrixXd output;
     Eigen::MatrixXd mean;
     Eigen::VectorXd neglogp;
@@ -217,6 +216,7 @@ void LearningCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node["reward"], "cart_reward", cart_reward_);
         myUtils::readParameter(node["reward"], "quad_input_reward",
                                quad_input_reward_);
+        myUtils::readParameter(node["reward"], "reward_scale", reward_scale_);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

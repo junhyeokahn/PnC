@@ -3,7 +3,6 @@
 #include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
 #include <PnC/CartPolePnC/TestSet/BasicTest.hpp>
-#include <PnC/CartPolePnC/TestSet/PolicyTest.hpp>
 #include <PnC/CartPolePnC/TestSet/RLTest.hpp>
 #include <RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -93,8 +92,6 @@ void CartPoleInterface::ParameterSetting_() {
                          "not found"
                       << std::endl;
 #endif
-        } else if (test_name == "policy_test") {
-            test_ = new PolicyTest(robot_);
         } else if (test_name == "basic_test") {
             test_ = new BasicTest(robot_);
         } else {
