@@ -148,9 +148,9 @@ void LearningCtrl::SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd) {
     // set done
     bool done(false);
     if ((obs(0, 0) < terminate_obs_lower_bound_[0]) ||
-        (obs(0, 1) > terminate_obs_upper_bound_[0]) ||
-        (obs(0, 2) < terminate_obs_lower_bound_[1]) ||
-        (obs(0, 3) > terminate_obs_upper_bound_[1])) {
+        (obs(0, 0) > terminate_obs_upper_bound_[0]) ||
+        (obs(0, 1) < terminate_obs_lower_bound_[1]) ||
+        (obs(0, 1) > terminate_obs_upper_bound_[1])) {
         done = true;
     }
     pb_data_set.set_done(done);

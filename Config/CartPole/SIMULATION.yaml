@@ -2,8 +2,8 @@ is_record: false
 num_steps_per_cycle: 1
 servo_rate: 0.01 # !! This should be match with controller servo rate !!
 display_joint_frame: false
-show_viewer: true
-#show_viewer: false
+#show_viewer: true
+show_viewer: false
 init_state_lower_bound: [-0.05 , -0.02 , -0.01 , -0.02]
 init_state_upper_bound: [0.05  , 0.02  , 0.01  , 0.02]
 
