@@ -40,9 +40,8 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mCommand->qdot = Eigen::VectorXd::Zero(10);
     mCommand->jtrq = Eigen::VectorXd::Zero(10);
 
-    // TODO : Fix this later
-    // led_pos_announcer_ = new DracoLedPosAnnouncer(world_);
-    // led_pos_announcer_->start();
+    led_pos_announcer_ = new DracoLedPosAnnouncer();
+    led_pos_announcer_->start();
 
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
@@ -109,9 +108,8 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mCommand->qdot = Eigen::VectorXd::Zero(10);
     mCommand->jtrq = Eigen::VectorXd::Zero(10);
 
-    // TODO : Fix this later
-    // led_pos_announcer_ = new DracoLedPosAnnouncer(world_);
-    // led_pos_announcer_->start();
+    led_pos_announcer_ = new DracoLedPosAnnouncer();
+    led_pos_announcer_->start();
 
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
@@ -159,6 +157,7 @@ void DracoWorldNode::customPreStep() {
     mSensorData->qdot = mSkel->getVelocities().tail(10);
     mSensorData->jtrq = mSkel->getForces().tail(10);
 
+    UpdateLedData_();
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
     if (b_check_collision_) {
@@ -201,6 +200,21 @@ void DracoWorldNode::customPreStep() {
     mSkel->setForces(mTorqueCommand);
 
     count_++;
+}
+
+void DracoWorldNode::UpdateLedData_() {
+    for (int led_idx(0); led_idx < NUM_MARKERS; ++led_idx) {
+        led_pos_announcer_->msg.visible[led_idx] = 1;
+        for (int axis_idx(0); axis_idx < 3; ++axis_idx) {
+            led_pos_announcer_->msg.data[3 * led_idx + axis_idx] =
+                mSkel
+                    ->getBodyNode(
+                        led_pos_announcer_->led_link_idx_list[led_idx])
+                    ->getTransform()
+                    .translation()[axis_idx] *
+                1000.0;
+        }
+    }
 }
 
 void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,

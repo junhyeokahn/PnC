@@ -1,54 +1,40 @@
 #include "DracoLedPosAnnouncer.hpp"
 #include <Addition/DataManager/data_protocol.h>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 #include <Utils/IO/comm_udp.hpp>
 
-DracoLedPosAnnouncer::DracoLedPosAnnouncer(dart::simulation::WorldPtr _world)
-    : socket_(0), count_(0) {
-    world_ = _world;
-    skel_ = world_->getSkeleton("Draco");
-    ground_ = world_->getSkeleton("ground_skeleton");
+DracoLedPosAnnouncer::DracoLedPosAnnouncer() : socket_(0), count_(0) {
+    // Link name list !! must match with MocapLed enum !!
+    led_link_idx_list.resize(NUM_MARKERS, 0);
+    led_link_idx_list[0] = DracoBodyNode::cTorsoLed;
+    led_link_idx_list[1] = DracoBodyNode::lTorsoLed;
+    led_link_idx_list[2] = DracoBodyNode::rTorsoLed;
 }
 
 void DracoLedPosAnnouncer::run() {
     // printf("[LED Position Announcer] Start \n");
 
-    draco_message draco_message;
-    led_link_name_list_.clear();
-
-    // Link name list !! must match with MocapLed enum !!
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("lTorsoLed");
-    led_link_name_list_.push_back("rTorsoLed");
-
-    // Null link
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-    led_link_name_list_.push_back("cTorsoLed");
-
     while (true) {
-        for (int j(0); j < NUM_MARKERS; ++j) {
-            draco_message.visible[j] = 1;
-            for (int i(0); i < 3; ++i) {
-                draco_message.data[3 * j + i] =
-                    skel_->getBodyNode(led_link_name_list_[j])
-                        ->getTransform()
-                        .translation()[i] *
-                    1000.0;
-            }
-        }
-
-        COMM::send_data(socket_, MOCAP_DATA_PORT, &draco_message,
-                        sizeof(draco_message), IP_ADDR_MYSELF);
+        COMM::send_data(socket_, MOCAP_DATA_PORT, &msg, sizeof(msg),
+                        IP_ADDR_MYSELF);
         usleep(2000);
         ++count_;
-        // if(count_%100 == 1)  printf("count: %d\n", count_);
+        if (count_ % 500 == 1) {
+            printf("sender count: %d\n", count_);
+            _Print_message();
+        }
     }
 }
 
+void DracoLedPosAnnouncer::_Print_message() {
+    for (int i(0); i < NUM_MARKERS; ++i) {
+        printf("%d th LED data (cond, x, y, z): %d, (%f, %f, %f) \n", i,
+               msg.visible[i], msg.data[3 * i], msg.data[3 * i + 1],
+               msg.data[3 * i + 2]);
+        if (i == (NUM_MARKERS - 1)) {
+            // printf("size: %lu\n", sizeof(draco_message));
+            printf("\n");
+        }
+    }
+}

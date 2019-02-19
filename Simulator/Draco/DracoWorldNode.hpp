@@ -23,6 +23,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void _check_collision();
     void _hold_xy();
     void _hold_rot();
+    void UpdateLedData_();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
