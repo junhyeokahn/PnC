@@ -15,11 +15,6 @@ test_configuration:
     end_transition_time: 0.03
     stance_time: 0.01
 
-    #swing_time: 0.28
-    #st_transition_time: 0.025
-    #end_transition_time: 0.025
-    #stance_time: 0.01
-
     replanning: true
     #replanning: false
     transition_phase_mix_ratio: 0.2

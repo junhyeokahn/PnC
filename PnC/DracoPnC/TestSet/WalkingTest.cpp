@@ -149,7 +149,7 @@ int WalkingTest::_NextPhase(const int& phase) {
     }
     sp_->num_step_copy = num_step_;
 
-    // !! Want to remove mocap !!
+    // !! TEST !!
     // if (((phase == WkPhase::double_contact_1) ||
     //(phase == WkPhase::double_contact_2)) &&
     //(num_step_ > 1)) {

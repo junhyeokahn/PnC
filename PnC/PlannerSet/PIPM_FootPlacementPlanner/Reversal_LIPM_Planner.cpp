@@ -101,7 +101,7 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     // _StepLengthCheck(target_loc, switch_state);
     //_StepLengthCheck(target_loc, _input->b_positive_sidestep,
     //_input->stance_foot_loc);
-    // TEST
+    // !! TEST !!
     _StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep,
                                         _input->stance_foot_loc);
 

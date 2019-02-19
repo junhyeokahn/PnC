@@ -315,7 +315,9 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     for (int i(0); i < 2; ++i) {
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
         // com_pos[i] += body_pt_offset_[i];
-        com_vel[i] = sp_->qdot[i];  // !! Want to remove mocap !!
+
+        // !! TEST !!
+        com_vel[i] = sp_->qdot[i];
         // com_vel[i] = sp_->est_mocap_body_vel[i];
     }
 
