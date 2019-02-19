@@ -10,6 +10,12 @@ DracoLedPosAnnouncer::DracoLedPosAnnouncer() : socket_(0), count_(0) {
     led_link_idx_list[0] = DracoBodyNode::cTorsoLed;
     led_link_idx_list[1] = DracoBodyNode::lTorsoLed;
     led_link_idx_list[2] = DracoBodyNode::rTorsoLed;
+    for (int led_idx = 0; led_idx < NUM_MARKERS; ++led_idx) {
+        msg.visible[led_idx] = 0;
+        for (int axis_idx = 0; axis_idx < 3; ++axis_idx) {
+            msg.data[3 * led_idx + axis_idx] = 0.;
+        }
+    }
 }
 
 void DracoLedPosAnnouncer::run() {
@@ -20,10 +26,10 @@ void DracoLedPosAnnouncer::run() {
                         IP_ADDR_MYSELF);
         usleep(2000);
         ++count_;
-        if (count_ % 500 == 1) {
-            printf("sender count: %d\n", count_);
-            _Print_message();
-        }
+        // if (count_ % 500 == 1) {
+        // printf("sender count: %d\n", count_);
+        //_Print_message();
+        //}
     }
 }
 

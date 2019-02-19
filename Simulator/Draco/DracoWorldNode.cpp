@@ -15,34 +15,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
       mpi_idx_(mpi_idx),
       env_idx_(env_idx) {
     world_ = _world;
-
-    mInterface = new DracoInterface();
-
-    mSensorData = new DracoSensorData();
-    mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
-    mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
-    mSensorData->q = Eigen::VectorXd::Zero(10);
-    mSensorData->qdot = Eigen::VectorXd::Zero(10);
-    mSensorData->jtrq = Eigen::VectorXd::Zero(10);
-    mSensorData->temperature = Eigen::VectorXd::Zero(10);
-    mSensorData->motor_current = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_current = Eigen::VectorXd::Zero(10);
-    mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
-    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->rfoot_contact = false;
-    mSensorData->lfoot_contact = false;
-
-    mCommand = new DracoCommand();
-    mCommand->turn_off = false;
-    mCommand->q = Eigen::VectorXd::Zero(10);
-    mCommand->qdot = Eigen::VectorXd::Zero(10);
-    mCommand->jtrq = Eigen::VectorXd::Zero(10);
-
-    led_pos_announcer_ = new DracoLedPosAnnouncer();
-    led_pos_announcer_->start();
-
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
     mDof = mSkel->getNumDofs();
@@ -68,6 +40,34 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                   << __FILE__ << "]" << std::endl
                   << std::endl;
     }
+
+    led_pos_announcer_ = new DracoLedPosAnnouncer();
+    led_pos_announcer_->start();
+    UpdateLedData_();
+
+    mInterface = new DracoInterface();
+
+    mSensorData = new DracoSensorData();
+    mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
+    mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
+    mSensorData->q = Eigen::VectorXd::Zero(10);
+    mSensorData->qdot = Eigen::VectorXd::Zero(10);
+    mSensorData->jtrq = Eigen::VectorXd::Zero(10);
+    mSensorData->temperature = Eigen::VectorXd::Zero(10);
+    mSensorData->motor_current = Eigen::VectorXd::Zero(10);
+    mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
+    mSensorData->bus_current = Eigen::VectorXd::Zero(10);
+    mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
+    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
+    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
+    mSensorData->rfoot_contact = false;
+    mSensorData->lfoot_contact = false;
+
+    mCommand = new DracoCommand();
+    mCommand->turn_off = false;
+    mCommand->q = Eigen::VectorXd::Zero(10);
+    mCommand->qdot = Eigen::VectorXd::Zero(10);
+    mCommand->jtrq = Eigen::VectorXd::Zero(10);
 
     DataManager* data_manager = DataManager::GetDataManager();
     q_sim_ = Eigen::VectorXd::Zero(16);
@@ -83,34 +83,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
       mpi_idx_(0),
       env_idx_(0) {
     world_ = _world;
-
-    mInterface = new DracoInterface();
-
-    mSensorData = new DracoSensorData();
-    mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
-    mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
-    mSensorData->q = Eigen::VectorXd::Zero(10);
-    mSensorData->qdot = Eigen::VectorXd::Zero(10);
-    mSensorData->jtrq = Eigen::VectorXd::Zero(10);
-    mSensorData->temperature = Eigen::VectorXd::Zero(10);
-    mSensorData->motor_current = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_current = Eigen::VectorXd::Zero(10);
-    mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
-    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->rfoot_contact = false;
-    mSensorData->lfoot_contact = false;
-
-    mCommand = new DracoCommand();
-    mCommand->turn_off = false;
-    mCommand->q = Eigen::VectorXd::Zero(10);
-    mCommand->qdot = Eigen::VectorXd::Zero(10);
-    mCommand->jtrq = Eigen::VectorXd::Zero(10);
-
-    led_pos_announcer_ = new DracoLedPosAnnouncer();
-    led_pos_announcer_->start();
-
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
     mDof = mSkel->getNumDofs();
@@ -137,6 +109,34 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                   << std::endl;
     }
 
+    led_pos_announcer_ = new DracoLedPosAnnouncer();
+    led_pos_announcer_->start();
+    UpdateLedData_();
+
+    mInterface = new DracoInterface();
+
+    mSensorData = new DracoSensorData();
+    mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
+    mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
+    mSensorData->q = Eigen::VectorXd::Zero(10);
+    mSensorData->qdot = Eigen::VectorXd::Zero(10);
+    mSensorData->jtrq = Eigen::VectorXd::Zero(10);
+    mSensorData->temperature = Eigen::VectorXd::Zero(10);
+    mSensorData->motor_current = Eigen::VectorXd::Zero(10);
+    mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
+    mSensorData->bus_current = Eigen::VectorXd::Zero(10);
+    mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
+    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
+    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
+    mSensorData->rfoot_contact = false;
+    mSensorData->lfoot_contact = false;
+
+    mCommand = new DracoCommand();
+    mCommand->turn_off = false;
+    mCommand->q = Eigen::VectorXd::Zero(10);
+    mCommand->qdot = Eigen::VectorXd::Zero(10);
+    mCommand->jtrq = Eigen::VectorXd::Zero(10);
+
     DataManager* data_manager = DataManager::GetDataManager();
     q_sim_ = Eigen::VectorXd::Zero(16);
     data_manager->RegisterData(&q_sim_, VECT, "q_sim", 16);
@@ -146,7 +146,7 @@ DracoWorldNode::~DracoWorldNode() {
     delete mInterface;
     delete mSensorData;
     delete mCommand;
-    // delete led_pos_announcer_;
+    delete led_pos_announcer_;
 }
 
 void DracoWorldNode::customPreStep() {
@@ -175,9 +175,8 @@ void DracoWorldNode::customPreStep() {
         printf("time: %f\n", clock_.stop());
     }
 
+    // Low level FeedForward and Position Control
     mTorqueCommand.tail(10) = mCommand->jtrq;
-
-    // Low level position control
     for (int i = 0; i < 10; ++i) {
         mTorqueCommand[i + 6] +=
             mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +

@@ -57,10 +57,12 @@ DracoMoCapManager::~DracoMoCapManager() {
 
 void DracoMoCapManager::run() {
     draco_message dracobip_msg;
+
     int count(0);
 
     while (true) {
         ++count;
+
         COMM::receive_data(socket_, MOCAP_DATA_PORT, &dracobip_msg,
                            sizeof(draco_message), IP_ADDRESS);
 
@@ -70,14 +72,17 @@ void DracoMoCapManager::run() {
             }
             marker_cond_[i] = dracobip_msg.visible[i];
         }
+
         if ((sp_->curr_time < initialization_duration_) || b_update_call_) {
             _CoordinateUpdate(dracobip_msg);
             b_update_call_ = false;
         } else {
             _CoordinateChange(dracobip_msg);
         }
+
         _UpdateLEDPosData(dracobip_msg);
 
+        // TEST
         // if (count % 500 == 0) {
         // printf("receiver count : %d\n", count);
         //_Print_message(dracobip_msg);

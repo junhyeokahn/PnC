@@ -24,6 +24,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void _hold_xy();
     void _hold_rot();
     void UpdateLedData_();
+    void SafeCmd_();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
@@ -34,6 +35,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     double pulling_back_distance_;
 
     int count_;
+    double waiting_time_;
     int mpi_idx_;
     int env_idx_;
     double t_;

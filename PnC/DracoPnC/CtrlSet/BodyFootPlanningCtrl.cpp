@@ -315,8 +315,8 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     for (int i(0); i < 2; ++i) {
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
         // com_pos[i] += body_pt_offset_[i];
-        // com_vel[i] = sp_->qdot[i];
-        com_vel[i] = sp_->est_mocap_body_vel[i];
+        com_vel[i] = sp_->qdot[i];  // !! Want to remove mocap !!
+        // com_vel[i] = sp_->est_mocap_body_vel[i];
     }
 
     printf("planning com state: %f, %f, %f, %f\n", com_pos[0], com_pos[1],
@@ -338,19 +338,15 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         pl_param.b_positive_sidestep = false;
 
     Eigen::Vector3d global_com_pos = com_pos + sp_->global_pos_local;
-    // myUtils::pretty_print(global_com_pos, std::cout, "***planning com pos
-    // global"); myUtils::pretty_print(com_vel, std::cout, "***planning com vel
-    // global");
 
     planner_->getNextFootLocation(global_com_pos, com_vel, target_loc,
                                   &pl_param, &pl_output);
 
-    // myUtils::pretty_print(target_loc, std::cout, "***next foot global");
     Eigen::VectorXd ss_global(4);
     for (int i = 0; i < 4; ++i) {
         ss_global[i] = pl_output.switching_state[i];
     }
-    // myUtils::pretty_print(ss_global, std::cout, "***planned ss global");
+
     // Time Modification
     replan_moment_ = state_machine_time_;
     end_time_ += pl_output.time_modification;

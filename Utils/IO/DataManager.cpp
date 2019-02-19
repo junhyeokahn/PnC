@@ -100,6 +100,7 @@ void DataManager::SaveDataFromValues(double* data, int st_idx, int data_idx) {
         }
     }
 }
+
 void DataManager::run() {
     // Data Setup
     DATA_Protocol::DATA_SETUP data_setup;
@@ -134,6 +135,7 @@ void DataManager::run() {
 
     delete[] data;
 }
+
 void DataManager::_ShowSendingMessage(
     const DATA_Protocol::DATA_SETUP& data_setup, const double* data) {
     int st_idx = 0;
