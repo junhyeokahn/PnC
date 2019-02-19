@@ -1,26 +1,22 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <dart/dart.hpp>
 
-#include <Utils/IO/Pthread.hpp>
 #include <PnC/DracoPnC/DracoMoCapManager.hpp>
+#include <Utils/IO/Pthread.hpp>
 
-class DracoLedPosAnnouncer: public Pthread{
-public:
-
+class DracoLedPosAnnouncer : public Pthread {
+   public:
     DracoLedPosAnnouncer(dart::simulation::WorldPtr _world);
-    virtual ~DracoLedPosAnnouncer(void){}
+    virtual ~DracoLedPosAnnouncer(void) {}
 
     virtual void run(void);
 
-protected:
+   protected:
     int count_;
-    int turn_off_count_;
-    std::vector<int> led_turn_off_st_count_;
-    std::vector<int> led_turn_off_end_count_;
     int socket_;
     std::vector<std::string> led_link_name_list_;
 

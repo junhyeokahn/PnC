@@ -1,36 +1,33 @@
 #pragma once
 
 #include <stdio.h>
-#include <iostream>
 #include <Eigen/Dense>
+#include <iostream>
 
-#include <Utils/IO/IOUtilities.hpp>
 #include <RobotSystem/RobotSystem.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 //! Contact Frame's z-axis should correspond normal vector to the ground
 
 class ContactSpec {
-public:
-    ContactSpec(RobotSystem* _robot,
-            const int & _dim ) {
-
+   public:
+    ContactSpec(RobotSystem* _robot, const int& _dim) {
         robot_ = _robot;
         dim_contact_ = _dim;
         b_set_contact_ = false;
         idx_Fz_ = dim_contact_ - 1;
         Jc_ = Eigen::MatrixXd::Zero(dim_contact_, robot_->getNumDofs());
         JcDotQdot_ = Eigen::VectorXd::Zero(dim_contact_);
-
     }
 
-    virtual ~ContactSpec(){}
+    virtual ~ContactSpec() {}
 
-    void getContactJacobian(Eigen::MatrixXd & Jc){ Jc = Jc_; }
-    void getJcDotQdot(Eigen::VectorXd & JcDotQdot) { JcDotQdot = JcDotQdot_; }
-    int getDim(){ return dim_contact_; }
-    void unsetContact(){ b_set_contact_ = false; }
+    void getContactJacobian(Eigen::MatrixXd& Jc) { Jc = Jc_; }
+    void getJcDotQdot(Eigen::VectorXd& JcDotQdot) { JcDotQdot = JcDotQdot_; }
+    int getDim() { return dim_contact_; }
+    void unsetContact() { b_set_contact_ = false; }
 
-    bool updateContactSpec(){
+    bool updateContactSpec() {
         _UpdateJc();
         _UpdateJcDotQdot();
         _UpdateUf();
@@ -40,12 +37,12 @@ public:
     }
 
     virtual int getDimRFConstratint() { return Uf_.rows(); }
-    void getRFConstraintMtx(Eigen::MatrixXd & Uf){ Uf = Uf_; }
-    void getRFConstraintVec(Eigen::VectorXd & ieq_vec){ ieq_vec = ieq_vec_; }
+    void getRFConstraintMtx(Eigen::MatrixXd& Uf) { Uf = Uf_; }
+    void getRFConstraintVec(Eigen::VectorXd& ieq_vec) { ieq_vec = ieq_vec_; }
 
-    int getFzIndex(){ return idx_Fz_; }
+    int getFzIndex() { return idx_Fz_; }
 
-protected:
+   protected:
     virtual bool _UpdateJc() = 0;
     virtual bool _UpdateJcDotQdot() = 0;
     virtual bool _UpdateUf() = 0;
@@ -58,6 +55,6 @@ protected:
     int idx_Fz_;
     bool b_set_contact_;
 
-    Eigen::MatrixXd  Uf_;
-    Eigen::VectorXd  ieq_vec_;
+    Eigen::MatrixXd Uf_;
+    Eigen::VectorXd ieq_vec_;
 };

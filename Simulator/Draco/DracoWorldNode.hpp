@@ -1,9 +1,9 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
 #include <osgShadow/LightSpacePerspectiveShadowMap>
-#include <Eigen/Dense>
 
 #include "Utils/General/Clock.hpp"
 
@@ -12,16 +12,14 @@ class DracoSensorData;
 class DracoCommand;
 class DracoLedPosAnnouncer;
 
-class DracoWorldNode : public dart::gui::osg::WorldNode
-{
-private:
+class DracoWorldNode : public dart::gui::osg::WorldNode {
+   private:
     Interface* mInterface;
     DracoSensorData* mSensorData;
     DracoCommand* mCommand;
 
-    void _get_imu_data( Eigen::VectorXd & ang_vel,
-                        Eigen::VectorXd & acc);
-    void _check_foot_contact( bool & rfoot_contact, bool & lfoot_contact );
+    void _get_imu_data(Eigen::VectorXd& ang_vel, Eigen::VectorXd& acc);
+    void _check_foot_contact(bool& rfoot_contact, bool& lfoot_contact);
     void _check_collision();
     void _hold_xy();
     void _hold_rot();
@@ -35,14 +33,18 @@ private:
     double pulling_back_distance_;
 
     int count_;
+    int mpi_idx_;
+    int env_idx_;
     double t_;
     bool b_check_collision_;
     bool b_print_computation_time;
     double servo_rate_;
 
-public:
-    DracoWorldNode(const dart::simulation::WorldPtr & world,
-                      osgShadow::MinimalShadowMap *);
+   public:
+    DracoWorldNode(const dart::simulation::WorldPtr& world,
+                   osgShadow::MinimalShadowMap*);
+    DracoWorldNode(const dart::simulation::WorldPtr& world,
+                   osgShadow::MinimalShadowMap*, int mpi_idx, int env_idx);
     virtual ~DracoWorldNode();
 
     void customPreStep() override;

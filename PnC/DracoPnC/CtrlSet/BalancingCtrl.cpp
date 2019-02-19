@@ -1,12 +1,12 @@
+#include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/DracoInterface.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
-#include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 
 BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "Balancing Ctrl");
@@ -18,11 +18,15 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    //contact
-    rfoot_front_contact_ = new PointContactSpec(robot_, "rFootFront", 3);
-    rfoot_back_contact_ = new PointContactSpec(robot_, "rFootBack", 3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, "lFootFront", 3);
-    lfoot_back_contact_ = new PointContactSpec(robot_, "lFootBack", 3);
+    // contact
+    rfoot_front_contact_ =
+        new PointContactSpec(robot_, DracoBodyNode::rFootFront, 3);
+    rfoot_back_contact_ =
+        new PointContactSpec(robot_, DracoBodyNode::rFootBack, 3);
+    lfoot_front_contact_ =
+        new PointContactSpec(robot_, DracoBodyNode::lFootFront, 3);
+    lfoot_back_contact_ =
+        new PointContactSpec(robot_, DracoBodyNode::lFootBack, 3);
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
     contact_list_.push_back(rfoot_back_contact_);
@@ -40,13 +44,13 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     centroid_vel_act_ = Eigen::VectorXd::Zero(centroid_task_->getDim());
     centroid_acc_act_ = Eigen::VectorXd::Zero(centroid_task_->getDim());
 
-    joint_task_ = new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumDofs());
+    joint_task_ =
+        new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumDofs());
 
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
-    for(int i(0); i < robot_->getNumVirtualDofs(); ++i)
-        act_list[i] = false;
+    for (int i(0); i < robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
     wbdc_ = new WBDC(act_list);
     wbdc_data_ = new WBDC_ExtraData();
 
@@ -54,16 +58,23 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     int task_dim(0);
     int contact_dim(0);
     int prev_contact_dim(0);
-    for (int i = 0; i < task_list_.size(); ++i) { task_dim += task_list_[i]->getDim(); }
-    for (int i = 0; i < contact_list_.size(); ++i) {contact_dim += contact_list_[i]->getDim(); }
+    for (int i = 0; i < task_list_.size(); ++i) {
+        task_dim += task_list_[i]->getDim();
+    }
+    for (int i = 0; i < contact_list_.size(); ++i) {
+        contact_dim += contact_list_[i]->getDim();
+    }
     wbdc_data_->cost_weight = Eigen::VectorXd::Zero(task_dim + contact_dim);
 
-    for(int i(0); i<task_dim; ++i) { wbdc_data_->cost_weight[i] = 1000.0; }
-    for(int i(0); i<contact_dim; ++i) {
+    for (int i(0); i < task_dim; ++i) {
+        wbdc_data_->cost_weight[i] = 1000.0;
+    }
+    for (int i(0); i < contact_dim; ++i) {
         wbdc_data_->cost_weight[task_dim + i] = 1.0;
     }
-    for(int i(0); i<contact_list_.size(); ++i) {
-        wbdc_data_->cost_weight[task_dim + prev_contact_dim + contact_list_[i]->getFzIndex()] = 0.001;
+    for (int i(0); i < contact_list_.size(); ++i) {
+        wbdc_data_->cost_weight[task_dim + prev_contact_dim +
+                                contact_list_[i]->getFzIndex()] = 0.001;
         prev_contact_dim = contact_list_[i]->getDim();
     }
 
@@ -78,7 +89,7 @@ BalancingCtrl::BalancingCtrl(RobotSystem* robot) : Controller(robot) {
     data_manager->RegisterData(&centroid_acc_act_, VECT, "centroid_acc_act", 6);
 }
 
-BalancingCtrl::~BalancingCtrl(){
+BalancingCtrl::~BalancingCtrl() {
     delete centroid_task_;
     delete joint_task_;
 
@@ -99,37 +110,41 @@ void BalancingCtrl::oneStep(void* _cmd) {
     _task_setup();
     _compute_torque(gamma);
 
-    for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
+    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
-        ((DracoCommand*)_cmd)->q[i] = sp_->q[i+6];
-        ((DracoCommand*)_cmd)->qdot[i] = sp_->qdot[i+6];
+        ((DracoCommand*)_cmd)->q[i] = sp_->q[i + 6];
+        ((DracoCommand*)_cmd)->qdot[i] = sp_->qdot[i + 6];
     }
     _PostProcessing_Command();
 }
 
-void BalancingCtrl::_compute_torque(Eigen::VectorXd & gamma) {
+void BalancingCtrl::_compute_torque(Eigen::VectorXd& gamma) {
     wbdc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     wbdc_->makeTorque(task_list_, contact_list_, gamma, wbdc_data_);
 }
 
-void BalancingCtrl::_task_setup(){
+void BalancingCtrl::_task_setup() {
     centroid_pos_des_.setZero();
     centroid_vel_des_.setZero();
     centroid_acc_des_.setZero();
     double d_ary[3];
     if (state_machine_time_ < interpolation_dur_) {
         for (int i = 0; i < 3; ++i) {
-            centroid_pos_des_[i+3] = myUtils::smooth_changing(ini_com_pos_[i],
-                    goal_com_pos_[i], interpolation_dur_, state_machine_time_);
-            centroid_vel_des_[i+3] = myUtils::smooth_changing_vel(ini_com_pos_[i],
-                    goal_com_pos_[i], interpolation_dur_, state_machine_time_);
-            centroid_acc_des_[i+3] = myUtils::smooth_changing_acc(ini_com_pos_[i],
-                    goal_com_pos_[i], interpolation_dur_, state_machine_time_);
+            centroid_pos_des_[i + 3] = myUtils::smooth_changing(
+                ini_com_pos_[i], goal_com_pos_[i], interpolation_dur_,
+                state_machine_time_);
+            centroid_vel_des_[i + 3] = myUtils::smooth_changing_vel(
+                ini_com_pos_[i], goal_com_pos_[i], interpolation_dur_,
+                state_machine_time_);
+            centroid_acc_des_[i + 3] = myUtils::smooth_changing_acc(
+                ini_com_pos_[i], goal_com_pos_[i], interpolation_dur_,
+                state_machine_time_);
         }
     } else {
         centroid_pos_des_.tail(3) = goal_com_pos_;
     }
-    centroid_task_->updateTask(centroid_pos_des_, centroid_vel_des_, centroid_acc_des_);
+    centroid_task_->updateTask(centroid_pos_des_, centroid_vel_des_,
+                               centroid_acc_des_);
     task_list_.push_back(centroid_task_);
 
     centroid_pos_act_.tail(3) = robot_->getCoMPosition();
@@ -138,7 +153,6 @@ void BalancingCtrl::_task_setup(){
     Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(robot_->getNumDofs());
     joint_task_->updateTask(ini_jpos_, zero_vec, zero_vec);
     task_list_.push_back(joint_task_);
-
 }
 
 void BalancingCtrl::_contact_setup() {
@@ -161,47 +175,63 @@ void BalancingCtrl::firstVisit() {
     ini_com_pos_ = robot_->getCoMPosition();
     ini_com_vel_ = robot_->getCoMVelocity();
 
-    Eigen::VectorXd rfoot_contact_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
-    Eigen::VectorXd lfoot_contact_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
+    Eigen::VectorXd rfoot_contact_pos =
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+    Eigen::VectorXd lfoot_contact_pos =
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
 
     // TODO
     goal_com_pos_ = (rfoot_contact_pos + lfoot_contact_pos) / 2.0;
     goal_com_pos_[2] = ini_com_pos_[2];
-    //goal_com_pos_[0] += 0.015;
-    //goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
-    //goal_com_pos_ = ini_com_pos_;
-    myUtils::pretty_print(rfoot_contact_pos , std::cout, "rfoot_contact_pos");
-    myUtils::pretty_print(lfoot_contact_pos , std::cout, "lfoot_contact_pos");
+    // goal_com_pos_[0] += 0.015;
+    // goal_com_pos_[2] = ini_com_pos_[2] - 0.05;
+    // goal_com_pos_ = ini_com_pos_;
+    myUtils::pretty_print(rfoot_contact_pos, std::cout, "rfoot_contact_pos");
+    myUtils::pretty_print(lfoot_contact_pos, std::cout, "lfoot_contact_pos");
     myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com");
     myUtils::pretty_print(goal_com_pos_, std::cout, "goal_com");
     goal_com_vel_ = Eigen::VectorXd::Zero(3);
 
-    double ini[9] = {ini_com_pos_[0] , ini_com_pos_[1] , ini_com_pos_[2] ,
-                     ini_com_vel_[0] , ini_com_vel_[1] , ini_com_vel_[2] ,
-                     0               , 0               , 0               };
-    double fin[9] = {goal_com_pos_[0] , goal_com_pos_[1] , goal_com_pos_[2] ,
-                     goal_com_vel_[0] , goal_com_vel_[1] , goal_com_vel_[2] ,
-                     0                , 0                , 0               };
-    double **middle_pt;
+    double ini[9] = {ini_com_pos_[0],
+                     ini_com_pos_[1],
+                     ini_com_pos_[2],
+                     ini_com_vel_[0],
+                     ini_com_vel_[1],
+                     ini_com_vel_[2],
+                     0,
+                     0,
+                     0};
+    double fin[9] = {goal_com_pos_[0],
+                     goal_com_pos_[1],
+                     goal_com_pos_[2],
+                     goal_com_vel_[0],
+                     goal_com_vel_[1],
+                     goal_com_vel_[2],
+                     0,
+                     0,
+                     0};
+    double** middle_pt;
     spline_.SetParam(ini, fin, middle_pt, interpolation_dur_);
 }
 
-void BalancingCtrl::lastVisit(){  }
+void BalancingCtrl::lastVisit() {}
 
-bool BalancingCtrl::endOfPhase(){
-    if(state_machine_time_ > end_time_){
+bool BalancingCtrl::endOfPhase() {
+    if (state_machine_time_ > end_time_) {
         return true;
     }
     return false;
 }
 
-void BalancingCtrl::ctrlInitialization(const YAML::Node& node){
+void BalancingCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
         myUtils::readParameter(node, "centroid_task_kp", Kp_);
         myUtils::readParameter(node, "centroid_task_kd", Kd_);
         centroid_task_->setGain(Kp_, Kd_);
-    }catch(std::runtime_error& e) {
-        std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
         exit(0);
     }
 }
