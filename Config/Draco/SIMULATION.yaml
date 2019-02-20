@@ -5,13 +5,12 @@ show_viewer: true
 num_steps_per_cycle: 30
 hanging_height: 0.83
 display_joint_frame: false
+display_target_frame: true
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
 
 print_computation_time: false
 release_time: 3.95
 check_collision: true
-pulling_back_time: 2.0
-pulling_back_distance: 0.088
 
 control_configuration:
   kp: [100 , 100 , 100 , 100 , 10 , 100 , 100 , 100 , 100 , 10]

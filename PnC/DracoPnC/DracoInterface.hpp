@@ -5,9 +5,8 @@
 class DracoStateEstimator;
 class DracoStateProvider;
 
-class DracoSensorData
-{
-public:
+class DracoSensorData {
+   public:
     Eigen::VectorXd imu_ang_vel;
     Eigen::VectorXd imu_acc;
     Eigen::VectorXd q;
@@ -24,30 +23,27 @@ public:
     bool lfoot_contact;
 };
 
-class DracoCommand
-{
-public:
+class DracoCommand {
+   public:
     bool turn_off;
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
 };
 
-
-class DracoInterface: public Interface
-{
-protected:
+class DracoInterface : public Interface {
+   protected:
     int waiting_count_;
 
     void _ParameterSetting();
-    bool _Initialization(DracoSensorData* , DracoCommand* );
+    bool _Initialization(DracoSensorData*, DracoCommand*);
     bool _UpdateTestCommand(DracoCommand* test_cmd);
     void _SetStopCommand(DracoSensorData*, DracoCommand* cmd);
-    void _CopyCommand(DracoCommand* cmd );
+    void _CopyCommand(DracoCommand* cmd);
 
     DracoCommand* test_cmd_;
-    DracoStateEstimator * state_estimator_;
-    DracoStateProvider * sp_;
+    DracoStateEstimator* state_estimator_;
+    DracoStateProvider* sp_;
 
     Eigen::VectorXd cmd_jtrq_;
     Eigen::VectorXd cmd_jpos_;
@@ -67,8 +63,15 @@ protected:
     Eigen::VectorXd jtrq_min_;
     bool stop_test_;
 
-public:
+    // walking
+    double walking_start_time_;
+    double walking_duration_;
+    double walking_distance_;
+
+   public:
     DracoInterface();
     virtual ~DracoInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
+
+    Eigen::Isometry3d GetTargetIso();
 };

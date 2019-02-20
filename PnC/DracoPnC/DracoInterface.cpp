@@ -107,6 +107,19 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     ++count_;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
+
+    // walking forward test
+    if (true) {
+        if (sp_->curr_time > walking_start_time_) {
+            double walking_time = sp_->curr_time - walking_start_time_;
+            sp_->des_location[0] =
+                walking_distance_ * walking_time / walking_duration_;
+            //(1-cos(walking_time/walking_duration * M_PI))/2.;
+        }
+        if (sp_->curr_time > walking_start_time_ + walking_duration_) {
+            sp_->des_location[0] = walking_distance_;
+        }
+    }
 }
 
 bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd) {
@@ -202,6 +215,9 @@ void DracoInterface::_ParameterSetting() {
         myUtils::readParameter(cfg, "jvel_min", jvel_min_);
         myUtils::readParameter(cfg, "jtrq_max", jtrq_max_);
         myUtils::readParameter(cfg, "jtrq_min", jtrq_min_);
+        myUtils::readParameter(cfg, "walking_start_time", walking_start_time_);
+        myUtils::readParameter(cfg, "walking_duration", walking_duration_);
+        myUtils::readParameter(cfg, "walking_distance", walking_distance_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -210,3 +226,12 @@ void DracoInterface::_ParameterSetting() {
     }
 }
 
+Eigen::Isometry3d DracoInterface::GetTargetIso() {
+    Eigen::Isometry3d target_iso = Eigen::Isometry3d::Identity();
+    Eigen::VectorXd target_pos = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 2; ++i) {
+        target_pos[i] = sp_->des_location[i];
+    }
+    target_iso.translation() = target_pos;
+    return target_iso;
+}

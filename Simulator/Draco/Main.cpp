@@ -29,6 +29,19 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
     }
 }
 
+void addTargetFrame(const dart::simulation::WorldPtr& world) {
+    dart::gui::osg::InteractiveFramePtr frame =
+        std::make_shared<dart::gui::osg::InteractiveFrame>(
+            dart::dynamics::Frame::World(), "target_frame");
+    for (int i = 0; i < 3; ++i) {
+        frame->getTool(dart::gui::osg::InteractiveTool::PLANAR, i)
+            ->setEnabled(false);
+        frame->getTool(dart::gui::osg::InteractiveTool::ANGULAR, i)
+            ->setEnabled(false);
+    }
+    world->addSimpleFrame(frame);
+}
+
 class OneStepProgress : public osgGA::GUIEventHandler {
    public:
     OneStepProgress(DracoWorldNode* worldnode) : worldnode_(worldnode) {}
@@ -197,6 +210,7 @@ int main(int argc, char** argv) {
     // ========================
     bool isRecord;
     bool b_display_joint_frame;
+    bool b_display_target_frame;
     bool b_show;
     int num_steps_per_cycle;
     double servo_rate;
@@ -206,6 +220,8 @@ int main(int argc, char** argv) {
         myUtils::readParameter(simulation_cfg, "is_record", isRecord);
         myUtils::readParameter(simulation_cfg, "display_joint_frame",
                                b_display_joint_frame);
+        myUtils::readParameter(simulation_cfg, "display_target_frame",
+                               b_display_target_frame);
         myUtils::readParameter(simulation_cfg, "num_steps_per_cycle",
                                num_steps_per_cycle);
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
@@ -266,6 +282,10 @@ int main(int argc, char** argv) {
     // Display Joints Frame
     // ====================
     if (b_display_joint_frame) displayJointFrames(world, robot);
+    // ====================
+    // Display Target Frame
+    // ====================
+    if (b_display_target_frame) addTargetFrame(world);
 
     // ====================
     // Add Collision Object

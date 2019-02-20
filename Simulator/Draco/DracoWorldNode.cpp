@@ -28,10 +28,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                                b_check_collision_);
         myUtils::readParameter(simulation_cfg, "print_computation_time",
                                b_print_computation_time);
-        myUtils::readParameter(simulation_cfg, "pulling_back_time",
-                               pulling_back_time_);
-        myUtils::readParameter(simulation_cfg, "pulling_back_distance",
-                               pulling_back_distance_);
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
         myUtils::readParameter(control_cfg, "kp", mKp);
         myUtils::readParameter(control_cfg, "kd", mKd);
@@ -96,10 +92,6 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                                b_check_collision_);
         myUtils::readParameter(simulation_cfg, "print_computation_time",
                                b_print_computation_time);
-        myUtils::readParameter(simulation_cfg, "pulling_back_time",
-                               pulling_back_time_);
-        myUtils::readParameter(simulation_cfg, "pulling_back_distance",
-                               pulling_back_distance_);
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
         myUtils::readParameter(control_cfg, "kp", mKp);
         myUtils::readParameter(control_cfg, "kd", mKd);
@@ -160,6 +152,8 @@ void DracoWorldNode::customPreStep() {
     UpdateLedData_();
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
+    UpdateTargetLocation_();
+
     if (b_check_collision_) {
         _check_collision();
     }
@@ -279,27 +273,6 @@ void DracoWorldNode::_hold_xy() {
     Eigen::VectorXd q = mSkel->getPositions();
     Eigen::VectorXd v = mSkel->getVelocities();
 
-    // if (t_ > mReleaseTime - pulling_back_time_) {
-
-    // static double interp_init_time = t_;
-    // static double ini_des_x = des_x;
-    // static double ini_des_y = des_y;
-    // static double final_des_x = (
-    // (mSkel->getBodyNode("rFootCenter")->getCOM())[0] +
-    // (mSkel->getBodyNode("lFootCenter")->getCOM())[0] ) / 2.0 -
-    // pulling_back_distance_; // Try to mimic in Experiment static double
-    // final_des_y = ( (mSkel->getBodyNode("rFootCenter")->getCOM())[1] +
-    // (mSkel->getBodyNode("lFootCenter")->getCOM())[1] ) / 2.0;
-
-    // des_x = myUtils::smooth_changing(ini_des_x, final_des_x,
-    // pulling_back_time_, t_ - interp_init_time); des_xdot =
-    // myUtils::smooth_changing_vel(ini_des_x, final_des_x, pulling_back_time_,
-    // t_ - interp_init_time); des_y = myUtils::smooth_changing(ini_des_y,
-    // final_des_y, pulling_back_time_, t_ - interp_init_time); des_ydot =
-    // myUtils::smooth_changing_vel(ini_des_y, final_des_y, pulling_back_time_,
-    // t_ - interp_init_time);
-    //}
-
     double kp(1500);
     double kd(100);
 
@@ -323,4 +296,11 @@ void DracoWorldNode::_check_collision() {
             exit(0);
         }
     }
+}
+
+void DracoWorldNode::UpdateTargetLocation_() {
+    dart::dynamics::SimpleFramePtr frame =
+        world_->getSimpleFrame("target_frame");
+    Eigen::Isometry3d tf = ((DracoInterface*)mInterface)->GetTargetIso();
+    frame->setTransform(tf);
 }

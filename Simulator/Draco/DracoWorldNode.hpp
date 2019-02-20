@@ -2,6 +2,7 @@
 
 #include <Eigen/Dense>
 #include <dart/dart.hpp>
+#include <dart/gui/GLFuncs.hpp>
 #include <dart/gui/osg/osg.hpp>
 #include <osgShadow/LightSpacePerspectiveShadowMap>
 
@@ -24,15 +25,13 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void _hold_xy();
     void _hold_rot();
     void UpdateLedData_();
-    void SafeCmd_();
+    void UpdateTargetLocation_();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
     double mReleaseTime;
-    double pulling_back_time_;
-    double pulling_back_distance_;
 
     int count_;
     double waiting_time_;
