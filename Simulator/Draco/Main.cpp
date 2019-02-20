@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
     if (b_show) {
         dart::gui::osg::Viewer viewer;
         viewer.addWorldNode(node);
-        viewer.simulate(false);
+        viewer.simulate(true);
         viewer.switchHeadlights(false);
         msm->setLight(viewer.getLightSource(0)->getLight());
         ::osg::Vec3 p1(1.0, 0.2, 1.0);
@@ -355,8 +355,8 @@ int main(int argc, char** argv) {
             viewer.record(THIS_COM "/ExperimentVideo");
         }
 
-        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 500, 500);
+        viewer.setUpViewInWindow(0, 0, 2880, 1800);
+        // viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
             ::osg::Vec3(0.0, 0.0, 1.0));

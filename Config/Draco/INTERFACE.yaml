@@ -15,6 +15,6 @@ jtrq_min: [-200. , -200. , -200. , -200. , -20. , -200. , -200. , -200. , -200. 
 
 max_temperature: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
 
-walking_start_time: 20
-walking_duration: 20
-walking_distance: 2.5
+walking_start_time: 5
+walking_duration: 10
+walking_distance: 1.0
