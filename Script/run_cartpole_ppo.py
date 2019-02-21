@@ -69,7 +69,8 @@ def main(args):
 
     if MPI is None or MPI.COMM_WORLD.Get_rank() == 0:
         rank = 0
-        logger.configure(dir=save_path)
+        # logger.configure(dir=save_path)
+        logger.configure(dir=save_path, format_strs=['stdout', 'csv'])
     else:
         logger.configure(dir=save_path, format_strs=[])
         rank = MPI.COMM_WORLD.Get_rank()

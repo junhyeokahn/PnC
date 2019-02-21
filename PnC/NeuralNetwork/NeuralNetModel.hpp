@@ -38,8 +38,13 @@ class NeuralNetModel {
     std::vector<Layer> GetLayers() { return layers_; }
     Eigen::MatrixXd GetOutput(const Eigen::MatrixXd& input);
     Eigen::MatrixXd GetOutput(const Eigen::MatrixXd& input, int idx);
-    void GetOutput(const Eigen::MatrixXd& _input, Eigen::MatrixXd& _output,
-                   Eigen::MatrixXd& _mean, Eigen::VectorXd& _neglogp);
+    void GetOutput(const Eigen::MatrixXd& _input,
+                   const Eigen::VectorXd& _lb,
+                   const Eigen::VectorXd& _ub,
+                   Eigen::MatrixXd& _output,
+                   Eigen::MatrixXd& _mean,
+                   Eigen::VectorXd& _neglogp);
+
     int GetNumInput() { return num_input_; }
     int GetNumOutput() { return num_output_; }
     void PrintInfo();

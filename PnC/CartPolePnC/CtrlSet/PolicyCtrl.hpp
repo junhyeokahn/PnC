@@ -36,6 +36,7 @@ class PolicyCtrl : public Controller {
    protected:
     double duration_;
     int ctrl_count_;
+    bool b_learning_;
 
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;

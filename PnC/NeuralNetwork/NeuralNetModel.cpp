@@ -1,4 +1,5 @@
-#include "PnC/NeuralNetwork/NeuralNetModel.hpp"
+#include <PnC/NeuralNetwork/NeuralNetModel.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 #include <cassert>
 #include <cmath>
 #include <random>
@@ -126,11 +127,25 @@ Eigen::MatrixXd NeuralNetModel::GetOutput(const Eigen::MatrixXd& input) {
 }
 
 void NeuralNetModel::GetOutput(const Eigen::MatrixXd& _input,
-                               Eigen::MatrixXd& _output, Eigen::MatrixXd& _mean,
+                               const Eigen::VectorXd& _lb,
+                               const Eigen::VectorXd& _ub,
+                               Eigen::MatrixXd& _output,
+                               Eigen::MatrixXd& _mean,
                                Eigen::VectorXd& _neglogp) {
     assert(b_stochastic_);
+    assert(_lb.size() == _ub.size());
+    assert(_lb.size() == num_output_);
 
     int num_data(_input.rows());
+    Eigen::MatrixXd aug_lb = Eigen::MatrixXd::Zero(num_data, num_output_);
+    Eigen::MatrixXd aug_ub = Eigen::MatrixXd::Zero(num_data, num_output_);
+    for (int data_idx = 0; data_idx < num_data; ++data_idx) {
+        for (int output_idx = 0; output_idx < num_output_; ++output_idx) {
+            aug_lb(data_idx, output_idx) = _lb(output_idx);
+            aug_ub(data_idx, output_idx) = _ub(output_idx);
+        }
+    }
+
     Eigen::MatrixXd mean = _input;
     Eigen::MatrixXd output = Eigen::MatrixXd::Zero(num_data, num_output_);
     Eigen::VectorXd neglogp = Eigen::VectorXd::Zero(num_data);
@@ -146,18 +161,19 @@ void NeuralNetModel::GetOutput(const Eigen::MatrixXd& _input,
             output(row, col) = d(gen);
         }
     }
+    output = myUtils::CropMatrix(output, aug_lb, aug_ub, "neural net output");
 
     for (int data_idx = 0; data_idx < num_data; ++data_idx) {
         for (int output_idx = 0; output_idx < num_output_; ++output_idx) {
             neglogp(data_idx) =
                 neglogp(data_idx) +
-                std::pow((output(data_idx, output_idx) -
-                          mean(data_idx, output_idx) / std_(output_idx)),
+                0.5 * std::pow( (output(data_idx, output_idx) -
+                          mean(data_idx, output_idx)  ) / std_(output_idx),
                          2) +
                 logstd_(output_idx);
         }
         neglogp(data_idx) =
-            neglogp(data_idx) + 0.5 * log(2 * M_PI) * num_output_;
+            neglogp(data_idx) + 0.5 * log(2 * M_PI) * (double)num_output_;
     }
 
     _output = output;
