@@ -13,7 +13,7 @@ test_configuration:
     # ==========================================================================
     action_lower_bound : [-1]
     action_upper_bound : [1]
-    action_scale : 10
+    action_scale : 30
 
     # ======================================================================
     # Terminate condition
@@ -36,12 +36,12 @@ control_configuration:
             exit_cmd: "pkill -f 'cart_pole"
 
         reward:
-            alive_reward: 1
-            pole_reward: 1
+            alive_reward: 10
+            pole_reward: 10
             cart_reward: 0.01
             quad_input_reward: 0.01
             reward_scale: 1
 
 
     policy_ctrl:
-        model_path: "ppo_4"
+        model_path: "ppo_2"

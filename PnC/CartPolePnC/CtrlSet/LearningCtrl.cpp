@@ -121,10 +121,10 @@ void LearningCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd output;
     Eigen::MatrixXd mean;
     Eigen::VectorXd neglogp;
-    nn_policy_->GetOutput(obs, output, mean, neglogp);
+    nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_,
+            output, mean, neglogp);
 
-    ((CartPoleCommand*)_cmd)->jtrq = myUtils::cropValue(
-        output(0, 0), action_lower_bound_[0], action_upper_bound_[0], "jtrq");
+    ((CartPoleCommand*)_cmd)->jtrq = output(0, 0);
     ((CartPoleCommand*)_cmd)->jtrq_mean = mean(0, 0);
     ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
 

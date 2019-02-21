@@ -26,10 +26,11 @@ void PolicyCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd output;
     Eigen::MatrixXd mean;
     Eigen::VectorXd neglogp;
-    nn_policy_->GetOutput(obs, output, mean, neglogp);
+    nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_,
+            output, mean, neglogp);
+    Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
 
-    ((CartPoleCommand*)_cmd)->jtrq = myUtils::cropValue(
-        output(0, 0), action_lower_bound_[0], action_upper_bound_[0], "jtrq");
+    ((CartPoleCommand*)_cmd)->jtrq = output(0, 0);
     ((CartPoleCommand*)_cmd)->jtrq_mean = mean(0, 0);
     ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
 
@@ -37,6 +38,18 @@ void PolicyCtrl::oneStep(void* _cmd) {
     ((CartPoleCommand*)_cmd)->jtrq *= action_scale_;
 
     ++ctrl_count_;
+
+    // !! TEST !! //
+    //std::cout << "# ========================================================= #" << std::endl;
+    //myUtils::pretty_print(obs, std::cout, "observation");
+    //std::cout << "mean : " << mean(0, 0) << std::endl;
+    //std::cout << "value : " << val(0, 0) << std::endl;
+    //std::cout << "neglogp : " << neglogp(0) << std::endl;
+    //std::cout << "output : " << output(0, 0) << std::endl;
+    //if (ctrl_count_ == 5) {
+        //exit(0);
+    //}
+    // !! TEST !! //
 }
 
 void PolicyCtrl::firstVisit() {}
@@ -58,4 +71,6 @@ void PolicyCtrl::ctrlInitialization(const YAML::Node& node) {
     YAML::Node model_cfg = YAML::LoadFile(model_dir);
     nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
     nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
+    nn_policy_->PrintInfo();
+    nn_valfn_->PrintInfo();
 }

@@ -10,7 +10,7 @@ RLTest::RLTest(RobotSystem* robot, int mpi_idx, int env_idx) : Test(robot) {
     state_list_.clear();
 
     learning_ctrl_ = new LearningCtrl(robot, mpi_idx, env_idx);
-    bool b_learning_ = true;
+    b_learning_ = true;
 
     state_list_.push_back(learning_ctrl_);
 
@@ -25,7 +25,7 @@ RLTest::RLTest(RobotSystem* robot) : Test(robot) {
     state_list_.clear();
 
     policy_ctrl_ = new PolicyCtrl(robot);
-    bool b_learning_ = false;
+    b_learning_ = false;
 
     state_list_.push_back(policy_ctrl_);
 

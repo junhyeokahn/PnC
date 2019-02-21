@@ -82,7 +82,7 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
     return ret;
 }
 
-double cropValue(double value, double min, double max, std::string source) {
+double CropValue(double value, double min, double max, std::string source) {
     assert(min < max);
     if (value > max) {
         printf("%s: %f is cropped to %f.\n", source.c_str(), value, max);
@@ -95,7 +95,7 @@ double cropValue(double value, double min, double max, std::string source) {
     return value;
 }
 
-Eigen::VectorXd cropVector(Eigen::VectorXd value, Eigen::VectorXd min,
+Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
                            Eigen::VectorXd max, std::string source) {
     assert(value.size() = min.size());
     assert(value.size() = max.size());
@@ -103,14 +103,41 @@ Eigen::VectorXd cropVector(Eigen::VectorXd value, Eigen::VectorXd min,
 
     for (int i = 0; i < n_data; ++i) {
         if (value[i] > max[i]) {
-            printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
-                   max[i]);
+            //printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
+                   //max[i]);
             value[i] = max[i];
         }
         if (value[i] < min[i]) {
-            printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
-                   min[i]);
+            //printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
+                   //min[i]);
             value[i] = min[i];
+        }
+    }
+    return value;
+}
+
+Eigen::MatrixXd CropMatrix(Eigen::MatrixXd value, Eigen::MatrixXd min,
+                           Eigen::MatrixXd max, std::string source) {
+    assert(value.cols() = min.cols());
+    assert(value.rows() = min.rows());
+    assert(value.cols() = max.cols());
+    assert(value.rows() = max.rows());
+
+    int  n_row = value.rows();
+    int  n_cols = value.cols();
+
+    for (int row_idx = 0; row_idx < n_row ; ++row_idx) {
+        for (int col_idx = 0; col_idx < n_cols; ++col_idx) {
+            if (value(row_idx, col_idx) < min(row_idx, col_idx)) {
+                //printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(), row_idx, col_idx, value(row_idx, col_idx),
+                        //min(row_idx, col_idx));
+                value(row_idx, col_idx) = min(row_idx, col_idx);
+            }
+            if (value(row_idx, col_idx) > max(row_idx, col_idx)) {
+                //printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(), row_idx, col_idx, value(row_idx, col_idx),
+                        //max(row_idx, col_idx));
+                value(row_idx, col_idx) = max(row_idx, col_idx);
+            }
         }
     }
     return value;
