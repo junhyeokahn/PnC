@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
     if (b_show) {
         dart::gui::osg::Viewer viewer;
         viewer.addWorldNode(node);
-        viewer.simulate(true);
+        viewer.simulate(false);
         viewer.switchHeadlights(false);
         msm->setLight(viewer.getLightSource(0)->getLight());
         ::osg::Vec3 p1(1.0, 0.2, 1.0);
