@@ -6,7 +6,7 @@ if(NOT (ZMQ_FOUND AND Protobuf_FOUND))
     list(REMOVE_ITEM rl_headers ${CMAKE_CURRENT_SOURCE_DIR}/RLInterface.hpp)
 endif()
 
-add_library(myRL SHARED ${sources})
+add_library(myRL ${sources})
 target_link_libraries(myRL myUtils)
 
 if(ZMQ_FOUND AND Protobuf_FOUND)
