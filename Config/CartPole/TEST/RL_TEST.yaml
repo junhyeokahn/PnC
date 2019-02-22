@@ -44,4 +44,4 @@ control_configuration:
 
 
     policy_ctrl:
-        model_path: "ppo_2"
+        model_path: "RLData/CartPole/ppo_1/checkpoints/00001.yaml"

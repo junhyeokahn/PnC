@@ -11,12 +11,33 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     result = pu.load_results(args.log_path)
-    res = result[0]
-    f, ax = plt.subplots()
-    ax.plot(res.progress.total_timesteps, res.progress.eprewmean)
-    ax.grid(True)
-    ax.set_xlabel('time_step')
-    ax.set_ylabel('eprewmean')
-    plt.plot(res.progress.total_timesteps, res.progress.eprewmean)
-    plt.show()
 
+    # ==========================================================================
+    # total_numstep vs eprewmean
+    # ==========================================================================
+    res = result[0]
+    f1, ax1 = plt.subplots()
+    ax1.plot(res.progress.total_timesteps, res.progress.eprewmean)
+    ax1.grid(True)
+    ax1.set_xlabel('total_timestep')
+    ax1.set_ylabel('eprewmean')
+
+    # ==========================================================================
+    # nupdates vs eprewmean
+    # ==========================================================================
+    f2, ax3 = plt.subplots()
+    ax3.plot(res.progress.nupdates, res.progress.eprewmean)
+    ax3.grid(True)
+    ax3.set_xlabel('nupdates')
+    ax3.set_ylabel('eprewmean')
+
+    # ==========================================================================
+    # nupdates vs total_num_dones
+    # ==========================================================================
+    f3, ax3 = plt.subplots()
+    ax3.plot(res.progress.nupdates, res.progress.total_num_dones)
+    ax3.grid(True)
+    ax3.set_xlabel('nupdates')
+    ax3.set_ylabel('total_num_dones')
+
+    plt.show()

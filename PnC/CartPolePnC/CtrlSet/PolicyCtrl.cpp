@@ -73,11 +73,10 @@ bool PolicyCtrl::endOfPhase() {
 }
 
 void PolicyCtrl::ctrlInitialization(const YAML::Node& node) {
-    std::string model_folder;
-    myUtils::readParameter(node, "model_path", model_folder);
-    std::string model_dir =
-        THIS_COM "RLData/CartPole/" + model_folder + "/model.yaml";
-    YAML::Node model_cfg = YAML::LoadFile(model_dir);
+    std::string model_path;
+    myUtils::readParameter(node, "model_path", model_path);
+    std::string model_yaml = THIS_COM + model_path;
+    YAML::Node model_cfg = YAML::LoadFile(model_yaml);
     nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
     nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
     // nn_policy_->PrintInfo();
