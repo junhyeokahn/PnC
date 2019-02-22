@@ -6,7 +6,7 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include <dart/utils/utils.hpp>
 #include <random>
-#include "CartPoleWorldNode.hpp"
+#include <Simulator/Dart/CartPole/CartPoleWorldNode.hpp>
 
 void displayJointFrames(const dart::simulation::WorldPtr& world,
                         const dart::dynamics::SkeletonPtr& robot) {

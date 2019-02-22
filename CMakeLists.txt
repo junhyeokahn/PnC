@@ -82,7 +82,6 @@ endif()
 ## Include Directory
 ##=============================================================================
 include_directories("${PROJECT_SOURCE_DIR}")
-include_directories("${PROJECT_SOURCE_DIR}/Simulator")
 
 ##=============================================================================
 ## Add Subdirectory
