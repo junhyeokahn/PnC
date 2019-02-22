@@ -8,14 +8,14 @@
 
 #include "Utils/General/Clock.hpp"
 
-class Interface;
+class EnvInterface;
 class DracoSensorData;
 class DracoCommand;
 class DracoLedPosAnnouncer;
 
 class DracoWorldNode : public dart::gui::osg::WorldNode {
    private:
-    Interface* mInterface;
+    EnvInterface* mInterface;
     DracoSensorData* mSensorData;
     DracoCommand* mCommand;
 

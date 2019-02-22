@@ -6,7 +6,7 @@
 class Test;
 class RobotSystem;
 
-class Interface {
+class EnvInterface {
    protected:
     Test* test_;
     RobotSystem* robot_;
@@ -14,11 +14,11 @@ class Interface {
     double running_time_;
 
    public:
-    Interface() {
+    EnvInterface() {
         count_ = 0;
         running_time_ = 0.;
     }
-    virtual ~Interface(){};
+    virtual ~EnvInterface(){};
 
     // Get Command through Test
     virtual void getCommand(void* _sensor_data, void* _command_data) = 0;

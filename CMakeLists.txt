@@ -96,14 +96,13 @@ add_subdirectory(Filters)
 if(Protobuf_FOUND)
     add_subdirectory(Messages)
 endif()
-
 if(USE_PYBIND11)
   add_subdirectory(Bindings)
 endif()
-
 if(GTEST_FOUND)
   add_subdirectory(UnitTest)
 endif()
+add_subdirectory(ReinforcementLearning)
 
 
 ##=============================================================================

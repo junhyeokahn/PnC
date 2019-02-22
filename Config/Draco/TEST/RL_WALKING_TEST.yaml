@@ -15,17 +15,43 @@ test_configuration:
     end_transition_time: 0.03
     stance_time: 0.01
 
-    #swing_time: 0.28
-    #st_transition_time: 0.025
-    #end_transition_time: 0.025
-    #stance_time: 0.01
-
     replanning: true
     #replanning: false
     transition_phase_mix_ratio: 0.2
     double_stance_mix_ratio: 0.0
     #contact_switch_check: true
     contact_switch_check: false
+
+    protocol:
+        ip_control_pc: "localhost"
+        ip_sub_pub_prefix: "tcp://127.0.0.1:50"
+        ip_req_rep_prefix: "tcp://127.0.0.1:51"
+        #username: 'junhyeokahn'
+        username: 'junhyeok'
+        execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_draco"
+        exit_cmd: "pkill -f 'draco"
+
+    # ==========================================================================
+    # Observation \in R^{4}
+    # [ com_x, com_y, com_vx, com_vy ]
+    # ==========================================================================
+    obs_lower_bound: []
+    obs_upper_bound: []
+
+    # ==========================================================================
+    # Action \in R^{2}
+    # [foot x, foot y]
+    # ==========================================================================
+    action_lower_bound: [-1, -1]
+    action_upper_bound: [1, 1]
+    action_scale: 5
+
+    # ======================================================================
+    # Terminate condition
+    # ======================================================================
+    terminate_obs_lower_bound: [-5 , -0.2 , -10 , -5]
+    terminate_obs_upper_bound: [5  , 0.2  , 10  , 5]
+
 
 control_configuration:
 
@@ -41,26 +67,26 @@ control_configuration:
         kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
 
     body_ctrl:
-        kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
     single_contact_trans_ctrl:
         max_rf_z: 550
         min_rf_z: 0
 
-        kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
     left_body_foot_planning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.11
+        swing_height: 0.17
         push_down_height: 0.0
-        default_target_foot_location: [-0.03, 0.11, 0.0]
+        default_target_foot_location: [0.0, 0.15, 0.0]
 
-        kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        body_pt_offset: [0.06, 0.00]
+        body_pt_offset: [-0.11, 0.00]
         foot_landing_offset: [0., 0.]
 
         fin_ankle: 1.4
@@ -71,14 +97,14 @@ control_configuration:
 
     right_body_foot_planning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.11
+        swing_height: 0.17
         push_down_height: 0.0
-        default_target_foot_location: [-0.03, -0.11, 0.0]
+        default_target_foot_location: [0.0, -0.15, 0.0]
 
-        kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
+        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
+        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        body_pt_offset: [0.06, -0.00]
+        body_pt_offset: [-0.11, 0.0]
         foot_landing_offset: [0., 0.]
 
         fin_ankle: 1.4
@@ -90,8 +116,13 @@ control_configuration:
 planner_configuration:
 
     velocity_reversal_pln:
-        x_step_length_limit: [-0.4, 0.4]
-        y_step_length_limit: [0.20, 0.55]
+        #x_step_length_limit: [-0.4, 0.4]
+        #y_step_length_limit: [0.25, 0.65]
         com_velocity_limit: [0.0, 1.3]
-        t_prime: [0.21 , 0.20]
-        kappa: [-0.08, -0.13]
+        #t_prime: [0.21 , 0.20]
+        #kappa: [-0.09, -0.13]
+
+        x_step_length_limit: [-0.4, 0.4]
+        y_step_length_limit: [0.20, 0.70]
+        t_prime: [0.20 , 0.22]
+        kappa: [-0.20, -0.20]

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package RL;
 
-message DataSet {
+message Data {
     int32 count = 1;
     bool done = 2;
     float reward = 3;

@@ -23,4 +23,7 @@ class RLTest : public Test {
 
     YAML::Node cfg_;
     bool b_learning_;
+
+    int mpi_idx_;
+    int env_idx_;
 };

@@ -37,7 +37,7 @@ def main(args):
     parser.add_argument("--num_minibatches", type=int, default=4)
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
-    parser.add_argument("--save_interval", type=int)
+    parser.add_argument("--save_interval", type=int, default=10)
     parser.add_argument("--save_path", type=str, default=current_path+"/RLData/CartPole")
     parser.add_argument("--seed", type=int)
     args = parser.parse_args()

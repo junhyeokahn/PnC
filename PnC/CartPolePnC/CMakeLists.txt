@@ -12,10 +12,4 @@ add_library(CartPolePnC ${sources})
 target_link_libraries(CartPolePnC ${DART_LIBRARIES}
                                   myRobotSystem
                                   myUtils
-                                  myNN)
-
-if( ZMQ_FOUND AND Protobuf_FOUND)
-    target_link_libraries(CartPolePnC RLProtobuf
-                                      ${Protobuf_LIBRARIES}
-                                      ${ZMQ_LIBRARIES})
-endif()
+                                  myRL)

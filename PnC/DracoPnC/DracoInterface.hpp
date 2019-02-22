@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PnC/Interface.hpp"
+#include "PnC/EnvInterface.hpp"
 
 class DracoStateEstimator;
 class DracoStateProvider;
@@ -31,7 +31,7 @@ class DracoCommand {
     Eigen::VectorXd jtrq;
 };
 
-class DracoInterface : public Interface {
+class DracoInterface : public EnvInterface {
    protected:
     int waiting_count_;
 

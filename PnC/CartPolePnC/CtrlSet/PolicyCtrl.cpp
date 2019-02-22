@@ -2,7 +2,7 @@
 #include <PnC/CartPolePnC/CartPoleDefinition.hpp>
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
 #include <PnC/CartPolePnC/CtrlSet/PolicyCtrl.hpp>
-#include <PnC/NeuralNetwork/NeuralNetModel.hpp>
+#include <ReinforcementLearning/RLInterface/NeuralNetModel.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
@@ -26,13 +26,20 @@ void PolicyCtrl::oneStep(void* _cmd) {
     Eigen::MatrixXd output;
     Eigen::MatrixXd mean;
     Eigen::VectorXd neglogp;
-    nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_,
-            output, mean, neglogp);
+    nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
+                          mean, neglogp);
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
 
     ((CartPoleCommand*)_cmd)->jtrq = output(0, 0);
-    ((CartPoleCommand*)_cmd)->jtrq_mean = mean(0, 0);
-    ((CartPoleCommand*)_cmd)->neglogp = neglogp(0);
+
+    bool done(false);
+    if ((obs(0, 0) < terminate_obs_lower_bound_[0]) ||
+        (obs(0, 0) > terminate_obs_upper_bound_[0]) ||
+        (obs(0, 1) < terminate_obs_lower_bound_[1]) ||
+        (obs(0, 1) > terminate_obs_upper_bound_[1])) {
+        done = true;
+    }
+    ((CartPoleCommand*)_cmd)->done = done;  // !! this will be no effects !!
 
     // scale the action for actual robot
     ((CartPoleCommand*)_cmd)->jtrq *= action_scale_;
@@ -40,14 +47,16 @@ void PolicyCtrl::oneStep(void* _cmd) {
     ++ctrl_count_;
 
     // !! TEST !! //
-    //std::cout << "# ========================================================= #" << std::endl;
-    //myUtils::pretty_print(obs, std::cout, "observation");
-    //std::cout << "mean : " << mean(0, 0) << std::endl;
-    //std::cout << "value : " << val(0, 0) << std::endl;
-    //std::cout << "neglogp : " << neglogp(0) << std::endl;
-    //std::cout << "output : " << output(0, 0) << std::endl;
-    //if (ctrl_count_ == 5) {
-        //exit(0);
+    // std::cout << "#
+    // =========================================================#"
+    //<< std::endl;
+    // myUtils::pretty_print(obs, std::cout, " observation ");
+    // std::cout << "mean : " << mean(0, 0) << std::endl;
+    // std::cout << "value : " << val(0, 0) << std::endl;
+    // std::cout << "neglogp : " << neglogp(0) << std::endl;
+    // std::cout << "output : " << output(0, 0) << std::endl;
+    // if (ctrl_count_ == 5) {
+    // exit(0);
     //}
     // !! TEST !! //
 }
@@ -71,6 +80,6 @@ void PolicyCtrl::ctrlInitialization(const YAML::Node& node) {
     YAML::Node model_cfg = YAML::LoadFile(model_dir);
     nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
     nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
-    nn_policy_->PrintInfo();
-    nn_valfn_->PrintInfo();
+    // nn_policy_->PrintInfo();
+    // nn_valfn_->PrintInfo();
 }

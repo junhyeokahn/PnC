@@ -1,15 +1,18 @@
 #include <PnC/CartPolePnC/CtrlSet/LearningCtrl.hpp>
 #include <PnC/CartPolePnC/CtrlSet/PolicyCtrl.hpp>
 #include <PnC/CartPolePnC/TestSet/RLTest.hpp>
+#include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 
 RLTest::RLTest(RobotSystem* robot, int mpi_idx, int env_idx) : Test(robot) {
     myUtils::pretty_constructor(1, "RL Test");
     cfg_ = YAML::LoadFile(THIS_COM "Config/CartPole/TEST/RL_TEST.yaml");
+    mpi_idx_ = mpi_idx;
+    env_idx_ = env_idx;
 
     phase_ = 0;
     state_list_.clear();
 
-    learning_ctrl_ = new LearningCtrl(robot, mpi_idx, env_idx);
+    learning_ctrl_ = new LearningCtrl(robot);
     b_learning_ = true;
 
     state_list_.push_back(learning_ctrl_);
@@ -20,6 +23,8 @@ RLTest::RLTest(RobotSystem* robot, int mpi_idx, int env_idx) : Test(robot) {
 RLTest::RLTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "RL Test");
     cfg_ = YAML::LoadFile(THIS_COM "Config/CartPole/TEST/RL_TEST.yaml");
+    mpi_idx_ = 0;
+    env_idx_ = 0;
 
     phase_ = 0;
     state_list_.clear();
@@ -78,6 +83,13 @@ void RLTest::_ParameterSetting() {
             ((LearningCtrl*)learning_ctrl_)->setActUpperBound(tmp_vec);
             myUtils::readParameter(test_cfg, "action_scale", tmp_val);
             ((LearningCtrl*)learning_ctrl_)->setActScale(tmp_val);
+
+            RLInterface* rl_interface = RLInterface::GetRLInterface();
+            rl_interface->Initialize(test_cfg["protocol"], mpi_idx_, env_idx_);
+            ((LearningCtrl*)learning_ctrl_)
+                ->setPolicy(rl_interface->GetPolicy());
+            ((LearningCtrl*)learning_ctrl_)
+                ->setValueFn(rl_interface->GetValueFn());
         } else {
             myUtils::readParameter(test_cfg, "duration", tmp_val);
             ((PolicyCtrl*)policy_ctrl_)->setDuration(tmp_val);

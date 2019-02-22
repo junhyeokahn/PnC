@@ -2,7 +2,7 @@
 
 #include <Eigen/Dense>
 
-#include <PnC/Interface.hpp>
+#include <PnC/EnvInterface.hpp>
 
 class CartPoleSensorData {
    public:
@@ -13,11 +13,10 @@ class CartPoleSensorData {
 class CartPoleCommand {
    public:
     double jtrq;
-    double jtrq_mean;
-    double neglogp;
+    bool done;
 };
 
-class CartPoleInterface : public Interface {
+class CartPoleInterface : public EnvInterface {
    public:
     CartPoleInterface();
     CartPoleInterface(int mpi_idx, int env_idx);

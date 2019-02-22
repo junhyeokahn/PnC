@@ -1,4 +1,4 @@
-#include <PnC/NeuralNetwork/NeuralNetModel.hpp>
+#include <ReinforcementLearning/RLInterface/NeuralNetModel.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 #include <cassert>
 #include <cmath>
@@ -129,8 +129,7 @@ Eigen::MatrixXd NeuralNetModel::GetOutput(const Eigen::MatrixXd& input) {
 void NeuralNetModel::GetOutput(const Eigen::MatrixXd& _input,
                                const Eigen::VectorXd& _lb,
                                const Eigen::VectorXd& _ub,
-                               Eigen::MatrixXd& _output,
-                               Eigen::MatrixXd& _mean,
+                               Eigen::MatrixXd& _output, Eigen::MatrixXd& _mean,
                                Eigen::VectorXd& _neglogp) {
     assert(b_stochastic_);
     assert(_lb.size() == _ub.size());
@@ -165,12 +164,12 @@ void NeuralNetModel::GetOutput(const Eigen::MatrixXd& _input,
 
     for (int data_idx = 0; data_idx < num_data; ++data_idx) {
         for (int output_idx = 0; output_idx < num_output_; ++output_idx) {
-            neglogp(data_idx) =
-                neglogp(data_idx) +
-                0.5 * std::pow( (output(data_idx, output_idx) -
-                          mean(data_idx, output_idx)  ) / std_(output_idx),
-                         2) +
-                logstd_(output_idx);
+            neglogp(data_idx) = neglogp(data_idx) +
+                                0.5 * std::pow((output(data_idx, output_idx) -
+                                                mean(data_idx, output_idx)) /
+                                                   std_(output_idx),
+                                               2) +
+                                logstd_(output_idx);
         }
         neglogp(data_idx) =
             neglogp(data_idx) + 0.5 * log(2 * M_PI) * (double)num_output_;

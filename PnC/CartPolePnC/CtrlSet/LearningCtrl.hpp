@@ -1,15 +1,14 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
-#include <PnC/NeuralNetwork/NeuralNetModel.hpp>
-#include <zmq.hpp>
+#include <ReinforcementLearning/RLInterface/NeuralNetModel.hpp>
 
 class CartPoleCommand;
 class RobotSystem;
 
 class LearningCtrl : public Controller {
    public:
-    LearningCtrl(RobotSystem* _robot, int mpi_idx, int env_idx);
+    LearningCtrl(RobotSystem* _robot);
     virtual ~LearningCtrl();
 
     virtual void oneStep(void* _cmd);
@@ -34,18 +33,13 @@ class LearningCtrl : public Controller {
         action_upper_bound_ = ub;
     }
     void setActScale(double scale) { action_scale_ = scale; }
+    void setPolicy(NeuralNetModel* model) { nn_policy_ = model; }
+    void setValueFn(NeuralNetModel* model) { nn_valfn_ = model; }
 
    protected:
     double duration_;
     int ctrl_count_;
 
-    zmq::context_t* context_;
-    zmq::socket_t* data_socket_;
-    zmq::socket_t* policy_valfn_socket_;
-    std::string ip_sub_pub_prefix_;
-    std::string ip_req_rep_prefix_;
-
-    std::vector<Layer> layers_;
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
 
@@ -55,8 +49,6 @@ class LearningCtrl : public Controller {
     Eigen::VectorXd terminate_obs_upper_bound_;
     Eigen::VectorXd action_lower_bound_;
     Eigen::VectorXd action_upper_bound_;
-
-    void SendRLData_(Eigen::MatrixXd obs, CartPoleCommand* cmd);
 
     double alive_reward_;
     double pole_reward_;

@@ -9,7 +9,7 @@
 #include <chrono>
 #include <thread>
 
-CartPoleInterface::CartPoleInterface() : Interface() {
+CartPoleInterface::CartPoleInterface() : EnvInterface() {
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
         border += "=";
@@ -29,7 +29,8 @@ CartPoleInterface::CartPoleInterface() : Interface() {
     myUtils::color_print(myColor::BoldCyan, border);
 }
 
-CartPoleInterface::CartPoleInterface(int mpi_idx, int env_idx) : Interface() {
+CartPoleInterface::CartPoleInterface(int mpi_idx, int env_idx)
+    : EnvInterface() {
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
         border += "=";
@@ -91,6 +92,7 @@ void CartPoleInterface::ParameterSetting_() {
             std::cout << "[Error] Dependancies for Reinforcement Learning is "
                          "not found"
                       << std::endl;
+            exit(0);
 #endif
         } else if (test_name == "basic_test") {
             test_ = new BasicTest(robot_);

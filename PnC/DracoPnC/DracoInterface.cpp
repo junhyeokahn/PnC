@@ -11,7 +11,7 @@
 #include <Utils/Math/pseudo_inverse.hpp>
 #include <string>
 
-DracoInterface::DracoInterface() : Interface() {
+DracoInterface::DracoInterface() : EnvInterface() {
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
         border += "=";
@@ -202,7 +202,14 @@ void DracoInterface::_ParameterSetting() {
         } else if (test_name == "balancing_test") {
             test_ = new BalancingTest(robot_);
         } else if (test_name == "rl_walking_test") {
+#if HAS_RL_DEP
             test_ = new RLWalkingTest(robot_);
+#else
+            std::cout << "[Error] Dependancies for Reinforcement Learning in "
+                         "not found"
+                      << std::endl;
+            exit(0);
+#endif
         } else {
             printf(
                 "[Draco Interface] There is no test matching test with the "

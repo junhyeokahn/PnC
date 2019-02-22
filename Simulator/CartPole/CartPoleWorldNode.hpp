@@ -7,13 +7,13 @@
 
 #include "Utils/General/Clock.hpp"
 
-class Interface;
+class EnvInterface;
 class CartPoleSensorData;
 class CartPoleCommand;
 
 class CartPoleWorldNode : public dart::gui::osg::WorldNode {
    private:
-    Interface* interface_;
+    EnvInterface* interface_;
     CartPoleSensorData* sensor_data_;
     CartPoleCommand* cmd_;
 
@@ -30,6 +30,7 @@ class CartPoleWorldNode : public dart::gui::osg::WorldNode {
     void customPreStep() override;
 
     dart::simulation::WorldPtr world_;
+    void ResetSim_();
 
     Clock clock_;
 };

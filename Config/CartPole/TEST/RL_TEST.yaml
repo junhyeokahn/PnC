@@ -20,24 +20,24 @@ test_configuration:
     # ======================================================================
     #terminate_obs_lower_bound: [-5 , -0.1, -10 , -5]
     #terminate_obs_upper_bound: [5  , 0.1, 10  , 5]
-    terminate_obs_lower_bound: [-15 , -0.2 , -10 , -5]
-    terminate_obs_upper_bound: [15  , 0.2  , 10  , 5]
+    terminate_obs_lower_bound: [-5 , -0.2 , -10 , -5]
+    terminate_obs_upper_bound: [5  , 0.2  , 10  , 5]
+
+    protocol:
+        ip_control_pc: "localhost"
+        ip_sub_pub_prefix: "tcp://127.0.0.1:50"
+        ip_req_rep_prefix: "tcp://127.0.0.1:51"
+        username: 'junhyeokahn'
+        #username: 'junhyeok'
+        execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_cart_pole"
+        exit_cmd: "pkill -f 'cart_pole"
 
 control_configuration:
 
     learning_ctrl:
-        protocol:
-            ip_control_pc: "localhost"
-            ip_sub_pub_prefix: "tcp://127.0.0.1:50"
-            ip_req_rep_prefix: "tcp://127.0.0.1:51"
-            #username: 'junhyeokahn'
-            username: 'junhyeok'
-            execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_cart_pole"
-            exit_cmd: "pkill -f 'cart_pole"
-
         reward:
             alive_reward: 10
-            pole_reward: 10
+            pole_reward: 20
             cart_reward: 0.01
             quad_input_reward: 0.01
             reward_scale: 1
