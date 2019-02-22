@@ -4,7 +4,7 @@
 #include <PnC/CartPolePnC/CartPoleInterface.hpp>
 #include <PnC/CartPolePnC/TestSet/BasicTest.hpp>
 #include <PnC/CartPolePnC/TestSet/RLTest.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <chrono>
 #include <thread>
@@ -20,8 +20,8 @@ CartPoleInterface::CartPoleInterface() : EnvInterface() {
     myUtils::color_print(myColor::BoldCyan, border);
     myUtils::pretty_constructor(0, "CartPole Interface");
 
-    robot_ = new RobotSystem(
-        1, THIS_COM "RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf");
+    robot_ =
+        new RobotSystem(1, THIS_COM "RobotModel/Robot/CartPole/CartPole.urdf");
     // robot_->printRobotInfo();
 
     ParameterSetting_();
@@ -44,8 +44,8 @@ CartPoleInterface::CartPoleInterface(int mpi_idx, int env_idx)
     env_idx_ = env_idx;
     b_learning = true;
 
-    robot_ = new RobotSystem(
-        1, THIS_COM "RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf");
+    robot_ =
+        new RobotSystem(1, THIS_COM "RobotModel/Robot/CartPole/CartPole.urdf");
     // robot_->printRobotInfo();
 
     ParameterSetting_();

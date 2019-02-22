@@ -1,6 +1,6 @@
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/DataManager.hpp>
 
 DracoStateProvider* DracoStateProvider::getStateProvider(RobotSystem* _robot) {

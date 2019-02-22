@@ -1,6 +1,6 @@
 #include <PnC/DracoPnC/TestSet/TestSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 
 #define DYNAMIC_BALANCING true
 //#define DYNAMIC_BALANCING false

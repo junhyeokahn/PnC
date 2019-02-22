@@ -44,4 +44,5 @@ control_configuration:
 
 
     policy_ctrl:
-        model_path: "RLData/CartPole/ppo_1/checkpoints/00001.yaml"
+        model_path: "ReinforcementLearning/PreCompiledData/CartPole/ppo_1/checkpoints/01000.yaml"
+        #model_path: "RLData/CartPole/ppo_1/checkpoints/01000.yaml"

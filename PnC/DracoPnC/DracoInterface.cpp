@@ -5,7 +5,7 @@
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/TestSet/TestSet.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
@@ -20,7 +20,7 @@ DracoInterface::DracoInterface() : EnvInterface() {
     myUtils::pretty_constructor(0, "Draco Interface");
 
     robot_ = new RobotSystem(
-        6, THIS_COM "RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
+        6, THIS_COM "RobotModel/Robot/Draco/DracoCollision.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();

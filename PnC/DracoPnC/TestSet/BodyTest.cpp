@@ -1,6 +1,6 @@
 #include <PnC/DracoPnC/TestSet/TestSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 
 BodyTest::BodyTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Body Test");

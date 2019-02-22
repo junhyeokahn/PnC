@@ -9,4 +9,4 @@ target_link_libraries(myRobotSystem ${DART_LIBRARIES}
 
 install(TARGETS myRobotSystem DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${robot_system_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/RobotSystem")
+    "${INSTALL_INCLUDE_DIR}/PnC/RobotSystem")

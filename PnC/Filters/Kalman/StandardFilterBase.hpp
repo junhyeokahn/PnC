@@ -19,27 +19,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#ifndef KALMAN_SQUAREROOTFILTERBASE_HPP_
-#define KALMAN_SQUAREROOTFILTERBASE_HPP_
+#ifndef KALMAN_STANDARDFILTERBASE_HPP_
+#define KALMAN_STANDARDFILTERBASE_HPP_
 
-#include "Filters/Kalman/SquareRootBase.hpp"
+#include "PnC/Filters/Kalman/StandardBase.hpp"
 
 namespace Kalman {
     
     /**
-     * @brief Abstract base class for square root filters
+     * @brief Abstract base class for standard (non-square root) filters
      * 
      * @param StateType The vector-type of the system state (usually some type derived from Kalman::Vector)
      */
     template<class StateType>
-    class SquareRootFilterBase : public SquareRootBase<StateType>
+    class StandardFilterBase : public StandardBase<StateType>
     {
     protected:
-        //! SquareRoot Base Type
-        typedef SquareRootBase<StateType> Base;
+        //! Standard Base Type
+        typedef StandardBase<StateType> Base;
         
-        //! Covariance Square Root
-        using Base::S;
+        //! Covariance matrix
+        using Base::P;
     };
 }
 

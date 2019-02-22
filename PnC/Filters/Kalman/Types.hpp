@@ -22,7 +22,7 @@
 #ifndef KALMAN_TYPES_HPP_
 #define KALMAN_TYPES_HPP_
 
-#include "Filters/Kalman/Matrix.hpp"
+#include "PnC/Filters/Kalman/Matrix.hpp"
 
 namespace Kalman
 {

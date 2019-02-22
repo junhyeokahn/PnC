@@ -7,6 +7,6 @@ target_link_libraries(myFilters myUtils)
 
 install(TARGETS myFilters DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${basic_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/Filters/Basic")
+    "${INSTALL_INCLUDE_DIR}/PnC/Filters/Basic")
 install(FILES ${kalman_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/Filters/Kalman")
+    "${INSTALL_INCLUDE_DIR}/PnC/Filters/Kalman")

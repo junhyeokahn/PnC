@@ -22,10 +22,10 @@
 #ifndef KALMAN_EXTENDEDKALMANFILTER_HPP_
 #define KALMAN_EXTENDEDKALMANFILTER_HPP_
 
-#include "Filters/Kalman/KalmanFilterBase.hpp"
-#include "Filters/Kalman/StandardFilterBase.hpp"
-#include "Filters/Kalman/LinearizedSystemModel.hpp"
-#include "Filters/Kalman/LinearizedMeasurementModel.hpp"
+#include "PnC/Filters/Kalman/KalmanFilterBase.hpp"
+#include "PnC/Filters/Kalman/StandardFilterBase.hpp"
+#include "PnC/Filters/Kalman/LinearizedSystemModel.hpp"
+#include "PnC/Filters/Kalman/LinearizedMeasurementModel.hpp"
 
 namespace Kalman {
     

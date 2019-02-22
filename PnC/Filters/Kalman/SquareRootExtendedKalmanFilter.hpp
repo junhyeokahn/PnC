@@ -22,10 +22,10 @@
 #ifndef KALMAN_SQUAREROOTEXTENDEDKALMANFILTER_HPP_
 #define KALMAN_SQUAREROOTEXTENDEDKALMANFILTER_HPP_
 
-#include "Filters/Kalman/KalmanFilterBase.hpp"
-#include "Filters/Kalman/SquareRootFilterBase.hpp"
-#include "Filters/Kalman/LinearizedSystemModel.hpp"
-#include "Filters/Kalman/LinearizedMeasurementModel.hpp"
+#include "PnC/Filters/Kalman/KalmanFilterBase.hpp"
+#include "PnC/Filters/Kalman/SquareRootFilterBase.hpp"
+#include "PnC/Filters/Kalman/LinearizedSystemModel.hpp"
+#include "PnC/Filters/Kalman/LinearizedMeasurementModel.hpp"
 
 namespace Kalman {
     

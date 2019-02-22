@@ -19,48 +19,61 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#ifndef KALMAN_MEASUREMENTMODEL_HPP_
-#define KALMAN_MEASUREMENTMODEL_HPP_
+#ifndef KALMAN_KALMANFILTERBASE_HPP_
+#define KALMAN_KALMANFILTERBASE_HPP_
 
-#include <type_traits>
-
-#include "Filters/Kalman/StandardBase.hpp"
+#include "PnC/Filters/Kalman/Matrix.hpp"
+#include "PnC/Filters/Kalman/Types.hpp"
 
 namespace Kalman {
+    
     /**
-     * @brief Abstract base class of all measurement models
-     *
+     * @brief Abstract base class for all Kalman Filters
+     * 
      * @param StateType The vector-type of the system state (usually some type derived from Kalman::Vector)
-     * @param MeasurementType The vector-type of the measurement (usually some type derived from Kalman::Vector)
-     * @param CovarianceBase The class template used for covariance storage (must be either StandardBase or SquareRootBase)
      */
-    template<class StateType, class MeasurementType, template<class> class CovarianceBase = StandardBase>
-    class MeasurementModel : public CovarianceBase<MeasurementType>
+    template<class StateType>
+    class KalmanFilterBase
     {
+    public:
         static_assert(/*StateType::RowsAtCompileTime == Dynamic ||*/StateType::RowsAtCompileTime > 0,
                       "State vector must contain at least 1 element" /* or be dynamic */);
-        static_assert(/*MeasurementType::RowsAtCompileTime == Dynamic ||*/MeasurementType::RowsAtCompileTime > 0,
-                      "Measurement vector must contain at least 1 element" /* or be dynamic */);
-        static_assert(std::is_same<typename StateType::Scalar, typename MeasurementType::Scalar>::value,
-                       "State and Measurement scalar types must be identical");
-    public:
-        //! System state type
+        static_assert(StateType::ColsAtCompileTime == 1, "State type must be a column vector");
+
+        //! Numeric scalar type
+        typedef typename StateType::Scalar T;
+        
+        //! Type of the state vector
         typedef StateType State;
         
-        //! Measurement vector type
-        typedef MeasurementType Measurement;
+    protected:
+        //! Estimated state
+        State x;
         
     public:
         /**
-         * Measurement Model Function h
-         * 
-         * Predicts the estimated measurement value given the current state estimate x
+         * Get current state estimate
          */
-        virtual Measurement h(const State& x) const = 0;
+        const State& getState() const
+        {
+            return x;
+        }
         
+        /**
+         * @brief Initialize state
+         * @param initialState The initial state of the system
+         */
+        void init(const State& initialState)
+        {
+            x = initialState;
+        }
     protected:
-        MeasurementModel() {}
-        virtual ~MeasurementModel() {}
+        /**
+         * @brief Protected constructor
+         */
+        KalmanFilterBase()
+        {
+        }
     };
 }
 

@@ -238,10 +238,10 @@ int main(int argc, char** argv) {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-        THIS_COM "RobotSystem/RobotModel/Ground/ground_terrain.urdf");
+        THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        // THIS_COM"RobotSystem/RobotModel/Robot/Draco/DracoCollision.urdf");
-        THIS_COM "RobotSystem/RobotModel/Robot/Draco/DracoCollisionSim.urdf");
+        // THIS_COM"RobotModel/Robot/Draco/DracoCollision.urdf");
+        THIS_COM "RobotModel/Robot/Draco/DracoCollisionSim.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 

@@ -19,60 +19,48 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#ifndef KALMAN_LINEARIZEDMEASUREMENTMODEL_HPP_
-#define KALMAN_LINEARIZEDMEASUREMENTMODEL_HPP_
+#ifndef KALMAN_MEASUREMENTMODEL_HPP_
+#define KALMAN_MEASUREMENTMODEL_HPP_
 
-#include "Filters/Kalman/MeasurementModel.hpp"
+#include <type_traits>
+
+#include "PnC/Filters/Kalman/StandardBase.hpp"
 
 namespace Kalman {
-    template<class StateType>
-    class ExtendedKalmanFilter;
-    template<class StateType>
-    class SquareRootExtendedKalmanFilter;
-    
     /**
-     * @brief Abstract base class of all linearized (first order taylor expansion) measurement models
+     * @brief Abstract base class of all measurement models
      *
      * @param StateType The vector-type of the system state (usually some type derived from Kalman::Vector)
      * @param MeasurementType The vector-type of the measurement (usually some type derived from Kalman::Vector)
      * @param CovarianceBase The class template used for covariance storage (must be either StandardBase or SquareRootBase)
      */
     template<class StateType, class MeasurementType, template<class> class CovarianceBase = StandardBase>
-    class LinearizedMeasurementModel : public MeasurementModel<StateType, MeasurementType, CovarianceBase>
+    class MeasurementModel : public CovarianceBase<MeasurementType>
     {
-        friend class ExtendedKalmanFilter<StateType>;
-        friend class SquareRootExtendedKalmanFilter<StateType>;
+        static_assert(/*StateType::RowsAtCompileTime == Dynamic ||*/StateType::RowsAtCompileTime > 0,
+                      "State vector must contain at least 1 element" /* or be dynamic */);
+        static_assert(/*MeasurementType::RowsAtCompileTime == Dynamic ||*/MeasurementType::RowsAtCompileTime > 0,
+                      "Measurement vector must contain at least 1 element" /* or be dynamic */);
+        static_assert(std::is_same<typename StateType::Scalar, typename MeasurementType::Scalar>::value,
+                       "State and Measurement scalar types must be identical");
     public:
-        //! Measurement model base
-        typedef MeasurementModel<StateType, MeasurementType, CovarianceBase> Base;
-        
         //! System state type
-        using typename Base::State;
+        typedef StateType State;
         
         //! Measurement vector type
-        using typename Base::Measurement;
+        typedef MeasurementType Measurement;
         
-    protected:
-        //! Measurement model jacobian
-        Jacobian<Measurement, State> H;
-        //! Measurement model noise jacobian
-        Jacobian<Measurement, Measurement> V;
-        
+    public:
         /**
-         * Callback function for state-dependent update of Jacobi-matrices H and V before each update step
+         * Measurement Model Function h
+         * 
+         * Predicts the estimated measurement value given the current state estimate x
          */
-        virtual void updateJacobians( const State& x )
-        {
-            // No update by default
-            (void)x;
-        }
+        virtual Measurement h(const State& x) const = 0;
+        
     protected:
-        LinearizedMeasurementModel()
-        {
-            H.setIdentity();
-            V.setIdentity();
-        }
-        ~LinearizedMeasurementModel() {}
+        MeasurementModel() {}
+        virtual ~MeasurementModel() {}
     };
 }
 

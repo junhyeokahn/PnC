@@ -22,8 +22,8 @@
 #ifndef KALMAN_UNSCENTEDKALMANFILTER_HPP_
 #define KALMAN_UNSCENTEDKALMANFILTER_HPP_
 
-#include "Filters/Kalman/UnscentedKalmanFilterBase.hpp"
-#include "Filters/Kalman/StandardFilterBase.hpp"
+#include "PnC/Filters/Kalman/UnscentedKalmanFilterBase.hpp"
+#include "PnC/Filters/Kalman/StandardFilterBase.hpp"
 
 namespace Kalman {
     

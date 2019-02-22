@@ -19,61 +19,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#ifndef KALMAN_KALMANFILTERBASE_HPP_
-#define KALMAN_KALMANFILTERBASE_HPP_
+#ifndef KALMAN_SQUAREROOTFILTERBASE_HPP_
+#define KALMAN_SQUAREROOTFILTERBASE_HPP_
 
-#include "Filters/Kalman/Matrix.hpp"
-#include "Filters/Kalman/Types.hpp"
+#include "PnC/Filters/Kalman/SquareRootBase.hpp"
 
 namespace Kalman {
     
     /**
-     * @brief Abstract base class for all Kalman Filters
+     * @brief Abstract base class for square root filters
      * 
      * @param StateType The vector-type of the system state (usually some type derived from Kalman::Vector)
      */
     template<class StateType>
-    class KalmanFilterBase
+    class SquareRootFilterBase : public SquareRootBase<StateType>
     {
-    public:
-        static_assert(/*StateType::RowsAtCompileTime == Dynamic ||*/StateType::RowsAtCompileTime > 0,
-                      "State vector must contain at least 1 element" /* or be dynamic */);
-        static_assert(StateType::ColsAtCompileTime == 1, "State type must be a column vector");
-
-        //! Numeric scalar type
-        typedef typename StateType::Scalar T;
-        
-        //! Type of the state vector
-        typedef StateType State;
-        
     protected:
-        //! Estimated state
-        State x;
+        //! SquareRoot Base Type
+        typedef SquareRootBase<StateType> Base;
         
-    public:
-        /**
-         * Get current state estimate
-         */
-        const State& getState() const
-        {
-            return x;
-        }
-        
-        /**
-         * @brief Initialize state
-         * @param initialState The initial state of the system
-         */
-        void init(const State& initialState)
-        {
-            x = initialState;
-        }
-    protected:
-        /**
-         * @brief Protected constructor
-         */
-        KalmanFilterBase()
-        {
-        }
+        //! Covariance Square Root
+        using Base::S;
     };
 }
 

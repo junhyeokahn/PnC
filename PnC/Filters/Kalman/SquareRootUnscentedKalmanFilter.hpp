@@ -22,8 +22,8 @@
 #ifndef KALMAN_SQUAREROOTUNSCENTEDKALMANFILTER_HPP_
 #define KALMAN_SQUAREROOTUNSCENTEDKALMANFILTER_HPP_
 
-#include "Filters/Kalman/UnscentedKalmanFilterBase.hpp"
-#include "Filters/Kalman/SquareRootFilterBase.hpp"
+#include "PnC/Filters/Kalman/UnscentedKalmanFilterBase.hpp"
+#include "PnC/Filters/Kalman/SquareRootFilterBase.hpp"
 
 namespace Kalman {
     

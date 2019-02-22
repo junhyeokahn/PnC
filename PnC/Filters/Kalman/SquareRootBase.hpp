@@ -19,40 +19,40 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#ifndef KALMAN_STANDARDBASE_HPP_
-#define KALMAN_STANDARDBASE_HPP_
+#ifndef KALMAN_SQUAREROOTBASE_HPP_
+#define KALMAN_SQUAREROOTBASE_HPP_
 
-#include "Filters/Kalman/Types.hpp"
+#include "PnC/Filters/Kalman/Types.hpp"
 
 namespace Kalman {
     
     /**
-     * @brief Abstract base class for standard (non-square root) filters and models
+     * @brief Abstract base class for square-root filters and models
      * 
      * @param StateType The vector-type of the system state (usually some type derived from Kalman::Vector)
      */
     template<class StateType>
-    class StandardBase
+    class SquareRootBase
     {
     protected:
-        //! Covariance
-        Covariance<StateType> P;
+        //! Covariance Square Root
+        CovarianceSquareRoot<StateType> S;
         
     public:
         /**
-         * Get covariance
+         * Get covariance (as square root)
          */
-        const Covariance<StateType>& getCovariance() const
+        const CovarianceSquareRoot<StateType>& getCovarianceSquareRoot() const
         {
-            return P;
+            return S;
         }
         
         /**
-         * Get covariance (as square root)
+         * Get covariance reconstructed from square root
          */
-        CovarianceSquareRoot<StateType> getCovarianceSquareRoot() const
+        Covariance<StateType> getCovariance() const
         {
-            return CovarianceSquareRoot<StateType>(P);
+            return S.reconstructedMatrix();
         }
         
         /**
@@ -60,8 +60,8 @@ namespace Kalman {
          */
         bool setCovariance(const Covariance<StateType>& covariance)
         {
-            P = covariance;
-            return true;
+            S.compute(covariance);
+            return (S.info() == Eigen::Success);
         }
 
         /**
@@ -72,17 +72,14 @@ namespace Kalman {
          */
         bool setCovarianceSquareRoot(const Covariance<StateType>& covSquareRoot)
         {
-            CovarianceSquareRoot<StateType> S;
             S.setL(covSquareRoot);
-            P = S.reconstructedMatrix();
             return true;
         }
-
         
     protected:
-        StandardBase()
+        SquareRootBase()
         {
-            P.setIdentity();
+            S.setIdentity();
         }
     };
 }

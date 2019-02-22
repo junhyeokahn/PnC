@@ -88,11 +88,9 @@ include_directories("${PROJECT_SOURCE_DIR}/Simulator")
 ## Add Subdirectory
 ##=============================================================================
 add_subdirectory(Simulator)
-add_subdirectory(RobotSystem)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
-add_subdirectory(Filters)
 if(Protobuf_FOUND)
     add_subdirectory(Messages)
 endif()

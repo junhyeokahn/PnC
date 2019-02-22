@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Utils/Math/pseudo_inverse.hpp>
-#include <RobotSystem/RobotSystem.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
 #include <Utils/IO/IOUtilities.hpp>

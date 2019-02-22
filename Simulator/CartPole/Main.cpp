@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        THIS_COM "RobotSystem/RobotModel/Robot/CartPole/CartPole.urdf");
+        THIS_COM "RobotModel/Robot/CartPole/CartPole.urdf");
     world->addSkeleton(robot);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
