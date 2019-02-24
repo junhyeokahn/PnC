@@ -20,9 +20,7 @@ from baselines.common.vec_env.vec_normalize import VecNormalize
 from baselines.ppo2.ppo2 import learn
 from baselines.ppo2.model import Model
 from baselines.common.policies import build_policy
-
-## python Script/run_baselines.py --alg=ppo2 --env=MyBulletCartPole-v0 --network=mlp --num_layers=2 --num_hidden=64 --value_network=copy --num_timesteps=1000000 --save_video_interval=10
-## python -m baselines.run --alg=ppo2 --env=MyBulletCartPole-v0 --network=mlp --num_layers=2 --num_hidden=64 --value_network=copy --num_timesteps=1000000
+import time
 
 try:
     from mpi4py import MPI
@@ -132,6 +130,7 @@ def do_play(args):
         obs, _, done, _ = env.step(actions)
         if done:
             obs = env.reset()
+        time.sleep(env.env.timeStep)
     env.close()
 
 if __name__ == '__main__':
