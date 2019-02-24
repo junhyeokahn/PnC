@@ -34,10 +34,15 @@ if __name__ == "__main__":
     # ==========================================================================
     # nupdates vs total_num_dones
     # ==========================================================================
-    f3, ax3 = plt.subplots()
-    ax3.plot(res.progress.nupdates, res.progress.total_num_dones)
-    ax3.grid(True)
-    ax3.set_xlabel('nupdates')
-    ax3.set_ylabel('total_num_dones')
+    # f3, ax3 = plt.subplots()
+    # ax3.plot(res.progress.nupdates, res.progress.total_num_dones)
+    # ax3.grid(True)
+    # ax3.set_xlabel('nupdates')
+    # ax3.set_ylabel('total_num_dones')
+
+
+    # f4, ax4 = plt.subplots()
+    # ax4.plot(np.cumsum(res.monitor.l), pu.smooth(res.monitor.r, radius=10))
+    # ax4.grid(True)
 
     plt.show()

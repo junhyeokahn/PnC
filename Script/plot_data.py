@@ -30,7 +30,7 @@ if __name__ == "__main__":
     data = np.load(args.data_path)
     obs = data['obs']
     ret = data['ret']
-    rew = data['rew']
+    # rew = data['rew']
     mask = data['mask']
     action = data['action']
     action *= action_scale
@@ -68,12 +68,12 @@ if __name__ == "__main__":
             ax_obs[i].axvline(x=(j+1), color='indigo', linestyle='-')
     f_obs.suptitle("obs")
 
-    f_rew, ax_rew = plt.subplots()
-    ax_rew.plot(ret[:])
-    ax_rew.grid()
+    f_ret, ax_ret = plt.subplots()
+    ax_ret.plot(ret[:])
+    ax_ret.grid()
     for j in done_idx:
-        ax_rew.axvline(x=(j+1), color='indigo', linestyle='-')
-    f_rew.suptitle("ret")
+        ax_ret.axvline(x=(j+1), color='indigo', linestyle='-')
+    f_ret.suptitle("ret")
 
     if n_action == 1:
         f_act, ax_act= plt.subplots()
@@ -101,11 +101,11 @@ if __name__ == "__main__":
         ax_val.axvline(x=(j+1), color='indigo', linestyle='-')
     f_val.suptitle("val")
 
-    f_rew, ax_rew = plt.subplots()
-    ax_rew.plot(rew[:])
-    ax_rew.grid()
-    for j in done_idx:
-        ax_rew.axvline(x=(j+1), color='indigo', linestyle='-')
-    f_rew.suptitle("rew")
+    # f_rew, ax_rew = plt.subplots()
+    # ax_rew.plot(rew[:])
+    # ax_rew.grid()
+    # for j in done_idx:
+        # ax_rew.axvline(x=(j+1), color='indigo', linestyle='-')
+    # f_rew.suptitle("rew")
 
     plt.show()
