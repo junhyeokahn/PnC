@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:23 GMT-05:00
- */
-
-#ifndef P_RHIPROLL_HH
-#define P_RHIPROLL_HH
-#include <Eigen/Dense>
-
-void p_rHipRoll(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // P_RHIPROLL_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:c038885a0b36213d6f8ec2567a77f865174f48d3c80a00acbeb899dc3d15b05c
+size 278

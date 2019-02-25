@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:43 GMT-05:00
- */
-
-#ifndef VCOM_DRACO_HH
-#define VCOM_DRACO_HH
-#include <Eigen/Dense>
-
-void vcom_Draco(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1, const Eigen::Matrix<double,16,1> &var2);
-#endif // VCOM_DRACO_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:94b1d781e6d3960c6f565469aae1a7261a47db2ea93491ec44d2d59e7f42e1a3
+size 318

@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:32 GMT-05:00
- */
-
-#ifndef P_LEFTFOOTBACK_HH
-#define P_LEFTFOOTBACK_HH
-#include <Eigen/Dense>
-
-void p_LeftFootBack(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // P_LEFTFOOTBACK_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:9000024ab629c3d5e5a6f4ccb08aa06854201906b1f5266b4c08e2993a9a4a37
+size 294

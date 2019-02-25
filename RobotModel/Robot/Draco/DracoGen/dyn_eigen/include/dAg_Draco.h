@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:57:57 GMT-05:00
- */
-
-#ifndef DAG_DRACO_HH
-#define DAG_DRACO_HH
-#include <Eigen/Dense>
-
-void dAg_Draco(Eigen::Matrix<double,6,16> &p_output1, const Eigen::Matrix<double,16,1> &var1, const Eigen::Matrix<double,16,1> &var2);
-#endif // DAG_DRACO_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:62a258bc143c6ee624437f30e177e8b6ae17e120f9d16a406f0856cd8421e8aa
+size 315

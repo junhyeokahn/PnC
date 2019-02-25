@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:52:36 GMT-05:00
- */
-
-#ifndef GE_DRACO_HH
-#define GE_DRACO_HH
-#include <Eigen/Dense>
-
-void Ge_Draco(Eigen::Matrix<double,16,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // GE_DRACO_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:cdaa408323f13797e1a6804977410a2074ea1cc47e24fd1c8c96f22fb1c846e3
+size 271

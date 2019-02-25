@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:13 GMT-05:00
- */
-
-#ifndef P_BASEROTX_HH
-#define P_BASEROTX_HH
-#include <Eigen/Dense>
-
-void p_BaseRotX(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // P_BASEROTX_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:f374c91124ef43cea0c17149ec6ffec96a7da7014a1c7604a60eddf565b55324
+size 278

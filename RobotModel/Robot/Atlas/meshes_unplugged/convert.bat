@@ -1,20 +1,3 @@
-assimp export ltorso.dae ltorso.obj
-assimp export l_foot.dae l_foot.obj
-assimp export l_lglut.dae l_lglut.obj
-assimp export l_lleg.dae l_lleg.obj
-assimp export l_talus.dae l_talus.obj
-assimp export l_uglut.dae l_uglut.obj
-assimp export l_uleg.dae l_uleg.obj
-assimp export mtorso.dae mtorso.obj
-assimp export pelvis.dae pelvis.obj
-assimp export r_clav.dae r_clav.obj
-assimp export r_foot.dae r_foot.obj
-assimp export r_lglut.dae r_lglut.obj
-assimp export r_lleg.dae r_lleg.obj
-assimp export r_scap.dae r_scap.obj
-assimp export r_talus.dae r_talus.obj
-assimp export r_uarm.dae r_uarm.obj
-assimp export r_uglut.dae r_uglut.obj
-assimp export r_uleg.dae r_uleg.obj
-assimp export utorso.dae utorso.obj
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:401f1f15f0005d4bb1475d42175332cbbafdd201d1b6c53583ff65711fa7c44d
+size 697

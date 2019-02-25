@@ -1,4 +1,3 @@
-set (files 
-  drc_torso_head_diffuse.jpg
-)
-install(FILES ${files} DESTINATION ${GAZEBO_INSTALL_PATH}/multisense_sl_description/materials/textures/)
+version https://git-lfs.github.com/spec/v1
+oid sha256:9e332aca2b77572ee138193a12185259508e852a7d613226dccdcb1bd5487288
+size 148

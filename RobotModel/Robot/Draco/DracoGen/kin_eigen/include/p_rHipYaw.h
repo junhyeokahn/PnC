@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:22 GMT-05:00
- */
-
-#ifndef P_RHIPYAW_HH
-#define P_RHIPYAW_HH
-#include <Eigen/Dense>
-
-void p_rHipYaw(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // P_RHIPYAW_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:6d4a483498c892e8f816a3391d10d42792341d17eee0d61fb4cadb993f6212fc
+size 274

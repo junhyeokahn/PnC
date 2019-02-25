@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:13 GMT-05:00
- */
-
-#ifndef R_BASEROTY_HH
-#define R_BASEROTY_HH
-#include <Eigen/Dense>
-
-void R_BaseRotY(Eigen::Matrix<double,3,3> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // R_BASEROTY_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:8effb405b91d56448fe6cacccd21119ec52bdb911d775eb9770372f0dab40450
+size 278

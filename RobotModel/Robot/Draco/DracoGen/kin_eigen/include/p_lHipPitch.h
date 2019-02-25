@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:17 GMT-05:00
- */
-
-#ifndef P_LHIPPITCH_HH
-#define P_LHIPPITCH_HH
-#include <Eigen/Dense>
-
-void p_lHipPitch(Eigen::Matrix<double,3,1> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // P_LHIPPITCH_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:a90e579abad603eb62467fc3c5dc9d21ef0f1266cc256ebf7b9c1a9b2a86a473
+size 282

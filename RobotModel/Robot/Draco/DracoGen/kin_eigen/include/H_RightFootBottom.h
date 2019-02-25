@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:34 GMT-05:00
- */
-
-#ifndef H_RIGHTFOOTBOTTOM_HH
-#define H_RIGHTFOOTBOTTOM_HH
-#include <Eigen/Dense>
-
-void H_RightFootBottom(Eigen::Matrix<double,4,4> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // H_RIGHTFOOTBOTTOM_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:ec7b3ff87dc24ca6d40f633c54177d0bf82fbf8e6cf26e029495fea94e1bd69d
+size 306

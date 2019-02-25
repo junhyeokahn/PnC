@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:10 GMT-05:00
- */
-
-#ifndef R_BASEPOSZ_HH
-#define R_BASEPOSZ_HH
-#include <Eigen/Dense>
-
-void R_BasePosZ(Eigen::Matrix<double,3,3> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // R_BASEPOSZ_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:f984bda2015a7f47dcad0af3bfe6ed6fc22df10dc2d2329d14d7f321867d40d0
+size 278

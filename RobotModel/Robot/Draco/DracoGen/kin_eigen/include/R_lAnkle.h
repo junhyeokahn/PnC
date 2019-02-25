@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:21 GMT-05:00
- */
-
-#ifndef R_LANKLE_HH
-#define R_LANKLE_HH
-#include <Eigen/Dense>
-
-void R_lAnkle(Eigen::Matrix<double,3,3> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // R_LANKLE_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:d6d2f9e7526d0969e29a113ed20293b4e98835f984d753f13620c87a7d33fa02
+size 270

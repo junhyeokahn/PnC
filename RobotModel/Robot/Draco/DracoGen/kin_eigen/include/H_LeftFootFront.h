@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:31 GMT-05:00
- */
-
-#ifndef H_LEFTFOOTFRONT_HH
-#define H_LEFTFOOTFRONT_HH
-#include <Eigen/Dense>
-
-void H_LeftFootFront(Eigen::Matrix<double,4,4> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // H_LEFTFOOTFRONT_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:b95990352d49b517a42872dde1d50f429f786c8263d7e6eb023f0489893bbf5c
+size 298

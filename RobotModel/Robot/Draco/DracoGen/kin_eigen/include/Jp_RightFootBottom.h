@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:34 GMT-05:00
- */
-
-#ifndef JP_RIGHTFOOTBOTTOM_HH
-#define JP_RIGHTFOOTBOTTOM_HH
-#include <Eigen/Dense>
-
-void Jp_RightFootBottom(Eigen::Matrix<double,3,16> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // JP_RIGHTFOOTBOTTOM_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:c30d9aaf51733194b6603de399bc6bba67a0c4557ad271f71fe3e076d4403de2
+size 311

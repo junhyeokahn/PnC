@@ -1,11 +1,3 @@
-/*
- * Automatically Generated from Mathematica.
- * Thu 23 Aug 2018 15:50:27 GMT-05:00
- */
-
-#ifndef H_RKNEE_HH
-#define H_RKNEE_HH
-#include <Eigen/Dense>
-
-void H_rKnee(Eigen::Matrix<double,4,4> &p_output1, const Eigen::Matrix<double,16,1> &var1);
-#endif // H_RKNEE_HH
+version https://git-lfs.github.com/spec/v1
+oid sha256:e3a22f34e6e884af7691f5a61dc3ecf9fab9c4c698fcd8b5e636d7be0afe1764
+size 266
