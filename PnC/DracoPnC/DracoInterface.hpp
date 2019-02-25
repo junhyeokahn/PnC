@@ -34,6 +34,9 @@ class DracoCommand {
 class DracoInterface : public EnvInterface {
    protected:
     int waiting_count_;
+    int mpi_idx_;
+    int env_idx_;
+    bool b_learning_;
 
     void _ParameterSetting();
     bool _Initialization(DracoSensorData*, DracoCommand*);
@@ -70,6 +73,7 @@ class DracoInterface : public EnvInterface {
 
    public:
     DracoInterface();
+    DracoInterface(int mpi_idx, int env_idx);
     virtual ~DracoInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
 

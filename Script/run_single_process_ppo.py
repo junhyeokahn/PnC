@@ -127,7 +127,7 @@ def do_play(args):
     obs = env.reset()
     while True:
         actions, _, _, _ = model.step(obs)
-        obs, _, done, _ = env.step(actions)
+        obs, _, done, _ = env.step(np.squeeze(actions))
         if done:
             obs = env.reset()
         time.sleep(env.env.timeStep)

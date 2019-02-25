@@ -5,6 +5,7 @@ sys.path.append(os.getcwd() + '/build/Messages')
 
 import gym
 from gym.envs.custom import dummy_cartpole
+from gym.envs.custom import dummy_draco
 from gym import envs
 from baselines.ppo2.seperate_process_ppo2 import learn
 from baselines.common.misc_util import get_latest_run_id
@@ -19,12 +20,14 @@ def main(args):
     current_path = os.getcwd()
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--load_path", type=str)
-    parser.add_argument("--password", type=str)
+    parser.add_argument("--env", type=str)
     parser.add_argument("--num_envs", type=int, default=1)
+    parser.add_argument("--password", type=str)
+
     parser.add_argument("--num_layers", type=int, default=2)
     parser.add_argument("--num_hidden", type=int, default=64)
     parser.add_argument("--activation", type=int, default=1)
+
     parser.add_argument("--num_timesteps", type=int, default=1e6)
     parser.add_argument("--num_steps", type=int, default=2048)
     parser.add_argument("--ent_coef", type=float, default=0)
@@ -33,12 +36,14 @@ def main(args):
     parser.add_argument("--max_grad_norm", type=float, default=0.5)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
-    parser.add_argument("--log_interval", type=int, default=1)
     parser.add_argument("--num_minibatches", type=int, default=4)
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
+
     parser.add_argument("--save_interval", type=int, default=10)
-    parser.add_argument("--save_path", type=str, default=current_path+"/RLData/CartPole")
+    parser.add_argument("--log_interval", type=int, default=1)
+    parser.add_argument("--save_path", type=str)
+    parser.add_argument("--load_path", type=str)
     parser.add_argument("--seed", type=int)
     args = parser.parse_args()
 
@@ -78,7 +83,7 @@ def main(args):
     # ==========================================================================
     # gym env
     # ==========================================================================
-    env = envs.make('DummyCartPole-v0')
+    env = envs.make(args.env)
 
     # ==========================================================================
     # learn model with ppo

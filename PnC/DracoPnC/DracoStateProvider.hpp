@@ -12,6 +12,11 @@ public:
 
   std::string stance_foot;
   double curr_time;
+  double contact_time;
+  int rl_count;
+  std::vector<bool> b_observe_keyframe_vel;
+  Eigen::VectorXd keyframe_vel;
+  Eigen::VectorXd target_keyframe_vel;
 
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;

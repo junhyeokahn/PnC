@@ -45,4 +45,13 @@ if __name__ == "__main__":
     # ax4.plot(np.cumsum(res.monitor.l), pu.smooth(res.monitor.r, radius=10))
     # ax4.grid(True)
 
+    # ==========================================================================
+    # nupdates vs total_num_dones
+    # ==========================================================================
+    f5, ax5 = plt.subplots()
+    ax5.plot(res.progress.total_timesteps, res.progress.eplenmean)
+    ax5.grid(True)
+    ax5.set_xlabel('total_timestep')
+    ax5.set_ylabel('eplenmean')
+
     plt.show()

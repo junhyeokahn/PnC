@@ -7,13 +7,19 @@ file(GLOB draco_contactset_headers "ContactSet/*.hpp")
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/OfflineTrajGen/CentroidDynOpt.cpp
                          ${CMAKE_CURRENT_SOURCE_DIR}/OfflineTrajGen/KinematicOpt.cpp)
 
-add_library(DracoPnC SHARED ${sources})
+if( NOT (ZMQ_FOUND AND Protobuf_FOUND) )
+    list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/TestSet/RLWalkingTest.cpp
+                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/BodyFootLearningCtrl.cpp)
+endif()
+
+add_library(DracoPnC ${sources})
 target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
                                myWBC
                                myFilters
-                               myPlanner)
+                               myPlanner
+                               myRL)
 
 install(TARGETS DracoPnC DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${draco_pnc_headers} DESTINATION

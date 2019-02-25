@@ -22,11 +22,16 @@ namespace RlWkPhase{
 class RLWalkingTest: public Test{
 public:
   RLWalkingTest(RobotSystem*);
+  RLWalkingTest(RobotSystem*, int mpi_idx, int env_idx);
   virtual ~RLWalkingTest();
   virtual void TestInitialization();
 
 protected:
   int num_step_;
+  int mpi_idx_;
+  int env_idx_;
+  bool b_learning_;
+
   DracoStateProvider* sp_;
   virtual int _NextPhase(const int & phase);
   void _SettingParameter();
@@ -46,4 +51,6 @@ protected:
   Controller* left_swing_end_trans_ctrl_;
 
   YAML::Node cfg_;
+  Eigen::VectorXd keyframe_vel_penalty_;
+  Eigen::VectorXd t_prime_;
 };

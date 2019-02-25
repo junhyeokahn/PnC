@@ -8,3 +8,7 @@
 
 #include <PnC/DracoPnC/CtrlSet/BalancingCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/KinBalancingCtrl.hpp>
+
+#if HAS_RL_DEP
+    #include <PnC/DracoPnC/CtrlSet/BodyFootLearningCtrl.hpp>
+#endif
