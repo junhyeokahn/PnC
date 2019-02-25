@@ -78,6 +78,7 @@ def GetJointStates():
 pb.setRealTimeSimulation(1)
 pb.setTimeStep(0.001)
 pb.setGravity(0,0,-9.81)
+__import__('ipdb').set_trace()
 while(1):
     pb.getCameraImage(320,200)
     # pb.setJointMotorControl2(draco,jointIds[0],pb.POSITION_CONTROL, t, force=140.)
