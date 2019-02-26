@@ -29,14 +29,10 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
     body_up_ctrl_ = new DoubleContactTransCtrl(robot);
     body_fix_ctrl_ = new BodyCtrl(robot);
     // Swing Controller Selection
-    if (b_learning_) {
-        right_swing_ctrl_ =
-            new BodyFootLearningCtrl(robot_, "rFoot", reversal_planner_);
-        left_swing_ctrl_ =
-            new BodyFootLearningCtrl(robot_, "lFoot", reversal_planner_);
-    } else {
-        std::cout << "Not Implemented Yet!" << std::endl;
-    }
+    right_swing_ctrl_ =
+        new BodyFootLearningCtrl(robot_, "rFoot", reversal_planner_);
+    left_swing_ctrl_ =
+        new BodyFootLearningCtrl(robot_, "lFoot", reversal_planner_);
 
     // Right
     right_swing_start_trans_ctrl_ =
@@ -85,73 +81,73 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
 }
 
 RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
-    /*
-     *    myUtils::pretty_constructor(1, "Walking Test");
-     *    cfg_ = YAML::LoadFile(THIS_COM
-     * "Config/Draco/TEST/RL_WALKING_TEST.yaml"); mpi_idx_ = 0 env_idx_ = 0
-     *    b_learning_ = false;
-     *
-     *    num_step_ = 0;
-     *    sp_ = DracoStateProvider::getStateProvider(robot_);
-     *    sp_->stance_foot = "lFoot";
-     *    sp_->global_pos_local[1] = 0.15;
-     *    reversal_planner_ = new Reversal_LIPM_Planner();
-     *    phase_ = WkPhase::initiation;
-     *
-     *    state_list_.clear();
-     *
-     *    jpos_ctrl_ = new JPosTargetCtrl(robot);
-     *    body_up_ctrl_ = new DoubleContactTransCtrl(robot);
-     *    body_fix_ctrl_ = new BodyCtrl(robot);
-     *    // Swing Controller Selection
-     *    right_swing_ctrl_ =
-     *        new BodyFootPlanningCtrl(robot_, "rFoot", reversal_planner_);
-     *    left_swing_ctrl_ =
-     *        new BodyFootPlanningCtrl(robot_, "lFoot", reversal_planner_);
-     *
-     *    // Right
-     *    right_swing_start_trans_ctrl_ =
-     *        new SingleContactTransCtrl(robot, "rFoot", false);
-     *    right_swing_end_trans_ctrl_ =
-     *        new SingleContactTransCtrl(robot, "rFoot", true);
-     *    // Left
-     *    left_swing_start_trans_ctrl_ =
-     *        new SingleContactTransCtrl(robot, "lFoot", false);
-     *    left_swing_end_trans_ctrl_ =
-     *        new SingleContactTransCtrl(robot, "lFoot", true);
-     *
-     *    _SettingParameter();
-     *
-     *    state_list_.push_back(jpos_ctrl_);
-     *    state_list_.push_back(body_up_ctrl_);
-     *    state_list_.push_back(body_fix_ctrl_);
-     *    state_list_.push_back(right_swing_start_trans_ctrl_);
-     *    state_list_.push_back(right_swing_ctrl_);
-     *    state_list_.push_back(right_swing_end_trans_ctrl_);
-     *    state_list_.push_back(body_fix_ctrl_);
-     *    state_list_.push_back(left_swing_start_trans_ctrl_);
-     *    state_list_.push_back(left_swing_ctrl_);
-     *    state_list_.push_back(left_swing_end_trans_ctrl_);
-     *
-     *    DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_pos_des_),
-     * VECT3, "rfoot_pos_des", 3); DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_pos_des_),
-     * VECT3, "lfoot_pos_des", 3);
-     *
-     *    DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_vel_des_),
-     * VECT3, "rfoot_vel_des", 3); DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_vel_des_),
-     * VECT3, "lfoot_vel_des", 3);
-     *
-     *    DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_acc_des_),
-     * VECT3, "rfoot_acc_des", 3); DataManager::GetDataManager()->RegisterData(
-     *        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_acc_des_),
-     * VECT3, "lfoot_acc_des", 3);
-     */
-    printf("Not Implemented yet\n");
+
+    myUtils::pretty_constructor(1, "Walking Test");
+    cfg_ = YAML::LoadFile(THIS_COM
+            "Config/Draco/TEST/RL_WALKING_TEST.yaml");
+    mpi_idx_ = 0;
+    env_idx_ = 0;
+    b_learning_ = false;
+    num_step_ = 0;
+
+    sp_ = DracoStateProvider::getStateProvider(robot_);
+    sp_->stance_foot = "lFoot";
+    sp_->global_pos_local[1] = 0.15;
+    reversal_planner_ = new Reversal_LIPM_Planner();
+    phase_ = WkPhase::initiation;
+
+    state_list_.clear();
+
+    jpos_ctrl_ = new JPosTargetCtrl(robot);
+    body_up_ctrl_ = new DoubleContactTransCtrl(robot);
+    body_fix_ctrl_ = new BodyCtrl(robot);
+    // Swing Controller Selection
+    right_swing_ctrl_ =
+        new BodyFootPolicyCtrl(robot_, "rFoot", reversal_planner_);
+    left_swing_ctrl_ =
+        new BodyFootPolicyCtrl(robot_, "lFoot", reversal_planner_);
+
+    // Right
+    right_swing_start_trans_ctrl_ =
+        new SingleContactTransCtrl(robot, "rFoot", false);
+    right_swing_end_trans_ctrl_ =
+        new SingleContactTransCtrl(robot, "rFoot", true);
+    // Left
+    left_swing_start_trans_ctrl_ =
+        new SingleContactTransCtrl(robot, "lFoot", false);
+    left_swing_end_trans_ctrl_ =
+        new SingleContactTransCtrl(robot, "lFoot", true);
+
+    _SettingParameter();
+
+    state_list_.push_back(jpos_ctrl_);
+    state_list_.push_back(body_up_ctrl_);
+    state_list_.push_back(body_fix_ctrl_);
+    state_list_.push_back(right_swing_start_trans_ctrl_);
+    state_list_.push_back(right_swing_ctrl_);
+    state_list_.push_back(right_swing_end_trans_ctrl_);
+    state_list_.push_back(body_fix_ctrl_);
+    state_list_.push_back(left_swing_start_trans_ctrl_);
+    state_list_.push_back(left_swing_ctrl_);
+    state_list_.push_back(left_swing_end_trans_ctrl_);
+
+    DataManager::GetDataManager()->RegisterData(
+            &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_pos_des_),
+            VECT3, "rfoot_pos_des", 3); DataManager::GetDataManager()->RegisterData(
+                &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_pos_des_),
+                VECT3, "lfoot_pos_des", 3);
+
+    DataManager::GetDataManager()->RegisterData(
+            &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_vel_des_),
+            VECT3, "rfoot_vel_des", 3); DataManager::GetDataManager()->RegisterData(
+                &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_vel_des_),
+                VECT3, "lfoot_vel_des", 3);
+
+    DataManager::GetDataManager()->RegisterData(
+            &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_acc_des_),
+            VECT3, "rfoot_acc_des", 3); DataManager::GetDataManager()->RegisterData(
+                &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_acc_des_),
+                VECT3, "lfoot_acc_des", 3);
 }
 
 RLWalkingTest::~RLWalkingTest() {
@@ -170,38 +166,41 @@ RLWalkingTest::~RLWalkingTest() {
 
 void RLWalkingTest::TestInitialization() {
     reversal_planner_->PlannerInitialization(
-        cfg_["planner_configuration"]["velocity_reversal_pln"]);
+            cfg_["planner_configuration"]["velocity_reversal_pln"]);
 
     jpos_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["joint_position_ctrl"]);
+            cfg_["control_configuration"]["joint_position_ctrl"]);
     body_up_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["double_contact_trans_ctrl"]);
+            cfg_["control_configuration"]["double_contact_trans_ctrl"]);
     body_fix_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["body_ctrl"]);
+            cfg_["control_configuration"]["body_ctrl"]);
 
     right_swing_start_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+            cfg_["control_configuration"]["single_contact_trans_ctrl"]);
     right_swing_end_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+            cfg_["control_configuration"]["single_contact_trans_ctrl"]);
     left_swing_start_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+            cfg_["control_configuration"]["single_contact_trans_ctrl"]);
     left_swing_end_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
+            cfg_["control_configuration"]["single_contact_trans_ctrl"]);
 
     if (b_learning_) {
         right_swing_ctrl_->ctrlInitialization(
-            cfg_["control_configuration"]["right_body_foot_learning_ctrl"]);
+                cfg_["control_configuration"]["right_body_foot_learning_ctrl"]);
         left_swing_ctrl_->ctrlInitialization(
-            cfg_["control_configuration"]["left_body_foot_learning_ctrl"]);
+                cfg_["control_configuration"]["left_body_foot_learning_ctrl"]);
     } else {
-        std::cout << "Not Implemented yet" << std::endl;
+        right_swing_ctrl_->ctrlInitialization(
+                cfg_["control_configuration"]["right_body_foot_policy_ctrl"]);
+        left_swing_ctrl_->ctrlInitialization(
+                cfg_["control_configuration"]["left_body_foot_policy_ctrl"]);
     }
 }
 
 int RLWalkingTest::_NextPhase(const int& phase) {
     int next_phase = phase + 1;
     myUtils::color_print(myColor::BoldGreen,
-                         "[Phase " + std::to_string(next_phase) + "]");
+            "[Phase " + std::to_string(next_phase) + "]");
     Eigen::Vector3d next_local_frame_location;
 
     if (phase == WkPhase::double_contact_1) {
@@ -213,7 +212,7 @@ int RLWalkingTest::_NextPhase(const int& phase) {
         // Global Frame Update
         next_local_frame_location =
             robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter)
-                .translation();
+            .translation();
         sp_->global_pos_local += next_local_frame_location;
     }
     if (phase == WkPhase::double_contact_2) {
@@ -226,7 +225,7 @@ int RLWalkingTest::_NextPhase(const int& phase) {
         // Global Frame Update
         next_local_frame_location =
             robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter)
-                .translation();
+            .translation();
         sp_->global_pos_local += next_local_frame_location;
     }
     sp_->num_step_copy = num_step_;
@@ -333,37 +332,62 @@ void RLWalkingTest::_SettingParameter() {
                 ->setPolicy(rl_interface->GetPolicy());
             ((BodyFootLearningCtrl*)left_swing_ctrl_)
                 ->setValueFn(rl_interface->GetValueFn());
+
             myUtils::readParameter(test_cfg, "action_lower_bound", tmp_vec);
             ((BodyFootLearningCtrl*)left_swing_ctrl_)
                 ->setActionLowerBound(tmp_vec);
             ((BodyFootLearningCtrl*)right_swing_ctrl_)
                 ->setActionLowerBound(tmp_vec);
+
             myUtils::readParameter(test_cfg, "action_upper_bound", tmp_vec);
             ((BodyFootLearningCtrl*)left_swing_ctrl_)
                 ->setActionUpperBound(tmp_vec);
             ((BodyFootLearningCtrl*)right_swing_ctrl_)
                 ->setActionUpperBound(tmp_vec);
+
             myUtils::readParameter(test_cfg, "action_scale", tmp_vec);
             ((BodyFootLearningCtrl*)left_swing_ctrl_)->setActionScale(tmp_vec);
             ((BodyFootLearningCtrl*)right_swing_ctrl_)->setActionScale(tmp_vec);
+
             myUtils::readParameter(test_cfg, "terminate_obs_lower_bound",
-                                   tmp_vec);
+                    tmp_vec);
             ((BodyFootLearningCtrl*)left_swing_ctrl_)
                 ->setTerminateObsLowerBound(tmp_vec);
             ((BodyFootLearningCtrl*)right_swing_ctrl_)
                 ->setTerminateObsLowerBound(tmp_vec);
             myUtils::readParameter(test_cfg, "terminate_obs_upper_bound",
-                                   tmp_vec);
+                    tmp_vec);
             ((BodyFootLearningCtrl*)left_swing_ctrl_)
                 ->setTerminateObsUpperBound(tmp_vec);
             ((BodyFootLearningCtrl*)right_swing_ctrl_)
                 ->setTerminateObsUpperBound(tmp_vec);
+        } else {
+
+            myUtils::readParameter(test_cfg, "action_lower_bound", tmp_vec);
+            ((BodyFootPolicyCtrl*)right_swing_ctrl_)->setActionLowerBound(tmp_vec);
+            ((BodyFootPolicyCtrl*)left_swing_ctrl_)->setActionLowerBound(tmp_vec);
+
+            myUtils::readParameter(test_cfg, "action_upper_bound", tmp_vec);
+            ((BodyFootPolicyCtrl*)right_swing_ctrl_)->setActionUpperBound(tmp_vec);
+            ((BodyFootPolicyCtrl*)left_swing_ctrl_)->setActionUpperBound(tmp_vec);
+
+            myUtils::readParameter(test_cfg, "action_scale", tmp_vec);
+            ((BodyFootPolicyCtrl*)right_swing_ctrl_)->setActionScale(tmp_vec);
+            ((BodyFootPolicyCtrl*)left_swing_ctrl_)->setActionScale(tmp_vec);
+
+            myUtils::readParameter(test_cfg, "terminate_obs_lower_bound", tmp_vec);
+            ((BodyFootPolicyCtrl*)left_swing_ctrl_)->setTerminateObsLowerBound(tmp_vec);
+            ((BodyFootPolicyCtrl*)right_swing_ctrl_)->setTerminateObsLowerBound(tmp_vec);
+
+            myUtils::readParameter(test_cfg, "terminate_obs_upper_bound", tmp_vec);
+            ((BodyFootPolicyCtrl*)left_swing_ctrl_)->setTerminateObsUpperBound(tmp_vec);
+            ((BodyFootPolicyCtrl*)right_swing_ctrl_)->setTerminateObsUpperBound(tmp_vec);
         }
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
+            << __FILE__ << "]" << std::endl
+            << std::endl;
         exit(0);
     }
 }

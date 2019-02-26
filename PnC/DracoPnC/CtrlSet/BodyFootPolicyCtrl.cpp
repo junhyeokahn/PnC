@@ -8,16 +8,14 @@
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
-#include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
-#include <dart/math/Helpers.hpp>
 
-BodyFootLearningCtrl::BodyFootLearningCtrl(RobotSystem* robot,
+BodyFootPolicyCtrl::BodyFootPolicyCtrl(RobotSystem* robot,
                                            std::string swing_foot,
                                            FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner) {
-    myUtils::pretty_constructor(2, "Body Foot Learning Ctrl");
+    myUtils::pretty_constructor(2, "Body Foot Planning Ctrl");
 
     push_down_height_ = 0.;
     swing_height_ = 0.05;
@@ -122,7 +120,7 @@ BodyFootLearningCtrl::BodyFootLearningCtrl(RobotSystem* robot,
     }
 }
 
-void BodyFootLearningCtrl::oneStep(void* _cmd) {
+void BodyFootPolicyCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma;
@@ -140,7 +138,7 @@ void BodyFootLearningCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 }
 
-void BodyFootLearningCtrl::_contact_setup() {
+void BodyFootPolicyCtrl::_contact_setup() {
     rfoot_contact_->updateContactSpec();
     lfoot_contact_->updateContactSpec();
 
@@ -148,7 +146,7 @@ void BodyFootLearningCtrl::_contact_setup() {
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BodyFootLearningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
+void BodyFootPolicyCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     Eigen::MatrixXd A_rotor = A_;
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         A_rotor(i + robot_->getNumVirtualDofs(),
@@ -177,7 +175,7 @@ void BodyFootLearningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
         sp_->reaction_forces[i] = wblc_data_->Fr_[i];
 }
 
-void BodyFootLearningCtrl::_task_setup() {
+void BodyFootPolicyCtrl::_task_setup() {
     double base_height_cmd = ini_base_height_;
     if (b_set_height_target_) base_height_cmd = des_body_height_;
 
@@ -290,7 +288,7 @@ void BodyFootLearningCtrl::_task_setup() {
                                 des_jpos_, des_jvel_, des_jacc_);
 }
 
-void BodyFootLearningCtrl::_CheckPlanning() {
+void BodyFootPolicyCtrl::_CheckPlanning() {
     if ((state_machine_time_ > 0.5 * end_time_) && b_replanning_ &&
         !b_replaned_) {
         Eigen::Vector3d target_loc;
@@ -309,101 +307,44 @@ void BodyFootLearningCtrl::_CheckPlanning() {
     }
 }
 
-void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
-    // =========================================================================
-    // 1. count
-    // =========================================================================
-    RLInterface::GetRLInterface()->GetRLData()->count = sp_->rl_count;
-    ++(sp_->rl_count);
-
-    // =========================================================================
-    // 2. observation
-    // =========================================================================
+void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+    // Direct value used
     Eigen::Vector3d com_pos = robot_->getCoMPosition();
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
+
     for (int i(0); i < 2; ++i) {
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
         // com_pos[i] += body_pt_offset_[i];
+
         // !! TEST !!
         com_vel[i] = sp_->qdot[i];
         // com_vel[i] = sp_->est_mocap_body_vel[i];
     }
+
     printf("planning com state: %f, %f, %f, %f\n", com_pos[0], com_pos[1],
            com_vel[0], com_vel[1]);
-
+    // Observation
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
-    Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
-    obs_vec << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
-    RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
-    // =========================================================================
-    // 3. nn outputs : actions, action_mean, neglogp, value
-    // =========================================================================
     Eigen::MatrixXd output, mean;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
-                          mean, neglogp);
-    int n_output(output.cols());
-    Eigen::VectorXd output_vec = Eigen::VectorXd::Zero(n_output);
-    Eigen::VectorXd mean_vec = Eigen::VectorXd::Zero(n_output);
-    float neglogp_val(0);
-    for (int i = 0; i < n_output; ++i) {
-        output_vec(i) = output(0, i);
-        mean_vec(i) = mean(0, i);
-    }
-    neglogp_val = neglogp(0);
-    RLInterface::GetRLInterface()->GetRLData()->action = output_vec;
-    RLInterface::GetRLInterface()->GetRLData()->action_mean = mean_vec;
-    RLInterface::GetRLInterface()->GetRLData()->neglogp = neglogp_val;
-    RLInterface::GetRLInterface()->GetRLData()->value =
-        (nn_valfn_->GetOutput(obs))(0, 0);
-    // =========================================================================
-    // 4. done
-    // =========================================================================
-    bool done;
-    if (myUtils::isInBoundingBox(terminate_obs_lower_bound_, obs_vec,
-                                 terminate_obs_upper_bound_)) {
-        done = false;
-    } else {
-        done = true;
-    }
-    RLInterface::GetRLInterface()->GetRLData()->done = done;
-    // =========================================================================
-    // 5. reward
-    // =========================================================================
-    float reward(0.0);
-    double input_pen = quad_input_penalty_ * output_vec.squaredNorm();
-    double height_dev_pen = deviation_penalty_ * (des_body_height_ - sp_->q[2]) *
-              (des_body_height_ - sp_->q[2]);
-    double yaw_dev_pen = deviation_penalty_ * (sp_->target_yaw - sp_->q[3]) *
-              (sp_->target_yaw - sp_->q[3]);
+            mean, neglogp);
+    Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
+    // TEST //
+    //std::cout << "==========================================" << std::endl;
+    //myUtils::pretty_print(obs, std::cout, "observation");
+    //myUtils::pretty_print(mean, std::cout, "mean_actions");
+    //myUtils::pretty_print(neglogp, std::cout, "neglogp");
+    //myUtils::pretty_print(output, std::cout, "output");
+    //myUtils::pretty_print(val, std::cout, "value");
+    //std::cout << "==========================================" << std::endl;
+    //if (sp_->rl_count > 10) {
+        //exit(0);
+    //}
+    //sp_->rl_count++;
+    // TEST //
 
-    Eigen::Vector2d act_location;
-    act_location << sp_->q[0], sp_->q[1];
-    double loc_pen = deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
-
-    Eigen::VectorXd keyframe_vel = Eigen::VectorXd::Zero(2);
-    keyframe_vel << sp_->qdot[0], sp_->qdot[1];
-    double keyframe_vel_pen = deviation_penalty_ * (sp_->target_keyframe_vel - keyframe_vel).squaredNorm();
-
-    reward = -input_pen - height_dev_pen - yaw_dev_pen - loc_pen - keyframe_vel_pen;
-
-    if (!done) {
-        reward += alive_reward_;
-    }
-    std::cout << "// ==========================================================" << std::endl;
-    std::cout << "// reward info "<< std::endl;
-    std::cout << "// ==========================================================" << std::endl;
-    std::cout <<"total rew : " << reward << "| input pen : " << input_pen << ", height_dev_pen : " << height_dev_pen << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen << ", keyframe_vel_pen : " << keyframe_vel_pen << std::endl;
-
-    RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
-    RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
-    myUtils::color_print(myColor::BoldMagneta, "[[Send Data]]");
-    RLInterface::GetRLInterface()->SendData();
-
-    // =========================================================================
-    // Foot Step Guider
-    // =========================================================================
     OutputReversalPL pl_output;
     ParamReversalPL pl_param;
     pl_param.swing_time = end_time_ - state_machine_time_ +
@@ -429,6 +370,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         ss_global[i] = pl_output.switching_state[i];
     }
 
+    // Time Modification
     replan_moment_ = state_machine_time_;
     end_time_ += pl_output.time_modification;
     target_loc -= sp_->global_pos_local;
@@ -443,12 +385,12 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     for (int i = 0; i < 2; ++i) {
-        target_loc[i] += action_scale_[i] * output_vec[i];
+        target_loc[i] += action_scale_[i] * output(0, i);
     }
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
 }
 
-void BodyFootLearningCtrl::firstVisit() {
+void BodyFootPolicyCtrl::firstVisit() {
     b_replaned_ = false;
     ini_config_ = sp_->q;
 
@@ -489,7 +431,7 @@ void BodyFootLearningCtrl::firstVisit() {
     input_state[3] = com_vel[1];
 }
 
-void BodyFootLearningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
+void BodyFootPolicyCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     // Initialize Minimum Jerk Parameter Containers
     Eigen::Vector3d init_params;
     Eigen::Vector3d final_params;
@@ -507,7 +449,7 @@ void BodyFootLearningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     }
 }
 
-bool BodyFootLearningCtrl::endOfPhase() {
+bool BodyFootPolicyCtrl::endOfPhase() {
     if (state_machine_time_ > (end_time_)) {
         printf("[Body Foot Ctrl] End, state_machine time/ end time: (%f, %f)\n",
                state_machine_time_, end_time_);
@@ -562,7 +504,7 @@ bool BodyFootLearningCtrl::endOfPhase() {
     return false;
 }
 
-void BodyFootLearningCtrl::ctrlInitialization(const YAML::Node& node) {
+void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
     ini_base_height_ = sp_->q[2];
     try {
         myUtils::readParameter(node, "kp", Kp_);
@@ -581,12 +523,18 @@ void BodyFootLearningCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "fin_foot_z_vel", fin_foot_z_vel_);
         myUtils::readParameter(node, "fin_foot_z_acc", fin_foot_z_acc_);
 
-        myUtils::readParameter(node, "quad_input_penalty", quad_input_penalty_);
-        myUtils::readParameter(node, "alive_reward", alive_reward_);
-        myUtils::readParameter(node, "keyframe_vel_penalty",
-                               keyframe_vel_penalty_);
-        myUtils::readParameter(node, "deviation_penalty", deviation_penalty_);
-        myUtils::readParameter(node, "reward_scale", reward_scale_);
+        // rl model
+        std::string model_path;
+        myUtils::readParameter(node, "model_path", model_path);
+        std::string model_yaml = THIS_COM + model_path;
+        YAML::Node model_cfg = YAML::LoadFile(model_yaml);
+        nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
+        nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
+        // TEST
+        nn_policy_->PrintInfo();
+        nn_valfn_->PrintInfo();
+        // TEST
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -603,7 +551,7 @@ void BodyFootLearningCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 }
 
-BodyFootLearningCtrl::~BodyFootLearningCtrl() {
+BodyFootPolicyCtrl::~BodyFootPolicyCtrl() {
     delete selected_joint_task_;
     delete base_task_;
     // delete foot_pitch_task_;
@@ -618,9 +566,12 @@ BodyFootLearningCtrl::~BodyFootLearningCtrl() {
 
     for (int i = 0; i < min_jerk_offset_.size(); ++i)
         delete min_jerk_offset_[i];
+
+    delete nn_policy_;
+    delete nn_valfn_;
 }
 
-void BodyFootLearningCtrl::_GetBsplineSwingTrajectory() {
+void BodyFootPolicyCtrl::_GetBsplineSwingTrajectory() {
     double pos[3];
     double vel[3];
     double acc[3];
@@ -635,7 +586,7 @@ void BodyFootLearningCtrl::_GetBsplineSwingTrajectory() {
         curr_foot_acc_des_[i] = acc[i];
     }
 }
-void BodyFootLearningCtrl::_GetSinusoidalSwingTrajectory() {
+void BodyFootPolicyCtrl::_GetSinusoidalSwingTrajectory() {
     curr_foot_acc_des_.setZero();
     for (int i(0); i < 2; ++i) {
         curr_foot_pos_des_[i] =
@@ -659,7 +610,7 @@ void BodyFootLearningCtrl::_GetSinusoidalSwingTrajectory() {
         amp * omega * omega * cos(omega * state_machine_time_);
 }
 
-void BodyFootLearningCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
+void BodyFootPolicyCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
                                        const Eigen::Vector3d& des_pos) {
     // Trajectory Setup
     double init[9];

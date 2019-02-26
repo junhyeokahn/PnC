@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser.add_argument("--value_network", type=str, default='copy')
 
     parser.add_argument("--num_timesteps", type=int, default=1e7)
-    parser.add_argument("--num_steps", type=int, default=2048)
+    parser.add_argument("--num_steps", type=int, default=512)
     parser.add_argument("--ent_coef", type=float, default=0.0)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--vf_coef", type=float, default=0.5)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int)
 
     parser.add_argument("--load_path", type=str)
-    parser.add_argument("--save_interval", type=int, default=100)
+    parser.add_argument("--save_interval", type=int, default=10)
     parser.add_argument("--save_path", type=str)
     args = parser.parse_args()
 

@@ -11,4 +11,5 @@
 
 #if HAS_RL_DEP
     #include <PnC/DracoPnC/CtrlSet/BodyFootLearningCtrl.hpp>
+    #include <PnC/DracoPnC/CtrlSet/BodyFootPolicyCtrl.hpp>
 #endif
