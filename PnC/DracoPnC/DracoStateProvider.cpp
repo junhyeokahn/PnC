@@ -15,10 +15,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     stance_foot = "lFoot";
     curr_time = 0.;
 
-    contact_time = 0.;
-    b_observe_keyframe_vel.resize(2, false);
-    keyframe_vel = Eigen::VectorXd::Zero(2);
     target_keyframe_vel = Eigen::VectorXd::Zero(2);
+    target_yaw = 0.;
     rl_count = 0;
 
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());

@@ -3,14 +3,15 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
-#include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
+#include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <dart/math/Helpers.hpp>
 
 BodyFootLearningCtrl::BodyFootLearningCtrl(RobotSystem* robot,
                                            std::string swing_foot,
@@ -313,7 +314,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // 1. count
     // =========================================================================
     RLInterface::GetRLInterface()->GetRLData()->count = sp_->rl_count;
-    ++ (sp_->rl_count);
+    ++(sp_->rl_count);
 
     // =========================================================================
     // 2. observation
@@ -334,6 +335,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs << com_pos[0], com_pos[1], sp_->q[2], com_vel[0], com_vel[1];
     obs_vec << com_pos[0], com_pos[1], sp_->q[2], com_vel[0], com_vel[1];
+    // TODO : How to Handle nan case
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
@@ -354,7 +356,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     RLInterface::GetRLInterface()->GetRLData()->action = output_vec;
     RLInterface::GetRLInterface()->GetRLData()->action_mean = mean_vec;
     RLInterface::GetRLInterface()->GetRLData()->neglogp = neglogp_val;
-    RLInterface::GetRLInterface()->GetRLData()->value = (nn_valfn_->GetOutput(obs))(0, 0);
+    RLInterface::GetRLInterface()->GetRLData()->value =
+        (nn_valfn_->GetOutput(obs))(0, 0);
     // =========================================================================
     // 4. done
     // =========================================================================
@@ -371,15 +374,25 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     float reward(0.0);
     reward -= quad_input_penalty_ * output_vec.norm();
-    reward -= deviation_penalty_ * (des_body_height_ - sp_->q[2]) * (des_body_height_ - sp_->q[2]);
-    RLInterface::GetRLInterface()->GetRLData()->reward = reward;
-    RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+    reward -= deviation_penalty_ * (des_body_height_ - sp_->q[2]) *
+              (des_body_height_ - sp_->q[2]);
+    reward -= deviation_penalty_ * (sp_->target_yaw - sp_->q[3]) *
+              (sp_->target_yaw - sp_->q[3]);
+    Eigen::VectorXd keyframe_vel = Eigen::VectorXd::Zero(2);
+    keyframe_vel << sp_->qdot[0], sp_->qdot[1];
+    for (int i = 0; i < 2; ++i) {
+        reward -= keyframe_vel_penalty_[i] *
+                  (sp_->target_keyframe_vel[i] - keyframe_vel[i]);
+    }
 
-    if (done) {
-        RLInterface::GetRLInterface()->SendData();
-    } else {
+    if (!done) {
         reward += alive_reward_;
     }
+
+    RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
+    RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+    myUtils::color_print(myColor::BoldMagneta, "[[Send Data]]");
+    RLInterface::GetRLInterface()->SendData();
 
     // =========================================================================
     // Foot Step Guider
@@ -426,7 +439,6 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         target_loc[i] += action_scale_[i] * output_vec[i];
     }
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
-
 }
 
 void BodyFootLearningCtrl::firstVisit() {
@@ -561,6 +573,13 @@ void BodyFootLearningCtrl::ctrlInitialization(const YAML::Node& node) {
                                switch_vel_threshold_);
         myUtils::readParameter(node, "fin_foot_z_vel", fin_foot_z_vel_);
         myUtils::readParameter(node, "fin_foot_z_acc", fin_foot_z_acc_);
+
+        myUtils::readParameter(node, "quad_input_penalty", quad_input_penalty_);
+        myUtils::readParameter(node, "alive_reward", alive_reward_);
+        myUtils::readParameter(node, "keyframe_vel_penalty",
+                               keyframe_vel_penalty_);
+        myUtils::readParameter(node, "deviation_penalty", deviation_penalty_);
+        myUtils::readParameter(node, "reward_scale", reward_scale_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

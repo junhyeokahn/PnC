@@ -1,7 +1,7 @@
 #include <Configuration.h>
-#include <Simulator/Dart/Draco/DracoWorldNode.hpp>
-#include <Simulator/Dart/Draco/DracoLedPosAnnouncer.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
+#include <Simulator/Dart/Draco/DracoLedPosAnnouncer.hpp>
+#include <Simulator/Dart/Draco/DracoWorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
@@ -41,7 +41,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     led_pos_announcer_->start();
     UpdateLedData_();
 
-    mInterface = new DracoInterface();
+    mInterface = new DracoInterface(mpi_idx, env_idx);
 
     mSensorData = new DracoSensorData();
     mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
@@ -176,6 +176,7 @@ void DracoWorldNode::customPreStep() {
             mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
             mKd[i] * (mCommand->qdot[i] - mSensorData->qdot[i]);
     }
+    mTorqueCommand.head(6).setZero();
 
     // hold robot at the initial phase
     if (t_ < mReleaseTime) {
@@ -227,26 +228,23 @@ void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
 
 void DracoWorldNode::_check_foot_contact(bool& rfoot_contact,
                                          bool& lfoot_contact) {
-    Eigen::VectorXd r_contact_pos =
-        (mSkel->getBodyNode("rFootFront")->getCOM() +
-         mSkel->getBodyNode("rFootBack")->getCOM()) /
-        2.0;
-    Eigen::VectorXd l_contact_pos =
-        (mSkel->getBodyNode("lFootFront")->getCOM() +
-         mSkel->getBodyNode("lFootBack")->getCOM()) /
-        2.0;
-    // std::cout << "right" << std::endl;
-    // std::cout << r_contact_pos << std::endl;
-    // std::cout << "left" << std::endl;
-    // std::cout << l_contact_pos << std::endl;
-    // exit(0);
-    if (fabs(l_contact_pos[2]) < 0.032) {
+    Eigen::VectorXd r_c = mSkel->getBodyNode("rFootCenter")->getCOM();
+    Eigen::VectorXd l_c = mSkel->getBodyNode("lFootCenter")->getCOM();
+    Eigen::VectorXd r_f = mSkel->getBodyNode("rFootFront")->getCOM();
+    Eigen::VectorXd l_f = mSkel->getBodyNode("lFootFront")->getCOM();
+    Eigen::VectorXd r_b = mSkel->getBodyNode("rFootBack")->getCOM();
+    Eigen::VectorXd l_b = mSkel->getBodyNode("lFootBack")->getCOM();
+
+    if ((fabs(l_c[2]) < 0.002) || (fabs(l_f[2]) < 0.002) ||
+        (fabs(l_b[2] < 0.002))) {
         lfoot_contact = true;
         // printf("left contact\n");
     } else {
         lfoot_contact = false;
     }
-    if (fabs(r_contact_pos[2]) < 0.032) {
+
+    if ((fabs(r_c[2]) < 0.002) || (fabs(r_f[2]) < 0.002) ||
+        (fabs(r_b[2] < 0.002))) {
         rfoot_contact = true;
         // printf("right contact\n");
     } else {

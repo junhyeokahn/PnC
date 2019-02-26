@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <Eigen/Dense>
+#include <Utils/IO/IOUtilities.hpp>
 #include <iostream>
 
 namespace myUtils {

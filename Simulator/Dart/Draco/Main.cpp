@@ -65,51 +65,13 @@ class OneStepProgress : public osgGA::GUIEventHandler {
     DracoWorldNode* worldnode_;
 };
 
-void _addFootCollisionObject(dart::dynamics::SkeletonPtr robot) {
-    using namespace dart::dynamics;
-    using namespace dart::simulation;
-
-    WeldJoint::Properties properties;
-    Inertia inertia(0.00001, 0., 0., 0., 0.00001, 0.00001, 0.00001, 0.00001,
-                    0.00001, 0.00001);
-    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    ShapePtr shape =
-        std::make_shared<EllipsoidShape>(0.06 * Eigen::Vector3d::Ones());
-
-    // right foot front
-    properties.mName = "rFootFront1";
-    tf.translation() = Eigen::Vector3d(0.08, 0, -0.044) / 2.0;
-    properties.mT_ParentBodyToJoint = tf;
-    properties.mT_ChildBodyToJoint = tf.inverse();
-
-    BodyNode* rfoot_front_bn =
-        robot
-            ->createJointAndBodyNodePair<WeldJoint>(
-                robot->getBodyNode("rAnkle"), properties,
-                BodyNode::AspectProperties("rFootFront1"))
-            .second;
-    rfoot_front_bn
-        ->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(
-            shape);
-    rfoot_front_bn->setInertia(inertia);
-    rfoot_front_bn->setRestitutionCoeff(0.6);
-
-    // right foot back
-    properties.mName = "rFootBack1";
-    tf.translation() = Eigen::Vector3d(-0.05, 0, -0.044) / 2.0;
-    properties.mT_ParentBodyToJoint = tf;
-    properties.mT_ChildBodyToJoint = tf.inverse();
-
-    BodyNode* rfoot_back_bn = robot
-                                  ->createJointAndBodyNodePair<WeldJoint>(
-                                      robot->getBodyNode("rAnkle"), properties,
-                                      BodyNode::AspectProperties("rFootBack1"))
-                                  .second;
-    rfoot_back_bn
-        ->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(
-            shape);
-    rfoot_back_bn->setInertia(inertia);
-    rfoot_back_bn->setRestitutionCoeff(0.6);
+void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
+    for (int i = 0; i < robot->getNumJoints(); ++i) {
+        dart::dynamics::Joint* joint = robot->getJoint(i);
+        // std::cout << i << "th" << std::endl;
+        // std::cout << joint->isPositionLimitEnforced() << std::endl;
+        joint->setPositionLimitEnforced(true);
+    }
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
@@ -205,12 +167,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 }
 
 int main(int argc, char** argv) {
-    // ========================
+    // =========================================================================
     // Parse Yaml for Simulator
-    // ========================
+    // =========================================================================
     bool isRecord;
     bool b_display_joint_frame;
     bool b_display_target_frame;
+    bool b_joint_limit_enforced;
     bool b_show;
     int num_steps_per_cycle;
     double servo_rate;
@@ -222,6 +185,8 @@ int main(int argc, char** argv) {
                                b_display_joint_frame);
         myUtils::readParameter(simulation_cfg, "display_target_frame",
                                b_display_target_frame);
+        myUtils::readParameter(simulation_cfg, "joint_limit_enforced",
+                               b_joint_limit_enforced);
         myUtils::readParameter(simulation_cfg, "num_steps_per_cycle",
                                num_steps_per_cycle);
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
@@ -232,74 +197,77 @@ int main(int argc, char** argv) {
                   << std::endl;
     }
 
-    // ================================
+    // =========================================================================
     // Generate world and add skeletons
-    // ================================
+    // =========================================================================
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        // THIS_COM"RobotModel/Robot/Draco/DracoCollision.urdf");
-        THIS_COM "RobotModel/Robot/Draco/DracoCollisionSim.urdf");
+        THIS_COM "RobotModel/Robot/Draco/DracoSim.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 
-    // ==================================
+    // =========================================================================
     // Friction & Restitution Coefficient
-    // ==================================
+    // =========================================================================
     double friction(10.);
     double restit(0.0);
     ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
     robot->getBodyNode("Torso")->setFrictionCoeff(friction);
-    robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
-    robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
-    robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
-    robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
-
-    robot->getBodyNode("rFootFront2")->setFrictionCoeff(friction);
-    robot->getBodyNode("rFootBack2")->setFrictionCoeff(friction);
-    robot->getBodyNode("lFootFront2")->setFrictionCoeff(friction);
-    robot->getBodyNode("lFootBack2")->setFrictionCoeff(friction);
-
     ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
     robot->getBodyNode("Torso")->setRestitutionCoeff(restit);
-    robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
-    robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
-    robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
-    robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
 
-    robot->getBodyNode("rFootFront2")->setRestitutionCoeff(restit);
-    robot->getBodyNode("rFootBack2")->setRestitutionCoeff(restit);
-    robot->getBodyNode("lFootFront2")->setRestitutionCoeff(restit);
-    robot->getBodyNode("lFootBack2")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
+    // robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
+    // robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
+    // robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
+    // robot->getBodyNode("rFootFront2")->setFrictionCoeff(friction);
+    // robot->getBodyNode("rFootBack2")->setFrictionCoeff(friction);
+    // robot->getBodyNode("lFootFront2")->setFrictionCoeff(friction);
+    // robot->getBodyNode("lFootBack2")->setFrictionCoeff(friction);
+    // robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("rFootFront2")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("rFootBack2")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("lFootFront2")->setRestitutionCoeff(restit);
+    // robot->getBodyNode("lFootBack2")->setRestitutionCoeff(restit);
+
+    robot->getBodyNode("rAnkle")->setFrictionCoeff(friction);
+    robot->getBodyNode("lAnkle")->setFrictionCoeff(friction);
+    robot->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
+    robot->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
     world->setTimeStep(servo_rate);
 
-    // ====================
+    // =========================================================================
     // Display Joints Frame
-    // ====================
+    // =========================================================================
     if (b_display_joint_frame) displayJointFrames(world, robot);
-    // ====================
+
+    // =========================================================================
     // Display Target Frame
-    // ====================
+    // =========================================================================
     if (b_display_target_frame) addTargetFrame(world);
 
-    // ====================
-    // Add Collision Object
-    // ====================
-    //_addFootCollisionObject(robot);
-
-    // =====================
+    // =========================================================================
     // Initial configuration
-    // =====================
+    // =========================================================================
     _setInitialConfiguration(robot);
 
-    // ================
+    // =========================================================================
+    // Enabel Joit Limits
+    // =========================================================================
+    if (b_joint_limit_enforced) _setJointLimitConstraint(robot);
+
+    // =========================================================================
     // Print Model Info
-    // ================
+    // =========================================================================
     //_printRobotModel(robot);
 
     osg::ref_ptr<osgShadow::MinimalShadowMap> msm =
@@ -319,9 +287,9 @@ int main(int argc, char** argv) {
     msm->setBaseTextureCoordIndex(baseTexUnit);
     msm->setBaseTextureUnit(baseTexUnit);
 
-    // ================
+    // =========================================================================
     // Wrap a worldnode
-    // ================
+    // =========================================================================
     osg::ref_ptr<DracoWorldNode> node;
     if (argc > 1) {
         node = new DracoWorldNode(world, msm, std::stoi(argv[1]),
@@ -331,10 +299,9 @@ int main(int argc, char** argv) {
     }
     node->setNumStepsPerCycle(num_steps_per_cycle);
 
-    // =====================
+    // =========================================================================
     // Create and Set Viewer
-    // =====================
-
+    // =========================================================================
     if (b_show) {
         dart::gui::osg::Viewer viewer;
         viewer.addWorldNode(node);
@@ -355,8 +322,8 @@ int main(int argc, char** argv) {
             viewer.record(THIS_COM "/ExperimentVideo");
         }
 
-        viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        // viewer.setUpViewInWindow(1440, 0, 500, 500);
+        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
             ::osg::Vec3(0.0, 0.0, 1.0));

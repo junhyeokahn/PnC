@@ -59,6 +59,7 @@ bool isInBoundingBox(const Eigen::VectorXd& lb, const Eigen::VectorXd& val,
     for (int i = 0; i < n; ++i) {
         if (lb[i] <= val[i] && val[i] <= ub[i]) {
         } else {
+            myUtils::color_print(myColor::BoldMagneta, "Is not BoundingBox");
             std::cout << i << " th : lb = " << lb[i] << " val = " << val[i]
                       << " ub = " << ub[i] << std::endl;
             ret = false;
@@ -103,13 +104,13 @@ Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
 
     for (int i = 0; i < n_data; ++i) {
         if (value[i] > max[i]) {
-            //printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
-                   //max[i]);
+            // printf("%s(%d): %f is cropped to %f\n", source.c_str(), i,
+            // value[i], max[i]);
             value[i] = max[i];
         }
         if (value[i] < min[i]) {
-            //printf("%s(%d): %f is cropped to %f\n", source.c_str(), i, value[i],
-                   //min[i]);
+            // printf("%s(%d): %f is cropped to %f\n", source.c_str(), i,
+            // value[i], min[i]);
             value[i] = min[i];
         }
     }
@@ -123,19 +124,21 @@ Eigen::MatrixXd CropMatrix(Eigen::MatrixXd value, Eigen::MatrixXd min,
     assert(value.cols() = max.cols());
     assert(value.rows() = max.rows());
 
-    int  n_row = value.rows();
-    int  n_cols = value.cols();
+    int n_row = value.rows();
+    int n_cols = value.cols();
 
-    for (int row_idx = 0; row_idx < n_row ; ++row_idx) {
+    for (int row_idx = 0; row_idx < n_row; ++row_idx) {
         for (int col_idx = 0; col_idx < n_cols; ++col_idx) {
             if (value(row_idx, col_idx) < min(row_idx, col_idx)) {
-                //printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(), row_idx, col_idx, value(row_idx, col_idx),
-                        //min(row_idx, col_idx));
+                // printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(),
+                // row_idx, col_idx, value(row_idx, col_idx), min(row_idx,
+                // col_idx));
                 value(row_idx, col_idx) = min(row_idx, col_idx);
             }
             if (value(row_idx, col_idx) > max(row_idx, col_idx)) {
-                //printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(), row_idx, col_idx, value(row_idx, col_idx),
-                        //max(row_idx, col_idx));
+                // printf("%s(%d, %d): %f is cropped to %f\n", source.c_str(),
+                // row_idx, col_idx, value(row_idx, col_idx), max(row_idx,
+                // col_idx));
                 value(row_idx, col_idx) = max(row_idx, col_idx);
             }
         }

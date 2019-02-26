@@ -22,8 +22,10 @@ DracoInterface::DracoInterface() : EnvInterface() {
     env_idx_ = 0;
     b_learning_ = false;
 
-    robot_ = new RobotSystem(
-        6, THIS_COM "RobotModel/Robot/Draco/DracoCollision.urdf");
+    robot_ =
+        // new RobotSystem(6, THIS_COM
+        // "RobotModel/Robot/Draco/DracoPnCOld.urdf");
+        new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
@@ -83,10 +85,12 @@ DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
     env_idx_ = env_idx;
     b_learning_ = true;
     myUtils::color_print(myColor::BoldCyan, border);
-    myUtils::pretty_constructor(0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) + ", ENV : " + std::to_string(env_idx) + " )");
+    myUtils::pretty_constructor(
+        0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) +
+               ", ENV : " + std::to_string(env_idx) + " )");
 
-    robot_ = new RobotSystem(
-        6, THIS_COM "RobotModel/Robot/Draco/DracoCollision.urdf");
+    robot_ =
+        new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
@@ -175,7 +179,7 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     sp_->phase_copy = test_->getPhase();
 
     // walking forward test
-    if (true) {
+    if (false) {
         if (sp_->curr_time > walking_start_time_) {
             double walking_time = sp_->curr_time - walking_start_time_;
             sp_->des_location[0] =
@@ -269,7 +273,7 @@ void DracoInterface::_ParameterSetting() {
             test_ = new BalancingTest(robot_);
         } else if (test_name == "rl_walking_test") {
 #if HAS_RL_DEP
-            if (b_learning_) {
+            if (!b_learning_) {
                 test_ = new RLWalkingTest(robot_);
             } else {
                 test_ = new RLWalkingTest(robot_, mpi_idx_, env_idx_);
