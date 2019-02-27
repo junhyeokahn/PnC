@@ -7,12 +7,13 @@ import pybullet_envs
 import gym
 import argparse
 import pybullet as p
+import pybullet_envs
 import time
 
 def test(args):
     count = 0
     if args.render:
-        env = gym.make(args.env, **{'renders':True})
+        env = gym.make(args.env, render=True)
     else:
         env = gym.make(args.env)
     env.reset()
@@ -21,17 +22,18 @@ def test(args):
     count = 0
     for i in range(args.steps):
         action = env.action_space.sample()
-        action = [0]*10
+        action = [0]*len(action)
         obs, rewards, done, _ = env.step(action)
-        print("# ===============================================")
-        print("ob : ", obs)
+        # print("# ===============================================")
+        # print("ob : ", obs)
         count += 1
         if done:
-            # print(count)
-            # count = 0
-            # env.reset()
+            print(count)
+            count = 0
+            env.reset()
             pass
-        time.sleep(env.env.timeStep)
+        # time.sleep(env.env.timeStep)
+        time.sleep(1./240.)
 
 def main():
     import argparse
