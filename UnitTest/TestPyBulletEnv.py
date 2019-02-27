@@ -22,23 +22,16 @@ def test(args):
     count = 0
     for i in range(args.steps):
         action = env.action_space.sample()
-        action = [0]*len(action)
+        # action = [0]*len(action)
+        p.stepSimulation()
         obs, rewards, done, _ = env.step(action)
-        # print("# ===============================================")
-        # print("ob : ", obs)
-        count += 1
         if done:
-            print(count)
-            count = 0
-            env.reset()
-            pass
-        # time.sleep(env.env.timeStep)
-        time.sleep(1./240.)
+            obs = env.reset()
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--env', help='environment ID', default='Draco-v0')
+    parser.add_argument('--env', help='environment ID')
     parser.add_argument('--render', help='OpenGL Visualizer', type=bool, default=True)
     parser.add_argument('--steps', help='Number of steps', type=int, default=10000)
 
