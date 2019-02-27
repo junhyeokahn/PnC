@@ -36,17 +36,14 @@ def do_learn(args):
     # ==========================================================================
     # configure logger
     # ==========================================================================
-    latest_run_id = get_latest_run_id(args.save_path, 'ppo')
-    save_path = osp.join(args.save_path, "{}_{}".format('ppo', latest_run_id+1))
-    if not osp.exists(save_path):
-        os.makedirs(save_path)
-
     if MPI is None or MPI.COMM_WORLD.Get_rank() == 0:
-        rank = 0
+        latest_run_id = get_latest_run_id(args.save_path, 'ppo')
+        save_path = osp.join(args.save_path, "{}_{}".format('ppo', latest_run_id+1))
+        if not osp.exists(save_path):
+            os.makedirs(save_path)
         logger.configure(dir=save_path, format_strs=['stdout', 'csv'])
     else:
-        logger.configure(dir=save_path, format_strs=[])
-        rank = MPI.COMM_WORLD.Get_rank()
+        logger.configure(format_strs=[])
 
     # ==========================================================================
     # Env
