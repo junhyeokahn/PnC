@@ -125,10 +125,14 @@ def do_play(args):
     # Play
     # ==========================================================================
     obs = env.reset()
+    total_rew = 0
     while True:
         actions, _, _, _ = model.step(obs)
-        obs, _, done, _ = env.step(np.squeeze(actions))
+        obs, rew, done, _ = env.step(np.squeeze(actions))
+        total_rew += rew
         if done:
+            print("total reward : ", total_rew)
+            total_rew = 0
             obs = env.reset()
         time.sleep(env.env.timeStep)
     env.close()
@@ -157,8 +161,8 @@ if __name__ == '__main__':
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
     parser.add_argument("--log_interval", type=int, default=1)
-    parser.add_argument("--nminibatches", type=int, default=4)
-    parser.add_argument("--noptepochs", type=int, default=4)
+    parser.add_argument("--nminibatches", type=int, default=16)
+    parser.add_argument("--noptepochs", type=int, default=10)
     parser.add_argument("--cliprange", type=float, default=0.2)
     parser.add_argument("--seed", type=int)
 

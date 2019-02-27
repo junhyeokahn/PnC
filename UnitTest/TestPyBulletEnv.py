@@ -21,13 +21,16 @@ def test(args):
     count = 0
     for i in range(args.steps):
         action = env.action_space.sample()
-        # action = [0]*10
+        action = [0]*10
         obs, rewards, done, _ = env.step(action)
+        print("# ===============================================")
+        print("ob : ", obs)
         count += 1
         if done:
-            print(count)
-            count = 0
-            env.reset()
+            # print(count)
+            # count = 0
+            # env.reset()
+            pass
         time.sleep(env.env.timeStep)
 
 def main():

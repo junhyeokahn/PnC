@@ -334,7 +334,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
-    obs_vec << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
+    obs_vec << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0],
+        com_vel[1];
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
@@ -373,28 +374,39 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     float reward(0.0);
     double input_pen = quad_input_penalty_ * output_vec.squaredNorm();
-    double height_dev_pen = deviation_penalty_ * (des_body_height_ - sp_->q[2]) *
-              (des_body_height_ - sp_->q[2]);
+    double height_dev_pen = deviation_penalty_ *
+                            (des_body_height_ - sp_->q[2]) *
+                            (des_body_height_ - sp_->q[2]);
     double yaw_dev_pen = deviation_penalty_ * (sp_->target_yaw - sp_->q[3]) *
-              (sp_->target_yaw - sp_->q[3]);
+                         (sp_->target_yaw - sp_->q[3]);
 
     Eigen::Vector2d act_location;
     act_location << sp_->q[0], sp_->q[1];
-    double loc_pen = deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
+    double loc_pen =
+        deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
 
     Eigen::VectorXd keyframe_vel = Eigen::VectorXd::Zero(2);
     keyframe_vel << sp_->qdot[0], sp_->qdot[1];
-    double keyframe_vel_pen = deviation_penalty_ * (sp_->target_keyframe_vel - keyframe_vel).squaredNorm();
+    double keyframe_vel_pen =
+        deviation_penalty_ *
+        (sp_->target_keyframe_vel - keyframe_vel).squaredNorm();
 
-    reward = -input_pen - height_dev_pen - yaw_dev_pen - loc_pen - keyframe_vel_pen;
-
+    // TEST //
+    // reward = -input_pen - height_dev_pen - yaw_dev_pen - loc_pen -
+    // keyframe_vel_pen;
+    // TEST //
     if (!done) {
         reward += alive_reward_;
     }
-    std::cout << "// ==========================================================" << std::endl;
-    std::cout << "// reward info "<< std::endl;
-    std::cout << "// ==========================================================" << std::endl;
-    std::cout <<"total rew : " << reward << "| input pen : " << input_pen << ", height_dev_pen : " << height_dev_pen << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen << ", keyframe_vel_pen : " << keyframe_vel_pen << std::endl;
+    std::cout << "// =========================================================="
+              << std::endl;
+    std::cout << "// reward info " << std::endl;
+    std::cout << "// =========================================================="
+              << std::endl;
+    std::cout << "total rew : " << reward << "| input pen : " << input_pen
+              << ", height_dev_pen : " << height_dev_pen
+              << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
+              << ", keyframe_vel_pen : " << keyframe_vel_pen << std::endl;
 
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
