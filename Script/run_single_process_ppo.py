@@ -27,6 +27,11 @@ try:
 except ImportError:
     MPI = None
 
+try:
+    import pybullet_envs
+except ImportError:
+    pybullet_envs = None
+
 def do_learn(args):
     # ==========================================================================
     # configure logger
@@ -120,21 +125,27 @@ def do_play(args):
                   nbatch_act=args.num_envs, nbatch_train=args.num_data_per_batch,
                   nsteps=args.num_steps, ent_coef=args.ent_coef,
                   vf_coef=args.vf_coef, max_grad_norm=args.max_grad_norm)
+    model.load(args.load_path)
 
     # ==========================================================================
     # Play
     # ==========================================================================
     obs = env.reset()
     total_rew = 0
+    epi_len = 0
     while True:
         actions, _, _, _ = model.step(obs)
         obs, rew, done, _ = env.step(np.squeeze(actions))
         total_rew += rew
+        epi_len += 1
         if done:
             print("total reward : ", total_rew)
+            print("episode length : ", epi_len)
             total_rew = 0
+            epi_len = 0
             obs = env.reset()
-        time.sleep(env.env.timeStep)
+        # time.sleep(env.env.timeStep)
+        time.sleep(1./240.)
     env.close()
 
 if __name__ == '__main__':
