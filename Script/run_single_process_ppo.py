@@ -74,13 +74,14 @@ def do_learn(args):
     # ==========================================================================
     # Learn
     # ==========================================================================
+    nminibatches = args.num_envs * args.num_steps // args.num_data_per_batch
     model = learn(network=args.network, env=env,
                   total_timesteps=args.num_timesteps, seed=args.seed,
                   nsteps=args.num_steps, ent_coef=args.ent_coef, lr=args.lr,
                   vf_coef=args.vf_coef, max_grad_norm=args.max_grad_norm,
                   gamma=args.gamma, lam=args.lam,
                   log_interval=args.log_interval,
-                  nminibatches=args.nminibatches,
+                  nminibatches=nminibatches,
                   noptepochs=args.noptepochs, cliprange=args.cliprange,
                   save_interval=args.save_interval,
                   load_path=args.load_path, **network_kwargs)
@@ -113,11 +114,10 @@ def do_play(args):
     ob_space = env.observation_space
     ac_space = env.action_space
 
-    nbatch = args.num_envs * args.num_steps
-    nbatch_train = nbatch // args.nminibatches
+    nminibatches = args.num_envs * args.num_steps // args.num_data_per_batch
 
     model = Model(policy=policy, ob_space=ob_space, ac_space=ac_space,
-                  nbatch_act=args.num_envs, nbatch_train=nbatch_train,
+                  nbatch_act=args.num_envs, nbatch_train=args.num_data_per_batch,
                   nsteps=args.num_steps, ent_coef=args.ent_coef,
                   vf_coef=args.vf_coef, max_grad_norm=args.max_grad_norm)
 
@@ -152,8 +152,8 @@ if __name__ == '__main__':
     parser.add_argument("--activation", type=int, default=1)
     parser.add_argument("--value_network", type=str, default='copy')
 
-    parser.add_argument("--num_timesteps", type=int, default=1e7)
-    parser.add_argument("--num_steps", type=int, default=512)
+    parser.add_argument("--num_timesteps", type=int, default=5e7)
+    parser.add_argument("--num_steps", type=int, default=2048)
     parser.add_argument("--ent_coef", type=float, default=0.0)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--vf_coef", type=float, default=0.5)
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
     parser.add_argument("--log_interval", type=int, default=1)
-    parser.add_argument("--nminibatches", type=int, default=16)
+    parser.add_argument("--num_data_per_batch", type=int, default=64)
     parser.add_argument("--noptepochs", type=int, default=10)
     parser.add_argument("--cliprange", type=float, default=0.2)
     parser.add_argument("--seed", type=int)

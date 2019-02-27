@@ -36,7 +36,7 @@ def main(args):
     parser.add_argument("--max_grad_norm", type=float, default=0.5)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
-    parser.add_argument("--num_minibatches", type=int, default=4)
+    parser.add_argument("--num_data_per_batch", type=int, default=64)
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
 
@@ -88,11 +88,12 @@ def main(args):
     # ==========================================================================
     # learn model with ppo
     # ==========================================================================
+    nminibatches = args.num_envs * args.num_steps // args.num_data_per_batch
     model = learn(env, args.num_envs, network, args.password,
                 total_timesteps=args.num_timesteps, nsteps=args.num_steps,
                 ent_coef=args.ent_coef, lr=args.lr, vf_coef=args.vf_coef,
                 max_grad_norm=args.max_grad_norm, gamma=args.gamma, lam=args.lam,
-                log_interval=args.log_interval, nminibatches=args.num_minibatches,
+                log_interval=args.log_interval, nminibatches=num_minibatches,
                 noptepochs=args.num_optepochs, cliprange=args.cliprange,
                 save_interval=args.save_interval, save_path=save_path,
                 load_path=args.load_path, **network_kwargs)
