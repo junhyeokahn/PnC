@@ -82,7 +82,7 @@ def do_learn(args):
                   gamma=args.gamma, lam=args.lam,
                   log_interval=args.log_interval,
                   nminibatches=nminibatches,
-                  noptepochs=args.noptepochs, cliprange=args.cliprange,
+                  noptepochs=args.num_epochs, cliprange=args.cliprange,
                   save_interval=args.save_interval,
                   load_path=args.load_path, **network_kwargs)
     env.close()
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument("--lam", type=float, default=0.95)
     parser.add_argument("--log_interval", type=int, default=1)
     parser.add_argument("--num_data_per_batch", type=int, default=64)
-    parser.add_argument("--noptepochs", type=int, default=10)
+    parser.add_argument("--num_epochs", type=int, default=10)
     parser.add_argument("--cliprange", type=float, default=0.2)
     parser.add_argument("--seed", type=int)
 
