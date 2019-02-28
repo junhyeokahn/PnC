@@ -24,14 +24,15 @@ def random_action_test(args):
         action = env.action_space.sample()
         action = [0]*len(action)
         obs, rewards, done, _ = env.step(action)
-        if done:
-            obs = env.reset()
+        # if done:
+            # obs = env.reset()
+        time.sleep(1./240.)
 
 def computation_time_test(args):
     t_0 = time.time()
     count = 0
-    env = gym.make(args.env) ## <-- ##
-    env.reset() ## <-- ##
+    env = gym.make(args.env)
+    env.reset()
     sample = env.action_space.sample()
     t_1 = time.time()
     print("initialization time : ", t_1 - t_0)
@@ -54,8 +55,8 @@ def main():
     args = parser.parse_args()
 
     ### TEST
-    # random_action_test(args)
-    computation_time_test(args)
+    random_action_test(args)
+    # computation_time_test(args)
 
 if __name__ == '__main__':
     main()
