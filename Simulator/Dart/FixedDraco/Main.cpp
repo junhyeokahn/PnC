@@ -1,5 +1,5 @@
 #include <Configuration.h>
-#include <Simulator/Dart/Draco/DracoWorldNode.hpp>
+#include <Simulator/Dart/FixedDraco/FixedDracoWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
@@ -44,7 +44,7 @@ void addTargetFrame(const dart::simulation::WorldPtr& world) {
 
 class OneStepProgress : public osgGA::GUIEventHandler {
    public:
-    OneStepProgress(DracoWorldNode* worldnode) : worldnode_(worldnode) {}
+    OneStepProgress(FixedDracoWorldNode* worldnode) : worldnode_(worldnode) {}
 
     /** Deprecated, Handle events, return true if handled, false otherwise. */
     virtual bool handle(const osgGA::GUIEventAdapter& ea,
@@ -62,7 +62,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
         }
         return false;
     }
-    DracoWorldNode* worldnode_;
+    FixedDracoWorldNode* worldnode_;
 };
 
 void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
@@ -121,82 +121,24 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    int initPos(2);  // 0 : Home, 1 : Simulation, 2 : Experiment
     Eigen::VectorXd q = robot->getPositions();
-
-    switch (initPos) {
-        case 0: {
-            q[2] = 1.425;
-            q[lAnkleIdx] = 0.;
-            q[rAnkleIdx] = 0.;
-            // q[lAnkleIdx] = M_PI/2;
-            // q[rAnkleIdx] = M_PI/2;
-            break;
-        }
-        case 1: {
-            q[2] = 1.193;
-            double alpha(-M_PI / 4.);
-            double beta(M_PI / 5.5);
-            q[lHipPitchIdx] = alpha;
-            q[lKneeIdx] = beta - alpha;
-            q[rHipPitchIdx] = alpha;
-            q[rKneeIdx] = beta - alpha;
-            q[lAnkleIdx] = M_PI / 2 - beta;
-            q[rAnkleIdx] = M_PI / 2 - beta;
-            break;
-        }
-        case 2: {
-            YAML::Node simulation_cfg =
-                YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
-            double hanging_height(0.0);
-            myUtils::readParameter(simulation_cfg, "hanging_height",
-                                   hanging_height);
-            Eigen::VectorXd init_config;
-            myUtils::readParameter(simulation_cfg, "initial_configuration",
-                                   init_config);
-            q[2] = hanging_height;
-            q.tail(10) = init_config;
-            break;
-        }
-        default:
-            std::cout << "[wrong initial pos case] in Draco/Main.cpp"
-                      << std::endl;
-    }
+    q[rAnkleIdx] = 1.57;
+    q[lAnkleIdx] = 1.57;
 
     robot->setPositions(q);
 }
 
 int main(int argc, char** argv) {
-    // =========================================================================
-    // Parse Yaml for Simulator
-    // =========================================================================
-    bool isRecord;
-    bool b_display_joint_frame;
-    bool b_display_target_frame;
-    bool b_joint_limit_enforced;
-    bool b_show;
-    int num_steps_per_cycle;
     double servo_rate;
     try {
         YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "is_record", isRecord);
-        myUtils::readParameter(simulation_cfg, "display_joint_frame",
-                               b_display_joint_frame);
-        myUtils::readParameter(simulation_cfg, "display_target_frame",
-                               b_display_target_frame);
-        myUtils::readParameter(simulation_cfg, "joint_limit_enforced",
-                               b_joint_limit_enforced);
-        myUtils::readParameter(simulation_cfg, "num_steps_per_cycle",
-                               num_steps_per_cycle);
+            YAML::LoadFile(THIS_COM "Config/FixedDraco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
-        myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
                   << std::endl;
     }
-
     // =========================================================================
     // Generate world and add skeletons
     // =========================================================================
@@ -205,7 +147,7 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Draco/DracoSim.urdf");
+        THIS_COM "RobotModel/Robot/Draco/FixedDracoSim_Dart.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 
@@ -214,32 +156,6 @@ int main(int argc, char** argv) {
     // =========================================================================
     double friction(10.);
     double restit(0.0);
-    ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
-    robot->getBodyNode("Torso")->setFrictionCoeff(friction);
-    ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
-    robot->getBodyNode("Torso")->setRestitutionCoeff(restit);
-
-    // robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootFront2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootBack2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootFront2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootBack2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootFront2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootBack2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootFront2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootBack2")->setRestitutionCoeff(restit);
-
-    robot->getBodyNode("rAnkle")->setFrictionCoeff(friction);
-    robot->getBodyNode("lAnkle")->setFrictionCoeff(friction);
-    robot->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
-    robot->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -248,12 +164,12 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Display Joints Frame
     // =========================================================================
-    if (b_display_joint_frame) displayJointFrames(world, robot);
+    // displayJointFrames(world, robot);
 
     // =========================================================================
     // Display Target Frame
     // =========================================================================
-    if (b_display_target_frame) addTargetFrame(world);
+    // addTargetFrame(world);
 
     // =========================================================================
     // Initial configuration
@@ -263,7 +179,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Enabel Joit Limits
     // =========================================================================
-    if (b_joint_limit_enforced) _setJointLimitConstraint(robot);
+    //_setJointLimitConstraint(robot);
 
     // =========================================================================
     // Print Model Info
@@ -290,50 +206,31 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Wrap a worldnode
     // =========================================================================
-    osg::ref_ptr<DracoWorldNode> node;
-    if (argc > 1) {
-        node = new DracoWorldNode(world, msm, std::stoi(argv[1]),
-                                  std::stoi(argv[2]));
-    } else {
-        node = new DracoWorldNode(world, msm);
-    }
-    node->setNumStepsPerCycle(num_steps_per_cycle);
+    osg::ref_ptr<FixedDracoWorldNode> node;
+    node = new FixedDracoWorldNode(world, msm);
+    node->setNumStepsPerCycle(30);
 
     // =========================================================================
     // Create and Set Viewer
     // =========================================================================
-    if (b_show) {
-        dart::gui::osg::Viewer viewer;
-        viewer.addWorldNode(node);
-        viewer.simulate(false);
-        viewer.switchHeadlights(false);
-        msm->setLight(viewer.getLightSource(0)->getLight());
-        ::osg::Vec3 p1(1.0, 0.2, 1.0);
-        p1 = p1 * 0.7;
-        viewer.getLightSource(0)->getLight()->setPosition(
-            ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
-        viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-        viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
-                                         GL_DEPTH_BUFFER_BIT);
-        viewer.addEventHandler(new OneStepProgress(node));
+    dart::gui::osg::Viewer viewer;
+    viewer.addWorldNode(node);
+    viewer.simulate(false);
+    viewer.switchHeadlights(false);
+    msm->setLight(viewer.getLightSource(0)->getLight());
+    ::osg::Vec3 p1(1.0, 0.2, 1.0);
+    p1 = p1 * 0.7;
+    viewer.getLightSource(0)->getLight()->setPosition(
+        ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
+    viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
+    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    viewer.addEventHandler(new OneStepProgress(node));
 
-        if (isRecord) {
-            std::cout << "[Video Record Enable]" << std::endl;
-            viewer.record(THIS_COM "/ExperimentVideo");
-        }
-
-        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 500, 500);
-        viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
-            ::osg::Vec3(0.0, 0.0, 1.0));
-        viewer.setCameraManipulator(viewer.getCameraManipulator());
-        viewer.run();
-    } else {
-        while (true) {
-            node->customPreStep();
-            node->getWorld()->step();
-            node->customPostStep();
-        }
-    }
+    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    // viewer.setUpViewInWindow(1440, 0, 500, 500);
+    viewer.getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    viewer.setCameraManipulator(viewer.getCameraManipulator());
+    viewer.run();
 }

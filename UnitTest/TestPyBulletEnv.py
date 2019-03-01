@@ -22,7 +22,7 @@ def random_action_test(args):
     count = 0
     for i in range(args.steps):
         action = env.action_space.sample()
-        # action = [0]*len(action)
+        #action = [0]*len(action)
         obs, rewards, done, _ = env.step(action)
         if done:
             obs = env.reset()
