@@ -9,7 +9,8 @@ list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/OfflineTrajGen/CentroidDynO
 
 if( NOT (ZMQ_FOUND AND Protobuf_FOUND) )
     list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/TestSet/RLWalkingTest.cpp
-                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/BodyFootLearningCtrl.cpp)
+                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/BodyFootLearningCtrl.cpp
+                             ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/BodyFootPolicyCtrl.cpp)
 endif()
 
 add_library(DracoPnC ${sources})
