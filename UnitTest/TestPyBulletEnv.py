@@ -22,11 +22,12 @@ def random_action_test(args):
     count = 0
     for i in range(args.steps):
         action = env.action_space.sample()
-        action = [0]*len(action)
+        # action = [0]*len(action)
         obs, rewards, done, _ = env.step(action)
-        # if done:
-            # obs = env.reset()
-        time.sleep(1./240.)
+        if done:
+            obs = env.reset()
+        # time.sleep(1./240.)
+        time.sleep(0.016)
 
 def computation_time_test(args):
     t_0 = time.time()

@@ -132,7 +132,8 @@ def do_play(args):
     epi_len = 0
     while True:
         actions, _, _, _ = model.step(obs)
-        # print("action : ", actions)
+        # print("obs : ", obs)
+        # print("ac : ", actions)
         obs, rew, done, _ = env.step(np.squeeze(actions))
         total_rew += rew
         epi_len += 1
