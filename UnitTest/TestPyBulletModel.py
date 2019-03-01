@@ -30,6 +30,7 @@ def test(args):
     joint_list = {}
     link_list = {}
     dof_idx = []
+    dof_max_trq = []
     active_joint = 0
     for j in range (p.getNumJoints(robot)):
         # ======================================================================
@@ -53,11 +54,14 @@ def test(args):
         p.setJointMotorControl2(robot, j, p.VELOCITY_CONTROL,force=0.0)
         if (joint_type==p.JOINT_PRISMATIC or joint_type==p.JOINT_REVOLUTE):
             dof_idx.append(j)
+            dof_max_trq.append(info[10])
             active_joint+=1
     n_dof = active_joint
 
     print(joint_list)
     print(dof_idx)
+    print(dof_max_trq)
+    # print(joint_list.keys())
 
     # p.resetJointState(robot, joint_list['rAnkle'], np.pi/2.)
     # p.resetJointState(robot, joint_list['lAnkle'], np.pi/2.)
