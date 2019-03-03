@@ -70,7 +70,7 @@ fi
 echo "# ==================================================================="
 echo "# Install Gym"
 echo "# ==================================================================="
-cd ${PATH_PACKAGE}/ReinforcementLearning/gym && pip install -e . &&
+conda install -c akode gym &&
 
 echo "# ==================================================================="
 echo "# Install Baseline"

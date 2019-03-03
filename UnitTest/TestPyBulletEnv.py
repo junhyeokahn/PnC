@@ -3,7 +3,9 @@ import inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
 os.sys.path.insert(0,parentdir)
-import pybullet_envs
+import os
+sys.path.append(os.getcwd()+'/ReinforcementLearning')
+import MyGym
 import gym
 import argparse
 import pybullet as p

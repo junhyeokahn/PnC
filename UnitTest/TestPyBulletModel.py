@@ -63,8 +63,8 @@ def test(args):
     print(dof_max_trq)
     # print(joint_list.keys())
 
-    # p.resetJointState(robot, joint_list['rAnkle'], np.pi/2.)
-    # p.resetJointState(robot, joint_list['lAnkle'], np.pi/2.)
+    # p.resetJointState(robot, joint_list['rKnee'], 0.52)
+    # p.resetJointState(robot, joint_list['lKnee'], 0.52)
 
     while (1):
         p.stepSimulation()
