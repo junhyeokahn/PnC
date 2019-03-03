@@ -7,6 +7,3 @@
 [submodule "ReinforcementLearning/baselines"]
 	path = ReinforcementLearning/baselines
 	url = https://github.com/junhyeokahn/baselines.git
-[submodule "ReinforcementLearning/gym"]
-	path = ReinforcementLearning/gym
-	url = https://github.com/junhyeokahn/gym.git
