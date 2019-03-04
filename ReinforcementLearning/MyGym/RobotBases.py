@@ -163,7 +163,8 @@ class URDFBasedRobot(XmlBasedRobot):
 					self._p.loadURDF(self.model_urdf,
 					basePosition=self.basePosition,
 					baseOrientation=self.baseOrientation,
-					useFixedBase=self.fixed_base))
+					useFixedBase=self.fixed_base,
+                                        flags=pybullet.URDF_USE_MATERIAL_COLORS_FROM_MTL))
 
 		self.robot_specific_reset(self._p)
 

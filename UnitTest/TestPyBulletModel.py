@@ -23,7 +23,7 @@ def test(args):
         b_urdf = False
 
     if b_urdf:
-        robot= p.loadURDF(args.file, [0, 0, 1.5], useFixedBase=True)
+        robot= p.loadURDF(args.file, [0, 0, 1.5], useFixedBase=True, flags=p.URDF_USE_MATERIAL_COLORS_FROM_MTL)
     else:
         robot=p.loadMJCF(args.file)[0]
 
