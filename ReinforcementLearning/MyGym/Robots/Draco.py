@@ -15,15 +15,16 @@ class Draco(WalkerBase, URDFBasedRobot):
     def __init__(self):
         n_ac = 8
         n_obs = 8 + 2*n_ac + 2
-        WalkerBase.__init__(self, power=2.9)
+        WalkerBase.__init__(self, power=1.5)
         URDFBasedRobot.__init__(self, PROJECT_PATH+"/RobotModel/Robot/Draco/FixedDracoSim_PyBullet.urdf", "Torso", action_dim=n_ac, obs_dim=n_obs)
 
     def alive_bonus(self, z, pitch):
         x, y, z = self.torso.pose().xyz()
+        roll, pitch, yaw = self.torso.pose().rpy()
 
         knees = np.array([j.current_relative_position() for j in [self.jdict["lKnee"], self.jdict["rKnee"]]], dtype=np.float32).flatten()
         knees_at_limit = np.count_nonzero(np.abs(knees[0::2]) > 0.99)
-        return +4 - knees_at_limit if z > 0.75 else -1
+        return +4 - knees_at_limit if ((z > 0.75) and (yaw < np.deg2rad(45))) else -1
 
     def robot_specific_reset(self, bullet_client):
         WalkerBase.robot_specific_reset(self, bullet_client)

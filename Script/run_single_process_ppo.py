@@ -147,7 +147,7 @@ def do_play(args):
             epi_len = 0
             obs = env.reset()
         # time.sleep(env.env.timeStep)
-        # time.sleep(1./240.)
+        time.sleep(0.016)
     env.close()
 
 if __name__ == '__main__':
