@@ -22,9 +22,9 @@ class XmlBasedRobot:
 		self.robot_body = None
 
 		high = np.ones([action_dim])
-		self.action_space = gym.spaces.Box(-high, high)
+		self.action_space = gym.spaces.Box(-high, high, dtype=np.float32)
 		high = np.inf * np.ones([obs_dim])
-		self.observation_space = gym.spaces.Box(-high, high)
+		self.observation_space = gym.spaces.Box(-high, high, dtype=np.float32)
 
 		self.robot_name = robot_name
 		self.self_collision = self_collision
