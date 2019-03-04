@@ -32,6 +32,9 @@ class WalkerBaseBulletEnv(BaseBulletEnv):
         self._p.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 1)
         if self.stateId < 0:
             self.stateId=self._p.saveState()
+
+        if self.isRender:
+            self.camera_adjust()
         # print("saving state self.stateId:",self.stateId)
 
         return r
@@ -109,9 +112,12 @@ class WalkerBaseBulletEnv(BaseBulletEnv):
         self.HUD(state, a, done)
         self.reward += sum(self.rewards)
 
+        if self.isRender:
+            self.camera_adjust()
+
         return state, sum(self.rewards), bool(done), {}
 
     def camera_adjust(self):
-        x, y, z = self.body_xyz
+        x, y, z = self.robot.body_xyz
         self.camera_x = 0.98*self.camera_x + (1-0.98)*x
-        self.camera.move_and_look_at(self.camera_x, y-2.0, 1.4, x, y, 1.0)
+        self.camera.move_and_look_at(self._p, self.camera_x, y-2.0, 1.4, x, y, 1.0)
