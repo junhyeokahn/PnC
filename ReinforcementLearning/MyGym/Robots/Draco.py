@@ -22,12 +22,12 @@ class Draco(WalkerBase, URDFBasedRobot):
         x, y, z = self.torso.pose().xyz()
         roll, pitch, yaw = self.torso.pose().rpy()
 
-        done = (z < 0.75) or (np.abs(yaw) > np.deg2rad(45)) or (np.abs(y) > 0.15)
+        done = (z < 0.75) or (np.abs(yaw) > np.deg2rad(45)) or (np.abs(y) > 1.)
 
         knees = np.array([j.current_relative_position() for j in [self.jdict["lKnee"], self.jdict["rKnee"]]], dtype=np.float32).flatten()
         knees_at_limit = np.count_nonzero(np.abs(knees[0::2]) > 0.99)
 
-        deviations = np.abs(y) / 0.15 + np.abs(yaw) / np.deg2rad(45)
+        deviations = np.abs(y) / 1. + np.abs(yaw) / np.deg2rad(45)
 
         return +4 - knees_at_limit - deviations if not done else -1
 
