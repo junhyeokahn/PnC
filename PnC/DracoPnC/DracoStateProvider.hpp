@@ -13,7 +13,6 @@ class DracoStateProvider {
     std::string stance_foot;
     double curr_time;
     int rl_count;
-    Eigen::VectorXd target_keyframe_vel;
     double target_yaw;
 
     Eigen::VectorXd q;

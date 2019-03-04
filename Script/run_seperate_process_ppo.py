@@ -1,11 +1,12 @@
 import datetime
 import sys
 import os
+import os.path as osp
 sys.path.append(os.getcwd() + '/build/Messages')
+sys.path.append(os.getcwd()+'/ReinforcementLearning')
+import MyGym
 
 import gym
-from gym.envs.custom import dummy_cartpole
-from gym.envs.custom import dummy_draco
 from gym import envs
 from baselines.ppo2.seperate_process_ppo2 import learn
 from baselines.common.misc_util import get_latest_run_id
@@ -28,15 +29,15 @@ def main(args):
     parser.add_argument("--num_hidden", type=int, default=64)
     parser.add_argument("--activation", type=int, default=1)
 
-    parser.add_argument("--num_timesteps", type=int, default=1e6)
-    parser.add_argument("--num_steps", type=int, default=2048)
+    parser.add_argument("--num_timesteps", type=int, default=1e5)
+    parser.add_argument("--num_steps", type=int, default=64)
     parser.add_argument("--ent_coef", type=float, default=0)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--vf_coef", type=float, default=0.5)
     parser.add_argument("--max_grad_norm", type=float, default=0.5)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
-    parser.add_argument("--num_data_per_batch", type=int, default=64)
+    parser.add_argument("--num_data_per_batch", type=int, default=32)
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
 
@@ -67,18 +68,14 @@ def main(args):
     # ==========================================================================
     # configure logger
     # ==========================================================================
-    latest_run_id = get_latest_run_id(args.save_path, 'ppo')
-    save_path = os.path.join(args.save_path, "{}_{}".format('ppo', latest_run_id+1))
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
     if MPI is None or MPI.COMM_WORLD.Get_rank() == 0:
-        rank = 0
-        # logger.configure(dir=save_path)
+        latest_run_id = get_latest_run_id(args.save_path, 'ppo')
+        save_path = osp.join(args.save_path, "{}_{}".format('ppo', latest_run_id+1))
+        if not osp.exists(save_path):
+            os.makedirs(save_path)
         logger.configure(dir=save_path, format_strs=['stdout', 'csv'])
     else:
-        logger.configure(dir=save_path, format_strs=[])
-        rank = MPI.COMM_WORLD.Get_rank()
+        logger.configure(format_strs=[])
 
     # ==========================================================================
     # gym env
@@ -93,10 +90,10 @@ def main(args):
                 total_timesteps=args.num_timesteps, nsteps=args.num_steps,
                 ent_coef=args.ent_coef, lr=args.lr, vf_coef=args.vf_coef,
                 max_grad_norm=args.max_grad_norm, gamma=args.gamma, lam=args.lam,
-                log_interval=args.log_interval, nminibatches=num_minibatches,
+                log_interval=args.log_interval, nminibatches=nminibatches,
                 noptepochs=args.num_optepochs, cliprange=args.cliprange,
-                save_interval=args.save_interval, save_path=save_path,
-                load_path=args.load_path, **network_kwargs)
+                save_interval=args.save_interval, load_path=args.load_path,
+                **network_kwargs)
 
 if __name__ == "__main__":
     main(sys.argv)

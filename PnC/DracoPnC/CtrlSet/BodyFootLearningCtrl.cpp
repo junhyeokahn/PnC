@@ -320,9 +320,11 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // 2. observation
     // =========================================================================
     Eigen::Vector3d com_pos = robot_->getCoMPosition();
+    Eigen::Vector3d com_pos2 = robot_->getCoMPosition();  // TEST
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
     for (int i(0); i < 2; ++i) {
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
+        com_pos2[i] = sp_->q[i];  // TEST
         // com_pos[i] += body_pt_offset_[i];
         // !! TEST !!
         com_vel[i] = sp_->qdot[i];
@@ -333,9 +335,10 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
-    obs << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
-    obs_vec << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0],
-        com_vel[1];
+    obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
+    obs_vec << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
@@ -374,44 +377,50 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     float reward(0.0);
     double input_pen = quad_input_penalty_ * output_vec.squaredNorm();
-    double height_dev_pen = deviation_penalty_ *
-                            (des_body_height_ - sp_->q[2]) *
-                            (des_body_height_ - sp_->q[2]);
-    double yaw_dev_pen = deviation_penalty_ * (sp_->target_yaw - sp_->q[3]) *
-                         (sp_->target_yaw - sp_->q[3]);
-
+    double yaw_dev_pen =
+        deviation_penalty_ * (sp_->target_yaw - sp_->q[3]) *
+        (sp_->target_yaw - sp_->q[3]) /
+        (terminate_obs_upper_bound_[5] * terminate_obs_upper_bound_[5]);
     Eigen::Vector2d act_location;
     act_location << sp_->q[0], sp_->q[1];
     double loc_pen =
         deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
 
-    Eigen::VectorXd keyframe_vel = Eigen::VectorXd::Zero(2);
-    keyframe_vel << sp_->qdot[0], sp_->qdot[1];
-    double keyframe_vel_pen =
-        deviation_penalty_ *
-        (sp_->target_keyframe_vel - keyframe_vel).squaredNorm();
-
-    // TEST //
-    // reward = -input_pen - height_dev_pen - yaw_dev_pen - loc_pen -
-    // keyframe_vel_pen;
-    // TEST //
+    reward = -input_pen - yaw_dev_pen - loc_pen;
     if (!done) {
         reward += alive_reward_;
     }
-    std::cout << "// =========================================================="
-              << std::endl;
-    std::cout << "// reward info " << std::endl;
-    std::cout << "// =========================================================="
-              << std::endl;
-    std::cout << "total rew : " << reward << "| input pen : " << input_pen
-              << ", height_dev_pen : " << height_dev_pen
-              << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
-              << ", keyframe_vel_pen : " << keyframe_vel_pen << std::endl;
+    // std::cout << "//
+    // =========================================================="
+    //<< std::endl;
+    // std::cout << "// Reward info " << std::endl;
+    // std::cout << "//
+    // =========================================================="
+    //<< std::endl;
+    // std::cout << "total rew : " << reward << "|| input pen : " << input_pen
+    //<< ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
+    //<< std::endl;
+
+    // std::cout << "//
+    // =========================================================="
+    //<< std::endl;
+    // std::cout << "// Observation info " << std::endl;
+    // std::cout << "//
+    // =========================================================="
+    //<< std::endl;
+    // myUtils::pretty_print(obs_vec, std::cout,
+    //"x, y, z, roll, pitch, yaw, vx, vy, vz");
 
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
-    myUtils::color_print(myColor::BoldMagneta, "[[Send Data]]");
-    RLInterface::GetRLInterface()->SendData();
+    if (sp_->num_step_copy == 1) {
+        RLInterface::GetRLInterface()->GetRLData()->b_data_filled = false;
+        sp_->rl_count = 0;
+        myUtils::color_print(myColor::BoldMagneta, "[[Skip First Step Data]]");
+    } else {
+        myUtils::color_print(myColor::BoldMagneta, "[[Send Data]]");
+        RLInterface::GetRLInterface()->SendData();
+    }
 
     // =========================================================================
     // Foot Step Guider
@@ -432,9 +441,14 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         pl_param.b_positive_sidestep = false;
 
     Eigen::Vector3d global_com_pos = com_pos + sp_->global_pos_local;
+    // TEST
+    Eigen::Vector3d global_com_pos2 = com_pos2 + sp_->global_pos_local;
 
     planner_->getNextFootLocation(global_com_pos, com_vel, target_loc,
                                   &pl_param, &pl_output);
+    Eigen::Vector3d target_loc2;  // TEST
+    planner_->getNextFootLocation(global_com_pos2, com_vel, target_loc2,
+                                  &pl_param, &pl_output);  // TEST
 
     Eigen::VectorXd ss_global(4);
     for (int i = 0; i < 4; ++i) {
@@ -454,6 +468,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // Step adjustment
     // =========================================================================
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
+    // myUtils::pretty_print(target_loc2, std::cout,
+    //"guided next foot location without body offset");
     for (int i = 0; i < 2; ++i) {
         target_loc[i] += action_scale_[i] * output_vec[i];
     }
@@ -595,8 +611,6 @@ void BodyFootLearningCtrl::ctrlInitialization(const YAML::Node& node) {
 
         myUtils::readParameter(node, "quad_input_penalty", quad_input_penalty_);
         myUtils::readParameter(node, "alive_reward", alive_reward_);
-        myUtils::readParameter(node, "keyframe_vel_penalty",
-                               keyframe_vel_penalty_);
         myUtils::readParameter(node, "deviation_penalty", deviation_penalty_);
         myUtils::readParameter(node, "reward_scale", reward_scale_);
     } catch (std::runtime_error& e) {

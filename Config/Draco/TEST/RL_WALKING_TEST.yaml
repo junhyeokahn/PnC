@@ -26,17 +26,17 @@ test_configuration:
         ip_control_pc: "localhost"
         ip_sub_pub_prefix: "tcp://127.0.0.1:50"
         ip_req_rep_prefix: "tcp://127.0.0.1:51"
-        #username: 'junhyeokahn'
-        username: 'junhyeok'
+        username: 'junhyeokahn'
+        #username: 'junhyeok'
         execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_draco"
         exit_cmd: "pkill -f 'draco"
 
     # ==========================================================================
-    # Observation \in R^{4}
-    # [ com_x, com_y, com_z, com_yaw, com_vx, com_vy ]
+    # Observation \in R^{9}
+    # [ com_x, com_y, com_z, com_roll, com_pitch, com_yaw, com_vx, com_vy, com_vz ]
     # ==========================================================================
-    obs_lower_bound: [-100., -100., -100., -100., -100., -100.]
-    obs_upper_bound: [100., 100., 100., 100., 100., 100.]
+    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
+    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
 
     # ==========================================================================
     # Action \in R^{2}
@@ -44,13 +44,13 @@ test_configuration:
     # ==========================================================================
     action_lower_bound: [-1, -1]
     action_upper_bound: [1, 1]
-    action_scale: [0.1, 0.1]
+    action_scale: [0.1, 0.05]
 
     # ======================================================================
     # Terminate condition
     # ======================================================================
-    terminate_obs_lower_bound: [-0.4 , -0.3 , 0.85, -0.35, -0.5 , -0.5]
-    terminate_obs_upper_bound: [0.4  , 0.3  , 1.05, 0.35,  0.5  , 0.5]
+    terminate_obs_lower_bound: [-0.3 , -0.3 , -0.1 , -0.52 , -0.52 , -0.52 , -0.5 , -0.5 , -0.2]
+    terminate_obs_upper_bound: [0.3  , 0.3  , 0.1  , 0.52  , 0.52  , 0.52  , 0.5  , 0.5  , 0.2]
 
 control_configuration:
 
@@ -97,9 +97,8 @@ control_configuration:
 
         # rl parameters
         quad_input_penalty: 1.0
-        keyframe_vel_penalty: [2.0, 2.0]
         alive_reward: 5.0
-        deviation_penalty: 50.
+        deviation_penalty: 1.0
         reward_scale: 1.0
 
     right_body_foot_learning_ctrl:
@@ -123,9 +122,8 @@ control_configuration:
 
         # rl parameters
         quad_input_penalty: 1.0
-        keyframe_vel_penalty: [2.0, 2.0]
         alive_reward: 5.0
-        deviation_penalty: 50.
+        deviation_penalty: 1.0
         reward_scale: 1.0
 
     right_body_foot_policy_ctrl:

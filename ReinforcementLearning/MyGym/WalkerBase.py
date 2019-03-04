@@ -55,7 +55,7 @@ class WalkerBase(XmlBasedRobot):
         rot_speed = np.array(
             [[np.cos(-yaw), -np.sin(-yaw), 0],
              [np.sin(-yaw), np.cos(-yaw), 0],
-             [		0,			 0, 1]]
+             [0, 0, 1]]
         )
         vx, vy, vz = np.dot(rot_speed, self.robot_body.speed())  # rotate speed back to body point of view
 

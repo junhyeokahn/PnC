@@ -50,7 +50,6 @@ class BodyFootLearningCtrl : public SwingPlanningCtrl {
     double alive_reward_;
     double deviation_penalty_;
     double reward_scale_;
-    Eigen::VectorXd keyframe_vel_penalty_;
     Eigen::VectorXd action_scale_;
 
     int dim_contact_;

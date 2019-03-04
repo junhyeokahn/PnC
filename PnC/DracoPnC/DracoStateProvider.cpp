@@ -15,7 +15,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     stance_foot = "lFoot";
     curr_time = 0.;
 
-    target_keyframe_vel = Eigen::VectorXd::Zero(2);
     target_yaw = 0.;
     rl_count = 0;
 
