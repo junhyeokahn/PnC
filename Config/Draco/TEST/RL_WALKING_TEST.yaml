@@ -26,8 +26,8 @@ test_configuration:
         ip_control_pc: "localhost"
         ip_sub_pub_prefix: "tcp://127.0.0.1:50"
         ip_req_rep_prefix: "tcp://127.0.0.1:51"
-        username: 'junhyeokahn'
-        #username: 'junhyeok'
+        #username: 'junhyeokahn'
+        username: 'junhyeok'
         execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_draco"
         exit_cmd: "pkill -f 'draco"
 

@@ -325,7 +325,8 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
            com_vel[0], com_vel[1]);
     // Observation
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
-    obs << com_pos[0], com_pos[1], sp_->q[2], sp_->q[3], com_vel[0], com_vel[1];
+    obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
     Eigen::MatrixXd output, mean;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
