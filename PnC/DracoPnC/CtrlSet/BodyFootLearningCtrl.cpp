@@ -320,13 +320,12 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // 2. observation
     // =========================================================================
     Eigen::Vector3d com_pos = robot_->getCoMPosition();
-    Eigen::Vector3d com_pos2 = robot_->getCoMPosition();  // TEST
+    Eigen::Vector3d com_pos2 = robot_->getCoMPosition();
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
     for (int i(0); i < 2; ++i) {
         com_pos[i] = sp_->q[i] + body_pt_offset_[i];
-        com_pos2[i] = sp_->q[i];  // TEST
+        com_pos2[i] = sp_->q[i];
         // com_pos[i] += body_pt_offset_[i];
-        // !! TEST !!
         com_vel[i] = sp_->qdot[i];
         // com_vel[i] = sp_->est_mocap_body_vel[i];
     }
@@ -382,7 +381,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         (sp_->target_yaw - sp_->q[3]) /
         (terminate_obs_upper_bound_[5] * terminate_obs_upper_bound_[5]);
     Eigen::Vector2d act_location;
-    act_location << sp_->q[0], sp_->q[1];
+    act_location << sp_->q[0] + sp_->global_pos_local[0],
+                    sp_->q[1] + sp_->global_pos_local[1];
     double loc_pen =
         deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
 
@@ -390,6 +390,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     if (!done) {
         reward += alive_reward_;
     }
+
     // std::cout << "//
     // =========================================================="
     //<< std::endl;
@@ -441,14 +442,13 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         pl_param.b_positive_sidestep = false;
 
     Eigen::Vector3d global_com_pos = com_pos + sp_->global_pos_local;
-    // TEST
     Eigen::Vector3d global_com_pos2 = com_pos2 + sp_->global_pos_local;
 
     planner_->getNextFootLocation(global_com_pos, com_vel, target_loc,
                                   &pl_param, &pl_output);
-    Eigen::Vector3d target_loc2;  // TEST
+    Eigen::Vector3d target_loc2;
     planner_->getNextFootLocation(global_com_pos2, com_vel, target_loc2,
-                                  &pl_param, &pl_output);  // TEST
+                                  &pl_param, &pl_output);
 
     Eigen::VectorXd ss_global(4);
     for (int i = 0; i < 4; ++i) {

@@ -59,9 +59,9 @@ bool isInBoundingBox(const Eigen::VectorXd& lb, const Eigen::VectorXd& val,
     for (int i = 0; i < n; ++i) {
         if (lb[i] <= val[i] && val[i] <= ub[i]) {
         } else {
-            // myUtils::color_print(myColor::BoldMagneta, "Is not BoundingBox");
-            // std::cout << i << " th : lb = " << lb[i] << " val = " << val[i]
-            //<< " ub = " << ub[i] << std::endl;
+             myUtils::color_print(myColor::BoldMagneta, "Is not BoundingBox");
+             std::cout << i << " th : lb = " << lb[i] << " val = " << val[i]
+            << " ub = " << ub[i] << std::endl;
             ret = false;
         }
     }

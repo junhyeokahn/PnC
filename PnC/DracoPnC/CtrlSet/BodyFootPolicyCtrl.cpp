@@ -15,7 +15,7 @@ BodyFootPolicyCtrl::BodyFootPolicyCtrl(RobotSystem* robot,
                                            std::string swing_foot,
                                            FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner) {
-    myUtils::pretty_constructor(2, "Body Foot Planning Ctrl");
+    myUtils::pretty_constructor(2, "Body Foot Policy Ctrl");
 
     push_down_height_ = 0.;
     swing_height_ = 0.05;

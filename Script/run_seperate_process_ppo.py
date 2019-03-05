@@ -29,15 +29,15 @@ def main(args):
     parser.add_argument("--num_hidden", type=int, default=64)
     parser.add_argument("--activation", type=int, default=1)
 
-    parser.add_argument("--num_timesteps", type=int, default=1e5)
-    parser.add_argument("--num_steps", type=int, default=64)
+    parser.add_argument("--num_timesteps", type=int, default=5e7)
+    parser.add_argument("--num_steps", type=int, default=1024)
     parser.add_argument("--ent_coef", type=float, default=0)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--vf_coef", type=float, default=0.5)
     parser.add_argument("--max_grad_norm", type=float, default=0.5)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
-    parser.add_argument("--num_data_per_batch", type=int, default=32)
+    parser.add_argument("--num_data_per_batch", type=int, default=64)
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
 
