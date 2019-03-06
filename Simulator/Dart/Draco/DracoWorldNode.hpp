@@ -22,6 +22,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void _get_imu_data(Eigen::VectorXd& ang_vel, Eigen::VectorXd& acc);
     void _check_foot_contact(bool& rfoot_contact, bool& lfoot_contact);
     void _check_collision();
+    void GetFTSensorData_();
     void _hold_xy();
     void _hold_rot();
     void UpdateLedData_();

@@ -4,6 +4,7 @@
 #include <Simulator/Dart/Draco/DracoWorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <cassert>
 
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                                osgShadow::MinimalShadowMap* msm, int mpi_idx,
@@ -157,7 +158,7 @@ void DracoWorldNode::customPreStep() {
     if (b_check_collision_) {
         _check_collision();
     }
-    //_get_ati_data();
+    GetFTSensorData_();
 
     if (b_print_computation_time) {
         clock_.start();
@@ -294,6 +295,60 @@ void DracoWorldNode::_check_collision() {
             exit(0);
         }
     }
+}
+
+void DracoWorldNode::GetFTSensorData_() {
+    std::vector<Eigen::Vector3d> cp;
+    std::vector<Eigen::Vector3d> cf;
+    cp.clear();
+    cf.clear();
+    dart::dynamics::BodyNode* lankle_bn = mSkel->getBodyNode("lAnkle");
+    dart::dynamics::BodyNode* rankle_bn = mSkel->getBodyNode("rAnkle");
+    const dart::collision::CollisionResult& _result =
+        world_->getLastCollisionResult();
+    Eigen::Vector3d F_contact = Eigen::Vector3d::Zero();
+    for (const auto& contact : _result.getContacts()) {
+        for (const auto& shapeNode :
+             lankle_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+            if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                shapeNode == contact.collisionObject2->getShapeFrame()) {
+                double normal(contact.normal(2));
+                cp.push_back(contact.point);
+                cf.push_back(contact.force * normal);
+            }
+        }
+
+        for (const auto& shapeNode :
+             rankle_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+            if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                shapeNode == contact.collisionObject2->getShapeFrame()) {
+                double normal(contact.normal(2));
+                cp.push_back(contact.point);
+                cf.push_back(contact.force * normal);
+            }
+        }
+    }
+    // Collect forces at ATI frame
+
+    // mSensorData->contact_points = cp;
+    // mSensorData->contact_forces = cf;
+
+    // TEST
+    // assert(cp.size() == cf.size());
+    // std::cout << "------------------------------------" << std::endl;
+    // std::cout << "num cp : " << cp.size() << std::endl;
+    // Eigen::Vector3d total_force;
+    // total_force.setZero();
+    // for (int i = 0; i < cp.size(); ++i) {
+    // std::cout << "cp" << std::endl;
+    // std::cout << cp[i] << std::endl;
+    // std::cout << "cf" << std::endl;
+    // std::cout << cf[i] << std::endl;
+    // total_force += cf[i];
+    //}
+    // std::cout << "total force" << std::endl;
+    // std::cout << total_force << std::endl;
+    // TEST
 }
 
 void DracoWorldNode::UpdateTargetLocation_() {
