@@ -136,23 +136,24 @@ void MomentumEstimator::Update(const Eigen::VectorXd rankle_ft,
 
     // For Debug Purpose >>>>>>>>>>>>>>>>>
     std::normal_distribution<double> noise(0, 1);
-    double obs_noise = 0.02;
+    double c_noise = 0.02;
+    double l_noise = 0.6;
     std::default_random_engine generator;
     generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
-    // o.c_x() = com(0) + obs_noise * noise(generator);
-    // o.c_y() = com(1) + obs_noise * noise(generator);
-    // o.c_z() = com(2) + obs_noise * noise(generator);
-    // o.k_x() = cm(0) + obs_noise * noise(generator);
-    // o.k_y() = cm(1) + obs_noise * noise(generator);
-    // o.k_z() = cm(2) + obs_noise * noise(generator);
+    o.c_x() = com(0) + c_noise * noise(generator);
+    o.c_y() = com(1) + c_noise * noise(generator);
+    o.c_z() = com(2) + c_noise * noise(generator);
+    o.k_x() = cm(0) + l_noise * noise(generator);
+    o.k_y() = cm(1) + l_noise * noise(generator);
+    o.k_z() = cm(2) + l_noise * noise(generator);
 
-    o.c_x() = com(0);
-    o.c_y() = com(1);
-    o.c_z() = com(2);
-    o.k_x() = cm(0);
-    o.k_y() = cm(1);
-    o.k_z() = cm(2);
+    // o.c_x() = com(0);
+    // o.c_y() = com(1);
+    // o.c_z() = com(2);
+    // o.k_x() = cm(0);
+    // o.k_y() = cm(1);
+    // o.k_z() = cm(2);
 
     // <<<<<<<<<<<<< For Debug Purpose
     s2 = ekf_->update(*obs_model_, o);

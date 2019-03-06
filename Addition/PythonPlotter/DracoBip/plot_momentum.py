@@ -135,7 +135,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     elif plot_configuration == PLOT_VERTICALLY:
         row_index +=1
 
-    ## plot foot vel
+    ## plot ati
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
     fig.canvas.set_window_title('ati')
@@ -143,8 +143,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
         ax1 = plt.subplot(6, 1, i)
         plt.plot(data_x, data_rfoot_ati[st_idx:end_idx, i-1], "b-", linewidth=1.5, label="rfoot ati")
         plt.plot(data_x, data_lfoot_ati[st_idx:end_idx, i-1], "r-", linewidth=1.5, label="lfoot ati")
-        plt.plot(data_x, data_rfoot_ati_raw[st_idx:end_idx, i-1], "c--", linewidth=3, label="rfoot ati raw")
-        plt.plot(data_x, data_lfoot_ati_raw[st_idx:end_idx, i-1], "m--", linewidth=3, label="lfoot ati raw")
+        # plt.plot(data_x, data_rfoot_ati_raw[st_idx:end_idx, i-1], "c--", linewidth=3, label="rfoot ati raw")
+        # plt.plot(data_x, data_lfoot_ati_raw[st_idx:end_idx, i-1], "m--", linewidth=3, label="lfoot ati raw")
 
        # phase marker #
         for j in phseChange:
