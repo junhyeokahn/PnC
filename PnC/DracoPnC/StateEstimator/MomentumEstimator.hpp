@@ -302,4 +302,13 @@ class MomentumEstimator {
     Eigen::VectorXd estimated_state_;
 
     DracoStateProvider* sp_;
+
+    Eigen::VectorXd debug_pred_;
+    Eigen::VectorXd debug_upd_;
+    Eigen::VectorXd debug_obs_;
+    Eigen::VectorXd debug_true_;
+    Eigen::VectorXd debug_rfoot_ati_;
+    Eigen::VectorXd debug_lfoot_ati_;
+    Eigen::VectorXd debug_rfoot_ati_raw_;
+    Eigen::VectorXd debug_lfoot_ati_raw_;
 };

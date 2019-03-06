@@ -26,6 +26,7 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
     y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     body_est_ = new BodyEstimator(robot);
+    momentum_est_ = new MomentumEstimator(robot);
 }
 
 DracoStateEstimator::~DracoStateEstimator() {
@@ -35,6 +36,7 @@ DracoStateEstimator::~DracoStateEstimator() {
     delete mocap_y_vel_est_;
     delete x_vel_est_;
     delete y_vel_est_;
+    delete momentum_est_;
 }
 
 void DracoStateEstimator::initialization(DracoSensorData* data) {
@@ -61,6 +63,7 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
     ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
     ((AverageFilter*)mocap_x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)mocap_y_vel_est_)->initialization(sp_->com_vel[1]);
+    momentum_est_->Initialization(data->rfoot_ati, data->lfoot_ati);
 
     _FootContactUpdate(data);
 
@@ -87,6 +90,7 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     sp_->com_vel = robot_->getCoMVelocity();
 
     static bool visit_once(false);
+    static bool released(false);
     if ((sp_->phase_copy == 2) && (!visit_once)) {
         body_est_->Initialization(global_body_quat_);
         ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
@@ -94,6 +98,13 @@ void DracoStateEstimator::update(DracoSensorData* data) {
         ((AverageFilter*)mocap_x_vel_est_)->initialization(sp_->com_vel[0]);
         ((AverageFilter*)mocap_y_vel_est_)->initialization(sp_->com_vel[1]);
         visit_once = true;
+        released = true;
+    }
+    if (!released) {
+        momentum_est_->Initialization(data->rfoot_ati, data->lfoot_ati);
+    } else {
+        momentum_est_->Update(data->rfoot_ati, data->lfoot_ati);
+        sp_->est_momentum_state = momentum_est_->GetEstimatedState();
     }
 
     x_vel_est_->input(sp_->com_vel[0]);
@@ -157,8 +168,9 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
     curr_qdot_[1] = -foot_vel[1];
     curr_qdot_[2] = -foot_vel[2];
 
-    // robot_->updateSystem(curr_config_, curr_qdot_, true);
-    robot_->updateSystem(curr_config_, curr_qdot_, false);
+    // TEST for Momentum Estimator
+    robot_->updateSystem(curr_config_, curr_qdot_, true);
+    // robot_->updateSystem(curr_config_, curr_qdot_, false);
 
     sp_->q = curr_config_;
     sp_->qdot = curr_qdot_;

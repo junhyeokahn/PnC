@@ -48,6 +48,8 @@ class DracoStateProvider {
     double first_LED_x;
     double first_LED_y;
 
+    Eigen::VectorXd est_momentum_state;
+
     void saveCurrentData();
 
    private:

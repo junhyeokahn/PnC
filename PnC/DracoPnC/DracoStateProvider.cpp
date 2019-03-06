@@ -18,6 +18,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     target_yaw = 0.;
     rl_count = 0;
 
+    est_momentum_state = Eigen::VectorXd::Zero(6);
+
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
     rotor_inertia = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());

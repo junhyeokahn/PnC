@@ -1,15 +1,23 @@
 #include <PnC/DracoPnC/StateEstimator/MomentumEstimator.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 MomentumEstimator::MomentumEstimator(RobotSystem* robot) {
     myUtils::pretty_constructor(2, "Momentum Estimator");
 
     robot_ = robot;
     sp_ = DracoStateProvider::getStateProvider(robot_);
+    Eigen::VectorXd ft_limit = Eigen::VectorXd::Zero(6);
+    ft_limit << 20., 20., 20., 150., 150., 500.;
     for (int i = 0; i < 6; ++i) {
+        /*        rankle_ft_filter_.push_back(*/
+        // new digital_lp_filter(2. * M_PI * 50, DracoAux::ServoRate));
+        // lankle_ft_filter_.push_back(
+        /*new digital_lp_filter(2. * M_PI * 50, DracoAux::ServoRate));*/
+
         rankle_ft_filter_.push_back(
-            new digital_lp_filter(2. * M_PI * 50, DracoAux::ServoRate));
+            new AverageFilter(DracoAux::ServoRate, 0.01, ft_limit[i]));
         lankle_ft_filter_.push_back(
-            new digital_lp_filter(2. * M_PI * 50, DracoAux::ServoRate));
+            new AverageFilter(DracoAux::ServoRate, 0.01, ft_limit[i]));
     }
 
     dyn_model_ = new MomentumDynamicsModel(robot_);
@@ -17,6 +25,28 @@ MomentumEstimator::MomentumEstimator(RobotSystem* robot) {
     ekf_ = new Kalman::ExtendedKalmanFilter<MomentumDynamicsState>();
 
     estimated_state_ = Eigen::VectorXd::Zero(9);
+
+    // For Debug Purpose >>>>>>>>>>>>>
+    DataManager* data_manager = DataManager::GetDataManager();
+    debug_upd_ = Eigen::VectorXd::Zero(9);
+    debug_true_ = Eigen::VectorXd::Zero(9);
+    debug_obs_ = Eigen::VectorXd::Zero(9);
+    debug_pred_ = Eigen::VectorXd::Zero(9);
+    debug_rfoot_ati_raw_ = Eigen::VectorXd::Zero(6);
+    debug_lfoot_ati_raw_ = Eigen::VectorXd::Zero(6);
+    debug_rfoot_ati_ = Eigen::VectorXd::Zero(6);
+    debug_lfoot_ati_ = Eigen::VectorXd::Zero(6);
+    data_manager->RegisterData(&debug_pred_, VECT, "debug_pred", 9);
+    data_manager->RegisterData(&debug_obs_, VECT, "debug_obs", 9);
+    data_manager->RegisterData(&debug_upd_, VECT, "debug_upd", 9);
+    data_manager->RegisterData(&debug_true_, VECT, "debug_true", 9);
+    data_manager->RegisterData(&debug_rfoot_ati_raw_, VECT,
+                               "debug_rfoot_ati_raw", 6);
+    data_manager->RegisterData(&debug_lfoot_ati_raw_, VECT,
+                               "debug_lfoot_ati_raw", 6);
+    data_manager->RegisterData(&debug_rfoot_ati_, VECT, "debug_rfoot_ati", 6);
+    data_manager->RegisterData(&debug_lfoot_ati_, VECT, "debug_lfoot_ati", 6);
+    // <<<<<<<<<<<<< For Debug Purpose
 }
 
 MomentumEstimator::~MomentumEstimator() {
@@ -81,18 +111,50 @@ void MomentumEstimator::Update(const Eigen::VectorXd rankle_ft,
 
     s1 = ekf_->predict(*dyn_model_, u);
 
+    // For Debug Purpose >>>>>>>>>>>>>
+    debug_pred_[0] = s1.c_x();
+    debug_pred_[1] = s1.c_y();
+    debug_pred_[2] = s1.c_z();
+    debug_pred_[3] = s1.l_x();
+    debug_pred_[4] = s1.l_y();
+    debug_pred_[5] = s1.l_z();
+    debug_pred_[6] = s1.k_x();
+    debug_pred_[7] = s1.k_y();
+    debug_pred_[8] = s1.k_z();
+    debug_rfoot_ati_ = rankle_ft_output;
+    debug_lfoot_ati_ = lankle_ft_output;
+    debug_rfoot_ati_raw_ = rankle_ft;
+    debug_lfoot_ati_raw_ = lankle_ft;
+    // <<<<<<<<<<<<< For Debug Purpose
+
     // ekf update
     MomentumDynamicsState s2;
     MomentumMeasurement o;
 
     Eigen::Vector3d com = robot_->getCoMPosition() + sp_->global_pos_local;
     Eigen::VectorXd cm = robot_->getCentroidMomentum();
+
+    // For Debug Purpose >>>>>>>>>>>>>>>>>
+    std::normal_distribution<double> noise(0, 1);
+    double obs_noise = 0.02;
+    std::default_random_engine generator;
+    generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+
+    // o.c_x() = com(0) + obs_noise * noise(generator);
+    // o.c_y() = com(1) + obs_noise * noise(generator);
+    // o.c_z() = com(2) + obs_noise * noise(generator);
+    // o.k_x() = cm(0) + obs_noise * noise(generator);
+    // o.k_y() = cm(1) + obs_noise * noise(generator);
+    // o.k_z() = cm(2) + obs_noise * noise(generator);
+
     o.c_x() = com(0);
     o.c_y() = com(1);
     o.c_z() = com(2);
     o.k_x() = cm(0);
     o.k_y() = cm(1);
     o.k_z() = cm(2);
+
+    // <<<<<<<<<<<<< For Debug Purpose
     s2 = ekf_->update(*obs_model_, o);
 
     estimated_state_[0] = s2.c_x();
@@ -104,4 +166,25 @@ void MomentumEstimator::Update(const Eigen::VectorXd rankle_ft,
     estimated_state_[6] = s2.k_x();
     estimated_state_[7] = s2.k_y();
     estimated_state_[8] = s2.k_z();
+
+    // For Debug Purpose >>>>>>>>>>>>>>>>>
+    debug_upd_ = estimated_state_;
+    debug_obs_[0] = o.c_x();
+    debug_obs_[1] = o.c_y();
+    debug_obs_[2] = o.c_z();
+    debug_obs_[6] = o.k_x();
+    debug_obs_[7] = o.k_y();
+    debug_obs_[8] = o.k_z();
+
+    debug_true_[0] = com(0);
+    debug_true_[1] = com(1);
+    debug_true_[2] = com(2);
+    debug_true_[3] = cm(3);
+    debug_true_[4] = cm(4);
+    debug_true_[5] = cm(5);
+    debug_true_[6] = cm(0);
+    debug_true_[7] = cm(1);
+    debug_true_[8] = cm(2);
+
+    // <<<<<<<<<<<<< For Debug Purpose
 }

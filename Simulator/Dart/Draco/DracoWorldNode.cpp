@@ -298,23 +298,32 @@ void DracoWorldNode::_check_collision() {
 }
 
 void DracoWorldNode::GetFTSensorData_() {
-    std::vector<Eigen::Vector3d> cp;
-    std::vector<Eigen::Vector3d> cf;
-    cp.clear();
-    cf.clear();
     dart::dynamics::BodyNode* lankle_bn = mSkel->getBodyNode("lAnkle");
     dart::dynamics::BodyNode* rankle_bn = mSkel->getBodyNode("rAnkle");
     const dart::collision::CollisionResult& _result =
         world_->getLastCollisionResult();
-    Eigen::Vector3d F_contact = Eigen::Vector3d::Zero();
+
+    Eigen::VectorXd lfoot_ati = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd rfoot_ati = Eigen::VectorXd::Zero(6);
+
     for (const auto& contact : _result.getContacts()) {
         for (const auto& shapeNode :
              lankle_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
             if (shapeNode == contact.collisionObject1->getShapeFrame() ||
                 shapeNode == contact.collisionObject2->getShapeFrame()) {
                 double normal(contact.normal(2));
-                cp.push_back(contact.point);
-                cf.push_back(contact.force * normal);
+                Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                w_c.tail(3) = contact.force * normal;
+                Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                T_wc.translation() = contact.point;
+                Eigen::Isometry3d T_wa =
+                    mSkel->getBodyNode("lAnkle")->getTransform(
+                        dart::dynamics::Frame::World());
+                Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+                Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+                Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+                w_a = AdT_ca.transpose() * w_c;
+                lfoot_ati += w_a;
             }
         }
 
@@ -323,32 +332,28 @@ void DracoWorldNode::GetFTSensorData_() {
             if (shapeNode == contact.collisionObject1->getShapeFrame() ||
                 shapeNode == contact.collisionObject2->getShapeFrame()) {
                 double normal(contact.normal(2));
-                cp.push_back(contact.point);
-                cf.push_back(contact.force * normal);
+                Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                w_c.tail(3) = contact.force * normal;
+                Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                T_wc.translation() = contact.point;
+                Eigen::Isometry3d T_wa =
+                    mSkel->getBodyNode("rAnkle")->getTransform(
+                        dart::dynamics::Frame::World());
+                Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+                Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+                Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+                w_a = AdT_ca.transpose() * w_c;
+                rfoot_ati += w_a;
             }
         }
     }
-    // Collect forces at ATI frame
 
-    // mSensorData->contact_points = cp;
-    // mSensorData->contact_forces = cf;
+    mSensorData->lfoot_ati = lfoot_ati;
+    mSensorData->rfoot_ati = rfoot_ati;
 
-    // TEST
-    // assert(cp.size() == cf.size());
-    // std::cout << "------------------------------------" << std::endl;
-    // std::cout << "num cp : " << cp.size() << std::endl;
-    // Eigen::Vector3d total_force;
-    // total_force.setZero();
-    // for (int i = 0; i < cp.size(); ++i) {
-    // std::cout << "cp" << std::endl;
-    // std::cout << cp[i] << std::endl;
-    // std::cout << "cf" << std::endl;
-    // std::cout << cf[i] << std::endl;
-    // total_force += cf[i];
-    //}
-    // std::cout << "total force" << std::endl;
-    // std::cout << total_force << std::endl;
-    // TEST
+    // std::cout << "--------------------------------------------" << std::endl;
+    // myUtils::pretty_print(lfoot_ati, std::cout, "lfoot ati");
+    // myUtils::pretty_print(rfoot_ati, std::cout, "rfoot ati");
 }
 
 void DracoWorldNode::UpdateTargetLocation_() {
