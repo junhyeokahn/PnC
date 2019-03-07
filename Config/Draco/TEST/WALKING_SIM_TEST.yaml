@@ -6,8 +6,8 @@ test_configuration:
     body_height: 0.98
     com_height_for_omega: 1.0
 
-    jpos_initialization_time: 2.0
-    com_lifting_time: 2.0
+    jpos_initialization_time: 0.15
+    com_lifting_time: 0.15
 
 
     swing_time: 0.33

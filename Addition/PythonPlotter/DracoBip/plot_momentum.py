@@ -143,8 +143,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
         ax1 = plt.subplot(6, 1, i)
         plt.plot(data_x, data_rfoot_ati[st_idx:end_idx, i-1], "b-", linewidth=1.5, label="rfoot ati")
         plt.plot(data_x, data_lfoot_ati[st_idx:end_idx, i-1], "r-", linewidth=1.5, label="lfoot ati")
-        # plt.plot(data_x, data_rfoot_ati_raw[st_idx:end_idx, i-1], "c--", linewidth=3, label="rfoot ati raw")
-        # plt.plot(data_x, data_lfoot_ati_raw[st_idx:end_idx, i-1], "m--", linewidth=3, label="lfoot ati raw")
+        plt.plot(data_x, data_rfoot_ati_raw[st_idx:end_idx, i-1], "c--", linewidth=3, label="rfoot ati raw")
+        plt.plot(data_x, data_lfoot_ati_raw[st_idx:end_idx, i-1], "m--", linewidth=3, label="lfoot ati raw")
 
        # phase marker #
         for j in phseChange:

@@ -323,6 +323,7 @@ void DracoWorldNode::GetFTSensorData_() {
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
                 Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
                 w_a = AdT_ca.transpose() * w_c;
+                // myUtils::pretty_print(w_a, std::cout, "left");
                 lfoot_ati += w_a;
             }
         }
@@ -343,6 +344,7 @@ void DracoWorldNode::GetFTSensorData_() {
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
                 Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
                 w_a = AdT_ca.transpose() * w_c;
+                // myUtils::pretty_print(w_a, std::cout, "right");
                 rfoot_ati += w_a;
             }
         }
@@ -352,8 +354,10 @@ void DracoWorldNode::GetFTSensorData_() {
     mSensorData->rfoot_ati = rfoot_ati;
 
     // std::cout << "--------------------------------------------" << std::endl;
+    // std::cout << t_ << std::endl;
     // myUtils::pretty_print(lfoot_ati, std::cout, "lfoot ati");
     // myUtils::pretty_print(rfoot_ati, std::cout, "rfoot ati");
+    // std::cout << "--------------------------------------------" << std::endl;
 }
 
 void DracoWorldNode::UpdateTargetLocation_() {

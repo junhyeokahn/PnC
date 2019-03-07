@@ -114,7 +114,7 @@ class MomentumDynamicsModel
         xdot.c_z() = x.l_z() / m_;
         xdot.l_x() = u.r_fx() + u.l_fx();
         xdot.l_y() = u.r_fy() + u.l_fy();
-        xdot.l_z() = u.r_fz() + u.l_fz();
+        xdot.l_z() = u.r_fz() + u.l_fz() - 9.81 * m_;
         xdot.k_x() = (r_p(1) - x.c_y()) * u.r_fz() -
                      (r_p(2) - x.c_z()) * u.r_fy() +
                      (l_p(1) - x.c_y()) * u.l_fz() -
@@ -148,6 +148,8 @@ class MomentumDynamicsModel
     DracoStateProvider* sp_;
     void updateJacobians(const S& x, const C& u) {
         // jacobian F, W
+        this->F.setZero();
+
         this->F(S::CX, S::CX) = 1;
         this->F(S::CY, S::CY) = 1;
         this->F(S::CZ, S::CZ) = 1;
@@ -176,35 +178,35 @@ class MomentumDynamicsModel
         l_p = robot_->getBodyNodeIsometry(DracoBodyNode::lAnkle).translation() +
               sp_->global_pos_local;
 
-        this->W.setZero();
+        this->W.setIdentity();
 
-        this->W(S::LX, C::RFX) = 1;
-        this->W(S::LY, C::RFY) = 1;
-        this->W(S::LZ, C::RFZ) = 1;
-        this->W(S::LX, C::LFX) = 1;
-        this->W(S::LY, C::LFY) = 1;
-        this->W(S::LZ, C::LFZ) = 1;
+        // this->W(S::LX, C::RFX) = 1;
+        // this->W(S::LY, C::RFY) = 1;
+        // this->W(S::LZ, C::RFZ) = 1;
+        // this->W(S::LX, C::LFX) = 1;
+        // this->W(S::LY, C::LFY) = 1;
+        // this->W(S::LZ, C::LFZ) = 1;
 
-        this->W(S::KX, C::RFY) = -(r_p(2) - x.c_z());
-        this->W(S::KX, C::RFZ) = +(r_p(1) - x.c_y());
-        this->W(S::KY, C::RFX) = +(r_p(2) - x.c_z());
-        this->W(S::KY, C::RFZ) = -(r_p(0) - x.c_x());
-        this->W(S::KZ, C::RFX) = -(r_p(1) - x.c_y());
-        this->W(S::KZ, C::RFY) = +(r_p(0) - x.c_x());
+        // this->W(S::KX, C::RFY) = -(r_p(2) - x.c_z());
+        // this->W(S::KX, C::RFZ) = +(r_p(1) - x.c_y());
+        // this->W(S::KY, C::RFX) = +(r_p(2) - x.c_z());
+        // this->W(S::KY, C::RFZ) = -(r_p(0) - x.c_x());
+        // this->W(S::KZ, C::RFX) = -(r_p(1) - x.c_y());
+        // this->W(S::KZ, C::RFY) = +(r_p(0) - x.c_x());
 
-        this->W(S::KX, C::LFY) = -(l_p(2) - x.c_z());
-        this->W(S::KX, C::LFZ) = +(l_p(1) - x.c_y());
-        this->W(S::KY, C::LFX) = +(l_p(2) - x.c_z());
-        this->W(S::KY, C::LFZ) = -(l_p(0) - x.c_x());
-        this->W(S::KZ, C::LFX) = -(l_p(1) - x.c_y());
-        this->W(S::KZ, C::LFY) = +(l_p(0) - x.c_x());
+        // this->W(S::KX, C::LFY) = -(l_p(2) - x.c_z());
+        // this->W(S::KX, C::LFZ) = +(l_p(1) - x.c_y());
+        // this->W(S::KY, C::LFX) = +(l_p(2) - x.c_z());
+        // this->W(S::KY, C::LFZ) = -(l_p(0) - x.c_x());
+        // this->W(S::KZ, C::LFX) = -(l_p(1) - x.c_y());
+        // this->W(S::KZ, C::LFY) = +(l_p(0) - x.c_x());
 
-        this->W(S::KX, C::RTX) = 1;
-        this->W(S::KY, C::RTY) = 1;
-        this->W(S::KZ, C::RTZ) = 1;
-        this->W(S::KX, C::LTX) = 1;
-        this->W(S::KY, C::LTY) = 1;
-        this->W(S::KZ, C::LTZ) = 1;
+        // this->W(S::KX, C::RTX) = 1;
+        // this->W(S::KY, C::RTY) = 1;
+        // this->W(S::KZ, C::RTZ) = 1;
+        // this->W(S::KX, C::LTX) = 1;
+        // this->W(S::KY, C::LTY) = 1;
+        // this->W(S::KZ, C::LTZ) = 1;
     }
 };
 
@@ -273,7 +275,7 @@ class MomentumObservationModel
         this->H(M::KY, S::KY) = 1;
         this->H(M::KZ, S::KZ) = 1;
 
-        this->V.setZero();
+        this->V.setIdentity();
     }
 };
 

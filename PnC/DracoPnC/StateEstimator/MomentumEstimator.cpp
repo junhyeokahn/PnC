@@ -7,7 +7,7 @@ MomentumEstimator::MomentumEstimator(RobotSystem* robot) {
     robot_ = robot;
     sp_ = DracoStateProvider::getStateProvider(robot_);
     Eigen::VectorXd ft_limit = Eigen::VectorXd::Zero(6);
-    ft_limit << 20., 20., 20., 150., 150., 500.;
+    ft_limit << 50., 50., 50., 300., 300., 600.;
     for (int i = 0; i < 6; ++i) {
         /*        rankle_ft_filter_.push_back(*/
         // new digital_lp_filter(2. * M_PI * 50, DracoAux::ServoRate));
@@ -21,7 +21,9 @@ MomentumEstimator::MomentumEstimator(RobotSystem* robot) {
     }
 
     dyn_model_ = new MomentumDynamicsModel(robot_);
+    dyn_model_->setCovariance(1 * dyn_model_->getCovariance());
     obs_model_ = new MomentumObservationModel(robot_);
+    obs_model_->setCovariance(1 * obs_model_->getCovariance());
     ekf_ = new Kalman::ExtendedKalmanFilter<MomentumDynamicsState>();
 
     estimated_state_ = Eigen::VectorXd::Zero(9);
@@ -83,6 +85,13 @@ void MomentumEstimator::Initialization(const Eigen::VectorXd rankle_ft,
 
 void MomentumEstimator::Update(const Eigen::VectorXd rankle_ft,
                                const Eigen::VectorXd lankle_ft) {
+    // TEST
+    // std::cout << "dyn cov" << std::endl;
+    // static Eigen::MatrixXd init_cov = dyn_model_->getCovariance();
+    // dym_model_->setCovariance()
+    // std::cout << dyn_model_->getCovariance() << std::endl;
+    // exit(0);
+    // TEST
     Eigen::VectorXd rankle_ft_output = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd lankle_ft_output = Eigen::VectorXd::Zero(6);
     for (int i = 0; i < 6; ++i) {
@@ -91,7 +100,6 @@ void MomentumEstimator::Update(const Eigen::VectorXd rankle_ft,
         rankle_ft_output[i] = rankle_ft_filter_[i]->output();
         lankle_ft_output[i] = lankle_ft_filter_[i]->output();
     }
-
     // ekf predict
     MomentumDynamicsState s1;
     MomentumDynamicsControl u;

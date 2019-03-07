@@ -100,7 +100,15 @@ void DracoStateEstimator::update(DracoSensorData* data) {
         visit_once = true;
         released = true;
     }
-    if (!released) {
+
+    // if (!released) {
+    // momentum_est_->Initialization(data->rfoot_ati, data->lfoot_ati);
+    //} else {
+    // momentum_est_->Update(data->rfoot_ati, data->lfoot_ati);
+    // sp_->est_momentum_state = momentum_est_->GetEstimatedState();
+    //}
+
+    if (sp_->phase_copy == 2 || sp_->phase_copy == 6) {
         momentum_est_->Initialization(data->rfoot_ati, data->lfoot_ati);
     } else {
         momentum_est_->Update(data->rfoot_ati, data->lfoot_ati);
