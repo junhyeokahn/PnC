@@ -30,7 +30,7 @@ def main(args):
     parser.add_argument("--activation", type=int, default=1)
 
     parser.add_argument("--num_timesteps", type=int, default=5e7)
-    parser.add_argument("--num_steps", type=int, default=1024)
+    parser.add_argument("--num_steps", type=int, default=2048)
     parser.add_argument("--ent_coef", type=float, default=0)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--vf_coef", type=float, default=0.5)
@@ -41,7 +41,7 @@ def main(args):
     parser.add_argument("--num_optepochs", type=int, default=4)
     parser.add_argument("--cliprange", type=float, default=0.2)
 
-    parser.add_argument("--save_interval", type=int, default=10)
+    parser.add_argument("--save_interval", type=int, default=1)
     parser.add_argument("--log_interval", type=int, default=1)
     parser.add_argument("--save_path", type=str)
     parser.add_argument("--load_path", type=str)

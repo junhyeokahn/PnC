@@ -531,10 +531,8 @@ void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
         YAML::Node model_cfg = YAML::LoadFile(model_yaml);
         nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
         nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
-        // TEST
-        nn_policy_->PrintInfo();
-        nn_valfn_->PrintInfo();
-        // TEST
+        //nn_policy_->PrintInfo();
+        //nn_valfn_->PrintInfo();
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
