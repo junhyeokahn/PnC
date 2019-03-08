@@ -16,6 +16,7 @@ class DracoStateProvider {
     double target_yaw;
     Eigen::Vector3d adjusted_foot;
     Eigen::Vector3d guided_foot;
+    Eigen::Vector2d walking_velocity;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;

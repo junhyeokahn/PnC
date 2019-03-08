@@ -68,8 +68,7 @@ class DracoInterface : public EnvInterface {
 
     // walking
     double walking_start_time_;
-    double walking_duration_;
-    double walking_distance_;
+    Eigen::Vector2d walking_velocity_;
 
    public:
     DracoInterface();

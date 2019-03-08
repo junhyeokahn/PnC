@@ -1,4 +1,5 @@
 #include <Configuration.h>
+#include <Simulator/Dart/CartPole/CartPoleWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 #include <dart/dart.hpp>
@@ -6,7 +7,6 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include <dart/utils/utils.hpp>
 #include <random>
-#include <Simulator/Dart/CartPole/CartPoleWorldNode.hpp>
 
 void displayJointFrames(const dart::simulation::WorldPtr& world,
                         const dart::dynamics::SkeletonPtr& robot) {
@@ -105,10 +105,8 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q = robot->getPositions();
     Eigen::VectorXd qdot = robot->getVelocities();
 
-    std::random_device
-        rd;  // Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with
-                             // rd()
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
     for (int i = 0; i < 2; ++i) {
         std::uniform_real_distribution<> dis(init_state_lower_bound[i],

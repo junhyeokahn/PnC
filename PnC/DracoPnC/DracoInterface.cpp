@@ -179,15 +179,13 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     sp_->phase_copy = test_->getPhase();
 
     // walking forward test
-    if (false) {
+    if (true) {
         if (sp_->curr_time > walking_start_time_) {
-            double walking_time = sp_->curr_time - walking_start_time_;
-            sp_->des_location[0] =
-                walking_distance_ * walking_time / walking_duration_;
-            //(1-cos(walking_time/walking_duration * M_PI))/2.;
-        }
-        if (sp_->curr_time > walking_start_time_ + walking_duration_) {
-            sp_->des_location[0] = walking_distance_;
+            for (int i = 0; i < 2; ++i) {
+                sp_->walking_velocity[i] = walking_velocity_[i];
+                sp_->des_location[i] +=
+                    walking_velocity_[i] * DracoAux::ServoRate;
+            }
         }
     }
 }
@@ -296,9 +294,22 @@ void DracoInterface::_ParameterSetting() {
         myUtils::readParameter(cfg, "jvel_min", jvel_min_);
         myUtils::readParameter(cfg, "jtrq_max", jtrq_max_);
         myUtils::readParameter(cfg, "jtrq_min", jtrq_min_);
+
         myUtils::readParameter(cfg, "walking_start_time", walking_start_time_);
-        myUtils::readParameter(cfg, "walking_duration", walking_duration_);
-        myUtils::readParameter(cfg, "walking_distance", walking_distance_);
+        Eigen::VectorXd walking_velocity_lb, walking_velocity_ub;
+        walking_velocity_.setZero();
+        myUtils::readParameter(cfg, "walking_velocity_lb", walking_velocity_lb);
+        myUtils::readParameter(cfg, "walking_velocity_ub", walking_velocity_ub);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        for (int i = 0; i < 2; ++i) {
+            std::uniform_real_distribution<> dis(walking_velocity_lb[i],
+                                                 walking_velocity_ub[i]);
+            walking_velocity_[i] = dis(gen);
+        }
+        myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout,
+                              "walking velocity");
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
