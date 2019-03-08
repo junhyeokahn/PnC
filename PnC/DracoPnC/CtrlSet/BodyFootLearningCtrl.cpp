@@ -473,13 +473,15 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     // Step adjustment
     // =========================================================================
-    myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
+    //myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     // myUtils::pretty_print(target_loc2, std::cout,
     //"guided next foot location without body offset");
+    sp_->guided_foot = target_loc + sp_->global_pos_local;
     for (int i = 0; i < 2; ++i) {
         target_loc[i] += action_scale_[i] * output_vec[i];
     }
-    myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
+    sp_->adjusted_foot = target_loc + sp_->global_pos_local;
+    //myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
 }
 
 void BodyFootLearningCtrl::firstVisit() {

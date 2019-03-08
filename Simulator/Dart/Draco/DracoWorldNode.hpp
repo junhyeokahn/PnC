@@ -51,6 +51,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     bool b_plot_guided_foot_;
     bool b_plot_adjusted_foot_;
     bool b_camera_manipulator_;
+    bool b_show_viewer_;
 
    public:
     DracoWorldNode(const dart::simulation::WorldPtr& world,

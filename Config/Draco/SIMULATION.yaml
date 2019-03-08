@@ -7,18 +7,18 @@ display_target_frame: true
 joint_limit_enforced: true
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
 
-plot_target: false
-plot_adjusted_foot: false
-plot_guided_foot: false
-camera_manipulator: false
+plot_target: true
+plot_adjusted_foot: true
+plot_guided_foot: true
+camera_manipulator: true
 print_computation_time: false
 #release_time: 4.20
 release_time: 0.5
 
 ### Toggle for RL ###
 #show_viewer: true
-#check_collision: true
 show_viewer: false
+#check_collision: true
 check_collision: false
 
 

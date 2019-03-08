@@ -122,6 +122,8 @@ void DracoWorldNode::SetParameters_() {
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
         myUtils::readParameter(simulation_cfg, "check_collision",
                                b_check_collision_);
+        myUtils::readParameter(simulation_cfg, "show_viewer",
+                               b_show_viewer_);
         myUtils::readParameter(simulation_cfg, "plot_target", b_plot_target_);
         myUtils::readParameter(simulation_cfg, "plot_guided_foot",
                                b_plot_guided_foot_);
@@ -134,6 +136,12 @@ void DracoWorldNode::SetParameters_() {
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
         myUtils::readParameter(control_cfg, "kp", mKp);
         myUtils::readParameter(control_cfg, "kd", mKd);
+        if (!b_show_viewer_) {
+            b_plot_target_ = false;
+            b_plot_guided_foot_ = false;
+            b_plot_adjusted_foot_= false;
+            b_camera_manipulator_ = false;
+        }
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # idx = 140
     f3, ax3 = plt.subplots()
     # ax3.plot(res.progress.nupdates[:idx], res.progress.total_num_dones[:idx])
-    ax3.plot(res.progress.nupdates[], res.progress.total_num_dones[])
+    ax3.plot(res.progress.nupdates, res.progress.total_num_dones)
     ax3.grid(True)
     ax3.set_xlabel('nupdates')
     ax3.set_ylabel('total_num_dones')
