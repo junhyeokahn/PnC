@@ -206,8 +206,14 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim.urdf");
+    dart::dynamics::SkeletonPtr star =
+        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/Star.urdf");
+    dart::dynamics::SkeletonPtr torus =
+        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/torus.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
+    world->addSkeleton(star);
+    world->addSkeleton(torus);
 
     // =========================================================================
     // Friction & Restitution Coefficient

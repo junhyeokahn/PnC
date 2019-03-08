@@ -17,25 +17,12 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     world_ = _world;
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
+    mStar = world_->getSkeleton("star");
+    mTorus = world_->getSkeleton("torus");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-    try {
-        YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
-        myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
-        myUtils::readParameter(simulation_cfg, "check_collision",
-                               b_check_collision_);
-        myUtils::readParameter(simulation_cfg, "print_computation_time",
-                               b_print_computation_time);
-        YAML::Node control_cfg = simulation_cfg["control_configuration"];
-        myUtils::readParameter(control_cfg, "kp", mKp);
-        myUtils::readParameter(control_cfg, "kd", mKd);
-    } catch (std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-    }
+
+    SetParameters_();
 
     led_pos_announcer_ = new DracoLedPosAnnouncer();
     led_pos_announcer_->start();
@@ -81,25 +68,11 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     world_ = _world;
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
+    mStar = world_->getSkeleton("star");
+    mTorus = world_->getSkeleton("torus");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-    try {
-        YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
-        myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
-        myUtils::readParameter(simulation_cfg, "check_collision",
-                               b_check_collision_);
-        myUtils::readParameter(simulation_cfg, "print_computation_time",
-                               b_print_computation_time);
-        YAML::Node control_cfg = simulation_cfg["control_configuration"];
-        myUtils::readParameter(control_cfg, "kp", mKp);
-        myUtils::readParameter(control_cfg, "kd", mKd);
-    } catch (std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-    }
+    SetParameters_();
 
     led_pos_announcer_ = new DracoLedPosAnnouncer();
     led_pos_announcer_->start();
@@ -141,6 +114,32 @@ DracoWorldNode::~DracoWorldNode() {
     delete led_pos_announcer_;
 }
 
+void DracoWorldNode::SetParameters_() {
+    try {
+        YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
+        myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
+        myUtils::readParameter(simulation_cfg, "check_collision",
+                               b_check_collision_);
+        myUtils::readParameter(simulation_cfg, "plot_target", b_plot_target_);
+        myUtils::readParameter(simulation_cfg, "plot_guided_foot",
+                               b_plot_guided_foot_);
+        myUtils::readParameter(simulation_cfg, "plot_adjusted_foot",
+                               b_plot_adjusted_foot_);
+        myUtils::readParameter(simulation_cfg, "camera_manipulator",
+                               b_camera_manipulator_);
+        myUtils::readParameter(simulation_cfg, "print_computation_time",
+                               b_print_computation_time);
+        YAML::Node control_cfg = simulation_cfg["control_configuration"];
+        myUtils::readParameter(control_cfg, "kp", mKp);
+        myUtils::readParameter(control_cfg, "kd", mKd);
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+    }
+}
 void DracoWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
 
@@ -152,7 +151,11 @@ void DracoWorldNode::customPreStep() {
     UpdateLedData_();
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
-    UpdateTargetLocation_();
+
+    if (b_plot_target_) PlotTargetLocation_();
+    if (b_plot_guided_foot_) PlotGuidedFootLocation_();
+    if (b_plot_adjusted_foot_) PlotAdjustedFootLocation_();
+    if (b_camera_manipulator_) UpdateCameraPos_();
 
     if (b_check_collision_) {
         _check_collision();
@@ -296,9 +299,41 @@ void DracoWorldNode::_check_collision() {
     }
 }
 
-void DracoWorldNode::UpdateTargetLocation_() {
+void DracoWorldNode::PlotTargetLocation_() {
     dart::dynamics::SimpleFramePtr frame =
         world_->getSimpleFrame("target_frame");
     Eigen::Isometry3d tf = ((DracoInterface*)mInterface)->GetTargetIso();
     frame->setTransform(tf);
+}
+
+void DracoWorldNode::UpdateCameraPos_() {
+    Eigen::Isometry3d torso_iso = mSkel->getBodyNode("Torso")->getTransform();
+    Eigen::Vector3d torso_vec = torso_iso.translation();
+    mViewer->getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(torso_vec[0] + 2, torso_vec[1] - 6., torso_vec[2] + 2),
+        ::osg::Vec3(torso_vec[0], torso_vec[1], torso_vec[2]),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    mViewer->setCameraManipulator(mViewer->getCameraManipulator());
+}
+
+void DracoWorldNode::PlotGuidedFootLocation_() {
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
+    q[5] = 0.001;
+    Eigen::Vector3d guided_foot =
+        ((DracoInterface*)mInterface)->GetGuidedFoot();
+    q[3] = guided_foot[0];
+    q[4] = guided_foot[1];
+    mTorus->setPositions(q);
+    mTorus->setVelocities(Eigen::VectorXd::Zero(6));
+}
+
+void DracoWorldNode::PlotAdjustedFootLocation_() {
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
+    q[5] = 0.001;
+    Eigen::Vector3d adjusted_foot =
+        ((DracoInterface*)mInterface)->GetAdjustedFoot();
+    q[3] = adjusted_foot[0];
+    q[4] = adjusted_foot[1];
+    mStar->setPositions(q);
+    mStar->setVelocities(Eigen::VectorXd::Zero(6));
 }

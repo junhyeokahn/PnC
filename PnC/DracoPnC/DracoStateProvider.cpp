@@ -17,6 +17,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     target_yaw = 0.;
     rl_count = 0;
+    adjusted_foot.setZero();
+    guided_foot.setZero();
 
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());

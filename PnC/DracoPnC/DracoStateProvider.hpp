@@ -14,6 +14,8 @@ class DracoStateProvider {
     double curr_time;
     int rl_count;
     double target_yaw;
+    Eigen::Vector3d adjusted_foot;
+    Eigen::Vector3d guided_foot;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;

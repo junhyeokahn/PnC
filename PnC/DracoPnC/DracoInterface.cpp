@@ -316,3 +316,6 @@ Eigen::Isometry3d DracoInterface::GetTargetIso() {
     target_iso.translation() = target_pos;
     return target_iso;
 }
+
+Eigen::Vector3d DracoInterface::GetGuidedFoot() { return sp_->guided_foot; }
+Eigen::Vector3d DracoInterface::GetAdjustedFoot() { return sp_->adjusted_foot; }

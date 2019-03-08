@@ -25,10 +25,16 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void _hold_xy();
     void _hold_rot();
     void UpdateLedData_();
-    void UpdateTargetLocation_();
+    void PlotTargetLocation_();
+    void UpdateCameraPos_();
+    void PlotAdjustedFootLocation_();
+    void PlotGuidedFootLocation_();
+    void SetParameters_();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
+    dart::dynamics::SkeletonPtr mStar;
+    dart::dynamics::SkeletonPtr mTorus;
     Eigen::VectorXd mTorqueCommand;
     int mDof;
     double mReleaseTime;
@@ -41,6 +47,10 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     bool b_check_collision_;
     bool b_print_computation_time;
     double servo_rate_;
+    bool b_plot_target_;
+    bool b_plot_guided_foot_;
+    bool b_plot_adjusted_foot_;
+    bool b_camera_manipulator_;
 
    public:
     DracoWorldNode(const dart::simulation::WorldPtr& world,

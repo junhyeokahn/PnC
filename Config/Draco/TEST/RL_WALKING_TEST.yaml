@@ -26,8 +26,8 @@ test_configuration:
         ip_control_pc: "localhost"
         ip_sub_pub_prefix: "tcp://127.0.0.1:50"
         ip_req_rep_prefix: "tcp://127.0.0.1:51"
-        #username: 'junhyeokahn'
-        username: 'junhyeok'
+        username: 'junhyeokahn'
+        #username: 'junhyeok'
         execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_draco"
         exit_cmd: "pkill -f 'draco"
 
@@ -143,13 +143,14 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # rl parameters
-        model_path: "RLData/DracoSeperateProcess/ppo_6/checkpoints/00246.yaml"
+        #model_path: "RLData/DracoSeperateProcess/ppo_6/checkpoints/00246.yaml"
+        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
 
     left_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
         swing_height: 0.17
         push_down_height: 0.0
-        default_target_foot_location: [0.0, -0.15, 0.0]
+        default_target_foot_location: [0.0, 0.15, 0.0]
 
         kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
         kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
@@ -164,7 +165,8 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # rl parameters
-        model_path: "RLData/DracoSeperateProcess/ppo_6/checkpoints/00246.yaml"
+        #model_path: "RLData/DracoSeperateProcess/ppo_6/checkpoints/00246.yaml"
+        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
 
 planner_configuration:
 

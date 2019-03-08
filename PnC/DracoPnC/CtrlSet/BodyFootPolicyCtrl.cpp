@@ -12,8 +12,8 @@
 #include <Utils/Math/MathUtilities.hpp>
 
 BodyFootPolicyCtrl::BodyFootPolicyCtrl(RobotSystem* robot,
-                                           std::string swing_foot,
-                                           FootStepPlanner* planner)
+                                       std::string swing_foot,
+                                       FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner) {
     myUtils::pretty_constructor(2, "Body Foot Policy Ctrl");
 
@@ -330,20 +330,20 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::MatrixXd output, mean;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
-            mean, neglogp);
+                          mean, neglogp);
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
     // TEST //
-    //std::cout << "==========================================" << std::endl;
-    //myUtils::pretty_print(obs, std::cout, "observation");
-    //myUtils::pretty_print(mean, std::cout, "mean_actions");
-    //myUtils::pretty_print(neglogp, std::cout, "neglogp");
-    //myUtils::pretty_print(output, std::cout, "output");
-    //myUtils::pretty_print(val, std::cout, "value");
-    //std::cout << "==========================================" << std::endl;
-    //if (sp_->rl_count > 10) {
-        //exit(0);
+    // std::cout << "==========================================" << std::endl;
+    // myUtils::pretty_print(obs, std::cout, "observation");
+    // myUtils::pretty_print(mean, std::cout, "mean_actions");
+    // myUtils::pretty_print(neglogp, std::cout, "neglogp");
+    // myUtils::pretty_print(output, std::cout, "output");
+    // myUtils::pretty_print(val, std::cout, "value");
+    // std::cout << "==========================================" << std::endl;
+    // if (sp_->rl_count > 10) {
+    // exit(0);
     //}
-    //sp_->rl_count++;
+    // sp_->rl_count++;
     // TEST //
 
     OutputReversalPL pl_output;
@@ -385,9 +385,11 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // Step adjustment
     // =========================================================================
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
+    sp_->guided_foot = target_loc + sp_->global_pos_local;
     for (int i = 0; i < 2; ++i) {
         target_loc[i] += action_scale_[i] * output(0, i);
     }
+    sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
 }
 
@@ -531,8 +533,8 @@ void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
         YAML::Node model_cfg = YAML::LoadFile(model_yaml);
         nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
         nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
-        //nn_policy_->PrintInfo();
-        //nn_valfn_->PrintInfo();
+        // nn_policy_->PrintInfo();
+        // nn_valfn_->PrintInfo();
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -610,7 +612,7 @@ void BodyFootPolicyCtrl::_GetSinusoidalSwingTrajectory() {
 }
 
 void BodyFootPolicyCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
-                                       const Eigen::Vector3d& des_pos) {
+                                     const Eigen::Vector3d& des_pos) {
     // Trajectory Setup
     double init[9];
     double fin[9];
