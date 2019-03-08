@@ -307,9 +307,6 @@ void DracoInterface::_ParameterSetting() {
                                                  walking_velocity_ub[i]);
             walking_velocity_[i] = dis(gen);
         }
-        myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout,
-                              "walking velocity");
-
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

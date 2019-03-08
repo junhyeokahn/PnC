@@ -55,8 +55,7 @@ control_configuration:
         kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
         kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        #body_pt_offset: [0.06, 0.0]
-        body_pt_offset: [0.0, 0.0]
+        body_pt_offset: [0.06, 0.0]
         foot_landing_offset: [0.0, 0.0]
 
         fin_ankle: 1.4
@@ -74,8 +73,7 @@ control_configuration:
         kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
         kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        #body_pt_offset: [0.06, 0.0]
-        body_pt_offset: [0.0, 0.0]
+        body_pt_offset: [0.06, 0.0]
         foot_landing_offset: [0., 0.]
 
         fin_ankle: 1.4
