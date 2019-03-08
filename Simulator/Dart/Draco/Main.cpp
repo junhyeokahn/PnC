@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim.urdf");
     dart::dynamics::SkeletonPtr star =
-        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/Star.urdf");
+        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/star.urdf");
     dart::dynamics::SkeletonPtr torus =
         urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/torus.urdf");
     world->addSkeleton(ground);
