@@ -335,9 +335,15 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
-        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
+        sp_->des_location[0] - sp_->global_pos_local[0],
+        sp_->des_location[1] - sp_->global_pos_local[1],
+        sp_->walking_velocity[0], sp_->walking_velocity[1];
     obs_vec << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
-        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
+        sp_->des_location[0] - sp_->global_pos_local[0],
+        sp_->des_location[1] - sp_->global_pos_local[1],
+        sp_->walking_velocity[0], sp_->walking_velocity[1];
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
@@ -382,7 +388,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         (terminate_obs_upper_bound_[5] * terminate_obs_upper_bound_[5]);
     Eigen::Vector2d act_location;
     act_location << sp_->q[0] + sp_->global_pos_local[0],
-                    sp_->q[1] + sp_->global_pos_local[1];
+        sp_->q[1] + sp_->global_pos_local[1];
     double loc_pen =
         deviation_penalty_ * (sp_->des_location - act_location).squaredNorm();
 
