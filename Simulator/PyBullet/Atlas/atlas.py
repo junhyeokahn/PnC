@@ -48,9 +48,9 @@ for j in range (pb.getNumJoints(atlas)):
             activeJoint+=1
 
 def so3_to_euler_zyx_dot(ori_ypr,angv_so3):
-    x = ori_ypr[2]
+    x = ori_ypr[0]
     y = ori_ypr[1]
-    z = ori_ypr[0]
+    z = ori_ypr[2]
     so3_to_euler_zyx_dot_map =np.array([[np.cos(z)*np.sin(y)/np.cos(y), np.sin(y)*np.sin(z)/np.cos(y),1],
                                         [-np.sin(z),np.cos(z),0],
                                         [np.cos(z)/np.cos(y), np.sin(z)/np.cos(y), 0]])
