@@ -234,11 +234,13 @@ void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd& q_,
 void RobotSystem::printRobotInfo() {
     for (int i = 0; i < skel_ptr_->getNumBodyNodes(); ++i) {
         dart::dynamics::BodyNodePtr bn = skel_ptr_->getBodyNode(i);
-        std::cout << "BodyNode::" << bn->getName() << std::endl;
+        //std::cout << "BodyNode::" << bn->getName() << std::endl;
+        std::cout << "constexpr int " << bn->getName() << " = " << std::to_string(i) << std::endl;
     }
     for (int i = 0; i < skel_ptr_->getNumDofs(); ++i) {
         dart::dynamics::DegreeOfFreedom* dof = skel_ptr_->getDof(i);
-        std::cout << "DoF::" << dof->getName() << std::endl;
+        //std::cout << "DoF::" << dof->getName() << std::endl;
+        std::cout << "constexpr int " << dof->getName() << " = " << std::to_string(i) << std::endl;
     }
     exit(0);
 }
