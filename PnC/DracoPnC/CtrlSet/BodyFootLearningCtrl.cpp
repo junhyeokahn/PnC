@@ -44,18 +44,18 @@ BodyFootLearningCtrl::BodyFootLearningCtrl(RobotSystem* robot,
     if (swing_foot == "lFoot") {
         selected_jidx_[2] = robot->getDofIdx("lAnkle");
         foot_point_task_ =
-            new IsolatedPointFootTask(robot_, DracoBodyNode::lFootCenter);
+            new PointFootTask(robot_, DracoBodyNode::lFootCenter);
     } else {
         selected_jidx_[2] = robot->getDofIdx("rAnkle");
         foot_point_task_ =
-            new IsolatedPointFootTask(robot_, DracoBodyNode::rFootCenter);
+            new PointFootTask(robot_, DracoBodyNode::rFootCenter);
     }
     selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
 
     // foot_pitch_task_ = new PitchFootTask(robot_, swing_foot);
     // foot_point_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
     // swing_foot+"Center");
-    base_task_ = new BodyRPZTask(robot_);
+    base_task_ = new BodyRxRyZTask(robot_);
 
     // contact
     rfoot_contact_ =

@@ -11,11 +11,11 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
-                                           std::string swing_foot,
-                                           FootStepPlanner* planner)
+BodyFootTurningCtrl::BodyFootTurningCtrl(RobotSystem* robot,
+                                         std::string swing_foot,
+                                         FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner) {
-    myUtils::pretty_constructor(2, "Body Foot Planning Ctrl");
+    myUtils::pretty_constructor(2, "Body Foot Turning Ctrl");
 
     push_down_height_ = 0.;
     swing_height_ = 0.05;
@@ -24,35 +24,14 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     des_jacc_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    ini_ankle_ = 0.;
-    fin_ankle_ = 0.;
     fin_foot_z_vel_ = 0.;
     fin_foot_z_acc_ = 0.;
-    switch_vel_threshold_ = 0;
 
-    // task
-    // selected_jidx_.resize(2);
-    // selected_jidx_[0] = robot->getDofIdx("rHipYaw");
-    // selected_jidx_[1] = robot->getDofIdx("lHipYaw");
-    // selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
-
-    selected_jidx_.resize(3);
-    selected_jidx_[0] = DracoDoF::rHipYaw;
-    selected_jidx_[1] = DracoDoF::lHipYaw;
     if (swing_foot == "lFoot") {
-        selected_jidx_[2] = robot->getDofIdx("lAnkle");
-        foot_point_task_ =
-            new PointFootTask(robot_, DracoBodyNode::lFootCenter);
+        foot_task_ = new LineFootTask(robot_, DracoBodyNode::lFootCenter);
     } else {
-        selected_jidx_[2] = robot->getDofIdx("rAnkle");
-        foot_point_task_ =
-            new PointFootTask(robot_, DracoBodyNode::rFootCenter);
+        foot_task_ = new LineFootTask(robot_, DracoBodyNode::rFootCenter);
     }
-    selected_joint_task_ = new SelectedJointTask(robot, selected_jidx_);
-
-    // foot_pitch_task_ = new PitchFootTask(robot_, swing_foot);
-    // foot_point_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
-    // swing_foot+"Center");
     base_task_ = new BodyRxRyZTask(robot_);
 
     // contact
@@ -120,7 +99,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot,
     }
 }
 
-void BodyFootPlanningCtrl::oneStep(void* _cmd) {
+void BodyFootTurningCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma;
@@ -138,7 +117,7 @@ void BodyFootPlanningCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 }
 
-void BodyFootPlanningCtrl::_contact_setup() {
+void BodyFootTurningCtrl::_contact_setup() {
     rfoot_contact_->updateContactSpec();
     lfoot_contact_->updateContactSpec();
 
@@ -146,7 +125,7 @@ void BodyFootPlanningCtrl::_contact_setup() {
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
+void BodyFootTurningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     Eigen::MatrixXd A_rotor = A_;
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         A_rotor(i + robot_->getNumVirtualDofs(),
@@ -175,42 +154,13 @@ void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
         sp_->reaction_forces[i] = wblc_data_->Fr_[i];
 }
 
-void BodyFootPlanningCtrl::_task_setup() {
+void BodyFootTurningCtrl::_task_setup() {
     double base_height_cmd = ini_base_height_;
     if (b_set_height_target_) base_height_cmd = des_body_height_;
 
-    /////// Selected Joint Task Setup
-    /*    Eigen::VectorXd yaw_pos = Eigen::VectorXd::Zero(2);*/
-    // Eigen::VectorXd yaw_vel = Eigen::VectorXd::Zero(2);
-    // Eigen::VectorXd yaw_acc = Eigen::VectorXd::Zero(2);
-
-    /*selected_joint_task_->updateTask(yaw_pos, yaw_vel, yaw_acc);*/
-
-    Eigen::VectorXd yaw_pos = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd yaw_vel = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd yaw_acc = Eigen::VectorXd::Zero(3);
-
-    double curr_ankle_pos_des(0.);
-    double curr_ankle_vel_des(0.);
-    double curr_ankle_acc_des(0.);
-    if (state_machine_time_ < end_time_ / 2.0) {
-        curr_ankle_pos_des = myUtils::smooth_changing(
-            ini_ankle_, fin_ankle_, end_time_ / 2.0, state_machine_time_);
-        curr_ankle_vel_des = myUtils::smooth_changing_vel(
-            ini_ankle_, fin_ankle_, end_time_ / 2.0, state_machine_time_);
-        curr_ankle_acc_des = myUtils::smooth_changing_acc(
-            ini_ankle_, fin_ankle_, end_time_ / 2.0, state_machine_time_);
-    } else {
-        curr_ankle_pos_des = fin_ankle_;
-    }
-    yaw_pos[2] = curr_ankle_pos_des;
-    yaw_vel[2] = curr_ankle_vel_des;
-    yaw_acc[2] = curr_ankle_acc_des;
-
-    selected_joint_task_->updateTask(yaw_pos, yaw_vel, yaw_acc);
-
-    /////// Body Posture Task Setup
-    Eigen::Quaternion<double> des_quat(1, 0, 0, 0);
+    // =========================================================================
+    // Body Posture Task Setup
+    // =========================================================================
     Eigen::VectorXd pos_des(7);
     pos_des.setZero();
     Eigen::VectorXd vel_des(6);
@@ -218,18 +168,27 @@ void BodyFootPlanningCtrl::_task_setup() {
     Eigen::VectorXd acc_des(6);
     acc_des.setZero();
 
-    pos_des[0] = des_quat.w();
-    pos_des[1] = des_quat.x();
-    pos_des[2] = des_quat.y();
-    pos_des[3] = des_quat.z();
-
-    pos_des[4] = 0.;  // not used
-    pos_des[5] = 0.;  // not used
+    // only rx, ry, z are used
+    pos_des[0] = 1.;
+    pos_des[1] = 0.;
+    pos_des[2] = 0.;
+    pos_des[3] = 0.;
+    pos_des[4] = 0.;
+    pos_des[5] = 0.;
     pos_des[6] = base_height_cmd;
 
     base_task_->updateTask(pos_des, vel_des, acc_des);
 
-    /////// Foot Pos Task Setup
+    // =========================================================================
+    // Foot Task Setup
+    // =========================================================================
+    Eigen::VectorXd foot_pos_des(7);
+    foot_pos_des.setZero();
+    Eigen::VectorXd foot_vel_des(6);
+    foot_vel_des.setZero();
+    Eigen::VectorXd foot_acc_des(6);
+    foot_acc_des.setZero();
+
     _CheckPlanning();
     //_GetSinusoidalSwingTrajectory();
     _GetBsplineSwingTrajectory();
@@ -248,47 +207,42 @@ void BodyFootPlanningCtrl::_task_setup() {
         }
     }
 
-    //// Foot Pitch Task
-    // Eigen::VectorXd foot_pos_des(7); foot_pos_des.setZero();
-    // Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();
-    // Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
+    double t(myUtils::smooth_changing(0, 1, end_time_, state_machine_time_));
+    double tdot(
+        myUtils::smooth_changing_vel(0, 1, end_time_, state_machine_time_));
+    double tddot(
+        myUtils::smooth_changing_acc(0, 1, end_time_, state_machine_time_));
+    Eigen::Quaternion<double> curr_foot_delta_quat =
+        dart::math::expToQuat(foot_delta_so3_ * t);
+    curr_foot_quat_des_ = curr_foot_delta_quat * ini_foot_ori_;
+    curr_foot_so3_des_ = foot_delta_so3_ * tdot;
 
-    // foot_pos_des[0] = des_quat.w();
-    // foot_pos_des[1] = des_quat.x();
-    // foot_pos_des[2] = des_quat.y();
-    // foot_pos_des[3] = des_quat.z();
-
-    // for(int i(0); i<3; ++i){
-    // foot_pos_des[i+4] = curr_foot_pos_des_[i];
-    // foot_vel_des[i+3] = curr_foot_vel_des_[i];
-    // foot_acc_des[i+3] = curr_foot_acc_des_[i];
-
-    //}
-    // foot_pitch_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
-
-    //// Point Foot Task
-    Eigen::VectorXd point_foot_pos_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd point_foot_vel_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd point_foot_acc_des = Eigen::VectorXd::Zero(3);
+    foot_pos_des[0] = curr_foot_quat_des_.w();
+    foot_pos_des[1] = curr_foot_quat_des_.x();
+    foot_pos_des[2] = curr_foot_quat_des_.y();
+    foot_pos_des[3] = curr_foot_quat_des_.z();
     for (int i = 0; i < 3; ++i) {
-        point_foot_pos_des[i] = curr_foot_pos_des_[i];
-        point_foot_vel_des[i] = curr_foot_vel_des_[i];
-        point_foot_acc_des[i] = curr_foot_acc_des_[i];
+        foot_vel_des[i] = curr_foot_so3_des_[i];
     }
-    foot_point_task_->updateTask(point_foot_pos_des, point_foot_vel_des,
-                                 point_foot_acc_des);
 
-    /////// Task push back
-    task_list_.push_back(selected_joint_task_);
+    for (int i(0); i < 3; ++i) {
+        foot_pos_des[i + 4] = curr_foot_pos_des_[i];
+        foot_vel_des[i + 3] = curr_foot_vel_des_[i];
+        foot_acc_des[i + 3] = curr_foot_acc_des_[i];
+    }
+    foot_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
+
+    // =========================================================================
+    // Task push back
+    // =========================================================================
     task_list_.push_back(base_task_);
-    // task_list_.push_back(foot_pitch_task_);
-    task_list_.push_back(foot_point_task_);
+    task_list_.push_back(foot_task_);
 
     kin_wbc_->FindConfiguration(sp_->q, task_list_, kin_wbc_contact_list_,
                                 des_jpos_, des_jvel_, des_jacc_);
 }
 
-void BodyFootPlanningCtrl::_CheckPlanning() {
+void BodyFootTurningCtrl::_CheckPlanning() {
     if ((state_machine_time_ > 0.5 * end_time_) && b_replanning_ &&
         !b_replaned_) {
         Eigen::Vector3d target_loc;
@@ -307,7 +261,7 @@ void BodyFootPlanningCtrl::_CheckPlanning() {
     }
 }
 
-void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+void BodyFootTurningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // Direct value used
     Eigen::Vector3d com_pos = robot_->getCoMPosition();
     Eigen::Vector3d com_vel = robot_->getCoMVelocity();
@@ -362,22 +316,26 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     myUtils::pretty_print(target_loc, std::cout, "next foot location");
 }
 
-void BodyFootPlanningCtrl::firstVisit() {
+void BodyFootTurningCtrl::firstVisit() {
     b_replaned_ = false;
     ini_config_ = sp_->q;
-
-    ini_ankle_ = sp_->q[selected_jidx_[2]];
 
     if (swing_foot_ == "rFoot") {
         ini_foot_pos_ = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter)
                             .translation();
+        ini_foot_ori_ = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).linear());
     } else if (swing_foot_ == "lFoot") {
         ini_foot_pos_ = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter)
                             .translation();
+        ini_foot_ori_ = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).linear());
     } else {
         std::cout << "Wrong swing foot" << std::endl;
         exit(0);
     }
+    foot_delta_quat_ = sp_->des_quat * ini_foot_ori_.inverse();
+    foot_delta_so3_ = dart::math::quatToExp(foot_delta_quat_);
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
     replan_moment_ = 0.;
@@ -403,7 +361,7 @@ void BodyFootPlanningCtrl::firstVisit() {
     input_state[3] = com_vel[1];
 }
 
-void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
+void BodyFootTurningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     // Initialize Minimum Jerk Parameter Containers
     Eigen::Vector3d init_params;
     Eigen::Vector3d final_params;
@@ -421,18 +379,17 @@ void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     }
 }
 
-bool BodyFootPlanningCtrl::endOfPhase() {
+bool BodyFootTurningCtrl::endOfPhase() {
     if (state_machine_time_ > (end_time_)) {
-        printf("[Body Foot Ctrl] End, state_machine time/ end time: (%f, %f)\n",
-               state_machine_time_, end_time_);
-        printf("end of phase\n");
+        printf(
+            "[Body Foot Planning Ctrl] End, state_machine time/ end time: (%f, "
+            "%f)\n",
+            state_machine_time_, end_time_);
         // if(b_set_height_target_)  printf("b set height target: true\n");
         // else  printf("b set height target: false\n");
         // printf("\n");
         return true;
     }
-    bool contact_check_with_ankle(true);
-    // Swing foot contact = END
     if (b_contact_switch_check_) {
         bool contact_happen(false);
         if (swing_foot_ == "lFoot" && sp_->b_lfoot_contact) {
@@ -443,31 +400,8 @@ bool BodyFootPlanningCtrl::endOfPhase() {
         }
         if (state_machine_time_ > end_time_ * 0.5 && contact_happen) {
             printf(
-                "[Config Body Foot Ctrl] contact happen, state_machine_time/ "
+                "[Body Foot Planning Ctrl] Contact Happen, state_machine_time/ "
                 "end time: (%f, %f)\n",
-                state_machine_time_, end_time_);
-            return true;
-        }
-    }
-    if (b_contact_switch_check_) {
-        contact_check_with_ankle = false;
-    }
-
-    if (contact_check_with_ankle) {
-        bool contact_happen_by_ankle(false);
-        if (swing_foot_ == "rFoot") {
-            if (sp_->qdot[DracoDoF::rAnkle] < switch_vel_threshold_) {
-                contact_happen_by_ankle = true;
-            }
-        } else {
-            if (sp_->qdot[DracoDoF::lAnkle] < switch_vel_threshold_) {
-                contact_happen_by_ankle = true;
-            }
-        }
-        if (state_machine_time_ > end_time_ * 0.5 && contact_happen_by_ankle) {
-            printf(
-                "[Config Body Foot Ctrl] contact happen by ankle, "
-                "state_machine_time/ end time: (%f, %f)\n",
                 state_machine_time_, end_time_);
             return true;
         }
@@ -476,7 +410,7 @@ bool BodyFootPlanningCtrl::endOfPhase() {
     return false;
 }
 
-void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
+void BodyFootTurningCtrl::ctrlInitialization(const YAML::Node& node) {
     ini_base_height_ = sp_->q[2];
     try {
         myUtils::readParameter(node, "kp", Kp_);
@@ -489,9 +423,6 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "foot_landing_offset",
                                foot_landing_offset_);
 
-        myUtils::readParameter(node, "fin_ankle", fin_ankle_);
-        myUtils::readParameter(node, "switch_vel_threshold",
-                               switch_vel_threshold_);
         myUtils::readParameter(node, "fin_foot_z_vel", fin_foot_z_vel_);
         myUtils::readParameter(node, "fin_foot_z_acc", fin_foot_z_acc_);
     } catch (std::runtime_error& e) {
@@ -510,11 +441,9 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 }
 
-BodyFootPlanningCtrl::~BodyFootPlanningCtrl() {
-    delete selected_joint_task_;
+BodyFootTurningCtrl::~BodyFootTurningCtrl() {
     delete base_task_;
-    // delete foot_pitch_task_;
-    delete foot_point_task_;
+    delete foot_task_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -527,7 +456,7 @@ BodyFootPlanningCtrl::~BodyFootPlanningCtrl() {
         delete min_jerk_offset_[i];
 }
 
-void BodyFootPlanningCtrl::_GetBsplineSwingTrajectory() {
+void BodyFootTurningCtrl::_GetBsplineSwingTrajectory() {
     double pos[3];
     double vel[3];
     double acc[3];
@@ -542,7 +471,7 @@ void BodyFootPlanningCtrl::_GetBsplineSwingTrajectory() {
         curr_foot_acc_des_[i] = acc[i];
     }
 }
-void BodyFootPlanningCtrl::_GetSinusoidalSwingTrajectory() {
+void BodyFootTurningCtrl::_GetSinusoidalSwingTrajectory() {
     curr_foot_acc_des_.setZero();
     for (int i(0); i < 2; ++i) {
         curr_foot_pos_des_[i] =
@@ -566,8 +495,8 @@ void BodyFootPlanningCtrl::_GetSinusoidalSwingTrajectory() {
         amp * omega * omega * cos(omega * state_machine_time_);
 }
 
-void BodyFootPlanningCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
-                                       const Eigen::Vector3d& des_pos) {
+void BodyFootTurningCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
+                                      const Eigen::Vector3d& des_pos) {
     // Trajectory Setup
     double init[9];
     double fin[9];

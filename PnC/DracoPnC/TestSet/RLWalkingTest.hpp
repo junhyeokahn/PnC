@@ -34,6 +34,7 @@ class RLWalkingTest : public Test {
 
     DracoStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
+    virtual void AuxUpdate_();
     void _SettingParameter();
 
     FootStepPlanner* reversal_planner_;
@@ -51,4 +52,8 @@ class RLWalkingTest : public Test {
     Controller* left_swing_end_trans_ctrl_;
 
     YAML::Node cfg_;
+
+    // walking
+    double walking_start_time_;
+    Eigen::Vector2d walking_velocity_;
 };

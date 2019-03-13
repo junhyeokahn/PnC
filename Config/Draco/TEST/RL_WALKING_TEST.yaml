@@ -22,6 +22,10 @@ test_configuration:
     contact_switch_check: true
     #contact_switch_check: false
 
+    walking_start_time: 5
+    walking_velocity_lb: [-0.1, -0.1]
+    walking_velocity_ub: [0.1, 0.1]
+
     protocol:
         ip_control_pc: "localhost"
         ip_sub_pub_prefix: "tcp://127.0.0.1:50"
@@ -145,9 +149,10 @@ control_configuration:
         fin_foot_z_vel: -0.5
         fin_foot_z_acc: 5.0
 
-        # rl parameters
-        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
+        # policy path
+        #model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
         #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
+        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/walking/checkpoints/00135.yaml"
 
     left_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
@@ -167,9 +172,10 @@ control_configuration:
         fin_foot_z_vel: -0.5
         fin_foot_z_acc: 5.0
 
-        # rl parameters
-        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
+        # policy path
+        #model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
         #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
+        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/walking/checkpoints/00135.yaml"
 
 planner_configuration:
 

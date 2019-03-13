@@ -4,10 +4,10 @@
 
 #include <PnC/WBC/Task.hpp>
 
-class IsolatedPointFootTask : public Task {
+class PointFootTask : public Task {
    public:
-    IsolatedPointFootTask(RobotSystem* robot_, int _link_idx);
-    virtual ~IsolatedPointFootTask();
+    PointFootTask(RobotSystem* robot_, int _link_idx);
+    virtual ~PointFootTask();
 
    private:
     virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,

@@ -21,7 +21,7 @@ BodyCtrl::BodyCtrl(RobotSystem* robot) : Controller(robot) {
     Kd_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // task
-    body_rpz_task_ = new BodyRPZTask(robot);
+    body_rpz_task_ = new BodyRxRyZTask(robot);
     selected_jidx_.resize(2);
     selected_jidx_[0] = DracoDoF::rHipYaw;
     selected_jidx_[1] = DracoDoF::lHipYaw;

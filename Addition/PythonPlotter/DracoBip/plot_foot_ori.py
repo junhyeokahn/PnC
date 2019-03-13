@@ -20,23 +20,25 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 
     ## read files
-    data_rfoot_pos_des = \
-            np.genfromtxt(file_path+'rfoot_pos_des.txt', delimiter=None, dtype=(float))
-    data_rfoot_pos = \
-            np.genfromtxt(file_path+'rfoot_cp.txt', delimiter=None, dtype=(float))
-    data_lfoot_pos_des = \
-            np.genfromtxt(file_path+'lfoot_pos_des.txt', delimiter=None, dtype=(float))
-    data_lfoot_pos = \
-            np.genfromtxt(file_path+'lfoot_cp.txt', delimiter=None, dtype=(float))
+    data_quat_des = \
+            np.genfromtxt(file_path+'des_quat.txt', delimiter=None, dtype=(float))
+    data_rfoot_quat = \
+            np.genfromtxt(file_path+'rfoot_quat.txt', delimiter=None, dtype=(float))
+    data_rfoot_des_quat = \
+            np.genfromtxt(file_path+'rfoot_quat_des.txt', delimiter=None, dtype=(float))
+    data_lfoot_quat= \
+            np.genfromtxt(file_path+'lfoot_quat.txt', delimiter=None, dtype=(float))
+    data_lfoot_des_quat= \
+            np.genfromtxt(file_path+'lfoot_quat_des.txt', delimiter=None, dtype=(float))
 
-    data_rfoot_vel_des = \
-            np.genfromtxt(file_path+'rfoot_vel_des.txt', delimiter=None, dtype=(float))
-    data_rfoot_vel = \
-            np.genfromtxt(file_path+'rfoot_cv.txt', delimiter=None, dtype=(float))
-    data_lfoot_vel_des = \
-            np.genfromtxt(file_path+'lfoot_vel_des.txt', delimiter=None, dtype=(float))
-    data_lfoot_vel = \
-            np.genfromtxt(file_path+'lfoot_cv.txt', delimiter=None, dtype=(float))
+    data_rfoot_so3= \
+            np.genfromtxt(file_path+'rfoot_so3.txt', delimiter=None, dtype=(float))
+    data_rfoot_des_so3 = \
+            np.genfromtxt(file_path+'rfoot_so3_des.txt', delimiter=None, dtype=(float))
+    data_lfoot_so3 = \
+            np.genfromtxt(file_path+'lfoot_so3.txt', delimiter=None, dtype=(float))
+    data_lfoot_des_so3 = \
+            np.genfromtxt(file_path+'lfoot_so3_des.txt', delimiter=None, dtype=(float))
 
 
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
@@ -81,15 +83,15 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
 
     axes = plt.gca()
 
-    ## plot rfoot pos
+    ## plot rfoot quat
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
-    fig.canvas.set_window_title('right foot pos')
-    for i in range(1,4,1):
-        ax1 = plt.subplot(3, 1, i)
-        plt.plot(data_x, data_rfoot_pos_des[st_idx:end_idx,i-1], \
+    fig.canvas.set_window_title('right foot quat')
+    for i in range(1,5,1):
+        ax1 = plt.subplot(4, 1, i)
+        plt.plot(data_x, data_rfoot_des_quat[st_idx:end_idx,i-1], \
                 "r-", linewidth = 3)
-        plt.plot(data_x, data_rfoot_pos[st_idx:end_idx,i-1], "b-")
+        plt.plot(data_x, data_rfoot_quat[st_idx:end_idx,i-1], "b-")
 
        # phase marker #
         for j in phseChange:
@@ -97,7 +99,6 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
             plt.axvline(x=data_x[j],color='indigo',linestyle='-')
             # phase number
             plt.text(data_x[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
-
 
         # Plot Left Foot Contact
         for j in range(1, len(lf_contact_index_change)):
@@ -130,15 +131,15 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     elif plot_configuration == PLOT_VERTICALLY:
         row_index +=1
 
-    ## plot lfoot pos
+    ## plot lfoot quat
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
-    fig.canvas.set_window_title('left foot pos')
-    for i in range(1,4,1):
-        ax1 = plt.subplot(3, 1, i)
-        plt.plot(data_x, data_lfoot_pos_des[st_idx:end_idx,i-1],\
+    fig.canvas.set_window_title('left foot quat')
+    for i in range(1,5,1):
+        ax1 = plt.subplot(4, 1, i)
+        plt.plot(data_x, data_lfoot_des_quat[st_idx:end_idx,i-1],\
                 "r-", linewidth=3)
-        plt.plot(data_x, data_lfoot_pos[st_idx:end_idx,i-1], "b-")
+        plt.plot(data_x, data_lfoot_quat[st_idx:end_idx,i-1], "b-")
 
         # phase marker #
         for j in phseChange:
@@ -182,14 +183,14 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
         row_index +=1
 
 
-    ## plot foot vel
+    ## plot foot so3
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
-    fig.canvas.set_window_title('rfoot vel')
+    fig.canvas.set_window_title('rfoot so3')
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
-        plt.plot(data_x, data_rfoot_vel_des[st_idx:end_idx,i-1], "r-")
-        plt.plot(data_x, data_rfoot_vel[st_idx:end_idx,i-1], "b-")
+        plt.plot(data_x, data_rfoot_des_so3[st_idx:end_idx,i-1], "r-", linewidth = 3)
+        plt.plot(data_x, data_rfoot_so3[st_idx:end_idx,i-1], "b-")
 
         # plt.legend(('command', 'pos'), loc='upper left')
         # phase marker #
@@ -207,14 +208,14 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     elif plot_configuration == PLOT_VERTICALLY:
         row_index +=1
 
-    ## plot foot vel
+    ## plot foot so3
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
-    fig.canvas.set_window_title('rfoot vel')
+    fig.canvas.set_window_title('lfoot so3')
     for i in range(1,4,1):
         ax1 = plt.subplot(3, 1, i)
-        plt.plot(data_x, data_lfoot_vel_des[st_idx:end_idx,i-1], "r-")
-        plt.plot(data_x, data_lfoot_vel[st_idx:end_idx,i-1], "b-")
+        plt.plot(data_x, data_lfoot_des_so3[st_idx:end_idx,i-1], "r-")
+        plt.plot(data_x, data_lfoot_so3[st_idx:end_idx,i-1], "b-")
 
         # plt.legend(('command', 'pos'), loc='upper left')
         # phase marker #

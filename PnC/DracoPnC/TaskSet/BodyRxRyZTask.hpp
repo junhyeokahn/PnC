@@ -4,10 +4,10 @@
 
 class RobotSystem;
 
-class CoMLinBodyOriTask : public Task {
+class BodyRxRyZTask : public Task {
    public:
-    CoMLinBodyOriTask(RobotSystem*);
-    virtual ~CoMLinBodyOriTask();
+    BodyRxRyZTask(RobotSystem*);
+    virtual ~BodyRxRyZTask();
 
    protected:
     /* Update pos_err, vel_des, acc_des

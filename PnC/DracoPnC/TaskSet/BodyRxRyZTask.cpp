@@ -3,16 +3,16 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
-BodyRPZTask::BodyRPZTask(RobotSystem* robot) : Task(robot, 3) {
+BodyRxRyZTask::BodyRxRyZTask(RobotSystem* robot) : Task(robot, 3) {
     myUtils::pretty_constructor(3, "Body Rx Ry Z Task");
 
     Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
     JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
 }
 
-BodyRPZTask::~BodyRPZTask() {}
+BodyRxRyZTask::~BodyRxRyZTask() {}
 
-bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
+bool BodyRxRyZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                  const Eigen::VectorXd& _vel_des,
                                  const Eigen::VectorXd& _acc_des) {
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2],
@@ -43,7 +43,7 @@ bool BodyRPZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     return true;
 }
 
-bool BodyRPZTask::_UpdateTaskJacobian() {
+bool BodyRxRyZTask::_UpdateTaskJacobian() {
     // Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(DracoBodyNode::Torso);
     Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(DracoBodyNode::Torso);
     // (Rx, Ry)
@@ -57,7 +57,7 @@ bool BodyRPZTask::_UpdateTaskJacobian() {
     return true;
 }
 
-bool BodyRPZTask::_UpdateTaskJDotQdot() {
+bool BodyRxRyZTask::_UpdateTaskJDotQdot() {
     JtDotQdot_.setZero();
     return true;
 }

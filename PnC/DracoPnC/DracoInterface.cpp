@@ -177,17 +177,6 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     ++count_;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
-
-    // walking forward test
-    if (true) {
-        if (sp_->curr_time > walking_start_time_) {
-            for (int i = 0; i < 2; ++i) {
-                sp_->walking_velocity[i] = walking_velocity_[i];
-                sp_->des_location[i] +=
-                    walking_velocity_[i] * DracoAux::ServoRate;
-            }
-        }
-    }
 }
 
 bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd) {
@@ -267,6 +256,8 @@ void DracoInterface::_ParameterSetting() {
             test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
+        } else if (test_name == "turning_test") {
+            test_ = new TurningTest(robot_);
         } else if (test_name == "balancing_test") {
             test_ = new BalancingTest(robot_);
         } else if (test_name == "rl_walking_test") {
@@ -295,19 +286,6 @@ void DracoInterface::_ParameterSetting() {
         myUtils::readParameter(cfg, "jtrq_max", jtrq_max_);
         myUtils::readParameter(cfg, "jtrq_min", jtrq_min_);
 
-        myUtils::readParameter(cfg, "walking_start_time", walking_start_time_);
-        Eigen::VectorXd walking_velocity_lb, walking_velocity_ub;
-        walking_velocity_.setZero();
-        myUtils::readParameter(cfg, "walking_velocity_lb", walking_velocity_lb);
-        myUtils::readParameter(cfg, "walking_velocity_ub", walking_velocity_ub);
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        for (int i = 0; i < 2; ++i) {
-            std::uniform_real_distribution<> dis(walking_velocity_lb[i],
-                                                 walking_velocity_ub[i]);
-            walking_velocity_[i] = dis(gen);
-        }
-        //myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout, "walking_velocity");
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -323,6 +301,7 @@ Eigen::Isometry3d DracoInterface::GetTargetIso() {
         target_pos[i] = sp_->des_location[i];
     }
     target_iso.translation() = target_pos;
+    target_iso.linear() = sp_->des_quat.toRotationMatrix();
     return target_iso;
 }
 

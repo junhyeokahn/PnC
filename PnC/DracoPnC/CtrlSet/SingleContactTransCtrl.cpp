@@ -28,7 +28,7 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     myUtils::pretty_constructor(2, "Single Contact Trans Ctrl");
 
     // task
-    base_task_ = new BodyRPZTask(robot);
+    base_task_ = new BodyRxRyZTask(robot);
     selected_jidx_.resize(2);
     selected_jidx_[0] = DracoDoF::rHipYaw;
     selected_jidx_[1] = DracoDoF::lHipYaw;

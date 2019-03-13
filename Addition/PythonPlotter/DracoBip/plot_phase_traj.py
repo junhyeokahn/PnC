@@ -33,13 +33,13 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
     data_rfoot_contact = \
         np.genfromtxt(file_path+'rfoot_contact.txt', delimiter=None, dtype=(float))
     data_rfoot_pos = \
-        np.genfromtxt(file_path+'rfoot_cp.txt', delimiter=None, dtype=(float))
+        np.genfromtxt(file_path+'rfoot_pos.txt', delimiter=None, dtype=(float))
     data_rfoot_pos_des = \
         np.genfromtxt(file_path+'rfoot_pos_des.txt', delimiter=None, dtype=(float))
     data_lfoot_contact = \
         np.genfromtxt(file_path+'lfoot_contact.txt', delimiter=None, dtype=(float))
     data_lfoot_pos = \
-        np.genfromtxt(file_path+'lfoot_cp.txt', delimiter=None, dtype=(float))
+        np.genfromtxt(file_path+'lfoot_pos.txt', delimiter=None, dtype=(float))
     data_lfoot_pos_des = \
         np.genfromtxt(file_path+'lfoot_pos_des.txt', delimiter=None, dtype=(float))
     data_phase = \
@@ -83,8 +83,8 @@ def create_figures(subfigure_width=480, subfigure_height=500, starting_figure_no
 
     data_com_pos_global = data_com_pos + data_global_pos_offset
     data_body_global = data_config[:,0:3] + data_global_pos_offset
-    st_step = 0
-    num_steps = 8
+    st_step = 135
+    num_steps = 5
 
     lin_width = 3
     fig_width = 480

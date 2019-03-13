@@ -66,10 +66,6 @@ class DracoInterface : public EnvInterface {
     Eigen::VectorXd jtrq_min_;
     bool stop_test_;
 
-    // walking
-    double walking_start_time_;
-    Eigen::Vector2d walking_velocity_;
-
    public:
     DracoInterface();
     DracoInterface(int mpi_idx, int env_idx);

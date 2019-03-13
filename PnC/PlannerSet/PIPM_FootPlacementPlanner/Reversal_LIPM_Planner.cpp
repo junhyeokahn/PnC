@@ -61,7 +61,11 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     // switch_state[1][0]);
     // printf("switching velocity: %f, %f\n", switch_state[0][1],
     // switch_state[1][1]);
-    int check_switch(_check_switch_velocity(switch_state));
+
+    // !! TEST !!
+    // int check_switch(_check_switch_velocity(switch_state));
+    int check_switch(_check_switch_velocity_considering_rotation(switch_state));
+    // !! TEST !!
     double new_swing_time(_input->swing_time);
     int count(0);
     while (check_switch != 0) {
@@ -81,7 +85,11 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
         _computeSwitchingState(new_swing_time, com_pos, com_vel,
                                _input->stance_foot_loc, switch_state);
 
-        check_switch = _check_switch_velocity(switch_state);
+        // !! TEST !!
+        // check_switch = _check_switch_velocity(switch_state);
+        check_switch =
+            _check_switch_velocity_considering_rotation(switch_state);
+        // !! TEST !!
         ++count;
         if (count > 0) break;
     }
@@ -99,11 +107,12 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     target_loc[2] = 0.;
 
     // _StepLengthCheck(target_loc, switch_state);
-    _StepLengthCheck(target_loc, _input->b_positive_sidestep,
-                     _input->stance_foot_loc);
     // !! TEST !!
-    //_StepLengthCheckConsideringRotation(target_loc,
-    //_input->b_positive_sidestep, _input->stance_foot_loc);
+    //_StepLengthCheck(target_loc, _input->b_positive_sidestep,
+    //_input->stance_foot_loc);
+    _StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep,
+                                        _input->stance_foot_loc);
+    // !! TEST !!
 
     // save data
     for (int i(0); i < 2; ++i) {
@@ -141,6 +150,36 @@ int Reversal_LIPM_Planner::_check_switch_velocity(
         if (y_vel < -com_vel_limit_[1]) ret = -1;
     }
 
+    return ret;
+}
+
+int Reversal_LIPM_Planner::_check_switch_velocity_considering_rotation(
+    const std::vector<Eigen::Vector2d>& switch_state) {
+    int ret(0);
+    Eigen::VectorXd global_com_vel = Eigen::VectorXd::Zero(2);
+    global_com_vel << switch_state[0][1], switch_state[1][1];
+    Eigen::VectorXd local_com_vel = Eigen::VectorXd::Zero(2);
+    local_com_vel = R_w_t_.transpose() * global_com_vel;
+
+    // X
+    double x_vel(local_com_vel[0]);
+    double y_vel(local_com_vel[1]);
+    if (x_vel > 0.) {
+        if (x_vel < com_vel_limit_[0]) ret = 1;
+        if (x_vel > com_vel_limit_[1]) ret = -1;
+    } else {
+        if (x_vel > -com_vel_limit_[0]) ret = 1;
+        if (x_vel < -com_vel_limit_[1]) ret = -1;
+    }
+
+    // Y
+    if (y_vel > 0.) {
+        if (y_vel < com_vel_limit_[0]) ret = 1;
+        if (y_vel > com_vel_limit_[1]) ret = -1;
+    } else {
+        if (y_vel > -com_vel_limit_[0]) ret = 1;
+        if (y_vel < -com_vel_limit_[1]) ret = -1;
+    }
     return ret;
 }
 

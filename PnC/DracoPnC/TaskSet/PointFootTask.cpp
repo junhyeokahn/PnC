@@ -3,7 +3,7 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
-IsolatedPointFootTask::IsolatedPointFootTask(RobotSystem* robot, int _link_idx)
+PointFootTask::PointFootTask(RobotSystem* robot, int _link_idx)
     : Task(robot, 3) {
     myUtils::pretty_constructor(3, "Isolated Point Foot Task");
 
@@ -17,9 +17,9 @@ IsolatedPointFootTask::IsolatedPointFootTask(RobotSystem* robot, int _link_idx)
     link_idx_ = _link_idx;
 }
 
-IsolatedPointFootTask::~IsolatedPointFootTask() {}
+PointFootTask::~PointFootTask() {}
 
-bool IsolatedPointFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
+bool PointFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                            const Eigen::VectorXd& _vel_des,
                                            const Eigen::VectorXd& _acc_des) {
     vel_des = _vel_des;
@@ -37,7 +37,7 @@ bool IsolatedPointFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     return true;
 }
 
-bool IsolatedPointFootTask::_UpdateTaskJacobian() {
+bool PointFootTask::_UpdateTaskJacobian() {
     Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
               .block(3, 0, dim_task_, robot_->getNumDofs());
     // isolate virtual joint
@@ -47,7 +47,7 @@ bool IsolatedPointFootTask::_UpdateTaskJacobian() {
     return true;
 }
 
-bool IsolatedPointFootTask::_UpdateTaskJDotQdot() {
+bool PointFootTask::_UpdateTaskJDotQdot() {
     JtDotQdot_ = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
                      3, 0, dim_task_, robot_->getNumDofs()) *
                  robot_->getQdot();

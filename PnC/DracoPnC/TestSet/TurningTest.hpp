@@ -5,7 +5,7 @@
 class DracoStateProvider;
 class FootStepPlanner;
 
-namespace WkPhase {
+namespace TnPhase {
 constexpr int initiation = 0;
 constexpr int lift_up = 1;
 constexpr int double_contact_1 = 2;
@@ -17,18 +17,19 @@ constexpr int left_swing_start_trans = 7;
 constexpr int left_swing = 8;
 constexpr int left_swing_end_trans = 9;
 constexpr int NUM_WALKING_PHASE = 10;
-};  // namespace WkPhase
+};  // namespace TnPhase
 
-class WalkingTest : public Test {
+class TurningTest : public Test {
    public:
-    WalkingTest(RobotSystem*);
-    virtual ~WalkingTest();
+    TurningTest(RobotSystem*);
+    virtual ~TurningTest();
     virtual void TestInitialization();
 
    protected:
     int num_step_;
     DracoStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
+    virtual void AuxUpdate_();
     void _SettingParameter();
 
     FootStepPlanner* reversal_planner_;
@@ -46,4 +47,10 @@ class WalkingTest : public Test {
     Controller* left_swing_end_trans_ctrl_;
 
     YAML::Node cfg_;
+
+    // walking
+    double walking_start_time_;
+    Eigen::Vector2d walking_velocity_;
+    double turning_rate_;
+    Eigen::Quaternion<double> delta_quat_;
 };

@@ -17,6 +17,7 @@ class DracoStateProvider {
     Eigen::Vector3d adjusted_foot;
     Eigen::Vector3d guided_foot;
     Eigen::Vector2d walking_velocity;
+    Eigen::Quaternion<double> des_quat;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
@@ -34,10 +35,14 @@ class DracoStateProvider {
     Eigen::VectorXd qddot_cmd;
     Eigen::VectorXd reaction_forces;
 
-    Eigen::Vector3d rfoot_contact_center_pos;
-    Eigen::Vector3d lfoot_contact_center_pos;
-    Eigen::Vector3d rfoot_contact_center_vel;
-    Eigen::Vector3d lfoot_contact_center_vel;
+    Eigen::Vector3d rfoot_center_pos;
+    Eigen::Vector3d lfoot_center_pos;
+    Eigen::Vector3d rfoot_center_vel;
+    Eigen::Vector3d lfoot_center_vel;
+    Eigen::Vector3d rfoot_center_so3;
+    Eigen::Vector3d lfoot_center_so3;
+    Eigen::Quaternion<double> rfoot_center_quat;
+    Eigen::Quaternion<double> lfoot_center_quat;
 
     Eigen::VectorXd led_kin_data;
 
