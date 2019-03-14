@@ -32,6 +32,15 @@ class SingleContactTransCtrl : public Controller {
     double target_body_height_;
     double ini_base_height_;
     Eigen::VectorXd ini_body_pos_;
+
+    Eigen::Quaternion<double> ini_body_quat_;
+    Eigen::Quaternion<double> body_delta_quat_;
+    Eigen::Vector3d body_delta_so3_;
+
+    Eigen::Quaternion<double> ini_torso_quat_;
+    Eigen::Quaternion<double> torso_delta_quat_;
+    Eigen::Vector3d torso_delta_so3_;
+
     int dim_contact_;
 
     double end_time_;

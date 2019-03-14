@@ -5,7 +5,7 @@ height: 0.90
 show_viewer: true
 show_joint_frame: false
 show_target_frame: true
-camera_manipulator: true
+camera_manipulator: false
 
 control_configuration:
     kp: 400

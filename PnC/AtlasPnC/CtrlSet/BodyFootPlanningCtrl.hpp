@@ -57,12 +57,22 @@ class BodyFootPlanningCtrl : public SwingPlanningCtrl {
     Eigen::VectorXd Kp_;
     Eigen::VectorXd Kd_;
 
+    // Task specification
     Eigen::VectorXd ini_body_pos_;
-    Eigen::Vector3d ini_com_pos_;
     Eigen::Vector3d ini_foot_pos_;
     Eigen::Vector2d body_pt_offset_;
 
-    Eigen::VectorXd ini_config_;
+    Eigen::Quaternion<double> ini_body_quat_;
+    Eigen::Quaternion<double> body_delta_quat_;
+    Eigen::Vector3d body_delta_so3_;
+
+    Eigen::Quaternion<double> ini_torso_quat_;
+    Eigen::Quaternion<double> torso_delta_quat_;
+    Eigen::Vector3d torso_delta_so3_;
+
+    Eigen::Quaternion<double> ini_foot_quat_;
+    Eigen::Quaternion<double> foot_delta_quat_;
+    Eigen::Vector3d foot_delta_so3_;
 
     std::vector<double> foot_landing_offset_;
 

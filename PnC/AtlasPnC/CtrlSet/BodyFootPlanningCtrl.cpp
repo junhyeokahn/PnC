@@ -134,7 +134,13 @@ void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 }
 
 void BodyFootPlanningCtrl::_task_setup() {
-    // Body Pos
+    double t(myUtils::smooth_changing(0, 1, end_time_, state_machine_time_));
+    double tdot(
+        myUtils::smooth_changing_vel(0, 1, end_time_, state_machine_time_));
+
+    // =========================================================================
+    // Body Pos Task
+    // =========================================================================
     double body_height_cmd;
     if (b_set_height_target_)
         body_height_cmd = target_body_height_;
@@ -149,29 +155,76 @@ void BodyFootPlanningCtrl::_task_setup() {
     des_pos[2] = body_height_cmd;
     body_pos_task_->updateTask(des_pos, vel_des, acc_des);
 
-    // Body & Foot Orientation
-    Eigen::VectorXd des_quat = Eigen::VectorXd::Zero(4);
-    des_quat << 1., 0., 0., 0;
-    Eigen::VectorXd ang_vel_des(3);
-    ang_vel_des.setZero();
-    Eigen::VectorXd ang_acc_des(3);
-    ang_acc_des.setZero();
+    // =========================================================================
+    // Body Ori Task
+    // =========================================================================
+    Eigen::Quaternion<double> curr_body_delta_quat =
+        dart::math::expToQuat(body_delta_so3_ * t);
+    Eigen::Quaternion<double> curr_body_quat_des =
+        curr_body_delta_quat * ini_body_quat_;
+    Eigen::Vector3d curr_body_so3_des = body_delta_so3_ * tdot;
 
-    body_ori_task_->updateTask(des_quat, ang_vel_des, ang_acc_des);
-    torso_ori_task_->updateTask(des_quat, ang_vel_des, ang_acc_des);
-    foot_ori_task_->updateTask(des_quat, ang_vel_des, ang_acc_des);
+    Eigen::VectorXd des_body_quat = Eigen::VectorXd::Zero(4);
+    des_body_quat << curr_body_quat_des.w(), curr_body_quat_des.x(),
+        curr_body_quat_des.y(), curr_body_quat_des.z();
+    Eigen::VectorXd des_body_so3 = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 3; ++i) des_body_so3[i] = curr_body_so3_des[i];
 
+    Eigen::VectorXd ang_acc_des = Eigen::VectorXd::Zero(3);
+
+    body_ori_task_->updateTask(des_body_quat, des_body_so3, ang_acc_des);
+
+    // =========================================================================
+    // Torso Ori Task
+    // =========================================================================
+    Eigen::Quaternion<double> curr_torso_delta_quat =
+        dart::math::expToQuat(torso_delta_so3_ * t);
+    Eigen::Quaternion<double> curr_torso_quat_des =
+        curr_torso_delta_quat * ini_torso_quat_;
+    Eigen::Vector3d curr_torso_so3_des = torso_delta_so3_ * tdot;
+
+    Eigen::VectorXd des_torso_quat = Eigen::VectorXd::Zero(4);
+    des_torso_quat << curr_torso_quat_des.w(), curr_torso_quat_des.x(),
+        curr_torso_quat_des.y(), curr_torso_quat_des.z();
+    Eigen::VectorXd des_torso_so3 = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 3; ++i) des_torso_so3[i] = curr_torso_so3_des[i];
+
+    torso_ori_task_->updateTask(des_torso_quat, des_torso_so3, ang_acc_des);
+
+    // =========================================================================
+    // Foot Ori Task
+    // =========================================================================
+    Eigen::Quaternion<double> curr_foot_delta_quat =
+        dart::math::expToQuat(foot_delta_so3_ * t);
+    Eigen::Quaternion<double> curr_foot_quat_des =
+        curr_foot_delta_quat * ini_foot_quat_;
+    Eigen::Vector3d curr_foot_so3_des = foot_delta_so3_ * tdot;
+
+    Eigen::VectorXd des_foot_quat = Eigen::VectorXd::Zero(4);
+    des_foot_quat << curr_foot_quat_des.w(), curr_foot_quat_des.x(),
+        curr_foot_quat_des.y(), curr_foot_quat_des.z();
+    Eigen::VectorXd des_foot_so3 = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 3; ++i) des_foot_so3[i] = curr_foot_so3_des[i];
+
+    foot_ori_task_->updateTask(des_foot_quat, des_foot_so3, ang_acc_des);
+
+    // =========================================================================
+    // Foot Pos Task
+    // =========================================================================
     _CheckPlanning();
-    // Foot Pos Task Setup
     _foot_pos_task_setup();
 
-    // Full joint task
+    // =========================================================================
+    // Joint Pos Task
+    // =========================================================================
     Eigen::VectorXd jpos_des = sp_->jpos_ini;
     Eigen::VectorXd zero(Atlas::n_adof);
     zero.setZero();
     total_joint_task_->updateTask(jpos_des, zero, zero);
 
-    // Task Update
+    // =========================================================================
+    // Task List Update
+    // =========================================================================
     task_list_.push_back(foot_pos_task_);
     task_list_.push_back(body_pos_task_);
     task_list_.push_back(body_ori_task_);
@@ -179,6 +232,9 @@ void BodyFootPlanningCtrl::_task_setup() {
     task_list_.push_back(foot_ori_task_);
     task_list_.push_back(total_joint_task_);
 
+    // =========================================================================
+    // Solve Inv Kinematics
+    // =========================================================================
     kin_wbc_->FindConfiguration(sp_->q, task_list_, kin_wbc_contact_list_,
                                 des_jpos_, des_jvel_, des_jacc_);
 }
@@ -284,10 +340,27 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
 void BodyFootPlanningCtrl::firstVisit() {
     b_replaned_ = false;
-    ini_config_ = sp_->q;
+
     ini_body_pos_ =
         robot_->getBodyNodeIsometry(AtlasBodyNode::pelvis).translation();
+
+    ini_body_quat_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(AtlasBodyNode::pelvis).linear());
+    body_delta_quat_ = sp_->des_quat * ini_body_quat_.inverse();
+    body_delta_so3_ = dart::math::quatToExp(body_delta_quat_);
+
+    ini_torso_quat_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(AtlasBodyNode::utorso).linear());
+    torso_delta_quat_ = sp_->des_quat * ini_torso_quat_.inverse();
+    torso_delta_so3_ = dart::math::quatToExp(torso_delta_quat_);
+
+    ini_foot_quat_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(swing_foot_).linear());
+    foot_delta_quat_ = sp_->des_quat * ini_foot_quat_.inverse();
+    foot_delta_so3_ = dart::math::quatToExp(foot_delta_quat_);
+
     ini_foot_pos_ = robot_->getBodyNodeIsometry(swing_foot_).translation();
+
     ctrl_start_time_ = sp_->curr_time;
     state_machine_time_ = 0.;
     replan_moment_ = 0.;
@@ -302,10 +375,6 @@ void BodyFootPlanningCtrl::firstVisit() {
     foot_pos_offset.setZero();
     foot_pos_offset[2] = 0.;
     _SetMinJerkOffset(foot_pos_offset);
-
-    Eigen::Vector3d com_vel;
-    ini_com_pos_ = robot_->getCoMPosition();
-    com_vel = robot_->getCoMVelocity();
 }
 
 void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
