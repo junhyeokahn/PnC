@@ -423,9 +423,9 @@ void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
 
 bool BodyFootPlanningCtrl::endOfPhase() {
     if (state_machine_time_ > (end_time_)) {
-        printf("[Body Foot Ctrl] End, state_machine time/ end time: (%f, %f)\n",
+        printf("(state_machine time, end time) : (%f, %f) \n",
                state_machine_time_, end_time_);
-        printf("end of phase\n");
+        // printf("end of phase\n");
         // if(b_set_height_target_)  printf("b set height target: true\n");
         // else  printf("b set height target: false\n");
         // printf("\n");
@@ -442,10 +442,8 @@ bool BodyFootPlanningCtrl::endOfPhase() {
             contact_happen = true;
         }
         if (state_machine_time_ > end_time_ * 0.5 && contact_happen) {
-            printf(
-                "[Config Body Foot Ctrl] contact happen, state_machine_time/ "
-                "end time: (%f, %f)\n",
-                state_machine_time_, end_time_);
+            printf("(state_machine_time , end time): (%f, %f) \n",
+                   state_machine_time_, end_time_);
             return true;
         }
     }

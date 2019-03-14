@@ -1,36 +1,31 @@
 #pragma once
 
 #include <Utils/Math/BSplineBasic.h>
-#include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/AtlasPnC/CtrlSet/SwingPlanningCtrl.hpp>
+#include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
 #include <Utils/Math/minjerk_one_dim.hpp>
-
-class KinWBC;
 
 class BodyFootPlanningCtrl : public SwingPlanningCtrl {
    public:
-    BodyFootPlanningCtrl(RobotSystem* robot, std::string swing_foot_,
+    BodyFootPlanningCtrl(RobotSystem* robot, int swing_foot,
                          FootStepPlanner* planner);
     virtual ~BodyFootPlanningCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();
-    virtual void lastVisit() {
-        sp_->des_jpos_prev = des_jpos_;
-        // std::cout << "[BodyFootPlanning] End "<< std::endl;
-    }
+    virtual void lastVisit() { sp_->des_jpos_prev = des_jpos_; }
     virtual bool endOfPhase();
-
     virtual void ctrlInitialization(const YAML::Node& node);
 
    protected:
+    double waiting_time_limit_;
     double ini_base_height_;
     int swing_leg_jidx_;
     double push_down_height_;  // push foot below the ground at landing
+
+    Eigen::Vector3d default_target_loc_;
     Eigen::Vector3d initial_target_loc_;
 
     int dim_contact_;
-    // [right_front, right_back, left_front, left_back]
-    std::vector<int> fz_idx_in_cost_;
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
 
@@ -45,15 +40,16 @@ class BodyFootPlanningCtrl : public SwingPlanningCtrl {
 
     void _GetSinusoidalSwingTrajectory();
     void _GetBsplineSwingTrajectory();
+    void _foot_pos_task_setup();
     std::vector<ContactSpec*> kin_wbc_contact_list_;
 
-    std::vector<int> selected_jidx_;
-    Task* selected_joint_task_;
-    Task* base_task_;
-    // Task* foot_pitch_task_;
-    Task* foot_point_task_;
+    Task* body_pos_task_;
+    Task* body_ori_task_;
+    Task* torso_ori_task_;
+    Task* foot_pos_task_;
+    Task* foot_ori_task_;
+    Task* total_joint_task_;
 
-    KinWBC* kin_wbc_;
     Eigen::VectorXd des_jpos_;
     Eigen::VectorXd des_jvel_;
     Eigen::VectorXd des_jacc_;
@@ -61,21 +57,14 @@ class BodyFootPlanningCtrl : public SwingPlanningCtrl {
     Eigen::VectorXd Kp_;
     Eigen::VectorXd Kd_;
 
+    Eigen::VectorXd ini_body_pos_;
     Eigen::Vector3d ini_com_pos_;
     Eigen::Vector3d ini_foot_pos_;
+    Eigen::Vector2d body_pt_offset_;
 
     Eigen::VectorXd ini_config_;
 
-    double ini_ankle_;
-    double fin_ankle_;
-    double switch_vel_threshold_;
-    double fin_foot_z_vel_;
-    double fin_foot_z_acc_;
-
     std::vector<double> foot_landing_offset_;
-
-    Eigen::VectorXd body_pt_offset_;
-    Eigen::VectorXd default_target_loc_;
 
     std::vector<MinJerk_OneDimension*> min_jerk_offset_;
     BS_Basic<3, 3, 1, 2, 2> foot_traj_;

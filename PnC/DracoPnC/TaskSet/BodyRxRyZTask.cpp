@@ -13,8 +13,8 @@ BodyRxRyZTask::BodyRxRyZTask(RobotSystem* robot) : Task(robot, 3) {
 BodyRxRyZTask::~BodyRxRyZTask() {}
 
 bool BodyRxRyZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
-                                 const Eigen::VectorXd& _vel_des,
-                                 const Eigen::VectorXd& _acc_des) {
+                                   const Eigen::VectorXd& _vel_des,
+                                   const Eigen::VectorXd& _acc_des) {
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2],
                                       _pos_des[3]);
     Eigen::Quaternion<double> ori_act(

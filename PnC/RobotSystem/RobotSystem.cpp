@@ -232,15 +232,27 @@ void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd& q_,
 }
 
 void RobotSystem::printRobotInfo() {
+    std::cout << " ==== Body Node ====" << std::endl;
     for (int i = 0; i < skel_ptr_->getNumBodyNodes(); ++i) {
         dart::dynamics::BodyNodePtr bn = skel_ptr_->getBodyNode(i);
-        //std::cout << "BodyNode::" << bn->getName() << std::endl;
-        std::cout << "constexpr int " << bn->getName() << " = " << std::to_string(i) << std::endl;
+        std::cout << "constexpr int " << bn->getName() << " = "
+                  << std::to_string(i) << ";" << std::endl;
     }
+    std::cout << " ==== DoF ====" << std::endl;
     for (int i = 0; i < skel_ptr_->getNumDofs(); ++i) {
         dart::dynamics::DegreeOfFreedom* dof = skel_ptr_->getDof(i);
-        //std::cout << "DoF::" << dof->getName() << std::endl;
-        std::cout << "constexpr int " << dof->getName() << " = " << std::to_string(i) << std::endl;
+        std::cout << "constexpr int " << dof->getName() << " = "
+                  << std::to_string(i) << ";" << std::endl;
     }
+    std::cout << " ==== Num ====" << std::endl;
+    std::cout << "constexpr int n_bodynode = "
+              << std::to_string(skel_ptr_->getNumBodyNodes()) << ";"
+              << std::endl;
+    std::cout << "constexpr int n_dof = " << std::to_string(num_dof_) << ";"
+              << std::endl;
+    std::cout << "constexpr int n_vdof = " << std::to_string(num_virtual_dof_)
+              << ";" << std::endl;
+    std::cout << "constexpr int n_adof = " << std::to_string(num_actuated_dof_)
+              << ";" << std::endl;
     exit(0);
 }

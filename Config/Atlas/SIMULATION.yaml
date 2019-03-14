@@ -1,1 +1,7 @@
 servo_rate: 0.001
+show_joint_frame: false
+height: 0.90
+
+control_configuration:
+    kp: 400
+    kd: 10

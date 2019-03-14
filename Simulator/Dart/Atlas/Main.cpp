@@ -88,14 +88,14 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     // std::cout << joint->getNumDofs() << std::endl;
     //}
 
-    // for (int i = 0; i < robot->getNumDofs(); ++i) {
-    // dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-    // std::cout << i << "th" << std::endl;
-    // std::cout << dof->getName() << std::endl;
-    // std::cout << "child body node name : " <<
-    // dof->getChildBodyNode()->getName() << std::endl; std::cout <<
-    // dof->getCoulombFriction() << std::endl;
-    //}
+    for (int i = 0; i < robot->getNumDofs(); ++i) {
+        dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        std::cout << i << "th" << std::endl;
+        std::cout << "dof name : " << dof->getName() << std::endl;
+        std::cout << "child body node name and mass : "
+                  << dof->getChildBodyNode()->getName() << " , "
+                  << dof->getChildBodyNode()->getMass() << std::endl;
+    }
 
     // std::cout << "num dof" << std::endl;
     // std::cout << robot->getNumDofs() << std::endl;
@@ -107,32 +107,64 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     // std::cout << robot->getPositions() << std::endl;
     // std::cout << "robot total mass" << std::endl;
     // std::cout << robot->getMass() << std::endl;
-    std::cout << "robot position" << std::endl;
-    std::cout << robot->getPositions() << std::endl;
+    // std::cout << "robot position" << std::endl;
+    // std::cout << robot->getPositions() << std::endl;
 
     exit(0);
 }
 
-//void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
-    //int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
-    //int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
-    //int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
-    //int rHipPitchIdx = robot->getDof("rHipPitch")->getIndexInSkeleton();
-    //int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
-    //int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+    double height;
+    try {
+        YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
+        myUtils::readParameter(simulation_cfg, "height", height);
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+    }
+    int l_leg_hpy = robot->getDof("l_leg_hpy")->getIndexInSkeleton();
+    int r_leg_hpy = robot->getDof("r_leg_hpy")->getIndexInSkeleton();
+    int l_leg_kny = robot->getDof("l_leg_kny")->getIndexInSkeleton();
+    int r_leg_kny = robot->getDof("r_leg_kny")->getIndexInSkeleton();
+    int l_leg_aky = robot->getDof("l_leg_aky")->getIndexInSkeleton();
+    int r_leg_aky = robot->getDof("r_leg_aky")->getIndexInSkeleton();
 
-    //Eigen::VectorXd q = robot->getPositions();
-    //q[rAnkleIdx] = 1.57;
-    //q[lAnkleIdx] = 1.57;
-    //robot->setPositions(q);
-//}
+    int r_arm_shx = robot->getDof("r_arm_shx")->getIndexInSkeleton();
+    int r_arm_ely = robot->getDof("r_arm_ely")->getIndexInSkeleton();
+    int r_arm_elx = robot->getDof("r_arm_elx")->getIndexInSkeleton();
+    int l_arm_shx = robot->getDof("l_arm_shx")->getIndexInSkeleton();
+    int l_arm_ely = robot->getDof("l_arm_ely")->getIndexInSkeleton();
+    int l_arm_elx = robot->getDof("l_arm_elx")->getIndexInSkeleton();
+
+    Eigen::VectorXd q = robot->getPositions();
+    q[2] = height;
+    q[l_leg_hpy] = -0.4;
+    q[r_leg_hpy] = -0.4;
+    q[l_leg_kny] = 0.8;
+    q[r_leg_kny] = 0.8;
+    q[l_leg_aky] = -0.4;
+    q[r_leg_aky] = -0.4;
+
+    q[r_arm_shx] = 0.8;
+    q[r_arm_ely] = -0.9;
+    q[r_arm_elx] = 1.8;
+    q[l_arm_shx] = -0.8;
+    q[l_arm_ely] = -0.9;
+    q[l_arm_elx] = -1.8;
+    robot->setPositions(q);
+}
 
 int main(int argc, char** argv) {
     double servo_rate;
+    bool b_show_joint_frame;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
+        myUtils::readParameter(simulation_cfg, "show_joint_frame",
+                               b_show_joint_frame);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -146,15 +178,18 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Atlas/FixedAtlasSim_Dart.urdf");
+        THIS_COM "RobotModel/Robot/Atlas/AtlasSim_Dart.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 
     // =========================================================================
     // Friction & Restitution Coefficient
     // =========================================================================
-    double friction(10.);
+    double friction(0.9);
     double restit(0.0);
+    ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
+    robot->getBodyNode("r_foot")->setFrictionCoeff(friction);
+    robot->getBodyNode("l_foot")->setFrictionCoeff(friction);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -163,7 +198,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Display Joints Frame
     // =========================================================================
-    // displayJointFrames(world, robot);
+    if (b_show_joint_frame) displayJointFrames(world, robot);
 
     // =========================================================================
     // Display Target Frame
@@ -173,7 +208,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Initial configuration
     // =========================================================================
-    //_setInitialConfiguration(robot)
+    _setInitialConfiguration(robot);
 
     // =========================================================================
     // Enabel Joit Limits
@@ -185,28 +220,11 @@ int main(int argc, char** argv) {
     // =========================================================================
     //_printRobotModel(robot);
 
-    osg::ref_ptr<osgShadow::MinimalShadowMap> msm =
-        new osgShadow::LightSpacePerspectiveShadowMapDB;
-
-    float minLightMargin = 10.f;
-    float maxFarPlane = 0;
-    unsigned int texSize = 1024;
-    unsigned int baseTexUnit = 0;
-    unsigned int shadowTexUnit = 1;
-
-    msm->setMinLightMargin(minLightMargin);
-    msm->setMaxFarPlane(maxFarPlane);
-    msm->setTextureSize(::osg::Vec2s(texSize, texSize));
-    msm->setShadowTextureCoordIndex(shadowTexUnit);
-    msm->setShadowTextureUnit(shadowTexUnit);
-    msm->setBaseTextureCoordIndex(baseTexUnit);
-    msm->setBaseTextureUnit(baseTexUnit);
-
     // =========================================================================
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<AtlasWorldNode> node;
-    node = new AtlasWorldNode(world, msm);
+    node = new AtlasWorldNode(world);
     node->setNumStepsPerCycle(30);
 
     // =========================================================================
@@ -216,7 +234,6 @@ int main(int argc, char** argv) {
     viewer.addWorldNode(node);
     viewer.simulate(false);
     viewer.switchHeadlights(false);
-    msm->setLight(viewer.getLightSource(0)->getLight());
     ::osg::Vec3 p1(1.0, 0.2, 1.0);
     p1 = p1 * 0.7;
     viewer.getLightSource(0)->getLight()->setPosition(
@@ -225,8 +242,8 @@ int main(int argc, char** argv) {
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     viewer.addEventHandler(new OneStepProgress(node));
 
-    viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    // viewer.setUpViewInWindow(1440, 0, 500, 500);
+    // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(1440, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
         ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
         ::osg::Vec3(0.0, 0.0, 1.0));

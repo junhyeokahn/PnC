@@ -122,8 +122,7 @@ void DracoWorldNode::SetParameters_() {
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
         myUtils::readParameter(simulation_cfg, "check_collision",
                                b_check_collision_);
-        myUtils::readParameter(simulation_cfg, "show_viewer",
-                               b_show_viewer_);
+        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
         myUtils::readParameter(simulation_cfg, "plot_target", b_plot_target_);
         myUtils::readParameter(simulation_cfg, "plot_guided_foot",
                                b_plot_guided_foot_);
@@ -139,7 +138,7 @@ void DracoWorldNode::SetParameters_() {
         if (!b_show_viewer_) {
             b_plot_target_ = false;
             b_plot_guided_foot_ = false;
-            b_plot_adjusted_foot_= false;
+            b_plot_adjusted_foot_ = false;
             b_camera_manipulator_ = false;
         }
     } catch (std::runtime_error& e) {

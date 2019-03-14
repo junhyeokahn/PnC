@@ -2,7 +2,7 @@
 
 #include <PnC/Controller.hpp>
 
-class DracoStateProvider;
+class AtlasStateProvider;
 class RobotSystem;
 class WBLC;
 class WBLC_ExtraData;
@@ -34,15 +34,16 @@ class BodyCtrl : public Controller {
 
     Eigen::VectorXd jpos_ini_;
     bool b_set_height_target_;
-    int trj_type_;
     double end_time_;
     int dim_contact_;
-    // [right_center, left_center]
-    std::vector<int> fz_idx_in_cost_;
 
     std::vector<int> selected_jidx_;
+
+    Task* total_joint_task_;
+    Task* body_pos_task_;  // pelvis
+    Task* body_ori_task_;
+    Task* torso_ori_task_;
     Task* selected_joint_task_;
-    Task* body_rpz_task_;
 
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
@@ -53,12 +54,12 @@ class BodyCtrl : public Controller {
 
     double target_body_height_;
     double ini_body_height_;
-    Eigen::Vector3d ini_body_pos_;
+    Eigen::VectorXd ini_body_pos_;
 
-    void _body_task_setup();
-    void _double_contact_setup();
+    void _task_setup();
+    void _contact_setup();
     void _compute_torque_wblc(Eigen::VectorXd& gamma);
 
     double ctrl_start_time_;
-    DracoStateProvider* sp_;
+    AtlasStateProvider* sp_;
 };

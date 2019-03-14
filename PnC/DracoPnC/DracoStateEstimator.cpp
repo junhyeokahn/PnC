@@ -1,15 +1,15 @@
-#include <PnC/Filters/Basic/filters.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/StateEstimator/BasicAccumulation.hpp>
 #include <PnC/DracoPnC/StateEstimator/BodyEstimator.hpp>
+#include <PnC/Filters/Basic/filters.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
 DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
-    myUtils::pretty_constructor(1, "State Estimator");
+    myUtils::pretty_constructor(1, "Atlas State Estimator");
 
     robot_ = robot;
     sp_ = DracoStateProvider::getStateProvider(robot_);

@@ -1,10 +1,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
-#include <PnC/AtlasPnC/TestSet/JointTest.hpp>
-#include <PnC/AtlasPnC/AtlasDefinition.hpp>
+#include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
+#include <PnC/AtlasPnC/AtlasStateProvider.hpp>
+#include <PnC/AtlasPnC/TestSet/WalkingTest.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 #include <string>
 
 AtlasInterface::AtlasInterface() : EnvInterface() {
@@ -16,42 +18,65 @@ AtlasInterface::AtlasInterface() : EnvInterface() {
     myUtils::pretty_constructor(0, "Atlas Interface");
 
     robot_ = new RobotSystem(
-        0, THIS_COM "RobotModel/Robot/Atlas/FixedAtlasSim_Dart.urdf");
-     //robot_->printRobotInfo();
+        6, THIS_COM "RobotModel/Robot/Atlas/AtlasSim_Dart.urdf");
+    // robot_->printRobotInfo();
+    state_estimator_ = new AtlasStateEstimator(robot_);
+    sp_ = AtlasStateProvider::getStateProvider(robot_);
+    count_ = 0;
+    waiting_count_ = 2;
+    cmd_jpos_ = Eigen::VectorXd::Zero(Atlas::n_adof);
+    cmd_jvel_ = Eigen::VectorXd::Zero(Atlas::n_adof);
+    cmd_jtrq_ = Eigen::VectorXd::Zero(Atlas::n_adof);
 
     _ParameterSetting();
+
+    DataManager* dm = DataManager::GetDataManager();
+    dm->RegisterData(&cmd_jpos_, VECT, "jpos_des", Atlas::n_adof);
+    dm->RegisterData(&cmd_jvel_, VECT, "jvel_des", Atlas::n_adof);
+    dm->RegisterData(&cmd_jtrq_, VECT, "command", Atlas::n_adof);
 
     myUtils::color_print(myColor::BoldCyan, border);
 }
 
-AtlasInterface::~AtlasInterface() { delete robot_; }
+AtlasInterface::~AtlasInterface() {
+    delete robot_;
+    delete state_estimator_;
+    delete test_;
+}
 
 void AtlasInterface::getCommand(void* _data, void* _command) {
     AtlasCommand* cmd = ((AtlasCommand*)_command);
     AtlasSensorData* data = ((AtlasSensorData*)_data);
 
-    static bool b_initialized(false);
-    if (!b_initialized) {
-        test_->TestInitialization();
-        b_initialized = true;
+    if (!Initialization_(data, cmd)) {
+        state_estimator_->Update(data);
+        test_->getCommand(cmd);
+        CropTorque_(cmd);
     }
 
-    Eigen::VectorXd q = data->q;
-    Eigen::VectorXd qdot = data->qdot;
-    robot_->updateSystem(q, qdot, false);
-    test_->getCommand(cmd);
+    cmd_jtrq_ = cmd->jtrq;
+    cmd_jvel_ = cmd->qdot;
+    cmd_jpos_ = cmd->q;
 
     ++count_;
+    running_time_ = (double)(count_)*AtlasAux::servo_rate;
+    sp_->curr_time = running_time_;
+    sp_->phase_copy = test_->getPhase();
+}
+
+void AtlasInterface::CropTorque_(AtlasCommand* cmd) {
+    cmd->jtrq = myUtils::CropVector(cmd->jtrq, robot_->GetTorqueLowerLimits(),
+                                    robot_->GetTorqueUpperLimits(),
+                                    "clip trq in interface");
 }
 
 void AtlasInterface::_ParameterSetting() {
     try {
-        YAML::Node cfg =
-            YAML::LoadFile(THIS_COM "Config/Atlas/INTERFACE.yaml");
+        YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/Atlas/INTERFACE.yaml");
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
-        if (test_name == "joint_test") {
-            test_ = new JointTest(robot_);
+        if (test_name == "walking_test") {
+            test_ = new WalkingTest(robot_);
         } else {
             printf(
                 "[Atlas Interface] There is no test matching test with "
@@ -63,5 +88,30 @@ void AtlasInterface::_ParameterSetting() {
                   << __FILE__ << "]" << std::endl
                   << std::endl;
         exit(0);
+    }
+}
+
+bool AtlasInterface::Initialization_(AtlasSensorData* _sensor_data,
+                                     AtlasCommand* _command) {
+    static bool test_initialized(false);
+    if (!test_initialized) {
+        test_->TestInitialization();
+        test_initialized = true;
+    }
+    if (count_ < waiting_count_) {
+        SetStopCommand_(_sensor_data, _command);
+        state_estimator_->Initialization(_sensor_data);
+        DataManager::GetDataManager()->start();
+        return true;
+    }
+    return false;
+}
+
+void AtlasInterface::SetStopCommand_(AtlasSensorData* _sensor_data,
+                                     AtlasCommand* _command) {
+    for (int i(0); i < Atlas::n_adof; ++i) {
+        _command->jtrq[i] = 0.;
+        _command->q[i] = _sensor_data->q[i];
+        _command->qdot[i] = 0.;
     }
 }

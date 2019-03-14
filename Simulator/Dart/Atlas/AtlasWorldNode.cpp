@@ -2,55 +2,122 @@
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 #include <Simulator/Dart/Atlas/AtlasWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
-AtlasWorldNode::AtlasWorldNode(
-    const dart::simulation::WorldPtr& _world, osgShadow::MinimalShadowMap* msm)
-    : dart::gui::osg::WorldNode(_world, msm),
-      count_(0),
-      t_(0.0),
-      servo_rate_(0) {
+AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
+    : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
+                               kp_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
+                               kd_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
                   << std::endl;
     }
     world_ = _world;
-    mSkel = world_->getSkeleton("multisense_sl");
-    mGround = world_->getSkeleton("ground_skeleton");
-    mTorqueCommand = Eigen::VectorXd::Zero(30); //Find Function to get the number of the active joint (Numdof)??
+    robot_ = world_->getSkeleton("multisense_sl");
+    trq_lb_ = robot_->getForceLowerLimits();
+    trq_ub_ = robot_->getForceUpperLimits();
+    n_dof_ = robot_->getNumDofs();
+    ground_ = world_->getSkeleton("ground_skeleton");
+    trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
 
-    mInterface = new AtlasInterface();
-
-    mSensorData = new AtlasSensorData();
-    mSensorData->q = Eigen::VectorXd::Zero(30);
-    mSensorData->qdot = Eigen::VectorXd::Zero(30);
-
-    mCommand = new AtlasCommand();
-    mCommand->jtrq = Eigen::VectorXd::Zero(30);
+    interface_ = new AtlasInterface();
+    sensor_data_ = new AtlasSensorData();
+    command_ = new AtlasCommand();
 }
 
 AtlasWorldNode::~AtlasWorldNode() {
-    delete mInterface;
-    delete mSensorData;
-    delete mCommand;
+    delete interface_;
+    delete sensor_data_;
+    delete command_;
 }
 
 void AtlasWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
+    if (dart::math::isNan(robot_->getPositions())) {
+        std::cout << "NaN" << std::endl;
+        myUtils::pretty_print(robot_->getPositions(), std::cout, "q");
+        exit(0);
+    }
 
-    mSensorData->q = mSkel->getPositions();
-    mSensorData->qdot = mSkel->getVelocities();
+    sensor_data_->q = robot_->getPositions().tail(n_dof_ - 6);
+    sensor_data_->qdot = robot_->getVelocities().tail(n_dof_ - 6);
+    GetImuData_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc);
+    GetContactSwitchData_(sensor_data_->rfoot_contact,
+                          sensor_data_->lfoot_contact);
 
-    mInterface->getCommand(mSensorData, mCommand);
+    interface_->getCommand(sensor_data_, command_);
 
-    mTorqueCommand = mCommand->jtrq;
+    trq_cmd_.tail(n_dof_ - 6) = command_->jtrq;
+    for (int i = 0; i < n_dof_ - 6; ++i) {
+        trq_cmd_[i + 6] += kp_ * (command_->q[i] - sensor_data_->q[i]) +
+                           kd_ * (command_->qdot[i] - sensor_data_->qdot[i]);
+    }
+    trq_cmd_.head(6).setZero();
+    // if (count_ < 10) HoldXY_();
 
-    // mTorqueCommand.setZero();
-    mSkel->setForces(mTorqueCommand);
+    // trq_cmd_.setZero();
+    Eigen::VectorXd clipped_trq =
+        myUtils::CropVector(trq_cmd_, trq_lb_, trq_ub_, "final trq");
+    robot_->setForces(clipped_trq);
 
     count_++;
+}
+
+void AtlasWorldNode::GetImuData_(Eigen::VectorXd& ang_vel,
+                                 Eigen::VectorXd& acc) {
+    Eigen::VectorXd ang_vel_local =
+        robot_->getBodyNode("pelvis")
+            ->getSpatialVelocity(dart::dynamics::Frame::World(),
+                                 robot_->getBodyNode("pelvis"))
+            .head(3);
+    ang_vel = ang_vel_local;
+    Eigen::MatrixXd rot_wp(3, 3);
+    rot_wp = robot_->getBodyNode("pelvis")->getWorldTransform().linear();
+    Eigen::VectorXd global_grav(3);
+    global_grav << 0, 0, 9.81;
+    Eigen::VectorXd local_grav = rot_wp.transpose() * global_grav;
+    acc = local_grav;
+}
+
+void AtlasWorldNode::GetContactSwitchData_(bool& rfoot_contact,
+                                           bool& lfoot_contact) {
+    Eigen::VectorXd rf =
+        robot_->getBodyNode("r_sole")->getWorldTransform().translation();
+    Eigen::VectorXd lf =
+        robot_->getBodyNode("l_sole")->getWorldTransform().translation();
+
+    // myUtils::pretty_print(rf, std::cout, "right_sole");
+    // myUtils::pretty_print(lf, std::cout, "left_sole");
+
+    if (fabs(rf[2] < 0.01)) {
+        rfoot_contact = true;
+        // printf("right contact\n");
+    } else {
+        rfoot_contact = false;
+    }
+
+    if (fabs(lf[2] < 0.01)) {
+        lfoot_contact = true;
+        // printf("left contact\n");
+    } else {
+        lfoot_contact = false;
+    }
+}
+
+void AtlasWorldNode::HoldXY_() {
+    Eigen::VectorXd q = robot_->getPositions();
+    Eigen::VectorXd v = robot_->getVelocities();
+    double kp(200);
+    double kd(50);
+    double des_x(0.);
+    double des_xdot(0.);
+    for (int i = 0; i < 2; ++i)
+        trq_cmd_[i] = kp * (des_x - q[i]) + kd * (des_xdot - v[i]);
 }

@@ -117,6 +117,9 @@ void BodyCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
 
+    // myUtils::pretty_print(des_jacc_, std::cout, "des_jacc");
+    // myUtils::pretty_print(des_jacc_cmd, std::cout, "des_jacc_cmd");
+
     sp_->qddot_cmd = wblc_data_->qddot_;
     for (int i = 0; i < wblc_data_->Fr_.size(); ++i) {
         sp_->reaction_forces[i] = wblc_data_->Fr_[i];

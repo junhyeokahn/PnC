@@ -25,7 +25,8 @@ DracoInterface::DracoInterface() : EnvInterface() {
     robot_ =
         // new RobotSystem(6, THIS_COM
         // "RobotModel/Robot/Draco/DracoPnCOld.urdf");
-        new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC.urdf");
+        new RobotSystem(6,
+                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
