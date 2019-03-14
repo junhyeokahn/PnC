@@ -34,7 +34,7 @@ class RLWalkingTest : public Test {
 
     DracoStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
-    virtual void AuxUpdate_();
+    virtual void AdditionalUpdate_();
     void _SettingParameter();
 
     FootStepPlanner* reversal_planner_;

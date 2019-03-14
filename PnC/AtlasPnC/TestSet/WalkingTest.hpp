@@ -27,6 +27,7 @@ class WalkingTest : public Test {
     int num_step_;
     AtlasStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
+    virtual void AdditionalUpdate_();
     void _SettingParameter();
 
     FootStepPlanner* reversal_planner_;
@@ -42,4 +43,10 @@ class WalkingTest : public Test {
     Controller* left_swing_end_trans_ctrl_;
 
     YAML::Node cfg_;
+
+    // Locomotion Behavior
+    double walking_start_time_;
+    Eigen::Vector2d walking_velocity_;
+    double turning_rate_;
+    Eigen::Quaternion<double> delta_quat_;
 };

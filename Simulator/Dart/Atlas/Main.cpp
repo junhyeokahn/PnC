@@ -159,12 +159,15 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 int main(int argc, char** argv) {
     double servo_rate;
     bool b_show_joint_frame;
+    bool b_show_target_frame;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
         myUtils::readParameter(simulation_cfg, "show_joint_frame",
                                b_show_joint_frame);
+        myUtils::readParameter(simulation_cfg, "show_target_frame",
+                               b_show_target_frame);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -203,7 +206,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Display Target Frame
     // =========================================================================
-    // addTargetFrame(world);
+    if (b_show_target_frame) addTargetFrame(world);
 
     // =========================================================================
     // Initial configuration

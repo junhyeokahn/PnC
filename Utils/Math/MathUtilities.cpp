@@ -102,9 +102,6 @@ Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
     assert(value.size() = max.size());
     int n_data = value.size();
 
-    // std::cout <<
-    // "------------------------------------------------------------"
-    //<< std::endl;
     for (int i = 0; i < n_data; ++i) {
         if (value[i] > max[i]) {
             // printf("%s(%d): %f is cropped to %f\n", source.c_str(), i,
@@ -117,9 +114,6 @@ Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
             value[i] = min[i];
         }
     }
-    // std::cout <<
-    // "------------------------------------------------------------"
-    //<< std::endl;
     return value;
 }
 

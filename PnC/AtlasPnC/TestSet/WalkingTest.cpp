@@ -133,6 +133,13 @@ int WalkingTest::_NextPhase(const int& phase) {
     }
     sp_->num_step_copy = num_step_;
 
+    // Update Turning Target
+    if (sp_->curr_time > walking_start_time_) {
+        if (sp_->phase_copy == 2 || sp_->phase_copy == 6) {
+            sp_->des_quat = delta_quat_ * sp_->des_quat;
+        }
+    }
+
     if (next_phase == WkPhase::NUM_WALKING_PHASE) {
         return WkPhase::double_contact_1;
     } else {
@@ -209,10 +216,51 @@ void WalkingTest::_SettingParameter() {
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setContactSwitchCheck(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setContactSwitchCheck(b_tmp);
 
+        // =====================================================================
+        // Locomotion Behavior
+        // =====================================================================
+        myUtils::readParameter(test_cfg, "walking_start_time",
+                               walking_start_time_);
+        Eigen::VectorXd walking_velocity_lb, walking_velocity_ub;
+        walking_velocity_.setZero();
+        myUtils::readParameter(test_cfg, "walking_velocity_lb",
+                               walking_velocity_lb);
+        myUtils::readParameter(test_cfg, "walking_velocity_ub",
+                               walking_velocity_ub);
+        double turning_rate_lb, turning_rate_ub;
+        myUtils::readParameter(test_cfg, "turning_rate_lb", turning_rate_lb);
+        myUtils::readParameter(test_cfg, "turning_rate_ub", turning_rate_ub);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        for (int i = 0; i < 2; ++i) {
+            std::uniform_real_distribution<> dis(walking_velocity_lb[i],
+                                                 walking_velocity_ub[i]);
+            walking_velocity_[i] = dis(gen);
+        }
+        std::uniform_real_distribution<> dis(turning_rate_lb, turning_rate_ub);
+        turning_rate_ = dis(gen);
+        Eigen::Vector3d euler_zyx(turning_rate_, 0, 0);
+        delta_quat_ =
+            Eigen::Quaternion<double>(dart::math::eulerZYXToMatrix(euler_zyx));
+
+        // myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout,
+        //"walking_velocity");
+        // myUtils::pretty_print(delta_quat_, std::cout, "delta_quat");
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
                   << std::endl;
         exit(0);
+    }
+}
+
+void WalkingTest::AdditionalUpdate_() {
+    // Update Walking Target
+    if (sp_->curr_time > walking_start_time_) {
+        for (int i = 0; i < 2; ++i) {
+            sp_->walking_velocity[i] = walking_velocity_[i];
+            sp_->des_location[i] += walking_velocity_[i] * AtlasAux::servo_rate;
+        }
     }
 }

@@ -10,10 +10,19 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
+        myUtils::readParameter(simulation_cfg, "show_target_frame",
+                               b_show_target_frame_);
+        myUtils::readParameter(simulation_cfg, "camera_manipulator",
+                               b_manipulate_camera_);
+        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
                                kp_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
                                kd_);
+        if (!b_show_viewer_) {
+            b_manipulate_camera_ = false;
+            b_show_target_frame_ = false;
+        }
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -68,6 +77,9 @@ void AtlasWorldNode::customPreStep() {
     robot_->setForces(clipped_trq);
 
     count_++;
+
+    if (b_show_target_frame_) PlotTargetLocation_();
+    if (b_manipulate_camera_) ManipulateCameraPos_();
 }
 
 void AtlasWorldNode::GetImuData_(Eigen::VectorXd& ang_vel,
@@ -120,4 +132,22 @@ void AtlasWorldNode::HoldXY_() {
     double des_xdot(0.);
     for (int i = 0; i < 2; ++i)
         trq_cmd_[i] = kp * (des_x - q[i]) + kd * (des_xdot - v[i]);
+}
+
+void AtlasWorldNode::PlotTargetLocation_() {
+    dart::dynamics::SimpleFramePtr frame =
+        world_->getSimpleFrame("target_frame");
+    Eigen::Isometry3d tf = ((AtlasInterface*)interface_)->GetTargetIso();
+    frame->setTransform(tf);
+}
+
+void AtlasWorldNode::ManipulateCameraPos_() {
+    Eigen::Isometry3d pelvis_iso =
+        robot_->getBodyNode("utorso")->getTransform();
+    Eigen::Vector3d pelvis_vec = pelvis_iso.translation();
+    mViewer->getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(pelvis_vec[0] + 3, pelvis_vec[1] - 8., pelvis_vec[2] + 3),
+        ::osg::Vec3(pelvis_vec[0], pelvis_vec[1], pelvis_vec[2]),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    mViewer->setCameraManipulator(mViewer->getCameraManipulator());
 }

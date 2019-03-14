@@ -115,3 +115,14 @@ void AtlasInterface::SetStopCommand_(AtlasSensorData* _sensor_data,
         _command->qdot[i] = 0.;
     }
 }
+
+Eigen::Isometry3d AtlasInterface::GetTargetIso() {
+    Eigen::Isometry3d target_iso = Eigen::Isometry3d::Identity();
+    Eigen::VectorXd target_pos = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 2; ++i) {
+        target_pos[i] = sp_->des_location[i];
+    }
+    target_iso.translation() = target_pos;
+    target_iso.linear() = sp_->des_quat.toRotationMatrix();
+    return target_iso;
+}

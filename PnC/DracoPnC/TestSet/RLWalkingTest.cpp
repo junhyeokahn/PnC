@@ -248,7 +248,7 @@ int RLWalkingTest::_NextPhase(const int& phase) {
     }
 }
 
-void RLWalkingTest::AuxUpdate_() {
+void RLWalkingTest::AdditionalUpdate_() {
     // Update Walking Target
     if (sp_->curr_time > walking_start_time_) {
         for (int i = 0; i < 2; ++i) {

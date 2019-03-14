@@ -1,6 +1,11 @@
 servo_rate: 0.001
-show_joint_frame: false
+
 height: 0.90
+
+show_viewer: true
+show_joint_frame: false
+show_target_frame: true
+camera_manipulator: true
 
 control_configuration:
     kp: 400
