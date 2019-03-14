@@ -3,27 +3,25 @@
 #include "PnC/EnvInterface.hpp"
 #include "PnC/Test.hpp"
 
-class FixedDracoSensorData {
+class FixedAtlasSensorData {
    public:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
 };
 
-class FixedDracoCommand {
+class FixedAtlasCommand {
    public:
     Eigen::VectorXd jtrq;
 };
 
-class FixedDracoInterface : public EnvInterface {
+class FixedAtlasInterface : public EnvInterface {
    protected:
     int count_;
 
     void _ParameterSetting();
 
-    Test* test_;
-
    public:
-    FixedDracoInterface();
-    virtual ~FixedDracoInterface();
+    FixedAtlasInterface();
+    virtual ~FixedAtlasInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
 };

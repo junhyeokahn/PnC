@@ -1,5 +1,5 @@
 add_subdirectory(DracoPnC)
-add_subdirectory(FixedDracoPnC)
+add_subdirectory(FixedAtlasPnC)
 add_subdirectory(AtlasPnC)
 add_subdirectory(WBC)
 add_subdirectory(PlannerSet)

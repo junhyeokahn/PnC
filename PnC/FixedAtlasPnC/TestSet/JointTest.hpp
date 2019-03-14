@@ -4,7 +4,9 @@
 
 class RobotSystem;
 
-enum JPOS_TEST_PHASE { JPOS_TEST_SWING = 0, NUM_JPOS_TEST = 1 };
+enum JPOS_TEST_PHASE {JPOS_TEST_INI = 0,
+                      JPOS_TEST_SWING = 1, 
+                      NUM_JPOS_TEST = 2 };
 
 class JointTest : public Test {
    public:
@@ -18,6 +20,7 @@ class JointTest : public Test {
     virtual int _NextPhase(const int& phase);
 
     Controller* jpos_ctrl_;
+    Controller* jpos_swing_ctrl_;
 
     YAML::Node cfg_;
 };

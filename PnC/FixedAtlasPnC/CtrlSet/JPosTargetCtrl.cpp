@@ -1,13 +1,12 @@
-#include <PnC/FixedDracoPnC/CtrlSet/JPosTargetCtrl.hpp>
-#include <PnC/FixedDracoPnC/FixedDracoDefinition.hpp>
-#include <PnC/FixedDracoPnC/FixedDracoInterface.hpp>
+#include <PnC/FixedAtlasPnC/CtrlSet/JPosTargetCtrl.hpp>
+#include <PnC/FixedAtlasPnC/FixedAtlasInterface.hpp>
+#include <PnC/FixedAtlasPnC/FixedAtlasDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
 JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(2, "JPos Target Ctrl");
     ctrl_count_ = 0;
-    ctrl_time_ = 0.;
 }
 
 JPosTargetCtrl::~JPosTargetCtrl() {}
@@ -21,24 +20,24 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
 
     for (int i = 0; i < robot_->getNumDofs(); ++i) {
         q_des = myUtils::smooth_changing(ini_pos_[i], target_pos_[i],
-                                         move_time_, ctrl_time_);
+                                         move_time_, state_machine_time_);
         qdot_des = myUtils::smooth_changing_vel(ini_pos_[i], target_pos_[i],
-                                                move_time_, ctrl_time_);
+                                                move_time_, state_machine_time_);
         qddot_ff = myUtils::smooth_changing_acc(ini_pos_[i], target_pos_[i],
-                                                move_time_, ctrl_time_);
+                                                move_time_, state_machine_time_);
         qddot[i] =
             qddot_ff + kp_[i] * (q_des - q[i]) + kd_[i] * (qdot_des - qdot[i]);
     }
     gamma = robot_->getMassMatrix() * qddot + robot_->getCoriolisGravity();
 
-    ((FixedDracoCommand*)_cmd)->jtrq = gamma;
+    ((FixedAtlasCommand*)_cmd)->jtrq = gamma;
 
     ++ctrl_count_;
-    ctrl_time_ = ctrl_count_ * FixedDracoAux::ServoRate;
+    state_machine_time_= ctrl_count_ * AtlasAux::ServoRate;
 }
 
 void JPosTargetCtrl::firstVisit() {
-    ctrl_time_ = 0.;
+    state_machine_time_= 0.;
     ctrl_count_ = 0;
     ini_pos_ = robot_->getQ();
     ini_vel_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
@@ -47,7 +46,7 @@ void JPosTargetCtrl::firstVisit() {
 void JPosTargetCtrl::lastVisit() {}
 
 bool JPosTargetCtrl::endOfPhase() {
-    if (ctrl_time_ > end_time_) {
+    if (state_machine_time_ > end_time_) {
         return true;
     }
     return false;

@@ -1,5 +1,5 @@
 #include <Configuration.h>
-#include <Simulator/Dart/FixedDraco/FixedDracoWorldNode.hpp>
+#include <Simulator/Dart/FixedAtlas/FixedAtlasWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
@@ -44,7 +44,7 @@ void addTargetFrame(const dart::simulation::WorldPtr& world) {
 
 class OneStepProgress : public osgGA::GUIEventHandler {
    public:
-    OneStepProgress(FixedDracoWorldNode* worldnode) : worldnode_(worldnode) {}
+    OneStepProgress(FixedAtlasWorldNode* worldnode) : worldnode_(worldnode) {}
 
     /** Deprecated, Handle events, return true if handled, false otherwise. */
     virtual bool handle(const osgGA::GUIEventAdapter& ea,
@@ -62,7 +62,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
         }
         return false;
     }
-    FixedDracoWorldNode* worldnode_;
+    FixedAtlasWorldNode* worldnode_;
 };
 
 void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
@@ -113,26 +113,25 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     exit(0);
 }
 
-void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
-    int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
-    int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
-    int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
-    int rHipPitchIdx = robot->getDof("rHipPitch")->getIndexInSkeleton();
-    int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
-    int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
+//void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+    //int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
+    //int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
+    //int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
+    //int rHipPitchIdx = robot->getDof("rHipPitch")->getIndexInSkeleton();
+    //int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
+    //int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    Eigen::VectorXd q = robot->getPositions();
-    q[rAnkleIdx] = 1.57;
-    q[lAnkleIdx] = 1.57;
-
-    robot->setPositions(q);
-}
+    //Eigen::VectorXd q = robot->getPositions();
+    //q[rAnkleIdx] = 1.57;
+    //q[lAnkleIdx] = 1.57;
+    //robot->setPositions(q);
+//}
 
 int main(int argc, char** argv) {
     double servo_rate;
     try {
         YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/FixedDraco/SIMULATION.yaml");
+            YAML::LoadFile(THIS_COM "Config/FixedAtlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -147,7 +146,7 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Draco/FixedDracoSim_Dart.urdf");
+        THIS_COM "RobotModel/Robot/Atlas/FixedAtlasSim_Dart.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 
@@ -174,7 +173,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Initial configuration
     // =========================================================================
-    _setInitialConfiguration(robot);
+    //_setInitialConfiguration(robot)
 
     // =========================================================================
     // Enabel Joit Limits
@@ -206,8 +205,8 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Wrap a worldnode
     // =========================================================================
-    osg::ref_ptr<FixedDracoWorldNode> node;
-    node = new FixedDracoWorldNode(world, msm);
+    osg::ref_ptr<FixedAtlasWorldNode> node;
+    node = new FixedAtlasWorldNode(world, msm);
     node->setNumStepsPerCycle(30);
 
     // =========================================================================

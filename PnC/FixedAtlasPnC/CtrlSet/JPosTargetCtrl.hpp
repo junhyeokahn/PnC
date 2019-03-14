@@ -17,14 +17,13 @@ class JPosTargetCtrl : public Controller {
 
     void setMovingTime(double time) { move_time_ = time; }
     void setEndTime(double time) { end_time_ = time; }
-    void setTargetPosition(const Eigen::VectorXd& jpos) { target_pos_ = jpos; };
+    void setTargetPosition(const Eigen::VectorXd& jpos) 
+    { target_pos_ = jpos;}
 
    protected:
     double move_time_;
     double end_time_;
-    double ctrl_start_time_;
     int ctrl_count_;
-    double ctrl_time_;
     Eigen::VectorXd target_pos_;
     Eigen::VectorXd ini_pos_;
     Eigen::VectorXd ini_vel_;

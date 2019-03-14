@@ -7,15 +7,14 @@
 #include <osgShadow/LightSpacePerspectiveShadowMap>
 
 class EnvInterface;
-class FixedDracoSensorData;
-class FixedDracoCommand;
-class FixedDracoLedPosAnnouncer;
+class FixedAtlasSensorData;
+class FixedAtlasCommand;
 
-class FixedDracoWorldNode : public dart::gui::osg::WorldNode {
+class FixedAtlasWorldNode : public dart::gui::osg::WorldNode {
    private:
     EnvInterface* mInterface;
-    FixedDracoSensorData* mSensorData;
-    FixedDracoCommand* mCommand;
+    FixedAtlasSensorData* mSensorData;
+    FixedAtlasCommand* mCommand;
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
@@ -26,9 +25,10 @@ class FixedDracoWorldNode : public dart::gui::osg::WorldNode {
     double servo_rate_;
 
    public:
-    FixedDracoWorldNode(const dart::simulation::WorldPtr& world,
+    FixedAtlasWorldNode(const dart::simulation::WorldPtr& world,
                         osgShadow::MinimalShadowMap*);
-    virtual ~FixedDracoWorldNode();
+
+    virtual ~FixedAtlasWorldNode(); ////////====== why virtual function????????
 
     void customPreStep() override;
 
