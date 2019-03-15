@@ -1,2 +1,3 @@
 pybind11_add_module(DracoInterface DracoInterfacePy.cpp)
 target_link_libraries(DracoInterface PRIVATE DracoPnC)
+set_target_properties(DracoInterface PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

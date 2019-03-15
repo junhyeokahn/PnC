@@ -387,7 +387,7 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
     for (int i = 0; i < 2; ++i) {
-        target_loc[i] += action_scale_[i] * output(0, i);
+        // target_loc[i] += action_scale_[i] * output(0, i);
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");

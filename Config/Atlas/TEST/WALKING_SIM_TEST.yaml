@@ -4,10 +4,15 @@ test_configuration:
     #body_height: 0.80
     body_height: 0.82
 
-    swing_time: 0.33
-    st_transition_time: 0.03
-    end_transition_time: 0.03
-    stance_time: 0.01
+    #swing_time: 0.33
+    #st_transition_time: 0.03
+    #end_transition_time: 0.03
+    #stance_time: 0.01
+
+    swing_time: 0.23
+    st_transition_time: 0.02
+    end_transition_time: 0.02
+    stance_time: 0.008
 
     replanning: true
     transition_phase_mix_ratio: 0.2
@@ -15,10 +20,10 @@ test_configuration:
     contact_switch_check: true
 
     walking_start_time: 5
-    walking_velocity_lb: [0, 0]
-    walking_velocity_ub: [0, 0]
-    turning_rate_lb: -0.05
-    turning_rate_ub: 0.05
+    walking_velocity_lb: [0., 0]
+    walking_velocity_ub: [0., 0]
+    turning_rate_lb: 0.02
+    turning_rate_ub: 0.02
 
 control_configuration:
     body_ctrl:
@@ -43,7 +48,7 @@ control_configuration:
 
     left_body_foot_planning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.15
+        swing_height: 0.16
         push_down_height: 0.03
         default_target_foot_location: [0.0, 0.2, 0.0]
 
@@ -59,7 +64,7 @@ control_configuration:
 
     right_body_foot_planning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.15
+        swing_height: 0.16
         push_down_height: 0.03
         default_target_foot_location: [0.0, -0.2, 0.0]
 
@@ -79,5 +84,5 @@ planner_configuration:
         x_step_length_limit: [-0.32, 0.32]
         y_step_length_limit: [0.15, 0.55]
         com_velocity_limit: [0.0, 1.3]
-        t_prime: [0.2, 0.2]
+        t_prime: [0.15, 0.15]
         kappa: [-0.16, -0.16]

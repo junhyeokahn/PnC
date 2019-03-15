@@ -1,6 +1,8 @@
 servo_rate: 0.001
 
-height: 0.90
+initial_configuration:
+    height: 0.90
+    yaw: 0
 
 show_viewer: true
 show_joint_frame: false

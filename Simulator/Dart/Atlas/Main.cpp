@@ -114,11 +114,14 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
-    double height;
+    double height, yaw;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "height", height);
+        myUtils::readParameter(simulation_cfg["initial_configuration"],
+                               "height", height);
+        myUtils::readParameter(simulation_cfg["initial_configuration"], "yaw",
+                               yaw);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -140,6 +143,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
     Eigen::VectorXd q = robot->getPositions();
     q[2] = height;
+    q[3] = yaw;
     q[l_leg_hpy] = -0.4;
     q[r_leg_hpy] = -0.4;
     q[l_leg_kny] = 0.8;
