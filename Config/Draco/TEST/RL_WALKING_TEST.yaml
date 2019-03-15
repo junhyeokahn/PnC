@@ -40,14 +40,14 @@ test_configuration:
         exit_cmd: "pkill -f 'draco"
 
     # ==========================================================================
-    # Observation \in R^{9}
+    # Observation \in R^{11}
     # [ com_x, com_y, com_z,
     #   com_roll, com_pitch, com_yaw,
     #   com_vx, com_vy, com_vz,
-    #   target_x, target_y, target_xdot, target_ydot]
+    #   target_x, target_y]
     # ==========================================================================
-    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
-    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
+    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
+    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
 
     # ==========================================================================
     # Action \in R^{2}
@@ -60,8 +60,8 @@ test_configuration:
     # ======================================================================
     # Terminate condition
     # ======================================================================
-    terminate_obs_lower_bound: [-0.35 , -0.35 , -0.05 , -0.51 , -0.51 , -0.51 , -0.6 , -0.6 , -0.25 , -100. , -100. , -100. , -100.]
-    terminate_obs_upper_bound: [0.35  , 0.35  , 0.05  , 0.51  , 0.51  , 0.51  , 0.6  , 0.6  , 0.25  , 100.  , 100.  , 100.  , 100.]
+    terminate_obs_lower_bound: [-0.35 , -0.35 , -0.1 , -0.51 , -0.51 , -0.51 , -0.6 , -0.6 , -0.5 , -100. , -100.]
+    terminate_obs_upper_bound: [0.35  , 0.35  , 0.1  , 0.51  , 0.51  , 0.51  , 0.6  , 0.6  , 0.5  , 100.  , 100.]
 
 control_configuration:
 
@@ -89,14 +89,14 @@ control_configuration:
 
     left_body_foot_learning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.17
-        push_down_height: 0.0
-        default_target_foot_location: [0.0, 0.15, 0.0]
+        swing_height: 0.15
+        push_down_height: 0.01
+        default_target_foot_location: [0.0, 0.20, 0.0]
 
         kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
         kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        body_pt_offset: [0.0, 0.0]
+        body_pt_offset: [0.12, 0.0]
         foot_landing_offset: [0., 0.]
 
         fin_ankle: 1.4
@@ -113,14 +113,14 @@ control_configuration:
 
     right_body_foot_learning_ctrl:
         planner_name: velocity_reversal_lipm
-        swing_height: 0.17
-        push_down_height: 0.0
-        default_target_foot_location: [0.0, -0.15, 0.0]
+        swing_height: 0.15
+        push_down_height: 0.01
+        default_target_foot_location: [0.0, -0.20, 0.0]
 
         kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
         kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
 
-        body_pt_offset: [0.0, 0.0]
+        body_pt_offset: [0.12, 0.0]
         foot_landing_offset: [0., 0.]
 
         fin_ankle: 1.4

@@ -337,13 +337,11 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
         sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
         sp_->des_location[0] - sp_->global_pos_local[0],
-        sp_->des_location[1] - sp_->global_pos_local[1],
-        sp_->walking_velocity[0], sp_->walking_velocity[1];
+        sp_->des_location[1] - sp_->global_pos_local[1];
     obs_vec << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
         sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
         sp_->des_location[0] - sp_->global_pos_local[0],
-        sp_->des_location[1] - sp_->global_pos_local[1],
-        sp_->walking_velocity[0], sp_->walking_velocity[1];
+        sp_->des_location[1] - sp_->global_pos_local[1];
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value

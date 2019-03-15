@@ -91,7 +91,8 @@ DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
                ", ENV : " + std::to_string(env_idx) + " )");
 
     robot_ =
-        new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC.urdf");
+        new RobotSystem(6,
+                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
