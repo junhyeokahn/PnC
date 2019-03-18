@@ -310,7 +310,12 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     double des_yaw =
         dart::math::matrixToEulerZYX(sp_->des_quat.toRotationMatrix())[0];
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
+    Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs << com_pos[0], com_pos[1], target_body_height_ - sp_->q[2], sp_->q[5],
+        sp_->q[4], des_yaw - sp_->q[3], sp_->qdot[0], sp_->qdot[1],
+        sp_->qdot[2], sp_->des_location[0] - sp_->global_pos_local[0],
+        sp_->des_location[1] - sp_->global_pos_local[1];
+    obs_vec << com_pos[0], com_pos[1], target_body_height_ - sp_->q[2], sp_->q[5],
         sp_->q[4], des_yaw - sp_->q[3], sp_->qdot[0], sp_->qdot[1],
         sp_->qdot[2], sp_->des_location[0] - sp_->global_pos_local[0],
         sp_->des_location[1] - sp_->global_pos_local[1];
@@ -319,6 +324,17 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
                           mean, neglogp);
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
+    bool done;
+    if (myUtils::isInBoundingBox(terminate_obs_lower_bound_, obs_vec,
+                                 terminate_obs_upper_bound_)) {
+        done = false;
+    } else {
+        done = true;
+    }
+    if (done) {
+        std::cout << "done" << std::endl;
+        exit(0);
+    }
     // TEST //
     // std::cout << "==========================================" << std::endl;
     // myUtils::pretty_print(obs, std::cout, "observation");

@@ -54,7 +54,7 @@ test_configuration:
     # ==========================================================================
     action_lower_bound: [-1, -1]
     action_upper_bound: [1, 1]
-    action_scale: [0.1, 0.05]
+    action_scale: [0.3, 0.15]
 
     # ======================================================================
     # Terminate condition
@@ -105,9 +105,9 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # rl parameters
-        quad_input_penalty: 1.0
+        quad_input_penalty: 0.1
         alive_reward: 5.0
-        deviation_penalty: 1.0
+        deviation_penalty: 5.0
         reward_scale: 1.0
 
     right_body_foot_learning_ctrl:
@@ -129,9 +129,9 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # rl parameters
-        quad_input_penalty: 1.0
+        quad_input_penalty: 0.1
         alive_reward: 5.0
-        deviation_penalty: 1.0
+        deviation_penalty: 5.0
         reward_scale: 1.0
 
     right_body_foot_policy_ctrl:
@@ -153,9 +153,8 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        #model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
+        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00196.yaml"
         #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
-        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/walking/checkpoints/00135.yaml"
 
     left_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
@@ -176,9 +175,8 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        #model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00135.yaml"
+        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00196.yaml"
         #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
-        model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/walking/checkpoints/00135.yaml"
 
 planner_configuration:
 

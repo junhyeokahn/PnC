@@ -395,30 +395,22 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         reward += alive_reward_;
     }
 
-    // std::cout << "//
-    // =========================================================="
-    //<< std::endl;
-    // std::cout << "// Reward info " << std::endl;
-    // std::cout << "//
-    // =========================================================="
-    //<< std::endl;
-    // std::cout << "total rew : " << reward << "|| input pen : " << input_pen
-    //<< ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
-    //<< std::endl;
+     std::cout << "// ==========================="<< std::endl;
+     std::cout << "// Reward info " << std::endl;
+     std::cout << "// ==========================="<< std::endl;
+     std::cout << "total rew : " << reward << "|| input pen : " << input_pen
+    << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
+    << std::endl;
 
-    // std::cout << "//
-    // =========================================================="
-    //<< std::endl;
-    // std::cout << "// Observation info " << std::endl;
-    // std::cout << "//
-    // =========================================================="
-    //<< std::endl;
-    // myUtils::pretty_print(obs_vec, std::cout,
-    //"x, y, z, roll, pitch, yaw, vx, vy, vz");
+     std::cout << "// ==========================="<< std::endl;
+     std::cout << "// Observation info " << std::endl;
+     std::cout << "// ==========================="<< std::endl;
+     myUtils::pretty_print(obs_vec, std::cout,
+    "x, y, z, roll, pitch, yaw, vx, vy, vz");
 
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
-    if (sp_->num_step_copy == 1) {
+    if (sp_->num_step_copy < 4) {
         RLInterface::GetRLInterface()->GetRLData()->b_data_filled = false;
         sp_->rl_count = 0;
         myUtils::color_print(myColor::BoldMagneta, "[[Skip First Step Data]]");
@@ -476,8 +468,12 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // myUtils::pretty_print(target_loc2, std::cout,
     //"guided next foot location without body offset");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
-    for (int i = 0; i < 2; ++i) {
-        target_loc[i] += action_scale_[i] * output_vec[i];
+
+    if (sp_->num_step_copy < 4) {
+    } else {
+        for (int i = 0; i < 2; ++i) {
+            target_loc[i] += action_scale_[i] * output_vec[i];
+        }
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     // myUtils::pretty_print(target_loc, std::cout, "adjusted next foot
