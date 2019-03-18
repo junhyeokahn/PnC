@@ -6,28 +6,6 @@
 
 AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
-    try {
-        YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
-        myUtils::readParameter(simulation_cfg, "show_target_frame",
-                               b_show_target_frame_);
-        myUtils::readParameter(simulation_cfg, "camera_manipulator",
-                               b_manipulate_camera_);
-        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
-        myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
-                               kp_);
-        myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
-                               kd_);
-        if (!b_show_viewer_) {
-            b_manipulate_camera_ = false;
-            b_show_target_frame_ = false;
-        }
-    } catch (std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-    }
     world_ = _world;
     robot_ = world_->getSkeleton("multisense_sl");
     trq_lb_ = robot_->getForceLowerLimits();
@@ -39,6 +17,26 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
     interface_ = new AtlasInterface();
     sensor_data_ = new AtlasSensorData();
     command_ = new AtlasCommand();
+
+    SetParams_();
+}
+
+AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world,
+                               int mpi_idx, int env_idx)
+    : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
+    world_ = _world;
+    robot_ = world_->getSkeleton("multisense_sl");
+    trq_lb_ = robot_->getForceLowerLimits();
+    trq_ub_ = robot_->getForceUpperLimits();
+    n_dof_ = robot_->getNumDofs();
+    ground_ = world_->getSkeleton("ground_skeleton");
+    trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
+
+    interface_ = new AtlasInterface(mpi_idx, env_idx);
+    sensor_data_ = new AtlasSensorData();
+    command_ = new AtlasCommand();
+
+    SetParams_();
 }
 
 AtlasWorldNode::~AtlasWorldNode() {
@@ -151,3 +149,29 @@ void AtlasWorldNode::ManipulateCameraPos_() {
         ::osg::Vec3(0.0, 0.0, 1.0));
     mViewer->setCameraManipulator(mViewer->getCameraManipulator());
 }
+
+void AtlasWorldNode::SetParams_() {
+    try {
+        YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
+        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
+        myUtils::readParameter(simulation_cfg, "show_target_frame",
+                               b_show_target_frame_);
+        myUtils::readParameter(simulation_cfg, "camera_manipulator",
+                               b_manipulate_camera_);
+        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
+                               kp_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
+                               kd_);
+        if (!b_show_viewer_) {
+            b_manipulate_camera_ = false;
+            b_show_target_frame_ = false;
+        }
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+    }
+}
+

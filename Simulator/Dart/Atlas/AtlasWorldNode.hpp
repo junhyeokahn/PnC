@@ -16,6 +16,7 @@ class AtlasWorldNode : public dart::gui::osg::WorldNode {
     void GetContactSwitchData_(bool& rfoot_contact, bool& lfoot_contact);
     void ManipulateCameraPos_();
     void PlotTargetLocation_();
+    void SetParams_();
 
     EnvInterface* interface_;
     AtlasSensorData* sensor_data_;
@@ -41,6 +42,8 @@ class AtlasWorldNode : public dart::gui::osg::WorldNode {
 
    public:
     AtlasWorldNode(const dart::simulation::WorldPtr& world);
+    AtlasWorldNode(const dart::simulation::WorldPtr& world, int mpi_idx,
+                   int env_idx);
     virtual ~AtlasWorldNode();
 
     void customPreStep() override;

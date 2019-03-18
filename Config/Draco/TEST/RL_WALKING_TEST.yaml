@@ -11,7 +11,6 @@ test_configuration:
     jpos_initialization_time: 0.15
     com_lifting_time: 0.15
 
-
     swing_time: 0.33
     st_transition_time: 0.03
     end_transition_time: 0.03

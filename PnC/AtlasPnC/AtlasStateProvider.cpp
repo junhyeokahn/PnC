@@ -14,6 +14,9 @@ AtlasStateProvider::AtlasStateProvider(RobotSystem* _robot) {
     robot_ = _robot;
     stance_foot = AtlasBodyNode::l_sole;
     curr_time = 0.;
+    rl_count = 0;
+    adjusted_foot.setZero();
+    guided_foot.setZero();
 
     q = Eigen::VectorXd::Zero(Atlas::n_dof);
     qdot = Eigen::VectorXd::Zero(Atlas::n_dof);

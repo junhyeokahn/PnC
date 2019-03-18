@@ -49,7 +49,6 @@ class SingleContactTransCtrl : public Controller {
     double max_rf_z_;
     double min_rf_z_;
 
-    std::vector<int> selected_jidx_;
     Task* body_pos_task_;  // pelvis
     Task* body_ori_task_;
     Task* torso_ori_task_;

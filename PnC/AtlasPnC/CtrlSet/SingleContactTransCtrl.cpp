@@ -262,6 +262,7 @@ void SingleContactTransCtrl::_contact_setup() {
 
 void SingleContactTransCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
+
     ini_body_pos_ =
         robot_->getBodyNodeIsometry(AtlasBodyNode::pelvis).translation();
 

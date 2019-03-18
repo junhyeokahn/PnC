@@ -4,7 +4,8 @@ initial_configuration:
     height: 0.90
     yaw: 0
 
-show_viewer: true
+#show_viewer: true
+show_viewer: false
 show_joint_frame: false
 show_target_frame: true
 camera_manipulator: false

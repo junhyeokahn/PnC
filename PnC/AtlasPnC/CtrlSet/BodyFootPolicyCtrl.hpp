@@ -1,26 +1,19 @@
 #pragma once
 
 #include <Utils/Math/BSplineBasic.h>
-#include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
-#include <ReinforcementLearning/RLInterface/NeuralNetModel.hpp>
+#include <PnC/AtlasPnC/CtrlSet/SwingPlanningCtrl.hpp>
+#include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
 #include <Utils/Math/minjerk_one_dim.hpp>
-
-class KinWBC;
 
 class BodyFootPolicyCtrl : public SwingPlanningCtrl {
    public:
-    BodyFootPolicyCtrl(RobotSystem* robot, std::string swing_foot_,
+    BodyFootPolicyCtrl(RobotSystem* robot, int swing_foot,
                        FootStepPlanner* planner);
     virtual ~BodyFootPolicyCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();
-    virtual void lastVisit() {
-        sp_->des_jpos_prev = des_jpos_;
-        // std::cout << "[BodyFootPlanning] End "<< std::endl;
-    }
+    virtual void lastVisit() { sp_->des_jpos_prev = des_jpos_; }
     virtual bool endOfPhase();
-
     virtual void ctrlInitialization(const YAML::Node& node);
 
     void setTerminateObsLowerBound(Eigen::VectorXd lb) {
@@ -43,14 +36,15 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
 
+    double waiting_time_limit_;
     double ini_base_height_;
     int swing_leg_jidx_;
     double push_down_height_;  // push foot below the ground at landing
+
+    Eigen::Vector3d default_target_loc_;
     Eigen::Vector3d initial_target_loc_;
 
     int dim_contact_;
-    // [right_front, right_back, left_front, left_back]
-    std::vector<int> fz_idx_in_cost_;
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
 
@@ -65,15 +59,16 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
 
     void _GetSinusoidalSwingTrajectory();
     void _GetBsplineSwingTrajectory();
+    void _foot_pos_task_setup();
     std::vector<ContactSpec*> kin_wbc_contact_list_;
 
-    std::vector<int> selected_jidx_;
-    Task* selected_joint_task_;
-    Task* base_task_;
-    // Task* foot_pitch_task_;
-    Task* foot_point_task_;
+    Task* body_pos_task_;
+    Task* body_ori_task_;
+    Task* torso_ori_task_;
+    Task* foot_pos_task_;
+    Task* foot_ori_task_;
+    Task* total_joint_task_;
 
-    KinWBC* kin_wbc_;
     Eigen::VectorXd des_jpos_;
     Eigen::VectorXd des_jvel_;
     Eigen::VectorXd des_jacc_;
@@ -81,21 +76,24 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     Eigen::VectorXd Kp_;
     Eigen::VectorXd Kd_;
 
-    Eigen::Vector3d ini_com_pos_;
+    // Task specification
+    Eigen::VectorXd ini_body_pos_;
     Eigen::Vector3d ini_foot_pos_;
+    Eigen::Vector2d body_pt_offset_;
 
-    Eigen::VectorXd ini_config_;
+    Eigen::Quaternion<double> ini_body_quat_;
+    Eigen::Quaternion<double> body_delta_quat_;
+    Eigen::Vector3d body_delta_so3_;
 
-    double ini_ankle_;
-    double fin_ankle_;
-    double switch_vel_threshold_;
-    double fin_foot_z_vel_;
-    double fin_foot_z_acc_;
+    Eigen::Quaternion<double> ini_torso_quat_;
+    Eigen::Quaternion<double> torso_delta_quat_;
+    Eigen::Vector3d torso_delta_so3_;
+
+    Eigen::Quaternion<double> ini_foot_quat_;
+    Eigen::Quaternion<double> foot_delta_quat_;
+    Eigen::Vector3d foot_delta_so3_;
 
     std::vector<double> foot_landing_offset_;
-
-    Eigen::VectorXd body_pt_offset_;
-    Eigen::VectorXd default_target_loc_;
 
     std::vector<MinJerk_OneDimension*> min_jerk_offset_;
     BS_Basic<3, 3, 1, 2, 2> foot_traj_;
