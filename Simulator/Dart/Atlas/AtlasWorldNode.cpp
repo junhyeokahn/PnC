@@ -50,7 +50,7 @@ void AtlasWorldNode::customPreStep() {
     if (dart::math::isNan(robot_->getPositions())) {
         std::cout << "NaN" << std::endl;
         myUtils::pretty_print(robot_->getPositions(), std::cout, "q");
-        exit(0);
+        // exit(0);
     }
 
     sensor_data_->q = robot_->getPositions().tail(n_dof_ - 6);

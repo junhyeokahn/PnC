@@ -298,6 +298,20 @@ void BodyFootLearningCtrl::_CheckPlanning() {
 }
 
 void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+    bool b_nan(false);
+    // =========================================================================
+    // 0. Check Nan
+    // =========================================================================
+    if (dart::math::isNan(robot_->getQ())) {
+        myUtils::color_print(myColor::BoldMagneta,
+                             "[[Nan Detected, Send Previous Data]]");
+        RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+        RLInterface::GetRLInterface()->GetRLData()->done = true;
+        RLInterface::GetRLInterface()->GetRLData()->reward -= alive_reward_;
+        RLInterface::GetRLInterface()->SendData();
+        b_nan = true;
+    }
+
     // =========================================================================
     // 1. count
     // =========================================================================
@@ -320,8 +334,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs_vec << com_pos[0], com_pos[1], target_body_height_ - sp_->q[2],
-        sp_->q[5], sp_->q[4], des_yaw - sp_->q[3], sp_->qdot[0], sp_->qdot[1],
-        sp_->qdot[2];
+        sp_->q[5], sp_->q[4], sp_->q[3], des_yaw - sp_->q[3], sp_->qdot[0],
+        sp_->qdot[1], sp_->qdot[2];
     obs_vec = myUtils::GetRelativeVector(obs_vec, terminate_obs_lower_bound_,
                                          terminate_obs_upper_bound_);
     for (int i = 0; i < obs_vec.size(); ++i) obs(0, i) = obs_vec(i);
@@ -392,6 +406,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+
     if (sp_->num_step_copy < 4) {
         RLInterface::GetRLInterface()->GetRLData()->b_data_filled = false;
         sp_->rl_count = 0;

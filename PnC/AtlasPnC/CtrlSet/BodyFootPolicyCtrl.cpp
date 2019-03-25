@@ -312,8 +312,8 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
     obs_vec << com_pos[0], com_pos[1], target_body_height_ - sp_->q[2],
-        sp_->q[5], sp_->q[4], des_yaw - sp_->q[3], sp_->qdot[0], sp_->qdot[1],
-        sp_->qdot[2];
+        sp_->q[5], sp_->q[4], sp_->q[3], des_yaw - sp_->q[3], sp_->qdot[0],
+        sp_->qdot[1], sp_->qdot[2];
     obs_vec = myUtils::GetRelativeVector(obs_vec, terminate_obs_lower_bound_,
                                          terminate_obs_upper_bound_);
     for (int i = 0; i < obs_vec.size(); ++i) obs(0, i) = obs_vec(i);
