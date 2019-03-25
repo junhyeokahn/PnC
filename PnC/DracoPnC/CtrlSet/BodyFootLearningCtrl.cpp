@@ -334,14 +334,11 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
     Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
-    obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
-        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
-        sp_->des_location[0] - sp_->global_pos_local[0],
-        sp_->des_location[1] - sp_->global_pos_local[1];
     obs_vec << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
-        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2],
-        sp_->des_location[0] - sp_->global_pos_local[0],
-        sp_->des_location[1] - sp_->global_pos_local[1];
+        sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
+    obs_vec = myUtils::GetRelativeVector(obs_vec, terminate_obs_lower_bound_,
+                                         terminate_obs_upper_bound_);
+    for (int i = 0; i < obs_vec.size(); ++i) obs(0, i) = obs_vec(i);
     RLInterface::GetRLInterface()->GetRLData()->observation = obs_vec;
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
@@ -368,8 +365,9 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // 4. done
     // =========================================================================
     bool done;
-    if (myUtils::isInBoundingBox(terminate_obs_lower_bound_, obs_vec,
-                                 terminate_obs_upper_bound_)) {
+    if (myUtils::isInBoundingBox(obs_vec,
+                                 -1.0 * Eigen::VectorXd::Ones(obs_vec.size()),
+                                 1.0 * Eigen::VectorXd::Ones(obs_vec.size()))) {
         done = false;
     } else {
         done = true;
@@ -395,18 +393,18 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         reward += alive_reward_;
     }
 
-     std::cout << "// ==========================="<< std::endl;
-     std::cout << "// Reward info " << std::endl;
-     std::cout << "// ==========================="<< std::endl;
-     std::cout << "total rew : " << reward << "|| input pen : " << input_pen
-    << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
-    << std::endl;
+    std::cout << "// ===========================" << std::endl;
+    std::cout << "// Reward info " << std::endl;
+    std::cout << "// ===========================" << std::endl;
+    std::cout << "total rew : " << reward << "|| input pen : " << input_pen
+              << ", yaw_dev_pen : " << yaw_dev_pen << ", loc_pen : " << loc_pen
+              << std::endl;
 
-     std::cout << "// ==========================="<< std::endl;
-     std::cout << "// Observation info " << std::endl;
-     std::cout << "// ==========================="<< std::endl;
-     myUtils::pretty_print(obs_vec, std::cout,
-    "x, y, z, roll, pitch, yaw, vx, vy, vz");
+    std::cout << "// ===========================" << std::endl;
+    std::cout << "// Observation info " << std::endl;
+    std::cout << "// ===========================" << std::endl;
+    myUtils::pretty_print(obs_vec, std::cout,
+                          "x, y, z, roll, pitch, yaw, vx, vy, vz");
 
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;

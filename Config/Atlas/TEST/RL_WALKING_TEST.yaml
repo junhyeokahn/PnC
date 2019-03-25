@@ -22,20 +22,19 @@ test_configuration:
         ip_control_pc: "localhost"
         ip_sub_pub_prefix: "tcp://127.0.0.1:50"
         ip_req_rep_prefix: "tcp://127.0.0.1:51"
-        #username: 'junhyeokahn'
-        username: 'junhyeok'
+        username: 'junhyeokahn'
+        #username: 'junhyeok'
         execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_atlas"
         exit_cmd: "pkill -f 'atlas"
 
     # ==========================================================================
-    # Observation \in R^{11}
+    # Observation \in R^{9}
     # [ com_x, com_y, com_z,
     #   com_roll, com_pitch, com_yaw,
-    #   com_vx, com_vy, com_vz,
-    #   target_x, target_y]
+    #   com_vx, com_vy, com_vz]
     # ==========================================================================
-    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
-    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
+    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
+    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
 
     # ==========================================================================
     # Action \in R^{2}
@@ -43,13 +42,13 @@ test_configuration:
     # ==========================================================================
     action_lower_bound: [-1, -1]
     action_upper_bound: [1, 1]
-    action_scale: [0.1, 0.05]
+    action_scale: [0.15, 0.15]
 
     # ======================================================================
     # Terminate condition
     # ======================================================================
-    terminate_obs_lower_bound: [-0.35 , -0.35 , -0.1 , -0.51 , -0.51 , -0.51 , -0.6 , -0.6 , -0.5 , -100. , -100.]
-    terminate_obs_upper_bound: [0.35  , 0.35  , 0.1  , 0.51  , 0.51  , 0.51  , 0.6  , 0.6  , 0.5  , 100.  , 100.]
+    terminate_obs_lower_bound: [-0.35 , -0.35 , -0.1 , -0.51 , -0.51 , -0.51 , -0.6 , -0.6 , -0.5]
+    terminate_obs_upper_bound: [0.35  , 0.35  , 0.1  , 0.51  , 0.51  , 0.51  , 0.6  , 0.6  , 0.5 ]
 
 control_configuration:
     body_ctrl:
@@ -116,7 +115,7 @@ control_configuration:
         deviation_penalty: 5.0
         reward_scale: 1.0
 
-    left_body_foot_learning_ctrl:
+    left_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
         swing_height: 0.16
         push_down_height: 0.03
@@ -132,7 +131,9 @@ control_configuration:
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0.0, 0.0]
 
-        model_path: "hi"
+        model_path: "RLData/AtlasSeperateProcess/ppo_4/checkpoints/00052.yaml"
+        use_policy: true
+        #use_policy: false
 
     right_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
@@ -149,7 +150,10 @@ control_configuration:
 
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0., 0.]
-        model_path: "hi"
+
+        model_path: "RLData/AtlasSeperateProcess/ppo_4/checkpoints/00052.yaml"
+        use_policy: true
+        #use_policy: false
 
 planner_configuration:
 

@@ -35,6 +35,7 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     Eigen::VectorXd action_upper_bound_;
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
+    bool b_use_policy_;
 
     double waiting_time_limit_;
     double ini_base_height_;
