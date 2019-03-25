@@ -30,6 +30,8 @@ FixedAtlasWorldNode::FixedAtlasWorldNode(
     mSensorData->qdot = Eigen::VectorXd::Zero(30);
 
     mCommand = new FixedAtlasCommand();
+    mCommand->q = Eigen::VectorXd::Zero(30);
+    mCommand->qdot = Eigen::VectorXd::Zero(30);
     mCommand->jtrq = Eigen::VectorXd::Zero(30);
 }
 
@@ -42,15 +44,30 @@ FixedAtlasWorldNode::~FixedAtlasWorldNode() {
 void FixedAtlasWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
 
+    //std::cout << "============" << std::endl; 
+    //std::cout << mSkel->getPositions() << std::endl;
+    //std::cout << "============" << std::endl; 
+    //std::cout << mSkel->getVelocities() << std::endl;
+
+
     mSensorData->q = mSkel->getPositions();
     mSensorData->qdot = mSkel->getVelocities();
 
     mInterface->getCommand(mSensorData, mCommand);
 
     mTorqueCommand = mCommand->jtrq;
-
+    
+    //std::cout << "============" << std::endl; 
+    //std::cout << count_ << "trq command" << std::endl;
+    //std::cout << mTorqueCommand << std::endl;
+    //std::exit(0);
     // mTorqueCommand.setZero();
     mSkel->setForces(mTorqueCommand);
+    myUtils::saveVector(mSensorData->q, "q");
+    myUtils::saveVector(mCommand->q, "q_des");
+    myUtils::saveVector(mSensorData->qdot, "qdot");
+    myUtils::saveVector(mCommand->qdot, "qdot_des");
+    myUtils::saveVector(mTorqueCommand, "gamma");
 
     count_++;
 }

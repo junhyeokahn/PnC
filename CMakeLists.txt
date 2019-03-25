@@ -46,7 +46,7 @@ if(Protobuf_FOUND)
 endif()
 
 # Pybind11
-set(USE_PYBIND11 False)
+set(USE_PYBIND11 True)
 if(USE_PYBIND11)
   message("-- Enable Pybind11")
   find_package(PythonAnaconda)

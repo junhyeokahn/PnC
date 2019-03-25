@@ -1,2 +1,7 @@
 pybind11_add_module(DracoInterface DracoInterfacePy.cpp)
 target_link_libraries(DracoInterface PRIVATE DracoPnC)
+set_target_properties(DracoPnC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+pybind11_add_module(FixedAtlasInterface FixedAtlasInterfacePy.cpp)
+target_link_libraries(FixedAtlasInterface PRIVATE FixedAtlasPnC)
+set_target_properties(FixedAtlasPnC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

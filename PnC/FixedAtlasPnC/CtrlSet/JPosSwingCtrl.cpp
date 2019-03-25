@@ -18,6 +18,8 @@ JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot) : Controller(_robot) {
 JPosSwingCtrl::~JPosSwingCtrl(){}
 
 void JPosSwingCtrl::oneStep(void* _cmd){
+    Eigen::VectorXd q_des_vec = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    Eigen::VectorXd qdot_des_vec = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     Eigen::VectorXd qddot_des = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
@@ -27,6 +29,7 @@ void JPosSwingCtrl::oneStep(void* _cmd){
     double q_des, qdot_des, qddot_ff, omega;
 ///TODO::amp_,freq_,phase_ definition
 ///don't need it (already set) in the JointTest::parametersetting
+    double ramp_time(4.0);
     for (int i(0); i < robot_->getNumActuatedDofs(); i++){
         omega = 2. * M_PI * freq_[i];
 
@@ -34,15 +37,25 @@ void JPosSwingCtrl::oneStep(void* _cmd){
         qdot_des = amp_[i] * omega * cos(omega * state_machine_time_ + phase_[i]);
         qddot_ff = -amp_[i] * omega * omega * sin(omega * state_machine_time_ + phase_[i]);
 
+        if (state_machine_time_ < ramp_time) {
+            qdot_des = state_machine_time_/ramp_time*qdot_des;
+            qddot_ff = state_machine_time_/ramp_time*qddot_ff;
+        }
+
+        q_des_vec[i] = q_des;
+        qdot_des_vec[i] = qdot_des;
         qddot_des[i] = qddot_ff + kp_[i] * (q_des - q[i]) + kd_[i] * (qdot_des -qdot[i]);
     }
 
     gamma = robot_->getMassMatrix() * qddot_des + robot_->getCoriolisGravity();
 
-    ((FixedAtlasCommand*)_cmd) -> jtrq = gamma;
+    ((FixedAtlasCommand*)_cmd)->q = q_des_vec;
+    ((FixedAtlasCommand*)_cmd)->qdot = qdot_des_vec;
+    ((FixedAtlasCommand*)_cmd)->jtrq = gamma;
 
     ++ctrl_count_;
     state_machine_time_= ctrl_count_ * AtlasAux::ServoRate;
+
 }
 
 void JPosSwingCtrl::firstVisit() {
@@ -53,7 +66,8 @@ void JPosSwingCtrl::firstVisit() {
     //ini_vel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 }
 
-void JPosSwingCtrl::lastVisit() {}
+void JPosSwingCtrl::lastVisit() {
+}
 
 bool JPosSwingCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {

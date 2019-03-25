@@ -7,10 +7,13 @@ class FixedAtlasSensorData {
    public:
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
+    //Sensor_Data
 };
 
 class FixedAtlasCommand {
    public:
+    Eigen::VectorXd q;
+    Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
 };
 
