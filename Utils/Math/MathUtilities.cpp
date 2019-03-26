@@ -52,7 +52,7 @@ double bind_half_pi(double ang) {
     return ang;
 }
 
-bool isInBoundingBox(const Eigen::VectorXd& lb, const Eigen::VectorXd& val,
+bool isInBoundingBox(const Eigen::VectorXd& val, const Eigen::VectorXd& lb,
                      const Eigen::VectorXd& ub) {
     int n = lb.size();
     bool ret(true);
@@ -102,9 +102,6 @@ Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
     assert(value.size() = max.size());
     int n_data = value.size();
 
-    // std::cout <<
-    // "------------------------------------------------------------"
-    //<< std::endl;
     for (int i = 0; i < n_data; ++i) {
         if (value[i] > max[i]) {
             // printf("%s(%d): %f is cropped to %f\n", source.c_str(), i,
@@ -117,18 +114,13 @@ Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
             value[i] = min[i];
         }
     }
-    // std::cout <<
-    // "------------------------------------------------------------"
-    //<< std::endl;
     return value;
 }
 
 Eigen::MatrixXd CropMatrix(Eigen::MatrixXd value, Eigen::MatrixXd min,
                            Eigen::MatrixXd max, std::string source) {
-    assert(value.cols() = min.cols());
-    assert(value.rows() = min.rows());
-    assert(value.cols() = max.cols());
-    assert(value.rows() = max.rows());
+    assert((value.cols() = min.cols()) && (value.cols() = max.cols()));
+    assert((value.rows() = min.rows()) && (value.cols() = max.cols()));
 
     int n_row = value.rows();
     int n_cols = value.cols();
@@ -150,6 +142,38 @@ Eigen::MatrixXd CropMatrix(Eigen::MatrixXd value, Eigen::MatrixXd min,
         }
     }
     return value;
+}
+
+Eigen::MatrixXd GetRelativeMatrix(const Eigen::MatrixXd value,
+                                  const Eigen::MatrixXd min,
+                                  const Eigen::MatrixXd max) {
+    assert((value.cols() = min.cols()) && (value.cols() = max.cols()));
+    assert((value.rows() = min.rows()) && (value.cols() = max.cols()));
+
+    Eigen::MatrixXd ret = value;
+    for (int col_idx = 0; col_idx < value.cols(); ++col_idx) {
+        for (int row_idx = 0; row_idx < value.rows(); ++row_idx) {
+            double width = max(row_idx, col_idx) - min(row_idx, col_idx);
+            double mid = (max(row_idx, col_idx) + min(row_idx, col_idx)) / 2.0;
+            ret(row_idx, col_idx) =
+                2.0 * (value(row_idx, col_idx) - mid) / width;
+        }
+    }
+    return ret;
+}
+
+Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
+                                  const Eigen::VectorXd min,
+                                  const Eigen::VectorXd max) {
+    assert((value.size() = min.size()) && (value.size() = max.size()));
+    Eigen::VectorXd ret = value;
+
+    for (int idx = 0; idx < value.size(); ++idx) {
+        double width = max(idx) - min(idx);
+        double mid = (max(idx) + min(idx)) / 2.0;
+        ret(idx) = 2.0 * (value(idx) - mid) / width;
+    }
+    return ret;
 }
 
 }  // namespace myUtils

@@ -5,18 +5,38 @@
 #include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
 #include <Utils/Math/minjerk_one_dim.hpp>
 
-class BodyFootPlanningCtrl : public SwingPlanningCtrl {
+class BodyFootPolicyCtrl : public SwingPlanningCtrl {
    public:
-    BodyFootPlanningCtrl(RobotSystem* robot, int swing_foot,
-                         FootStepPlanner* planner);
-    virtual ~BodyFootPlanningCtrl();
+    BodyFootPolicyCtrl(RobotSystem* robot, int swing_foot,
+                       FootStepPlanner* planner);
+    virtual ~BodyFootPolicyCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();
     virtual void lastVisit() { sp_->des_jpos_prev = des_jpos_; }
     virtual bool endOfPhase();
     virtual void ctrlInitialization(const YAML::Node& node);
 
+    void setTerminateObsLowerBound(Eigen::VectorXd lb) {
+        terminate_obs_lower_bound_ = lb;
+    }
+    void setTerminateObsUpperBound(Eigen::VectorXd ub) {
+        terminate_obs_upper_bound_ = ub;
+    }
+    void setActionScale(Eigen::VectorXd as) { action_scale_ = as; }
+    void setActionLowerBound(Eigen::VectorXd lb) { action_lower_bound_ = lb; }
+    void setActionUpperBound(Eigen::VectorXd ub) { action_upper_bound_ = ub; }
+
    protected:
+    // rl parameters
+    Eigen::VectorXd terminate_obs_lower_bound_;
+    Eigen::VectorXd terminate_obs_upper_bound_;
+    Eigen::VectorXd action_scale_;
+    Eigen::VectorXd action_lower_bound_;
+    Eigen::VectorXd action_upper_bound_;
+    NeuralNetModel* nn_policy_;
+    NeuralNetModel* nn_valfn_;
+    bool b_use_policy_;
+
     double waiting_time_limit_;
     double ini_base_height_;
     int swing_leg_jidx_;

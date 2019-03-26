@@ -23,6 +23,8 @@ if __name__ == "__main__":
         obs_upper_bound = np.array(config['test_configuration']['terminate_obs_upper_bound'])
     action_lower_bound = action_lower_bound * action_scale
     action_upper_bound = action_upper_bound * action_scale
+    obs_lower_bound = -1*np.ones(shape=obs_lower_bound.shape, dtype=float)
+    obs_upper_bound = np.ones(shape=obs_lower_bound.shape, dtype=float)
 
     # =========================================================================
     # Read Data

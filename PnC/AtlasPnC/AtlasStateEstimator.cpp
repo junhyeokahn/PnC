@@ -37,6 +37,7 @@ void AtlasStateEstimator::Initialization(AtlasSensorData* data) {
         dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
     _ConfigurationAndModelUpdate();
+    sp_->jpos_ini = curr_config_.segment(Atlas::n_vdof, Atlas::n_adof);
 
     _FootContactUpdate(data);
 
@@ -99,7 +100,6 @@ void AtlasStateEstimator::_ConfigurationAndModelUpdate() {
 
     sp_->q = curr_config_;
     sp_->qdot = curr_qdot_;
-    sp_->jpos_ini = curr_config_.segment(Atlas::n_vdof, Atlas::n_adof);
 }
 
 void AtlasStateEstimator::_FootContactUpdate(AtlasSensorData* data) {

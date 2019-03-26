@@ -10,16 +10,23 @@ class AtlasStateProvider {
     static AtlasStateProvider* getStateProvider(RobotSystem* _robot);
     ~AtlasStateProvider() {}
 
+    int rl_count;
+
     int stance_foot;
     double curr_time;
+    Eigen::Vector3d adjusted_foot;
+    Eigen::Vector3d guided_foot;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
 
     Eigen::Vector3d global_pos_local;
-    Eigen::Vector2d des_location;
     Eigen::VectorXd des_jpos_prev;
     Eigen::VectorXd jpos_ini;
+
+    Eigen::Vector2d des_location;
+    Eigen::Quaternion<double> des_quat;
+    Eigen::Vector2d walking_velocity;
 
     int b_rfoot_contact;
     int b_lfoot_contact;
@@ -32,7 +39,6 @@ class AtlasStateProvider {
     Eigen::Vector3d lfoot_vel;
     Eigen::Vector3d rfoot_so3;
     Eigen::Vector3d lfoot_so3;
-    Eigen::Quaternion<double> des_quat;
 
     int num_step_copy;
     int phase_copy;

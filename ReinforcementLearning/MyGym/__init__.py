@@ -32,6 +32,12 @@ register(
         )
 
 register(
+        id='DummyAtlasEnv-v0',
+        entry_point='MyGym.Envs.DummyAtlasEnv:DummyAtlasEnv',
+        max_episode_steps=1000
+        )
+
+register(
         id='DummyCartPoleEnv-v0',
         entry_point='MyGym.Envs.DummyCartPoleEnv:DummyCartPoleEnv',
         max_episode_steps=1000

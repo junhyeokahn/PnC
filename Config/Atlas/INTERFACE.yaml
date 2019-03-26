@@ -1,1 +1,2 @@
-test_name: walking_test
+#test_name: walking_test
+test_name: rl_walking_test

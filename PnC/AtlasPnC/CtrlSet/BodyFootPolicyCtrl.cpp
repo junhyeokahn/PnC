@@ -8,11 +8,12 @@
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
+#include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot, int swing_foot,
-                                           FootStepPlanner* planner)
+BodyFootPolicyCtrl::BodyFootPolicyCtrl(RobotSystem* robot, int swing_foot,
+                                       FootStepPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner),
       push_down_height_(0.),
       des_jpos_(Atlas::n_adof),
@@ -91,7 +92,7 @@ BodyFootPlanningCtrl::BodyFootPlanningCtrl(RobotSystem* robot, int swing_foot,
     }
 }
 
-void BodyFootPlanningCtrl::oneStep(void* _cmd) {
+void BodyFootPolicyCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma;
@@ -108,14 +109,14 @@ void BodyFootPlanningCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 }
 
-void BodyFootPlanningCtrl::_contact_setup() {
+void BodyFootPolicyCtrl::_contact_setup() {
     rfoot_contact_->updateContactSpec();
     lfoot_contact_->updateContactSpec();
     contact_list_.push_back(rfoot_contact_);
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
+void BodyFootPolicyCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     Eigen::VectorXd des_jacc_cmd =
         des_jacc_ +
@@ -133,7 +134,7 @@ void BodyFootPlanningCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     // myUtils::pretty_print(gamma, std::cout, "gamma");
 }
 
-void BodyFootPlanningCtrl::_task_setup() {
+void BodyFootPolicyCtrl::_task_setup() {
     double t(myUtils::smooth_changing(0, 1, end_time_, state_machine_time_));
     double tdot(
         myUtils::smooth_changing_vel(0, 1, end_time_, state_machine_time_));
@@ -239,7 +240,7 @@ void BodyFootPlanningCtrl::_task_setup() {
                                 des_jpos_, des_jvel_, des_jacc_);
 }
 
-void BodyFootPlanningCtrl::_foot_pos_task_setup() {
+void BodyFootPolicyCtrl::_foot_pos_task_setup() {
     //_GetSinusoidalSwingTrajectory();
     _GetBsplineSwingTrajectory();
 
@@ -277,7 +278,7 @@ void BodyFootPlanningCtrl::_foot_pos_task_setup() {
     foot_pos_task_->updateTask(curr_foot_pos_des_, foot_vel_des, foot_acc_des);
 }
 
-void BodyFootPlanningCtrl::_CheckPlanning() {
+void BodyFootPolicyCtrl::_CheckPlanning() {
     if ((state_machine_time_ > 0.5 * end_time_) && b_replanning_ &&
         !b_replaned_) {
         Eigen::Vector3d target_loc;
@@ -296,7 +297,7 @@ void BodyFootPlanningCtrl::_CheckPlanning() {
     }
 }
 
-void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::Vector3d com_pos, com_vel;
     // Direct value used
     com_pos = robot_->getCoMPosition();
@@ -304,6 +305,48 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
     printf("planning com state: %f, %f, %f, %f\n", com_pos[0], com_pos[1],
            com_vel[0], com_vel[1]);
+
+    // Observation
+    double des_yaw =
+        dart::math::matrixToEulerZYX(sp_->des_quat.toRotationMatrix())[0];
+    Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
+    Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
+    obs_vec << com_pos[0], com_pos[1], target_body_height_ - sp_->q[2],
+        sp_->q[5], sp_->q[4], sp_->q[3], des_yaw - sp_->q[3], sp_->qdot[0],
+        sp_->qdot[1], sp_->qdot[2];
+    obs_vec = myUtils::GetRelativeVector(obs_vec, terminate_obs_lower_bound_,
+                                         terminate_obs_upper_bound_);
+    for (int i = 0; i < obs_vec.size(); ++i) obs(0, i) = obs_vec(i);
+    Eigen::MatrixXd output, mean;
+    Eigen::VectorXd neglogp;
+    nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
+                          mean, neglogp);
+    Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
+    bool done;
+    if (myUtils::isInBoundingBox(obs_vec,
+                                 -1.0 * Eigen::VectorXd::Ones(obs_vec.size()),
+                                 1.0 * Eigen::VectorXd::Ones(obs_vec.size()))) {
+        done = false;
+    } else {
+        done = true;
+    }
+    if (sp_->num_step_copy > 4 && done) {
+        std::cout << "done" << std::endl;
+        exit(0);
+    }
+    // TEST //
+    // std::cout << "==========================================" << std::endl;
+    // myUtils::pretty_print(obs, std::cout, "observation");
+    // myUtils::pretty_print(mean, std::cout, "mean_actions");
+    // myUtils::pretty_print(neglogp, std::cout, "neglogp");
+    // myUtils::pretty_print(output, std::cout, "output");
+    // myUtils::pretty_print(val, std::cout, "value");
+    // std::cout << "==========================================" << std::endl;
+    // if (sp_->rl_count > 10) {
+    // exit(0);
+    //}
+    // sp_->rl_count++;
+    // TEST //
 
     OutputReversalPL pl_output;
     ParamReversalPL pl_param;
@@ -331,14 +374,22 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
 
     target_loc[2] = initial_target_loc_[2];
 
-    // TEST
     for (int i(0); i < 2; ++i) {
         target_loc[i] += foot_landing_offset_[i];
     }
-    myUtils::pretty_print(target_loc, std::cout, "next foot loc");
+    // =========================================================================
+    // Step adjustment
+    // =========================================================================
+    myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
+    sp_->guided_foot = target_loc + sp_->global_pos_local;
+    for (int i = 0; i < 2; ++i) {
+        if (b_use_policy_) target_loc[i] += action_scale_[i] * output(0, i);
+    }
+    sp_->adjusted_foot = target_loc + sp_->global_pos_local;
+    myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
 }
 
-void BodyFootPlanningCtrl::firstVisit() {
+void BodyFootPolicyCtrl::firstVisit() {
     b_replaned_ = false;
 
     ini_body_pos_ =
@@ -377,7 +428,7 @@ void BodyFootPlanningCtrl::firstVisit() {
     _SetMinJerkOffset(foot_pos_offset);
 }
 
-void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
+void BodyFootPolicyCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     // Initialize Minimum Jerk Parameter Containers
     Eigen::Vector3d init_params;
     Eigen::Vector3d final_params;
@@ -395,7 +446,7 @@ void BodyFootPlanningCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
     }
 }
 
-bool BodyFootPlanningCtrl::endOfPhase() {
+bool BodyFootPolicyCtrl::endOfPhase() {
     // if (state_machine_time_ > (end_time_ + waiting_time_limit_)) {
     if (state_machine_time_ > end_time_) {
         printf("(state_machine time, end time) : (%f, %f) \n",
@@ -420,7 +471,7 @@ bool BodyFootPlanningCtrl::endOfPhase() {
     return false;
 }
 
-void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
+void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
     ini_base_height_ = sp_->q[AtlasDoF::basePosZ];
     std::vector<double> tmp_vec;
 
@@ -435,6 +486,18 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "body_pt_offset", body_pt_offset_);
         myUtils::readParameter(node, "foot_landing_offset",
                                foot_landing_offset_);
+        myUtils::readParameter(node, "use_policy", b_use_policy_);
+
+        // rl model
+        std::string model_path;
+        myUtils::readParameter(node, "model_path", model_path);
+        std::string model_yaml = THIS_COM + model_path;
+        YAML::Node model_cfg = YAML::LoadFile(model_yaml);
+        nn_policy_ = new NeuralNetModel(model_cfg["pol_params"], true);
+        nn_valfn_ = new NeuralNetModel(model_cfg["valfn_params"], false);
+        // nn_policy_->PrintInfo();
+        // nn_valfn_->PrintInfo();
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -452,13 +515,13 @@ void BodyFootPlanningCtrl::ctrlInitialization(const YAML::Node& node) {
     // printf("[Body Foot JPos Planning Ctrl] Parameter Setup Completed\n");
 }
 
-BodyFootPlanningCtrl::~BodyFootPlanningCtrl() {
+BodyFootPolicyCtrl::~BodyFootPolicyCtrl() {
     delete wblc_;
     delete lfoot_contact_;
     delete rfoot_contact_;
 }
 
-void BodyFootPlanningCtrl::_GetBsplineSwingTrajectory() {
+void BodyFootPolicyCtrl::_GetBsplineSwingTrajectory() {
     double pos[3];
     double vel[3];
     double acc[3];
@@ -473,7 +536,7 @@ void BodyFootPlanningCtrl::_GetBsplineSwingTrajectory() {
         curr_foot_acc_des_[i] = acc[i];
     }
 }
-void BodyFootPlanningCtrl::_GetSinusoidalSwingTrajectory() {
+void BodyFootPolicyCtrl::_GetSinusoidalSwingTrajectory() {
     curr_foot_acc_des_.setZero();
     for (int i(0); i < 2; ++i) {
         curr_foot_pos_des_[i] =
@@ -497,8 +560,8 @@ void BodyFootPlanningCtrl::_GetSinusoidalSwingTrajectory() {
         amp * omega * omega * cos(omega * state_machine_time_);
 }
 
-void BodyFootPlanningCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
-                                       const Eigen::Vector3d& des_pos) {
+void BodyFootPolicyCtrl::_SetBspline(const Eigen::Vector3d& st_pos,
+                                     const Eigen::Vector3d& des_pos) {
     // Trajectory Setup
     double init[9];
     double fin[9];

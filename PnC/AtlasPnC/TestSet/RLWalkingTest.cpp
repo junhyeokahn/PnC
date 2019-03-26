@@ -1,54 +1,47 @@
-#include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
-#include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
-#include <PnC/DracoPnC/DracoDefinition.hpp>
-#include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
-#include <PnC/DracoPnC/TestSet/TestSet.hpp>
+#include <PnC/AtlasPnC/AtlasDefinition.hpp>
+#include <PnC/AtlasPnC/AtlasStateProvider.hpp>
+#include <PnC/AtlasPnC/ContactSet/ContactSet.hpp>
+#include <PnC/AtlasPnC/CtrlSet/CtrlSet.hpp>
+#include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
+#include <PnC/AtlasPnC/TestSet/RLWalkingTest.hpp>
 #include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
 #include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <Utils/IO/DataManager.hpp>
 
-RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
-    : Test(robot) {
+RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "RL Walking Test");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/RL_WALKING_TEST.yaml");
-    mpi_idx_ = mpi_idx;
-    env_idx_ = env_idx;
-    b_learning_ = true;
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Atlas/TEST/RL_WALKING_TEST.yaml");
 
     num_step_ = 0;
-    sp_ = DracoStateProvider::getStateProvider(robot_);
-    sp_->stance_foot = "lFoot";
-    sp_->global_pos_local[1] = 0.15;
+    mpi_idx_ = 0;
+    env_idx_ = 0;
+    b_learning_ = false;
+    sp_ = AtlasStateProvider::getStateProvider(robot_);
+    sp_->stance_foot = AtlasBodyNode::l_sole;
+    sp_->global_pos_local[1] = 0.11;
     reversal_planner_ = new Reversal_LIPM_Planner();
-    phase_ = WkPhase::initiation;
+    phase_ = RLWkPhase::double_contact_1;
 
     state_list_.clear();
 
-    jpos_ctrl_ = new JPosTargetCtrl(robot);
-    body_up_ctrl_ = new DoubleContactTransCtrl(robot);
     body_fix_ctrl_ = new BodyCtrl(robot);
-    // Swing Controller Selection
-    right_swing_ctrl_ =
-        new BodyFootLearningCtrl(robot_, "rFoot", reversal_planner_);
-    left_swing_ctrl_ =
-        new BodyFootLearningCtrl(robot_, "lFoot", reversal_planner_);
-
     // Right
     right_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", false);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::r_sole, false);
     right_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", true);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::r_sole, true);
     // Left
     left_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", false);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::l_sole, false);
     left_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", true);
-
+        new SingleContactTransCtrl(robot, AtlasBodyNode::l_sole, true);
+    // Swing Controller Selection
+    right_swing_ctrl_ = new BodyFootPolicyCtrl(robot_, AtlasBodyNode::r_sole,
+                                               reversal_planner_);
+    left_swing_ctrl_ = new BodyFootPolicyCtrl(robot_, AtlasBodyNode::l_sole,
+                                              reversal_planner_);
     _SettingParameter();
 
-    state_list_.push_back(jpos_ctrl_);
-    state_list_.push_back(body_up_ctrl_);
     state_list_.push_back(body_fix_ctrl_);
     state_list_.push_back(right_swing_start_trans_ctrl_);
     state_list_.push_back(right_swing_ctrl_);
@@ -80,46 +73,41 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
         "lfoot_acc_des", 3);
 }
 
-RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
-    myUtils::pretty_constructor(1, "Walking Test");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/RL_WALKING_TEST.yaml");
-    mpi_idx_ = 0;
-    env_idx_ = 0;
-    b_learning_ = false;
-    num_step_ = 0;
+RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
+    : Test(robot) {
+    myUtils::pretty_constructor(1, "RL Walking Test");
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Atlas/TEST/RL_WALKING_TEST.yaml");
 
-    sp_ = DracoStateProvider::getStateProvider(robot_);
-    sp_->stance_foot = "lFoot";
-    sp_->global_pos_local[1] = 0.15;
+    num_step_ = 0;
+    mpi_idx_ = mpi_idx;
+    env_idx_ = env_idx;
+    b_learning_ = true;
+    sp_ = AtlasStateProvider::getStateProvider(robot_);
+    sp_->stance_foot = AtlasBodyNode::l_sole;
+    sp_->global_pos_local[1] = 0.11;
     reversal_planner_ = new Reversal_LIPM_Planner();
-    phase_ = WkPhase::initiation;
+    phase_ = RLWkPhase::double_contact_1;
 
     state_list_.clear();
 
-    jpos_ctrl_ = new JPosTargetCtrl(robot);
-    body_up_ctrl_ = new DoubleContactTransCtrl(robot);
     body_fix_ctrl_ = new BodyCtrl(robot);
-    // Swing Controller Selection
-    right_swing_ctrl_ =
-        new BodyFootPolicyCtrl(robot_, "rFoot", reversal_planner_);
-    left_swing_ctrl_ =
-        new BodyFootPolicyCtrl(robot_, "lFoot", reversal_planner_);
-
     // Right
     right_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", false);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::r_sole, false);
     right_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", true);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::r_sole, true);
     // Left
     left_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", false);
+        new SingleContactTransCtrl(robot, AtlasBodyNode::l_sole, false);
     left_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", true);
-
+        new SingleContactTransCtrl(robot, AtlasBodyNode::l_sole, true);
+    // Swing Controller Selection
+    right_swing_ctrl_ = new BodyFootLearningCtrl(robot_, AtlasBodyNode::r_sole,
+                                                 reversal_planner_);
+    left_swing_ctrl_ = new BodyFootLearningCtrl(robot_, AtlasBodyNode::l_sole,
+                                                reversal_planner_);
     _SettingParameter();
 
-    state_list_.push_back(jpos_ctrl_);
-    state_list_.push_back(body_up_ctrl_);
     state_list_.push_back(body_fix_ctrl_);
     state_list_.push_back(right_swing_start_trans_ctrl_);
     state_list_.push_back(right_swing_ctrl_);
@@ -152,8 +140,6 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
 }
 
 RLWalkingTest::~RLWalkingTest() {
-    delete jpos_ctrl_;
-    delete body_up_ctrl_;
     delete right_swing_start_trans_ctrl_;
     delete right_swing_ctrl_;
     delete right_swing_end_trans_ctrl_;
@@ -168,11 +154,6 @@ RLWalkingTest::~RLWalkingTest() {
 void RLWalkingTest::TestInitialization() {
     reversal_planner_->PlannerInitialization(
         cfg_["planner_configuration"]["velocity_reversal_pln"]);
-
-    jpos_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["joint_position_ctrl"]);
-    body_up_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["double_contact_trans_ctrl"]);
     body_fix_ctrl_->ctrlInitialization(
         cfg_["control_configuration"]["body_ctrl"]);
 
@@ -204,57 +185,42 @@ int RLWalkingTest::_NextPhase(const int& phase) {
                          "[Phase " + std::to_string(next_phase) + "]");
     Eigen::Vector3d next_local_frame_location;
 
-    if (phase == WkPhase::double_contact_1) {
+    if (phase == RLWkPhase::double_contact_1) {
         ++num_step_;
         printf("%i th step : ", num_step_);
         printf("Right Leg Swing\n");
-        sp_->stance_foot = "lFoot";
+        sp_->stance_foot = AtlasBodyNode::l_sole;
 
         // Global Frame Update
         next_local_frame_location =
-            robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter)
-                .translation();
+            robot_->getBodyNodeIsometry(AtlasBodyNode::l_sole).translation();
         sp_->global_pos_local += next_local_frame_location;
     }
-    if (phase == WkPhase::double_contact_2) {
+    if (phase == RLWkPhase::double_contact_2) {
         ++num_step_;
         printf("%i th step : ", num_step_);
         printf("Left Leg Swing\n");
 
-        sp_->stance_foot = "rFoot";
+        sp_->stance_foot = AtlasBodyNode::r_sole;
 
         // Global Frame Update
         next_local_frame_location =
-            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter)
-                .translation();
+            robot_->getBodyNodeIsometry(AtlasBodyNode::r_sole).translation();
         sp_->global_pos_local += next_local_frame_location;
     }
     sp_->num_step_copy = num_step_;
 
-    // !! TEST !!
-    // if (((phase == WkPhase::double_contact_1) ||
-    //(phase == WkPhase::double_contact_2)) &&
-    //(num_step_ > 1)) {
-    // sp_->global_pos_local[0] =
-    // sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
-    // sp_->global_pos_local[1] =
-    // sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
-    //}
+    // Update Turning Target
+    if (sp_->curr_time > walking_start_time_) {
+        if (sp_->phase_copy == 2 || sp_->phase_copy == 6) {
+            sp_->des_quat = delta_quat_ * sp_->des_quat;
+        }
+    }
 
-    if (next_phase == WkPhase::NUM_WALKING_PHASE) {
-        return WkPhase::double_contact_1;
+    if (next_phase == RLWkPhase::NUM_WALKING_PHASE) {
+        return RLWkPhase::double_contact_1;
     } else {
         return next_phase;
-    }
-}
-
-void RLWalkingTest::AdditionalUpdate_() {
-    // Update Walking Target
-    if (sp_->curr_time > walking_start_time_) {
-        for (int i = 0; i < 2; ++i) {
-            sp_->walking_velocity[i] = walking_velocity_[i];
-            sp_->des_location[i] += walking_velocity_[i] * DracoAux::ServoRate;
-        }
     }
 }
 
@@ -262,19 +228,18 @@ void RLWalkingTest::_SettingParameter() {
     try {
         double tmp;
         bool b_tmp;
-        Eigen::VectorXd tmp_vec;
+        Eigen::VectorXd tmp_vec(10);
         std::string tmp_str;
 
         YAML::Node test_cfg = cfg_["test_configuration"];
 
-        myUtils::readParameter(test_cfg, "start_phase", phase_);
-
-        myUtils::readParameter(test_cfg, "initial_jpos", tmp_vec);
-        ((JPosTargetCtrl*)jpos_ctrl_)->setTargetPosition(tmp_vec);
-
+        // =====================================================================
+        // body height
+        // =====================================================================
         myUtils::readParameter(test_cfg, "body_height", tmp);
-        ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceHeight(tmp);
+
         ((BodyCtrl*)body_fix_ctrl_)->setStanceHeight(tmp);
+
         ((SingleContactTransCtrl*)right_swing_start_trans_ctrl_)
             ->setStanceHeight(tmp);
         ((SingleContactTransCtrl*)right_swing_end_trans_ctrl_)
@@ -283,18 +248,14 @@ void RLWalkingTest::_SettingParameter() {
             ->setStanceHeight(tmp);
         ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)
             ->setStanceHeight(tmp);
+
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
-
-        myUtils::readParameter(test_cfg, "com_height_for_omega", tmp);
         ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
 
-        myUtils::readParameter(test_cfg, "jpos_initialization_time", tmp);
-        ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);
-
-        myUtils::readParameter(test_cfg, "com_lifting_time", tmp);
-        ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceTime(tmp);
-
+        // =====================================================================
+        // stance time
+        // =====================================================================
         myUtils::readParameter(test_cfg, "stance_time", tmp);
         ((BodyCtrl*)body_fix_ctrl_)->setStanceTime(tmp);
         ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyStanceTime(tmp);
@@ -332,7 +293,9 @@ void RLWalkingTest::_SettingParameter() {
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setContactSwitchCheck(b_tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setContactSwitchCheck(b_tmp);
 
-        // walking parameters
+        // =====================================================================
+        // Locomotion Behavior
+        // =====================================================================
         myUtils::readParameter(test_cfg, "walking_start_time",
                                walking_start_time_);
         Eigen::VectorXd walking_velocity_lb, walking_velocity_ub;
@@ -341,6 +304,9 @@ void RLWalkingTest::_SettingParameter() {
                                walking_velocity_lb);
         myUtils::readParameter(test_cfg, "walking_velocity_ub",
                                walking_velocity_ub);
+        double turning_rate_lb, turning_rate_ub;
+        myUtils::readParameter(test_cfg, "turning_rate_lb", turning_rate_lb);
+        myUtils::readParameter(test_cfg, "turning_rate_ub", turning_rate_ub);
         std::random_device rd;
         std::mt19937 gen(rd());
         for (int i = 0; i < 2; ++i) {
@@ -348,9 +314,19 @@ void RLWalkingTest::_SettingParameter() {
                                                  walking_velocity_ub[i]);
             walking_velocity_[i] = dis(gen);
         }
-        // myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout,
-        // "walking_velocity");
+        std::uniform_real_distribution<> dis(turning_rate_lb, turning_rate_ub);
+        turning_rate_ = dis(gen);
+        Eigen::Vector3d euler_zyx(turning_rate_, 0, 0);
+        delta_quat_ =
+            Eigen::Quaternion<double>(dart::math::eulerZYXToMatrix(euler_zyx));
 
+        // myUtils::pretty_print((Eigen::VectorXd)walking_velocity_, std::cout,
+        //"walking_velocity");
+        // myUtils::pretty_print(delta_quat_, std::cout, "delta_quat");
+
+        // =====================================================================
+        // Environment Parameters
+        // =====================================================================
         if (b_learning_) {
             RLInterface* rl_interface = RLInterface::GetRLInterface();
             rl_interface->Initialize(test_cfg["protocol"], mpi_idx_, env_idx_);
@@ -428,5 +404,15 @@ void RLWalkingTest::_SettingParameter() {
                   << __FILE__ << "]" << std::endl
                   << std::endl;
         exit(0);
+    }
+}
+
+void RLWalkingTest::AdditionalUpdate_() {
+    // Update Walking Target
+    if (sp_->curr_time > walking_start_time_) {
+        for (int i = 0; i < 2; ++i) {
+            sp_->walking_velocity[i] = walking_velocity_[i];
+            sp_->des_location[i] += walking_velocity_[i] * AtlasAux::servo_rate;
+        }
     }
 }

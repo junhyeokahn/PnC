@@ -34,19 +34,31 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
 // ETC
 // =============================================================================
 double bind_half_pi(double);
+
 bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
              const double threshold = 0.00001);
 double CropValue(double value, double min, double max, std::string source);
+
 Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
                            Eigen::VectorXd max, std::string source);
 
 Eigen::MatrixXd CropMatrix(Eigen::MatrixXd value, Eigen::MatrixXd min,
                            Eigen::MatrixXd max, std::string source);
 
-bool isInBoundingBox(const Eigen::VectorXd& lb, const Eigen::VectorXd& val,
+bool isInBoundingBox(const Eigen::VectorXd& val, const Eigen::VectorXd& lb,
                      const Eigen::VectorXd& ub);
+
+Eigen::MatrixXd GetRelativeMatrix(const Eigen::MatrixXd value,
+                                  const Eigen::MatrixXd min,
+                                  const Eigen::MatrixXd max);
+
+Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
+                                  const Eigen::VectorXd min,
+                                  const Eigen::VectorXd max);
+
 Eigen::VectorXd eulerIntegration(const Eigen::VectorXd& x,
                                  const Eigen::VectorXd& xdot, double dt);
+
 Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
                                   const Eigen::VectorXd& alpha,
                                   const Eigen::VectorXd& alphad, double dt);

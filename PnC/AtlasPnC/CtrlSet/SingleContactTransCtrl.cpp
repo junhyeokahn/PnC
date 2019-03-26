@@ -8,6 +8,7 @@
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
                                                int moving_foot, bool b_increase)
@@ -105,11 +106,13 @@ void SingleContactTransCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 }
 
 void SingleContactTransCtrl::_task_setup() {
-    des_jpos_ = sp_->jpos_ini;
-    des_jvel_.setZero();
-    des_jacc_.setZero();
+    double t(myUtils::smooth_changing(0, 1, end_time_, state_machine_time_));
+    double tdot(
+        myUtils::smooth_changing_vel(0, 1, end_time_, state_machine_time_));
 
-    // Calculate IK for a desired height and orientation.
+    // =========================================================================
+    // Body Pos Task
+    // =========================================================================
     double body_height_cmd;
     if (b_set_height_target_)
         body_height_cmd = target_body_height_;
@@ -124,31 +127,61 @@ void SingleContactTransCtrl::_task_setup() {
     des_pos[2] = body_height_cmd;
     body_pos_task_->updateTask(des_pos, vel_des, acc_des);
 
-    // Set Desired Orientation
-    Eigen::VectorXd des_quat(4);
-    des_quat << 1., 0., 0., 0;
+    // =========================================================================
+    // Body Ori Task
+    // =========================================================================
+    Eigen::Quaternion<double> curr_body_delta_quat =
+        dart::math::expToQuat(body_delta_so3_ * t);
+    Eigen::Quaternion<double> curr_body_quat_des =
+        curr_body_delta_quat * ini_body_quat_;
+    Eigen::Vector3d curr_body_so3_des = body_delta_so3_ * tdot;
 
-    Eigen::VectorXd ang_vel_des(body_ori_task_->getDim());
-    ang_vel_des.setZero();
-    Eigen::VectorXd ang_acc_des(body_ori_task_->getDim());
-    ang_acc_des.setZero();
-    body_ori_task_->updateTask(des_quat, ang_vel_des, ang_acc_des);
-    torso_ori_task_->updateTask(des_quat, ang_vel_des, ang_acc_des);
+    Eigen::VectorXd des_body_quat = Eigen::VectorXd::Zero(4);
+    des_body_quat << curr_body_quat_des.w(), curr_body_quat_des.x(),
+        curr_body_quat_des.y(), curr_body_quat_des.z();
+    Eigen::VectorXd des_body_so3 = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 3; ++i) des_body_so3[i] = curr_body_so3_des[i];
 
-    // Joint
+    Eigen::VectorXd ang_acc_des = Eigen::VectorXd::Zero(3);
+
+    body_ori_task_->updateTask(des_body_quat, des_body_so3, ang_acc_des);
+
+    // =========================================================================
+    // Torso Ori Task
+    // =========================================================================
+    Eigen::Quaternion<double> curr_torso_delta_quat =
+        dart::math::expToQuat(torso_delta_so3_ * t);
+    Eigen::Quaternion<double> curr_torso_quat_des =
+        curr_torso_delta_quat * ini_torso_quat_;
+    Eigen::Vector3d curr_torso_so3_des = torso_delta_so3_ * tdot;
+
+    Eigen::VectorXd des_torso_quat = Eigen::VectorXd::Zero(4);
+    des_torso_quat << curr_torso_quat_des.w(), curr_torso_quat_des.x(),
+        curr_torso_quat_des.y(), curr_torso_quat_des.z();
+    Eigen::VectorXd des_torso_so3 = Eigen::VectorXd::Zero(3);
+    for (int i = 0; i < 3; ++i) des_torso_so3[i] = curr_torso_so3_des[i];
+
+    torso_ori_task_->updateTask(des_torso_quat, des_torso_so3, ang_acc_des);
+
+    // =========================================================================
+    // Joint Pos Task
+    // =========================================================================
     Eigen::VectorXd jpos_des = sp_->jpos_ini;
-    Eigen::VectorXd jvel_des(Atlas::n_adof);
-    jvel_des.setZero();
-    Eigen::VectorXd jacc_des(Atlas::n_adof);
-    jacc_des.setZero();
-    total_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
+    Eigen::VectorXd zero(Atlas::n_adof);
+    zero.setZero();
+    total_joint_task_->updateTask(jpos_des, zero, zero);
 
+    // =========================================================================
     // Task List Update
+    // =========================================================================
     task_list_.push_back(body_pos_task_);
     task_list_.push_back(body_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
+    // =========================================================================
+    // Solve Inv Kinematics
+    // =========================================================================
     kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
                                 des_jvel_, des_jacc_);
 
@@ -174,10 +207,10 @@ void SingleContactTransCtrl::_task_setup() {
         }
     }
 
-    // dynacore::pretty_print(jpos_ini, std::cout, "jpos ini");
-    // dynacore::pretty_print(des_jpos_, std::cout, "des jpos");
-    // dynacore::pretty_print(des_jvel_, std::cout, "des jvel");
-    // dynacore::pretty_print(des_jacc_, std::cout, "des jacc");
+    // myUtils::pretty_print(jpos_ini, std::cout, "jpos ini");
+    // myUtils::pretty_print(des_jpos_, std::cout, "des jpos");
+    // myUtils::pretty_print(des_jvel_, std::cout, "des jvel");
+    // myUtils::pretty_print(des_jacc_, std::cout, "des jacc");
 }
 
 void SingleContactTransCtrl::_contact_setup() {
@@ -229,8 +262,19 @@ void SingleContactTransCtrl::_contact_setup() {
 
 void SingleContactTransCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
+
     ini_body_pos_ =
         robot_->getBodyNodeIsometry(AtlasBodyNode::pelvis).translation();
+
+    ini_body_quat_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(AtlasBodyNode::pelvis).linear());
+    body_delta_quat_ = sp_->des_quat * ini_body_quat_.inverse();
+    body_delta_so3_ = dart::math::quatToExp(body_delta_quat_);
+
+    ini_torso_quat_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(AtlasBodyNode::utorso).linear());
+    torso_delta_quat_ = sp_->des_quat * ini_torso_quat_.inverse();
+    torso_delta_so3_ = dart::math::quatToExp(torso_delta_quat_);
 }
 
 void SingleContactTransCtrl::lastVisit() { sp_->des_jpos_prev = des_jpos_; }

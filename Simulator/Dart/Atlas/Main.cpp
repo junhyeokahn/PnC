@@ -114,11 +114,14 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
-    double height;
+    double height, yaw;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "height", height);
+        myUtils::readParameter(simulation_cfg["initial_configuration"],
+                               "height", height);
+        myUtils::readParameter(simulation_cfg["initial_configuration"], "yaw",
+                               yaw);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -140,6 +143,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
     Eigen::VectorXd q = robot->getPositions();
     q[2] = height;
+    q[3] = yaw;
     q[l_leg_hpy] = -0.4;
     q[r_leg_hpy] = -0.4;
     q[l_leg_kny] = 0.8;
@@ -159,12 +163,17 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 int main(int argc, char** argv) {
     double servo_rate;
     bool b_show_joint_frame;
+    bool b_show_target_frame;
+    bool b_show;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
         myUtils::readParameter(simulation_cfg, "show_joint_frame",
                                b_show_joint_frame);
+        myUtils::readParameter(simulation_cfg, "show_target_frame",
+                               b_show_target_frame);
+        myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -203,7 +212,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Display Target Frame
     // =========================================================================
-    // addTargetFrame(world);
+    if (b_show_target_frame) addTargetFrame(world);
 
     // =========================================================================
     // Initial configuration
@@ -224,29 +233,43 @@ int main(int argc, char** argv) {
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<AtlasWorldNode> node;
-    node = new AtlasWorldNode(world);
+    if (argc > 1) {
+        node =
+            new AtlasWorldNode(world, std::stoi(argv[1]), std::stoi(argv[2]));
+    } else {
+        node = new AtlasWorldNode(world);
+    }
     node->setNumStepsPerCycle(30);
 
     // =========================================================================
     // Create and Set Viewer
     // =========================================================================
-    dart::gui::osg::Viewer viewer;
-    viewer.addWorldNode(node);
-    viewer.simulate(false);
-    viewer.switchHeadlights(false);
-    ::osg::Vec3 p1(1.0, 0.2, 1.0);
-    p1 = p1 * 0.7;
-    viewer.getLightSource(0)->getLight()->setPosition(
-        ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
-    viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    viewer.addEventHandler(new OneStepProgress(node));
+    if (b_show) {
+        dart::gui::osg::Viewer viewer;
+        viewer.addWorldNode(node);
+        viewer.simulate(false);
+        viewer.switchHeadlights(false);
+        ::osg::Vec3 p1(1.0, 0.2, 1.0);
+        p1 = p1 * 0.7;
+        viewer.getLightSource(0)->getLight()->setPosition(
+            ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
+        viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
+        viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
+                                         GL_DEPTH_BUFFER_BIT);
+        viewer.addEventHandler(new OneStepProgress(node));
 
-    // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    viewer.setUpViewInWindow(1440, 0, 500, 500);
-    viewer.getCameraManipulator()->setHomePosition(
-        ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
-        ::osg::Vec3(0.0, 0.0, 1.0));
-    viewer.setCameraManipulator(viewer.getCameraManipulator());
-    viewer.run();
+        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
+        viewer.getCameraManipulator()->setHomePosition(
+            ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
+            ::osg::Vec3(0.0, 0.0, 1.0));
+        viewer.setCameraManipulator(viewer.getCameraManipulator());
+        viewer.run();
+    } else {
+        while (true) {
+            node->customPreStep();
+            node->getWorld()->step();
+            node->customPostStep();
+        }
+    }
 }

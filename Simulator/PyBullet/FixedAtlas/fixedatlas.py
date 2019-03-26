@@ -41,8 +41,10 @@ for j in range (pb.getNumJoints(atlas)):
     info = pb.getJointInfo(atlas,j)
     jointName = info[1]
     jointType = info[2]
+    linkName = info[12]
     print(j, " th joint")
     print(jointName)
+    print(linkName)
     if (jointType==pb.JOINT_PRISMATIC or jointType==pb.JOINT_REVOLUTE):
             pb.setJointMotorControl2(atlas,j,controlMode=pb.VELOCITY_CONTROL,force=0.0) 
             jointIds.append(j)
@@ -71,12 +73,10 @@ def GetBaseStates():
     return base_pos_tot, based_vel_tot
 
 def GetJointStates():
-    pos=np.zeros(activeJoint,dtype=float)
-    vel=np.zeros(activeJoint,dtype=float)
-    for i in range (activeJoint):
-        joint_state =pb.getJointState(atlas,i)
-        pos[i] = joint_state[0]
-        vel[i] = joint_state[1]
+    # pos = np.array([pb.getJointState(atlas, jidx)[0] for jidx in jointIds])
+    # vel = np.array([pb.getJointState(atlas, jidx)[1] for jidx in jointIds])
+    pos = [pb.getJointState(atlas, jidx)[0] for jidx in jointIds]
+    vel = [pb.getJointState(atlas, jidx)[1] for jidx in jointIds]
     return pos, vel
 
 fixedatlas_interface = FixedAtlasInterface.FixedAtlasInterface()
@@ -87,32 +87,55 @@ fixedatlas_sensordata.q = np.zeros(activeJoint)
 fixedatlas_sensordata.qdot = np.zeros(activeJoint)
 fixedatlas_command.jtrq = np.zeros(activeJoint)
 fixedatlas_torque_command = np.zeros(activeJoint)
+# =============================================================================
+# Camera Setting
+# =============================================================================
+fov, aspect, nearplane, farplane = 90, 2.0, 0.01, 1000
+projection_matrix = pb.computeProjectionMatrixFOV(fov, aspect, nearplane, farplane)
+def atlas_camera():
+    linkinfo = pb.getLinkState(atlas,10) #Get head link info
+    com_pos = linkinfo[0]
+    com_ori = linkinfo[1]
+    rot_matrix = pb.getMatrixFromQuaternion(com_ori)
+    rot_matrix = np.array(rot_matrix).reshape(3,3)
+    #initial vectors
+    global_camera_x = np.array([1,0,0])
+    global_camera_z = np.array([0,0,1]) 
+    #Rotated vectors
+    init_camera_offset = rot_matrix.dot(0.1*global_camera_x)
+    target_camera_offset = rot_matrix.dot(1.*global_camera_x)
+    up_vector = rot_matrix.dot(global_camera_z)
+    view_matrix = pb.computeViewMatrix(com_pos+init_camera_offset, com_pos +target_camera_offset, up_vector)
+    img = pb.getCameraImage(320,200,view_matrix,projection_matrix)
+    # rgb_matrix = img[2]
+    # depth_matrix = img[3]
+    # print("=============RGB=============")
+    # print(rgb_matrix)
+    # print("=============Depth=============")
+    # print(depth_matrix)
+    return img
 
+# =============================================================================
+# Simulation Setting
+# =============================================================================
 dt = 0.001
 pb.setTimeStep(dt)
-# pb.setPhysicsEngineParameter(fixedTimeStep=self.timestep*self.frame_skip, numSolverIterations=self.numSolverIterations, numSubSteps=self.frame_skip)
+count = 0
 
 while (1):
-    # pb.getCameraImage(320,200)
-    # for i in range(len(paramIds)): ##JointControl from GUI
-            # c=paramIds[i]
-            # targetPos = pb.readUserDebugParameter(c)
-            # pb.setJointMotorControl2(atlas,jointIds[i],pb.POSITION_CONTROL,targetPos,force=140.)
+    if count % 100. == 0:
+        img = atlas_camera()
+        __import__('ipdb').set_trace()
     pos, vel = GetJointStates()
-    # print("==============pos=============")
-    # print(pos)
-    # print("================vel===========")
-    # print(vel)
 
-    fixedatlas_sensordata.q = pos
-    fixedatlas_sensordata.qdot = vel
+    fixedatlas_sensordata.q = np.array(pos)
+    fixedatlas_sensordata.qdot = np.array(vel)
 
     fixedatlas_interface.getCommand(fixedatlas_sensordata,fixedatlas_command)
 
     fixedatlas_torque_command = fixedatlas_command.jtrq
 
-    # print("===============torque============")
-    # print(fixedatlas_torque_command)
     pb.setJointMotorControlArray(atlas,jointIds,controlMode=pb.TORQUE_CONTROL, forces=fixedatlas_torque_command)
     pb.stepSimulation()
     time.sleep(dt)
+    count += 1

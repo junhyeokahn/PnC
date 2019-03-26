@@ -304,7 +304,7 @@ void TurningTest::_SettingParameter() {
     }
 }
 
-void TurningTest::AuxUpdate_() {
+void TurningTest::AdditionalUpdate_() {
     // Update Walking Target
     if (sp_->curr_time > walking_start_time_) {
         for (int i = 0; i < 2; ++i) {

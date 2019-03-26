@@ -9,20 +9,26 @@ AtlasStateProvider* AtlasStateProvider::getStateProvider(RobotSystem* _robot) {
 }
 
 AtlasStateProvider::AtlasStateProvider(RobotSystem* _robot) {
-    myUtils::pretty_constructor(1, "State Provider");
+    myUtils::pretty_constructor(1, "Atlas State Provider");
 
     robot_ = _robot;
     stance_foot = AtlasBodyNode::l_sole;
     curr_time = 0.;
+    rl_count = 0;
+    adjusted_foot.setZero();
+    guided_foot.setZero();
 
     q = Eigen::VectorXd::Zero(Atlas::n_dof);
     qdot = Eigen::VectorXd::Zero(Atlas::n_dof);
     global_pos_local.setZero();
-    des_location.setZero();
+
     b_rfoot_contact = 0;
     b_lfoot_contact = 0;
 
+    des_location.setZero();
     des_quat = Eigen::Quaternion<double>::Identity();
+    walking_velocity.setZero();
+
     rfoot_pos.setZero();
     lfoot_pos.setZero();
     rfoot_quat = Eigen::Quaternion<double>::Identity();

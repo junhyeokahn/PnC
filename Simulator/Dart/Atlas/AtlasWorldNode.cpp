@@ -6,19 +6,6 @@
 
 AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
-    try {
-        YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
-        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
-        myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
-                               kp_);
-        myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
-                               kd_);
-    } catch (std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-    }
     world_ = _world;
     robot_ = world_->getSkeleton("multisense_sl");
     trq_lb_ = robot_->getForceLowerLimits();
@@ -30,6 +17,26 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
     interface_ = new AtlasInterface();
     sensor_data_ = new AtlasSensorData();
     command_ = new AtlasCommand();
+
+    SetParams_();
+}
+
+AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world,
+                               int mpi_idx, int env_idx)
+    : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
+    world_ = _world;
+    robot_ = world_->getSkeleton("multisense_sl");
+    trq_lb_ = robot_->getForceLowerLimits();
+    trq_ub_ = robot_->getForceUpperLimits();
+    n_dof_ = robot_->getNumDofs();
+    ground_ = world_->getSkeleton("ground_skeleton");
+    trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
+
+    interface_ = new AtlasInterface(mpi_idx, env_idx);
+    sensor_data_ = new AtlasSensorData();
+    command_ = new AtlasCommand();
+
+    SetParams_();
 }
 
 AtlasWorldNode::~AtlasWorldNode() {
@@ -43,7 +50,7 @@ void AtlasWorldNode::customPreStep() {
     if (dart::math::isNan(robot_->getPositions())) {
         std::cout << "NaN" << std::endl;
         myUtils::pretty_print(robot_->getPositions(), std::cout, "q");
-        exit(0);
+        // exit(0);
     }
 
     sensor_data_->q = robot_->getPositions().tail(n_dof_ - 6);
@@ -68,6 +75,9 @@ void AtlasWorldNode::customPreStep() {
     robot_->setForces(clipped_trq);
 
     count_++;
+
+    if (b_show_target_frame_) PlotTargetLocation_();
+    if (b_manipulate_camera_) ManipulateCameraPos_();
 }
 
 void AtlasWorldNode::GetImuData_(Eigen::VectorXd& ang_vel,
@@ -121,3 +131,47 @@ void AtlasWorldNode::HoldXY_() {
     for (int i = 0; i < 2; ++i)
         trq_cmd_[i] = kp * (des_x - q[i]) + kd * (des_xdot - v[i]);
 }
+
+void AtlasWorldNode::PlotTargetLocation_() {
+    dart::dynamics::SimpleFramePtr frame =
+        world_->getSimpleFrame("target_frame");
+    Eigen::Isometry3d tf = ((AtlasInterface*)interface_)->GetTargetIso();
+    frame->setTransform(tf);
+}
+
+void AtlasWorldNode::ManipulateCameraPos_() {
+    Eigen::Isometry3d pelvis_iso =
+        robot_->getBodyNode("utorso")->getTransform();
+    Eigen::Vector3d pelvis_vec = pelvis_iso.translation();
+    mViewer->getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(pelvis_vec[0] + 3, pelvis_vec[1] - 8., pelvis_vec[2] + 3),
+        ::osg::Vec3(pelvis_vec[0], pelvis_vec[1], pelvis_vec[2]),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    mViewer->setCameraManipulator(mViewer->getCameraManipulator());
+}
+
+void AtlasWorldNode::SetParams_() {
+    try {
+        YAML::Node simulation_cfg =
+            YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
+        myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
+        myUtils::readParameter(simulation_cfg, "show_target_frame",
+                               b_show_target_frame_);
+        myUtils::readParameter(simulation_cfg, "camera_manipulator",
+                               b_manipulate_camera_);
+        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
+                               kp_);
+        myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
+                               kd_);
+        if (!b_show_viewer_) {
+            b_manipulate_camera_ = false;
+            b_show_target_frame_ = false;
+        }
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+    }
+}
+

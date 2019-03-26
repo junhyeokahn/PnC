@@ -325,8 +325,25 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
            com_vel[0], com_vel[1]);
     // Observation
     Eigen::MatrixXd obs(1, nn_policy_->GetNumInput());
-    obs << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
+    Eigen::VectorXd obs_vec(nn_policy_->GetNumInput());
+    obs_vec << com_pos[0], com_pos[1], des_body_height_ - sp_->q[2], sp_->q[5],
         sp_->q[4], sp_->q[3], sp_->qdot[0], sp_->qdot[1], sp_->qdot[2];
+    obs_vec = myUtils::GetRelativeVector(obs_vec, terminate_obs_lower_bound_,
+                                         terminate_obs_upper_bound_);
+    for (int i = 0; i < obs_vec.size(); ++i) obs(0, i) = obs_vec(i);
+    bool done;
+    if (myUtils::isInBoundingBox(obs_vec,
+                                 -1.0 * Eigen::VectorXd::Ones(obs_vec.size()),
+                                 1.0 * Eigen::VectorXd::Ones(obs_vec.size()))) {
+        done = false;
+    } else {
+        done = true;
+    }
+    if (done) {
+        std::cout << "done" << std::endl;
+        exit(0);
+    }
+
     Eigen::MatrixXd output, mean;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
@@ -387,7 +404,8 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
     for (int i = 0; i < 2; ++i) {
-        target_loc[i] += action_scale_[i] * output(0, i);
+        // target_loc[i] += action_scale_[i] * output(0, i);
+        target_loc[i] += action_scale_[i] * mean(0, i);
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");

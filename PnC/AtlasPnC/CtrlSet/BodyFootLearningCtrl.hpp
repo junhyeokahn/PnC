@@ -3,18 +3,31 @@
 #include <Utils/Math/BSplineBasic.h>
 #include <PnC/AtlasPnC/CtrlSet/SwingPlanningCtrl.hpp>
 #include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
+#include <ReinforcementLearning/RLInterface/NeuralNetModel.hpp>
 #include <Utils/Math/minjerk_one_dim.hpp>
 
-class BodyFootPlanningCtrl : public SwingPlanningCtrl {
+class BodyFootLearningCtrl : public SwingPlanningCtrl {
    public:
-    BodyFootPlanningCtrl(RobotSystem* robot, int swing_foot,
+    BodyFootLearningCtrl(RobotSystem* robot, int swing_foot,
                          FootStepPlanner* planner);
-    virtual ~BodyFootPlanningCtrl();
+    virtual ~BodyFootLearningCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();
     virtual void lastVisit() { sp_->des_jpos_prev = des_jpos_; }
     virtual bool endOfPhase();
     virtual void ctrlInitialization(const YAML::Node& node);
+
+    void setActionLowerBound(Eigen::VectorXd lb) { action_lower_bound_ = lb; }
+    void setActionUpperBound(Eigen::VectorXd ub) { action_upper_bound_ = ub; }
+    void setTerminateObsLowerBound(Eigen::VectorXd lb) {
+        terminate_obs_lower_bound_ = lb;
+    }
+    void setTerminateObsUpperBound(Eigen::VectorXd ub) {
+        terminate_obs_upper_bound_ = ub;
+    }
+    void setActionScale(Eigen::VectorXd as) { action_scale_ = as; }
+    void setPolicy(NeuralNetModel* model) { nn_policy_ = model; }
+    void setValueFn(NeuralNetModel* model) { nn_valfn_ = model; }
 
    protected:
     double waiting_time_limit_;
@@ -24,6 +37,20 @@ class BodyFootPlanningCtrl : public SwingPlanningCtrl {
 
     Eigen::Vector3d default_target_loc_;
     Eigen::Vector3d initial_target_loc_;
+
+    // rl parameters
+    Eigen::VectorXd action_lower_bound_;
+    Eigen::VectorXd action_upper_bound_;
+    Eigen::VectorXd terminate_obs_lower_bound_;
+    Eigen::VectorXd terminate_obs_upper_bound_;
+    double quad_input_penalty_;
+    double alive_reward_;
+    double deviation_penalty_;
+    double reward_scale_;
+    Eigen::VectorXd action_scale_;
+
+    NeuralNetModel* nn_policy_;
+    NeuralNetModel* nn_valfn_;
 
     int dim_contact_;
     ContactSpec* rfoot_contact_;

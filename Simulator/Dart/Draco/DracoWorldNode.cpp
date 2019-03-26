@@ -123,7 +123,8 @@ void DracoWorldNode::SetParameters_() {
         myUtils::readParameter(simulation_cfg, "check_collision",
                                b_check_collision_);
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
-        myUtils::readParameter(simulation_cfg, "plot_target", b_plot_target_);
+        myUtils::readParameter(simulation_cfg, "display_target_frame",
+                               b_plot_target_);
         myUtils::readParameter(simulation_cfg, "plot_guided_foot",
                                b_plot_guided_foot_);
         myUtils::readParameter(simulation_cfg, "plot_adjusted_foot",

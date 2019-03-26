@@ -58,8 +58,15 @@ class AtlasInterface : public EnvInterface {
     Eigen::VectorXd cmd_jvel_;
     Eigen::VectorXd cmd_jtrq_;
 
+    int mpi_idx_;
+    int env_idx_;
+    bool b_learning_;
+
    public:
     AtlasInterface();
+    AtlasInterface(int mpi_idx, int env_idx);
     virtual ~AtlasInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
+
+    Eigen::Isometry3d GetTargetIso();
 };

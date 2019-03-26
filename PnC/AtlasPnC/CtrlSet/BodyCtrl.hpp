@@ -52,9 +52,17 @@ class BodyCtrl : public Controller {
     WBLC* wblc_;
     WBLC_ExtraData* wblc_data_;
 
+    // Task specification
     double target_body_height_;
-    double ini_body_height_;
     Eigen::VectorXd ini_body_pos_;
+
+    Eigen::Quaternion<double> ini_body_quat_;
+    Eigen::Quaternion<double> body_delta_quat_;
+    Eigen::Vector3d body_delta_so3_;
+
+    Eigen::Quaternion<double> ini_torso_quat_;
+    Eigen::Quaternion<double> torso_delta_quat_;
+    Eigen::Vector3d torso_delta_so3_;
 
     void _task_setup();
     void _contact_setup();
