@@ -123,9 +123,8 @@ pb.setTimeStep(dt)
 count = 0
 
 while (1):
-    if count % 100. == 0:
+    if count % 33. == 0:
         img = atlas_camera()
-        __import__('ipdb').set_trace()
     pos, vel = GetJointStates()
 
     fixedatlas_sensordata.q = np.array(pos)
