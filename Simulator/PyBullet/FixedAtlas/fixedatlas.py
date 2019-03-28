@@ -42,9 +42,9 @@ for j in range (pb.getNumJoints(atlas)):
     jointName = info[1]
     jointType = info[2]
     linkName = info[12]
-    print(j, " th joint")
-    print(jointName)
-    print(linkName)
+    # print(j, " th joint")
+    # print(jointName)
+    # print(linkName)
     if (jointType==pb.JOINT_PRISMATIC or jointType==pb.JOINT_REVOLUTE):
             pb.setJointMotorControl2(atlas,j,controlMode=pb.VELOCITY_CONTROL,force=0.0) 
             jointIds.append(j)
