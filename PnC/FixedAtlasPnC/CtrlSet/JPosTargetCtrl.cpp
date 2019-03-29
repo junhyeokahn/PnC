@@ -12,6 +12,8 @@ JPosTargetCtrl::JPosTargetCtrl(RobotSystem* _robot) : Controller(_robot) {
 JPosTargetCtrl::~JPosTargetCtrl() {}
 
 void JPosTargetCtrl::oneStep(void* _cmd) {
+    Eigen::VectorXd q_des_vec = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::VectorXd qdot_des_vec = Eigen::VectorXd::Zero(robot_->getNumDofs());
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumDofs());
     Eigen::VectorXd qddot = Eigen::VectorXd::Zero(robot_->getNumDofs());
     double q_des, qdot_des, qddot_ff;
@@ -21,8 +23,10 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
     for (int i = 0; i < robot_->getNumDofs(); ++i) {
         q_des = myUtils::smooth_changing(ini_pos_[i], target_pos_[i],
                                          move_time_, state_machine_time_);
+        q_des_vec[i] = q_des;
         qdot_des = myUtils::smooth_changing_vel(ini_pos_[i], target_pos_[i],
                                                 move_time_, state_machine_time_);
+        qdot_des_vec[i] = qdot_des;
         qddot_ff = myUtils::smooth_changing_acc(ini_pos_[i], target_pos_[i],
                                                 move_time_, state_machine_time_);
         qddot[i] =
@@ -30,10 +34,13 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
     }
     gamma = robot_->getMassMatrix() * qddot + robot_->getCoriolisGravity();
 
+    ((FixedAtlasCommand*)_cmd)->q = q_des_vec;
+    ((FixedAtlasCommand*)_cmd)->qdot = qdot_des_vec;
     ((FixedAtlasCommand*)_cmd)->jtrq = gamma;
 
     ++ctrl_count_;
     state_machine_time_= ctrl_count_ * AtlasAux::ServoRate;
+
 }
 
 void JPosTargetCtrl::firstVisit() {
@@ -43,7 +50,8 @@ void JPosTargetCtrl::firstVisit() {
     ini_vel_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
 }
 
-void JPosTargetCtrl::lastVisit() {}
+void JPosTargetCtrl::lastVisit() {
+}
 
 bool JPosTargetCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
