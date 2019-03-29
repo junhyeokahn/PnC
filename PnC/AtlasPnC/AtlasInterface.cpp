@@ -179,3 +179,6 @@ Eigen::Isometry3d AtlasInterface::GetTargetIso() {
     target_iso.linear() = sp_->des_quat.toRotationMatrix();
     return target_iso;
 }
+
+Eigen::Vector3d AtlasInterface::GetGuidedFoot() { return sp_->guided_foot; }
+Eigen::Vector3d AtlasInterface::GetAdjustedFoot() { return sp_->adjusted_foot; }

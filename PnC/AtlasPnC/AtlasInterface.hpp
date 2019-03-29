@@ -69,4 +69,6 @@ class AtlasInterface : public EnvInterface {
     virtual void getCommand(void* _sensor_data, void* _command_data);
 
     Eigen::Isometry3d GetTargetIso();
+    Eigen::Vector3d GetGuidedFoot();
+    Eigen::Vector3d GetAdjustedFoot();
 };

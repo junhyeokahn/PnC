@@ -344,10 +344,12 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         exit(0);
     }
 
-    Eigen::MatrixXd output, mean;
+    Eigen::MatrixXd output, mean, mean_cropped;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
                           mean, neglogp);
+    mean_cropped = myUtils::CropMatrix(mean, action_lower_bound_mat_,
+                                       action_upper_bound_mat_, "atlas bfp");
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
     // TEST //
     // std::cout << "==========================================" << std::endl;
@@ -404,19 +406,24 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
     if (b_use_policy_) {
-        //if (sp_->num_step_copy < 4) {
+        // if (sp_->num_step_copy < 4) {
         //} else {
-            for (int i = 0; i < 2; ++i) {
-                //target_loc[i] += action_scale_[i] * output(0, i);
-                target_loc[i] += action_scale_[i] * mean(0, i);
-            }
+        for (int i = 0; i < 2; ++i) {
+            // target_loc[i] += action_scale_[i] * output(0, i);
+            // target_loc[i] += action_scale_[i] * mean(0, i);
+            target_loc[i] += action_scale_[i] * mean_cropped(0, i);
+        }
         //}
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::color_print(myColor::BoldCyan, "Mean");
     std::cout << "[" << mean(0, 0) << ", " << mean(0, 1) << "]" << std::endl;
+    myUtils::color_print(myColor::BoldCyan, "Mean Cropped");
+    std::cout << "[" << mean_cropped(0, 0) << ", " << mean_cropped(0, 1) << "]"
+              << std::endl;
     myUtils::color_print(myColor::BoldCyan, "Sample");
-    std::cout << "[" << output(0, 0) << ", " << output(0, 1) << "]" << std::endl;
+    std::cout << "[" << output(0, 0) << ", " << output(0, 1) << "]"
+              << std::endl;
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
 }
 

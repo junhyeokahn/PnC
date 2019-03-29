@@ -30,8 +30,20 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
         terminate_obs_upper_bound_ = ub;
     }
     void setActionScale(Eigen::VectorXd as) { action_scale_ = as; }
-    void setActionLowerBound(Eigen::VectorXd lb) { action_lower_bound_ = lb; }
-    void setActionUpperBound(Eigen::VectorXd ub) { action_upper_bound_ = ub; }
+    void setActionLowerBound(Eigen::VectorXd lb) {
+        action_lower_bound_ = lb;
+        action_lower_bound_mat_ = Eigen::MatrixXd::Zero(1, lb.size());
+        for (int i = 0; i < lb.size(); ++i) {
+            action_lower_bound_mat_(0, i) = lb(i);
+        }
+    }
+    void setActionUpperBound(Eigen::VectorXd ub) {
+        action_upper_bound_ = ub;
+        action_upper_bound_mat_ = Eigen::MatrixXd::Zero(1, ub.size());
+        for (int i = 0; i < ub.size(); ++i) {
+            action_upper_bound_mat_(0, i) = ub(i);
+        }
+    }
 
    protected:
     // rl parameters
@@ -40,6 +52,8 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     Eigen::VectorXd action_scale_;
     Eigen::VectorXd action_lower_bound_;
     Eigen::VectorXd action_upper_bound_;
+    Eigen::MatrixXd action_lower_bound_mat_;
+    Eigen::MatrixXd action_upper_bound_mat_;
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
 

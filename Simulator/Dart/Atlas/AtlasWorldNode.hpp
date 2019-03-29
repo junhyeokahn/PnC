@@ -16,6 +16,8 @@ class AtlasWorldNode : public dart::gui::osg::WorldNode {
     void GetContactSwitchData_(bool& rfoot_contact, bool& lfoot_contact);
     void ManipulateCameraPos_();
     void PlotTargetLocation_();
+    void PlotAdjustedFootLocation_();
+    void PlotGuidedFootLocation_();
     void SetParams_();
 
     EnvInterface* interface_;
@@ -25,6 +27,9 @@ class AtlasWorldNode : public dart::gui::osg::WorldNode {
     dart::simulation::WorldPtr world_;
     dart::dynamics::SkeletonPtr robot_;
     dart::dynamics::SkeletonPtr ground_;
+    dart::dynamics::SkeletonPtr star_;
+    dart::dynamics::SkeletonPtr torus_;
+
     Eigen::VectorXd trq_cmd_;
 
     int count_;
@@ -36,6 +41,9 @@ class AtlasWorldNode : public dart::gui::osg::WorldNode {
     bool b_show_viewer_;
     bool b_manipulate_camera_;
     bool b_show_target_frame_;
+    bool b_parallel_;
+    bool b_plot_guided_foot_;
+    bool b_plot_adjusted_foot_;
 
     Eigen::VectorXd trq_lb_;
     Eigen::VectorXd trq_ub_;

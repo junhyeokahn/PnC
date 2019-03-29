@@ -188,8 +188,15 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Atlas/AtlasSim_Dart.urdf");
+    dart::dynamics::SkeletonPtr star =
+        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/star.urdf");
+    dart::dynamics::SkeletonPtr torus =
+        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/torus.urdf");
+
     world->addSkeleton(ground);
     world->addSkeleton(robot);
+    world->addSkeleton(star);
+    world->addSkeleton(torus);
 
     // =========================================================================
     // Friction & Restitution Coefficient
@@ -238,6 +245,7 @@ int main(int argc, char** argv) {
             new AtlasWorldNode(world, std::stoi(argv[1]), std::stoi(argv[2]));
     } else {
         node = new AtlasWorldNode(world);
+        b_show = true;
     }
     node->setNumStepsPerCycle(30);
 

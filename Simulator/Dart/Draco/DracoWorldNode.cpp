@@ -21,6 +21,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mTorus = world_->getSkeleton("torus");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
+    b_parallel_ = true;
 
     SetParameters_();
 
@@ -72,6 +73,8 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mTorus = world_->getSkeleton("torus");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
+    b_parallel_ = false;
+
     SetParameters_();
 
     led_pos_announcer_ = new DracoLedPosAnnouncer();
@@ -136,6 +139,8 @@ void DracoWorldNode::SetParameters_() {
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
         myUtils::readParameter(control_cfg, "kp", mKp);
         myUtils::readParameter(control_cfg, "kd", mKd);
+        if (!b_parallel_) b_show_viewer_ = true;
+
         if (!b_show_viewer_) {
             b_plot_target_ = false;
             b_plot_guided_foot_ = false;
