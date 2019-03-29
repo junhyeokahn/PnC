@@ -310,6 +310,20 @@ void BodyFootLearningCtrl::_CheckPlanning() {
 }
 
 void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+    bool b_nan(false);
+    // =========================================================================
+    // 0. Check Nan
+    // =========================================================================
+    if (dart::math::isNan(robot_->getQ())) {
+        myUtils::color_print(myColor::BoldMagneta,
+                             "[[Nan Detected, Send Previous Data]]");
+        RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+        RLInterface::GetRLInterface()->GetRLData()->done = true;
+        RLInterface::GetRLInterface()->GetRLData()->reward -= alive_reward_;
+        RLInterface::GetRLInterface()->SendData();
+        b_nan = true;
+    }
+
     // =========================================================================
     // 1. count
     // =========================================================================
@@ -327,7 +341,7 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         com_pos2[i] = sp_->q[i];
         // com_pos[i] += body_pt_offset_[i];
         com_vel[i] = sp_->qdot[i];
-        // com_vel[i] = sp_->est_mocap_body_vel[i];
+         //com_vel[i] = sp_->est_mocap_body_vel[i];
     }
     printf("planning com state: %f, %f, %f, %f\n", com_pos[0], com_pos[1],
            com_vel[0], com_vel[1]);
@@ -352,7 +366,10 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     Eigen::VectorXd mean_vec = Eigen::VectorXd::Zero(n_output);
     float neglogp_val(0);
     for (int i = 0; i < n_output; ++i) {
-        output_vec(i) = output(0, i);
+        // !! Stochastic policy !! //
+        //output_vec(i) = output(0, i);
+        // !! Deterministic policy !! //
+        output_vec(i) = mean(0, i);
         mean_vec(i) = mean(0, i);
     }
     neglogp_val = neglogp(0);

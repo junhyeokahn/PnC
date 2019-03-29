@@ -43,6 +43,8 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     NeuralNetModel* nn_policy_;
     NeuralNetModel* nn_valfn_;
 
+    bool b_use_policy_;
+
     double ini_base_height_;
     int swing_leg_jidx_;
     double push_down_height_;  // push foot below the ground at landing
