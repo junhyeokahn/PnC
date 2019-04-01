@@ -369,9 +369,9 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     float neglogp_val(0);
     for (int i = 0; i < n_output; ++i) {
         // !! Stochastic policy !! //
-        // output_vec(i) = output(0, i);
+        output_vec(i) = output(0, i);
         // !! Deterministic policy !! //
-        output_vec(i) = mean_cropped(0, i);
+        // output_vec(i) = mean_cropped(0, i);
         mean_vec(i) = mean(0, i);
     }
     neglogp_val = neglogp(0);
