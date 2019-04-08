@@ -310,6 +310,20 @@ void BodyFootLearningCtrl::_CheckPlanning() {
 }
 
 void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
+    bool b_nan(false);
+    // =========================================================================
+    // 0. Check Nan
+    // =========================================================================
+    if (dart::math::isNan(robot_->getQ())) {
+        myUtils::color_print(myColor::BoldMagneta,
+                             "[[Nan Detected, Send Previous Data]]");
+        RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
+        RLInterface::GetRLInterface()->GetRLData()->done = true;
+        RLInterface::GetRLInterface()->GetRLData()->reward -= alive_reward_;
+        RLInterface::GetRLInterface()->SendData();
+        b_nan = true;
+    }
+
     // =========================================================================
     // 1. count
     // =========================================================================
@@ -343,16 +357,21 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
     // =========================================================================
-    Eigen::MatrixXd output, mean;
+    Eigen::MatrixXd output, mean, mean_cropped;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
                           mean, neglogp);
+    mean_cropped = myUtils::CropMatrix(mean, action_lower_bound_mat_,
+                                       action_upper_bound_mat_, "atlas bfl");
     int n_output(output.cols());
     Eigen::VectorXd output_vec = Eigen::VectorXd::Zero(n_output);
     Eigen::VectorXd mean_vec = Eigen::VectorXd::Zero(n_output);
     float neglogp_val(0);
     for (int i = 0; i < n_output; ++i) {
+        // !! Stochastic policy !! //
         output_vec(i) = output(0, i);
+        // !! Deterministic policy !! //
+        // output_vec(i) = mean_cropped(0, i);
         mean_vec(i) = mean(0, i);
     }
     neglogp_val = neglogp(0);

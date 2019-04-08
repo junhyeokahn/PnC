@@ -12,7 +12,12 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world)
     trq_ub_ = robot_->getForceUpperLimits();
     n_dof_ = robot_->getNumDofs();
     ground_ = world_->getSkeleton("ground_skeleton");
+
+    star_ = world_->getSkeleton("star");
+    torus_ = world_->getSkeleton("torus");
+
     trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
+    b_parallel_ = false;
 
     interface_ = new AtlasInterface();
     sensor_data_ = new AtlasSensorData();
@@ -30,7 +35,12 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr& _world,
     trq_ub_ = robot_->getForceUpperLimits();
     n_dof_ = robot_->getNumDofs();
     ground_ = world_->getSkeleton("ground_skeleton");
+
+    star_ = world_->getSkeleton("star");
+    torus_ = world_->getSkeleton("torus");
+
     trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
+    b_parallel_ = true;
 
     interface_ = new AtlasInterface(mpi_idx, env_idx);
     sensor_data_ = new AtlasSensorData();
@@ -78,6 +88,30 @@ void AtlasWorldNode::customPreStep() {
 
     if (b_show_target_frame_) PlotTargetLocation_();
     if (b_manipulate_camera_) ManipulateCameraPos_();
+    if (b_plot_guided_foot_) PlotGuidedFootLocation_();
+    if (b_plot_adjusted_foot_) PlotAdjustedFootLocation_();
+}
+
+void AtlasWorldNode::PlotGuidedFootLocation_() {
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
+    q[5] = 0.001;
+    Eigen::Vector3d guided_foot =
+        ((AtlasInterface*)interface_)->GetGuidedFoot();
+    q[3] = guided_foot[0];
+    q[4] = guided_foot[1];
+    torus_->setPositions(q);
+    torus_->setVelocities(Eigen::VectorXd::Zero(6));
+}
+
+void AtlasWorldNode::PlotAdjustedFootLocation_() {
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
+    q[5] = 0.001;
+    Eigen::Vector3d adjusted_foot =
+        ((AtlasInterface*)interface_)->GetAdjustedFoot();
+    q[3] = adjusted_foot[0];
+    q[4] = adjusted_foot[1];
+    star_->setPositions(q);
+    star_->setVelocities(Eigen::VectorXd::Zero(6));
 }
 
 void AtlasWorldNode::GetImuData_(Eigen::VectorXd& ang_vel,
@@ -164,10 +198,17 @@ void AtlasWorldNode::SetParams_() {
                                kp_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
                                kd_);
+        myUtils::readParameter(simulation_cfg, "plot_guided_foot",
+                               b_plot_guided_foot_);
+        myUtils::readParameter(simulation_cfg, "plot_adjusted_foot",
+                               b_plot_adjusted_foot_);
+
+        if (!b_parallel_) b_show_viewer_ = true;
         if (!b_show_viewer_) {
             b_manipulate_camera_ = false;
             b_show_target_frame_ = false;
         }
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

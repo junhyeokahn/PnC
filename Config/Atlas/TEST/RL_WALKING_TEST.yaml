@@ -12,7 +12,7 @@ test_configuration:
     double_stance_mix_ratio: 0.0
     contact_switch_check: true
 
-    walking_start_time: 5
+    walking_start_time: 3
     walking_velocity_lb: [0., 0]
     walking_velocity_ub: [0., 0]
     turning_rate_lb: 0.02
@@ -131,7 +131,7 @@ control_configuration:
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0.0, 0.0]
 
-        model_path: "RLData/AtlasSeperateProcess/ppo_4/checkpoints/00052.yaml"
+        model_path: "RLData/AtlasSeperateProcess/ppo_2/checkpoints/00052.yaml"
         use_policy: true
         #use_policy: false
 
@@ -151,7 +151,7 @@ control_configuration:
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0., 0.]
 
-        model_path: "RLData/AtlasSeperateProcess/ppo_4/checkpoints/00052.yaml"
+        model_path: "RLData/AtlasSeperateProcess/ppo_2/checkpoints/00052.yaml"
         use_policy: true
         #use_policy: false
 

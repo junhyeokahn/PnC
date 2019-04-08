@@ -302,6 +302,7 @@ int main(int argc, char** argv) {
                                   std::stoi(argv[2]));
     } else {
         node = new DracoWorldNode(world, msm);
+        b_show = true;
     }
     node->setNumStepsPerCycle(num_steps_per_cycle);
 

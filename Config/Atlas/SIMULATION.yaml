@@ -8,6 +8,8 @@ initial_configuration:
 show_viewer: false
 show_joint_frame: false
 show_target_frame: true
+plot_guided_foot: true
+plot_adjusted_foot: true
 camera_manipulator: false
 
 control_configuration:

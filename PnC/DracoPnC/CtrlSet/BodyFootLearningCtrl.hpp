@@ -23,8 +23,20 @@ class BodyFootLearningCtrl : public SwingPlanningCtrl {
 
     virtual void ctrlInitialization(const YAML::Node& node);
 
-    void setActionLowerBound(Eigen::VectorXd lb) { action_lower_bound_ = lb; }
-    void setActionUpperBound(Eigen::VectorXd ub) { action_upper_bound_ = ub; }
+    void setActionLowerBound(Eigen::VectorXd lb) {
+        action_lower_bound_ = lb;
+        action_lower_bound_mat_ = Eigen::MatrixXd::Zero(1, lb.size());
+        for (int i = 0; i < lb.size(); ++i) {
+            action_lower_bound_mat_(0, i) = lb(i);
+        }
+    }
+    void setActionUpperBound(Eigen::VectorXd ub) {
+        action_upper_bound_ = ub;
+        action_upper_bound_mat_ = Eigen::MatrixXd::Zero(1, ub.size());
+        for (int i = 0; i < ub.size(); ++i) {
+            action_upper_bound_mat_(0, i) = ub(i);
+        }
+    }
     void setTerminateObsLowerBound(Eigen::VectorXd lb) {
         terminate_obs_lower_bound_ = lb;
     }
@@ -44,6 +56,8 @@ class BodyFootLearningCtrl : public SwingPlanningCtrl {
     // rl parameters
     Eigen::VectorXd action_lower_bound_;
     Eigen::VectorXd action_upper_bound_;
+    Eigen::MatrixXd action_lower_bound_mat_;
+    Eigen::MatrixXd action_upper_bound_mat_;
     Eigen::VectorXd terminate_obs_lower_bound_;
     Eigen::VectorXd terminate_obs_upper_bound_;
     double quad_input_penalty_;

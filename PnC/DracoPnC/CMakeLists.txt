@@ -13,7 +13,7 @@ if( NOT (ZMQ_FOUND AND Protobuf_FOUND) )
                              ${CMAKE_CURRENT_SOURCE_DIR}/CtrlSet/BodyFootPolicyCtrl.cpp)
 endif()
 
-add_library(DracoPnC SHARED ${sources})
+add_library(DracoPnC ${sources})
 target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils

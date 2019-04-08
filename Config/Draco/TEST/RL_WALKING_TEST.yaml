@@ -152,8 +152,8 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00196.yaml"
-        #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
+        model_path: "RLData/DracoSeperateProcess/ppo_2/checkpoints/00104.yaml"
+        use_policy: true
 
     left_body_foot_policy_ctrl:
         planner_name: velocity_reversal_lipm
@@ -174,8 +174,8 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        model_path: "RLData/DracoSeperateProcess/ppo_1/checkpoints/00196.yaml"
-        #model_path: "ReinforcementLearning/PrecompiledData/DracoSeperateProcess/ppo_6/checkpoints/00100.yaml"
+        model_path: "RLData/DracoSeperateProcess/ppo_2/checkpoints/00104.yaml"
+        use_policy: true
 
 planner_configuration:
 

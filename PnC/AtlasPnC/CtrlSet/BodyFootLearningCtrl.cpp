@@ -343,16 +343,21 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // =========================================================================
     // 3. nn outputs : actions, action_mean, neglogp, value
     // =========================================================================
-    Eigen::MatrixXd output, mean;
+    Eigen::MatrixXd output, mean, mean_cropped;
     Eigen::VectorXd neglogp;
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
                           mean, neglogp);
+    mean_cropped = myUtils::CropMatrix(mean, action_lower_bound_mat_,
+                                       action_upper_bound_mat_, "atlas bfl");
     int n_output(output.cols());
     Eigen::VectorXd output_vec = Eigen::VectorXd::Zero(n_output);
     Eigen::VectorXd mean_vec = Eigen::VectorXd::Zero(n_output);
     float neglogp_val(0);
     for (int i = 0; i < n_output; ++i) {
+        // !! Stochastic !! //
         output_vec(i) = output(0, i);
+        // !! Deterministic !! //
+        // output_vec(i) = mean_cropped(0, i);
         mean_vec(i) = mean(0, i);
     }
     neglogp_val = neglogp(0);
@@ -407,7 +412,8 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     RLInterface::GetRLInterface()->GetRLData()->reward = reward_scale_ * reward;
     RLInterface::GetRLInterface()->GetRLData()->b_data_filled = true;
 
-    if (sp_->num_step_copy < 4) {
+    int num_ignore(4);
+    if (sp_->num_step_copy < num_ignore) {
         RLInterface::GetRLInterface()->GetRLData()->b_data_filled = false;
         sp_->rl_count = 0;
         myUtils::color_print(myColor::BoldMagneta, "[[Skip First Step Data]]");
@@ -455,8 +461,11 @@ void BodyFootLearningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // myUtils::pretty_print(target_loc2, std::cout,
     //"guided next foot location without body offset");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
-    for (int i = 0; i < 2; ++i) {
-        target_loc[i] += action_scale_[i] * output_vec[i];
+    if (sp_->num_step_copy < num_ignore) {
+    } else {
+        for (int i = 0; i < 2; ++i) {
+            target_loc[i] += action_scale_[i] * output_vec[i];
+        }
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::pretty_print(target_loc, std::cout, "adjusted next foot location");
