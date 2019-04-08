@@ -70,8 +70,8 @@ def GetBaseStates():
     base_angv_euler = so3_to_euler_zyx_dot(base_ori_ypr,base_angv) #function mapping so3 to euler zyx vel
     base_pos_tot = list(base_pos) + list(base_ori_ypr)
     base_vel_tot = list(base_vel) + list(base_angv_euler) 
-    return base_pos_tot, based_vel_tot
-
+    return base_pos_tot, base_vel_tot
+# __import__('ipdb').set_trace()
 def GetJointStates():
     # pos = np.array([pb.getJointState(atlas, jidx)[0] for jidx in jointIds])
     # vel = np.array([pb.getJointState(atlas, jidx)[1] for jidx in jointIds])

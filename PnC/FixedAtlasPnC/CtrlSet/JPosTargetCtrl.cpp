@@ -40,7 +40,6 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
 
     ++ctrl_count_;
     state_machine_time_= ctrl_count_ * AtlasAux::ServoRate;
-
 }
 
 void JPosTargetCtrl::firstVisit() {

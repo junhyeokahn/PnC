@@ -1,0 +1,16 @@
+test_configuration:
+    xyz_duration: 3.
+    rf_target_pos: [ 1, 0 , 1]
+    ori_duration: 5.
+    head_target_pos: [0.5,0.5,0.5,-0.5]
+
+control_configuration:
+    osc_position_ctrl:
+       rf_kp: [300,300,300]
+       rf_kd: [150,150,150]
+       q_kp: [70 , 70 , 70 , 70 ,  70 , 70 , 70 , 70 , 70 , 70 , 70 , 70 ,  70 , 70 , 70 , 70 ,70 , 70 , 70 , 70 ,  70 , 70 , 70 , 70 ,70,70,70,70,70 ]
+       q_kd: [7   , 7   , 7   , 7   ,  7   , 7   , 7   , 7   ,  7   , 7   , 7   , 7   ,  7   , 7   , 7   , 7   ,7   , 7   , 7   , 7   ,  7   , 7   , 7   , 7   ,7,7,7,7,7]
+    osc_orientation_ctrl:
+       head_kp: [300,300,300]
+       head_kd: [150,150,150]
+
