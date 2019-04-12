@@ -25,6 +25,8 @@ class OSCPosCtrl : public Controller {
     Eigen::VectorXd target_pos_;
     Eigen::VectorXd ini_pos_;
     Eigen::VectorXd ini_vel_;
+    Eigen::VectorXd ini_pos_q;
+    Eigen::VectorXd ini_vel_q;
     Eigen::VectorXd q_kp_;
     Eigen::VectorXd q_kd_;
     Eigen::VectorXd rf_kp_;

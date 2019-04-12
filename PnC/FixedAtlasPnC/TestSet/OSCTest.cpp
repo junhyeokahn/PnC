@@ -1,4 +1,4 @@
-//#include <PnC/FixedAtlasPnC/CtrlSet/OSCPosCtrl.hpp>
+#include <PnC/FixedAtlasPnC/CtrlSet/OSCPosCtrl.hpp>
 #include <PnC/FixedAtlasPnC/CtrlSet/OSCOriCtrl.hpp>
 #include <PnC/FixedAtlasPnC/TestSet/OSCTest.hpp>
 
@@ -9,22 +9,22 @@ OSCTest::OSCTest(RobotSystem* robot) : Test(robot) {
     phase_ = 0;
     state_list_.clear();
 
-    //osc_pos_ctrl_ = new OSCPosCtrl(robot);
+    osc_pos_ctrl_ = new OSCPosCtrl(robot);
     osc_ori_ctrl_ = new OSCOriCtrl(robot);
 
-    //state_list_.push_back(osc_pos_ctrl_);
+    state_list_.push_back(osc_pos_ctrl_);
     state_list_.push_back(osc_ori_ctrl_);
 
     _ParameterSetting();
 }
 OSCTest::~OSCTest() {
-    //delete osc_pos_ctrl_;
+    delete osc_pos_ctrl_;
     delete osc_ori_ctrl_;
 }
 
 void OSCTest::TestInitialization() {
-    //osc_pos_ctrl_->ctrlInitialization(
-        //cfg_["control_configuration"]["osc_position_ctrl"]);
+    osc_pos_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["osc_position_ctrl"]);
     osc_ori_ctrl_->ctrlInitialization(
         cfg_["control_configuration"]["osc_orientation_ctrl"]);
 }
@@ -41,19 +41,17 @@ void OSCTest::_ParameterSetting() {
     try {
         YAML::Node test_cfg = cfg_["test_configuration"];
 
-        Eigen::VectorXd tmp_vec1;
-        Eigen::VectorXd tmp_vec2;
-        double tmp_val1;
-        double tmp_val2;
-        //myUtils::readParameter(test_cfg, "xyz_duration", tmp_val1);
-        //((OSCPosCtrl*)osc_pos_ctrl_)->setEndTime(tmp_val1);
-        //myUtils::readParameter(test_cfg, "rf_target_pos", tmp_vec1);
-        //((OSCPosCtrl*)osc_pos_ctrl_)->setTargetPosition(tmp_vec1);
+        Eigen::VectorXd tmp_vec;
+        double tmp_val;
+        myUtils::readParameter(test_cfg, "xyz_duration", tmp_val);
+        ((OSCPosCtrl*)osc_pos_ctrl_)->setEndTime(tmp_val);
+        myUtils::readParameter(test_cfg, "rf_target_pos", tmp_vec);
+        ((OSCPosCtrl*)osc_pos_ctrl_)->setTargetPosition(tmp_vec);
 
-        myUtils::readParameter(test_cfg, "ori_duration", tmp_val2);
-        ((OSCOriCtrl*)osc_ori_ctrl_)->setEndTime(tmp_val2);
-        myUtils::readParameter(test_cfg, "head_target_pos", tmp_vec2);
-        ((OSCOriCtrl*)osc_ori_ctrl_)->setTargetPosition(tmp_vec2);
+        myUtils::readParameter(test_cfg, "ori_duration", tmp_val);
+        ((OSCOriCtrl*)osc_ori_ctrl_)->setEndTime(tmp_val);
+        myUtils::readParameter(test_cfg, "head_target_pos", tmp_vec);
+        ((OSCOriCtrl*)osc_ori_ctrl_)->setTargetPosition(tmp_vec);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

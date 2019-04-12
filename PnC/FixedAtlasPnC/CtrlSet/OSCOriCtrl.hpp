@@ -29,5 +29,8 @@ class OSCOriCtrl : public Controller {
     Eigen::Vector3d so3_ori_error;
     Eigen::VectorXd head_kp_;
     Eigen::VectorXd head_kd_;
-
+    Eigen::VectorXd q_kp_;
+    Eigen::VectorXd q_kd_;
+    Eigen::VectorXd ini_pos_q;
+    Eigen::VectorXd ini_vel_q;
 };

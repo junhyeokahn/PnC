@@ -48,8 +48,23 @@ void OSCOriCtrl::oneStep(void* _cmd) {
     myUtils::weightedInverse(J_head,robot_->getInvMassMatrix(),J_head_bar);
     Eigen::MatrixXd J_head_dot = robot_->getBodyNodeJacobianDot("head").block(0,0,3,robot_->getNumDofs());
     Eigen::VectorXd qddot_des = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::VectorXd qddot_des_head = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::VectorXd qddot_des_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::MatrixXd J_q = Eigen::MatrixXd::Identity(robot_->getNumDofs(),robot_->getNumDofs());
+    Eigen::MatrixXd N_head = Eigen::MatrixXd::Identity(robot_->getNumDofs(),robot_->getNumDofs()) - J_head_bar * J_head;
+    Eigen::MatrixXd J_q_N_head = J_q * N_head;
+    Eigen::MatrixXd J_q_N_head_bar = Eigen::MatrixXd::Zero(robot_->getNumDofs(),robot_->getNumDofs());
+    myUtils::weightedInverse(J_q_N_head,robot_->getInvMassMatrix(),J_q_N_head_bar);
 
-    qddot_des = J_head_bar * (head_acc_des - J_head_dot*(robot_->getQdot()));
+    qddot_des_head = J_head_bar * (head_acc_des - J_head_dot*(robot_->getQdot()));
+    
+    for (int i = 0; i < robot_->getNumDofs(); ++i){
+        qddot_des_q[i] = q_kp_[i] * (ini_pos_q[i] - robot_->getQ()[i]) + 
+                        q_kd_[i] * (ini_vel_q[i] - robot_->getQdot()[i]);
+    }
+    qddot_des_q = J_q_N_head * (qddot_des_q);
+
+    qddot_des = qddot_des_head + qddot_des_q;
 
     gamma = robot_->getMassMatrix() * qddot_des + robot_->getCoriolisGravity();
 
@@ -57,7 +72,7 @@ void OSCOriCtrl::oneStep(void* _cmd) {
     //std::cout << ctrl_count_ << std::endl;
     ++ctrl_count_;
     state_machine_time_= ctrl_count_ * AtlasAux::ServoRate;
-    std::cout << state_machine_time_ << std::endl;
+    //std::cout << state_machine_time_ << std::endl;
 }
 
 void OSCOriCtrl::firstVisit() {
@@ -67,6 +82,8 @@ void OSCOriCtrl::firstVisit() {
     fin_pos_quat_ = Eigen::Quaternion<double>(target_pos_[0],target_pos_[1],target_pos_[2],target_pos_[3]); 
     quat_ori_error = fin_pos_quat_*(ini_pos_quat_.inverse());
     so3_ori_error = dart::math::quatToExp(quat_ori_error);
+    ini_pos_q = robot_->getQ();
+    ini_vel_q = robot_->getQdot();
 }
 void OSCOriCtrl::lastVisit() {
 }
@@ -82,6 +99,8 @@ void OSCOriCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
         myUtils::readParameter(node, "head_kp", head_kp_);
         myUtils::readParameter(node, "head_kd", head_kd_);
+        myUtils::readParameter(node, "q_kp", q_kp_);
+        myUtils::readParameter(node, "q_kd", q_kd_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

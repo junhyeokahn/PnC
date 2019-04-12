@@ -38,8 +38,23 @@ void OSCPosCtrl::oneStep(void* _cmd) {
     myUtils::weightedInverse(J_rf,robot_->getInvMassMatrix(),J_rf_bar);
     Eigen::MatrixXd J_rf_dot = robot_->getBodyNodeJacobianDot("r_foot").block(3,0,3,robot_->getNumDofs());
     Eigen::VectorXd qddot_des = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::VectorXd qddot_des_rf = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::VectorXd qddot_des_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    Eigen::MatrixXd J_q = Eigen::MatrixXd::Identity(robot_->getNumDofs(),robot_->getNumDofs());
+    Eigen::MatrixXd N_rf = Eigen::MatrixXd::Identity(robot_->getNumDofs(),robot_->getNumDofs()) - J_rf_bar * J_rf;
+    Eigen::MatrixXd J_q_N_rf = J_q * N_rf;
+    Eigen::MatrixXd J_q_N_rf_bar = Eigen::MatrixXd::Zero(robot_->getNumDofs(),robot_->getNumDofs());
+    myUtils::weightedInverse(J_q_N_rf,robot_->getInvMassMatrix(),J_q_N_rf_bar);
 
-    qddot_des = J_rf_bar * (rf_acc_des - J_rf_dot*(robot_->getQdot()));
+    qddot_des_rf = J_rf_bar * (rf_acc_des - J_rf_dot*(robot_->getQdot()));
+    
+    for (int i = 0; i < robot_->getNumDofs(); ++i){
+        qddot_des_q[i] = q_kp_[i] * (ini_pos_q[i] - robot_->getQ()[i]) + 
+                        q_kd_[i] * (ini_vel_q[i] - robot_->getQdot()[i]);
+    }
+    qddot_des_q = J_q_N_rf * (qddot_des_q);
+
+    qddot_des = qddot_des_rf + qddot_des_q;
 
     gamma = robot_->getMassMatrix() * qddot_des + robot_->getCoriolisGravity();
 
@@ -55,6 +70,8 @@ void OSCPosCtrl::firstVisit() {
     ctrl_count_ = 0;
     ini_pos_ = robot_->getBodyNodeIsometry("r_foot").translation();
     ini_vel_ = robot_->getBodyNodeSpatialVelocity("r_foot").tail(3); 
+    ini_pos_q = robot_->getQ();
+    ini_vel_q = robot_->getQdot();
 }
 void OSCPosCtrl::lastVisit() {
 }
