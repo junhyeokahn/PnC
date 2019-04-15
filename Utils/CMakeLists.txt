@@ -1,7 +1,7 @@
 FILE(GLOB_RECURSE sources "*.cpp")
 FILE(GLOB general_headers "General/*.hpp")
-FILE(GLOB io_headers "*.hpp")
-FILE(GLOB math_headers "*.hpp" "*.h")
+FILE(GLOB io_headers "IO/*.hpp")
+FILE(GLOB math_headers "Math/*.hpp" "*.h")
 
 if(NOT ZMQ_FOUND)
     list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/IO/ZmqUtilities.cpp)
@@ -20,7 +20,6 @@ if(CMAKE_THREAD_LIBS_INIT)
 endif()
 
 install(TARGETS myUtils DESTINATION "${INSTALL_LIB_DIR}")
-install(FILES ${general_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils/General")
 install(FILES ${general_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils/General")
 install(FILES ${io_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils/IO")
 install(FILES ${math_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/Utils/Math")
