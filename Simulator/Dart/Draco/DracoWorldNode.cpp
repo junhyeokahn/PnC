@@ -234,6 +234,7 @@ void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
             ->getSpatialVelocity(dart::dynamics::Frame::World(),
                                  mSkel->getBodyNode("Torso"))
             .head(3);
+
     ang_vel = ang_vel_local;
     Eigen::MatrixXd rot_world_torso(3, 3);
     rot_world_torso = mSkel->getBodyNode("Torso")->getWorldTransform().linear();
