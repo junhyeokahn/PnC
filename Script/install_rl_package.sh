@@ -58,19 +58,26 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     ldconfig -p | grep zmq
 
     cd ~/Repository && git clone https://github.com/zeromq/cppzmq.git &&
-    cd cppzmq && mkdir build && cd build && cmake .. && sudo make -j4 install &&
+    cd cppzmq && mkdir build && cd build && cmake .. && sudo make -j4 install
 
     # Expected
     ############################################################
     # libzmq.so.5 (libc6,x86-64) => /usr/local/lib/libzmq.so.5
     # libzmq.so (libc6,x86-64) => /usr/local/lib/libzmq.so
     ############################################################
+else
+    echo "[Error] OS not detected"
 fi
 
 echo "# ==================================================================="
 echo "# Install Gym"
 echo "# ==================================================================="
 pip install gym &&
+
+echo "# ==================================================================="
+echo "# Install MPI4py"
+echo "# ==================================================================="
+conda install -c anaconda mpi4py
 
 echo "# ==================================================================="
 echo "# Install Baseline"

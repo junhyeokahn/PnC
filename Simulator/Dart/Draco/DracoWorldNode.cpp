@@ -126,6 +126,8 @@ void DracoWorldNode::SetParameters_() {
         myUtils::readParameter(simulation_cfg, "check_collision",
                                b_check_collision_);
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
+        myUtils::readParameter(simulation_cfg, "calculate_zmp",
+                               b_calculate_zmp_);
         myUtils::readParameter(simulation_cfg, "display_target_frame",
                                b_plot_target_);
         myUtils::readParameter(simulation_cfg, "plot_guided_foot",
@@ -169,6 +171,9 @@ void DracoWorldNode::customPreStep() {
     if (b_plot_guided_foot_) PlotGuidedFootLocation_();
     if (b_plot_adjusted_foot_) PlotAdjustedFootLocation_();
     if (b_camera_manipulator_) UpdateCameraPos_();
+    if (((DracoInterface*)mInterface)->GetNumStep() > 4) {
+        if (b_calculate_zmp_) CalculateZMP_();
+    }
 
     if (b_check_collision_) {
         _check_collision();
@@ -349,4 +354,103 @@ void DracoWorldNode::PlotAdjustedFootLocation_() {
     q[4] = adjusted_foot[1];
     mStar->setPositions(q);
     mStar->setVelocities(Eigen::VectorXd::Zero(6));
+}
+
+void DracoWorldNode::CalculateZMP_() {
+    if (((DracoInterface*)mInterface)->GetPhase() == 4) {
+        // =====================================================================
+        // Right Swing
+        // =====================================================================
+        Eigen::VectorXd wrench = Eigen::VectorXd::Zero(6);
+        dart::dynamics::BodyNode* lankle = mSkel->getBodyNode("lAnkle");
+        const dart::collision::CollisionResult& result =
+            mWorld->getLastCollisionResult();
+
+        // Wrench
+        for (const auto& contact : result.getContacts()) {
+            for (const auto& shapeNode :
+                 lankle->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+                if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                    shapeNode == contact.collisionObject2->getShapeFrame()) {
+                    double normal(contact.normal(2));
+                    Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                    w_c.tail(3) = contact.force * normal;
+                    Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                    T_wc.translation() = contact.point;
+                    Eigen::MatrixXd AdT_cw =
+                        dart::math::getAdTMatrix(T_wc.inverse());
+                    Eigen::VectorXd w_w = Eigen::VectorXd::Zero(6);
+                    w_w = AdT_cw.transpose() * w_c;
+
+                    wrench += w_w;
+                }
+            }
+        }
+        // ZMP
+        Eigen::Vector3d zmp = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d fc = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d tc = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d n = Eigen::Vector3d::Zero(3);
+
+        n(2) = 1;
+        tc << wrench(0), wrench(1), wrench(2);
+        fc << wrench(3), wrench(4), wrench(5);
+
+        zmp = (n.cross(tc)) / n.dot(fc);
+        Eigen::Vector3d local_zmp =
+            zmp -
+            mSkel->getBodyNode("lFootCenter")->getTransform().translation();
+        if (!dart::math::isNan(zmp)) {
+            myUtils::saveVector(local_zmp, "lfoot_zmp");
+        }
+
+    } else if (((DracoInterface*)mInterface)->GetPhase() == 8) {
+        // =====================================================================
+        // Left Swing
+        // =====================================================================
+        Eigen::VectorXd wrench = Eigen::VectorXd::Zero(6);
+        dart::dynamics::BodyNode* lankle = mSkel->getBodyNode("rAnkle");
+        const dart::collision::CollisionResult& result =
+            mWorld->getLastCollisionResult();
+
+        // Wrench
+        for (const auto& contact : result.getContacts()) {
+            for (const auto& shapeNode :
+                 lankle->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+                if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                    shapeNode == contact.collisionObject2->getShapeFrame()) {
+                    double normal(contact.normal(2));
+                    Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                    w_c.tail(3) = contact.force * normal;
+                    Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                    T_wc.translation() = contact.point;
+                    Eigen::MatrixXd AdT_cw =
+                        dart::math::getAdTMatrix(T_wc.inverse());
+                    Eigen::VectorXd w_w = Eigen::VectorXd::Zero(6);
+                    w_w = AdT_cw.transpose() * w_c;
+
+                    wrench += w_w;
+                }
+            }
+        }
+        // ZMP
+        Eigen::Vector3d zmp = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d fc = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d tc = Eigen::Vector3d::Zero(3);
+        Eigen::Vector3d n = Eigen::Vector3d::Zero(3);
+
+        n(2) = 1;
+        tc << wrench(0), wrench(1), wrench(2);
+        fc << wrench(3), wrench(4), wrench(5);
+
+        zmp = (n.cross(tc)) / n.dot(fc);
+        Eigen::Vector3d local_zmp =
+            zmp -
+            mSkel->getBodyNode("rFootCenter")->getTransform().translation();
+        if (!dart::math::isNan(zmp)) {
+            myUtils::saveVector(local_zmp, "rfoot_zmp");
+        }
+    } else {
+        // do nothing
+    }
 }

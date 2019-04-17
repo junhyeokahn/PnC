@@ -90,9 +90,8 @@ DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
         0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) +
                ", ENV : " + std::to_string(env_idx) + " )");
 
-    robot_ =
-        new RobotSystem(6,
-                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+    robot_ = new RobotSystem(
+        6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
@@ -309,3 +308,5 @@ Eigen::Isometry3d DracoInterface::GetTargetIso() {
 
 Eigen::Vector3d DracoInterface::GetGuidedFoot() { return sp_->guided_foot; }
 Eigen::Vector3d DracoInterface::GetAdjustedFoot() { return sp_->adjusted_foot; }
+int DracoInterface::GetPhase() { return sp_->phase_copy; };
+int DracoInterface::GetNumStep() { return sp_->num_step_copy; }

@@ -7,9 +7,10 @@ display_target_frame: true
 joint_limit_enforced: true
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
 
+calculate_zmp: true
 plot_adjusted_foot: true
 plot_guided_foot: true
-camera_manipulator: false
+camera_manipulator: true
 print_computation_time: false
 #release_time: 4.20
 release_time: 0.5

@@ -349,7 +349,7 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     nn_policy_->GetOutput(obs, action_lower_bound_, action_upper_bound_, output,
                           mean, neglogp);
     mean_cropped = myUtils::CropMatrix(mean, action_lower_bound_mat_,
-                                       action_upper_bound_mat_, "atlas bfp");
+                                       action_upper_bound_mat_, "draco bfp");
     Eigen::MatrixXd val = nn_valfn_->GetOutput(obs);
     // TEST //
     // std::cout << "==========================================" << std::endl;
@@ -406,14 +406,14 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     myUtils::pretty_print(target_loc, std::cout, "guided next foot location");
     sp_->guided_foot = target_loc + sp_->global_pos_local;
     if (b_use_policy_) {
-        // if (sp_->num_step_copy < 4) {
-        //} else {
-        for (int i = 0; i < 2; ++i) {
-            // target_loc[i] += action_scale_[i] * output(0, i);
-            // target_loc[i] += action_scale_[i] * mean(0, i);
-            target_loc[i] += action_scale_[i] * mean_cropped(0, i);
+        if (sp_->num_step_copy < 4) {
+        } else {
+            for (int i = 0; i < 2; ++i) {
+                // target_loc[i] += action_scale_[i] * output(0, i);
+                // target_loc[i] += action_scale_[i] * mean(0, i);
+                target_loc[i] += action_scale_[i] * mean_cropped(0, i);
+            }
         }
-        //}
     }
     sp_->adjusted_foot = target_loc + sp_->global_pos_local;
     myUtils::color_print(myColor::BoldCyan, "Mean");
@@ -488,8 +488,10 @@ void BodyFootPolicyCtrl::_SetMinJerkOffset(const Eigen::Vector3d& offset) {
 
 bool BodyFootPolicyCtrl::endOfPhase() {
     if (state_machine_time_ > (end_time_)) {
-        printf("[Body Foot Ctrl] End, state_machine time/ end time: (%f, %f)\n",
-               state_machine_time_, end_time_);
+        printf(
+            "[Body Foot Ctrl] End, state_machine time/ end time: (%f, "
+            "%f)\n",
+            state_machine_time_, end_time_);
         printf("end of phase\n");
         // if(b_set_height_target_)  printf("b set height target: true\n");
         // else  printf("b set height target: false\n");
@@ -508,7 +510,8 @@ bool BodyFootPolicyCtrl::endOfPhase() {
         }
         if (state_machine_time_ > end_time_ * 0.5 && contact_happen) {
             printf(
-                "[Config Body Foot Ctrl] contact happen, state_machine_time/ "
+                "[Config Body Foot Ctrl] contact happen, "
+                "state_machine_time/ "
                 "end time: (%f, %f)\n",
                 state_machine_time_, end_time_);
             return true;

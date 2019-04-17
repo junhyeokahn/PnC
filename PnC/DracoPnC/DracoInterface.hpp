@@ -75,4 +75,6 @@ class DracoInterface : public EnvInterface {
     Eigen::Isometry3d GetTargetIso();
     Eigen::Vector3d GetGuidedFoot();
     Eigen::Vector3d GetAdjustedFoot();
+    int GetPhase();
+    int GetNumStep();
 };

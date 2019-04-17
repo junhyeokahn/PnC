@@ -152,7 +152,7 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        model_path: "RLData/DracoSeperateProcess/ppo_2/checkpoints/00104.yaml"
+        model_path: "ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml"
         use_policy: true
 
     left_body_foot_policy_ctrl:
@@ -174,7 +174,7 @@ control_configuration:
         fin_foot_z_acc: 5.0
 
         # policy path
-        model_path: "RLData/DracoSeperateProcess/ppo_2/checkpoints/00104.yaml"
+        model_path: "ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml"
         use_policy: true
 
 planner_configuration:

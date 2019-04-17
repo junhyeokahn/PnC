@@ -30,6 +30,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void PlotAdjustedFootLocation_();
     void PlotGuidedFootLocation_();
     void SetParameters_();
+    void CalculateZMP_();
 
     dart::dynamics::SkeletonPtr mSkel;
     dart::dynamics::SkeletonPtr mGround;
@@ -53,6 +54,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     bool b_camera_manipulator_;
     bool b_show_viewer_;
     bool b_parallel_;
+    bool b_calculate_zmp_;
 
    public:
     DracoWorldNode(const dart::simulation::WorldPtr& world,
