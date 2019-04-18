@@ -36,7 +36,7 @@ class BasicAccumulation{
         double cutoff_freq_;
         std::vector<filter*> filtered_acc_;
 
-        void _InitIMUOrientationEstimateFromGravity();
+        void _InitTorsoOrientationEstimateFromGravity();
         Eigen::Quaternion<double> global_ori_quat_;
         Eigen::Vector3d global_ori_ypr_;
         Eigen::Vector3d global_ori_ypr_dot_;

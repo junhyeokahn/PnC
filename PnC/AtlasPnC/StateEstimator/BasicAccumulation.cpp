@@ -27,7 +27,7 @@ void BasicAccumulation::estimatorInitialization(
         global_ang_vel_[i] = ang_vel[i];
         filtered_acc_[i]->input(acc[i]);
     }
-    _InitIMUOrientationEstimateFromGravity();
+    _InitTorsoOrientationEstimateFromGravity();
 }
 
 void BasicAccumulation::setSensorData(const std::vector<double>& acc,
@@ -41,9 +41,9 @@ void BasicAccumulation::setSensorData(const std::vector<double>& acc,
     Eigen::Quaternion<double> delta_quat_body =
         dart::math::expToQuat(body_omega * AtlasAux::servo_rate);
 
-    Eigen::MatrixXd R_global_to_imu =
+    Eigen::MatrixXd R_global_to_torso =
         global_ori_quat_.normalized().toRotationMatrix();
-    global_ang_vel_ = R_global_to_imu * body_omega;
+    global_ang_vel_ = R_global_to_torso * body_omega;
 
     // Perform orientation update via integration
     global_ori_quat_ = global_ori_quat_ * delta_quat_body;
@@ -53,12 +53,12 @@ void BasicAccumulation::setSensorData(const std::vector<double>& acc,
         _so3_to_euler_zyx_dot(global_ori_ypr_, global_ang_vel_);
 }
 
-void BasicAccumulation::_InitIMUOrientationEstimateFromGravity() {
+void BasicAccumulation::_InitTorsoOrientationEstimateFromGravity() {
     Eigen::Vector3d g_B;
     g_B.setZero();
     for (int i(0); i < 3; ++i) {
         // We expect a negative number if gravity is pointing opposite of
-        // the IMU direction
+        // the TORSO direction
         g_B[i] = filtered_acc_[i]->output();
     }
     // Test Vector  ////////////////////////

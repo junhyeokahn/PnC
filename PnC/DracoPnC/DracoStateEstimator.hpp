@@ -42,4 +42,8 @@ class DracoStateEstimator {
     void _JointUpdate(DracoSensorData* data);
     void _ConfigurationAndModelUpdate();
     void _FootContactUpdate(DracoSensorData* data);
+    void MapToTorso_( const Eigen::VectorXd & imu_acc,
+                      const Eigen::VectorXd & imu_angvel,
+                      std::vector<double> & torso_acc,
+                      std::vector<double> & torso_angvel);
 };
