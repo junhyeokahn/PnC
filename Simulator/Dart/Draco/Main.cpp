@@ -175,12 +175,14 @@ int main(int argc, char** argv) {
     bool b_display_target_frame;
     bool b_joint_limit_enforced;
     bool b_show;
+    bool b_simulate;
     int num_steps_per_cycle;
     double servo_rate;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "is_record", isRecord);
+        myUtils::readParameter(simulation_cfg, "auto_start", b_simulate);
         myUtils::readParameter(simulation_cfg, "display_joint_frame",
                                b_display_joint_frame);
         myUtils::readParameter(simulation_cfg, "display_target_frame",
@@ -312,7 +314,7 @@ int main(int argc, char** argv) {
     if (b_show) {
         dart::gui::osg::Viewer viewer;
         viewer.addWorldNode(node);
-        viewer.simulate(false);
+        viewer.simulate(b_simulate);
         viewer.switchHeadlights(false);
         msm->setLight(viewer.getLightSource(0)->getLight());
         ::osg::Vec3 p1(1.0, 0.2, 1.0);

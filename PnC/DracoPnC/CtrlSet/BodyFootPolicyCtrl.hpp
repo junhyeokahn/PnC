@@ -58,6 +58,7 @@ class BodyFootPolicyCtrl : public SwingPlanningCtrl {
     NeuralNetModel* nn_valfn_;
 
     bool b_use_policy_;
+    bool b_use_stochastic_;
 
     double ini_base_height_;
     int swing_leg_jidx_;

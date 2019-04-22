@@ -341,6 +341,8 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     }
     if (done) {
         std::cout << "done" << std::endl;
+        myUtils::saveValue(sp_->num_step_copy,
+                           std::to_string(sp_->num_step_copy));
         exit(0);
     }
 
@@ -409,9 +411,11 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         if (sp_->num_step_copy < 4) {
         } else {
             for (int i = 0; i < 2; ++i) {
-                // target_loc[i] += action_scale_[i] * output(0, i);
-                // target_loc[i] += action_scale_[i] * mean(0, i);
-                target_loc[i] += action_scale_[i] * mean_cropped(0, i);
+                if (b_use_stochastic_) {
+                    target_loc[i] += action_scale_[i] * output(0, i);
+                } else {
+                    target_loc[i] += action_scale_[i] * mean_cropped(0, i);
+                }
             }
         }
     }
@@ -564,6 +568,7 @@ void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "fin_foot_z_acc", fin_foot_z_acc_);
 
         myUtils::readParameter(node, "use_policy", b_use_policy_);
+        myUtils::readParameter(node, "use_stochastic", b_use_stochastic_);
 
         // rl model
         std::string model_path;

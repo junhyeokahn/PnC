@@ -1,187 +1,119 @@
-test_configuration:
-    start_phase: 0
-
-    initial_jpos: [0., -0.1, -0.9, 1.7, 0.71, 0., 0.08, -0.9, 1.7, 0.71]
-
-    body_height: 0.93
-    com_height_for_omega: 0.93
-    #body_height: 1.0
-    #com_height_for_omega: 1.0
-
-    jpos_initialization_time: 0.15
-    com_lifting_time: 0.15
-
-    swing_time: 0.33
-    st_transition_time: 0.03
-    end_transition_time: 0.03
-    stance_time: 0.01
-
-    replanning: true
-    #replanning: false
-    transition_phase_mix_ratio: 0.2
-    double_stance_mix_ratio: 0.0
-    contact_switch_check: true
-    #contact_switch_check: false
-
-    walking_start_time: 5
-    #walking_velocity_lb: [-0.1, -0.1]
-    #walking_velocity_ub: [0.1, 0.1]
-    walking_velocity_lb: [0.1, 0.]
-    walking_velocity_ub: [0.1, 0.]
-
-    protocol:
-        ip_control_pc: "localhost"
-        ip_sub_pub_prefix: "tcp://127.0.0.1:50"
-        ip_req_rep_prefix: "tcp://127.0.0.1:51"
-        #username: 'junhyeokahn'
-        username: 'junhyeok'
-        execute_cmd: "cd ~/Repository/PnC/build/bin && ./run_draco"
-        exit_cmd: "pkill -f 'draco"
-
-    # ==========================================================================
-    # Observation \in R^{11}
-    # [ com_x, com_y, com_z,
-    #   com_roll, com_pitch, com_yaw,
-    #   com_vx, com_vy, com_vz ]
-    # ==========================================================================
-    obs_lower_bound: [-100. , -100. , -100. , -100. , -100. , -100. , -100. , -100. , -100.]
-    obs_upper_bound: [100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.  , 100.]
-
-    # ==========================================================================
-    # Action \in R^{2}
-    # [foot x, foot y]
-    # ==========================================================================
-    action_lower_bound: [-1, -1]
-    action_upper_bound: [1, 1]
-    action_scale: [0.15, 0.07]
-
-    # ======================================================================
-    # Terminate condition
-    # ======================================================================
-    terminate_obs_lower_bound: [-0.35 , -0.35 , -0.03 , -0.3 , -0.5 , -0.3 , -0.6 , -0.6 , -0.3]
-    terminate_obs_upper_bound: [0.35  , 0.35  , 0.1   , 0.3  , 0.5  , 0.3  , 0.6  , 0.6  , 0.3]
-
 control_configuration:
-
-    joint_position_ctrl:
-        kp: [100 , 100 , 100 , 100 , 50. , 100 , 100 , 100 , 100 , 50. ]
-        kd: [3   , 3   , 3   , 3   , 1.   , 3   , 3   , 3   , 3   , 1.  ]
-
-    double_contact_trans_ctrl:
-        max_rf_z: 300.0
-        min_rf_z: 5.0
-
-        kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
-        kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
-
-    body_ctrl:
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-    single_contact_trans_ctrl:
-        max_rf_z: 550
-        min_rf_z: 5
-
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-    left_body_foot_learning_ctrl:
-        planner_name: velocity_reversal_lipm
-        swing_height: 0.15
-        push_down_height: 0.01
-        default_target_foot_location: [0.0, 0.20, 0.0]
-
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-        body_pt_offset: [0.12, 0.0]
-        foot_landing_offset: [0., 0.]
-
-        fin_ankle: 1.4
-        switch_vel_threshold: -2.8
-
-        fin_foot_z_vel: -0.5
-        fin_foot_z_acc: 5.0
-
-        # rl parameters
-        quad_input_penalty: 0.1
-        alive_reward: 5.0
-        deviation_penalty: 5.0
-        reward_scale: 1.0
-
-    right_body_foot_learning_ctrl:
-        planner_name: velocity_reversal_lipm
-        swing_height: 0.15
-        push_down_height: 0.01
-        default_target_foot_location: [0.0, -0.20, 0.0]
-
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-        body_pt_offset: [0.12, 0.0]
-        foot_landing_offset: [0., 0.]
-
-        fin_ankle: 1.4
-        switch_vel_threshold: -2.8
-
-        fin_foot_z_vel: -0.5
-        fin_foot_z_acc: 5.0
-
-        # rl parameters
-        quad_input_penalty: 0.1
-        alive_reward: 5.0
-        deviation_penalty: 5.0
-        reward_scale: 1.0
-
-    right_body_foot_policy_ctrl:
-        planner_name: velocity_reversal_lipm
-        swing_height: 0.15
-        push_down_height: 0.01
-        default_target_foot_location: [0.0, -0.20, 0.0]
-
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-        body_pt_offset: [0.12, 0.0]
-        foot_landing_offset: [0., 0.]
-
-        fin_ankle: 1.4
-        switch_vel_threshold: -2.8
-
-        fin_foot_z_vel: -0.5
-        fin_foot_z_acc: 5.0
-
-        # policy path
-        model_path: "ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml"
-        use_policy: true
-
-    left_body_foot_policy_ctrl:
-        planner_name: velocity_reversal_lipm
-        swing_height: 0.15
-        push_down_height: 0.01
-        default_target_foot_location: [0.0, 0.20, 0.0]
-
-        kp: [100 , 200 , 200 , 200 , 10 , 100 , 200 , 200 , 200 , 10 ]
-        kd: [10  , 20  , 20  , 20  , 1  , 10  , 20  , 20  , 20  , 1  ]
-
-        body_pt_offset: [0.12, 0.0]
-        foot_landing_offset: [0., 0.]
-
-        fin_ankle: 1.4
-        switch_vel_threshold: -2.8
-
-        fin_foot_z_vel: -0.5
-        fin_foot_z_acc: 5.0
-
-        # policy path
-        model_path: "ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml"
-        use_policy: true
-
+  body_ctrl:
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+  double_contact_trans_ctrl:
+    kd: [8, 8, 8, 8, 0, 8, 8, 8, 8, 0]
+    kp: [150, 150, 150, 150, 5, 150, 150, 150, 150, 5]
+    max_rf_z: 300.0
+    min_rf_z: 5.0
+  joint_position_ctrl:
+    kd: [3, 3, 3, 3, 1.0, 3, 3, 3, 3, 1.0]
+    kp: [100, 100, 100, 100, 50.0, 100, 100, 100, 100, 50.0]
+  left_body_foot_learning_ctrl:
+    alive_reward: 5.0
+    body_pt_offset: [0.12, 0.0]
+    default_target_foot_location: [0.0, 0.2, 0.0]
+    deviation_penalty: 5.0
+    fin_ankle: 1.4
+    fin_foot_z_acc: 5.0
+    fin_foot_z_vel: -0.5
+    foot_landing_offset: [0.0, 0.0]
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+    planner_name: velocity_reversal_lipm
+    push_down_height: 0.01
+    quad_input_penalty: 0.1
+    reward_scale: 1.0
+    swing_height: 0.15
+    switch_vel_threshold: -2.8
+  left_body_foot_policy_ctrl:
+    body_pt_offset: [0.12, 0.0]
+    default_target_foot_location: [0.0, 0.2, 0.0]
+    fin_ankle: 1.4
+    fin_foot_z_acc: 5.0
+    fin_foot_z_vel: -0.5
+    foot_landing_offset: [0.0, 0.0]
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+    model_path: ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml
+    planner_name: velocity_reversal_lipm
+    push_down_height: 0.01
+    swing_height: 0.15
+    switch_vel_threshold: -2.8
+    use_policy: true
+    use_stochastic: false
+  right_body_foot_learning_ctrl:
+    alive_reward: 5.0
+    body_pt_offset: [0.12, 0.0]
+    default_target_foot_location: [0.0, -0.2, 0.0]
+    deviation_penalty: 5.0
+    fin_ankle: 1.4
+    fin_foot_z_acc: 5.0
+    fin_foot_z_vel: -0.5
+    foot_landing_offset: [0.0, 0.0]
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+    planner_name: velocity_reversal_lipm
+    push_down_height: 0.01
+    quad_input_penalty: 0.1
+    reward_scale: 1.0
+    swing_height: 0.15
+    switch_vel_threshold: -2.8
+  right_body_foot_policy_ctrl:
+    body_pt_offset: [0.12, 0.0]
+    default_target_foot_location: [0.0, -0.2, 0.0]
+    fin_ankle: 1.4
+    fin_foot_z_acc: 5.0
+    fin_foot_z_vel: -0.5
+    foot_landing_offset: [0.0, 0.0]
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+    model_path: ReinforcementLearning/PreCompiledData/DracoSeperateProcess/ppo_6/checkpoints/00125.yaml
+    planner_name: velocity_reversal_lipm
+    push_down_height: 0.01
+    swing_height: 0.15
+    switch_vel_threshold: -2.8
+    use_policy: true
+    use_stochastic: false
+  single_contact_trans_ctrl:
+    kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
+    kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]
+    max_rf_z: 550
+    min_rf_z: 5
 planner_configuration:
-
-    velocity_reversal_pln:
-        x_step_length_limit: [-0.7, 0.7]
-        y_step_length_limit: [0.18, 0.95]
-        com_velocity_limit: [0.0, 1.3]
-        t_prime: [0.22 , 0.22]
-        kappa: [-0.18, -0.18]
+  velocity_reversal_pln:
+    com_velocity_limit: [0.0, 1.3]
+    kappa: [-0.18, -0.18]
+    t_prime: [0.22, 0.22]
+    x_step_length_limit: [-0.7, 0.7]
+    y_step_length_limit: [0.18, 0.95]
+test_configuration:
+  action_lower_bound: [-1, -1]
+  action_scale: [0.15, 0.07]
+  action_upper_bound: [1, 1]
+  body_height: 0.93
+  com_height_for_omega: 0.93
+  com_lifting_time: 0.15
+  contact_switch_check: true
+  double_stance_mix_ratio: 0.0
+  end_transition_time: 0.03
+  initial_jpos: [0.0, -0.1, -0.9, 1.7, 0.71, 0.0, 0.08, -0.9, 1.7, 0.71]
+  jpos_initialization_time: 0.15
+  obs_lower_bound: [-100.0, -100.0, -100.0, -100.0, -100.0, -100.0, -100.0, -100.0,
+    -100.0]
+  obs_upper_bound: [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0]
+  protocol: {execute_cmd: cd ~/Repository/PnC/build/bin && ./run_draco, exit_cmd: pkill
+      -f 'draco, ip_control_pc: localhost, ip_req_rep_prefix: 'tcp://127.0.0.1:51',
+    ip_sub_pub_prefix: 'tcp://127.0.0.1:50', username: junhyeok}
+  replanning: true
+  st_transition_time: 0.03
+  stance_time: 0.01
+  start_phase: 0
+  swing_time: 0.33
+  terminate_obs_lower_bound: [-0.35, -0.35, -0.03, -0.3, -0.5, -0.3, -0.6, -0.6, -0.3]
+  terminate_obs_upper_bound: [0.35, 0.35, 0.1, 0.3, 0.5, 0.3, 0.6, 0.6, 0.3]
+  transition_phase_mix_ratio: 0.2
+  walking_start_time: 5
+  walking_velocity_lb: [0.1, 0.0]
+  walking_velocity_ub: [0.1, 0.0]
