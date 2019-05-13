@@ -179,15 +179,6 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     ++count_;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
-
-    // TEST //
-    std::cout << "q" << std::endl;
-    std::cout << (sp_->q).segment<3>(3) << std::endl;
-    std::cout << "qdot" << std::endl;
-    std::cout << (sp_->qdot).segment<3>(3) << std::endl;
-    std::cout << "count : " << count_ << std::endl;
-    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
-    // TEST END //
 }
 
 bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd) {

@@ -82,10 +82,6 @@ void DracoStateEstimator::MapToTorso_(const Eigen::VectorXd & imu_acc,
     t_acc_local = R_torso_imu * imu_acc;
     t_angvel_local = R_torso_imu * imu_angvel;
 
-    //myUtils::pretty_print(t_acc_local, std::cout, "torso_acc");
-    //myUtils::pretty_print(t_angvel_local, std::cout, "torso_angvel");
-    //std::cout << "@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
-
     for (int i = 0; i < 3; ++i) {
         torso_acc[i] = t_acc_local[i];
         torso_angvel[i] = t_angvel_local[i];

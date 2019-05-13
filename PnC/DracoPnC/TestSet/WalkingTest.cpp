@@ -9,8 +9,8 @@
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
-    // cfg_ = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_EXP_TEST.yaml");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_SIM_TEST.yaml");
+     cfg_ = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_EXP_TEST.yaml");
+    //cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_SIM_TEST.yaml");
 
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
@@ -150,14 +150,11 @@ int WalkingTest::_NextPhase(const int& phase) {
     sp_->num_step_copy = num_step_;
 
     // !! TEST !!
-    // if (((phase == WkPhase::double_contact_1) ||
-    //(phase == WkPhase::double_contact_2)) &&
-    //(num_step_ > 1)) {
-    // sp_->global_pos_local[0] =
-    // sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
-    // sp_->global_pos_local[1] =
-    // sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
+    //if (((phase == WkPhase::double_contact_1) || (phase == WkPhase::double_contact_2)) && (num_step_ > 1)) {
+        //sp_->global_pos_local[0] = sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
+        //sp_->global_pos_local[1] = sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
     //}
+     // !! TEST
 
     if (next_phase == WkPhase::NUM_WALKING_PHASE) {
         return WkPhase::double_contact_1;

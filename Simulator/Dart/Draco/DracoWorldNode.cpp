@@ -229,31 +229,6 @@ void DracoWorldNode::UpdateLedData_() {
 
 void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
                                    Eigen::VectorXd& acc) {
-    //Eigen::VectorXd ang_vel_local =
-        //mSkel->getBodyNode("Torso")
-            //->getSpatialVelocity(dart::dynamics::Frame::World(),
-                                 //mSkel->getBodyNode("Torso"))
-            //.head(3);
-
-    //ang_vel = ang_vel_local;
-    //Eigen::MatrixXd rot_world_torso(3, 3);
-    //rot_world_torso = mSkel->getBodyNode("Torso")->getWorldTransform().linear();
-    //Eigen::Vector3d global_grav(0, 0, 9.81);
-    //Eigen::Vector3d local_grav = rot_world_torso.transpose() * global_grav;
-    //acc = local_grav;
-    //// TEST
-    //Eigen::VectorXd torso_angvel_local =
-        //mSkel->getBodyNode("Torso")
-            //->getSpatialVelocity(dart::dynamics::Frame::World(),
-                                 //mSkel->getBodyNode("Torso")).head(3);
-    //Eigen::MatrixXd rot_world_torso(3, 3);
-    //rot_world_torso = mSkel->getBodyNode("Torso")->getWorldTransform().linear();
-    //Eigen::Vector3d grav_g(0, 0, 9.81);
-    //Eigen::Vector3d torso_acc_local= rot_world_torso.transpose() * grav_g;
-    //myUtils::pretty_print(torso_angvel_local, std::cout, "torso_angvel_local");
-    //myUtils::pretty_print(torso_acc_local, std::cout, "torso_acc_local");
-    //// TEST END
-
     Eigen::VectorXd ang_vel_local =
         mSkel->getBodyNode("IMU")
             ->getSpatialVelocity(dart::dynamics::Frame::World(),

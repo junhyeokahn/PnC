@@ -54,6 +54,12 @@ void JPosSwingCtrl::oneStep(void* _cmd){
     _jpos_task_setup();
     _jpos_ctrl_wbdc_rotor(gamma);
 
+    double ramp_time(2.0);
+    if (state_machine_time_<ramp_time) {
+        des_jvel_ *= state_machine_time_ / ramp_time;
+        gamma *= state_machine_time_ / ramp_time;
+    }
+
     ((DracoCommand*)_cmd)->jtrq = gamma;
     ((DracoCommand*)_cmd)->q = des_jpos_;
     ((DracoCommand*)_cmd)->qdot = des_jvel_;

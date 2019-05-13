@@ -446,8 +446,6 @@ bool BodyFootPlanningCtrl::endOfPhase() {
                    state_machine_time_, end_time_);
             return true;
         }
-    }
-    if (b_contact_switch_check_) {
         contact_check_with_ankle = false;
     }
 

@@ -63,8 +63,8 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     // switch_state[1][1]);
 
     // !! TEST !!
-    // int check_switch(_check_switch_velocity(switch_state));
-    int check_switch(_check_switch_velocity_considering_rotation(switch_state));
+     int check_switch(_check_switch_velocity(switch_state));
+    //int check_switch(_check_switch_velocity_considering_rotation(switch_state));
     // !! TEST !!
     double new_swing_time(_input->swing_time);
     int count(0);
@@ -86,9 +86,8 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
                                _input->stance_foot_loc, switch_state);
 
         // !! TEST !!
-        // check_switch = _check_switch_velocity(switch_state);
-        check_switch =
-            _check_switch_velocity_considering_rotation(switch_state);
+         check_switch = _check_switch_velocity(switch_state);
+        //check_switch = _check_switch_velocity_considering_rotation(switch_state);
         // !! TEST !!
         ++count;
         if (count > 0) break;
@@ -108,10 +107,9 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
 
     // _StepLengthCheck(target_loc, switch_state);
     // !! TEST !!
-    //_StepLengthCheck(target_loc, _input->b_positive_sidestep,
-    //_input->stance_foot_loc);
-    _StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep,
-                                        _input->stance_foot_loc);
+    _StepLengthCheck(target_loc, _input->b_positive_sidestep, _input->stance_foot_loc);
+    //_StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep,
+                                        //_input->stance_foot_loc);
     // !! TEST !!
 
     // save data
