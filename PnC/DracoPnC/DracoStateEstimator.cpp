@@ -179,7 +179,6 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
     curr_qdot_[1] = -foot_vel[1];
     curr_qdot_[2] = -foot_vel[2];
 
-    // robot_->updateSystem(curr_config_, curr_qdot_, true);
     robot_->updateSystem(curr_config_, curr_qdot_, false);
 
     sp_->q = curr_config_;

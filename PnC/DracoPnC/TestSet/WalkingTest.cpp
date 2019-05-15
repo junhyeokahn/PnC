@@ -150,10 +150,10 @@ int WalkingTest::_NextPhase(const int& phase) {
     sp_->num_step_copy = num_step_;
 
     // !! TEST !!
-    //if (((phase == WkPhase::double_contact_1) || (phase == WkPhase::double_contact_2)) && (num_step_ > 1)) {
-        //sp_->global_pos_local[0] = sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
-        //sp_->global_pos_local[1] = sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
-    //}
+    if (((phase == WkPhase::double_contact_1) || (phase == WkPhase::double_contact_2)) && (num_step_ > 1)) {
+        sp_->global_pos_local[0] = sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
+        sp_->global_pos_local[1] = sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
+    }
      // !! TEST
 
     if (next_phase == WkPhase::NUM_WALKING_PHASE) {
