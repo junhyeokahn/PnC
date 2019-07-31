@@ -70,6 +70,18 @@ if __name__ == "__main__":
             ax_obs[i].axvline(x=(j+1), color='indigo', linestyle='-')
     f_obs.suptitle("obs")
 
+    fx_ph, ax_ph = plt.subplots()
+    ax_ph.plot(obs[:,0], obs[:,6], '.')
+    fx_ph.suptitle("x-xdot")
+    ax_ph.grid()
+    plt.savefig('ExperimentData/x-xdot.eps', format='eps', dpi=1000)
+
+    fy_ph, ay_ph = plt.subplots()
+    ay_ph.plot(obs[:,1], obs[:,7], '.')
+    fy_ph.suptitle("y-ydot")
+    ay_ph.grid()
+    plt.savefig('ExperimentData/y-ydot.eps', format='eps', dpi=1000)
+
     f_ret, ax_ret = plt.subplots()
     ax_ret.plot(ret[:], '--.')
     ax_ret.grid()
@@ -109,5 +121,6 @@ if __name__ == "__main__":
     for j in done_idx:
         ax_rew.axvline(x=(j+1), color='indigo', linestyle='-')
     f_rew.suptitle("rew")
+
 
     plt.show()

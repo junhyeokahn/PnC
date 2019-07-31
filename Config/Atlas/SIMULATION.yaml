@@ -1,4 +1,5 @@
 servo_rate: 0.001
+is_record: true
 
 initial_configuration:
     height: 0.90
@@ -8,8 +9,8 @@ initial_configuration:
 show_viewer: false
 show_joint_frame: false
 show_target_frame: true
-plot_guided_foot: true
-plot_adjusted_foot: true
+plot_guided_foot: false
+plot_adjusted_foot: false
 camera_manipulator: false
 
 control_configuration:

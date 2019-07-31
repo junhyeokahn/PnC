@@ -165,6 +165,7 @@ int main(int argc, char** argv) {
     bool b_show_joint_frame;
     bool b_show_target_frame;
     bool b_show;
+    bool b_record;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
@@ -174,6 +175,7 @@ int main(int argc, char** argv) {
         myUtils::readParameter(simulation_cfg, "show_target_frame",
                                b_show_target_frame);
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
+        myUtils::readParameter(simulation_cfg, "is_record", b_record);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -265,6 +267,11 @@ int main(int argc, char** argv) {
         viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
                                          GL_DEPTH_BUFFER_BIT);
         viewer.addEventHandler(new OneStepProgress(node));
+
+        if (b_record) {
+            std::cout << "[Video Record Enable]" << std::endl;
+            viewer.record(THIS_COM "/ExperimentVideo");
+        }
 
         // viewer.setUpViewInWindow(0, 0, 2880, 1800);
         viewer.setUpViewInWindow(1440, 0, 500, 500);

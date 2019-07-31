@@ -8,10 +8,6 @@ import os
 PLOT_VERTICALLY = 0
 PLOT_HORIZONTALLY = 1
 
-# number of figures in this plot
-num_figures = 4
-num_leg_joint = 5
-
 def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no=1, \
         starting_col_index = 0, starting_row_index=0, plot_configuration=PLOT_HORIZONTALLY):
     figure_number = starting_figure_no
@@ -44,6 +40,12 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
 
     data_est_mocap_body_vel = \
     np.genfromtxt(file_path+'est_mocap_body_vel.txt', delimiter=None, dtype=(float))
+
+    data_led_vel= \
+    np.genfromtxt(file_path+'Body_LED_vel.txt', delimiter=None, dtype=(float))
+
+    data_led_pos= \
+    np.genfromtxt(file_path+'LED_Pos.txt', delimiter=None, dtype=(float))
 
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
 
@@ -182,6 +184,53 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
             plt.text(data_x[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
         plt.xlabel('time (sec)')
 
+    figure_number += 1
+
+    if plot_configuration == PLOT_HORIZONTALLY:
+        col_index += 1
+    elif plot_configuration == PLOT_VERTICALLY:
+        row_index +=1
+
+    fig = plt.figure(figure_number)
+    plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))        
+    fig.canvas.set_window_title('led vel')
+
+    for i in range(1,3,1):
+        ax1 = plt.subplot(2, 1, i)
+        plt.plot(data_x, data_led_vel[st_idx:end_idx,i-1], "b-")
+        plt.grid(True)
+
+        for j in phseChange:
+            # phase line
+            plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+            # phase number
+            plt.text(data_x[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+
+    plt.xlabel('time (sec)')
+
+    figure_number += 1
+
+    if plot_configuration == PLOT_HORIZONTALLY:
+        col_index += 1
+    elif plot_configuration == PLOT_VERTICALLY:
+        row_index +=1
+
+    fig = plt.figure(figure_number)
+    plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))        
+    fig.canvas.set_window_title('led pos')
+
+    for i in range(1,4,1):
+        ax1 = plt.subplot(3, 1, i)
+        plt.plot(data_x, data_led_pos[st_idx:end_idx,i-1], "b-")
+        plt.grid(True)
+
+        for j in phseChange:
+            # phase line
+            plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+            # phase number
+            plt.text(data_x[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+
+    plt.xlabel('time (sec)')
 
 if __name__ == "__main__":
     create_figures()

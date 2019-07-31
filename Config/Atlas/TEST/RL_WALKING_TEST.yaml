@@ -131,7 +131,8 @@ control_configuration:
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0.0, 0.0]
 
-        model_path: "RLData/AtlasSeperateProcess/ppo_2/checkpoints/00052.yaml"
+        #model_path: "RLData/AtlasSeperateProcess/ppo_1/checkpoints/00015.yaml"
+        model_path: "RLData/AtlasSeperateProcess/ppo_1/checkpoints/00013.yaml"
         use_policy: true
         #use_policy: false
 
@@ -151,7 +152,8 @@ control_configuration:
         body_pt_offset: [0.0, 0.0]
         foot_landing_offset: [0., 0.]
 
-        model_path: "RLData/AtlasSeperateProcess/ppo_2/checkpoints/00052.yaml"
+        #model_path: "RLData/AtlasSeperateProcess/ppo_1/checkpoints/00015.yaml"
+        model_path: "RLData/AtlasSeperateProcess/ppo_1/checkpoints/00013.yaml"
         use_policy: true
         #use_policy: false
 

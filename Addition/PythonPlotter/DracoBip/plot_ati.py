@@ -24,13 +24,14 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
             np.genfromtxt(file_path+'rfoot_ati.txt', delimiter=None, dtype=(float))
     data_rfoot_ati_norm = np.zeros(len(data_rfoot_ati))
 
-    # __import__('ipdb').set_trace()
-    # exit()
     for i in range(len(data_rfoot_ati)):
         data_rfoot_ati_norm[i] = np.linalg.norm(data_rfoot_ati[i, 3:6])
 
     data_lfoot_ati = \
             np.genfromtxt(file_path+'lfoot_ati.txt', delimiter=None, dtype=(float))
+    data_lfoot_ati_norm = np.zeros(len(data_lfoot_ati))
+    for i in range(len(data_lfoot_ati)):
+        data_lfoot_ati_norm[i] = np.linalg.norm(data_lfoot_ati[i, 3:6])
 
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
     st_idx = 5
@@ -86,10 +87,14 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
     fig.canvas.set_window_title('left foot ati')
-    for i in range(1,7,1):
-        ax1 = plt.subplot(7, 1, i)
-        plt.plot(data_x, data_lfoot_ati[st_idx:end_idx,i-1],\
-                "r-", linewidth=3)
+    for i in range(1,8,1):
+        if i != 7:
+            ax1 = plt.subplot(7, 1, i)
+            plt.plot(data_x, data_lfoot_ati[st_idx:end_idx,i-1],\
+                    "r-", linewidth=3)
+        else:
+            plt.subplot(7, 1, 7)
+            plt.plot(data_x, data_lfoot_ati_norm[st_idx:end_idx], "b-", linewidth=3)
 
         # phase marker #
         for j in phseChange:

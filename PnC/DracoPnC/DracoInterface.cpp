@@ -257,6 +257,8 @@ void DracoInterface::_ParameterSetting() {
             test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
+        } else if (test_name == "cbf_walking_test") {
+            test_ = new ControlBarrierFunctionWalkingTest(robot_);
         } else if (test_name == "turning_test") {
             test_ = new TurningTest(robot_);
         } else if (test_name == "balancing_test") {

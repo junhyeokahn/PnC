@@ -21,6 +21,7 @@ if __name__ == "__main__":
     ax1.grid(True)
     ax1.set_xlabel('total_timestep')
     ax1.set_ylabel('eprewmean')
+    plt.savefig('ExperimentData/timesteps_eprewmean.eps', format='eps', dpi=1000)
 
     # ==========================================================================
     # nupdates vs eprewmean
@@ -30,34 +31,34 @@ if __name__ == "__main__":
     ax3.grid(True)
     ax3.set_xlabel('nupdates')
     ax3.set_ylabel('eprewmean')
+    plt.savefig('ExperimentData/nupdates_eprewmean.eps', format='eps', dpi=1000)
 
     # ==========================================================================
     # nupdates vs total_num_dones
     # ==========================================================================
-    # idx = 140
     f3, ax3 = plt.subplots()
-    # ax3.plot(res.progress.nupdates[:idx], res.progress.total_num_dones[:idx])
     ax3.plot(res.progress.nupdates, res.progress.total_num_dones)
     ax3.grid(True)
     ax3.set_xlabel('nupdates')
     ax3.set_ylabel('total_num_dones')
+    plt.savefig('ExperimentData/nupdates_dones.eps', format='eps', dpi=1000)
 
     # ==========================================================================
     # total_numstep vs total reward
     # ==========================================================================
-    f4, ax4 = plt.subplots()
-    ax4.plot(res.progress.total_timesteps, res.progress.dataset_rew)
-    ax4.set_xlabel('total_timestep')
-    ax4.set_ylabel('dataset_rew')
-    ax4.grid(True)
+    #f4, ax4 = plt.subplots()
+    #ax4.plot(res.progress.total_timesteps, res.progress.dataset_rew)
+    #ax4.set_xlabel('total_timestep')
+    #ax4.set_ylabel('dataset_rew')
+    #ax4.grid(True)
 
     # ==========================================================================
     # nupdates vs totla reward
     # ==========================================================================
-    f6, ax6 = plt.subplots()
-    ax6.plot(res.progress.nupdates, res.progress.dataset_rew)
-    ax6.set_xlabel('nupdates')
-    ax6.set_ylabel('dataset_rew')
-    ax6.grid(True)
+    #f6, ax6 = plt.subplots()
+    #ax6.plot(res.progress.nupdates, res.progress.dataset_rew)
+    #ax6.set_xlabel('nupdates')
+    #ax6.set_ylabel('dataset_rew')
+    #ax6.grid(True)
 
     plt.show()

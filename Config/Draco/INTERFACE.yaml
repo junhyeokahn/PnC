@@ -3,6 +3,7 @@
 #test_name: balancing_test
 #test_name: walking_test
 test_name: rl_walking_test
+#test_name: cbf_walking_test
 #test_name: turning_test
 
 jpos_min: [-0.6 , -0.4 , -1.15 , -0.2  , 0.64 , -0.6 , -0.4 , -1.15 , -0.2  , 0.64]

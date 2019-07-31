@@ -41,8 +41,8 @@ control_configuration:
     push_down_height: 0.01
     swing_height: 0.15
     switch_vel_threshold: -2.8
-    use_policy: true
-    use_stochastic: false
+    use_policy: false
+    use_stochastic: true
   right_body_foot_learning_ctrl:
     alive_reward: 5.0
     body_pt_offset: [0.12, 0.0]
@@ -74,8 +74,8 @@ control_configuration:
     push_down_height: 0.01
     swing_height: 0.15
     switch_vel_threshold: -2.8
-    use_policy: true
-    use_stochastic: false
+    use_policy: false
+    use_stochastic: true
   single_contact_trans_ctrl:
     kd: [10, 20, 20, 20, 1, 10, 20, 20, 20, 1]
     kp: [100, 200, 200, 200, 10, 100, 200, 200, 200, 10]

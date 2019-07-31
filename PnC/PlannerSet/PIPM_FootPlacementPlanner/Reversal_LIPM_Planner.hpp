@@ -1,9 +1,8 @@
 #pragma once
-#include <vector>
 
 #include <Eigen/Dense>
-
 #include <PnC/FootStepPlanner.hpp>
+#include <vector>
 
 class ParamReversalPL {
    public:
