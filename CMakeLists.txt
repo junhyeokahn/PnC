@@ -38,6 +38,7 @@ find_package(ZMQ)
 if(ZMQ_FOUND)
     include_directories(${ZMQ_INCLUDE_DIRS})
 endif()
+set(ZMQ_FOUND FALSE)
 
 # Protobuf
 find_package(Protobuf)
