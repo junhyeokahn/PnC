@@ -3,6 +3,7 @@
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 #include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
+#include <PnC/AtlasPnC/TestSet/BalanceTest.hpp>
 #include <PnC/AtlasPnC/TestSet/RLWalkingTest.hpp>
 #include <PnC/AtlasPnC/TestSet/WalkingTest.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
@@ -117,6 +118,8 @@ void AtlasInterface::_ParameterSetting() {
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
+        } else if (test_name == "balance_test") {
+            test_ = new BalanceTest(robot_);
         } else if (test_name == "rl_walking_test") {
 #if HAS_RL_DEP
             if (!b_learning_) {

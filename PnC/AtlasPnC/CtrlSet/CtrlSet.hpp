@@ -1,3 +1,4 @@
+#include <PnC/AtlasPnC/CtrlSet/BalanceCtrl.hpp>
 #include <PnC/AtlasPnC/CtrlSet/BodyCtrl.hpp>
 #include <PnC/AtlasPnC/CtrlSet/BodyFootLearningCtrl.hpp>
 #include <PnC/AtlasPnC/CtrlSet/BodyFootPlanningCtrl.hpp>
