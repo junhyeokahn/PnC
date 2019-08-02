@@ -117,6 +117,7 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
     // fill out contactsequence
     for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
         int cpe = contact_sequence[eef_id].size();
+        // std::cout << "eef_id : " << eef_id << std::endl;
         contactPlanInterface.contactsPerEndeff[eef_id] = cpe;
         contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
         for (int c_id = 0; c_id < cpe; ++c_id) {
@@ -134,6 +135,10 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
                 Eigen::Quaternion<double>(v[5], v[6], v[7], v[8]);
             contactPlanInterface.contactSequence.eEfContacts[eef_id][c_id]
                 .contactType = idToContactType(static_cast<int>(v(9)));
+            // std::cout << "c_id : " << c_id << std::endl;
+            // std::cout << contactPlanInterface.contactSequence
+            //.eEfContacts[eef_id][c_id]
+            //<< std::endl;
         }
     }
     b_req[2] = true;
@@ -156,6 +161,8 @@ void CentroidPlannerParameter::UpdateInitialState(
             Eigen::Quaternion<double>(iso[eef_id].linear());
     }
     b_req[0] = true;
+    // std::cout << "initial state" << std::endl;
+    // std::cout << initialState << std::endl;
 }
 
 void CentroidPlannerParameter::UpdateTerminalState(
@@ -449,7 +456,9 @@ void CentroidPlanner::_updateTrackingObjective() {
 
 void CentroidPlanner::_internalOptimize(bool is_first_time) {
     try {
+        // =====================================================================
         // add variables to model
+        // =====================================================================
         mVars.clear();
         for (int var_id = 0; var_id < mNumVars; var_id++)
             mVars.push_back(Var());
@@ -473,7 +482,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
             _addVariableToModel(mTrqLocal[eef_id], mModel, mVars);
         }
 
+        // =====================================================================
         // adding quadratic objective
+        // =====================================================================
         mQuadObjective.clear();
 
         if (mCentParam->numComViaPoints > 0) {
@@ -866,7 +877,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
 
         mModel.setObjective(mQuadObjective, 0.0);
 
+        // =====================================================================
         // constant time horizon with time adaptation
+        // =====================================================================
         if (mCentParam->isTimeHorizonFixed &&
             mCentParam->heuristic == Heuristic::timeOptimization) {
             mLinCons = 0.0;
@@ -876,7 +889,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                 mLinCons, "=", mCentParam->numTimeSteps * mCentParam->timeStep);
         }
 
+        // =====================================================================
         // upper and lower bounds constraints
+        // =====================================================================
         for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
             if (mCentParam->heuristic == Heuristic::timeOptimization) {
                 mModel.addLinConstr(mVars[mDt.id(0, time_id)], ">",
@@ -921,7 +936,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
             }
         }
 
+        // =====================================================================
         // friction cone constraints
+        // =====================================================================
         for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
             for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
                 if (mDynStateSeq.dynamicsStateSequence[time_id]
@@ -985,7 +1002,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
             if (mCentParam->heuristic == Heuristic::timeOptimization) {
                 if (is_first_time) {
+                    // =========================================================
                     // center of mass constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         if (time_id == 0) {
                             mLinCons =
@@ -1007,7 +1026,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         mModel.addLinConstr(mLinCons, "=", 0.0);
                     }
 
+                    // =========================================================
                     // linear momentum constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         if (time_id == 0) {
                             mLinCons =
@@ -1028,7 +1049,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         mModel.addLinConstr(mLinCons, "=", 0.0);
                     }
 
+                    // =========================================================
                     // angular momentum constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         if (time_id == 0) {
                             mLinCons =
@@ -1054,7 +1077,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         dt_val =
                             mDynStateSeq.dynamicsStateSequence[time_id].time;
 
+                    // =========================================================
                     // center of mass constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         lmom = mVars[mLMom.id(axis_id, time_id)];
                         lmom_val = mDynStateSeq.dynamicsStateSequence[time_id]
@@ -1080,7 +1105,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         mModel.addLinConstr(mLinCons, "=", 0.0);
                     }
 
+                    // =========================================================
                     // linear momentum constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         lmomd = mVars[mLMomD.id(axis_id, time_id)];
                         lmomd_val = mDynStateSeq.dynamicsStateSequence[time_id]
@@ -1108,7 +1135,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         mModel.addLinConstr(mLinCons, "=", 0.0);
                     }
 
+                    // =========================================================
                     // angular momentum constraint
+                    // =========================================================
                     for (int axis_id = 0; axis_id < 3; axis_id++) {
                         amomd = mVars[mAMomD.id(axis_id, time_id)];
                         amomd_val = mDynStateSeq.dynamicsStateSequence[time_id]
@@ -1137,7 +1166,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     }
                 }
 
+                // =============================================================
                 // linear momentum rate constraint
+                // =============================================================
                 for (int axis_id = 0; axis_id < 3; axis_id++) {
                     mLinCons = LinExpr(mCentParam->robotMass *
                                        mCentParam->gravityVector[axis_id]) -
@@ -1156,7 +1187,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
 
+                // =============================================================
                 // angular momentum rate constraint
+                // =============================================================
                 for (int axis_id = 0; axis_id < 3; axis_id++) {
                     mLinCons =
                         LinExpr() - LinExpr(mVars[mAMomD.id(axis_id, time_id)]);
@@ -1189,7 +1222,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
             } else {
+                // =============================================================
                 // center of mass constraint
+                // =============================================================
                 for (int axis_id = 0; axis_id < 3; axis_id++) {
                     if (time_id == 0) {
                         mLinCons =
@@ -1211,7 +1246,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
 
+                // =============================================================
                 // linear momentum constraint
+                // =============================================================
                 for (int axis_id = 0; axis_id < 3; axis_id++) {
                     if (time_id == 0) {
                         mLinCons =
@@ -1254,7 +1291,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
 
+                // =============================================================
                 // angular momentum constraint
+                // =============================================================
                 for (int axis_id = 0; axis_id < 3; axis_id++) {
                     if (time_id == 0) {
                         mLinCons =
@@ -1382,7 +1421,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         2, mDynStateSeq.dynamicsStateSequence[time_id]
                                .eEfsActivationIds[eef_id])];
 
+                    // =========================================================
                     // upper and lower bounds on momentum rate constraints
+                    // =========================================================
                     mQuadCons.clear();
                     mQuadCons.addQuaTerm(1.0, LinExpr() - lz + fy);
                     mQuadCons.addQuaTerm(1.0, ly + fz);
@@ -1443,7 +1484,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                                    .eEfsActivationIds[eef_id])],
                         qapprox);
 
+                    // =========================================================
                     // end-effector length constraint
+                    // =========================================================
                     mQuadCons.clear();
                     mQuadCons.addQuaTerm(
                         1.0, lx - mCentParam->eEfOffset[eef_id].x());

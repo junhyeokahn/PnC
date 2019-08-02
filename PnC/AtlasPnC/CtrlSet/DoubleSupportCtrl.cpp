@@ -87,7 +87,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     // update initial state
     // =========================================================================
     Eigen::Vector3d r, l, k;
-    r = robot_->getCoMPosition();
+    r = robot_->getCoMPosition() + sp_->global_pos_local;
     Eigen::VectorXd lk = robot_->getCentroidMomentum();
     for (int i = 0; i < 3; ++i) {
         l[i] = lk[i];
@@ -122,6 +122,8 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             Eigen::Quaternion<double>(iso[i].linear());
         tmp_vec << tmp_quat.w(), tmp_quat.x(), tmp_quat.y(), tmp_quat.z();
         quat[i] = tmp_vec;
+        for (int j = 0; j < 3; ++j)
+            iso[i].translation()[j] += sp_->global_pos_local[j];
     }
 
     _param->UpdateInitialState(r, l, k, actv, eef_frc, iso);
@@ -183,7 +185,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
-            rf_st_time += ssp_dur_;
+            rf_st_time = rf_end_time + ssp_dur_;
             rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             rf_pos[0] += footstep_length_[0];
             rf_pos[1] += footstep_length_[1];
@@ -202,7 +204,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
-            lf_st_time += ssp_dur_;
+            lf_st_time = lf_end_time + ssp_dur_;
             lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             lf_pos[0] += footstep_length_[0];
             lf_pos[1] += footstep_length_[1];
@@ -264,6 +266,8 @@ void DoubleSupportCtrl::PlannerInitialization_() {
         com_displacement[i] = (rf_pos[i] > lf_pos[i]) ? rf_pos[i] : lf_pos[i];
     com_displacement[2] = com_height_;
     _param->UpdateTerminalState(com_displacement);
+
+    exit(0);
 }
 
 void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
