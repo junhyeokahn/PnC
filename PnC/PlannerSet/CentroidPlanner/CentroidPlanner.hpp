@@ -6,6 +6,7 @@
 #include <PnC/PlannerSet/CentroidPlanner/ContactPlanInterface.hpp>
 #include <PnC/PlannerSet/CentroidPlanner/DynamicsState.hpp>
 #include <PnC/RobotSystem/CentroidModel.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/General/Clock.hpp>
 
 using namespace solver;
@@ -38,12 +39,33 @@ struct FrictionCone {
 
 enum class Heuristic { trustRegion, softConstraint, timeOptimization };
 
-class CentroidPlannerParameter : public PlannerParameter {
+class CentroidPlannerParameter {
    public:
-    CentroidPlannerParameter() : PlannerParameter(){};
-    virtual ~CentroidPlannerParameter(){};
+    // =========================================================================
+    // constructor for online planning
+    // =========================================================================
+    CentroidPlannerParameter(YAML::Node planner_cfg, double robot_mass);
+    void UpdateInitialState(
+        const Eigen::Vector3d& r, const Eigen::Vector3d& l,
+        const Eigen::Vector3d& k,
+        const std::array<int, CentroidModel::numEEf>& activation,
+        const std::array<Eigen::Vector3d, CentroidModel::numEEf>& eef_frc,
+        const std::array<Eigen::Isometry3d, CentroidModel::numEEf>& iso);
+    void UpdateRefDynamicsStateSequence();  // TODO : fix this for mpc
+    // [time_ini, time_end, pos, quat, type]
+    void UpdateContactPlanInterface(
+        std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>
+            contact_sequence);
+    void UpdateTerminalState(const Eigen::Vector3d& r_goal);
+    std::vector<bool> b_req;
 
+    // =========================================================================
+    // constructor for offline planning
+    // =========================================================================
+    CentroidPlannerParameter() { b_req.resize(4, false); };
     void paramSetFromYaml(const std::string& configFile_);
+
+    virtual ~CentroidPlannerParameter(){};
 
     Heuristic heuristic;
 
@@ -88,15 +110,18 @@ class CentroidPlannerParameter : public PlannerParameter {
 
 class CentroidPlanner : public Planner {
    public:
-    CentroidPlanner();
+    CentroidPlanner(CentroidPlannerParameter* param);
     virtual ~CentroidPlanner();
+    virtual void DoPlan();
+    virtual void EvalTrajectory(double time, Eigen::VectorXd& s,
+                                Eigen::VectorXd& sdot, Eigen::VectorXd& u);
+
+    CentroidPlannerParameter* GetCentroidPlannerParameter() {
+        return mCentParam;
+    };
 
    private:
-    virtual void _doPlan();
-    virtual void _evalTrajectory(double time, Eigen::VectorXd& pos,
-                                 Eigen::VectorXd& vel, Eigen::VectorXd& trq);
-
-    std::shared_ptr<CentroidPlannerParameter> mCentParam;
+    CentroidPlannerParameter* mCentParam;
 
     /**
      * class that stores all information about the problem, interfaces between

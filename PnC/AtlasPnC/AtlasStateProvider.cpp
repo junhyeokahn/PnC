@@ -11,6 +11,8 @@ AtlasStateProvider* AtlasStateProvider::getStateProvider(RobotSystem* _robot) {
 AtlasStateProvider::AtlasStateProvider(RobotSystem* _robot) {
     myUtils::pretty_constructor(1, "Atlas State Provider");
 
+    num_step_copy = 0;
+    phase_copy = 0;
     robot_ = _robot;
     stance_foot = AtlasBodyNode::l_sole;
     curr_time = 0.;
