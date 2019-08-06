@@ -1,4 +1,4 @@
-#include <PnC/AtlasPnC/AtlasDefinition.hpp>
+#// include <PnC/AtlasPnC/AtlasDefinition.hpp>
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
 #include <PnC/AtlasPnC/ContactSet/ContactSet.hpp>
 #include <PnC/AtlasPnC/CtrlSet/CtrlSet.hpp>
@@ -14,6 +14,7 @@ WPGTest::WPGTest(RobotSystem* robot) : Test(robot) {
     num_step_ = 0;
     sp_ = AtlasStateProvider::getStateProvider(robot_);
     sp_->stance_foot = AtlasBodyNode::l_sole;
+    sp_->global_pos_local[0] = -0.02;
     sp_->global_pos_local[1] = 0.11;
 
     centroid_planner_param_ = new CentroidPlannerParameter(

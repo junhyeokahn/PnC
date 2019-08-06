@@ -62,10 +62,9 @@ DoubleSupportCtrl::~DoubleSupportCtrl() {
 }
 
 void DoubleSupportCtrl::oneStep(void* _cmd) {
-    PlannerInitialization_();
-    _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
+    UpdateMPC_();
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Atlas::n_adof);
     _contact_setup();
     _task_setup();
@@ -78,6 +77,12 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
     }
 
     _PostProcessing_Command();
+}
+
+void DoubleSupportCtrl::UpdateMPC_() {
+    PlannerInitialization_();
+    planner_->DoPlan();
+    exit(0);
 }
 
 void DoubleSupportCtrl::PlannerInitialization_() {
@@ -187,6 +192,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 static_cast<double>(ContactType::FlatContact);
             rf_st_time = rf_end_time + ssp_dur_;
             rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+            if (rf_st_time > _param->timeHorizon) break;
             rf_pos[0] += footstep_length_[0];
             rf_pos[1] += footstep_length_[1];
         }
@@ -206,6 +212,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 static_cast<double>(ContactType::FlatContact);
             lf_st_time = lf_end_time + ssp_dur_;
             lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+            if (lf_st_time > _param->timeHorizon) break;
             lf_pos[0] += footstep_length_[0];
             lf_pos[1] += footstep_length_[1];
         }
@@ -232,6 +239,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 static_cast<double>(ContactType::FlatContact);
             lf_st_time += ssp_dur_;
             lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+            if (lf_st_time > _param->timeHorizon) break;
             lf_pos[0] += footstep_length_[0];
             lf_pos[1] += footstep_length_[1];
         }
@@ -251,6 +259,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 static_cast<double>(ContactType::FlatContact);
             rf_st_time += ssp_dur_;
             rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+            if (rf_st_time > _param->timeHorizon) break;
             rf_pos[0] += footstep_length_[0];
             rf_pos[1] += footstep_length_[1];
         }
@@ -264,10 +273,9 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     Eigen::Vector3d com_displacement;
     for (int i = 0; i < 2; ++i)
         com_displacement[i] = (rf_pos[i] > lf_pos[i]) ? rf_pos[i] : lf_pos[i];
-    com_displacement[2] = com_height_;
+    // com_displacement[2] = com_height_ - r[2];
+    com_displacement[2] = 0.;
     _param->UpdateTerminalState(com_displacement);
-
-    exit(0);
 }
 
 void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {

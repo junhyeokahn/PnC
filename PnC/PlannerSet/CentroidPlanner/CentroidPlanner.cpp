@@ -13,11 +13,14 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
     defaultSolverSettingFile =
         THIS_COM +
         std::string("Config/Solver/DEFAULT_CONIC_SOLVER_SETTING.yaml");
+
     try {
         // =====================================================================
         // Solver Setting
         // =====================================================================
         YAML::Node optim_cfg = planner_cfg["optimization"];
+        saveDynamicsFile =
+            THIS_COM + readParameter<std::string>(optim_cfg, "storage_path");
         YAML::Node contact_cfg = planner_cfg["contact_sequence"];
         // Dynamics parameters
         readParameter(optim_cfg, "num_com_viapoints", numComViaPoints);
@@ -44,25 +47,12 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
         } else {
             heuristic = Heuristic::softConstraint;
         }
-        // Time optimization parameters
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "max_time_iterations", maxTimeIterations);
-            readParameter(optim_cfg, "max_time_residual_tolerance",
-                          maxTimeResidualTolerance);
-            readParameter(optim_cfg, "min_time_residual_improvement",
-                          minTimeResidualImprovement);
-        }
         // Configuration parameters
         gravity = 9.81;
         robotMass = robot_mass;
         readParameter(optim_cfg, "torque_range", torqueRange);
         readParameter(optim_cfg, "friction_coeff", frictionCoeff);
         readParameter(optim_cfg, "max_eef_lengths", maxEEfLengths);
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "time_range", timeRange);
-            readParameter(optim_cfg, "is_time_horizon_fixed",
-                          isTimeHorizonFixed);
-        }
         for (int eef_id = 0; eef_id < CentroidModel::numEEf; eef_id++) {
             readParameter(optim_cfg,
                           "cop_range_" + CentroidModel::eEfIdToString(eef_id),
@@ -91,10 +81,6 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
         readParameter(optim_cfg, "w_lmom_final", wLMomFinal);
         readParameter(optim_cfg, "w_amom_track", wAMomTrack);
         readParameter(optim_cfg, "w_lmom_track", wLMomTrack);
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "w_time", wTime);
-            readParameter(optim_cfg, "w_time_penalty", wTimePenalty);
-        }
         // Storage information
         readParameter(optim_cfg, "store_data", isStoreData);
         // Solver setting
@@ -114,9 +100,13 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
 void CentroidPlannerParameter::UpdateContactPlanInterface(
     std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>
         contact_sequence) {
+    Eigen::VectorXd _num_contacts = Eigen::VectorXd::Zero(4);
     // fill out contactsequence
     for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
         int cpe = contact_sequence[eef_id].size();
+        _num_contacts[eef_id] = cpe;
+        YAML::Node _eefcnt =
+            contact_plan["eefcnt_" + CentroidModel::eEfIdToString(eef_id)];
         // std::cout << "eef_id : " << eef_id << std::endl;
         contactPlanInterface.contactsPerEndeff[eef_id] = cpe;
         contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
@@ -135,12 +125,14 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
                 Eigen::Quaternion<double>(v[5], v[6], v[7], v[8]);
             contactPlanInterface.contactSequence.eEfContacts[eef_id][c_id]
                 .contactType = idToContactType(static_cast<int>(v(9)));
+            _eefcnt["cnt" + std::to_string(c_id)] = v;
             // std::cout << "c_id : " << c_id << std::endl;
             // std::cout << contactPlanInterface.contactSequence
             //.eEfContacts[eef_id][c_id]
             //<< std::endl;
         }
     }
+    contact_plan["num_contacts"] = _num_contacts;
     b_req[2] = true;
 }
 
@@ -176,182 +168,6 @@ void CentroidPlannerParameter::UpdateRefDynamicsStateSequence() {
     b_req[1] = true;
 }
 
-void CentroidPlannerParameter::paramSetFromYaml(const std::string& cfg_file) {
-    cfgFile = cfg_file;
-    saveDynamicsFile = cfg_file.substr(0, cfg_file.size() - 5) + "_RESULT.yaml";
-    defaultSolverSettingFile =
-        THIS_COM +
-        std::string("Config/Solver/DEFAULT_CONIC_SOLVER_SETTING.yaml");
-    try {
-        YAML::Node planner_cfg = YAML::LoadFile(cfgFile.c_str());
-
-        // ===============
-        // Planner Setting
-        // ===============
-        YAML::Node optim_cfg = planner_cfg["planner_variables"];
-        // Dynamics parameters
-        readParameter(optim_cfg, "num_com_viapoints", numComViaPoints);
-        comViaPoints.clear();
-        for (int via_id = 0; via_id < numComViaPoints; via_id++) {
-            comViaPoints.push_back(Eigen::Vector4d::Zero());
-            readParameter(optim_cfg["com_viapoints"],
-                          "via" + std::to_string(via_id), comViaPoints[via_id]);
-        }
-
-        readParameter(optim_cfg, "time_step", timeStep);
-        readParameter(optim_cfg, "n_act_eefs", numActEEfs);
-        readParameter(optim_cfg, "time_horizon", timeHorizon);
-        readParameter(optim_cfg, "external_force", externalForce);
-        readParameter(optim_cfg, "com_displacement", comDisplacement);
-        if (readParameter<std::string>(optim_cfg, "heuristic")
-                .compare("TrustRegion") == 0) {
-            heuristic = Heuristic::trustRegion;
-        } else if (readParameter<std::string>(optim_cfg, "heuristic")
-                       .compare("SoftConstraint") == 0) {
-            heuristic = Heuristic::softConstraint;
-        } else if (readParameter<std::string>(optim_cfg, "heuristic")
-                       .compare("TimeOptimization") == 0) {
-            heuristic = Heuristic::timeOptimization;
-        } else {
-            heuristic = Heuristic::softConstraint;
-        }
-        // Time optimization parameters
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "max_time_iterations", maxTimeIterations);
-            readParameter(optim_cfg, "max_time_residual_tolerance",
-                          maxTimeResidualTolerance);
-            readParameter(optim_cfg, "min_time_residual_improvement",
-                          minTimeResidualImprovement);
-        }
-        // Configuration parameters
-        readParameter(optim_cfg, "gravity", gravity);
-        readParameter(optim_cfg, "robot_mass", robotMass);
-        readParameter(optim_cfg, "torque_range", torqueRange);
-        readParameter(optim_cfg, "friction_coeff", frictionCoeff);
-        readParameter(optim_cfg, "max_eef_lengths", maxEEfLengths);
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "time_range", timeRange);
-            readParameter(optim_cfg, "is_time_horizon_fixed",
-                          isTimeHorizonFixed);
-        }
-        for (int eef_id = 0; eef_id < CentroidModel::numEEf; eef_id++) {
-            readParameter(optim_cfg,
-                          "cop_range_" + CentroidModel::eEfIdToString(eef_id),
-                          copRange[eef_id]);
-            readParameter(optim_cfg,
-                          "eef_offset_" + CentroidModel::eEfIdToString(eef_id),
-                          eEfOffset[eef_id]);
-        }
-        isFrictionConeLinear =
-            (readParameter<std::string>(optim_cfg, "friction_cone")
-                 .compare("LinearCone") == 0);
-        // Dynamics weights
-        readParameter(optim_cfg, "w_com", wCom);
-        readParameter(optim_cfg, "w_amom", wAMom);
-        readParameter(optim_cfg, "w_lmom", wLMom);
-        readParameter(optim_cfg, "w_amomd", wAMomD);
-        readParameter(optim_cfg, "w_lmomd", wLMomD);
-        readParameter(optim_cfg, "w_com_via", wComVia);
-        readParameter(optim_cfg, "w_trq_arm", wTrqArm);
-        readParameter(optim_cfg, "w_trq_leg", wTrqLeg);
-        readParameter(optim_cfg, "w_frc_arm", wFrcArm);
-        readParameter(optim_cfg, "w_frc_leg", wFrcLeg);
-        readParameter(optim_cfg, "w_dfrc_arm", wDFrcArm);
-        readParameter(optim_cfg, "w_dfrc_leg", wDFrcLeg);
-        readParameter(optim_cfg, "w_amom_final", wAMomFinal);
-        readParameter(optim_cfg, "w_lmom_final", wLMomFinal);
-        readParameter(optim_cfg, "w_amom_track", wAMomTrack);
-        readParameter(optim_cfg, "w_lmom_track", wLMomTrack);
-        if (heuristic == Heuristic::timeOptimization) {
-            readParameter(optim_cfg, "w_time", wTime);
-            readParameter(optim_cfg, "w_time_penalty", wTimePenalty);
-        }
-        // Storage information
-        readParameter(optim_cfg, "store_data", isStoreData);
-        // Solver setting
-        readParameter(optim_cfg, "use_default_solver_setting",
-                      isDefaultSolverSetting);
-        massTimesGravity = robotMass * gravity;
-        gravityVector = Eigen::Vector3d(0., 0., -gravity);
-        numTimeSteps = std::floor(timeHorizon / timeStep);
-
-        // ===================
-        // Robot Initial State
-        // ===================
-        YAML::Node ini_robo_cfg = planner_cfg["initial_robot_configuration"];
-        readParameter(ini_robo_cfg, "com", initialState.com);
-        readParameter(ini_robo_cfg, "lmom", initialState.lMom);
-        readParameter(ini_robo_cfg, "amom", initialState.aMom);
-        for (int eef_id = 0; eef_id < CentroidModel::numEEf; eef_id++) {
-            Eigen::VectorXd eef_cfg = readParameter<Eigen::VectorXd>(
-                ini_robo_cfg["eef_pose"],
-                "eef_" + CentroidModel::eEfIdToString(eef_id));
-            initialState.eEfsActivation[eef_id] = int(eef_cfg(0));
-            initialState.eEfsPosition[eef_id] = eef_cfg.segment<3>(1);
-            initialState.eEfsOrientation[eef_id] = Eigen::Quaternion<double>(
-                eef_cfg[4], eef_cfg[5], eef_cfg[6], eef_cfg[7]);
-            readParameter(ini_robo_cfg["eef_ctrl"],
-                          "eef_frc_" + CentroidModel::eEfIdToString(eef_id),
-                          initialState.eEfsFrc[eef_id]);
-        }
-
-        // ===========================
-        // Reference Dynamics Sequence
-        // ===========================
-        refDynamicsStateSequence.resize(numTimeSteps);
-
-        // ================
-        // Contact Interface
-        // ================
-        YAML::Node contact_cfg = planner_cfg["contact_plan"];
-
-        // Contact parameters
-        readParameter(contact_cfg, "num_contacts",
-                      contactPlanInterface.contactsPerEndeff);
-        for (int eef_id = 0; eef_id < CentroidModel::numEEf; eef_id++) {
-            contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
-            if (contactPlanInterface.contactsPerEndeff[eef_id] > 0) {
-                YAML::Node eff_params =
-                    contact_cfg[("eefcnt_" +
-                                 CentroidModel::eEfIdToString(eef_id))
-                                    .c_str()];
-                for (int cnt_id = 0;
-                     cnt_id < contactPlanInterface.contactsPerEndeff[eef_id];
-                     cnt_id++) {
-                    Eigen::VectorXd v(10);
-                    readParameter(eff_params, "cnt" + std::to_string(cnt_id),
-                                  v);
-                    contactPlanInterface.contactSequence.eEfContacts[eef_id]
-                        .push_back(ContactState());
-                    contactPlanInterface.contactSequence
-                        .eEfContacts[eef_id][cnt_id]
-                        .timeIni = v[0];
-                    contactPlanInterface.contactSequence
-                        .eEfContacts[eef_id][cnt_id]
-                        .timeEnd = v[1];
-                    contactPlanInterface.contactSequence
-                        .eEfContacts[eef_id][cnt_id]
-                        .position = v.segment<3>(2);
-                    contactPlanInterface.contactSequence
-                        .eEfContacts[eef_id][cnt_id]
-                        .contactType = idToContactType(v(9));
-                    contactPlanInterface.contactSequence
-                        .eEfContacts[eef_id][cnt_id]
-                        .orientation =
-                        Eigen::Quaternion<double>(v[5], v[6], v[7], v[8]);
-                }
-            }
-        }
-
-        for (int i = 0; i < b_req.size(); ++i) b_req[i] = true;
-
-    } catch (std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-    }
-}
-
 CentroidPlanner::CentroidPlanner(CentroidPlannerParameter* _param) : Planner() {
     mCentParam = _param;
 }
@@ -378,7 +194,7 @@ void CentroidPlanner::_initialize() {
         mModel.configSetting(mCentParam->defaultSolverSettingFile);
     }
 
-    // mComPosGoal = mCentParam->initialState.com + mCentParam->comDisplacement;
+    mComPosGoal = mCentParam->initialState.com + mCentParam->comDisplacement;
     mFrictionCone.getCone(mCentParam->frictionCoeff, mConeMatrix);
     mDynStateSeq.resize(mCentParam->numTimeSteps);
     for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
@@ -401,16 +217,6 @@ void CentroidPlanner::_initializeOptimizationVariables() {
                      mNumVars);
     mAMom.initialize('C', 3, mCentParam->numTimeSteps, -inf_value, inf_value,
                      mNumVars);
-
-    // time variable, linear and angular momentum rates
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        mDt.initialize('C', 1, mCentParam->numTimeSteps, -inf_value, inf_value,
-                       mNumVars);
-        mLMomD.initialize('C', 3, mCentParam->numTimeSteps, -inf_value,
-                          inf_value, mNumVars);
-        mAMomD.initialize('C', 3, mCentParam->numTimeSteps, -inf_value,
-                          inf_value, mNumVars);
-    }
 
     // upper and lower bound variables, forces, cops, torques
     for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
@@ -436,14 +242,7 @@ solver::ExitCode CentroidPlanner::_optimize(bool update_tracking_objective) {
     mSolveTime = 0.0;
     mHasConverged = false;
     _internalOptimize(true);
-
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        for (int iter_id = 1; iter_id <= mCentParam->maxTimeIterations;
-             iter_id++) {
-            _internalOptimize();
-            if (mHasConverged) break;
-        }
-    }
+    // std::cout << mSolveTime << std::endl;
 
     _saveToFile(mCentParam->refDynamicsStateSequence);
     return mExitCode;
@@ -467,12 +266,6 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         _addVariableToModel(mCom, mModel, mVars);
         _addVariableToModel(mLMom, mModel, mVars);
         _addVariableToModel(mAMom, mModel, mVars);
-
-        if (mCentParam->heuristic == Heuristic::timeOptimization) {
-            _addVariableToModel(mDt, mModel, mVars);
-            _addVariableToModel(mLMomD, mModel, mVars);
-            _addVariableToModel(mAMomD, mModel, mVars);
-        }
 
         for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
             _addVariableToModel(mLbVar[eef_id], mModel, mVars);
@@ -535,45 +328,32 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                 }
 
                 // penalty on linear and angular momentum rates
-                if (mCentParam->heuristic == Heuristic::timeOptimization) {
+                if (time_id == 0) {
                     mQuadObjective.addQuaTerm(
                         mCentParam->wLMomD[axis_id],
-                        mVars[mLMomD.id(axis_id, time_id)]);
+                        (LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
+                         LinExpr(mCentParam->initialState.lMom[axis_id])) *
+                            (1.0 /
+                             mDynStateSeq.dynamicsStateSequence[time_id].time));
                     mQuadObjective.addQuaTerm(
                         mCentParam->wAMomD[axis_id],
-                        mVars[mAMomD.id(axis_id, time_id)]);
+                        (LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
+                         LinExpr(mCentParam->initialState.aMom[axis_id])) *
+                            (1.0 /
+                             mDynStateSeq.dynamicsStateSequence[time_id].time));
                 } else {
-                    if (time_id == 0) {
-                        mQuadObjective.addQuaTerm(
-                            mCentParam->wLMomD[axis_id],
-                            (LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                             LinExpr(mCentParam->initialState.lMom[axis_id])) *
-                                (1.0 /
-                                 mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time));
-                        mQuadObjective.addQuaTerm(
-                            mCentParam->wAMomD[axis_id],
-                            (LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                             LinExpr(mCentParam->initialState.aMom[axis_id])) *
-                                (1.0 /
-                                 mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time));
-                    } else {
-                        mQuadObjective.addQuaTerm(
-                            mCentParam->wLMomD[axis_id],
-                            (LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                             LinExpr(mVars[mLMom.id(axis_id, time_id - 1)])) *
-                                (1.0 /
-                                 mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time));
-                        mQuadObjective.addQuaTerm(
-                            mCentParam->wAMomD[axis_id],
-                            (LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                             LinExpr(mVars[mAMom.id(axis_id, time_id - 1)])) *
-                                (1.0 /
-                                 mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time));
-                    }
+                    mQuadObjective.addQuaTerm(
+                        mCentParam->wLMomD[axis_id],
+                        (LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
+                         LinExpr(mVars[mLMom.id(axis_id, time_id - 1)])) *
+                            (1.0 /
+                             mDynStateSeq.dynamicsStateSequence[time_id].time));
+                    mQuadObjective.addQuaTerm(
+                        mCentParam->wAMomD[axis_id],
+                        (LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
+                         LinExpr(mVars[mAMom.id(axis_id, time_id - 1)])) *
+                            (1.0 /
+                             mDynStateSeq.dynamicsStateSequence[time_id].time));
                 }
 
                 // penalty on forces
@@ -680,225 +460,14 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     }
                 }
             }
-
-            // penalty on time
-            if (mCentParam->heuristic == Heuristic::timeOptimization) {
-                mQuadObjective.addQuaTerm(mCentParam->wTimePenalty,
-                                          LinExpr(mVars[mDt.id(0, time_id)]));
-                mQuadObjective.addQuaTerm(mCentParam->wTime,
-                                          LinExpr(mVars[mDt.id(0, time_id)]) -
-                                              LinExpr(mCentParam->timeStep));
-            }
-        }
-
-        if (!is_first_time &&
-            mCentParam->heuristic == Heuristic::timeOptimization) {
-            for (int time_id = 0; time_id < mCentParam->numTimeSteps;
-                 time_id++) {
-                for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
-                     eef_id++) {
-                    if (mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsActivation[eef_id]) {
-                        Eigen::Matrix3d rot =
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsOrientation[eef_id]
-                                .toRotationMatrix();
-                        Eigen::Vector3d rx = rot.col(0);
-                        Eigen::Vector3d ry = rot.col(1);
-
-                        LinExpr lx, ly, lz, fx, fy, fz;
-                        lx = LinExpr(mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsPosition[eef_id]
-                                         .x()) -
-                             LinExpr(mVars[mCom.id(0, time_id)]) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 rx(0) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 ry(0);
-                        ly = LinExpr(mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsPosition[eef_id]
-                                         .y()) -
-                             LinExpr(mVars[mCom.id(1, time_id)]) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 rx(1) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 ry(1);
-                        lz = LinExpr(mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsPosition[eef_id]
-                                         .z()) -
-                             LinExpr(mVars[mCom.id(2, time_id)]) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 rx(2) +
-                             LinExpr(mVars[mCopLocal[eef_id].id(
-                                 1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                 ry(2);
-                        fx = mVars[mFrcWorld[eef_id].id(
-                            0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                   .eEfsActivationIds[eef_id])];
-                        fy = mVars[mFrcWorld[eef_id].id(
-                            1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                   .eEfsActivationIds[eef_id])];
-                        fz = mVars[mFrcWorld[eef_id].id(
-                            2, mDynStateSeq.dynamicsStateSequence[time_id]
-                                   .eEfsActivationIds[eef_id])];
-
-                        double lx_val, ly_val, lz_val, fx_val, fy_val, fz_val;
-                        lx_val =
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsPosition[eef_id]
-                                .x() -
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .com.x() +
-                            rx(0) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .x() +
-                            ry(0) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .y();
-                        ly_val =
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsPosition[eef_id]
-                                .y() -
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .com.y() +
-                            rx(1) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .x() +
-                            ry(1) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .y();
-                        lz_val =
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsPosition[eef_id]
-                                .z() -
-                            mDynStateSeq.dynamicsStateSequence[time_id]
-                                .com.z() +
-                            rx(2) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .x() +
-                            ry(2) * mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsCop[eef_id]
-                                        .y();
-                        fx_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .eEfsFrc[eef_id]
-                                     .x();
-                        fy_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .eEfsFrc[eef_id]
-                                     .y();
-                        fz_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .eEfsFrc[eef_id]
-                                     .z();
-
-                        LinExpr ub_x, lb_x, ub_y, lb_y, ub_z, lb_z;
-                        ub_x =
-                            (LinExpr(std::pow(-lz_val + fy_val, 2.0) +
-                                     std::pow(ly_val + fz_val, 2.0)) +
-                             ((LinExpr() - lz + fy) - (-lz_val + fy_val)) *
-                                 2.0 * (-lz_val + fy_val) +
-                             ((ly + fz) - (ly_val + fz_val)) * 2.0 *
-                                 (ly_val + fz_val)) -
-                            LinExpr(mVars[mUbVar[eef_id].id(
-                                0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-                        lb_x =
-                            (LinExpr(std::pow(-lz_val - fy_val, 2.0) +
-                                     std::pow(ly_val - fz_val, 2.0)) +
-                             ((LinExpr() - lz - fy) - (-lz_val - fy_val)) *
-                                 2.0 * (-lz_val - fy_val) +
-                             ((ly - fz) - (ly_val - fz_val)) * 2.0 *
-                                 (ly_val - fz_val)) -
-                            LinExpr(mVars[mLbVar[eef_id].id(
-                                0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-                        ub_y =
-                            (LinExpr(std::pow(lz_val + fx_val, 2.0) +
-                                     std::pow(-lx_val + fz_val, 2.0)) +
-                             ((lz + fx) - (lz_val + fx_val)) * 2.0 *
-                                 (lz_val + fx_val) +
-                             ((LinExpr() - lx + fz) - (-lx_val + fz_val)) *
-                                 2.0 * (-lx_val + fz_val)) -
-                            LinExpr(mVars[mUbVar[eef_id].id(
-                                1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-                        lb_y =
-                            (LinExpr(std::pow(lz_val - fx_val, 2.0) +
-                                     std::pow(-lx_val - fz_val, 2.0)) +
-                             ((lz - fx) - (lz_val - fx_val)) * 2.0 *
-                                 (lz_val - fx_val) +
-                             ((LinExpr() - lx - fz) - (-lx_val - fz_val)) *
-                                 2.0 * (-lx_val - fz_val)) -
-                            LinExpr(mVars[mLbVar[eef_id].id(
-                                1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-                        ub_z =
-                            (LinExpr(std::pow(-ly_val + fx_val, 2.0) +
-                                     std::pow(lx_val + fy_val, 2.0)) +
-                             ((LinExpr() - ly + fx) - (-ly_val + fx_val)) *
-                                 2.0 * (-ly_val + fx_val) +
-                             ((lx + fy) - (lx_val + fy_val)) * 2.0 *
-                                 (lx_val + fy_val)) -
-                            LinExpr(mVars[mUbVar[eef_id].id(
-                                2, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-                        lb_z =
-                            (LinExpr(std::pow(-ly_val - fx_val, 2.0) +
-                                     std::pow(lx_val - fy_val, 2.0)) +
-                             ((LinExpr() - ly - fx) - (-ly_val - fx_val)) *
-                                 2.0 * (-ly_val - fx_val) +
-                             ((lx - fy) - (lx_val - fy_val)) * 2.0 *
-                                 (lx_val - fy_val)) -
-                            LinExpr(mVars[mLbVar[eef_id].id(
-                                2, mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .eEfsActivationIds[eef_id])]);
-
-                        double w_soft_constraint = mModel.getStgs().get(
-                            SolverDoubleParam_SoftConstraintWeight);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, ub_x);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, lb_x);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, ub_y);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, lb_y);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, ub_z);
-                        mQuadObjective.addQuaTerm(w_soft_constraint, lb_z);
-                    }
-                }
-            }
         }
 
         mModel.setObjective(mQuadObjective, 0.0);
 
         // =====================================================================
-        // constant time horizon with time adaptation
-        // =====================================================================
-        if (mCentParam->isTimeHorizonFixed &&
-            mCentParam->heuristic == Heuristic::timeOptimization) {
-            mLinCons = 0.0;
-            for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
-                mLinCons += mVars[mDt.id(0, time_id)];
-            mModel.addLinConstr(
-                mLinCons, "=", mCentParam->numTimeSteps * mCentParam->timeStep);
-        }
-
-        // =====================================================================
         // upper and lower bounds constraints
         // =====================================================================
         for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
-            if (mCentParam->heuristic == Heuristic::timeOptimization) {
-                mModel.addLinConstr(mVars[mDt.id(0, time_id)], ">",
-                                    mCentParam->timeRange[0]);
-                mModel.addLinConstr(mVars[mDt.id(0, time_id)], "<",
-                                    mCentParam->timeRange[1]);
-            }
             for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
                 if (mDynStateSeq.dynamicsStateSequence[time_id]
                         .eEfsActivation[eef_id]) {
@@ -1000,355 +569,120 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         }
 
         for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
-            if (mCentParam->heuristic == Heuristic::timeOptimization) {
-                if (is_first_time) {
-                    // =========================================================
-                    // center of mass constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        if (time_id == 0) {
-                            mLinCons =
-                                LinExpr(mVars[mCom.id(axis_id, time_id)]) -
-                                LinExpr(mCentParam->initialState.com[axis_id]) -
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
-                                    (mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .time /
-                                     mCentParam->robotMass);
-                        } else {
-                            mLinCons =
-                                LinExpr(mVars[mCom.id(axis_id, time_id)]) -
-                                LinExpr(mVars[mCom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
-                                    (mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .time /
-                                     mCentParam->robotMass);
-                        }
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-
-                    // =========================================================
-                    // linear momentum constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        if (time_id == 0) {
-                            mLinCons =
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                                LinExpr(
-                                    mCentParam->initialState.lMom[axis_id]) -
-                                LinExpr(mVars[mLMomD.id(axis_id, time_id)]) *
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time;
-                        } else {
-                            mLinCons =
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                                LinExpr(mVars[mLMom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mLMomD.id(axis_id, time_id)]) *
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time;
-                        }
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-
-                    // =========================================================
-                    // angular momentum constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        if (time_id == 0) {
-                            mLinCons =
-                                LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                                LinExpr(
-                                    mCentParam->initialState.aMom[axis_id]) -
-                                LinExpr(mVars[mAMomD.id(axis_id, time_id)]) *
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time;
-                        } else {
-                            mLinCons =
-                                LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                                LinExpr(mVars[mAMom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mAMomD.id(axis_id, time_id)]) *
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time;
-                        }
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-                } else {
-                    LinExpr lmom, lmomd, amomd, dt = mVars[mDt.id(0, time_id)];
-                    double lmom_val, lmomd_val, amomd_val,
-                        dt_val =
-                            mDynStateSeq.dynamicsStateSequence[time_id].time;
-
-                    // =========================================================
-                    // center of mass constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        lmom = mVars[mLMom.id(axis_id, time_id)];
-                        lmom_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                       .lMom[axis_id];
-                        mLinCons = 0.0;
-                        if (time_id == 0) {
-                            mLinCons +=
-                                LinExpr(mCentParam->initialState.com[axis_id]) -
-                                LinExpr(mVars[mCom.id(axis_id, time_id)]);
-                        } else {
-                            mLinCons +=
-                                LinExpr(mVars[mCom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mCom.id(axis_id, time_id)]);
-                        }
-                        mLinCons += (LinExpr(std::pow(dt_val + lmom_val, 2.0)) +
-                                     ((dt + lmom) - (dt_val + lmom_val)) * 2.0 *
-                                         (dt_val + lmom_val)) *
-                                        (0.25 / mCentParam->robotMass) -
-                                    (LinExpr(std::pow(dt_val - lmom_val, 2.0)) +
-                                     ((dt - lmom) - (dt_val - lmom_val)) * 2.0 *
-                                         (dt_val - lmom_val)) *
-                                        (0.25 / mCentParam->robotMass);
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-
-                    // =========================================================
-                    // linear momentum constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        lmomd = mVars[mLMomD.id(axis_id, time_id)];
-                        lmomd_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .lMomD[axis_id];
-                        mLinCons = 0.0;
-                        if (time_id == 0) {
-                            mLinCons +=
-                                LinExpr(
-                                    mCentParam->initialState.lMom[axis_id]) -
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]);
-                        } else {
-                            mLinCons +=
-                                LinExpr(mVars[mLMom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mLMom.id(axis_id, time_id)]);
-                        }
-                        mLinCons +=
-                            (LinExpr(std::pow(dt_val + lmomd_val, 2.0)) +
-                             ((dt + lmomd) - (dt_val + lmomd_val)) * 2.0 *
-                                 (dt_val + lmomd_val)) *
-                                0.25 -
-                            (LinExpr(std::pow(dt_val - lmomd_val, 2.0)) +
-                             ((dt - lmomd) - (dt_val - lmomd_val)) * 2.0 *
-                                 (dt_val - lmomd_val)) *
-                                0.25;
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-
-                    // =========================================================
-                    // angular momentum constraint
-                    // =========================================================
-                    for (int axis_id = 0; axis_id < 3; axis_id++) {
-                        amomd = mVars[mAMomD.id(axis_id, time_id)];
-                        amomd_val = mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .aMomD[axis_id];
-                        mLinCons = 0.0;
-                        if (time_id == 0) {
-                            mLinCons +=
-                                LinExpr(
-                                    mCentParam->initialState.aMom[axis_id]) -
-                                LinExpr(mVars[mAMom.id(axis_id, time_id)]);
-                        } else {
-                            mLinCons +=
-                                LinExpr(mVars[mAMom.id(axis_id, time_id - 1)]) -
-                                LinExpr(mVars[mAMom.id(axis_id, time_id)]);
-                        }
-                        mLinCons +=
-                            (LinExpr(std::pow(dt_val + amomd_val, 2.0)) +
-                             ((dt + amomd) - (dt_val + amomd_val)) * 2.0 *
-                                 (dt_val + amomd_val)) *
-                                0.25 -
-                            (LinExpr(std::pow(dt_val - amomd_val, 2.0)) +
-                             ((dt - amomd) - (dt_val - amomd_val)) * 2.0 *
-                                 (dt_val - amomd_val)) *
-                                0.25;
-                        mModel.addLinConstr(mLinCons, "=", 0.0);
-                    }
-                }
-
-                // =============================================================
-                // linear momentum rate constraint
-                // =============================================================
-                for (int axis_id = 0; axis_id < 3; axis_id++) {
-                    mLinCons = LinExpr(mCentParam->robotMass *
-                                       mCentParam->gravityVector[axis_id]) -
-                               LinExpr(mVars[mLMomD.id(axis_id, time_id)]);
-                    for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
-                         eef_id++)
-                        if (mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsActivation[eef_id]) {
-                            mLinCons +=
-                                LinExpr(mVars[mFrcWorld[eef_id].id(
-                                    axis_id,
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                mCentParam->massTimesGravity;
-                        }
-                    mModel.addLinConstr(mLinCons, "=", 0.0);
-                }
-
-                // =============================================================
-                // angular momentum rate constraint
-                // =============================================================
-                for (int axis_id = 0; axis_id < 3; axis_id++) {
+            // =================================================================
+            // center of mass constraint
+            // =================================================================
+            for (int axis_id = 0; axis_id < 3; axis_id++) {
+                if (time_id == 0) {
                     mLinCons =
-                        LinExpr() - LinExpr(mVars[mAMomD.id(axis_id, time_id)]);
-                    for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
-                         eef_id++) {
-                        if (mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsActivation[eef_id]) {
-                            Eigen::Matrix3d rot =
-                                mDynStateSeq.dynamicsStateSequence[time_id]
-                                    .eEfsOrientation[eef_id]
-                                    .toRotationMatrix();
-                            mLinCons +=
-                                (LinExpr(mVars[mUbVar[eef_id].id(
-                                     axis_id,
-                                     mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])]) -
-                                 LinExpr(mVars[mLbVar[eef_id].id(
-                                     axis_id,
-                                     mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])])) *
-                                0.25 * mCentParam->massTimesGravity;
-                            mLinCons +=
-                                LinExpr(mVars[mTrqLocal[eef_id].id(
-                                    0,
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                rot.col(2)[axis_id];
-                        }
-                    }
-                    mModel.addLinConstr(mLinCons, "=", 0.0);
+                        LinExpr(mVars[mCom.id(axis_id, time_id)]) -
+                        LinExpr(mCentParam->initialState.com[axis_id]) -
+                        LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
+                            (mDynStateSeq.dynamicsStateSequence[time_id].time /
+                             mCentParam->robotMass);
+                } else {
+                    mLinCons =
+                        LinExpr(mVars[mCom.id(axis_id, time_id)]) -
+                        LinExpr(mVars[mCom.id(axis_id, time_id - 1)]) -
+                        LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
+                            (mDynStateSeq.dynamicsStateSequence[time_id].time /
+                             mCentParam->robotMass);
                 }
-            } else {
-                // =============================================================
-                // center of mass constraint
-                // =============================================================
-                for (int axis_id = 0; axis_id < 3; axis_id++) {
-                    if (time_id == 0) {
-                        mLinCons =
-                            LinExpr(mVars[mCom.id(axis_id, time_id)]) -
-                            LinExpr(mCentParam->initialState.com[axis_id]) -
-                            LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
-                                (mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time /
-                                 mCentParam->robotMass);
-                    } else {
-                        mLinCons =
-                            LinExpr(mVars[mCom.id(axis_id, time_id)]) -
-                            LinExpr(mVars[mCom.id(axis_id, time_id - 1)]) -
-                            LinExpr(mVars[mLMom.id(axis_id, time_id)]) *
-                                (mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time /
-                                 mCentParam->robotMass);
-                    }
-                    mModel.addLinConstr(mLinCons, "=", 0.0);
+                mModel.addLinConstr(mLinCons, "=", 0.0);
+            }
+
+            // =================================================================
+            // linear momentum constraint
+            // =================================================================
+            for (int axis_id = 0; axis_id < 3; axis_id++) {
+                if (time_id == 0) {
+                    mLinCons =
+                        LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
+                        LinExpr(
+                            mDynStateSeq.dynamicsStateSequence[time_id].time *
+                            (mCentParam->robotMass *
+                             mCentParam->gravityVector[axis_id])) -
+                        LinExpr(mCentParam->initialState.lMom(axis_id));
+                } else {
+                    mLinCons =
+                        LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
+                        LinExpr(
+                            mDynStateSeq.dynamicsStateSequence[time_id].time *
+                            (mCentParam->robotMass *
+                             mCentParam->gravityVector[axis_id])) -
+                        LinExpr(mVars[mLMom.id(axis_id, time_id - 1)]);
                 }
 
-                // =============================================================
-                // linear momentum constraint
-                // =============================================================
-                for (int axis_id = 0; axis_id < 3; axis_id++) {
-                    if (time_id == 0) {
-                        mLinCons =
-                            LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                            LinExpr(mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time *
-                                    (mCentParam->robotMass *
-                                     mCentParam->gravityVector[axis_id])) -
-                            LinExpr(mCentParam->initialState.lMom(axis_id));
-                    } else {
-                        mLinCons =
-                            LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
-                            LinExpr(mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .time *
-                                    (mCentParam->robotMass *
-                                     mCentParam->gravityVector[axis_id])) -
-                            LinExpr(mVars[mLMom.id(axis_id, time_id - 1)]);
-                    }
-
-                    for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
-                         eef_id++) {
-                        if (mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsActivation[eef_id]) {
-                            mLinCons +=
-                                LinExpr(mVars[mFrcWorld[eef_id].id(
-                                    axis_id,
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                (-mDynStateSeq.dynamicsStateSequence[time_id]
-                                      .time *
-                                 mCentParam->massTimesGravity);
-                        }
-                    }
-                    if (time_id == 0) {
+                for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
+                     eef_id++) {
+                    if (mDynStateSeq.dynamicsStateSequence[time_id]
+                            .eEfsActivation[eef_id]) {
                         mLinCons +=
-                            LinExpr(mCentParam->externalForce[axis_id]) *
+                            LinExpr(mVars[mFrcWorld[eef_id].id(
+                                axis_id,
+                                mDynStateSeq.dynamicsStateSequence[time_id]
+                                    .eEfsActivationIds[eef_id])]) *
                             (-mDynStateSeq.dynamicsStateSequence[time_id].time *
                              mCentParam->massTimesGravity);
                     }
-                    mModel.addLinConstr(mLinCons, "=", 0.0);
+                }
+                if (time_id == 0) {
+                    mLinCons +=
+                        LinExpr(mCentParam->externalForce[axis_id]) *
+                        (-mDynStateSeq.dynamicsStateSequence[time_id].time *
+                         mCentParam->massTimesGravity);
+                }
+                mModel.addLinConstr(mLinCons, "=", 0.0);
+            }
+
+            // =================================================================
+            // angular momentum constraint
+            // =================================================================
+            for (int axis_id = 0; axis_id < 3; axis_id++) {
+                if (time_id == 0) {
+                    mLinCons = LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
+                               LinExpr(mCentParam->initialState.aMom[axis_id]);
+                } else {
+                    mLinCons = LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
+                               LinExpr(mVars[mAMom.id(axis_id, time_id - 1)]);
                 }
 
-                // =============================================================
-                // angular momentum constraint
-                // =============================================================
-                for (int axis_id = 0; axis_id < 3; axis_id++) {
-                    if (time_id == 0) {
-                        mLinCons =
-                            LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                            LinExpr(mCentParam->initialState.aMom[axis_id]);
-                    } else {
-                        mLinCons =
-                            LinExpr(mVars[mAMom.id(axis_id, time_id)]) -
-                            LinExpr(mVars[mAMom.id(axis_id, time_id - 1)]);
-                    }
-
-                    for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
-                         eef_id++) {
-                        if (mDynStateSeq.dynamicsStateSequence[time_id]
-                                .eEfsActivation[eef_id]) {
-                            mLinCons +=
-                                (LinExpr(mVars[mLbVar[eef_id].id(
-                                     axis_id,
-                                     mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])]) -
-                                 LinExpr(mVars[mUbVar[eef_id].id(
-                                     axis_id,
-                                     mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])])) *
-                                (0.25 *
+                for (int eef_id = 0; eef_id < mCentParam->numActEEfs;
+                     eef_id++) {
+                    if (mDynStateSeq.dynamicsStateSequence[time_id]
+                            .eEfsActivation[eef_id]) {
+                        mLinCons +=
+                            (LinExpr(mVars[mLbVar[eef_id].id(
+                                 axis_id,
                                  mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time *
-                                 mCentParam->massTimesGravity);
-
-                            Eigen::Vector3d rz =
-                                mDynStateSeq.dynamicsStateSequence[time_id]
-                                    .eEfsOrientation[eef_id]
-                                    .toRotationMatrix()
-                                    .col(2);
-                            mLinCons +=
-                                LinExpr(mVars[mTrqLocal[eef_id].id(
-                                    0,
-                                    mDynStateSeq.dynamicsStateSequence[time_id]
-                                        .eEfsActivationIds[eef_id])]) *
-                                (-rz[axis_id] *
+                                     .eEfsActivationIds[eef_id])]) -
+                             LinExpr(mVars[mUbVar[eef_id].id(
+                                 axis_id,
                                  mDynStateSeq.dynamicsStateSequence[time_id]
-                                     .time);
-                        }
+                                     .eEfsActivationIds[eef_id])])) *
+                            (0.25 *
+                             mDynStateSeq.dynamicsStateSequence[time_id].time *
+                             mCentParam->massTimesGravity);
+
+                        Eigen::Vector3d rz =
+                            mDynStateSeq.dynamicsStateSequence[time_id]
+                                .eEfsOrientation[eef_id]
+                                .toRotationMatrix()
+                                .col(2);
+                        mLinCons +=
+                            LinExpr(mVars[mTrqLocal[eef_id].id(
+                                0, mDynStateSeq.dynamicsStateSequence[time_id]
+                                       .eEfsActivationIds[eef_id])]) *
+                            (-rz[axis_id] *
+                             mDynStateSeq.dynamicsStateSequence[time_id].time);
                     }
-                    mModel.addLinConstr(mLinCons, "=", 0.0);
                 }
+                mModel.addLinConstr(mLinCons, "=", 0.0);
             }
         }
 
         QuadConstrApprox qapprox = QuadConstrApprox::None;
         switch (mCentParam->heuristic) {
-            case Heuristic::timeOptimization: {
-                qapprox = QuadConstrApprox::None;
-                break;
-            }
             case Heuristic::trustRegion: {
                 qapprox = QuadConstrApprox::TrustRegion;
                 break;
@@ -1516,15 +850,9 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         std::cout << "Exception during optimization" << std::endl;
     }
 
-    if (mCentParam->heuristic == Heuristic::timeOptimization)
-        _saveSolution(mDt);
     _saveSolution(mCom);
     _saveSolution(mAMom);
     _saveSolution(mLMom);
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        _saveSolution(mLMomD);
-        _saveSolution(mAMomD);
-    }
     for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
         _saveSolution(mFrcWorld[eef_id]);
         _saveSolution(mCopLocal[eef_id]);
@@ -1539,52 +867,6 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
     linmom.setZero();
     Eigen::MatrixXd angmom(3, mCentParam->numTimeSteps);
     angmom.setZero();
-
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
-            if (time_id == 0) {
-                compos.col(time_id) = mCentParam->initialState.com;
-                linmom.col(time_id) = mCentParam->initialState.lMom;
-            } else {
-                compos.col(time_id) = compos.col(time_id - 1);
-                linmom.col(time_id) = linmom.col(time_id - 1);
-            }
-
-            linmom.col(time_id) +=
-                mCentParam->robotMass * mCentParam->gravityVector *
-                mVars[mDt.id(0, time_id)].get(SolverDoubleParam_X);
-            for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
-                if (mDynStateSeq.dynamicsStateSequence[time_id]
-                        .eEfsActivation[eef_id]) {
-                    frc.x() =
-                        mCentParam->massTimesGravity *
-                        mVars[mFrcWorld[eef_id].id(
-                                  0, mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])]
-                            .get(SolverDoubleParam_X);
-                    frc.y() =
-                        mCentParam->massTimesGravity *
-                        mVars[mFrcWorld[eef_id].id(
-                                  1, mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])]
-                            .get(SolverDoubleParam_X);
-                    frc.z() =
-                        mCentParam->massTimesGravity *
-                        mVars[mFrcWorld[eef_id].id(
-                                  2, mDynStateSeq.dynamicsStateSequence[time_id]
-                                         .eEfsActivationIds[eef_id])]
-                            .get(SolverDoubleParam_X);
-                    linmom.col(time_id).head(3) +=
-                        mVars[mDt.id(0, time_id)].get(SolverDoubleParam_X) *
-                        frc;
-                }
-            }
-            compos.col(time_id).head(3) +=
-                1.0 / mCentParam->robotMass *
-                mVars[mDt.id(0, time_id)].get(SolverDoubleParam_X) *
-                linmom.col(time_id).head(3);
-        }
-    }
 
     // computation of angular momentum out of forces and lengths
     for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++) {
@@ -1605,99 +887,51 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                 Eigen::Vector3d ry = rot.col(1);
                 Eigen::Vector3d rz = rot.col(2);
 
-                if (mCentParam->heuristic == Heuristic::timeOptimization) {
-                    len.x() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .x() -
-                        compos(0, time_id) +
-                        rx(0) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(0) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                    len.y() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .y() -
-                        compos(1, time_id) +
-                        rx(1) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(1) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                    len.z() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .z() -
-                        compos(2, time_id) +
-                        rx(2) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(2) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                } else {
-                    len.x() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .x() -
-                        mVars[mCom.id(0, time_id)].get(SolverDoubleParam_X) +
-                        rx(0) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(0) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                    len.y() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .y() -
-                        mVars[mCom.id(1, time_id)].get(SolverDoubleParam_X) +
-                        rx(1) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(1) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                    len.z() =
-                        mDynStateSeq.dynamicsStateSequence[time_id]
-                            .eEfsPosition[eef_id]
-                            .z() -
-                        mVars[mCom.id(2, time_id)].get(SolverDoubleParam_X) +
-                        rx(2) * mVars[mCopLocal[eef_id].id(
-                                          0, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X) +
-                        ry(2) * mVars[mCopLocal[eef_id].id(
-                                          1, mDynStateSeq
-                                                 .dynamicsStateSequence[time_id]
-                                                 .eEfsActivationIds[eef_id])]
-                                    .get(SolverDoubleParam_X);
-                }
+                len.x() =
+                    mDynStateSeq.dynamicsStateSequence[time_id]
+                        .eEfsPosition[eef_id]
+                        .x() -
+                    mVars[mCom.id(0, time_id)].get(SolverDoubleParam_X) +
+                    rx(0) *
+                        mVars[mCopLocal[eef_id].id(
+                                  0, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X) +
+                    ry(0) *
+                        mVars[mCopLocal[eef_id].id(
+                                  1, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X);
+                len.y() =
+                    mDynStateSeq.dynamicsStateSequence[time_id]
+                        .eEfsPosition[eef_id]
+                        .y() -
+                    mVars[mCom.id(1, time_id)].get(SolverDoubleParam_X) +
+                    rx(1) *
+                        mVars[mCopLocal[eef_id].id(
+                                  0, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X) +
+                    ry(1) *
+                        mVars[mCopLocal[eef_id].id(
+                                  1, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X);
+                len.z() =
+                    mDynStateSeq.dynamicsStateSequence[time_id]
+                        .eEfsPosition[eef_id]
+                        .z() -
+                    mVars[mCom.id(2, time_id)].get(SolverDoubleParam_X) +
+                    rx(2) *
+                        mVars[mCopLocal[eef_id].id(
+                                  0, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X) +
+                    ry(2) *
+                        mVars[mCopLocal[eef_id].id(
+                                  1, mDynStateSeq.dynamicsStateSequence[time_id]
+                                         .eEfsActivationIds[eef_id])]
+                            .get(SolverDoubleParam_X);
                 frc.x() =
                     mCentParam->massTimesGravity *
                     mVars[mFrcWorld[eef_id].id(
@@ -1731,45 +965,12 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
         mAMom.setGuessValue(angmom);
     }
     _storeSolution();
-
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        // computing convergence error
-        if (is_first_time) {
-            mLastConvergenceErr = SolverSetting::inf;
-        } else {
-            mLastConvergenceErr = mConvergenceErr;
-        }
-        mCom.getGuessValue(mComGuess);
-        double com_err = (mComGuess - compos).norm() / mCentParam->numTimeSteps;
-        mLMom.getGuessValue(mLMomGuess);
-        double lmom_err =
-            (mLMomGuess - linmom).norm() / mCentParam->numTimeSteps;
-        mAMom.getGuessValue(mAMomGuess);
-        double amom_err =
-            (mAMomGuess - angmom).norm() / mCentParam->numTimeSteps;
-        mConvergenceErr = std::max(com_err, std::max(lmom_err, amom_err));
-
-        if (mConvergenceErr < mCentParam->maxTimeResidualTolerance) {
-            mHasConverged = true;
-        }
-        if (std::abs(mLastConvergenceErr - mConvergenceErr) <
-            mCentParam->minTimeResidualImprovement) {
-            mHasConverged = true;
-        }
-        if (mHasConverged) {
-            mAMom.setGuessValue(angmom);
-            _storeSolution();
-        }
-    }
 }
 
 void CentroidPlanner::_saveToFile(const DynamicsStateSequence& _ref_sequence) {
     if (mCentParam->isStoreData) {
         try {
-            YAML::Node cfg_pars = YAML::LoadFile(mCentParam->cfgFile.c_str());
-
             YAML::Node qcqp_cfg;
-            qcqp_cfg["robot_model_path"] = cfg_pars["robot_model_path"];
             qcqp_cfg["dynopt_params"]["time_step"] = mCentParam->timeStep;
             qcqp_cfg["dynopt_params"]["end_com"] = mComPosGoal;
             qcqp_cfg["dynopt_params"]["robot_mass"] = mCentParam->robotMass;
@@ -1780,7 +981,7 @@ void CentroidPlanner::_saveToFile(const DynamicsStateSequence& _ref_sequence) {
             qcqp_cfg["dynopt_params"]["ini_lin_mom"] =
                 mCentParam->initialState.lMom;
             qcqp_cfg["dynopt_params"]["time_horizon"] = mCentParam->timeHorizon;
-            qcqp_cfg["cntopt_params"] = cfg_pars["contact_plan"];
+            qcqp_cfg["cntopt_params"] = mCentParam->contact_plan;
 
             mCom.getGuessValue(mMatGuess);
             qcqp_cfg["dynopt_params"]["com_motion"] = mMatGuess;
@@ -1883,22 +1084,6 @@ void CentroidPlanner::_storeSolution() {
     for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
         mDynStateSeq.dynamicsStateSequence[time_id].aMom =
             Eigen::Vector3d(mMatGuess.block<3, 1>(0, time_id));
-
-    if (mCentParam->heuristic == Heuristic::timeOptimization) {
-        mDt.getGuessValue(mMatGuess);
-        for (int time = 0; time < mCentParam->numTimeSteps; time++)
-            mDynStateSeq.dynamicsStateSequence[time].time = mMatGuess(0, time);
-
-        mLMomD.getGuessValue(mMatGuess);
-        for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
-            mDynStateSeq.dynamicsStateSequence[time_id].lMomD =
-                Eigen::Vector3d(mMatGuess.block<3, 1>(0, time_id));
-
-        mAMomD.getGuessValue(mMatGuess);
-        for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
-            mDynStateSeq.dynamicsStateSequence[time_id].aMomD =
-                Eigen::Vector3d(mMatGuess.block<3, 1>(0, time_id));
-    }
 
     for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
         mFrcWorld[eef_id].getGuessValue(mMatGuess);

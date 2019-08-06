@@ -64,6 +64,7 @@ class DoubleSupportCtrl : public Controller {
     Eigen::Quaternion<double> torso_delta_quat_;
     Eigen::Vector3d torso_delta_so3_;
 
+    void UpdateMPC_();
     void PlannerInitialization_();
     void _task_setup();
     void _contact_setup();

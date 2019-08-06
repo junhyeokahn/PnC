@@ -56,6 +56,7 @@ class CentroidPlannerParameter {
     void UpdateContactPlanInterface(
         std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>
             contact_sequence);
+    YAML::Node contact_plan;
     void UpdateTerminalState(const Eigen::Vector3d& r_goal);
     std::vector<bool> b_req;
 
@@ -63,7 +64,6 @@ class CentroidPlannerParameter {
     // constructor for offline planning
     // =========================================================================
     CentroidPlannerParameter() { b_req.resize(4, false); };
-    void paramSetFromYaml(const std::string& configFile_);
 
     virtual ~CentroidPlannerParameter(){};
 
