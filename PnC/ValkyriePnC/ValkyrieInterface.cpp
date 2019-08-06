@@ -1,7 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-//#include <PnC/ValkyriePnC/TestSet/BalanceTest.hpp>
+#include <PnC/ValkyriePnC/TestSet/BalanceTest.hpp>
+#include <PnC/ValkyriePnC/TestSet/WalkingTest.hpp>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateEstimator.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
@@ -36,7 +37,7 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
 ValkyrieInterface::~ValkyrieInterface() {
     delete robot_;
     delete state_estimator_;
-    // delete test_;
+    delete test_;
 }
 
 void ValkyrieInterface::getCommand(void* _data, void* _command) {
@@ -45,7 +46,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
 
     if (!Initialization_(data, cmd)) {
         state_estimator_->Update(data);
-        // test_->getCommand(cmd);
+        test_->getCommand(cmd);
         CropTorque_(cmd);
     }
 
@@ -56,7 +57,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
     ++count_;
     running_time_ = (double)(count_)*ValkyrieAux::servo_rate;
     sp_->curr_time = running_time_;
-    // sp_->phase_copy = test_->getPhase();
+    sp_->phase_copy = test_->getPhase();
 }
 
 void ValkyrieInterface::CropTorque_(ValkyrieCommand* cmd) {
@@ -72,7 +73,9 @@ void ValkyrieInterface::_ParameterSetting() {
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "balance_test") {
-            // test_ = new BalanceTest(robot_);
+            test_ = new BalanceTest(robot_);
+        } else if (test_name == "walking_test") {
+            test_ = new WalkingTest(robot_);
         } else {
             printf(
                 "[Valkyrie Interface] There is no test matching test with "

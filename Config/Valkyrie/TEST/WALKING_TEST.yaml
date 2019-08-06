@@ -14,7 +14,7 @@ planner_configuration:
     # ==========================================================================
     optimization:
 
-        heuristic: SoftConstraint  # Types: TrustRegion, SoftConstraint, TimeOptimization 
+        heuristic: SoftConstraint  # Types: TrustRegion, SoftConstraint
         n_act_eefs: 2
         time_step: 0.1
         time_horizon: 1.6
@@ -42,8 +42,8 @@ planner_configuration:
         eef_offset_lf: [ 0.00,  0.00,  0.00]
         eef_offset_rh: [ 0.20,  0.00,  0.48]
         eef_offset_lh: [-0.20,  0.00,  0.48]
-        cop_range_rf: [-0.125, 0.125, -0.075, 0.075]
-        cop_range_lf: [-0.125, 0.125, -0.075, 0.075]
+        cop_range_rf: [-0.135, 0.135, -0.08, 0.08]
+        cop_range_lf: [-0.135, 0.135, -0.08, 0.08]
         cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
         cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
         max_eef_lengths: [1.5,  1.5,  0.60,  0.60]
@@ -86,7 +86,7 @@ control_configuration:
     ds_ctrl:
         kp: [ 300, 300, 300, 300, 300, 300, 300, 300, 300, 300,
               300, 300, 300, 300, 300, 300, 300, 300, 300, 300,
-              300, 300, 300 ]
+              300, 300, 300, 300, 300, 300, 300, 300 ]
         kd: [ 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
               15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-              15, 15, 15 ]
+              15, 15, 15, 15, 15, 15, 15, 15 ]

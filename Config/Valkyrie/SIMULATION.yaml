@@ -2,5 +2,5 @@ servo_rate: 0.001 # !!this should be match with controller servo rate!!
 show_joint_frame: false
 
 control_configuration:
-  kp: 100
-  kd: 5
+  kp: 50
+  kd: 1

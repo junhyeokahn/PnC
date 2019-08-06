@@ -30,6 +30,8 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
     int n_dof_;
     double kp_;
     double kd_;
+    Eigen::VectorXd trq_lb_;
+    Eigen::VectorXd trq_ub_;
 
    public:
     ValkyrieWorldNode(const dart::simulation::WorldPtr& world);

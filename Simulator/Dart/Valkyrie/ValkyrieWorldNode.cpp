@@ -8,6 +8,8 @@ ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr& _world)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
     world_ = _world;
     robot_ = world_->getSkeleton("valkyrie");
+    trq_lb_ = robot_->getForceLowerLimits();
+    trq_ub_ = robot_->getForceUpperLimits();
     n_dof_ = robot_->getNumDofs();
     ground_ = world_->getSkeleton("ground_skeleton");
 
@@ -46,7 +48,9 @@ void ValkyrieWorldNode::customPreStep() {
     }
     trq_cmd_.head(6).setZero();
 
-    trq_cmd_.setZero();
+    // trq_cmd_.setZero();
+    Eigen::VectorXd clipped_trq =
+        myUtils::CropVector(trq_cmd_, trq_lb_, trq_ub_, "final trq");
     robot_->setForces(trq_cmd_);
 
     count_++;

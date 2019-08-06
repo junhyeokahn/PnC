@@ -38,7 +38,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
                         osgGA::GUIActionAdapter& /*aa*/) {
         if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
             if (ea.getKey() == 'f') {
-                int numStepProgress(50);
+                int numStepProgress(5);
                 for (int i = 0; i < numStepProgress; ++i) {
                     worldnode_->customPreStep();
                     worldnode_->getWorld()->step();
