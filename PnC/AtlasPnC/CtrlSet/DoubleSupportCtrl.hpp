@@ -74,4 +74,10 @@ class DoubleSupportCtrl : public Controller {
     AtlasStateProvider* sp_;
 
     Planner* planner_;
+    Eigen::MatrixXd com_traj_;
+    Eigen::MatrixXd lmom_traj_;
+    Eigen::MatrixXd amom_traj_;
+    Eigen::MatrixXd cop_local_traj_;  // TODO : double check
+    Eigen::MatrixXd frc_world_traj_;
+    Eigen::MatrixXd trq_local_traj_;
 };

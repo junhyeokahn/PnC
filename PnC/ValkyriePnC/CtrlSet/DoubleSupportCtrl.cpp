@@ -1,6 +1,5 @@
 #include <array>
 
-#include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
 #include <PnC/ValkyriePnC/ContactSet/ContactSet.hpp>
 #include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
@@ -62,6 +61,7 @@ DoubleSupportCtrl::~DoubleSupportCtrl() {
 }
 
 void DoubleSupportCtrl::oneStep(void* _cmd) {
+    _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
     UpdateMPC_();
@@ -82,7 +82,14 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 void DoubleSupportCtrl::UpdateMPC_() {
     PlannerInitialization_();
     planner_->DoPlan();
-    exit(0);
+    ((CentroidPlanner*)planner_)
+        ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
+                      frc_world_traj_, trq_local_traj_);
+    sp_->com_des_list.clear();
+    for (int i = 0; i < com_traj_.cols(); ++i) {
+        sp_->com_des_list.push_back(
+            (Eigen::VectorXd)(com_traj_.block(0, i, 3, 1)));
+    }
 }
 
 void DoubleSupportCtrl::PlannerInitialization_() {
@@ -186,6 +193,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<3>(2) = rf_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
+            c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5] = 1.;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
             rf_st_time = rf_end_time + ssp_dur_;
@@ -206,6 +214,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<3>(2) = lf_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
+            c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5] = 1.;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
             lf_st_time = lf_end_time + ssp_dur_;
@@ -233,6 +242,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<3>(2) = lf_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
+            c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5] = 1.;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
             lf_st_time += ssp_dur_;
@@ -253,6 +263,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                 .segment<3>(2) = rf_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
+            c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5] = 1.;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][9] =
                 static_cast<double>(ContactType::FlatContact);
             rf_st_time += ssp_dur_;
@@ -274,6 +285,22 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     // com_displacement[2] = com_height_ - r[2];
     com_displacement[2] = 0.;
     _param->UpdateTerminalState(com_displacement);
+
+    // =========================================================================
+    // save contact sequence for plotting
+    // =========================================================================
+    sp_->foot_target_list.clear();
+    for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
+        for (int c_id = 0; c_id < c_seq[eef_id].size(); ++c_id) {
+            Eigen::Isometry3d tmp;
+            tmp.translation() = c_seq[eef_id][c_id].segment<3>(2);
+            tmp.linear() = Eigen::Quaternion<double>(
+                               c_seq[eef_id][c_id][5], c_seq[eef_id][c_id][6],
+                               c_seq[eef_id][c_id][7], c_seq[eef_id][c_id][8])
+                               .toRotationMatrix();
+            sp_->foot_target_list.push_back(tmp);
+        }
+    }
 }
 
 void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
@@ -285,6 +312,8 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
                          sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof)) +
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
 
+    // myUtils::pretty_print(des_jacc_cmd, std::cout, "double");
+    // exit(0);
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
 }
 

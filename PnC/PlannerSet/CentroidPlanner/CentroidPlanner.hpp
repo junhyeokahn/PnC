@@ -115,6 +115,11 @@ class CentroidPlanner : public Planner {
     virtual void DoPlan();
     virtual void EvalTrajectory(double time, Eigen::VectorXd& s,
                                 Eigen::VectorXd& sdot, Eigen::VectorXd& u);
+    void GetSolution(Eigen::MatrixXd& com, Eigen::MatrixXd& lmom,
+                     Eigen::MatrixXd& amom,
+                     std::array<Eigen::MatrixXd, CentroidModel::numEEf>& cop,
+                     std::array<Eigen::MatrixXd, CentroidModel::numEEf>& frc,
+                     std::array<Eigen::MatrixXd, CentroidModel::numEEf>& trq);
 
     CentroidPlannerParameter* GetCentroidPlannerParameter() {
         return mCentParam;

@@ -104,3 +104,13 @@ bool ValkyrieInterface::Initialization_(ValkyrieSensorData* _sensor_data,
     }
     return false;
 }
+
+void ValkyrieInterface::GetCoMTrajectory(
+    std::vector<Eigen::VectorXd>& com_des_list) {
+    com_des_list = sp_->com_des_list;
+}
+void ValkyrieInterface::GetContactSequence(
+    std::vector<Eigen::Isometry3d>& foot_target_list) {
+    foot_target_list = sp_->foot_target_list;
+}
+

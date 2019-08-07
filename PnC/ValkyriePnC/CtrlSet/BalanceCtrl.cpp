@@ -87,6 +87,8 @@ void BalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
                          sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof)) +
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
 
+    // myUtils::pretty_print(des_jacc_cmd, std::cout, "balance");
+    // exit(0);
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
 }
 

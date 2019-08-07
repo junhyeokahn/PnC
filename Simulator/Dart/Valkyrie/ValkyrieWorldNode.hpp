@@ -13,6 +13,7 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
    private:
     void GetContactSwitchData_(bool& rfoot_contact, bool& lfoot_contact);
     void SetParams_();
+    void PlotMPCResult_();
 
     EnvInterface* interface_;
     ValkyrieSensorData* sensor_data_;
@@ -32,6 +33,8 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
     double kd_;
     Eigen::VectorXd trq_lb_;
     Eigen::VectorXd trq_ub_;
+
+    bool b_plot_mpc_result_;
 
    public:
     ValkyrieWorldNode(const dart::simulation::WorldPtr& world);

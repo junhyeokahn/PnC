@@ -38,7 +38,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
                         osgGA::GUIActionAdapter& /*aa*/) {
         if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
             if (ea.getKey() == 'f') {
-                int numStepProgress(5);
+                int numStepProgress(1);
                 for (int i = 0; i < numStepProgress; ++i) {
                     worldnode_->customPreStep();
                     worldnode_->getWorld()->step();
@@ -59,6 +59,16 @@ void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
         // std::cout << joint->isPositionLimitEnforced() << std::endl;
         joint->setPositionLimitEnforced(true);
     }
+}
+
+void _setTransparency(dart::dynamics::SkeletonPtr robot) {
+    // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+    // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+    // auto sns = bn->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    // for (auto sn : sns) {
+    // sn->getVisualAspect()->setAlpha(0.4);
+    //}
+    //}
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
@@ -212,6 +222,11 @@ int main(int argc, char** argv) {
     // Enabel Joit Limits
     // =========================================================================
     //_setJointLimitConstraint(robot);
+
+    // =========================================================================
+    // Set Transparency
+    // =========================================================================
+    _setTransparency(robot);
 
     // =========================================================================
     // Print Model Info

@@ -967,6 +967,21 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
     _storeSolution();
 }
 
+void CentroidPlanner::GetSolution(
+    Eigen::MatrixXd& com, Eigen::MatrixXd& lmom, Eigen::MatrixXd& amom,
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf>& cop,
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf>& frc,
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf>& trq) {
+    mCom.getGuessValue(com);
+    mLMom.getGuessValue(lmom);
+    mAMom.getGuessValue(amom);
+    for (int eef_id = 0; eef_id < mCentParam->numActEEfs; ++eef_id) {
+        mCopLocal[eef_id].getGuessValue(cop[eef_id]);
+        mFrcWorld[eef_id].getGuessValue(frc[eef_id]);
+        mTrqLocal[eef_id].getGuessValue(trq[eef_id]);
+    }
+}
+
 void CentroidPlanner::_saveToFile(const DynamicsStateSequence& _ref_sequence) {
     if (mCentParam->isStoreData) {
         try {

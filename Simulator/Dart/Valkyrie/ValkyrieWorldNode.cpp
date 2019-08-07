@@ -12,6 +12,7 @@ ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr& _world)
     trq_ub_ = robot_->getForceUpperLimits();
     n_dof_ = robot_->getNumDofs();
     ground_ = world_->getSkeleton("ground_skeleton");
+    b_plot_mpc_result_ = false;
 
     trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
 
@@ -41,6 +42,8 @@ void ValkyrieWorldNode::customPreStep() {
 
     interface_->getCommand(sensor_data_, command_);
 
+    if (b_plot_mpc_result_) PlotMPCResult_();
+
     trq_cmd_.tail(n_dof_ - 6) = command_->jtrq;
     for (int i = 0; i < n_dof_ - 6; ++i) {
         trq_cmd_[i + 6] += kp_ * (command_->q[i] - sensor_data_->q[i]) +
@@ -54,6 +57,55 @@ void ValkyrieWorldNode::customPreStep() {
     robot_->setForces(trq_cmd_);
 
     count_++;
+}
+
+void ValkyrieWorldNode::PlotMPCResult_() {
+    world_->removeAllSimpleFrames();
+    std::vector<Eigen::VectorXd> com_des_list;
+    std::vector<Eigen::Isometry3d> contact_sequence;
+
+    ((ValkyrieInterface*)interface_)->GetCoMTrajectory(com_des_list);
+    ((ValkyrieInterface*)interface_)->GetContactSequence(contact_sequence);
+    int n_traj = com_des_list.size();
+    int n_contact = contact_sequence.size();
+
+    // line segment
+    Eigen::Vector4d foot_color = Eigen::Vector4d(1.0, 0.63, 0.0, 1.0);
+    Eigen::Vector4d line_color = Eigen::Vector4d(0.9, 0., 0., 1.0);
+
+    std::vector<dart::dynamics::SimpleFramePtr> line_frame;
+    line_frame.clear();
+
+    for (int i = 0; i < n_traj - 1; ++i) {
+        Eigen::Vector3d v0, v1;
+        v0 << com_des_list[i][0], com_des_list[i][1], com_des_list[i][2];
+        v1 << com_des_list[i + 1][0], com_des_list[i + 1][1],
+            com_des_list[i + 1][2];
+        line_frame.push_back(std::make_shared<dart::dynamics::SimpleFrame>(
+            dart::dynamics::Frame::World(), "l" + std::to_string(i)));
+        dart::dynamics::LineSegmentShapePtr traj_line =
+            std::make_shared<dart::dynamics::LineSegmentShape>(v0, v1, 3.0);
+        line_frame[i]->setShape(traj_line);
+        line_frame[i]->createVisualAspect();
+        line_frame[i]->getVisualAspect()->setColor(line_color);
+        world_->addSimpleFrame(line_frame[i]);
+    }
+
+    // contact sequence
+    std::vector<dart::dynamics::SimpleFramePtr> contact_frame;
+    contact_frame.clear();
+
+    for (int i = 0; i < n_contact; ++i) {
+        Eigen::Isometry3d tf = contact_sequence[i];
+        contact_frame.push_back(std::make_shared<dart::dynamics::SimpleFrame>(
+            dart::dynamics::Frame::World(), "c" + std::to_string(i), tf));
+        dart::dynamics::BoxShapePtr b_shape =
+            std::make_shared<dart::dynamics::BoxShape>(
+                dart::dynamics::BoxShape(Eigen::Vector3d(0.23, 0.16, 0.001)));
+        contact_frame[i]->setShape(b_shape);
+        contact_frame[i]->getVisualAspect(true)->setColor(foot_color);
+        world_->addSimpleFrame(contact_frame[i]);
+    }
 }
 
 void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
@@ -91,6 +143,8 @@ void ValkyrieWorldNode::SetParams_() {
                                kp_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
                                kd_);
+        myUtils::readParameter(simulation_cfg, "plot_mpc_result",
+                               b_plot_mpc_result_);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

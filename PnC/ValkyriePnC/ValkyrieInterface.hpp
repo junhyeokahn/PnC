@@ -61,4 +61,7 @@ class ValkyrieInterface : public EnvInterface {
     ValkyrieInterface();
     virtual ~ValkyrieInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
+
+    void GetCoMTrajectory(std::vector<Eigen::VectorXd>& com_des_list);
+    void GetContactSequence(std::vector<Eigen::Isometry3d>& foot_target_list);
 };

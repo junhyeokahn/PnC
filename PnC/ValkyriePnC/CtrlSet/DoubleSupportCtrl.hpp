@@ -1,6 +1,9 @@
 #pragma once
 
+#include <array>
+
 #include <PnC/Controller.hpp>
+#include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
 
 class ValkyrieStateProvider;
 class RobotSystem;
@@ -8,7 +11,6 @@ class WBLC;
 class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
-class Planner;
 
 class DoubleSupportCtrl : public Controller {
    public:
@@ -74,4 +76,11 @@ class DoubleSupportCtrl : public Controller {
     ValkyrieStateProvider* sp_;
 
     Planner* planner_;
+    Eigen::MatrixXd com_traj_;
+    Eigen::MatrixXd lmom_traj_;
+    Eigen::MatrixXd amom_traj_;
+    // TODO : double check
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf> cop_local_traj_;
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf> frc_world_traj_;
+    std::array<Eigen::MatrixXd, CentroidModel::numEEf> trq_local_traj_;
 };

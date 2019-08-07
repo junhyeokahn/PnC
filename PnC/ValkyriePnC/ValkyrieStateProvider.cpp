@@ -23,4 +23,7 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
 
     b_rfoot_contact = 0;
     b_lfoot_contact = 0;
+
+    foot_target_list.clear();
+    com_des_list.clear();
 }

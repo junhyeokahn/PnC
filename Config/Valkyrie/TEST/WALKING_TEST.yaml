@@ -6,7 +6,7 @@ test_configuration:
     tr_duration: 0.05
 
     com_height: 0.85
-    footstep_length: [0.2, 0.0]
+    footstep_length: [0.3, 0.0]
 
 planner_configuration:
     # ==========================================================================
