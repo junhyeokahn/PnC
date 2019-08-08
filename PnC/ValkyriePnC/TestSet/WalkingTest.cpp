@@ -25,6 +25,11 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 
     ds_ctrl_ = new DoubleSupportCtrl(robot, centroid_planner_);
 
+    r_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
+                                       ValkyrieBodyNode::rightFoot);
+    l_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
+                                       ValkyrieBodyNode::leftFoot);
+
     rs_start_trns_ctrl_ =
         new TransitionCtrl(robot, ValkyrieBodyNode::rightFoot, false);
     rs_end_trns_ctrl_ =
@@ -38,6 +43,12 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 
     state_list_.push_back(ds_ctrl_);
     state_list_.push_back(rs_start_trns_ctrl_);
+    state_list_.push_back(r_ss_ctrl_);
+    state_list_.push_back(rs_end_trns_ctrl_);
+    state_list_.push_back(ds_ctrl_);
+    state_list_.push_back(ls_start_trns_ctrl_);
+    state_list_.push_back(l_ss_ctrl_);
+    state_list_.push_back(ls_end_trns_ctrl_);
 }
 
 WalkingTest::~WalkingTest() {
@@ -49,6 +60,8 @@ WalkingTest::~WalkingTest() {
     delete rs_end_trns_ctrl_;
     delete ls_start_trns_ctrl_;
     delete ls_end_trns_ctrl_;
+    delete l_ss_ctrl_;
+    delete r_ss_ctrl_;
 }
 
 void WalkingTest::TestInitialization() {
@@ -112,21 +125,46 @@ void WalkingTest::_SettingParameter() {
         YAML::Node test_cfg = cfg_["test_configuration"];
         myUtils::readParameter(test_cfg, "dsp_duration", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetDSPDuration(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetDSPDuration(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetDSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "ssp_duration", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetSSPDuration(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetSSPDuration(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetSSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "ini_dsp_duration", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetIniDSPDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "footstep_length", tmp_vec);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp_vec);
+        myUtils::readParameter(test_cfg, "footstep_length", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepLength(tmp);
+
+        myUtils::readParameter(test_cfg, "footstep_width", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepWidth(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepWidth(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepWidth(tmp);
 
         myUtils::readParameter(test_cfg, "com_height", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetCoMHeight(tmp);
-        //((DoubleSupportCtrl*)ssp_ctrl_)->SetDuration(tmp);
-        // myUtils::readParameter(test_cfg, "tr_duration", tmp);
-        //((DoubleSupportCtrl*)tr_ctrl_)->SetDuration(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetCoMHeight(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetCoMHeight(tmp);
+
+        myUtils::readParameter(test_cfg, "trns_duration", tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetTRNSDuration(tmp);
+
+        myUtils::readParameter(test_cfg, "replan", b_tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetRePlanningFlag(b_tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetRePlanningFlag(b_tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetRePlanningFlag(b_tmp);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

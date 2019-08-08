@@ -112,7 +112,9 @@ class CentroidPlanner : public Planner {
    public:
     CentroidPlanner(CentroidPlannerParameter* param);
     virtual ~CentroidPlanner();
-    virtual void DoPlan();
+    virtual void DoPlan(bool b_use_previous_solution = false);
+    // s = [dummy, dummy, dummy, rx, ry, rz]
+    // sdot = [amom_x, amom_y, amom_z, lmom_x, lmom_y, lmom_z]
     virtual void EvalTrajectory(double time, Eigen::VectorXd& s,
                                 Eigen::VectorXd& sdot, Eigen::VectorXd& u);
     void GetSolution(Eigen::MatrixXd& com, Eigen::MatrixXd& lmom,
@@ -201,7 +203,7 @@ class CentroidPlanner : public Planner {
      * function to initialize and configure the optimization
      * @param[in]  param_                     planning parameter
      */
-    void _initialize();
+    void _initialize(bool b_use_previous_solution);
 
     /**
      * function to add each variable to the Model and assign a unique identifier

@@ -3,10 +3,13 @@ test_configuration:
     dsp_duration: 0.2
     fin_dsp_duration: 0.3
     ssp_duration: 0.8
-    tr_duration: 0.05
+    trns_duration: 0.05
 
     com_height: 1.0
-    footstep_length: [0.3, 0.0]
+    footstep_width: 0.26
+    footstep_length: 0.3
+
+    replan: false
 
 planner_configuration:
     # ==========================================================================

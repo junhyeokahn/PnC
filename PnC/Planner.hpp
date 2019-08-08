@@ -12,7 +12,7 @@ class Planner {
     Planner(){};
     virtual ~Planner(){};
 
-    virtual void DoPlan() = 0;
+    virtual void DoPlan(bool b_use_previous_solution = false) = 0;
     virtual void EvalTrajectory(double time, Eigen::VectorXd& s,
                                 Eigen::VectorXd& sdot, Eigen::VectorXd& u) = 0;
 

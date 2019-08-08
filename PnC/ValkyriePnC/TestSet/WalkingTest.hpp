@@ -36,6 +36,9 @@ class WalkingTest : public Test {
 
     Controller* ds_ctrl_;
 
+    Controller* l_ss_ctrl_;
+    Controller* r_ss_ctrl_;
+
     Controller* rs_start_trns_ctrl_;
     Controller* rs_end_trns_ctrl_;
     Controller* ls_start_trns_ctrl_;

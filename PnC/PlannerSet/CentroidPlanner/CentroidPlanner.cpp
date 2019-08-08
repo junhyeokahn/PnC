@@ -174,20 +174,79 @@ CentroidPlanner::CentroidPlanner(CentroidPlannerParameter* _param) : Planner() {
 
 CentroidPlanner::~CentroidPlanner() {}
 
-void CentroidPlanner::DoPlan() {
+void CentroidPlanner::DoPlan(bool b_use_previous_solution) {
     for (int i = 0; i < mCentParam->b_req.size(); ++i) {
         assert(mCentParam->b_req[i]);
         mCentParam->b_req[i] = false;
     }
-    _initialize();
+    _initialize(b_use_previous_solution);
     _optimize();
 }
 
 void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
                                      Eigen::VectorXd& sdot,
-                                     Eigen::VectorXd& u) {}
+                                     Eigen::VectorXd& u) {
+    s = Eigen::VectorXd::Zero(9);
+    sdot = Eigen::VectorXd::Zero(9);
+    // TODO : u?
 
-void CentroidPlanner::_initialize() {
+    double ini_time(0.);
+    Eigen::Vector3d ini_com, ini_amom, ini_lmom;
+
+    double fin_time(0.);
+    Eigen::Vector3d fin_com, fin_amom, fin_lmom;
+
+    int idx(-1);
+
+    for (int i = 0; i < mCentParam->numTimeSteps; ++i) {
+        ini_time = mCentParam->timeStep * (i);
+        fin_time = mCentParam->timeStep * (i + 1);
+        if (ini_time <= time && time <= fin_time) {
+            idx = i;
+            break;
+        }
+    }
+    assert(idx != -1);
+
+    if (idx == 0) {
+        ini_com = mCentParam->initialState.com;
+        ini_amom = mCentParam->initialState.aMom;
+        ini_lmom = mCentParam->initialState.lMom;
+    } else {
+        ini_com = mDynStateSeq.dynamicsStateSequence[idx - 1].com;
+        ini_amom = mDynStateSeq.dynamicsStateSequence[idx - 1].aMom;
+        ini_lmom = mDynStateSeq.dynamicsStateSequence[idx - 1].lMom;
+    }
+    fin_com = mDynStateSeq.dynamicsStateSequence[idx].com;
+    fin_amom = mDynStateSeq.dynamicsStateSequence[idx].aMom;
+    fin_lmom = mDynStateSeq.dynamicsStateSequence[idx].lMom;
+
+    // cubic interpolation
+    double ini_time_3 = std::pow(ini_time, 3);
+    double ini_time_2 = std::pow(ini_time, 2);
+    double fin_time_3 = std::pow(fin_time, 3);
+    double fin_time_2 = std::pow(fin_time, 2);
+    double t3 = std::pow(time, 3);
+    double t2 = std::pow(time, 2);
+    for (int i = 0; i < 3; ++i) {
+        Eigen::Matrix4d A;
+        Eigen::Vector4d b;
+        Eigen::Vector4d coef;
+        A << ini_time_3, ini_time_2, ini_time, 1, 3 * ini_time_2, 2 * ini_time,
+            1, 0, fin_time_3, fin_time_2, fin_time, 1, 3 * fin_time_2,
+            2 * fin_time, 1, 0;
+        b << ini_com[i], ini_lmom[i] / mCentParam->robotMass, fin_com[i],
+            fin_lmom[i] / mCentParam->robotMass;
+        coef = A.colPivHouseholderQr().solve(b);
+        s[i + 3] = coef[0] * t3 + coef[1] * t2 + coef[2] * time + coef[3];
+        sdot[i + 3] = (3 * coef[0] * t2 + 2 * coef[1] * time + coef[2]) *
+                      mCentParam->robotMass;
+        sdot[i] = (fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
+                  (time - ini_time);
+    }
+}
+
+void CentroidPlanner::_initialize(bool b_use_previous_solution) {
     if (!mCentParam->isDefaultSolverSetting) {
         mModel.configSetting(mCentParam->cfgFile);
     } else {
@@ -203,7 +262,9 @@ void CentroidPlanner::_initialize() {
     mCentParam->contactPlanInterface.fillDynamicsSequence(
         mDynStateSeq, mCentParam->numTimeSteps, mCentParam->timeStep);
 
-    _initializeOptimizationVariables();
+    if (!b_use_previous_solution) {
+        _initializeOptimizationVariables();
+    }
 }
 
 void CentroidPlanner::_initializeOptimizationVariables() {
@@ -242,7 +303,6 @@ solver::ExitCode CentroidPlanner::_optimize(bool update_tracking_objective) {
     mSolveTime = 0.0;
     mHasConverged = false;
     _internalOptimize(true);
-    // std::cout << mSolveTime << std::endl;
 
     _saveToFile(mCentParam->refDynamicsStateSequence);
     return mExitCode;

@@ -216,6 +216,7 @@ void TransitionCtrl::SetBSpline_() {
     } else {
         fin_pos = robot_->getBodyNodeIsometry(stance_foot_).translation();
     }
+    fin_pos[2] = ini_pos[2];
 
     for (int i = 0; i < 3; ++i) {
         ini[i] = ini_pos[i];
