@@ -186,8 +186,8 @@ void CentroidPlanner::DoPlan(bool b_use_previous_solution) {
 void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
                                      Eigen::VectorXd& sdot,
                                      Eigen::VectorXd& u) {
-    s = Eigen::VectorXd::Zero(9);
-    sdot = Eigen::VectorXd::Zero(9);
+    s = Eigen::VectorXd::Zero(6);
+    sdot = Eigen::VectorXd::Zero(6);
     // TODO : u?
 
     double ini_time(0.);

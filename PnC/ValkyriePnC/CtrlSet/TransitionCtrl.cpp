@@ -17,9 +17,13 @@ TransitionCtrl::TransitionCtrl(RobotSystem* robot, int moving_foot,
     myUtils::pretty_constructor(2, "Transition Ctrl");
 
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        moving_cop_ = ValkyrieBodyNode::rightCOP_Frame;
         stance_foot_ = ValkyrieBodyNode::leftFoot;
+        stance_cop_ = ValkyrieBodyNode::leftCOP_Frame;
     } else {
+        moving_cop_ = ValkyrieBodyNode::leftCOP_Frame;
         stance_foot_ = ValkyrieBodyNode::rightFoot;
+        stance_cop_ = ValkyrieBodyNode::rightCOP_Frame;
     }
 
     ctrl_start_time_ = 0.;
@@ -122,6 +126,14 @@ void TransitionCtrl::_task_setup() {
         cen_vel_des[i] = 0.;
         cen_vel_des[i + 3] = vel[i] * robot_->getRobotMass();
     }
+
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
+
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
     // =========================================================================
@@ -212,9 +224,9 @@ void TransitionCtrl::SetBSpline_() {
     Eigen::VectorXd fin_pos = Eigen::VectorXd::Zero(3);
 
     if (b_increase_) {
-        fin_pos = robot_->getBodyNodeIsometry(moving_foot_).translation();
+        fin_pos = robot_->getBodyNodeIsometry(moving_cop_).translation();
     } else {
-        fin_pos = robot_->getBodyNodeIsometry(stance_foot_).translation();
+        fin_pos = robot_->getBodyNodeIsometry(stance_cop_).translation();
     }
     fin_pos[2] = ini_pos[2];
 

@@ -44,6 +44,8 @@ class TransitionCtrl : public Controller {
     bool b_increase_;
     int moving_foot_;
     int stance_foot_;
+    int moving_cop_;
+    int stance_cop_;
 
     Task* centroid_task_;
     Task* total_joint_task_;

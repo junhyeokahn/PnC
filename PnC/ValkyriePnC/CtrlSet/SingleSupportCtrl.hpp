@@ -51,6 +51,8 @@ class SingleSupportCtrl : public Controller {
 
     int moving_foot_;
     int stance_foot_;
+    int moving_cop_;
+    int stance_cop_;
 
     Task* centroid_task_;
     Task* foot_pos_task_;

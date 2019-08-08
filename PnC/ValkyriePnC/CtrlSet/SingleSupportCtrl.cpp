@@ -17,9 +17,13 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
     myUtils::pretty_constructor(2, "Single Support Ctrl");
 
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        moving_cop_ = ValkyrieBodyNode::rightCOP_Frame;
         stance_foot_ = ValkyrieBodyNode::leftFoot;
+        stance_cop_ = ValkyrieBodyNode::leftCOP_Frame;
     } else {
+        moving_cop_ = ValkyrieBodyNode::leftCOP_Frame;
         stance_foot_ = ValkyrieBodyNode::rightFoot;
+        stance_cop_ = ValkyrieBodyNode::rightCOP_Frame;
     }
     ctrl_start_time_ = 0.;
     des_jpos_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
@@ -30,7 +34,7 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
 
     centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
     foot_pos_task_ =
-        new BasicTask(robot, BasicTaskType::LINKXYZ, 3, moving_foot_);
+        new BasicTask(robot, BasicTaskType::LINKXYZ, 3, moving_cop_);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
@@ -121,13 +125,13 @@ void SingleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void SingleSupportCtrl::PlannerUpdate_() {
-    std::cout << "time" << std::endl;
-    std::cout << sp_->curr_time << std::endl;
+    // std::cout << "time" << std::endl;
+    // std::cout << sp_->curr_time << std::endl;
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
-    std::cout << "(ss) planning takes : " << sp_->clock.stop() << " (ms)"
-              << std::endl;
+    // std::cout << "(ss) planning takes : " << sp_->clock.stop() << " (ms)"
+    //<< std::endl;
     ((CentroidPlanner*)planner_)
         ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
                       frc_world_traj_, trq_local_traj_);
@@ -379,6 +383,13 @@ void SingleSupportCtrl::_task_setup() {
     planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
                              dummy);
 
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
+
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
     // =========================================================================
@@ -400,6 +411,18 @@ void SingleSupportCtrl::_task_setup() {
         foot_vel_des[i] = vel[i];
         foot_acc_des[i] = acc[i];
     }
+    if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        for (int i = 0; i < 3; ++i) {
+            sp_->rf_pos_des[i] = foot_pos_des[i];
+            sp_->rf_vel_des[i] = foot_vel_des[i];
+        }
+    } else {
+        for (int i = 0; i < 3; ++i) {
+            sp_->lf_pos_des[i] = foot_pos_des[i];
+            sp_->lf_vel_des[i] = foot_vel_des[i];
+        }
+    }
+
     foot_pos_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
 
     // =========================================================================
@@ -415,8 +438,8 @@ void SingleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    task_list_.push_back(centroid_task_);
     task_list_.push_back(foot_pos_task_);
+    task_list_.push_back(centroid_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -448,9 +471,9 @@ void SingleSupportCtrl::SetBSpline_() {
     middle_pt[0] = new double[3];
 
     Eigen::VectorXd ini_pos =
-        robot_->getBodyNodeIsometry(moving_foot_).translation();
+        robot_->getBodyNodeIsometry(moving_cop_).translation();
     Eigen::VectorXd fin_pos =
-        robot_->getBodyNodeIsometry(stance_foot_).translation();
+        robot_->getBodyNodeIsometry(stance_cop_).translation();
     fin_pos[0] += footstep_length_;
     if (moving_foot_ == ValkyrieBodyNode::rightFoot)
         fin_pos[1] -= footstep_width_;
@@ -485,11 +508,15 @@ bool SingleSupportCtrl::endOfPhase() {
         return true;
     }
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
-        if (sp_->b_rfoot_contact) {
+        if (state_machine_time_ > ssp_dur_ * 0.5 && sp_->b_rfoot_contact) {
+            printf("(state_machine time, end time) : (%f, %f) \n",
+                   state_machine_time_, ssp_dur_);
             return true;
         }
     } else {
-        if (sp_->b_lfoot_contact) {
+        if (state_machine_time_ > ssp_dur_ * 0.5 && sp_->b_lfoot_contact) {
+            printf("(state_machine time, end time) : (%f, %f) \n",
+                   state_machine_time_, ssp_dur_);
             return true;
         }
     }

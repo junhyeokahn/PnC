@@ -89,13 +89,13 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void DoubleSupportCtrl::PlannerUpdate_() {
-    std::cout << "time" << std::endl;
-    std::cout << sp_->curr_time << std::endl;
+    // std::cout << "time" << std::endl;
+    // std::cout << sp_->curr_time << std::endl;
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
-    std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
-              << std::endl;
+    // std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
+    //<< std::endl;
     ((CentroidPlanner*)planner_)
         ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
                       frc_world_traj_, trq_local_traj_);
@@ -340,6 +340,13 @@ void DoubleSupportCtrl::_task_setup() {
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
     planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
                              dummy);
+
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
 
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 

@@ -32,6 +32,11 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
     _ParameterSetting();
 
     myUtils::color_print(myColor::BoldCyan, border);
+
+    DataManager* data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", Valkyrie::n_adof);
+    data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", Valkyrie::n_adof);
+    data_manager->RegisterData(&cmd_jtrq_, VECT, "command", Valkyrie::n_adof);
 }
 
 ValkyrieInterface::~ValkyrieInterface() {

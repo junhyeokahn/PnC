@@ -21,12 +21,14 @@ void ValkyrieStateEstimator::Initialization(ValkyrieSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->jpos_ini = curr_config_.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     _FootContactUpdate(data);
+    sp_->saveCurrentData();
 }
 
 void ValkyrieStateEstimator::Update(ValkyrieSensorData* data) {
     _JointUpdate(data);
     _ConfigurationAndModelUpdate();
     _FootContactUpdate(data);
+    sp_->saveCurrentData();
 }
 
 void ValkyrieStateEstimator::_JointUpdate(ValkyrieSensorData* data) {
