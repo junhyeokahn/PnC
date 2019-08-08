@@ -22,6 +22,7 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner)
     Kp_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     Kd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
+    centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
@@ -53,9 +54,13 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner)
 }
 
 DoubleSupportCtrl::~DoubleSupportCtrl() {
+    delete centroid_task_;
     delete total_joint_task_;
+
+    delete kin_wbc_;
     delete wblc_;
     delete wblc_data_;
+
     delete rfoot_contact_;
     delete lfoot_contact_;
 }
@@ -80,8 +85,13 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void DoubleSupportCtrl::UpdateMPC_() {
+    std::cout << "time" << std::endl;
+    std::cout << sp_->curr_time << std::endl;
+    sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
+    std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
+              << std::endl;
     ((CentroidPlanner*)planner_)
         ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
                       frc_world_traj_, trq_local_traj_);
@@ -282,8 +292,8 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     Eigen::Vector3d com_displacement;
     for (int i = 0; i < 2; ++i)
         com_displacement[i] = (rf_pos[i] > lf_pos[i]) ? rf_pos[i] : lf_pos[i];
-    // com_displacement[2] = com_height_ - r[2];
-    com_displacement[2] = 0.;
+    com_displacement[2] = com_height_ - r[2];
+    // com_displacement[2] = 0.;
     _param->UpdateTerminalState(com_displacement);
 
     // =========================================================================
@@ -291,7 +301,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     // =========================================================================
     sp_->foot_target_list.clear();
     for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
-        for (int c_id = 0; c_id < c_seq[eef_id].size(); ++c_id) {
+        for (int c_id = 1; c_id < c_seq[eef_id].size(); ++c_id) {
             Eigen::Isometry3d tmp;
             tmp.translation() = c_seq[eef_id][c_id].segment<3>(2);
             tmp.linear() = Eigen::Quaternion<double>(
@@ -312,12 +322,24 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
                          sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof)) +
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
 
-    // myUtils::pretty_print(des_jacc_cmd, std::cout, "double");
-    // exit(0);
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
 }
 
 void DoubleSupportCtrl::_task_setup() {
+    // =========================================================================
+    // Centroid Task
+    // =========================================================================
+
+    Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
+    for (int i = 0; i < 3; ++i) {
+        cen_pos_des[i + 3] = com_traj_(0, i);
+        cen_vel_des[i] = amom_traj_(0, i);
+        cen_vel_des[i + 3] = lmom_traj_(0, i);
+    }
+    centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
+
     // =========================================================================
     // Joint Pos Task
     // =========================================================================
@@ -331,6 +353,7 @@ void DoubleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
+    task_list_.push_back(centroid_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================

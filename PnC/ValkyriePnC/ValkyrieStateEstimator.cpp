@@ -43,7 +43,7 @@ void ValkyrieStateEstimator::_JointUpdate(ValkyrieSensorData* data) {
 }
 
 void ValkyrieStateEstimator::_ConfigurationAndModelUpdate() {
-    robot_->updateSystem(curr_config_, curr_qdot_, false);
+    robot_->updateSystem(curr_config_, curr_qdot_, true);
 
     sp_->q = curr_config_;
     sp_->qdot = curr_qdot_;

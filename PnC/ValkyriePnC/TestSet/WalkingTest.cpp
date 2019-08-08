@@ -25,19 +25,43 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 
     ds_ctrl_ = new DoubleSupportCtrl(robot, centroid_planner_);
 
+    rs_start_trns_ctrl_ =
+        new TransitionCtrl(robot, ValkyrieBodyNode::rightFoot, false);
+    rs_end_trns_ctrl_ =
+        new TransitionCtrl(robot, ValkyrieBodyNode::rightFoot, true);
+    ls_start_trns_ctrl_ =
+        new TransitionCtrl(robot, ValkyrieBodyNode::leftFoot, false);
+    ls_end_trns_ctrl_ =
+        new TransitionCtrl(robot, ValkyrieBodyNode::leftFoot, true);
+
     _SettingParameter();
 
     state_list_.push_back(ds_ctrl_);
+    state_list_.push_back(rs_start_trns_ctrl_);
 }
 
 WalkingTest::~WalkingTest() {
     delete centroid_planner_;
     delete centroid_planner_param_;
+
     delete ds_ctrl_;
+    delete rs_start_trns_ctrl_;
+    delete rs_end_trns_ctrl_;
+    delete ls_start_trns_ctrl_;
+    delete ls_end_trns_ctrl_;
 }
 
 void WalkingTest::TestInitialization() {
     ds_ctrl_->ctrlInitialization(cfg_["control_configuration"]["ds_ctrl"]);
+
+    rs_start_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["rs_start_trns_ctrl"]);
+    rs_end_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["rs_end_trns_ctrl"]);
+    ls_start_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["ls_start_trns_ctrl"]);
+    ls_end_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["ls_end_trns_ctrl"]);
 }
 
 int WalkingTest::_NextPhase(const int& phase) {

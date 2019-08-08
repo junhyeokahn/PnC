@@ -72,6 +72,7 @@ void ValkyrieWorldNode::PlotMPCResult_() {
     // line segment
     Eigen::Vector4d foot_color = Eigen::Vector4d(1.0, 0.63, 0.0, 1.0);
     Eigen::Vector4d line_color = Eigen::Vector4d(0.9, 0., 0., 1.0);
+    Eigen::Vector4d com_color = Eigen::Vector4d(0, 0, 139, 1.0);
 
     std::vector<dart::dynamics::SimpleFramePtr> line_frame;
     line_frame.clear();
@@ -84,7 +85,7 @@ void ValkyrieWorldNode::PlotMPCResult_() {
         line_frame.push_back(std::make_shared<dart::dynamics::SimpleFrame>(
             dart::dynamics::Frame::World(), "l" + std::to_string(i)));
         dart::dynamics::LineSegmentShapePtr traj_line =
-            std::make_shared<dart::dynamics::LineSegmentShape>(v0, v1, 3.0);
+            std::make_shared<dart::dynamics::LineSegmentShape>(v0, v1, 5.0);
         line_frame[i]->setShape(traj_line);
         line_frame[i]->createVisualAspect();
         line_frame[i]->getVisualAspect()->setColor(line_color);
@@ -106,6 +107,19 @@ void ValkyrieWorldNode::PlotMPCResult_() {
         contact_frame[i]->getVisualAspect(true)->setColor(foot_color);
         world_->addSimpleFrame(contact_frame[i]);
     }
+
+    // com
+    // Eigen::Isometry3d com_tf = Eigen::Isometry3d::Identity();
+    // com_tf.translation() = robot_->getCOM();
+    // dart::dynamics::SimpleFramePtr com_frame =
+    // std::make_shared<dart::dynamics::SimpleFrame>(
+    // dart::dynamics::Frame::World(), "com", com_tf);
+    // std::shared_ptr<dart::dynamics::SphereShape> s_shape =
+    // std::make_shared<dart::dynamics::SphereShape>(
+    // dart::dynamics::SphereShape(0.05));
+    // com_frame->setShape(s_shape);
+    // com_frame->getVisualAspect(true)->setColor(com_color);
+    // world_->addSimpleFrame(com_frame);
 }
 
 void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,

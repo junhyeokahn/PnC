@@ -58,7 +58,6 @@ SingleContactTransCtrl::SingleContactTransCtrl(RobotSystem* robot,
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Atlas::n_adof, 2500.);
 
     sp_ = AtlasStateProvider::getStateProvider(robot_);
-    // printf("[Transition Controller] Constructed\n");
 }
 
 SingleContactTransCtrl::~SingleContactTransCtrl() {

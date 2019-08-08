@@ -55,20 +55,20 @@ class OneStepProgress : public osgGA::GUIEventHandler {
 void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
     for (int i = 0; i < robot->getNumJoints(); ++i) {
         dart::dynamics::Joint* joint = robot->getJoint(i);
-        // std::cout << i << "th" << std::endl;
-        // std::cout << joint->isPositionLimitEnforced() << std::endl;
         joint->setPositionLimitEnforced(true);
     }
 }
 
 void _setTransparency(dart::dynamics::SkeletonPtr robot) {
-    // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
-    // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
-    // auto sns = bn->getShapeNodesWith<dart::dynamics::VisualAspect>();
-    // for (auto sn : sns) {
-    // sn->getVisualAspect()->setAlpha(0.4);
-    //}
-    //}
+    for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+        dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+        auto sns = bn->getShapeNodesWith<dart::dynamics::VisualAspect>();
+        for (auto sn : sns) {
+            sn->getShape()->addDataVariance(
+                dart::dynamics::Shape::DYNAMIC_COLOR);
+            sn->getVisualAspect()->setAlpha(0.4);
+        }
+    }
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {

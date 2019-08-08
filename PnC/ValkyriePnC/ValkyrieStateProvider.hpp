@@ -2,6 +2,7 @@
 #include <utility>
 
 #include <Configuration.h>
+#include <Utils/General/Clock.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
 class RobotSystem;
@@ -10,6 +11,8 @@ class ValkyrieStateProvider {
    public:
     static ValkyrieStateProvider* getStateProvider(RobotSystem* _robot);
     ~ValkyrieStateProvider() {}
+
+    Clock clock;
 
     int stance_foot;
     double curr_time;

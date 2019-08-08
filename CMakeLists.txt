@@ -30,7 +30,7 @@ include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
 # Dart
-find_package(DART 6.8 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Zmq
