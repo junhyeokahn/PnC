@@ -4,5 +4,5 @@ plot_mpc_result: true
 #plot_mpc_result: false
 
 control_configuration:
-  kp: 50
-  kd: 1
+  kp: 300
+  kd: 3
