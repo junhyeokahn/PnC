@@ -290,15 +290,15 @@ class Graphics:
                 point  = np.array([cnt_pos[0], cnt_pos[1], cnt_pos[2]])
                 normal = np.array([cnt_ori[0,0], cnt_ori[1,0], cnt_ori[2,0]])
                 d = -point.dot(normal)
-                xx, yy = np.meshgrid(np.linspace(cnt_pos[0]-0.05,cnt_pos[0]+0.05,2), np.linspace(cnt_pos[1]-0.1,cnt_pos[1]+0.1,2))
+                xx, yy = np.meshgrid(np.linspace(cnt_pos[0]-0.10,cnt_pos[0]+0.10,2), np.linspace(cnt_pos[1]-0.05,cnt_pos[1]+0.05,2))
                 z = (-normal[0] * xx - normal[1] * yy - d) * 1. /normal[2]
                 CoM_motion.plot_wireframe(xx, yy, z, color=colors[eff_id], linewidth=1.5)
                 CoM_motion.plot_surface(xx, yy, z, edgecolors=colors[eff_id], color=colors[eff_id], alpha = 0.5)
                 CoM_motion.scatter(xs=cnt_pos[0], ys=cnt_pos[1], zs=cnt_pos[2], zdir='z', s=50, c=colors[eff_id], depthshade=True)
          
         CoM_motion.tick_params(labelsize=com_axis_tick_size, colors=com_axis_tick_color)
-        CoM_motion.set_xlabel('Lateral direction', fontsize=com_axis_label_size, color=com_axis_label_color)
-        CoM_motion.set_ylabel('Forward direction', fontsize=com_axis_label_size, color=com_axis_label_color)
+        CoM_motion.set_xlabel('Forward direction', fontsize=com_axis_label_size, color=com_axis_label_color)
+        CoM_motion.set_ylabel('Lateral direction', fontsize=com_axis_label_size, color=com_axis_label_color)
         CoM_motion.set_zlabel('Vertical direction', fontsize=com_axis_label_size, color=com_axis_label_color)        
 
         'Figure2: Linear and angular momenta, forces and timesteps'

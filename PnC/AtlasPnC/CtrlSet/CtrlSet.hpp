@@ -5,3 +5,5 @@
 #include <PnC/AtlasPnC/CtrlSet/BodyFootPolicyCtrl.hpp>
 #include <PnC/AtlasPnC/CtrlSet/SingleContactTransCtrl.hpp>
 #include <PnC/AtlasPnC/CtrlSet/SwingPlanningCtrl.hpp>
+
+#include <PnC/AtlasPnC/CtrlSet/DoubleSupportCtrl.hpp>

@@ -5,6 +5,7 @@
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
 #include <PnC/AtlasPnC/TestSet/BalanceTest.hpp>
 #include <PnC/AtlasPnC/TestSet/RLWalkingTest.hpp>
+#include <PnC/AtlasPnC/TestSet/WPGTest.hpp>
 #include <PnC/AtlasPnC/TestSet/WalkingTest.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -122,6 +123,8 @@ void AtlasInterface::_ParameterSetting() {
             test_ = new WalkingTest(robot_);
         } else if (test_name == "balance_test") {
             test_ = new BalanceTest(robot_);
+        } else if (test_name == "wpg_test") {
+            test_ = new WPGTest(robot_);
         } else if (test_name == "rl_walking_test") {
 #if HAS_RL_DEP
             if (!b_learning_) {

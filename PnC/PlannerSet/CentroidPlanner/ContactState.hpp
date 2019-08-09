@@ -41,7 +41,7 @@ class ContactState {
 
     std::string toString() const {
         std::stringstream text;
-        text << "    time         " << timeIni << " - " << timeEnd << "\n";
+        text << "    time         " << timeIni << " ~ " << timeEnd << "\n";
         text << "    contact type " << static_cast<int>(contactType) << "\n";
         text << "    position     " << position.transpose() << "\n";
         text << "    orientation  " << orientation.coeffs().transpose() << "\n";

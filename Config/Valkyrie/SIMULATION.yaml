@@ -1,0 +1,8 @@
+servo_rate: 0.001 # !!this should be match with controller servo rate!!
+show_joint_frame: false
+#plot_mpc_result: true
+plot_mpc_result: false
+
+control_configuration:
+  kp: 300
+  kd: 3
