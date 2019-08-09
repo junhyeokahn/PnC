@@ -55,6 +55,9 @@ class SingleSupportCtrl : public Controller {
     int stance_cop_;
 
     Task* centroid_task_;
+    Task* com_task_;
+    Task* pelvis_ori_task_;
+    Task* torso_ori_task_;
     Task* foot_pos_task_;
     Task* foot_ori_task_;
     Task* total_joint_task_;

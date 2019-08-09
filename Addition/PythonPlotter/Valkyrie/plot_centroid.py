@@ -73,7 +73,7 @@ plt.xlabel('time (sec)')
 figure_number += 1
 # plot amom
 fig = plt.figure(figure_number)
-fig.canvas.set_window_title('lmom')
+fig.canvas.set_window_title('amom')
 for i in range(1,4,1):
     ax1 = plt.subplot(3, 1, i)
     plt.plot(data_x, data_centroid_momentum[st_idx:end_idx,i-1], "b-")
@@ -88,7 +88,7 @@ plt.xlabel('time (sec)')
 figure_number += 1
 ## plot lmom
 fig = plt.figure(figure_number)
-fig.canvas.set_window_title('amom')
+fig.canvas.set_window_title('lmom')
 for i in range(1,4,1):
     ax1 = plt.subplot(3, 1, i)
     plt.plot(data_x, data_centroid_momentum[st_idx:end_idx,i+2], "b-")

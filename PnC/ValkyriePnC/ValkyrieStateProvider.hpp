@@ -53,6 +53,9 @@ class ValkyrieStateProvider {
     Eigen::VectorXd lf_pos_des;
     Eigen::VectorXd lf_vel_des;
 
+    Eigen::VectorXd r_rf;
+    Eigen::VectorXd l_rf;
+
    private:
     ValkyrieStateProvider(RobotSystem* _robot);
     RobotSystem* robot_;

@@ -45,6 +45,9 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     lf_pos_des = Eigen::VectorXd::Zero(3);
     lf_vel_des = Eigen::VectorXd::Zero(3);
 
+    r_rf = Eigen::VectorXd::Zero(6);
+    l_rf = Eigen::VectorXd::Zero(6);
+
     DataManager* data_manager = DataManager::GetDataManager();
     data_manager->RegisterData(&curr_time, DOUBLE, "time");
     data_manager->RegisterData(&q, VECT, "q", Valkyrie::n_dof);
@@ -69,6 +72,9 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&rf_vel_des, VECT, "rf_vel_des", 3);
     data_manager->RegisterData(&lf_pos_des, VECT, "lf_pos_des", 3);
     data_manager->RegisterData(&lf_vel_des, VECT, "lf_vel_des", 3);
+
+    data_manager->RegisterData(&r_rf, VECT, "r_rf", 6);
+    data_manager->RegisterData(&l_rf, VECT, "l_rf", 6);
 }
 
 void ValkyrieStateProvider::saveCurrentData() {

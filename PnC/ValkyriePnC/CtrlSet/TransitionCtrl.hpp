@@ -48,7 +48,10 @@ class TransitionCtrl : public Controller {
     int stance_cop_;
 
     Task* centroid_task_;
+    Task* com_task_;
     Task* total_joint_task_;
+    Task* pelvis_ori_task_;
+    Task* torso_ori_task_;
 
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
@@ -66,4 +69,6 @@ class TransitionCtrl : public Controller {
 
     BS_Basic<3, 3, 1, 2, 2> com_traj_;
     void SetBSpline_();
+
+    Eigen::VectorXd ini_com_pos_;
 };

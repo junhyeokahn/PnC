@@ -241,8 +241,9 @@ void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
         s[i + 3] = coef[0] * t3 + coef[1] * t2 + coef[2] * time + coef[3];
         sdot[i + 3] = (3 * coef[0] * t2 + 2 * coef[1] * time + coef[2]) *
                       mCentParam->robotMass;
-        sdot[i] = (fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
-                  (time - ini_time);
+        sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
+                   (time - ini_time)) +
+                  ini_amom[i];
     }
 }
 

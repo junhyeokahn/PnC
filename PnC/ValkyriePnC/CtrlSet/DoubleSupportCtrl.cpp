@@ -23,8 +23,13 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner)
     Kd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
     centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
+    com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
+    pelvis_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3,
+                                     ValkyrieBodyNode::pelvis);
+    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3,
+                                    ValkyrieBodyNode::torso);
 
     std::vector<bool> act_list;
     act_list.resize(Valkyrie::n_dof, true);
@@ -55,7 +60,10 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner)
 
 DoubleSupportCtrl::~DoubleSupportCtrl() {
     delete centroid_task_;
+    delete com_task_;
     delete total_joint_task_;
+    delete pelvis_ori_task_;
+    delete torso_ori_task_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -116,8 +124,8 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     r = robot_->getCoMPosition();
     Eigen::VectorXd lk = robot_->getCentroidMomentum();
     for (int i = 0; i < 3; ++i) {
-        l[i] = lk[i];
-        k[i] = lk[i + 3];
+        l[i] = lk[i + 3];
+        k[i] = lk[i];
     }
     std::array<int, CentroidModel::numEEf> actv;
     std::array<Eigen::Vector3d, CentroidModel::numEEf> eef_frc;
@@ -327,13 +335,14 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
 
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
+    sp_->r_rf = wblc_data_->Fr_.head(6);
+    sp_->l_rf = wblc_data_->Fr_.tail(6);
 }
 
 void DoubleSupportCtrl::_task_setup() {
     // =========================================================================
     // Centroid Task
     // =========================================================================
-
     Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
@@ -351,6 +360,30 @@ void DoubleSupportCtrl::_task_setup() {
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
     // =========================================================================
+    // COM Task
+    // =========================================================================
+    Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
+
+    for (int i = 0; i < 3; ++i) {
+        com_pos_des[i] = cen_pos_des[i + 3];
+        com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+    }
+
+    com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
+
+    // =========================================================================
+    // Pelvis & Torso Ori Task
+    // =========================================================================
+    Eigen::VectorXd des_quat = Eigen::VectorXd::Zero(4);
+    des_quat << 1., 0., 0., 0.;
+    Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
+    pelvis_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
+    torso_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
+
+    // =========================================================================
     // Joint Pos Task
     // =========================================================================
     Eigen::VectorXd jpos_des = sp_->jpos_ini;
@@ -363,7 +396,10 @@ void DoubleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    task_list_.push_back(centroid_task_);
+    // task_list_.push_back(centroid_task_);
+    task_list_.push_back(com_task_);
+    task_list_.push_back(pelvis_ori_task_);
+    task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
