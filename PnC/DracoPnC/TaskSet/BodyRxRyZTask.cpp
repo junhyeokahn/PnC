@@ -19,6 +19,12 @@ bool BodyRxRyZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                       _pos_des[3]);
     Eigen::Quaternion<double> ori_act(
         robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
+    Eigen::MatrixXd ori_act_1(
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
+    std::cout << "==============="  << std::endl;
+    myUtils::pretty_print(ori_act, std::cout, "quatmatrix");
+    std::cout << "==============="  << std::endl;
+    myUtils::pretty_print(ori_act_1, std::cout, "quatmatrix");
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
     Eigen::Vector3d ori_err_so3;
@@ -53,7 +59,6 @@ bool BodyRxRyZTask::_UpdateTaskJacobian() {
     Jt_(2, 2) = 1.0;
     // Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(5, 0, 1,
     // robot_->getNumDofs());
-
     return true;
 }
 

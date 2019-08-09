@@ -52,7 +52,6 @@ class AtlasInterface : public EnvInterface {
     bool Initialization_(AtlasSensorData*, AtlasCommand*);
     void SetStopCommand_(AtlasSensorData*, AtlasCommand*);
 
-    int count_;
     int waiting_count_;
     Eigen::VectorXd cmd_jpos_;
     Eigen::VectorXd cmd_jvel_;

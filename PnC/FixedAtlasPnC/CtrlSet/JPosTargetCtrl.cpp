@@ -34,8 +34,8 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
     }
     gamma = robot_->getMassMatrix() * qddot + robot_->getCoriolisGravity();
 
-    ((FixedAtlasCommand*)_cmd)->q = q_des_vec;
-    ((FixedAtlasCommand*)_cmd)->qdot = qdot_des_vec;
+    //((FixedAtlasCommand*)_cmd)->q = q_des_vec;
+    //((FixedAtlasCommand*)_cmd)->qdot = qdot_des_vec;
     ((FixedAtlasCommand*)_cmd)->jtrq = gamma;
 
     ++ctrl_count_;

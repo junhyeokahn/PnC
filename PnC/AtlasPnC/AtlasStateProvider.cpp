@@ -38,6 +38,9 @@ AtlasStateProvider::AtlasStateProvider(RobotSystem* _robot) {
     rfoot_so3.setZero();
     lfoot_so3.setZero();
 
+    com_pos = Eigen::VectorXd::Zero(3);
+    com_vel = Eigen::VectorXd::Zero(3);
+
     DataManager* data_manager = DataManager::GetDataManager();
 
     data_manager->RegisterData(&curr_time, DOUBLE, "time");
@@ -47,6 +50,9 @@ AtlasStateProvider::AtlasStateProvider(RobotSystem* _robot) {
 
     data_manager->RegisterData(&b_rfoot_contact, INT, "rfoot_contact", 1);
     data_manager->RegisterData(&b_lfoot_contact, INT, "lfoot_contact", 1);
+
+    data_manager->RegisterData(&com_pos, VECT, "com_pos", 3);
+    data_manager->RegisterData(&com_vel, VECT, "com_vel", 3);
 
     data_manager->RegisterData(&rfoot_pos, VECT3, "rfoot_pos", 3);
     data_manager->RegisterData(&lfoot_pos, VECT3, "lfoot_pos", 3);
@@ -77,4 +83,11 @@ void AtlasStateProvider::saveCurrentData() {
         robot_->getBodyNodeSpatialVelocity(AtlasBodyNode::r_sole).head(3);
     lfoot_so3 =
         robot_->getBodyNodeSpatialVelocity(AtlasBodyNode::l_sole).head(3);
+
+    Eigen::Vector3d com_pos_tmp = robot_->getCoMPosition();
+    Eigen::Vector3d com_vel_tmp = robot_->getCoMVelocity();
+    for (int i = 0; i < 3; ++i) {
+        com_pos[i] = com_pos_tmp[i];
+        com_vel[i] = com_vel_tmp[i];
+    }
 }

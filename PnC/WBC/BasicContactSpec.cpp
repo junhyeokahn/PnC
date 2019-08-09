@@ -20,12 +20,10 @@ bool PointContactSpec::_UpdateJc() {
 
 bool PointContactSpec::_UpdateJcDotQdot() {
     Eigen::VectorXd JcDotQdot_tmp =
-        robot_->getBodyNodeCoMJacobianDot(link_idx_,
-                                          robot_->getBodyNode(link_idx_)) *
-        robot_->getQdot();
+        robot_->getBodyNodeCoMJacobianDot(link_idx_) * robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
 
-    JcDotQdot_.setZero();
+    //JcDotQdot_.setZero();
     return true;
 }
 
