@@ -35,6 +35,8 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
     centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
     foot_pos_task_ =
         new BasicTask(robot, BasicTaskType::LINKXYZ, 3, moving_cop_);
+    foot_ori_task_ =
+        new BasicTask(robot, BasicTaskType::LINKORI, 3, moving_cop_);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
@@ -92,6 +94,7 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
 SingleSupportCtrl::~SingleSupportCtrl() {
     delete centroid_task_;
     delete foot_pos_task_;
+    delete foot_ori_task_;
     delete total_joint_task_;
 
     delete kin_wbc_;
@@ -393,7 +396,7 @@ void SingleSupportCtrl::_task_setup() {
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
     // =========================================================================
-    // Foot Task
+    // Foot Pos Task
     // =========================================================================
     Eigen::VectorXd foot_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd foot_vel_des = Eigen::VectorXd::Zero(3);
@@ -426,6 +429,15 @@ void SingleSupportCtrl::_task_setup() {
     foot_pos_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
 
     // =========================================================================
+    // Foot Ori Task
+    // =========================================================================
+    Eigen::VectorXd des_foot_quat = Eigen::VectorXd::Zero(4);
+    des_foot_quat << 1., 0., 0., 0.;
+    Eigen::VectorXd des_foot_so3 = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd ang_acc_des = Eigen::VectorXd::Zero(3);
+    foot_ori_task_->updateTask(des_foot_quat, des_foot_so3, ang_acc_des);
+
+    // =========================================================================
     // Joint Pos Task
     // =========================================================================
     Eigen::VectorXd jpos_des = sp_->jpos_ini;
@@ -439,6 +451,7 @@ void SingleSupportCtrl::_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(foot_pos_task_);
+    task_list_.push_back(foot_ori_task_);
     task_list_.push_back(centroid_task_);
     task_list_.push_back(total_joint_task_);
 

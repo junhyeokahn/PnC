@@ -75,6 +75,9 @@ void WalkingTest::TestInitialization() {
         cfg_["control_configuration"]["ls_start_trns_ctrl"]);
     ls_end_trns_ctrl_->ctrlInitialization(
         cfg_["control_configuration"]["ls_end_trns_ctrl"]);
+
+    r_ss_ctrl_->ctrlInitialization(cfg_["control_configuration"]["r_ss_ctrl"]);
+    l_ss_ctrl_->ctrlInitialization(cfg_["control_configuration"]["l_ss_ctrl"]);
 }
 
 int WalkingTest::_NextPhase(const int& phase) {

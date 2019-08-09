@@ -56,6 +56,7 @@ class SingleSupportCtrl : public Controller {
 
     Task* centroid_task_;
     Task* foot_pos_task_;
+    Task* foot_ori_task_;
     Task* total_joint_task_;
 
     ContactSpec* rfoot_contact_;
