@@ -111,6 +111,7 @@ void TransitionCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
                          sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof)) +
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
 
+    sp_->des_jacc_cmd = des_jacc_cmd;
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
     sp_->r_rf = wblc_data_->Fr_.head(6);
     sp_->l_rf = wblc_data_->Fr_.tail(6);
@@ -137,12 +138,12 @@ void TransitionCtrl::_task_setup() {
         cen_vel_des[i + 3] = vel[i] * robot_->getRobotMass();
     }
 
-    for (int i = 0; i < 3; ++i) {
-        sp_->com_pos_des[i] = cen_pos_des[i + 3];
-        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-        sp_->mom_des[i] = cen_vel_des[i];
-        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    }
+    // for (int i = 0; i < 3; ++i) {
+    // sp_->com_pos_des[i] = cen_pos_des[i + 3];
+    // sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+    // sp_->mom_des[i] = cen_vel_des[i];
+    // sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    //}
 
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
@@ -152,12 +153,13 @@ void TransitionCtrl::_task_setup() {
     Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
-    // for (int i = 0; i < 3; ++i) {
-    // com_pos_des[i] = pos[i];
-    // com_vel_des[i] = vel[i];
-    // com_acc_des[i] = acc[i];
-    //}
+
     com_pos_des = ini_com_pos_;
+
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = com_pos_des[i];
+        sp_->com_vel_des[i] = com_vel_des[i];
+    }
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 

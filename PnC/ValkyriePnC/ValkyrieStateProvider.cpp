@@ -48,6 +48,8 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     r_rf = Eigen::VectorXd::Zero(6);
     l_rf = Eigen::VectorXd::Zero(6);
 
+    des_jacc_cmd = Eigen::VectorXd::Zero(Valkyrie::n_adof);
+
     DataManager* data_manager = DataManager::GetDataManager();
     data_manager->RegisterData(&curr_time, DOUBLE, "time");
     data_manager->RegisterData(&q, VECT, "q", Valkyrie::n_dof);
@@ -75,6 +77,9 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
 
     data_manager->RegisterData(&r_rf, VECT, "r_rf", 6);
     data_manager->RegisterData(&l_rf, VECT, "l_rf", 6);
+
+    data_manager->RegisterData(&des_jacc_cmd, VECT, "des_jacc_cmd",
+                               Valkyrie::n_adof);
 }
 
 void ValkyrieStateProvider::saveCurrentData() {

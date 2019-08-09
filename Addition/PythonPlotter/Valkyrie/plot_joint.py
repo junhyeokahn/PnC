@@ -21,6 +21,9 @@ np.genfromtxt(file_path+'qdot.txt', delimiter=None, dtype=(float))
 data_jvel_des = \
 np.genfromtxt(file_path+'jvel_des.txt', delimiter=None, dtype=(float))
 
+data_des_jacc_cmd = \
+np.genfromtxt(file_path+'des_jacc_cmd.txt', delimiter=None, dtype=(float))
+
 data_command = \
 np.genfromtxt(file_path+'command.txt', delimiter=None, dtype=(float))
 
@@ -79,6 +82,9 @@ for i in range(1, 7, 1):
     plt.plot(data_x, data_q[st_idx:end_idx, left_leg_idx[i-1]+6], 'b-')
     plt.plot(data_x, data_jpos_des[st_idx:end_idx, left_leg_idx[i-1]], 'r-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 fig=plt.figure(figure_number)
@@ -88,6 +94,9 @@ for i in range(1, 7, 1):
     plt.plot(data_x, data_qdot[st_idx:end_idx, left_leg_idx[i-1]+6], 'b-')
     plt.plot(data_x, data_jvel_des[st_idx:end_idx, left_leg_idx[i-1]], 'r-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 fig=plt.figure(figure_number)
@@ -96,6 +105,9 @@ for i in range(1, 7, 1):
     ax = plt.subplot(6, 1, i)
     plt.plot(data_x, data_command[st_idx:end_idx, left_leg_idx[i-1]], 'b-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 
@@ -106,6 +118,9 @@ for i in range(1, 7, 1):
     plt.plot(data_x, data_q[st_idx:end_idx, right_leg_idx[i-1]+6], 'b-')
     plt.plot(data_x, data_jpos_des[st_idx:end_idx, right_leg_idx[i-1]], 'r-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 fig=plt.figure(figure_number)
@@ -115,6 +130,9 @@ for i in range(1, 7, 1):
     plt.plot(data_x, data_qdot[st_idx:end_idx, right_leg_idx[i-1]+6], 'b-')
     plt.plot(data_x, data_jvel_des[st_idx:end_idx, right_leg_idx[i-1]], 'r-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 fig=plt.figure(figure_number)
@@ -123,6 +141,31 @@ for i in range(1, 7, 1):
     ax = plt.subplot(6, 1, i)
     plt.plot(data_x, data_command[st_idx:end_idx, right_leg_idx[i-1]], 'b-')
     plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+figure_number += 1
+
+fig=plt.figure(figure_number)
+fig.canvas.set_window_title('right leg des_jacc_cmd(hy, hr, hp, kp, ap, ar)')
+for i in range(1, 7, 1):
+    ax = plt.subplot(6, 1, i)
+    plt.plot(data_x, data_des_jacc_cmd[st_idx:end_idx, right_leg_idx[i-1]], 'b-')
+    plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+figure_number += 1
+
+fig=plt.figure(figure_number)
+fig.canvas.set_window_title('left leg des_jacc_cmd(hy, hr, hp, kp, ap, ar)')
+for i in range(1, 7, 1):
+    ax = plt.subplot(6, 1, i)
+    plt.plot(data_x, data_des_jacc_cmd[st_idx:end_idx, left_leg_idx[i-1]], 'b-')
+    plt.grid(True)
+    for j in phseChange:
+        plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.text(data_x[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 figure_number += 1
 
 plt.show()

@@ -56,6 +56,8 @@ class ValkyrieStateProvider {
     Eigen::VectorXd r_rf;
     Eigen::VectorXd l_rf;
 
+    Eigen::VectorXd des_jacc_cmd;
+
    private:
     ValkyrieStateProvider(RobotSystem* _robot);
     RobotSystem* robot_;
