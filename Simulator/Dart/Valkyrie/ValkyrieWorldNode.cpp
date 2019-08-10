@@ -133,14 +133,14 @@ void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
     // myUtils::pretty_print(rf, std::cout, "right_sole");
     // myUtils::pretty_print(lf, std::cout, "left_sole");
 
-    if (fabs(rf[2] < 0.001)) {
+    if (fabs(rf[2] < 0.01)) {
         rfoot_contact = true;
         // printf("right contact\n");
     } else {
         rfoot_contact = false;
     }
 
-    if (fabs(lf[2] < 0.001)) {
+    if (fabs(lf[2] < 0.01)) {
         lfoot_contact = true;
         // printf("left contact\n");
     } else {

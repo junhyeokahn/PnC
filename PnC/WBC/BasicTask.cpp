@@ -50,7 +50,7 @@ BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
             assert(dim_task_ = 3);
             task_type_string_ = "CoM";
             for (int i = 0; i < 3; ++i) {
-                kp_[i] = 150.;
+                kp_[i] = 300.;
                 kd_[i] = 10.;
             }
             break;

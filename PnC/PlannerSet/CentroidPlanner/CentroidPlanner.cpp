@@ -108,7 +108,7 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
         _num_contacts[eef_id] = cpe;
         YAML::Node _eefcnt =
             contact_plan["eefcnt_" + CentroidModel::eEfIdToString(eef_id)];
-        // std::cout << "eef_id : " << eef_id << std::endl;
+        std::cout << "eef_id : " << eef_id << std::endl;
         contactPlanInterface.contactsPerEndeff[eef_id] = cpe;
         contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
         for (int c_id = 0; c_id < cpe; ++c_id) {
@@ -127,10 +127,10 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
             contactPlanInterface.contactSequence.eEfContacts[eef_id][c_id]
                 .contactType = idToContactType(static_cast<int>(v(9)));
             _eefcnt["cnt" + std::to_string(c_id)] = v;
-            // std::cout << "c_id : " << c_id << std::endl;
-            // std::cout << contactPlanInterface.contactSequence
-            //.eEfContacts[eef_id][c_id]
-            //<< std::endl;
+            std::cout << "c_id : " << c_id << std::endl;
+            std::cout << contactPlanInterface.contactSequence
+                             .eEfContacts[eef_id][c_id]
+                      << std::endl;
         }
     }
     contact_plan["num_contacts"] = _num_contacts;
@@ -154,14 +154,16 @@ void CentroidPlannerParameter::UpdateInitialState(
             Eigen::Quaternion<double>(iso[eef_id].linear());
     }
     b_req[0] = true;
-    // std::cout << "initial state" << std::endl;
-    // std::cout << initialState << std::endl;
+    std::cout << "initial state" << std::endl;
+    std::cout << initialState << std::endl;
 }
 
 void CentroidPlannerParameter::UpdateTerminalState(
     const Eigen::Vector3d& r_displacement) {
     comDisplacement = r_displacement;
     b_req[3] = true;
+    std::cout << "com goal" << std::endl;
+    std::cout << initialState.com + comDisplacement << std::endl;
 }
 
 void CentroidPlannerParameter::UpdateRefDynamicsStateSequence() {
@@ -1071,6 +1073,93 @@ void CentroidPlanner::GetSolution(
         mCopLocal[eef_id].getGuessValue(cop[eef_id]);
         mFrcWorld[eef_id].getGuessValue(frc[eef_id]);
         mTrqLocal[eef_id].getGuessValue(trq[eef_id]);
+    }
+}
+
+void CentroidPlanner::SaveResult(const std::string& file_name) {
+    try {
+        YAML::Node qcqp_cfg;
+        qcqp_cfg["dynopt_params"]["time_step"] = mCentParam->timeStep;
+        qcqp_cfg["dynopt_params"]["end_com"] = mComPosGoal;
+        qcqp_cfg["dynopt_params"]["robot_mass"] = mCentParam->robotMass;
+        qcqp_cfg["dynopt_params"]["n_act_eefs"] = mCentParam->numActEEfs;
+        qcqp_cfg["dynopt_params"]["ini_com"] = mCentParam->initialState.com;
+        qcqp_cfg["dynopt_params"]["ini_ang_mom"] =
+            mCentParam->initialState.aMom;
+        qcqp_cfg["dynopt_params"]["ini_lin_mom"] =
+            mCentParam->initialState.lMom;
+        qcqp_cfg["dynopt_params"]["time_horizon"] = mCentParam->timeHorizon;
+        qcqp_cfg["cntopt_params"] = mCentParam->contact_plan;
+
+        mCom.getGuessValue(mMatGuess);
+        qcqp_cfg["dynopt_params"]["com_motion"] = mMatGuess;
+        mLMom.getGuessValue(mMatGuess);
+        qcqp_cfg["dynopt_params"]["lin_mom"] = mMatGuess;
+        mAMom.getGuessValue(mMatGuess);
+        qcqp_cfg["dynopt_params"]["ang_mom"] = mMatGuess;
+
+        // building momentum references
+        // for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
+        // { mMatGuess.col(time_id) =
+        //_ref_sequence.dynamicsStateSequence[time_id].com;
+        //}
+        // qcqp_cfg["dynopt_params"]["com_motion_ref"] = mMatGuess;
+        // for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
+        // { mMatGuess.col(time_id) =
+        //_ref_sequence.dynamicsStateSequence[time_id].lMom;
+        //}
+        // qcqp_cfg["dynopt_params"]["lin_mom_ref"] = mMatGuess;
+        // for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
+        // { mMatGuess.col(time_id) =
+        //_ref_sequence.dynamicsStateSequence[time_id].aMom;
+        //}
+        // qcqp_cfg["dynopt_params"]["ang_mom_ref"] = mMatGuess;
+
+        // saving vector of time-steps
+        mMatGuess.resize(1, mCentParam->numTimeSteps);
+        mMatGuess.setZero();
+        mMatGuess(0, 0) = mDynStateSeq.dynamicsStateSequence[0].time;
+        for (int time_id = 1; time_id < mCentParam->numTimeSteps; time_id++)
+            mMatGuess(0, time_id) =
+                mMatGuess(0, time_id - 1) +
+                mDynStateSeq.dynamicsStateSequence[time_id].time;
+        qcqp_cfg["dynopt_params"]["time_vec"] = mMatGuess;
+
+        // saving vector of forces, torques and cops
+        for (int eef_id = 0; eef_id < mCentParam->numActEEfs; eef_id++) {
+            mMatGuess.resize(3, mCentParam->numTimeSteps);
+            mMatGuess.setZero();
+            for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
+                if (mDynStateSeq.dynamicsStateSequence[time_id]
+                        .eEfsActivation[eef_id])
+                    mMatGuess.col(time_id).head(3) =
+                        mDynStateSeq.dynamicsStateSequence[time_id]
+                            .eEfsFrc[eef_id];
+            qcqp_cfg["dynopt_params"]["eef_frc_" + std::to_string(eef_id)] =
+                mMatGuess;
+
+            mMatGuess.resize(1, mCentParam->numTimeSteps);
+            mMatGuess.setZero();
+            for (int time_id = 0; time_id < mCentParam->numTimeSteps; time_id++)
+                if (mDynStateSeq.dynamicsStateSequence[time_id]
+                        .eEfsActivation[eef_id])
+                    mMatGuess(0, time_id) =
+                        mDynStateSeq.dynamicsStateSequence[time_id]
+                            .eEfsTrq[eef_id]
+                            .z();
+            qcqp_cfg["dynopt_params"]["eef_trq_" + std::to_string(eef_id)] =
+                mMatGuess;
+
+            mCopLocal[eef_id].getGuessValue(mMatGuess);
+            qcqp_cfg["dynopt_params"]["eef_cop_" + std::to_string(eef_id)] =
+                mMatGuess;
+        }
+        std::string full_path = THIS_COM + std::string("ExperimentData/") +
+                                file_name + std::string(".yaml");
+        std::ofstream file_out(full_path);
+        file_out << qcqp_cfg;
+    } catch (YAML::ParserException& e) {
+        std::cout << e.what() << "\n";
     }
 }
 

@@ -116,6 +116,7 @@ SingleSupportCtrl::~SingleSupportCtrl() {
 void SingleSupportCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
+    sp_->prev_state_machine_time_ = state_machine_time_;
 
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     if (b_do_plan_) {
@@ -141,6 +142,9 @@ void SingleSupportCtrl::PlannerUpdate_() {
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
+    ((CentroidPlanner*)planner_)
+        ->SaveResult("SS_" + std::to_string(sp_->num_step_copy));
+    std::cout << "Saved SS_" + std::to_string(sp_->num_step_copy) << std::endl;
     // std::cout << "(ss) planning takes : " << sp_->clock.stop() << " (ms)"
     //<< std::endl;
     ((CentroidPlanner*)planner_)
@@ -207,13 +211,6 @@ void SingleSupportCtrl::PlannerInitialization_() {
     }
 
     _param->UpdateInitialState(r, l, k, actv, eef_frc, iso);
-    // std::cout << "At SSP : " << sp_->curr_time << std::endl;
-    // std::cout << "r" << std::endl;
-    // std::cout << r << std::endl;
-    // std::cout << "l" << std::endl;
-    // std::cout << l << std::endl;
-    // std::cout << "k" << std::endl;
-    // std::cout << k << std::endl;
 
     // =========================================================================
     // update reference dynamics state sequence
@@ -247,8 +244,11 @@ void SingleSupportCtrl::PlannerInitialization_() {
         iso[static_cast<int>(CentroidModel::EEfID::rightFoot)].translation();
     Eigen::VectorXd lf_pos =
         iso[static_cast<int>(CentroidModel::EEfID::leftFoot)].translation();
+    Eigen::VectorXd r_ct_pos = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd l_ct_pos = Eigen::VectorXd::Zero(3);
 
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        // stance = left foot
         int n_rf_con_seq(ceil(n_phase / 2.0));
         int n_lf_con_seq(floor(n_phase / 2.0));
         double rf_st_time(rem_time);
@@ -256,9 +256,9 @@ void SingleSupportCtrl::PlannerInitialization_() {
         double rf_end_time = rem_time + dsp_dur_ + ssp_dur_ + dsp_dur_;
         double lf_end_time = rem_time + dsp_dur_;
         // update rf contact sequence
-        Eigen::VectorXd foot_pos = lf_pos;
         for (int i = 0; i < n_rf_con_seq; ++i) {
-            foot_pos[1] -= footstep_width_;
+            r_ct_pos[0] = lf_pos[0] + footstep_length_ * (2 * i + 1);
+            r_ct_pos[1] = lf_pos[1] - footstep_width_;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].push_back(
                 Eigen::VectorXd::Zero(10));
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][0] =
@@ -266,7 +266,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][1] =
                 rf_end_time;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-                .segment<3>(2) = foot_pos;
+                .segment<3>(2) = r_ct_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5] = 1.;
@@ -277,6 +277,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             if (rf_st_time > _param->timeHorizon) break;
         }
         // update lf contact sequence
+        l_ct_pos = lf_pos;
         for (int i = 0; i < n_lf_con_seq; ++i) {
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].push_back(
                 Eigen::VectorXd::Zero(10));
@@ -285,7 +286,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][1] =
                 lf_end_time;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-                .segment<3>(2) = lf_pos;
+                .segment<3>(2) = l_ct_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5] = 1.;
@@ -294,10 +295,11 @@ void SingleSupportCtrl::PlannerInitialization_() {
             lf_st_time = lf_end_time + ssp_dur_;
             lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             if (lf_st_time > _param->timeHorizon) break;
-            lf_pos[0] += footstep_length_;
-            lf_pos[1] += 0.;
+            l_ct_pos[0] = lf_pos[0] + footstep_length_ * (2 * i + 2);
+            l_ct_pos[1] = lf_pos[1];
         }
     } else {
+        // stance = right foot
         int n_lf_con_seq(ceil(n_phase / 2.0));
         int n_rf_con_seq(floor(n_phase / 2.0));
         double lf_st_time(rem_time);
@@ -305,9 +307,10 @@ void SingleSupportCtrl::PlannerInitialization_() {
         double lf_end_time = rem_time + dsp_dur_ + ssp_dur_ + dsp_dur_;
         double rf_end_time = rem_time + dsp_dur_;
         // update lf contact sequence
-        Eigen::VectorXd foot_pos = rf_pos;
+        Eigen::VectorXd l_ct_pos = Eigen::VectorXd::Zero(3);
         for (int i = 0; i < n_lf_con_seq; ++i) {
-            foot_pos[1] += footstep_width_;
+            l_ct_pos[0] = rf_pos[0] + footstep_length_ * (2 * i + 1);
+            l_ct_pos[1] = rf_pos[1] + footstep_width_;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].push_back(
                 Eigen::VectorXd::Zero(10));
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][0] =
@@ -315,7 +318,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][1] =
                 lf_end_time;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-                .segment<3>(2) = foot_pos;
+                .segment<3>(2) = l_ct_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5] = 1.;
@@ -326,6 +329,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             if (lf_st_time > _param->timeHorizon) break;
         }
         // update rf contact sequence
+        r_ct_pos = rf_pos;
         for (int i = 0; i < n_rf_con_seq; ++i) {
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].push_back(
                 Eigen::VectorXd::Zero(10));
@@ -334,7 +338,7 @@ void SingleSupportCtrl::PlannerInitialization_() {
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][1] =
                 rf_end_time;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-                .segment<3>(2) = rf_pos;
+                .segment<3>(2) = r_ct_pos;
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
                 .segment<4>(5) = Eigen::VectorXd::Zero(4);
             c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5] = 1.;
@@ -343,8 +347,8 @@ void SingleSupportCtrl::PlannerInitialization_() {
             rf_st_time = rf_end_time + ssp_dur_;
             rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             if (rf_st_time > _param->timeHorizon) break;
-            rf_pos[0] += footstep_length_;
-            rf_pos[1] += 0.;
+            r_ct_pos[0] = rf_pos[0] + footstep_length_ * (2 * i + 2);
+            r_ct_pos[1] = rf_pos[1];
         }
     }
 
@@ -354,8 +358,15 @@ void SingleSupportCtrl::PlannerInitialization_() {
     // update goal state
     // =========================================================================
     Eigen::Vector3d com_displacement;
-    for (int i = 0; i < 2; ++i)
-        com_displacement[i] = (rf_pos[i] > lf_pos[i]) ? rf_pos[i] : lf_pos[i];
+    if (r_ct_pos[0] > l_ct_pos[0]) {
+        for (int i = 0; i < 3; ++i) {
+            com_displacement[i] = r_ct_pos[i] - r[i];
+        }
+    } else {
+        for (int i = 0; i < 3; ++i) {
+            com_displacement[i] = l_ct_pos[i] - r[i];
+        }
+    }
     com_displacement[2] = com_height_ - r[2];
     // com_displacement[2] = 0.;
     _param->UpdateTerminalState(com_displacement);
@@ -502,7 +513,6 @@ void SingleSupportCtrl::_task_setup() {
     task_list_.push_back(foot_pos_task_);
     task_list_.push_back(foot_ori_task_);
     // task_list_.push_back(centroid_task_);
-    // task_list_.push_back(com_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
@@ -559,7 +569,9 @@ void SingleSupportCtrl::SetBSpline_() {
     for (int i = 0; i < 2; ++i) {
         middle_pt[0][i] = (ini_pos[i] + fin_pos[i]) / 2.0;
     }
-    middle_pt[0][2] = 0.15;
+    middle_pt[0][2] = swing_height_;
+    // fin[5] = -0.5;
+    // fin[8] = 5.;
     foot_traj_.SetParam(ini, fin, middle_pt, ssp_dur_);
 
     delete[] * middle_pt;
@@ -570,6 +582,8 @@ void SingleSupportCtrl::lastVisit() {}
 
 bool SingleSupportCtrl::endOfPhase() {
     if (state_machine_time_ > ssp_dur_) {
+        printf("(state_machine time, end time) : (%f, %f) \n",
+               state_machine_time_, ssp_dur_);
         return true;
     }
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {

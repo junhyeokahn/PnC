@@ -4,6 +4,7 @@
 
 #include <Utils/Math/BSplineBasic.h>
 #include <PnC/Controller.hpp>
+#include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
 
 class ValkyrieStateProvider;
 class RobotSystem;
@@ -14,7 +15,7 @@ class ContactSpec;
 
 class TransitionCtrl : public Controller {
    public:
-    TransitionCtrl(RobotSystem*, int moving_foot, bool b_increase);
+    TransitionCtrl(RobotSystem*, Planner*, int moving_foot, bool b_increase);
     virtual ~TransitionCtrl();
 
     virtual void oneStep(void* _cmd);
@@ -25,6 +26,9 @@ class TransitionCtrl : public Controller {
 
     void SetTRNSDuration(double time) { trns_dur_ = time; }
     void SetCoMHeight(double h) { com_height_ = h; }
+    void SetDSPDuration(double time) { dsp_dur_ = time; }
+    void SetSSPDuration(double time) { ssp_dur_ = time; }
+    void SetIniDSPDuration(double time) { ini_dsp_dur_ = time; }
 
    protected:
     double max_rf_z_;
@@ -41,6 +45,9 @@ class TransitionCtrl : public Controller {
     double com_height_;
     int dim_contact_;
 
+    double ini_dsp_dur_;
+    double dsp_dur_;
+    double ssp_dur_;
     bool b_increase_;
     int moving_foot_;
     int stance_foot_;
@@ -71,4 +78,6 @@ class TransitionCtrl : public Controller {
     void SetBSpline_();
 
     Eigen::VectorXd ini_com_pos_;
+
+    Planner* planner_;
 };

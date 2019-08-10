@@ -17,6 +17,7 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     robot_ = _robot;
     stance_foot = ValkyrieBodyNode::leftFoot;
     curr_time = 0.;
+    prev_state_machine_time_ = 0.;
 
     q = Eigen::VectorXd::Zero(Valkyrie::n_dof);
     qdot = Eigen::VectorXd::Zero(Valkyrie::n_dof);

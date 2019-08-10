@@ -56,8 +56,11 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     _PseudoInverse(JtPre, JtPre_pinv);
 
     delta_q = JtPre_pinv * (task->pos_err);
+    // myUtils::pretty_print(task->pos_err, std::cout, "com error");
+    // myUtils::pretty_print(delta_q, std::cout, "delta_q");
     qdot = JtPre_pinv * (task->vel_des);
     qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
+    // qddot = JtPre_pinv * (task->op_cmd - JtDotQdot);
 
     Eigen::VectorXd prev_delta_q = delta_q;
     Eigen::VectorXd prev_qdot = qdot;

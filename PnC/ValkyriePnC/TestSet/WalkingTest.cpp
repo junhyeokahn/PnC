@@ -30,14 +30,14 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     l_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
                                        ValkyrieBodyNode::leftFoot);
 
-    rs_start_trns_ctrl_ =
-        new TransitionCtrl(robot, ValkyrieBodyNode::rightFoot, false);
-    rs_end_trns_ctrl_ =
-        new TransitionCtrl(robot, ValkyrieBodyNode::rightFoot, true);
-    ls_start_trns_ctrl_ =
-        new TransitionCtrl(robot, ValkyrieBodyNode::leftFoot, false);
-    ls_end_trns_ctrl_ =
-        new TransitionCtrl(robot, ValkyrieBodyNode::leftFoot, true);
+    rs_start_trns_ctrl_ = new TransitionCtrl(
+        robot, centroid_planner_, ValkyrieBodyNode::rightFoot, false);
+    rs_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                           ValkyrieBodyNode::rightFoot, true);
+    ls_start_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                             ValkyrieBodyNode::leftFoot, false);
+    ls_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                           ValkyrieBodyNode::leftFoot, true);
 
     _SettingParameter();
 
@@ -130,14 +130,26 @@ void WalkingTest::_SettingParameter() {
         ((DoubleSupportCtrl*)ds_ctrl_)->SetDSPDuration(tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetDSPDuration(tmp);
         ((SingleSupportCtrl*)l_ss_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetDSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "ssp_duration", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetSSPDuration(tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetSSPDuration(tmp);
         ((SingleSupportCtrl*)l_ss_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetSSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "ini_dsp_duration", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetIniDSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_length", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
@@ -168,6 +180,10 @@ void WalkingTest::_SettingParameter() {
         ((DoubleSupportCtrl*)ds_ctrl_)->SetRePlanningFlag(b_tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetRePlanningFlag(b_tmp);
         ((SingleSupportCtrl*)l_ss_ctrl_)->SetRePlanningFlag(b_tmp);
+
+        myUtils::readParameter(test_cfg, "swing_height", tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetSwingHeight(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetSwingHeight(tmp);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

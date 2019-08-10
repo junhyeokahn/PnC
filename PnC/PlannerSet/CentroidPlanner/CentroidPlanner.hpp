@@ -122,6 +122,7 @@ class CentroidPlanner : public Planner {
                      std::array<Eigen::MatrixXd, CentroidModel::numEEf>& cop,
                      std::array<Eigen::MatrixXd, CentroidModel::numEEf>& frc,
                      std::array<Eigen::MatrixXd, CentroidModel::numEEf>& trq);
+    void SaveResult(const std::string& file_name);
 
     CentroidPlannerParameter* GetCentroidPlannerParameter() {
         return mCentParam;

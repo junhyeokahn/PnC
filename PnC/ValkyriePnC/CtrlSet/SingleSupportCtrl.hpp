@@ -29,6 +29,7 @@ class SingleSupportCtrl : public Controller {
     void SetFootStepLength(double l) { footstep_length_ = l; }
     void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
+    void SetSwingHeight(double h) { swing_height_ = h; }
     void SetRePlanningFlag(bool b) { b_replan_ = b; }
 
    protected:
@@ -39,6 +40,7 @@ class SingleSupportCtrl : public Controller {
 
     Eigen::VectorXd jpos_ini_;
 
+    double swing_height_;
     double dsp_dur_;
     double ssp_dur_;
     double footstep_length_;

@@ -202,11 +202,11 @@ class Graphics:
                 self.time_vec = np.matrix(cfg_pars['dynopt_params']['time_vec'])
                 
                 self.com = np.matrix(cfg_pars['dynopt_params']['com_motion'])
-                self.com_ref = np.matrix(cfg_pars['dynopt_params']['com_motion_ref'])
+                # self.com_ref = np.matrix(cfg_pars['dynopt_params']['com_motion_ref'])
                 self.lmom = np.matrix(cfg_pars['dynopt_params']['lin_mom'])/self.robot_mass
                 self.amom = np.matrix(cfg_pars['dynopt_params']['ang_mom'])/self.robot_mass
-                self.lmom_ref = np.matrix(cfg_pars['dynopt_params']['lin_mom_ref'])/self.robot_mass
-                self.amom_ref = np.matrix(cfg_pars['dynopt_params']['ang_mom_ref'])/self.robot_mass
+                # self.lmom_ref = np.matrix(cfg_pars['dynopt_params']['lin_mom_ref'])/self.robot_mass
+                # self.amom_ref = np.matrix(cfg_pars['dynopt_params']['ang_mom_ref'])/self.robot_mass
                 self.eef_frcs = list()
                 for eff_id in range(0, self.n_act_eefs):
                     self.eef_frcs.insert(eff_id, np.matrix(cfg_pars['dynopt_params']['eef_frc_'+str(eff_id)]))    
@@ -231,15 +231,15 @@ class Graphics:
         amomy = np.squeeze(np.asarray(self.amom[1,:]))
         amomz = np.squeeze(np.asarray(self.amom[2,:]))
 
-        comrefx = np.squeeze(np.asarray(self.com_ref[0,:]))
-        comrefy = np.squeeze(np.asarray(self.com_ref[1,:]))
-        comrefz = np.squeeze(np.asarray(self.com_ref[2,:]))
-        lmomrefx = np.squeeze(np.asarray(self.lmom_ref[0,:]))
-        lmomrefy = np.squeeze(np.asarray(self.lmom_ref[1,:]))
-        lmomrefz = np.squeeze(np.asarray(self.lmom_ref[2,:]))
-        amomrefx = np.squeeze(np.asarray(self.amom_ref[0,:]))
-        amomrefy = np.squeeze(np.asarray(self.amom_ref[1,:]))
-        amomrefz = np.squeeze(np.asarray(self.amom_ref[2,:]))
+        # comrefx = np.squeeze(np.asarray(self.com_ref[0,:]))
+        # comrefy = np.squeeze(np.asarray(self.com_ref[1,:]))
+        # comrefz = np.squeeze(np.asarray(self.com_ref[2,:]))
+        # lmomrefx = np.squeeze(np.asarray(self.lmom_ref[0,:]))
+        # lmomrefy = np.squeeze(np.asarray(self.lmom_ref[1,:]))
+        # lmomrefz = np.squeeze(np.asarray(self.lmom_ref[2,:]))
+        # amomrefx = np.squeeze(np.asarray(self.amom_ref[0,:]))
+        # amomrefy = np.squeeze(np.asarray(self.amom_ref[1,:]))
+        # amomrefz = np.squeeze(np.asarray(self.amom_ref[2,:]))
         
         time = np.squeeze(np.asarray(self.time_vec[0,:]))
         timesteps1 = np.squeeze(np.asarray( np.zeros((len(time),1)) ))
@@ -263,13 +263,13 @@ class Graphics:
         'Figure1: Center of Mass motion'
         offset = 0.05
         com_linewidth = 2
-        comref_linewidth = 2
+        # comref_linewidth = 2
         com_axis_tick_size = 10
         com_axis_label_size = 14
         com_axis_tick_color = '#434440'
         com_axis_label_color = '#373834'
         com_linecolor = 'cornflowerblue'
-        comref_linecolor = 'darkorange'
+        # comref_linecolor = 'darkorange'
         linestyles = {0:'--', 1:'-', 2: '--', 3: '-'}
         endeffectors = {0: 'RF', 1: 'LF', 2: 'RH', 3: 'LH'}
         colors = {0: 'red', 1: 'magenta', 2: 'blue', 3: 'cyan'}
@@ -279,7 +279,7 @@ class Graphics:
         fig1 = plt.figure()
         CoM_motion = Axes3D(fig1)
         CoM_motion.plot(xs=comx, ys=comy, zs=comz, linewidth=com_linewidth, color=com_linecolor)
-        CoM_motion.plot(xs=comrefx, ys=comrefy, zs=comrefz, linewidth=comref_linewidth, color=comref_linecolor, linestyle='--')
+        # CoM_motion.plot(xs=comrefx, ys=comrefy, zs=comrefz, linewidth=comref_linewidth, color=comref_linecolor, linestyle='--')
         for eff_id in range(0, 4):
             for cnt_id in range(0, len(self.effs_cnts[eff_id])):
                 cnt_pos = self.effs_cnts[eff_id][cnt_id].pos
@@ -303,7 +303,7 @@ class Graphics:
 
         'Figure2: Linear and angular momenta, forces and timesteps'
         mom_line_width = 2
-        momref_line_width = 2
+        # momref_line_width = 2
         mom_axis_tick_size = 10
         mom_axis_label_size = 10
         
@@ -317,7 +317,7 @@ class Graphics:
         mom_axis_tick_color = '#434440'
         mom_axis_label_color = '#373834'
         mom_line_color = 'cornflowerblue'
-        momref_line_color = 'darkorange'
+        # momref_line_color = 'darkorange'
         mom_line_styles = {0:'-', 1:'--'}
         shading = 0.1
 
@@ -359,12 +359,12 @@ class Graphics:
         self.nice_mom_plot(amom_y1, time, amomy, mom_line_color, mom_line_width, mom_line_styles[0], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngY""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='DynMom', showLabel=False)
         self.nice_mom_plot(amom_z1, time, amomz, mom_line_color, mom_line_width, mom_line_styles[0], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngZ""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='DynMom', showLabel=False)
 
-        self.nice_mom_plot(lmom_x1, time, lmomrefx, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomx_y_size, r"""Time $[sec]$""", r"""LinX""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=True)
-        self.nice_mom_plot(lmom_y1, time, lmomrefy, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomy_y_size, r"""Time $[sec]$""", r"""LinY""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
-        self.nice_mom_plot(lmom_z1, time, lmomrefz, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomz_y_size, r"""Time $[sec]$""", r"""LinZ""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
-        self.nice_mom_plot(amom_x1, time, amomrefx, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngX""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=True)
-        self.nice_mom_plot(amom_y1, time, amomrefy, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngY""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
-        self.nice_mom_plot(amom_z1, time, amomrefz, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngZ""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
+        # self.nice_mom_plot(lmom_x1, time, lmomrefx, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomx_y_size, r"""Time $[sec]$""", r"""LinX""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=True)
+        # self.nice_mom_plot(lmom_y1, time, lmomrefy, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomy_y_size, r"""Time $[sec]$""", r"""LinY""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
+        # self.nice_mom_plot(lmom_z1, time, lmomrefz, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, lmomz_y_size, r"""Time $[sec]$""", r"""LinZ""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
+        # self.nice_mom_plot(amom_x1, time, amomrefx, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngX""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=True)
+        # self.nice_mom_plot(amom_y1, time, amomrefy, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngY""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
+        # self.nice_mom_plot(amom_z1, time, amomrefz, momref_line_color, momref_line_width, mom_line_styles[1], mom_grid_color, mom_axis_color, mom_x_size, amom_y_size, r"""Time $[sec]$""", r"""AngZ""", mom_axis_label_size, mom_axis_label_color, False, mom_axis_tick_size, mom_axis_tick_color, True, False, linecolors, shading, linelabel='KinMom', showLabel=False)
 
         self.nice_frc_plot(frc_x1, time, frcs_x, linecolors, linestyles, endeffectors, True, frc_line_width, frc_grid_color, frc_axis_tick_size, frc_axis_tick_color, frc_axis_color, frc_xsize, frc_x_ysize, r"""""", r"""FrcX""", frc_axis_label_size, frc_axis_label_color, frc_legend_textsize, frc_legend_color, frc_legend_frame_color, frc_legend_frame_linewidth, frc_legend_frame_background_color, shading)
         self.nice_frc_plot(frc_y1, time, frcs_y, linecolors, linestyles, endeffectors, False, frc_line_width, frc_grid_color, frc_axis_tick_size, frc_axis_tick_color, frc_axis_color, frc_xsize, frc_y_ysize, r"""""", r"""FrcY""", frc_axis_label_size, frc_axis_label_color, frc_legend_textsize, frc_legend_color, frc_legend_frame_color, frc_legend_frame_linewidth, frc_legend_frame_background_color, shading)

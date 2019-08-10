@@ -11,9 +11,12 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-TransitionCtrl::TransitionCtrl(RobotSystem* robot, int moving_foot,
-                               bool b_increase)
-    : Controller(robot), moving_foot_(moving_foot), b_increase_(b_increase) {
+TransitionCtrl::TransitionCtrl(RobotSystem* robot, Planner* planner,
+                               int moving_foot, bool b_increase)
+    : Controller(robot),
+      planner_(planner),
+      moving_foot_(moving_foot),
+      b_increase_(b_increase) {
     myUtils::pretty_constructor(2, "Transition Ctrl");
 
     if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
@@ -132,11 +135,18 @@ void TransitionCtrl::_task_setup() {
     Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
-    for (int i = 0; i < 3; ++i) {
-        cen_pos_des[i + 3] = pos[i];
-        cen_vel_des[i] = 0.;
-        cen_vel_des[i + 3] = vel[i] * robot_->getRobotMass();
-    }
+    // Get task from spline
+    // for (int i = 0; i < 3; ++i) {
+    // cen_pos_des[i + 3] = pos[i];
+    // cen_vel_des[i] = 0.;
+    // cen_vel_des[i + 3] = vel[i] * robot_->getRobotMass();
+    //}
+
+    // Get task from centroidal planner
+    Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
+    planner_->EvalTrajectory(
+        sp_->prev_state_machine_time_ + state_machine_time_, cen_pos_des,
+        cen_vel_des, dummy);
 
     // for (int i = 0; i < 3; ++i) {
     // sp_->com_pos_des[i] = cen_pos_des[i + 3];
@@ -154,7 +164,13 @@ void TransitionCtrl::_task_setup() {
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
+    // initial pos
     com_pos_des = ini_com_pos_;
+    // centroid planner
+    for (int i = 0; i < 3; ++i) {
+        com_pos_des[i] = cen_pos_des[i + 3];
+        com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+    }
 
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = com_pos_des[i];
@@ -209,12 +225,12 @@ void TransitionCtrl::_contact_setup() {
     // set swing foot's weight and limit
     if (b_increase_) {
         upper_lim = min_rf_z_ + alpha * (max_rf_z_ - min_rf_z_);  // min->max
-        rf_weight = (1. - alpha) * 5. + alpha * 1.0;              // 5->1
+        rf_weight = (1. - alpha) * 5. + alpha * 0.1;              // 5->0.1
         rf_weight_z = (1. - alpha) * 0.5 + alpha * 0.01;          // 0.5->0.01
         foot_weight = 0.001 * (1. - alpha) + 1000. * alpha;  // 0.001 -> 1000
     } else {
         upper_lim = max_rf_z_ - alpha * (max_rf_z_ - min_rf_z_);  // max->min
-        rf_weight = (alpha)*5. + (1. - alpha) * 1.0;              // 1->5
+        rf_weight = (alpha)*5. + (1. - alpha) * 0.1;              // 0.1->5
         rf_weight_z = (alpha)*0.5 + (1. - alpha) * 0.01;          // 0.01->0.5
         foot_weight = 0.001 * (alpha) + 1000. * (1. - alpha);  // 1000 -> 0.001
     }

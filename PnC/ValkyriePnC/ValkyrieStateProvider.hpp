@@ -18,6 +18,7 @@ class ValkyrieStateProvider {
 
     int stance_foot;
     double curr_time;
+    double prev_state_machine_time_;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
