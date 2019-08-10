@@ -69,12 +69,12 @@ void WBLC::makeWBLC_Torque(const Eigen::VectorXd& des_jacc_cmd,
     _GetSolution(cmd);
     // std::cout << "f: " << f << std::endl;
     // std::cout << "x: " << z << std::endl;
-    // std::cout << "cmd: "<<cmd<<std::endl;
+     //std::cout << "cmd: "<<cmd<<std::endl;
 
     // if(f > 1.e5){
     //   std::cout << "f: " << f << std::endl;
     //   std::cout << "x: " << z << std::endl;
-    //   std::cout << "cmd: "<<cmd<<std::endl;
+       //std::cout << "cmd: "<<cmd<<std::endl;
 
     //   printf("G:\n");
     //   std::cout<<G<<std::endl;

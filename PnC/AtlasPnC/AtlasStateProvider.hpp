@@ -40,6 +40,10 @@ class AtlasStateProvider {
     Eigen::Vector3d rfoot_so3;
     Eigen::Vector3d lfoot_so3;
 
+    // save
+    Eigen::VectorXd com_pos;
+    Eigen::VectorXd com_vel;
+
     int num_step_copy;
     int phase_copy;
 

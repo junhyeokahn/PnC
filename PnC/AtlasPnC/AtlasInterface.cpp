@@ -38,8 +38,10 @@ AtlasInterface::AtlasInterface() : EnvInterface() {
     _ParameterSetting();
 
     DataManager* dm = DataManager::GetDataManager();
+    dm->RegisterData(&running_time_, DOUBLE, "running_time");
     dm->RegisterData(&cmd_jpos_, VECT, "jpos_des", Atlas::n_adof);
     dm->RegisterData(&cmd_jvel_, VECT, "jvel_des", Atlas::n_adof);
+    //dm->RegisterData(&cmd_jacc_, VECT, "jacc_des", Atlas::n_adof);
     dm->RegisterData(&cmd_jtrq_, VECT, "command", Atlas::n_adof);
 
     myUtils::color_print(myColor::BoldCyan, border);

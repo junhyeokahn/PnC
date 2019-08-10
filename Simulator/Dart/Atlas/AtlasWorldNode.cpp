@@ -195,7 +195,7 @@ void AtlasWorldNode::SetParams_() {
                                b_manipulate_camera_);
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
-                               kp_);
+                              kp_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kd",
                                kd_);
         myUtils::readParameter(simulation_cfg, "plot_guided_foot",
