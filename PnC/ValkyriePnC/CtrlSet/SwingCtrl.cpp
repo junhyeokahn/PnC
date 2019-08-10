@@ -9,8 +9,8 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-BalanceCtrl::BalanceCtrl(RobotSystem* robot) : Controller(robot) {
-    myUtils::pretty_constructor(2, "Balance Ctrl");
+SwingCtrl::SwingCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "Swing Ctrl");
     ctrl_start_time_ = 0.;
     end_time_ = 0.;
     des_jpos_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
@@ -24,9 +24,12 @@ BalanceCtrl::BalanceCtrl(RobotSystem* robot) : Controller(robot) {
     des_com_vel_ = Eigen::VectorXd::Zero(6);
     des_com_acc_ = Eigen::VectorXd::Zero(6);
 
-    com_pos_dev_ = Eigen::VectorXd::Zero(3);
-
     ini_torso_quat = Eigen::Quaternion<double> (1,0,0,0);
+    
+    amp_ = Eigen::VectorXd::Zero(3);
+    freq_ = Eigen::VectorXd::Zero(3);
+    phase_ = Eigen::VectorXd::Zero(3);
+
     // TASK
     com_task_ =
         new CoMxyzRxRyRzTask(robot);
@@ -63,7 +66,7 @@ BalanceCtrl::BalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
 }
 
-BalanceCtrl::~BalanceCtrl() {
+SwingCtrl::~SwingCtrl() {
     delete total_joint_task_;
     delete com_task_;
     delete torso_ori_task_;
@@ -73,7 +76,7 @@ BalanceCtrl::~BalanceCtrl() {
     delete lfoot_contact_;
 }
 
-void BalanceCtrl::oneStep(void* _cmd) {
+void SwingCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
@@ -91,7 +94,7 @@ void BalanceCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 }
 
-void BalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
+void SwingCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     // WBLC
     wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     Eigen::VectorXd des_jacc_cmd =
@@ -105,15 +108,26 @@ void BalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
 }
 
-void BalanceCtrl::_task_setup() {
+void SwingCtrl::_task_setup() {
     // =========================================================================
     // CoMxyzRxRyRzTask
     // =========================================================================
         //ori_traj
+    des_com_pos_ = ini_com_pos_;
         //xyz_traj
-    _GetBsplineTrajectory();
-    // for com plotting
+    Eigen::VectorXd omega_ = Eigen::VectorXd::Zero(3);
     for (int i = 0; i < 3; ++i) {
+       omega_[i] = 2 * M_PI * freq_[i]; 
+    }
+    for (int i = 0; i < 3; ++i) {
+       des_com_pos_[i+4] = ini_com_pos_[i+4] + amp_[i] * sin(omega_[i] * state_machine_time_ + phase_[i]);
+       des_com_vel_[i+3] = amp_[i] * omega_[i] * cos(omega_[i] * state_machine_time_ + phase_[i]);
+       des_com_acc_[i+3] = -amp_[i] * omega_[i] * omega_[i] * sin(omega_[i] *state_machine_time_ + phase_[i]);
+       double ramp_time_ = 1.;
+        if(state_machine_time_ < ramp_time_) 
+            des_com_vel_[i+3] = state_machine_time_ / ramp_time_ * des_com_vel_[i+3];
+            des_com_acc_[i+3] = state_machine_time_ / ramp_time_ * des_com_vel_[i+3];
+    // for com plotting
         (sp_->com_pos_des)[i] = des_com_pos_[i+4];
         (sp_->com_vel_des)[i] = des_com_vel_[i+3];
     }
@@ -152,7 +166,7 @@ void BalanceCtrl::_task_setup() {
                                 des_jvel_, des_jacc_);
 }
 
-void BalanceCtrl::_contact_setup() {
+void SwingCtrl::_contact_setup() {
     rfoot_contact_->updateContactSpec();
     lfoot_contact_->updateContactSpec();
 
@@ -160,8 +174,7 @@ void BalanceCtrl::_contact_setup() {
     contact_list_.push_back(lfoot_contact_);
 }
 
-void BalanceCtrl::firstVisit() {
-    jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+void SwingCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
 
     // ini_com_pos setting
@@ -173,26 +186,23 @@ void BalanceCtrl::firstVisit() {
     for (int i(0); i < 3; ++i) {
         ini_com_pos_[i+4] = com_pos_xyz_ini[i]; 
     }
-    
-    des_com_pos_ = ini_com_pos_;
-    des_com_pos_.tail(3) = ini_com_pos_.tail(3) + com_pos_dev_;
-
-    _SetBspline(ini_com_pos_.tail(3),des_com_pos_.tail(3));
-    //myUtils::pretty_print(ini_com_pos_, std::cout, "ini");
-    
+   // ini_torso_ori setting 
     ini_torso_quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(ValkyrieBodyNode::torso).linear());
+
+    // ini_jpos setting
+    jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
 }
 
-void BalanceCtrl::lastVisit() {}
+void SwingCtrl::lastVisit() {}
 
-bool BalanceCtrl::endOfPhase() {
-     if (state_machine_time_ > end_time_) {
-     return true;
-    }
+bool SwingCtrl::endOfPhase() {
+     //if (state_machine_time_ > end_time_) {
+     //return true;
+    //}
     return false;
 }
 
-void BalanceCtrl::ctrlInitialization(const YAML::Node& node) {
+void SwingCtrl::ctrlInitialization(const YAML::Node& node) {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     try {
         myUtils::readParameter(node, "kp", Kp_);
@@ -205,50 +215,4 @@ void BalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 }
 
-void BalanceCtrl::_SetBspline(const Eigen::VectorXd st_pos,
-                              const Eigen::VectorXd des_pos) {
-    // Trajectory Setup
-    double init[9];
-    double fin[9];
-    double** middle_pt = new double*[1];
-    middle_pt[0] = new double[3];
-    Eigen::Vector3d middle_pos;
 
-    middle_pos = (st_pos + des_pos) / 2.;
-
-    // Initial and final position & velocity & acceleration
-    for (int i(0); i < 3; ++i) {
-        // Initial
-        init[i] = st_pos[i];
-        init[i + 3] = 0.;
-        init[i + 6] = 0.;
-        // Final
-        fin[i] = des_pos[i];
-        fin[i + 3] = 0.;
-        fin[i + 6] = 0.;
-        // Middle
-        middle_pt[0][i] = middle_pos[i];
-    }
-    // TEST
-    //fin[5] = amplitude_[] * omega_;
-    com_traj_.SetParam(init, fin, middle_pt, end_time_);
-
-    delete[] * middle_pt;
-    delete[] middle_pt;
-}
-
-void BalanceCtrl::_GetBsplineTrajectory(){
-    double pos[3];
-    double vel[3];
-    double acc[3];
-
-    com_traj_.getCurvePoint(state_machine_time_, pos);
-    com_traj_.getCurveDerPoint(state_machine_time_, 1, vel);
-    com_traj_.getCurveDerPoint(state_machine_time_, 2, acc);
-
-    for (int i(0); i < 3; ++i) {
-        des_com_pos_[i+4] = pos[i];
-        des_com_vel_[i+3] = vel[i];
-        des_com_acc_[i+3] = acc[i];
-    }
-}
