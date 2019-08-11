@@ -142,9 +142,10 @@ void SingleSupportCtrl::PlannerUpdate_() {
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
-    ((CentroidPlanner*)planner_)
-        ->SaveResult("SS_" + std::to_string(sp_->num_step_copy));
-    std::cout << "Saved SS_" + std::to_string(sp_->num_step_copy) << std::endl;
+    //((CentroidPlanner*)planner_)
+    //->SaveResult("SS_" + std::to_string(sp_->num_step_copy));
+    // std::cout << "Saved SS_" + std::to_string(sp_->num_step_copy) <<
+    // std::endl;
     // std::cout << "(ss) planning takes : " << sp_->clock.stop() << " (ms)"
     //<< std::endl;
     ((CentroidPlanner*)planner_)

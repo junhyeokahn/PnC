@@ -103,9 +103,10 @@ void DoubleSupportCtrl::PlannerUpdate_() {
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
-    ((CentroidPlanner*)planner_)
-        ->SaveResult("DS_" + std::to_string(sp_->num_step_copy));
-    std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) << std::endl;
+    //((CentroidPlanner*)planner_)
+    //->SaveResult("DS_" + std::to_string(sp_->num_step_copy));
+    // std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) <<
+    // std::endl;
     // std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
     //<< std::endl;
     ((CentroidPlanner*)planner_)

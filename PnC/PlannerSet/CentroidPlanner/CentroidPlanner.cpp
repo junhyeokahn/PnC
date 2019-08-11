@@ -108,7 +108,7 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
         _num_contacts[eef_id] = cpe;
         YAML::Node _eefcnt =
             contact_plan["eefcnt_" + CentroidModel::eEfIdToString(eef_id)];
-        std::cout << "eef_id : " << eef_id << std::endl;
+        // std::cout << "eef_id : " << eef_id << std::endl;
         contactPlanInterface.contactsPerEndeff[eef_id] = cpe;
         contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
         for (int c_id = 0; c_id < cpe; ++c_id) {
@@ -127,10 +127,10 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
             contactPlanInterface.contactSequence.eEfContacts[eef_id][c_id]
                 .contactType = idToContactType(static_cast<int>(v(9)));
             _eefcnt["cnt" + std::to_string(c_id)] = v;
-            std::cout << "c_id : " << c_id << std::endl;
-            std::cout << contactPlanInterface.contactSequence
-                             .eEfContacts[eef_id][c_id]
-                      << std::endl;
+            // std::cout << "c_id : " << c_id << std::endl;
+            // std::cout << contactPlanInterface.contactSequence
+            //.eEfContacts[eef_id][c_id]
+            //<< std::endl;
         }
     }
     contact_plan["num_contacts"] = _num_contacts;
@@ -154,16 +154,16 @@ void CentroidPlannerParameter::UpdateInitialState(
             Eigen::Quaternion<double>(iso[eef_id].linear());
     }
     b_req[0] = true;
-    std::cout << "initial state" << std::endl;
-    std::cout << initialState << std::endl;
+    // std::cout << "initial state" << std::endl;
+    // std::cout << initialState << std::endl;
 }
 
 void CentroidPlannerParameter::UpdateTerminalState(
     const Eigen::Vector3d& r_displacement) {
     comDisplacement = r_displacement;
     b_req[3] = true;
-    std::cout << "com goal" << std::endl;
-    std::cout << initialState.com + comDisplacement << std::endl;
+    // std::cout << "com goal" << std::endl;
+    // std::cout << initialState.com + comDisplacement << std::endl;
 }
 
 void CentroidPlannerParameter::UpdateRefDynamicsStateSequence() {

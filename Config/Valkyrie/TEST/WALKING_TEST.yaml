@@ -1,6 +1,6 @@
 test_configuration:
     ini_dsp_duration: 0.6
-    dsp_duration: 0.2
+    dsp_duration: 0.4
     fin_dsp_duration: 0.3
     ssp_duration: 0.8
     trns_duration: 0.05
@@ -59,7 +59,7 @@ planner_configuration:
         w_trq_arm:       1.000
         w_trq_leg:       1.000
         w_com:           [ 10000,  10000,  10000]
-        w_amom:          [ 0.500,  0.500,  0.500]
+        w_amom:          [ 35.500,  35.500,  35.500]
         w_lmom:          [ 0.010,  0.001,  0.001]
         w_amomd:         [ 0.100,  0.400,  0.100]
         w_lmomd:         [ 0.015,  0.015,  0.015]

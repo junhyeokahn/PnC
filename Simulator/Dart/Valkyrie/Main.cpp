@@ -170,11 +170,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
 int main(int argc, char** argv) {
     double servo_rate;
+    bool isRecord;
     bool b_show_joint_frame;
     try {
         YAML::Node simulation_cfg =
             YAML::LoadFile(THIS_COM "Config/Valkyrie/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
+        myUtils::readParameter(simulation_cfg, "is_record", isRecord);
         myUtils::readParameter(simulation_cfg, "show_joint_frame",
                                b_show_joint_frame);
     } catch (std::runtime_error& e) {
@@ -254,6 +256,11 @@ int main(int argc, char** argv) {
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     viewer.addEventHandler(new OneStepProgress(node));
+
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM "/ExperimentVideo");
+    }
 
     // viewer.setUpViewInWindow(0, 0, 2880, 1800);
     viewer.setUpViewInWindow(1440, 0, 500, 500);
