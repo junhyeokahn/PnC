@@ -6,6 +6,7 @@ class ValkyrieStateProvider;
 
 namespace BLPhase {
 constexpr int BALANCE = 0;
+constexpr int SWING = 1;
 };  // namespace BLPhase
 
 class BalanceTest : public Test {
@@ -22,6 +23,7 @@ class BalanceTest : public Test {
     void _SettingParameter();
 
     Controller* balance_ctrl_;
+    Controller* swing_ctrl_;
 
     YAML::Node cfg_;
 };

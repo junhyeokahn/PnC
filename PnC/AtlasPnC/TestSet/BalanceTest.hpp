@@ -6,6 +6,7 @@ class AtlasStateProvider;
 
 namespace BLPhase {
 constexpr int BALANCE = 0;
+constexpr int SWING = 1;
 };  // namespace BLPhase
 
 class BalanceTest : public Test {
