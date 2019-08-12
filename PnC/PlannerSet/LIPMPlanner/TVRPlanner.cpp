@@ -1,13 +1,10 @@
 #include <Configuration.h>
 #include <Eigen/Eigenvalues>
-#include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
+#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
-Reversal_LIPM_Planner::Reversal_LIPM_Planner()
-    : FootStepPlanner(),
-      com_vel_limit_(2),
-      b_set_omega_(false),
-      planner_save_data_(11) {
+TVRPlanner::TVRPlanner()
+    : com_vel_limit_(2), b_set_omega_(false), planner_save_data_(11) {
     t_prime_.resize(2);
     kappa_.resize(2);
     x_step_length_limit_.resize(2);
@@ -16,9 +13,9 @@ Reversal_LIPM_Planner::Reversal_LIPM_Planner()
     R_w_t_ = Eigen::MatrixXd::Identity(2, 2);
 }
 
-Reversal_LIPM_Planner::~Reversal_LIPM_Planner() {}
+TVRPlanner::~TVRPlanner() {}
 
-void Reversal_LIPM_Planner::_computeSwitchingState(
+void TVRPlanner::_computeSwitchingState(
     double swing_time, const Eigen::Vector3d& com_pos,
     const Eigen::Vector3d& com_vel, const Eigen::Vector3d& stance_foot_loc,
     std::vector<Eigen::Vector2d>& switching_state) {
@@ -35,7 +32,7 @@ void Reversal_LIPM_Planner::_computeSwitchingState(
 }
 
 // global CoM pos
-void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
+void TVRPlanner::getNextFootLocation(const Eigen::Vector3d& com_pos,
                                                 const Eigen::Vector3d& com_vel,
                                                 Eigen::Vector3d& target_loc,
                                                 const void* additional_input,
@@ -44,8 +41,8 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
         printf("[Reversal Planner] Omega is not set\n");
         exit(0);
     }
-    ParamReversalPL* _input = ((ParamReversalPL*)additional_input);
-    OutputReversalPL* _output = ((OutputReversalPL*)additional_output);
+    TVRParameter* _input = ((TVRParameter*)additional_input);
+    TVROutput* _output = ((TVROutput*)additional_output);
     _UpdateRotation(_input->yaw_angle);
 
     std::vector<Eigen::Vector2d> switch_state(2);
@@ -63,8 +60,9 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     // switch_state[1][1]);
 
     // !! TEST !!
-     int check_switch(_check_switch_velocity(switch_state));
-    //int check_switch(_check_switch_velocity_considering_rotation(switch_state));
+    int check_switch(_check_switch_velocity(switch_state));
+    // int
+    // check_switch(_check_switch_velocity_considering_rotation(switch_state));
     // !! TEST !!
     double new_swing_time(_input->swing_time);
     int count(0);
@@ -86,8 +84,9 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
                                _input->stance_foot_loc, switch_state);
 
         // !! TEST !!
-         check_switch = _check_switch_velocity(switch_state);
-        //check_switch = _check_switch_velocity_considering_rotation(switch_state);
+        check_switch = _check_switch_velocity(switch_state);
+        // check_switch =
+        // _check_switch_velocity_considering_rotation(switch_state);
         // !! TEST !!
         ++count;
         if (count > 0) break;
@@ -107,9 +106,10 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
 
     // _StepLengthCheck(target_loc, switch_state);
     // !! TEST !!
-    _StepLengthCheck(target_loc, _input->b_positive_sidestep, _input->stance_foot_loc);
-    //_StepLengthCheckConsideringRotation(target_loc, _input->b_positive_sidestep,
-                                        //_input->stance_foot_loc);
+    _StepLengthCheck(target_loc, _input->b_positive_sidestep,
+                     _input->stance_foot_loc);
+    //_StepLengthCheckConsideringRotation(target_loc,
+    //_input->b_positive_sidestep, _input->stance_foot_loc);
     // !! TEST !!
 
     // save data
@@ -124,7 +124,7 @@ void Reversal_LIPM_Planner::getNextFootLocation(const Eigen::Vector3d& com_pos,
     myUtils::saveVector(planner_save_data_, "planner_data");
 }
 
-int Reversal_LIPM_Planner::_check_switch_velocity(
+int TVRPlanner::_check_switch_velocity(
     const std::vector<Eigen::Vector2d>& switch_state) {
     int ret(0);
     double x_vel(switch_state[0][1]);
@@ -151,7 +151,7 @@ int Reversal_LIPM_Planner::_check_switch_velocity(
     return ret;
 }
 
-int Reversal_LIPM_Planner::_check_switch_velocity_considering_rotation(
+int TVRPlanner::_check_switch_velocity_considering_rotation(
     const std::vector<Eigen::Vector2d>& switch_state) {
     int ret(0);
     Eigen::VectorXd global_com_vel = Eigen::VectorXd::Zero(2);
@@ -181,7 +181,7 @@ int Reversal_LIPM_Planner::_check_switch_velocity_considering_rotation(
     return ret;
 }
 
-void Reversal_LIPM_Planner::_StepLengthCheck(
+void TVRPlanner::_StepLengthCheck(
     Eigen::Vector3d& target_loc, bool b_positive_sidestep,
     const Eigen::Vector3d& stance_foot) {
     // X limit check
@@ -265,7 +265,7 @@ void Reversal_LIPM_Planner::_StepLengthCheck(
     }
 }
 
-void Reversal_LIPM_Planner::_StepLengthCheck(
+void TVRPlanner::_StepLengthCheck(
     Eigen::Vector3d& target_loc,
     const std::vector<Eigen::Vector2d>& switch_state) {
     // X limit check
@@ -300,7 +300,7 @@ void Reversal_LIPM_Planner::_StepLengthCheck(
     }
 }
 
-void Reversal_LIPM_Planner::PlannerInitialization(const YAML::Node& node) {
+void TVRPlanner::PlannerInitialization(const YAML::Node& node) {
     try {
         Eigen::VectorXd tmp;
         myUtils::readParameter(node, "t_prime", tmp);
@@ -330,7 +330,7 @@ void Reversal_LIPM_Planner::PlannerInitialization(const YAML::Node& node) {
     }
 }
 
-void Reversal_LIPM_Planner::CheckEigenValues(double swing_time) {
+void TVRPlanner::CheckEigenValues(double swing_time) {
     Eigen::MatrixXd A(2, 2);
     printf("omega, swing_time: %f, %f\n", omega_, swing_time);
 
@@ -350,14 +350,14 @@ void Reversal_LIPM_Planner::CheckEigenValues(double swing_time) {
     }
 }
 
-void Reversal_LIPM_Planner::_UpdateRotation(double yaw_angle) {
+void TVRPlanner::_UpdateRotation(double yaw_angle) {
     R_w_t_(0, 0) = cos(yaw_angle);
     R_w_t_(1, 0) = sin(yaw_angle);
     R_w_t_(1, 0) = -sin(yaw_angle);
     R_w_t_(1, 1) = cos(yaw_angle);
 }
 
-void Reversal_LIPM_Planner::_StepLengthCheckConsideringRotation(
+void TVRPlanner::_StepLengthCheckConsideringRotation(
     Eigen::Vector3d& target_loc, bool b_positive_sidestep,
     const Eigen::Vector3d& stance_foot) {
     Eigen::Vector2d stance_foot_in_torso, target_loc_in_torso,

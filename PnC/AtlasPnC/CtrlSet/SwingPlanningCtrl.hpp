@@ -11,12 +11,12 @@ class WBLC;
 class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
-class FootStepPlanner;
+class TVRPlanner;
 
 class SwingPlanningCtrl : public Controller {
    public:
     SwingPlanningCtrl(RobotSystem* robot, int swing_foot,
-                      FootStepPlanner* planner)
+                      TVRPlanner* planner)
         : Controller(robot),
           swing_foot_(swing_foot),
           b_replanning_(false),
@@ -83,7 +83,7 @@ class SwingPlanningCtrl : public Controller {
     KinWBC* kin_wbc_;
     WBLC* wblc_;
     WBLC_ExtraData* wblc_data_;
-    FootStepPlanner* planner_;
+    TVRPlanner* planner_;
 
     AtlasStateProvider* sp_;
 

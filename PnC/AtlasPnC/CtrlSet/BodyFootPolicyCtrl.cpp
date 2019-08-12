@@ -5,7 +5,7 @@
 #include <PnC/AtlasPnC/ContactSet/ContactSet.hpp>
 #include <PnC/AtlasPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
-#include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
+#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <ReinforcementLearning/RLInterface/RLInterface.hpp>
@@ -13,7 +13,7 @@
 #include <Utils/Math/MathUtilities.hpp>
 
 BodyFootPolicyCtrl::BodyFootPolicyCtrl(RobotSystem* robot, int swing_foot,
-                                       FootStepPlanner* planner)
+                                       TVRPlanner* planner)
     : SwingPlanningCtrl(robot, swing_foot, planner),
       push_down_height_(0.),
       des_jpos_(Atlas::n_adof),
@@ -350,8 +350,8 @@ void BodyFootPolicyCtrl::_Replanning(Eigen::Vector3d& target_loc) {
     // sp_->rl_count++;
     // TEST //
 
-    OutputReversalPL pl_output;
-    ParamReversalPL pl_param;
+    TVROutput pl_output;
+    TVRParameter pl_param;
     pl_param.swing_time = end_time_ - state_machine_time_ +
                           transition_time_ * transition_phase_ratio_ +
                           stance_time_ * double_stance_ratio_;
@@ -523,7 +523,7 @@ void BodyFootPolicyCtrl::ctrlInitialization(const YAML::Node& node) {
     }
     static bool b_bodypute_eigenvalue(true);
     if (b_bodypute_eigenvalue) {
-        ((Reversal_LIPM_Planner*)planner_)
+        ((TVRPlanner*)planner_)
             ->CheckEigenValues(double_stance_ratio_ * stance_time_ +
                                transition_phase_ratio_ * transition_time_ +
                                end_time_);

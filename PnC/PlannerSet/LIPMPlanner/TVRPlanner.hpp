@@ -3,9 +3,9 @@
 
 #include <Eigen/Dense>
 
-#include <PnC/FootStepPlanner.hpp>
+#include "Utils/IO/IOUtilities.hpp"
 
-class ParamReversalPL {
+class TVRParameter {
    public:
     double swing_time;
     Eigen::Vector2d des_loc;
@@ -14,24 +14,24 @@ class ParamReversalPL {
     double yaw_angle;
 };
 
-class OutputReversalPL {
+class TVROutput {
    public:
     double time_modification;
     double switching_state[4];
 };
 
-class Reversal_LIPM_Planner : public FootStepPlanner {
+class TVRPlanner {
    public:
-    Reversal_LIPM_Planner();
-    virtual ~Reversal_LIPM_Planner();
+    TVRPlanner();
+    virtual ~TVRPlanner();
 
-    virtual void PlannerInitialization(const YAML::Node& node);
+    void PlannerInitialization(const YAML::Node& node);
 
-    virtual void getNextFootLocation(const Eigen::Vector3d& com_pos,
-                                     const Eigen::Vector3d& com_vel,
-                                     Eigen::Vector3d& target_loc,
-                                     const void* additional_input = NULL,
-                                     void* additional_output = NULL);
+    void getNextFootLocation(const Eigen::Vector3d& com_pos,
+                             const Eigen::Vector3d& com_vel,
+                             Eigen::Vector3d& target_loc,
+                             const void* additional_input = NULL,
+                             void* additional_output = NULL);
 
     // Set Functions
     void setOmega(double com_height) {

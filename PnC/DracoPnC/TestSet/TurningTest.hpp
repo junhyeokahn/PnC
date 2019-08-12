@@ -3,7 +3,7 @@
 #include <PnC/Test.hpp>
 
 class DracoStateProvider;
-class FootStepPlanner;
+class TVRPlanner;
 
 namespace TnPhase {
 constexpr int initiation = 0;
@@ -32,7 +32,7 @@ class TurningTest : public Test {
     virtual void AdditionalUpdate_();
     void _SettingParameter();
 
-    FootStepPlanner* reversal_planner_;
+    TVRPlanner* reversal_planner_;
 
     Controller* jpos_ctrl_;
     Controller* body_up_ctrl_;

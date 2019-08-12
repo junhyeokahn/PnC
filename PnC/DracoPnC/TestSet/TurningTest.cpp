@@ -4,7 +4,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/TestSet/TestSet.hpp>
-#include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
+#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <Utils/IO/DataManager.hpp>
 
 TurningTest::TurningTest(RobotSystem* robot) : Test(robot) {
@@ -16,7 +16,7 @@ TurningTest::TurningTest(RobotSystem* robot) : Test(robot) {
     sp_ = DracoStateProvider::getStateProvider(robot_);
     sp_->stance_foot = "lFoot";
     sp_->global_pos_local[1] = 0.15;
-    reversal_planner_ = new Reversal_LIPM_Planner();
+    reversal_planner_ = new TVRPlanner();
     phase_ = TnPhase::initiation;
 
     state_list_.clear();
@@ -219,7 +219,7 @@ void TurningTest::_SettingParameter() {
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
 
         myUtils::readParameter(test_cfg, "com_height_for_omega", tmp);
-        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
+        ((TVRPlanner*)reversal_planner_)->setOmega(tmp);
 
         myUtils::readParameter(test_cfg, "jpos_initialization_time", tmp);
         ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);

@@ -4,7 +4,7 @@
 #include <PnC/AtlasPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
 #include <PnC/AtlasPnC/TestSet/RLWalkingTest.hpp>
-#include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
+#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <ReinforcementLearning/RLInterface/RLInterface.hpp>
 #include <Utils/IO/DataManager.hpp>
 
@@ -19,7 +19,7 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot) : Test(robot) {
     sp_ = AtlasStateProvider::getStateProvider(robot_);
     sp_->stance_foot = AtlasBodyNode::l_sole;
     sp_->global_pos_local[1] = 0.11;
-    reversal_planner_ = new Reversal_LIPM_Planner();
+    reversal_planner_ = new TVRPlanner();
     phase_ = RLWkPhase::double_contact_1;
 
     state_list_.clear();
@@ -85,7 +85,7 @@ RLWalkingTest::RLWalkingTest(RobotSystem* robot, int mpi_idx, int env_idx)
     sp_ = AtlasStateProvider::getStateProvider(robot_);
     sp_->stance_foot = AtlasBodyNode::l_sole;
     sp_->global_pos_local[1] = 0.11;
-    reversal_planner_ = new Reversal_LIPM_Planner();
+    reversal_planner_ = new TVRPlanner();
     phase_ = RLWkPhase::double_contact_1;
 
     state_list_.clear();
@@ -251,7 +251,7 @@ void RLWalkingTest::_SettingParameter() {
 
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
-        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
+        ((TVRPlanner*)reversal_planner_)->setOmega(tmp);
 
         // =====================================================================
         // stance time

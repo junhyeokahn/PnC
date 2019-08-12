@@ -8,7 +8,7 @@
 class BodyFootPolicyCtrl : public SwingPlanningCtrl {
    public:
     BodyFootPolicyCtrl(RobotSystem* robot, int swing_foot,
-                       FootStepPlanner* planner);
+                       TVRPlanner* planner);
     virtual ~BodyFootPolicyCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();

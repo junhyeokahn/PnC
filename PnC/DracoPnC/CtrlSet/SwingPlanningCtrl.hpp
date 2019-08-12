@@ -4,7 +4,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 
 class DracoStateProvider;
-class FootStepPlanner;
+class TVRPlanner;
 class ContactSpec;
 class WBLC;
 class WBLC_ExtraData;
@@ -12,7 +12,7 @@ class WBLC_ExtraData;
 class SwingPlanningCtrl : public Controller {
    public:
     SwingPlanningCtrl(RobotSystem* robot, std::string swing_foot,
-                      FootStepPlanner* planner)
+                      TVRPlanner* planner)
         : Controller(robot),
           swing_foot_(swing_foot),
           b_replanning_(false),
@@ -80,7 +80,7 @@ class SwingPlanningCtrl : public Controller {
     ContactSpec* single_contact_;
     WBLC* wblc_;
     WBLC_ExtraData* wblc_data_;
-    FootStepPlanner* planner_;
+    TVRPlanner* planner_;
 
     DracoStateProvider* sp_;
 

@@ -10,7 +10,7 @@ class KinWBC;
 class BodyFootTurningCtrl : public SwingPlanningCtrl {
    public:
     BodyFootTurningCtrl(RobotSystem* robot, std::string swing_foot_,
-                        FootStepPlanner* planner);
+                        TVRPlanner* planner);
     virtual ~BodyFootTurningCtrl();
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();

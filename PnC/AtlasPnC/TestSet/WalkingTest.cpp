@@ -4,7 +4,7 @@
 #include <PnC/AtlasPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/AtlasPnC/TaskSet/TaskSet.hpp>
 #include <PnC/AtlasPnC/TestSet/WalkingTest.hpp>
-#include <PnC/PlannerSet/PIPM_FootPlacementPlanner/Reversal_LIPM_Planner.hpp>
+#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <Utils/IO/DataManager.hpp>
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
@@ -15,7 +15,7 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     sp_ = AtlasStateProvider::getStateProvider(robot_);
     sp_->stance_foot = AtlasBodyNode::l_sole;
     sp_->global_pos_local[1] = 0.11;
-    reversal_planner_ = new Reversal_LIPM_Planner();
+    reversal_planner_ = new TVRPlanner();
     phase_ = WkPhase::double_contact_1;
 
     state_list_.clear();
@@ -174,7 +174,7 @@ void WalkingTest::_SettingParameter() {
 
         ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
         ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
-        ((Reversal_LIPM_Planner*)reversal_planner_)->setOmega(tmp);
+        ((TVRPlanner*)reversal_planner_)->setOmega(tmp);
 
         // =====================================================================
         // stance time

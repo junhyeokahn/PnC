@@ -3,7 +3,7 @@
 #include <PnC/Test.hpp>
 
 class AtlasStateProvider;
-class FootStepPlanner;
+class TVRPlanner;
 
 namespace WkPhase {
 constexpr int double_contact_1 = 0;
@@ -30,7 +30,7 @@ class WalkingTest : public Test {
     virtual void AdditionalUpdate_();
     void _SettingParameter();
 
-    FootStepPlanner* reversal_planner_;
+    TVRPlanner* reversal_planner_;
 
     Controller* body_fix_ctrl_;
     // Right

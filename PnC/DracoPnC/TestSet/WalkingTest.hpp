@@ -3,7 +3,7 @@
 #include <PnC/Test.hpp>
 
 class DracoStateProvider;
-class FootStepPlanner;
+class TVRPlanner;
 
 namespace WkPhase {
 constexpr int initiation = 0;
@@ -31,7 +31,7 @@ class WalkingTest : public Test {
     virtual int _NextPhase(const int& phase);
     void _SettingParameter();
 
-    FootStepPlanner* reversal_planner_;
+    TVRPlanner* reversal_planner_;
 
     Controller* jpos_ctrl_;
     Controller* body_up_ctrl_;

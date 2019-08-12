@@ -3,7 +3,7 @@
 #include <PnC/Test.hpp>
 
 class AtlasStateProvider;
-class FootStepPlanner;
+class TVRPlanner;
 
 namespace RLWkPhase {
 constexpr int double_contact_1 = 0;
@@ -35,7 +35,7 @@ class RLWalkingTest : public Test {
     int env_idx_;
     bool b_learning_;
 
-    FootStepPlanner* reversal_planner_;
+    TVRPlanner* reversal_planner_;
 
     Controller* body_fix_ctrl_;
     // Right
