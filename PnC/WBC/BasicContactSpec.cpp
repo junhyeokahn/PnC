@@ -23,7 +23,7 @@ bool PointContactSpec::_UpdateJcDotQdot() {
         robot_->getBodyNodeCoMJacobianDot(link_idx_) * robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
 
-    //JcDotQdot_.setZero();
+    // JcDotQdot_.setZero();
     return true;
 }
 
@@ -110,6 +110,7 @@ bool SurfaceContactSpec::_UpdateJc() {
 
 bool SurfaceContactSpec::_UpdateJcDotQdot() {
     JcDotQdot_ = robot_->getBodyNodeJacobianDot(link_idx_) * robot_->getQdot();
+    // JcDotQdot_.setZero();
     return true;
 }
 

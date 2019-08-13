@@ -324,6 +324,11 @@ void TransitionCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "kd", Kd_);
         myUtils::readParameter(node, "max_rf_z", max_rf_z_);
         myUtils::readParameter(node, "min_rf_z", min_rf_z_);
+
+        Eigen::VectorXd tmp_vec1, tmp_vec2;
+        myUtils::readParameter(node, "com_kp", tmp_vec1);
+        myUtils::readParameter(node, "com_kd", tmp_vec2);
+        com_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

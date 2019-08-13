@@ -69,12 +69,12 @@ void WBLC::makeWBLC_Torque(const Eigen::VectorXd& des_jacc_cmd,
     _GetSolution(cmd);
     // std::cout << "f: " << f << std::endl;
     // std::cout << "x: " << z << std::endl;
-     //std::cout << "cmd: "<<cmd<<std::endl;
+    // std::cout << "cmd: "<<cmd<<std::endl;
 
     // if(f > 1.e5){
     //   std::cout << "f: " << f << std::endl;
     //   std::cout << "x: " << z << std::endl;
-       //std::cout << "cmd: "<<cmd<<std::endl;
+    // std::cout << "cmd: "<<cmd<<std::endl;
 
     //   printf("G:\n");
     //   std::cout<<G<<std::endl;
@@ -249,6 +249,10 @@ void WBLC::_GetSolution(Eigen::VectorXd& cmd) {
     for (int i(0); i < num_qdot_; ++i) delta_qddot[i] = z[i];
     data_->Fr_ = Eigen::VectorXd(dim_rf_);
     for (int i(0); i < dim_rf_; ++i) data_->Fr_[i] = z[i + num_qdot_];
+    Eigen::VectorXd delta_xddot(dim_rf_);
+    for (int i = 0; i < dim_rf_; ++i)
+        delta_xddot[i] = z[i + num_qdot_ + dim_rf_];
+    // myUtils::pretty_print(delta_xddot, std::cout, "delta xddot");
 
     Eigen::VectorXd tau = A_ * (qddot_ + delta_qddot) + cori_ + grav_ -
                           Jc_.transpose() * data_->Fr_;

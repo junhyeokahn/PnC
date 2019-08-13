@@ -147,13 +147,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int leftForearmYaw = robot->getDof("leftForearmYaw")->getIndexInSkeleton();
 
     Eigen::VectorXd q = robot->getPositions();
-    q[2] = 2.5 - 1.365;
-    q[leftHipPitch] = -0.3;
-    q[rightHipPitch] = -0.3;
-    q[leftKneePitch] = 0.6;
-    q[rightKneePitch] = 0.6;
-    q[leftAnklePitch] = -0.3;
-    q[rightAnklePitch] = -0.3;
+    q[2] = 2.5 - 1.365 - 0.11;
+    q[leftHipPitch] = -0.6;
+    q[rightHipPitch] = -0.6;
+    q[leftKneePitch] = 1.2;
+    q[rightKneePitch] = 1.2;
+    q[leftAnklePitch] = -0.6;
+    q[rightAnklePitch] = -0.6;
 
     q[rightShoulderPitch] = 0.2;
     q[rightShoulderRoll] = 1.1;

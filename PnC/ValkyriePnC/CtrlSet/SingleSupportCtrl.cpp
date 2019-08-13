@@ -512,13 +512,18 @@ void SingleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
+    /*    task_list_.push_back(com_task_);*/
+    // task_list_.push_back(foot_pos_task_);
+    // task_list_.push_back(foot_ori_task_);
+    // task_list_.push_back(pelvis_ori_task_);
+    // task_list_.push_back(torso_ori_task_);
+    /*task_list_.push_back(total_joint_task_);*/
+
     task_list_.push_back(com_task_);
-    task_list_.push_back(foot_pos_task_);
-    task_list_.push_back(foot_ori_task_);
-    // task_list_.push_back(com_task_);
-    // task_list_.push_back(centroid_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
+    task_list_.push_back(foot_pos_task_);
+    task_list_.push_back(foot_ori_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -576,6 +581,8 @@ void SingleSupportCtrl::SetBSpline_() {
     middle_pt[0][2] = swing_height_;
     // fin[5] = -0.5;
     // fin[8] = 5.;
+    fin[5] = 0.;
+    fin[8] = 0.;
     foot_traj_.SetParam(ini, fin, middle_pt, ssp_dur_);
 
     delete[] * middle_pt;
@@ -611,6 +618,15 @@ void SingleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
         myUtils::readParameter(node, "kp", Kp_);
         myUtils::readParameter(node, "kd", Kd_);
+
+        Eigen::VectorXd tmp_vec1, tmp_vec2;
+        myUtils::readParameter(node, "com_kp", tmp_vec1);
+        myUtils::readParameter(node, "com_kd", tmp_vec2);
+        com_task_->setGain(tmp_vec1, tmp_vec2);
+
+        myUtils::readParameter(node, "foot_pos_kp", tmp_vec1);
+        myUtils::readParameter(node, "foot_pos_kd", tmp_vec2);
+        foot_pos_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

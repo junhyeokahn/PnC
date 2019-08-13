@@ -130,9 +130,9 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     Eigen::VectorXd lk = robot_->getCentroidMomentum();
     for (int i = 0; i < 3; ++i) {
         l[i] = lk[i + 3];
-        k[i] = lk[i];
+        // k[i] = lk[i];
         // l[i] = 0.;
-        // k[i] = 0.;
+        k[i] = 0.;
     }
     std::array<int, CentroidModel::numEEf> actv;
     std::array<Eigen::Vector3d, CentroidModel::numEEf> eef_frc;
@@ -310,7 +310,7 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             }
 
             // update right foot
-            if (!l_done) {
+            if (!r_done) {
                 c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)]
                     .push_back(Eigen::VectorXd::Zero(10));
                 c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][r_idx]
@@ -349,6 +349,12 @@ void DoubleSupportCtrl::PlannerInitialization_() {
         }
     }
     _param->UpdateContactPlanInterface(c_seq);
+    std::cout << "right step to go : "
+              << c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].size()
+              << std::endl;
+    std::cout << "left step to go : "
+              << c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].size()
+              << std::endl;
 
     // =========================================================================
     // update reference dynamics state sequence
@@ -523,6 +529,11 @@ void DoubleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
     try {
         myUtils::readParameter(node, "kp", Kp_);
         myUtils::readParameter(node, "kd", Kd_);
+
+        Eigen::VectorXd tmp_vec1, tmp_vec2;
+        myUtils::readParameter(node, "com_kp", tmp_vec1);
+        myUtils::readParameter(node, "com_kd", tmp_vec2);
+        com_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
