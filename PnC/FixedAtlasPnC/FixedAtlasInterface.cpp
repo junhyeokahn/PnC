@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <PnC/FixedAtlasPnC/FixedAtlasInterface.hpp>
 #include <PnC/FixedAtlasPnC/TestSet/JointTest.hpp>
-//#include <PnC/FixedAtlasPnC/TestSet/OSCTest.hpp>
+#include <PnC/FixedAtlasPnC/TestSet/OSCTest.hpp>
 #include <PnC/FixedAtlasPnC/FixedAtlasDefinition.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -57,9 +57,9 @@ void FixedAtlasInterface::_ParameterSetting() {
         if (test_name == "joint_test") {
             test_ = new JointTest(robot_);
         } 
-        //if (test_name == "OSC_test") {
-            //test_ = new OSCTest(robot_);
-        //} 
+        if (test_name == "OSC_test") {
+            test_ = new OSCTest(robot_);
+        } 
         else {
             printf(
                 "[Atlas Interface] There is no test matching test with "

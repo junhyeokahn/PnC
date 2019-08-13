@@ -7,39 +7,55 @@
 OSCOriCtrl::OSCOriCtrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(3, "OSC ORI Ctrl");
     ctrl_count_ = 0;
+    target_pos_ = Eigen::VectorXd::Zero(4);
+    head_kp_ = Eigen::VectorXd::Zero(3);
+    head_kd_ = Eigen::VectorXd::Zero(3);
+    q_kp_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    q_kd_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    ini_pos_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    ini_vel_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    so3_ori_error = Eigen::VectorXd::Zero(3);
 }
+
 
 OSCOriCtrl::~OSCOriCtrl() {}
 
 void OSCOriCtrl::oneStep(void* _cmd) {
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumDofs());
-    Eigen::Vector3d so3_delta = Eigen::Vector3d::Zero();
-    Eigen::Vector3d curr_so3_des = Eigen::Vector3d::Zero();
+    Eigen::VectorXd so3_delta = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd curr_so3_des = Eigen::VectorXd::Zero(3);
     Eigen::Quaternion<double> quat_delta;
     Eigen::Quaternion<double> curr_quat_des;
-
     Eigen::Quaternion<double> act_pos_quat_;
     act_pos_quat_= robot_->getBodyNodeCoMIsometry("head").linear();
-    Eigen::Vector3d act_vel_so3 = robot_->getBodyNodeCoMSpatialVelocity("head").head(3); 
+    Eigen::VectorXd act_vel_so3 = robot_->getBodyNodeCoMSpatialVelocity("head").head(3); 
+
+    //Test
+    //Eigen::VectorXd act_vel_so3_2 = robot_->getBodyNodeSpatialVelocity("head").head(3);
+    //std::cout << "===============" << std::endl;
+    //myUtils::pretty_print(act_vel_so3, std::cout, "com spatial vel");
+    //myUtils::pretty_print(act_vel_so3_2, std::cout, "spatial vel");
+    //Test
+
     double t = myUtils::smooth_changing(0, 1,end_time_, state_machine_time_);
     double tdot = myUtils::smooth_changing_vel(0, 1,end_time_, state_machine_time_);
-  
     so3_delta = so3_ori_error * t;
     quat_delta = dart::math::expToQuat(so3_delta);
     curr_quat_des = quat_delta * ini_pos_quat_;
 
     curr_so3_des = so3_ori_error * tdot;
 
-    Eigen::Vector3d head_acc_des = Eigen::Vector3d::Zero();
-    Eigen::Vector3d ori_error = Eigen::Vector3d::Zero();
+    Eigen::VectorXd head_acc_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd ori_error = Eigen::VectorXd::Zero(3);
     ori_error = dart::math::quatToExp(curr_quat_des * (act_pos_quat_.inverse()));
-    Eigen::Vector3d head_acc_ff = Eigen::Vector3d::Zero();
+    Eigen::VectorXd head_acc_ff = Eigen::VectorXd::Zero(3);
 
     for (int i = 0; i < 3; ++i) {
         head_acc_des[i] =
             head_acc_ff[i] + head_kp_[i] * ori_error[i] 
             + head_kd_[i] * (curr_so3_des[i] - act_vel_so3[i]);
     }
+
     //std::cout << head_acc_des[0] << std::endl;
     //std::cout << head_acc_des[1] << std::endl;
     //std::cout << head_acc_des[2] << std::endl;
@@ -57,7 +73,6 @@ void OSCOriCtrl::oneStep(void* _cmd) {
     myUtils::weightedInverse(J_q_N_head,robot_->getInvMassMatrix(),J_q_N_head_bar);
 
     qddot_des_head = J_head_bar * (head_acc_des - J_head_dot*(robot_->getQdot()));
-    
     for (int i = 0; i < robot_->getNumDofs(); ++i){
         qddot_des_q[i] = q_kp_[i] * (ini_pos_q[i] - robot_->getQ()[i]) + 
                         q_kd_[i] * (ini_vel_q[i] - robot_->getQdot()[i]);
@@ -83,15 +98,15 @@ void OSCOriCtrl::firstVisit() {
     quat_ori_error = fin_pos_quat_*(ini_pos_quat_.inverse());
     so3_ori_error = dart::math::quatToExp(quat_ori_error);
     ini_pos_q = robot_->getQ();
-    ini_vel_q = robot_->getQdot();
 }
+    
 void OSCOriCtrl::lastVisit() {
 }
 
 bool OSCOriCtrl::endOfPhase() {
-    if (state_machine_time_ > end_time_) {
-        return true;
-    }
+    //if (state_machine_time_ > end_time_) {
+        //return true;
+    //}
     return false;
 }
 
