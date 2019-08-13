@@ -5,5 +5,5 @@ show_joint_frame: false
 plot_mpc_result: false
 
 control_configuration:
-  kp: 300
-  kd: 3
+  kp: 500
+  kd: 5

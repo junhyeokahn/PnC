@@ -54,6 +54,7 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
         readParameter(optim_cfg, "torque_range", torqueRange);
         readParameter(optim_cfg, "friction_coeff", frictionCoeff);
         readParameter(optim_cfg, "max_eef_lengths", maxEEfLengths);
+        // readParameter(optim_cfg, "min_eef_lengths", minEEfLengths);
         for (int eef_id = 0; eef_id < CentroidModel::numEEf; eef_id++) {
             readParameter(optim_cfg,
                           "cop_range_" + CentroidModel::eEfIdToString(eef_id),
@@ -96,6 +97,11 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
                   << __FILE__ << "]" << std::endl
                   << std::endl;
     }
+}
+
+void CentroidPlannerParameter::UpdateTimeHorizon(double time_horizon) {
+    timeHorizon = time_horizon;
+    numTimeSteps = std::floor(timeHorizon / timeStep);
 }
 
 void CentroidPlannerParameter::UpdateContactPlanInterface(
@@ -913,7 +919,7 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                         qapprox);
 
                     // =========================================================
-                    // end-effector length constraint
+                    // end-effector max length constraint
                     // =========================================================
                     mQuadCons.clear();
                     mQuadCons.addQuaTerm(
@@ -925,6 +931,20 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                     mModel.addQuaConstr(
                         mQuadCons, "<",
                         pow(mCentParam->maxEEfLengths[eef_id], 2.0));
+
+                    // =========================================================
+                    // end-effector min length constraint
+                    // =========================================================
+                    // mQuadCons.clear();
+                    // mQuadCons.addQuaTerm(
+                    // 1.0, lx - mCentParam->eEfOffset[eef_id].x());
+                    // mQuadCons.addQuaTerm(
+                    // 1.0, ly - mCentParam->eEfOffset[eef_id].y());
+                    // mQuadCons.addQuaTerm(
+                    // 1.0, lz - mCentParam->eEfOffset[eef_id].z());
+                    // mModel.addQuaConstr(
+                    // mQuadCons, ">",
+                    // pow(mCentParam->minEEfLengths[eef_id], 2.0));
                 }
             }
         }

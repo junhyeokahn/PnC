@@ -11,10 +11,11 @@ class WBLC;
 class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
+class FootstepSequenceGenerator;
 
 class DoubleSupportCtrl : public Controller {
    public:
-    DoubleSupportCtrl(RobotSystem*, Planner*);
+    DoubleSupportCtrl(RobotSystem*, Planner*, FootstepSequenceGenerator*);
     virtual ~DoubleSupportCtrl();
 
     virtual void oneStep(void* _cmd);
@@ -29,6 +30,7 @@ class DoubleSupportCtrl : public Controller {
     void SetFootStepLength(double l) { footstep_length_ = l; }
     void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
+    void SetWalkingDistance(double h) { walking_distance_ = h; }
     void SetRePlanningFlag(bool b) { b_replan_ = b; }
 
    protected:
@@ -45,6 +47,7 @@ class DoubleSupportCtrl : public Controller {
     double dsp_dur_;
     double ssp_dur_;
     double com_height_;
+    double walking_distance_;
     int dim_contact_;
     bool b_replan_;
     bool b_do_plan_;
@@ -71,6 +74,7 @@ class DoubleSupportCtrl : public Controller {
     double ctrl_start_time_;
     ValkyrieStateProvider* sp_;
 
+    FootstepSequenceGenerator* foot_sequence_gen_;
     Planner* planner_;
     Eigen::MatrixXd com_traj_;
     Eigen::MatrixXd lmom_traj_;

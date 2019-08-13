@@ -1,4 +1,5 @@
 #include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
+#include <PnC/PlannerSet/ContactSequenceGenerator/FootstepSequenceGenerator.hpp>
 #include <PnC/ValkyriePnC/ContactSet/ContactSet.hpp>
 #include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
@@ -18,12 +19,14 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     centroid_planner_param_ = new CentroidPlannerParameter(
         cfg_["planner_configuration"], robot_->getRobotMass());
     centroid_planner_ = new CentroidPlanner(centroid_planner_param_);
+    foot_sequence_gen_ = new FootstepSequenceGenerator();
 
     phase_ = WKPhase::double_contact_1;
 
     state_list_.clear();
 
-    ds_ctrl_ = new DoubleSupportCtrl(robot, centroid_planner_);
+    ds_ctrl_ =
+        new DoubleSupportCtrl(robot, centroid_planner_, foot_sequence_gen_);
 
     r_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
                                        ValkyrieBodyNode::rightFoot);
@@ -53,6 +56,7 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 
 WalkingTest::~WalkingTest() {
     delete centroid_planner_;
+    delete foot_sequence_gen_;
     delete centroid_planner_param_;
 
     delete ds_ctrl_;
@@ -155,11 +159,13 @@ void WalkingTest::_SettingParameter() {
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(tmp);
         ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepLength(tmp);
+        foot_sequence_gen_->SetFootStepLength(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_width", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepWidth(tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepWidth(tmp);
         ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepWidth(tmp);
+        foot_sequence_gen_->SetFootStepWidth(tmp);
 
         myUtils::readParameter(test_cfg, "com_height", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetCoMHeight(tmp);
@@ -169,6 +175,9 @@ void WalkingTest::_SettingParameter() {
         ((TransitionCtrl*)ls_start_trns_ctrl_)->SetCoMHeight(tmp);
         ((TransitionCtrl*)rs_end_trns_ctrl_)->SetCoMHeight(tmp);
         ((TransitionCtrl*)ls_end_trns_ctrl_)->SetCoMHeight(tmp);
+
+        myUtils::readParameter(test_cfg, "walking_distance", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetWalkingDistance(tmp);
 
         myUtils::readParameter(test_cfg, "trns_duration", tmp);
         ((TransitionCtrl*)rs_start_trns_ctrl_)->SetTRNSDuration(tmp);

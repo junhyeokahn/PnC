@@ -17,7 +17,8 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     robot_ = _robot;
     stance_foot = ValkyrieBodyNode::leftFoot;
     curr_time = 0.;
-    prev_state_machine_time_ = 0.;
+    prev_state_machine_time = 0.;
+    planning_moment = 0.;
 
     q = Eigen::VectorXd::Zero(Valkyrie::n_dof);
     qdot = Eigen::VectorXd::Zero(Valkyrie::n_dof);
@@ -98,4 +99,6 @@ void ValkyrieStateProvider::saveCurrentData() {
                  .translation();
     lf_vel = robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::leftCOP_Frame)
                  .tail(3);
+    // myUtils::pretty_print(rf_pos, std::cout, "right foot");
+    // myUtils::pretty_print(lf_pos, std::cout, "left foot");
 }

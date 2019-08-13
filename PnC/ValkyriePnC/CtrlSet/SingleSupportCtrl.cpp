@@ -116,7 +116,7 @@ SingleSupportCtrl::~SingleSupportCtrl() {
 void SingleSupportCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
-    sp_->prev_state_machine_time_ = state_machine_time_;
+    sp_->prev_state_machine_time = state_machine_time_;
 
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     if (b_do_plan_) {
@@ -413,8 +413,10 @@ void SingleSupportCtrl::_task_setup() {
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
-    planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
-                             dummy);
+    // planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
+    // dummy);
+    planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
+                             cen_vel_des, dummy);
 
     // for (int i = 0; i < 3; ++i) {
     // sp_->com_pos_des[i] = cen_pos_des[i + 3];
@@ -510,9 +512,10 @@ void SingleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    task_list_.push_back(com_task_);
+    // task_list_.push_back(com_task_);
     task_list_.push_back(foot_pos_task_);
     task_list_.push_back(foot_ori_task_);
+    task_list_.push_back(com_task_);
     // task_list_.push_back(centroid_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
@@ -537,7 +540,7 @@ void SingleSupportCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ctrl_start_time_ = sp_->curr_time;
     SetBSpline_();
-    b_do_plan_ = true;
+    b_do_plan_ = false;
 }
 
 void SingleSupportCtrl::SetBSpline_() {

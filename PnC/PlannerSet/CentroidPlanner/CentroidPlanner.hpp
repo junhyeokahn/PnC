@@ -56,6 +56,7 @@ class CentroidPlannerParameter {
     void UpdateContactPlanInterface(
         std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>
             contact_sequence);
+    void UpdateTimeHorizon(double time_horizon);
     YAML::Node contact_plan;
     void UpdateTerminalState(const Eigen::Vector3d& r_goal);
     std::vector<bool> b_req;
@@ -102,6 +103,7 @@ class CentroidPlannerParameter {
 
     /*! maximum end-effector lengths for legs and arms */
     Eigen::Matrix<double, CentroidModel::numEEf, 1> maxEEfLengths;
+    // Eigen::Matrix<double, CentroidModel::numEEf, 1> minEEfLengths;
 
     DynamicsState initialState;
     DynamicsStateSequence refDynamicsStateSequence;

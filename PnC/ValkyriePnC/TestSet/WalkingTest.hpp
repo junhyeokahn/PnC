@@ -5,6 +5,7 @@
 class ValkyrieStateProvider;
 class Planner;
 class CentroidPlannerParameter;
+class FootstepSequenceGenerator;
 
 namespace WKPhase {
 constexpr int double_contact_1 = 0;
@@ -31,6 +32,7 @@ class WalkingTest : public Test {
     virtual void AdditionalUpdate_();
     void _SettingParameter();
 
+    FootstepSequenceGenerator* foot_sequence_gen_;
     Planner* centroid_planner_;
     CentroidPlannerParameter* centroid_planner_param_;
 

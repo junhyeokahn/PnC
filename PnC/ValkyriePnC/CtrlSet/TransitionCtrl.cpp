@@ -144,9 +144,11 @@ void TransitionCtrl::_task_setup() {
 
     // Get task from centroidal planner
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
-    planner_->EvalTrajectory(
-        sp_->prev_state_machine_time_ + state_machine_time_, cen_pos_des,
-        cen_vel_des, dummy);
+    // planner_->EvalTrajectory(
+    // sp_->prev_state_machine_time + state_machine_time_, cen_pos_des,
+    // cen_vel_des, dummy);
+    planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
+                             cen_vel_des, dummy);
 
     // for (int i = 0; i < 3; ++i) {
     // sp_->com_pos_des[i] = cen_pos_des[i + 3];
