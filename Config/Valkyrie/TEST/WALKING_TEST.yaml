@@ -12,7 +12,7 @@ test_configuration:
     #swing_height: 0.15
 
     ini_dsp_duration: 1.0
-    dsp_duration: 0.5
+    dsp_duration: 0.6
     fin_dsp_duration: 0.5
     ssp_duration: 0.3
     trns_duration: 0.03

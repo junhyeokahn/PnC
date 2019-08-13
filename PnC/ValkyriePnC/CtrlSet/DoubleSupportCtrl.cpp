@@ -381,7 +381,8 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     */
     Eigen::Vector3d com_displacement;
     com_displacement.setZero();
-    com_displacement[0] = walking_distance_;
+    com_displacement[0] = walking_distance_ - r[0];
+    com_displacement[1] = 0. - r[1];
     com_displacement[2] = com_height_ - r[2];
     _param->UpdateTerminalState(com_displacement);
 

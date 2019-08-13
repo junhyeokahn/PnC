@@ -579,10 +579,10 @@ void SingleSupportCtrl::SetBSpline_() {
         middle_pt[0][i] = (ini_pos[i] + fin_pos[i]) / 2.0;
     }
     middle_pt[0][2] = swing_height_;
-    // fin[5] = -0.5;
-    // fin[8] = 5.;
-    fin[5] = 0.;
-    fin[8] = 0.;
+    fin[5] = -0.5;
+    fin[8] = 5.;
+    // fin[5] = 0.;
+    // fin[8] = 0.;
     foot_traj_.SetParam(ini, fin, middle_pt, ssp_dur_);
 
     delete[] * middle_pt;
