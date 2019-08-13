@@ -26,7 +26,7 @@ class OSCOriCtrl : public Controller {
     Eigen::Quaternion<double> ini_pos_quat_;
     Eigen::Quaternion<double> fin_pos_quat_;
     Eigen::Quaternion<double> quat_ori_error;
-    Eigen::Vector3d so3_ori_error;
+    Eigen::VectorXd so3_ori_error;
     Eigen::VectorXd head_kp_;
     Eigen::VectorXd head_kd_;
     Eigen::VectorXd q_kp_;

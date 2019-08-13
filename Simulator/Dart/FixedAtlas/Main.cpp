@@ -113,7 +113,7 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     exit(0);
 }
 
-//void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     //int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
     //int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
     //int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
@@ -121,11 +121,12 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     //int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     //int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    //Eigen::VectorXd q = robot->getPositions();
+    Eigen::VectorXd q = robot->getPositions();
+    //q[10] = 0.6;
     //q[rAnkleIdx] = 1.57;
     //q[lAnkleIdx] = 1.57;
-    //robot->setPositions(q);
-//}
+    robot->setPositions(q);
+}
 
 int main(int argc, char** argv) {
     double servo_rate;
@@ -163,7 +164,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Display Joints Frame
     // =========================================================================
-    // displayJointFrames(world, robot);
+     //displayJointFrames(world, robot);
 
     // =========================================================================
     // Display Target Frame
@@ -173,7 +174,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Initial configuration
     // =========================================================================
-    //_setInitialConfiguration(robot)
+    _setInitialConfiguration(robot);
 
     // =========================================================================
     // Enabel Joit Limits
