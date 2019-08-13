@@ -6,9 +6,9 @@ test_configuration:
     trns_duration: 0.03
 
     com_height: 0.9
-    walking_distance: 0.9
+    walking_distance: 0.09
     footstep_width: 0.274
-    footstep_length: 0.15
+    footstep_length: 0.02
     swing_height: 0.15
 
     replan: false
@@ -105,8 +105,8 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
               70, 70, 70, 70, 70, 70, 70, 70 ]
 
-        max_rf_z: 1800
-        min_rf_z: 5
+        max_rf_z: 1500
+        min_rf_z: 10
 
     rs_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -116,8 +116,8 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
               70, 70, 70, 70, 70, 70, 70, 70 ]
 
-        max_rf_z: 1800
-        min_rf_z: 5
+        max_rf_z: 1500
+        min_rf_z: 10
 
     ls_start_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -127,8 +127,8 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
               70, 70, 70, 70, 70, 70, 70, 70 ]
 
-        max_rf_z: 1800
-        min_rf_z: 5
+        max_rf_z: 1500
+        min_rf_z: 10
 
     ls_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -138,8 +138,8 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
               70, 70, 70, 70, 70, 70, 70, 70 ]
 
-        max_rf_z: 1800
-        min_rf_z: 5
+        max_rf_z: 1500
+        min_rf_z: 10
 
     r_ss_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,

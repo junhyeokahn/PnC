@@ -80,13 +80,9 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     sp_->prev_state_machine_time = state_machine_time_;
 
-    static bool tmp_b(true);
-    if (tmp_b) {
-        if (b_do_plan_) {
-            PlannerUpdate_();
-            if (!b_replan_) b_do_plan_ = false;
-        }
-        tmp_b = false;
+    if (b_do_plan_) {
+        PlannerUpdate_();
+        if (!b_replan_) b_do_plan_ = false;
     }
 
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Valkyrie::n_adof);
