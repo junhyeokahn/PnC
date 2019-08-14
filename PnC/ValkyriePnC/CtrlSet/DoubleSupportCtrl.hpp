@@ -26,6 +26,7 @@ class DoubleSupportCtrl : public Controller {
 
     void SetDSPDuration(double time) { dsp_dur_ = time; }
     void SetIniDSPDuration(double time) { ini_dsp_dur_ = time; }
+    void SetFinDSPDuration(double time) { fin_dsp_dur_ = time; }
     void SetSSPDuration(double time) { ssp_dur_ = time; }
     void SetFootStepLength(double l) { footstep_length_ = l; }
     void SetFootStepWidth(double w) { footstep_width_ = w; }
@@ -44,6 +45,7 @@ class DoubleSupportCtrl : public Controller {
     double footstep_length_;
     double footstep_width_;
     double ini_dsp_dur_;
+    double fin_dsp_dur_;
     double dsp_dur_;
     double ssp_dur_;
     double com_height_;

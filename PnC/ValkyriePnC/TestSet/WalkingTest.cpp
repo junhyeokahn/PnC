@@ -155,6 +155,9 @@ void WalkingTest::_SettingParameter() {
         ((TransitionCtrl*)rs_end_trns_ctrl_)->SetIniDSPDuration(tmp);
         ((TransitionCtrl*)ls_end_trns_ctrl_)->SetIniDSPDuration(tmp);
 
+        myUtils::readParameter(test_cfg, "fin_dsp_duration", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetFinDSPDuration(tmp);
+
         myUtils::readParameter(test_cfg, "footstep_length", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(tmp);

@@ -108,12 +108,11 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
     std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>
         contact_sequence) {
     Eigen::VectorXd _num_contacts = Eigen::VectorXd::Zero(4);
+    YAML::Node _eefcnt;
     // fill out contactsequence
     for (int eef_id = 0; eef_id < CentroidModel::numEEf; ++eef_id) {
         int cpe = contact_sequence[eef_id].size();
         _num_contacts[eef_id] = cpe;
-        YAML::Node _eefcnt =
-            contact_plan["eefcnt_" + CentroidModel::eEfIdToString(eef_id)];
         // std::cout << "eef_id : " << eef_id << std::endl;
         contactPlanInterface.contactsPerEndeff[eef_id] = cpe;
         contactPlanInterface.contactSequence.eEfContacts[eef_id].clear();
@@ -132,14 +131,16 @@ void CentroidPlannerParameter::UpdateContactPlanInterface(
                 Eigen::Quaternion<double>(v[5], v[6], v[7], v[8]);
             contactPlanInterface.contactSequence.eEfContacts[eef_id][c_id]
                 .contactType = idToContactType(static_cast<int>(v(9)));
-            _eefcnt["cnt" + std::to_string(c_id)] = v;
+            _eefcnt["eefcnt_" + CentroidModel::eEfIdToString(eef_id)]
+                   ["cnt" + std::to_string(c_id)] = v;
             // std::cout << "c_id : " << c_id << std::endl;
             // std::cout << contactPlanInterface.contactSequence
             //.eEfContacts[eef_id][c_id]
             //<< std::endl;
         }
     }
-    contact_plan["num_contacts"] = _num_contacts;
+    _eefcnt["num_contacts"] = _num_contacts;
+    contact_plan = _eefcnt;
     b_req[2] = true;
 }
 
