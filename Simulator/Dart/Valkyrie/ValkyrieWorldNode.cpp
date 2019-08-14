@@ -42,7 +42,11 @@ void ValkyrieWorldNode::customPreStep() {
 
     interface_->getCommand(sensor_data_, command_);
 
-    if (b_plot_mpc_result_) PlotMPCResult_();
+    if (b_plot_mpc_result_) {
+        if (((ValkyrieInterface*)interface_)->IsTrajectoryUpdated()) {
+            PlotMPCResult_();
+        }
+    }
 
     trq_cmd_.tail(n_dof_ - 6) = command_->jtrq;
     for (int i = 0; i < n_dof_ - 6; ++i) {

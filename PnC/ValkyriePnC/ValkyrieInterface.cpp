@@ -29,6 +29,8 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
     cmd_jvel_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     cmd_jtrq_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
+    prev_planning_moment_ = 0.;
+
     _ParameterSetting();
 
     myUtils::color_print(myColor::BoldCyan, border);
@@ -108,6 +110,16 @@ bool ValkyrieInterface::Initialization_(ValkyrieSensorData* _sensor_data,
         return true;
     }
     return false;
+}
+
+bool ValkyrieInterface::IsTrajectoryUpdated() {
+    if (prev_planning_moment_ == sp_->planning_moment) {
+        prev_planning_moment_ = sp_->planning_moment;
+        return false;
+    } else {
+        prev_planning_moment_ = sp_->planning_moment;
+        return true;
+    }
 }
 
 void ValkyrieInterface::GetCoMTrajectory(

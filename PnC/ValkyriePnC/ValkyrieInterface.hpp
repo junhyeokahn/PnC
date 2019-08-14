@@ -57,6 +57,8 @@ class ValkyrieInterface : public EnvInterface {
     Eigen::VectorXd cmd_jvel_;
     Eigen::VectorXd cmd_jtrq_;
 
+    double prev_planning_moment_;
+
    public:
     ValkyrieInterface();
     virtual ~ValkyrieInterface();
@@ -64,4 +66,5 @@ class ValkyrieInterface : public EnvInterface {
 
     void GetCoMTrajectory(std::vector<Eigen::VectorXd>& com_des_list);
     void GetContactSequence(std::vector<Eigen::Isometry3d>& foot_target_list);
+    bool IsTrajectoryUpdated();
 };

@@ -1,22 +1,16 @@
 test_configuration:
-    #ini_dsp_duration: 0.6
-    #dsp_duration: 0.4
-    #fin_dsp_duration: 0.3
-    #ssp_duration: 0.8
+    #ini_dsp_duration: 0.8
+    #dsp_duration: 0.6
+    #fin_dsp_duration: 0.6
+    #ssp_duration: 0.3
     #trns_duration: 0.03
 
     #com_height: 0.95
-    #walking_distance: 0.89
-    #footstep_width: 0.274
-    #footstep_length: 0.20
-    #swing_height: 0.15
-
-
-    #com_height: 0.95
-    #walking_distance: 0.89
+    #walking_distance: 1.3
     #footstep_width: 0.22
     #footstep_length: 0.13
     #swing_height: 0.11
+    #replan: false
 
     ini_dsp_duration: 0.8
     dsp_duration: 0.6
@@ -24,12 +18,13 @@ test_configuration:
     ssp_duration: 0.3
     trns_duration: 0.03
 
-    com_height: 0.95
+    com_height: 0.97
     walking_distance: 1.3
-    footstep_width: 0.22
-    footstep_length: 0.13
+    footstep_width: 0.27
+    footstep_length: 0.15
     swing_height: 0.11
     replan: false
+
 
 planner_configuration:
     # ==========================================================================
@@ -128,7 +123,7 @@ control_configuration:
         com_kd: [500., 1500., 500.]
 
         max_rf_z: 1500
-        min_rf_z: 10
+        min_rf_z: 30
 
     rs_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -141,7 +136,7 @@ control_configuration:
         com_kd: [500., 1500., 500.]
 
         max_rf_z: 1500
-        min_rf_z: 10
+        min_rf_z: 30
 
     ls_start_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -154,7 +149,7 @@ control_configuration:
         com_kd: [500., 1500., 500.]
 
         max_rf_z: 1500
-        min_rf_z: 10
+        min_rf_z: 30
 
     ls_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -167,7 +162,7 @@ control_configuration:
         com_kd: [500., 1500., 500.]
 
         max_rf_z: 1500
-        min_rf_z: 10
+        min_rf_z: 30
 
     r_ss_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
