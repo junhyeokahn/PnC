@@ -19,7 +19,7 @@ test_configuration:
     trns_duration: 0.03
 
     com_height: 0.97
-    walking_distance: 1.3
+    walking_distance: 0.5
     footstep_width: 0.27
     footstep_length: 0.15
     swing_height: 0.11

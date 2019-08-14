@@ -216,74 +216,86 @@ void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
             break;
         }
     }
-    assert(idx != -1);
 
-    if (idx == 0) {
-        ini_com = mCentParam->initialState.com;
-        ini_amom = mCentParam->initialState.aMom;
-        ini_lmom = mCentParam->initialState.lMom;
+    if (idx == -1) {
+        std::cout << "outside in time range so return the last" << std::endl;
+        for (int i = 0; i < 3; ++i) {
+            s[i + 3] = mComPosGoal[i];
+            sdot[i] = 0.;
+            sdot[i + 3] = 0.;
+        }
     } else {
-        ini_com = mDynStateSeq.dynamicsStateSequence[idx - 1].com;
-        ini_amom = mDynStateSeq.dynamicsStateSequence[idx - 1].aMom;
-        ini_lmom = mDynStateSeq.dynamicsStateSequence[idx - 1].lMom;
-    }
-    fin_com = mDynStateSeq.dynamicsStateSequence[idx].com;
-    fin_amom = mDynStateSeq.dynamicsStateSequence[idx].aMom;
-    fin_lmom = mDynStateSeq.dynamicsStateSequence[idx].lMom;
+        if (idx == 0) {
+            ini_com = mCentParam->initialState.com;
+            ini_amom = mCentParam->initialState.aMom;
+            ini_lmom = mCentParam->initialState.lMom;
+        } else {
+            ini_com = mDynStateSeq.dynamicsStateSequence[idx - 1].com;
+            ini_amom = mDynStateSeq.dynamicsStateSequence[idx - 1].aMom;
+            ini_lmom = mDynStateSeq.dynamicsStateSequence[idx - 1].lMom;
+        }
+        fin_com = mDynStateSeq.dynamicsStateSequence[idx].com;
+        fin_amom = mDynStateSeq.dynamicsStateSequence[idx].aMom;
+        fin_lmom = mDynStateSeq.dynamicsStateSequence[idx].lMom;
 
-    // cubic interpolation
-    // double ini_time_3 = std::pow(ini_time, 3);
-    // double ini_time_2 = std::pow(ini_time, 2);
-    // double fin_time_3 = std::pow(fin_time, 3);
-    // double fin_time_2 = std::pow(fin_time, 2);
-    // double t3 = std::pow(time, 3);
-    // double t2 = std::pow(time, 2);
-    // for (int i = 0; i < 3; ++i) {
-    // Eigen::Matrix4d A;
-    // Eigen::Vector4d b;
-    // Eigen::Vector4d coef;
-    // A << ini_time_3, ini_time_2, ini_time, 1, 3 * ini_time_2, 2 * ini_time,
-    // 1, 0, fin_time_3, fin_time_2, fin_time, 1, 3 * fin_time_2,
-    // 2 * fin_time, 1, 0;
-    // b << ini_com[i], ini_lmom[i] / mCentParam->robotMass, fin_com[i],
-    // fin_lmom[i] / mCentParam->robotMass;
-    // coef = A.colPivHouseholderQr().solve(b);
-    // s[i + 3] = coef[0] * t3 + coef[1] * t2 + coef[2] * time + coef[3];
-    // sdot[i + 3] = (3 * coef[0] * t2 + 2 * coef[1] * time + coef[2]) *
-    // mCentParam->robotMass;
-    // sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
-    //(time - ini_time)) +
-    // ini_amom[i];
-    //}
+        // =========================================================================
+        // cubic interpolation
+        // =========================================================================
+        // double ini_time_3 = std::pow(ini_time, 3);
+        // double ini_time_2 = std::pow(ini_time, 2);
+        // double fin_time_3 = std::pow(fin_time, 3);
+        // double fin_time_2 = std::pow(fin_time, 2);
+        // double t3 = std::pow(time, 3);
+        // double t2 = std::pow(time, 2);
+        // for (int i = 0; i < 3; ++i) {
+        // Eigen::Matrix4d A;
+        // Eigen::Vector4d b;
+        // Eigen::Vector4d coef;
+        // A << ini_time_3, ini_time_2, ini_time, 1, 3 * ini_time_2, 2 *
+        // ini_time, 1, 0, fin_time_3, fin_time_2, fin_time, 1, 3 * fin_time_2,
+        // 2 * fin_time, 1, 0;
+        // b << ini_com[i], ini_lmom[i] / mCentParam->robotMass, fin_com[i],
+        // fin_lmom[i] / mCentParam->robotMass;
+        // coef = A.colPivHouseholderQr().solve(b);
+        // s[i + 3] = coef[0] * t3 + coef[1] * t2 + coef[2] * time + coef[3];
+        // sdot[i + 3] = (3 * coef[0] * t2 + 2 * coef[1] * time + coef[2]) *
+        // mCentParam->robotMass;
+        // sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
+        //(time - ini_time)) +
+        // ini_amom[i];
+        //}
 
-    // min jerk interpolation
-    /*    for (int i = 0; i < 3; ++i) {*/
-    // Eigen::Vector3d ini, fin;
-    // ini << ini_com[i], ini_lmom[i] / mCentParam->robotMass, 0;
-    // fin << fin_com[i], fin_lmom[i] / mCentParam->robotMass, 0;
-    // MinJerk_OneDimension min_jerk =
-    // MinJerk_OneDimension(ini, fin, ini_time, fin_time);
-    // double tmp(0);
-    // min_jerk.getPos(time, tmp);
-    // s[i + 3] = tmp;
-    // min_jerk.getVel(time, tmp);
-    // sdot[i + 3] = tmp * mCentParam->robotMass;
-    // sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
-    //(time - ini_time)) +
-    // ini_amom[i];
-    /*}*/
+        // =========================================================================
+        // min jerk interpolation
+        // =========================================================================
+        /*    for (int i = 0; i < 3; ++i) {*/
+        // Eigen::Vector3d ini, fin;
+        // ini << ini_com[i], ini_lmom[i] / mCentParam->robotMass, 0;
+        // fin << fin_com[i], fin_lmom[i] / mCentParam->robotMass, 0;
+        // MinJerk_OneDimension min_jerk =
+        // MinJerk_OneDimension(ini, fin, ini_time, fin_time);
+        // double tmp(0);
+        // min_jerk.getPos(time, tmp);
+        // s[i + 3] = tmp;
+        // min_jerk.getVel(time, tmp);
+        // sdot[i + 3] = tmp * mCentParam->robotMass;
+        // sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
+        //(time - ini_time)) +
+        // ini_amom[i];
+        /*}*/
 
-    // linear interpolation
-    for (int i = 0; i < 3; ++i) {
-        s[i + 3] = ((fin_com[i] - ini_com[i]) / (fin_time - ini_time) *
-                    (time - ini_time)) +
-                   ini_com[i];
-        sdot[i + 3] = ((fin_lmom[i] - ini_lmom[i]) / (fin_time - ini_time) *
+        // linear interpolation
+        for (int i = 0; i < 3; ++i) {
+            s[i + 3] = ((fin_com[i] - ini_com[i]) / (fin_time - ini_time) *
+                        (time - ini_time)) +
+                       ini_com[i];
+            sdot[i + 3] = ((fin_lmom[i] - ini_lmom[i]) / (fin_time - ini_time) *
+                           (time - ini_time)) +
+                          ini_lmom[i];
+            sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
                        (time - ini_time)) +
-                      ini_lmom[i];
-        sdot[i] = ((fin_amom[i] - ini_amom[i]) / (fin_time - ini_time) *
-                   (time - ini_time)) +
-                  ini_amom[i];
+                      ini_amom[i];
+        }
     }
 }
 

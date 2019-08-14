@@ -53,6 +53,7 @@ class DoubleSupportCtrl : public Controller {
     int dim_contact_;
     bool b_replan_;
     bool b_do_plan_;
+    bool b_reached_;
 
     Task* centroid_task_;
     Task* com_task_;
@@ -84,4 +85,10 @@ class DoubleSupportCtrl : public Controller {
     std::array<Eigen::MatrixXd, CentroidModel::numEEf> cop_local_traj_;
     std::array<Eigen::MatrixXd, CentroidModel::numEEf> frc_world_traj_;
     std::array<Eigen::MatrixXd, CentroidModel::numEEf> trq_local_traj_;
+
+    // f_ori =[w,x,y,z]
+    void AddContactSequence_(
+        CentroidModel::EEfID eef_id, double ini, double fin,
+        Eigen::VectorXd f_pos, Eigen::VectorXd f_ori,
+        std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>& c_seq);
 };
