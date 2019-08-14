@@ -1,29 +1,29 @@
 test_configuration:
-    #ini_dsp_duration: 0.8
-    #dsp_duration: 0.6
-    #fin_dsp_duration: 0.6
-    #ssp_duration: 0.3
-    #trns_duration: 0.03
-
-    #com_height: 0.95
-    #walking_distance: 1.3
-    #footstep_width: 0.22
-    #footstep_length: 0.13
-    #swing_height: 0.11
-    #replan: false
-
     ini_dsp_duration: 0.8
     dsp_duration: 0.6
     fin_dsp_duration: 0.6
     ssp_duration: 0.3
     trns_duration: 0.03
 
-    com_height: 0.97
-    walking_distance: 0.5
-    footstep_width: 0.27
-    footstep_length: 0.15
+    com_height: 0.95
+    walking_distance: 1.3
+    footstep_width: 0.22
+    footstep_length: 0.13
     swing_height: 0.11
     replan: false
+
+    #ini_dsp_duration: 0.8
+    #dsp_duration: 0.6
+    #fin_dsp_duration: 0.6
+    #ssp_duration: 0.3
+    #trns_duration: 0.03
+
+    #com_height: 0.97
+    #walking_distance: 0.5
+    #footstep_width: 0.27
+    #footstep_length: 0.15
+    #swing_height: 0.11
+    #replan: false
 
 
 planner_configuration:

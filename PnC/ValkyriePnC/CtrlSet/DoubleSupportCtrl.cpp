@@ -205,20 +205,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             // update right foot
             AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                                 rf_end_time, rf_ct_pos, f_ori, c_seq);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].push_back(
-            // Eigen::VectorXd::Zero(10));
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][0] =
-            // rf_st_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][1] =
-            // rf_end_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-            //.segment<3>(2) = rf_ct_pos;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-            //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5]
-            // = 1.;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][9] =
-            // static_cast<double>(ContactType::FlatContact);
             rf_st_time = rf_end_time + ssp_dur_;
             if (i == n_step_hori - 1) {
                 rf_end_time += ssp_dur_ + fin_dsp_dur_;
@@ -230,20 +216,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             // update left foot
             AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                                 lf_end_time, lf_ct_pos, f_ori, c_seq);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].push_back(
-            // Eigen::VectorXd::Zero(10));
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][0] =
-            // lf_st_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][1] =
-            // lf_end_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-            //.segment<3>(2) = lf_ct_pos;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-            //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5]
-            // = 1.;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][9] =
-            // static_cast<double>(ContactType::FlatContact);
             lf_st_time = lf_end_time + ssp_dur_;
             if (i == n_step_hori - 2) {
                 lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
@@ -258,20 +230,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
         rf_ct_pos[0] = lf_ct_pos[0];
         AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                             rf_end_time, rf_ct_pos, f_ori, c_seq);
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].push_back(
-        // Eigen::VectorXd::Zero(10));
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //[0] = rf_st_time;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //[1] = rf_end_time;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //.segment<3>(2) = rf_ct_pos;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //[5] = 1.;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][n_step_hori]
-        //[9] = static_cast<double>(ContactType::FlatContact);
 
         _param->UpdateTimeHorizon(rf_end_time);
     } else {
@@ -286,20 +244,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             // update left foot
             AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                                 lf_end_time, lf_ct_pos, f_ori, c_seq);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].push_back(
-            // Eigen::VectorXd::Zero(10));
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][0] =
-            // lf_st_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][1] =
-            // lf_end_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-            //.segment<3>(2) = lf_ct_pos;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i]
-            //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][5]
-            // = 1.;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][i][9] =
-            // static_cast<double>(ContactType::FlatContact);
             lf_st_time = lf_end_time + ssp_dur_;
             if (i == n_step_hori - 1) {
                 lf_end_time += ssp_dur_ + fin_dsp_dur_;
@@ -311,20 +255,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             // update right foot
             AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                                 rf_end_time, rf_ct_pos, f_ori, c_seq);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)].push_back(
-            // Eigen::VectorXd::Zero(10));
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][0] =
-            // rf_st_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][1] =
-            // rf_end_time;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-            //.segment<3>(2) = rf_ct_pos;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i]
-            //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][5]
-            // = 1.;
-            // c_seq[static_cast<int>(CentroidModel::EEfID::rightFoot)][i][9] =
-            // static_cast<double>(ContactType::FlatContact);
             rf_st_time = rf_end_time + ssp_dur_;
             if (i == n_step_hori - 2) {
                 rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
@@ -339,21 +269,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
         lf_ct_pos[0] = rf_ct_pos[0];
         AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                             lf_end_time, lf_ct_pos, f_ori, c_seq);
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)].push_back(
-        // Eigen::VectorXd::Zero(10));
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //[0] = lf_st_time;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //[1] = lf_end_time;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //.segment<3>(2) = lf_ct_pos;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //.segment<4>(5) = Eigen::VectorXd::Zero(4);
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //[5] = 1.;
-        // c_seq[static_cast<int>(CentroidModel::EEfID::leftFoot)][n_step_hori]
-        //[9] = static_cast<double>(ContactType::FlatContact);
-
         _param->UpdateTimeHorizon(rf_end_time);
     }
     _param->UpdateContactPlanInterface(c_seq);
