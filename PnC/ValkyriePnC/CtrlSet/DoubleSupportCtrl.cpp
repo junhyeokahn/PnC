@@ -193,82 +193,83 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     double rf_st_time(0.);
     double lf_st_time(0.);
     CentroidModel::EEfID dummy;
+    int n_step_hori(1);
     if (sp_->phase_copy == 0) {
-        // stance : left foot, // swing : right foot
+        // Stance : left foot
         double rf_end_time(rem_time);
         double lf_end_time(rem_time + ssp_dur_ + dsp_dur_);
         foot_sequence_gen_->Update(CentroidModel::EEfID::leftFoot, rf_ct_pos,
                                    lf_ct_pos);
-
-        int n_step_hori(2);
+        // Add Current Step
+        AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                            rf_end_time, rf_ct_pos, f_ori, c_seq);
+        AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                            lf_end_time, lf_ct_pos, f_ori, c_seq);
         for (int i = 0; i < n_step_hori; ++i) {
-            // update right foot
-            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
-                                rf_end_time, rf_ct_pos, f_ori, c_seq);
-            rf_st_time = rf_end_time + ssp_dur_;
-            if (i == n_step_hori - 1) {
-                rf_end_time += ssp_dur_ + fin_dsp_dur_;
-            } else {
-                rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            }
             foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
+            foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
 
-            // update left foot
-            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
-                                lf_end_time, lf_ct_pos, f_ori, c_seq);
+            rf_st_time = rf_end_time + ssp_dur_;
+            rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             lf_st_time = lf_end_time + ssp_dur_;
-            if (i == n_step_hori - 2) {
+            if (i == n_step_hori - 1) {
                 lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
-                foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
-            } else if (i == n_step_hori - 1) {
             } else {
                 lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-                foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
             }
+
+            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                                rf_end_time, rf_ct_pos, f_ori, c_seq);
+            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                                lf_end_time, lf_ct_pos, f_ori, c_seq);
         }
-        // update final right foot
+        // Update Last Step
+        rf_st_time = rf_end_time + ssp_dur_;
+        rf_end_time += ssp_dur_ + fin_dsp_dur_;
+        foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
         rf_ct_pos[0] = lf_ct_pos[0];
         AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                             rf_end_time, rf_ct_pos, f_ori, c_seq);
 
         _param->UpdateTimeHorizon(rf_end_time);
     } else {
-        // stance : right foot, // swing : left foot
+        // Stance : right foot
         double lf_end_time(rem_time);
         double rf_end_time(rem_time + ssp_dur_ + dsp_dur_);
         foot_sequence_gen_->Update(CentroidModel::EEfID::rightFoot, rf_ct_pos,
                                    lf_ct_pos);
-
-        int n_step_hori(2);
+        // Add Current Step
+        AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                            rf_end_time, rf_ct_pos, f_ori, c_seq);
+        AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                            lf_end_time, lf_ct_pos, f_ori, c_seq);
         for (int i = 0; i < n_step_hori; ++i) {
-            // update left foot
-            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
-                                lf_end_time, lf_ct_pos, f_ori, c_seq);
-            lf_st_time = lf_end_time + ssp_dur_;
-            if (i == n_step_hori - 1) {
-                lf_end_time += ssp_dur_ + fin_dsp_dur_;
-            } else {
-                lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            }
+            // Update Left Foot
             foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
+            foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
 
-            // update right foot
-            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
-                                rf_end_time, rf_ct_pos, f_ori, c_seq);
+            lf_st_time = lf_end_time + ssp_dur_;
+            lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
             rf_st_time = rf_end_time + ssp_dur_;
-            if (i == n_step_hori - 2) {
+            if (i == n_step_hori - 1) {
                 rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
-                foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
-            } else if (i == n_step_hori - 1) {
             } else {
                 rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-                foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
             }
+
+            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                                lf_end_time, lf_ct_pos, f_ori, c_seq);
+            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                                rf_end_time, rf_ct_pos, f_ori, c_seq);
         }
-        // update final left foot
+        // Update Last Step
+        lf_st_time = lf_end_time + ssp_dur_;
+        lf_end_time += ssp_dur_ + fin_dsp_dur_;
+        foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
         lf_ct_pos[0] = rf_ct_pos[0];
         AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                             lf_end_time, lf_ct_pos, f_ori, c_seq);
+
         _param->UpdateTimeHorizon(rf_end_time);
     }
     _param->UpdateContactPlanInterface(c_seq);
