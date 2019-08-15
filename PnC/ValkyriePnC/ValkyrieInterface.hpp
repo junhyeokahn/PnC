@@ -14,6 +14,8 @@ class ValkyrieSensorData {
         qdot = Eigen::VectorXd::Zero(Valkyrie::n_adof);
         virtual_q = Eigen::VectorXd::Zero(Valkyrie::n_vdof);
         virtual_qdot = Eigen::VectorXd::Zero(Valkyrie::n_vdof);
+        lf_wrench = Eigen::VectorXd::Zero(6);
+        rf_wrench = Eigen::VectorXd::Zero(6);
         rfoot_contact = false;
         lfoot_contact = false;
     }
@@ -23,6 +25,8 @@ class ValkyrieSensorData {
     Eigen::VectorXd qdot;
     Eigen::VectorXd virtual_q;
     Eigen::VectorXd virtual_qdot;
+    Eigen::VectorXd lf_wrench;
+    Eigen::VectorXd rf_wrench;
     bool rfoot_contact;
     bool lfoot_contact;
 };

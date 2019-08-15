@@ -17,7 +17,8 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     : Controller(robot),
       planner_(planner),
       foot_sequence_gen_(fsg),
-      b_reached_(false) {
+      b_reached_(false),
+      last_step_counter_(0) {
     myUtils::pretty_constructor(2, "Double Support Ctrl");
     dsp_dur_ = 1000.;
     ctrl_start_time_ = 0.;
@@ -133,9 +134,9 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     Eigen::VectorXd lk = robot_->getCentroidMomentum();
     for (int i = 0; i < 3; ++i) {
         l[i] = lk[i + 3];
-        // k[i] = lk[i];
+        k[i] = lk[i];
         // l[i] = 0.;
-        k[i] = 0.;
+        // k[i] = 0.;
     }
     std::array<int, CentroidModel::numEEf> actv;
     std::array<Eigen::Vector3d, CentroidModel::numEEf> eef_frc;
@@ -193,7 +194,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     double rf_st_time(0.);
     double lf_st_time(0.);
     CentroidModel::EEfID dummy;
-    int n_step_hori(1);
     if (sp_->phase_copy == 0) {
         // Stance : left foot
         double rf_end_time(rem_time);
@@ -205,31 +205,43 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                             rf_end_time, rf_ct_pos, f_ori, c_seq);
         AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                             lf_end_time, lf_ct_pos, f_ori, c_seq);
-        for (int i = 0; i < n_step_hori; ++i) {
-            foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
-            foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
 
-            rf_st_time = rf_end_time + ssp_dur_;
-            rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            lf_st_time = lf_end_time + ssp_dur_;
-            if (i == n_step_hori - 1) {
-                lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
-            } else {
-                lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            }
-
-            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
-                                rf_end_time, rf_ct_pos, f_ori, c_seq);
-            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
-                                lf_end_time, lf_ct_pos, f_ori, c_seq);
-        }
-        // Update Last Step
-        rf_st_time = rf_end_time + ssp_dur_;
-        rf_end_time += ssp_dur_ + fin_dsp_dur_;
+        // Add Next Step
         foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
-        rf_ct_pos[0] = lf_ct_pos[0];
+        if (rf_ct_pos[0] > walking_distance_) {
+            b_reached_ = true;
+            std::cout << "[[reached in left stance!!]]" << std::endl;
+        }
+        foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
+
+        rf_st_time = rf_end_time + ssp_dur_;
+        lf_st_time = lf_end_time + ssp_dur_;
+        if (b_reached_) {
+            rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
+            lf_ct_pos[0] = rf_ct_pos[0];
+        } else {
+            rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+        }
+        lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
+
         AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                             rf_end_time, rf_ct_pos, f_ori, c_seq);
+        AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                            lf_end_time, lf_ct_pos, f_ori, c_seq);
+        sp_->last_foot_pos[static_cast<int>(CentroidModel::EEfID::rightFoot)] =
+            rf_ct_pos;
+        sp_->last_foot_pos[static_cast<int>(CentroidModel::EEfID::leftFoot)] =
+            lf_ct_pos;
+
+        // Update Last Step
+        if (!b_reached_) {
+            rf_st_time = rf_end_time + ssp_dur_;
+            rf_end_time += ssp_dur_ + fin_dsp_dur_;
+            foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
+            rf_ct_pos[0] = lf_ct_pos[0];
+            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                                rf_end_time, rf_ct_pos, f_ori, c_seq);
+        }
 
         _param->UpdateTimeHorizon(rf_end_time);
     } else {
@@ -243,33 +255,43 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                             rf_end_time, rf_ct_pos, f_ori, c_seq);
         AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                             lf_end_time, lf_ct_pos, f_ori, c_seq);
-        for (int i = 0; i < n_step_hori; ++i) {
-            // Update Left Foot
-            foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
-            foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
 
-            lf_st_time = lf_end_time + ssp_dur_;
-            lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            rf_st_time = rf_end_time + ssp_dur_;
-            if (i == n_step_hori - 1) {
-                rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
-            } else {
-                rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
-            }
-
-            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
-                                lf_end_time, lf_ct_pos, f_ori, c_seq);
-            AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
-                                rf_end_time, rf_ct_pos, f_ori, c_seq);
-        }
-        // Update Last Step
-        lf_st_time = lf_end_time + ssp_dur_;
-        lf_end_time += ssp_dur_ + fin_dsp_dur_;
+        // Add Next Foot
         foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
-        lf_ct_pos[0] = rf_ct_pos[0];
+        if (lf_ct_pos[0] > walking_distance_) {
+            b_reached_ = true;
+            std::cout << "[[reached in right stance !!]]" << std::endl;
+        }
+        foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_pos);
+
+        lf_st_time = lf_end_time + ssp_dur_;
+        rf_st_time = rf_end_time + ssp_dur_;
+        if (b_reached_) {
+            lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
+            rf_ct_pos[0] = lf_ct_pos[0];
+        } else {
+            lf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + dsp_dur_;
+        }
+        rf_end_time += ssp_dur_ + dsp_dur_ + ssp_dur_ + fin_dsp_dur_;
+
         AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                             lf_end_time, lf_ct_pos, f_ori, c_seq);
+        AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
+                            rf_end_time, rf_ct_pos, f_ori, c_seq);
+        sp_->last_foot_pos[static_cast<int>(CentroidModel::EEfID::rightFoot)] =
+            rf_ct_pos;
+        sp_->last_foot_pos[static_cast<int>(CentroidModel::EEfID::leftFoot)] =
+            lf_ct_pos;
 
+        // Update Last Step
+        if (!b_reached_) {
+            lf_st_time = lf_end_time + ssp_dur_;
+            lf_end_time += ssp_dur_ + fin_dsp_dur_;
+            foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_pos);
+            lf_ct_pos[0] = rf_ct_pos[0];
+            AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
+                                lf_end_time, lf_ct_pos, f_ori, c_seq);
+        }
         _param->UpdateTimeHorizon(rf_end_time);
     }
     _param->UpdateContactPlanInterface(c_seq);
@@ -319,8 +341,8 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
     sp_->des_jacc_cmd = des_jacc_cmd;
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
-    sp_->r_rf = wblc_data_->Fr_.head(6);
-    sp_->l_rf = wblc_data_->Fr_.tail(6);
+    sp_->r_rf_des = wblc_data_->Fr_.head(6);
+    sp_->l_rf_des = wblc_data_->Fr_.tail(6);
 }
 
 void DoubleSupportCtrl::_task_setup() {
@@ -331,17 +353,16 @@ void DoubleSupportCtrl::_task_setup() {
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
-    // planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
-    // dummy);
     planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
                              cen_vel_des, dummy);
 
-    // for (int i = 0; i < 3; ++i) {
-    // sp_->com_pos_des[i] = cen_pos_des[i + 3];
-    // sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-    // sp_->mom_des[i] = cen_vel_des[i];
-    // sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    //}
+    for (int i = 0; i < 3; ++i) {
+        cen_vel_des[i] = 0.;
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
 
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
@@ -412,21 +433,32 @@ void DoubleSupportCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ctrl_start_time_ = sp_->curr_time;
     b_do_plan_ = true;
+    if (b_reached_) {
+        ++last_step_counter_;
+        // std::cout << "last step counter" << std::endl;
+        // std::cout << last_step_counter_ << std::endl;
+    }
 }
 
 void DoubleSupportCtrl::lastVisit() {}
 
 bool DoubleSupportCtrl::endOfPhase() {
-    if (sp_->num_step_copy == 0) {
-        if (state_machine_time_ > ini_dsp_dur_) {
-            return true;
-        }
+    // std::cout << "state machine time" << std::endl;
+    // std::cout << state_machine_time_ << std::endl;
+    if (last_step_counter_ == 2) {
+        return false;
     } else {
-        if (state_machine_time_ > dsp_dur_) {
-            return true;
+        if (sp_->num_step_copy == 0) {
+            if (state_machine_time_ > ini_dsp_dur_) {
+                return true;
+            }
+        } else {
+            if (state_machine_time_ > dsp_dur_) {
+                return true;
+            }
         }
+        return false;
     }
-    return false;
 }
 
 void DoubleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
@@ -439,6 +471,10 @@ void DoubleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "com_kp", tmp_vec1);
         myUtils::readParameter(node, "com_kd", tmp_vec2);
         com_task_->setGain(tmp_vec1, tmp_vec2);
+
+        myUtils::readParameter(node, "centroid_kp", tmp_vec1);
+        myUtils::readParameter(node, "centroid_kd", tmp_vec2);
+        centroid_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

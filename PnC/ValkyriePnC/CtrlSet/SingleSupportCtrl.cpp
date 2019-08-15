@@ -400,8 +400,8 @@ void SingleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
     sp_->des_jacc_cmd = des_jacc_cmd;
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
-    sp_->r_rf = wblc_data_->Fr_.head(6);
-    sp_->l_rf = wblc_data_->Fr_.tail(6);
+    sp_->r_rf_des = wblc_data_->Fr_.head(6);
+    sp_->l_rf_des = wblc_data_->Fr_.tail(6);
 }
 
 void SingleSupportCtrl::_task_setup() {
@@ -413,17 +413,16 @@ void SingleSupportCtrl::_task_setup() {
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
-    // planner_->EvalTrajectory(state_machine_time_, cen_pos_des, cen_vel_des,
-    // dummy);
     planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
                              cen_vel_des, dummy);
 
-    // for (int i = 0; i < 3; ++i) {
-    // sp_->com_pos_des[i] = cen_pos_des[i + 3];
-    // sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-    // sp_->mom_des[i] = cen_vel_des[i];
-    // sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    //}
+    for (int i = 0; i < 3; ++i) {
+        cen_vel_des[i] = 0.;
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
 
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
@@ -520,6 +519,7 @@ void SingleSupportCtrl::_task_setup() {
     /*task_list_.push_back(total_joint_task_);*/
 
     task_list_.push_back(com_task_);
+    // task_list_.push_back(centroid_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(foot_pos_task_);
@@ -556,13 +556,14 @@ void SingleSupportCtrl::SetBSpline_() {
 
     Eigen::VectorXd ini_pos =
         robot_->getBodyNodeIsometry(moving_cop_).translation();
-    Eigen::VectorXd fin_pos =
-        robot_->getBodyNodeIsometry(stance_cop_).translation();
-    fin_pos[0] += footstep_length_;
-    if (moving_foot_ == ValkyrieBodyNode::rightFoot)
-        fin_pos[1] -= footstep_width_;
-    else
-        fin_pos[1] += footstep_width_;
+    Eigen::VectorXd fin_pos(3);
+    if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        fin_pos = sp_->last_foot_pos[static_cast<int>(
+            CentroidModel::EEfID::rightFoot)];
+    } else {
+        fin_pos = sp_->last_foot_pos[static_cast<int>(
+            CentroidModel::EEfID::leftFoot)];
+    }
 
     for (int i = 0; i < 3; ++i) {
         ini[i] = ini_pos[i];
@@ -627,6 +628,10 @@ void SingleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "foot_pos_kp", tmp_vec1);
         myUtils::readParameter(node, "foot_pos_kd", tmp_vec2);
         foot_pos_task_->setGain(tmp_vec1, tmp_vec2);
+
+        myUtils::readParameter(node, "centroid_kp", tmp_vec1);
+        myUtils::readParameter(node, "centroid_kd", tmp_vec2);
+        centroid_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

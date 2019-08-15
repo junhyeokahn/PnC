@@ -42,6 +42,9 @@ void ValkyrieStateEstimator::_JointUpdate(ValkyrieSensorData* data) {
         curr_config_[Valkyrie::n_vdof + i] = data->q[i];
         curr_qdot_[Valkyrie::n_vdof + i] = data->qdot[i];
     }
+
+    sp_->l_rf = data->lf_wrench;
+    sp_->r_rf = data->rf_wrench;
 }
 
 void ValkyrieStateEstimator::_ConfigurationAndModelUpdate() {

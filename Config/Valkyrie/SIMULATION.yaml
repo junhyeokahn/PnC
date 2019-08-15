@@ -5,5 +5,5 @@ plot_mpc_result: true
 #plot_mpc_result: false
 
 control_configuration:
-  kp: 500
+  kp: 700
   kd: 5

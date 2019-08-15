@@ -2,6 +2,7 @@
 #include <utility>
 
 #include <Configuration.h>
+#include <PnC/RobotSystem/CentroidModel.hpp>
 #include <Utils/General/Clock.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
@@ -20,6 +21,8 @@ class ValkyrieStateProvider {
     double curr_time;
     double prev_state_machine_time;
     double planning_moment;
+
+    std::array<Eigen::VectorXd, CentroidModel::numEEf> last_foot_pos;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
@@ -55,6 +58,8 @@ class ValkyrieStateProvider {
     Eigen::VectorXd lf_pos_des;
     Eigen::VectorXd lf_vel_des;
 
+    Eigen::VectorXd r_rf_des;
+    Eigen::VectorXd l_rf_des;
     Eigen::VectorXd r_rf;
     Eigen::VectorXd l_rf;
 

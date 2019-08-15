@@ -116,8 +116,8 @@ void TransitionCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
     sp_->des_jacc_cmd = des_jacc_cmd;
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
-    sp_->r_rf = wblc_data_->Fr_.head(6);
-    sp_->l_rf = wblc_data_->Fr_.tail(6);
+    sp_->r_rf_des = wblc_data_->Fr_.head(6);
+    sp_->l_rf_des = wblc_data_->Fr_.tail(6);
 }
 
 void TransitionCtrl::_task_setup() {
@@ -135,27 +135,17 @@ void TransitionCtrl::_task_setup() {
     Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_acc_des = Eigen::VectorXd::Zero(6);
-    // Get task from spline
-    // for (int i = 0; i < 3; ++i) {
-    // cen_pos_des[i + 3] = pos[i];
-    // cen_vel_des[i] = 0.;
-    // cen_vel_des[i + 3] = vel[i] * robot_->getRobotMass();
-    //}
-
-    // Get task from centroidal planner
     Eigen::VectorXd dummy = Eigen::VectorXd::Zero(6);
-    // planner_->EvalTrajectory(
-    // sp_->prev_state_machine_time + state_machine_time_, cen_pos_des,
-    // cen_vel_des, dummy);
     planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
                              cen_vel_des, dummy);
 
-    // for (int i = 0; i < 3; ++i) {
-    // sp_->com_pos_des[i] = cen_pos_des[i + 3];
-    // sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-    // sp_->mom_des[i] = cen_vel_des[i];
-    // sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    //}
+    for (int i = 0; i < 3; ++i) {
+        cen_vel_des[i] = 0.;
+        sp_->com_pos_des[i] = cen_pos_des[i + 3];
+        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
+    }
 
     centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
 
@@ -329,6 +319,10 @@ void TransitionCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "com_kp", tmp_vec1);
         myUtils::readParameter(node, "com_kd", tmp_vec2);
         com_task_->setGain(tmp_vec1, tmp_vec2);
+
+        myUtils::readParameter(node, "centroid_kp", tmp_vec1);
+        myUtils::readParameter(node, "centroid_kd", tmp_vec2);
+        centroid_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

@@ -49,6 +49,8 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
 
     r_rf = Eigen::VectorXd::Zero(6);
     l_rf = Eigen::VectorXd::Zero(6);
+    r_rf_des = Eigen::VectorXd::Zero(6);
+    l_rf_des = Eigen::VectorXd::Zero(6);
 
     des_jacc_cmd = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
@@ -77,6 +79,8 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&lf_pos_des, VECT, "lf_pos_des", 3);
     data_manager->RegisterData(&lf_vel_des, VECT, "lf_vel_des", 3);
 
+    data_manager->RegisterData(&r_rf_des, VECT, "r_rf_des", 6);
+    data_manager->RegisterData(&l_rf_des, VECT, "l_rf_des", 6);
     data_manager->RegisterData(&r_rf, VECT, "r_rf", 6);
     data_manager->RegisterData(&l_rf, VECT, "l_rf", 6);
 

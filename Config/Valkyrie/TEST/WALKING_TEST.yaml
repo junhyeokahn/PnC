@@ -1,29 +1,30 @@
 test_configuration:
-    ini_dsp_duration: 0.8
-    dsp_duration: 0.6
-    fin_dsp_duration: 0.6
-    ssp_duration: 0.3
-    trns_duration: 0.03
-
-    com_height: 0.95
-    walking_distance: 1.3
-    footstep_width: 0.22
-    footstep_length: 0.13
-    swing_height: 0.11
-    replan: false
-
     #ini_dsp_duration: 0.8
     #dsp_duration: 0.6
     #fin_dsp_duration: 0.6
     #ssp_duration: 0.3
     #trns_duration: 0.03
 
-    #com_height: 0.97
-    #walking_distance: 0.5
-    #footstep_width: 0.27
-    #footstep_length: 0.15
+    #com_height: 0.95
+    #walking_distance: 1.3
+    #footstep_width: 0.22
+    #footstep_length: 0.13
     #swing_height: 0.11
     #replan: false
+
+    ini_dsp_duration: 0.8
+    dsp_duration: 0.6
+    fin_dsp_duration: 0.6
+    ssp_duration: 0.3
+    trns_duration: 0.03
+
+    com_height: 0.85
+    walking_distance: 1.3
+    footstep_width: 0.27
+    footstep_length: 0.15
+    swing_height: 0.11
+    replan: false
+
 
 
 planner_configuration:
@@ -60,8 +61,10 @@ planner_configuration:
         eef_offset_lf: [ 0.0189,  0.00,  0.00]
         eef_offset_rh: [ 0.20,  0.00,  0.48]
         eef_offset_lh: [-0.20,  0.00,  0.48]
-        cop_range_rf: [-0.135, 0.135, -0.08, 0.08]
-        cop_range_lf: [-0.135, 0.135, -0.08, 0.08]
+        #cop_range_rf: [-0.135, 0.135, -0.08, 0.08]
+        #cop_range_lf: [-0.135, 0.135, -0.08, 0.08]
+        cop_range_rf: [-0.08, 0.08, -0.02, 0.02]
+        cop_range_lf: [-0.08, 0.08, -0.02, 0.02]
         cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
         cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
         max_eef_lengths: [1.1,  1.1,  0.60,  0.60]
@@ -110,6 +113,8 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
 
 
     rs_start_trns_ctrl:
@@ -121,9 +126,11 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
 
         max_rf_z: 1500
-        min_rf_z: 30
+        min_rf_z: 3
 
     rs_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -134,9 +141,11 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
 
         max_rf_z: 1500
-        min_rf_z: 30
+        min_rf_z: 3
 
     ls_start_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -147,9 +156,11 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
 
         max_rf_z: 1500
-        min_rf_z: 30
+        min_rf_z: 3
 
     ls_end_trns_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
@@ -160,19 +171,25 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
 
         max_rf_z: 1500
-        min_rf_z: 30
+        min_rf_z: 3
 
     r_ss_ctrl:
         kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
               700, 700, 700, 700, 700, 700, 700, 700, 700, 700,
               700, 700, 700, 700, 700, 700, 700, 700 ]
-        kd: [ 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
-              50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
-              50, 50, 50, 50, 50, 50, 50, 50 ]
+        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
+              70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
+              70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
+
         foot_pos_kp: [150., 150., 150.]
         foot_pos_kd: [10., 10., 10.]
 
@@ -185,6 +202,10 @@ control_configuration:
               70, 70, 70, 70, 70, 70, 70, 70 ]
         com_kp: [5000., 15000., 5000.]
         com_kd: [500., 1500., 500.]
+
+        centroid_kp: [0., 0., 0., 5000., 15000., 5000.]
+        centroid_kd: [5., 5., 5., 15., 15., 15.]
+
         foot_pos_kp: [150., 150., 150.]
         foot_pos_kd: [10., 10., 10.]
 

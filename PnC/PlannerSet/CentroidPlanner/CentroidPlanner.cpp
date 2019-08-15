@@ -218,7 +218,7 @@ void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
     }
 
     if (idx == -1) {
-        std::cout << "outside in time range so return the last" << std::endl;
+        // std::cout << "outside in time range so return the last" << std::endl;
         for (int i = 0; i < 3; ++i) {
             s[i + 3] = mComPosGoal[i];
             sdot[i] = 0.;

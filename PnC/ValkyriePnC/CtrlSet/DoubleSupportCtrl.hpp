@@ -51,9 +51,11 @@ class DoubleSupportCtrl : public Controller {
     double com_height_;
     double walking_distance_;
     int dim_contact_;
+
     bool b_replan_;
     bool b_do_plan_;
     bool b_reached_;
+    int last_step_counter_;
 
     Task* centroid_task_;
     Task* com_task_;

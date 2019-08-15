@@ -14,6 +14,7 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
     void GetContactSwitchData_(bool& rfoot_contact, bool& lfoot_contact);
     void SetParams_();
     void PlotMPCResult_();
+    void GetForceTorqueData_();
 
     EnvInterface* interface_;
     ValkyrieSensorData* sensor_data_;

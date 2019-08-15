@@ -1,6 +1,7 @@
 #include <Configuration.h>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <Simulator/Dart/Valkyrie/ValkyrieWorldNode.hpp>
+#include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
@@ -39,6 +40,7 @@ void ValkyrieWorldNode::customPreStep() {
 
     GetContactSwitchData_(sensor_data_->rfoot_contact,
                           sensor_data_->lfoot_contact);
+    GetForceTorqueData_();
 
     interface_->getCommand(sensor_data_, command_);
 
@@ -171,3 +173,59 @@ void ValkyrieWorldNode::SetParams_() {
     }
 }
 
+void ValkyrieWorldNode::GetForceTorqueData_() {
+    Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
+    Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
+
+    dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftFoot");
+    dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightFoot");
+    const dart::collision::CollisionResult& _result =
+        world_->getLastCollisionResult();
+
+    for (const auto& contact : _result.getContacts()) {
+        for (const auto& shapeNode :
+             lfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+            if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                shapeNode == contact.collisionObject2->getShapeFrame()) {
+                double normal(contact.normal(2));
+                Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                w_c.tail(3) = contact.force * normal;
+                Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                T_wc.translation() = contact.point;
+                Eigen::Isometry3d T_wa =
+                    robot_->getBodyNode("leftCOP_Frame")
+                        ->getTransform(dart::dynamics::Frame::World());
+                Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+                Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+                Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+                w_a = AdT_ca.transpose() * w_c;
+                // myUtils::pretty_print(w_a, std::cout, "left");
+                lf_wrench += w_a;
+            }
+        }
+
+        for (const auto& shapeNode :
+             rfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+            if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+                shapeNode == contact.collisionObject2->getShapeFrame()) {
+                double normal(contact.normal(2));
+                Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+                w_c.tail(3) = contact.force * normal;
+                Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+                T_wc.translation() = contact.point;
+                Eigen::Isometry3d T_wa =
+                    robot_->getBodyNode("rightCOP_Frame")
+                        ->getTransform(dart::dynamics::Frame::World());
+                Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+                Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+                Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+                w_a = AdT_ca.transpose() * w_c;
+                // myUtils::pretty_print(w_a, std::cout, "right");
+                rf_wrench += w_a;
+            }
+        }
+    }
+
+    sensor_data_->lf_wrench = lf_wrench;
+    sensor_data_->rf_wrench = rf_wrench;
+}
