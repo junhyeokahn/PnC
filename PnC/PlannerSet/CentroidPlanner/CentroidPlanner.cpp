@@ -218,13 +218,40 @@ void CentroidPlanner::EvalTrajectory(double time, Eigen::VectorXd& s,
     }
 
     if (idx == -1) {
-        // std::cout << "outside in time range so return the last" << std::endl;
-        for (int i = 0; i < 3; ++i) {
-            s[i + 3] = mComPosGoal[i];
-            sdot[i] = 0.;
-            sdot[i + 3] = 0.;
+        // Time Horizon is Finished. Interpolate to the goal
+        static double ini_time(time);
+        double interp_dur(4.);
+        ini_com =
+            mDynStateSeq.dynamicsStateSequence[mCentParam->numTimeSteps - 1]
+                .com;
+        ini_amom =
+            mDynStateSeq.dynamicsStateSequence[mCentParam->numTimeSteps - 1]
+                .aMom;
+        ini_lmom =
+            mDynStateSeq.dynamicsStateSequence[mCentParam->numTimeSteps - 1]
+                .lMom;
+        if (time >= ini_time + interp_dur) {
+            for (int i = 0; i < 3; ++i) {
+                s[i + 3] = mComPosGoal[i];
+                sdot[i] = 0.;
+                sdot[i + 3] = 0.;
+            }
+        } else {
+            for (int i = 0; i < 3; ++i) {
+                s[i + 3] = ((mComPosGoal[i] - ini_com[i]) / (interp_dur) *
+                            (time - ini_time)) +
+                           ini_com[i];
+
+                sdot[i] =
+                    ((0. - ini_amom[i]) / (interp_dur) * (time - ini_time)) +
+                    ini_amom[i];
+                sdot[i + 3] =
+                    ((0. - ini_lmom[i]) / (interp_dur) * (time - ini_time)) +
+                    ini_lmom[i];
+            }
         }
     } else {
+        // Time Horizon is not Finished. Return the planned trajectory
         if (idx == 0) {
             ini_com = mCentParam->initialState.com;
             ini_amom = mCentParam->initialState.aMom;

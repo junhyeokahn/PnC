@@ -1,31 +1,45 @@
 test_configuration:
+    ## keep walking
     #ini_dsp_duration: 0.8
     #dsp_duration: 0.6
     #fin_dsp_duration: 0.6
     #ssp_duration: 0.3
     #trns_duration: 0.03
 
-    #com_height: 0.95
+    #com_height: 0.9
     #walking_distance: 1.3
-    #footstep_width: 0.22
-    #footstep_length: 0.13
+    #footstep_width: 0.27
+    #footstep_length: 0.15
     #swing_height: 0.11
     #replan: false
 
+    ## walk and stop 1
+    #ini_dsp_duration: 0.8
+    #dsp_duration: 0.6
+    #fin_dsp_duration: 0.6
+    #ssp_duration: 0.3
+    #trns_duration: 0.03
+
+    #com_height: 0.9
+    #walking_distance: 0.4
+    #footstep_width: 0.27
+    #footstep_length: 0.15
+    #swing_height: 0.11
+    #replan: false
+
+    ## walk and stop 2
     ini_dsp_duration: 0.8
     dsp_duration: 0.6
     fin_dsp_duration: 0.6
     ssp_duration: 0.3
     trns_duration: 0.03
 
-    com_height: 0.85
-    walking_distance: 1.4
+    com_height: 0.9
+    walking_distance: 0.52
     footstep_width: 0.27
     footstep_length: 0.15
     swing_height: 0.11
     replan: false
-
-
 
 planner_configuration:
     # ==========================================================================
@@ -63,8 +77,8 @@ planner_configuration:
         eef_offset_lh: [-0.20,  0.00,  0.48]
         #cop_range_rf: [-0.135, 0.135, -0.08, 0.08]
         #cop_range_lf: [-0.135, 0.135, -0.08, 0.08]
-        cop_range_rf: [-0.08, 0.08, -0.02, 0.02]
-        cop_range_lf: [-0.08, 0.08, -0.02, 0.02]
+        cop_range_rf: [-0.06, 0.06, -0.02, 0.02]
+        cop_range_lf: [-0.06, 0.06, -0.02, 0.02]
         cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
         cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
         max_eef_lengths: [1.1,  1.1,  0.60,  0.60]
