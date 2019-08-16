@@ -46,15 +46,6 @@ if(Protobuf_FOUND)
     include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
 
-# Pybind11
-set(USE_PYBIND11 False)
-if(USE_PYBIND11)
-  message("-- Enable Pybind11")
-  find_package(PythonAnaconda)
-else()
-  message("-- Disable Pybind11")
-endif()
-
 # Eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
@@ -91,16 +82,9 @@ add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
-if(Protobuf_FOUND AND ZMQ_FOUND)
-    add_subdirectory(Messages)
-endif()
-if(USE_PYBIND11)
-  add_subdirectory(Bindings)
-endif()
 if(GTEST_FOUND)
   add_subdirectory(UnitTest)
 endif()
-add_subdirectory(ReinforcementLearning)
 
 
 ##=============================================================================

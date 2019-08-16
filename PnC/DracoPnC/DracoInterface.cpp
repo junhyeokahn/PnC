@@ -90,9 +90,8 @@ DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
         0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) +
                ", ENV : " + std::to_string(env_idx) + " )");
 
-    robot_ =
-        new RobotSystem(6,
-                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+    robot_ = new RobotSystem(
+        6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
     // robot_->printRobotInfo();
 
     test_cmd_ = new DracoCommand();
@@ -258,23 +257,6 @@ void DracoInterface::_ParameterSetting() {
             test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
-        } else if (test_name == "turning_test") {
-            test_ = new TurningTest(robot_);
-        } else if (test_name == "balancing_test") {
-            test_ = new BalancingTest(robot_);
-        } else if (test_name == "rl_walking_test") {
-#if HAS_RL_DEP
-            if (!b_learning_) {
-                test_ = new RLWalkingTest(robot_);
-            } else {
-                test_ = new RLWalkingTest(robot_, mpi_idx_, env_idx_);
-            }
-#else
-            std::cout << "[Error] Dependancies for Reinforcement Learning in "
-                         "not found"
-                      << std::endl;
-            exit(0);
-#endif
         } else {
             printf(
                 "[Draco Interface] There is no test matching test with the "

@@ -3,9 +3,6 @@
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 #include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
-#include <PnC/AtlasPnC/TestSet/BalanceTest.hpp>
-#include <PnC/AtlasPnC/TestSet/RLWalkingTest.hpp>
-#include <PnC/AtlasPnC/TestSet/WPGTest.hpp>
 #include <PnC/AtlasPnC/TestSet/WalkingTest.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -41,7 +38,7 @@ AtlasInterface::AtlasInterface() : EnvInterface() {
     dm->RegisterData(&running_time_, DOUBLE, "running_time");
     dm->RegisterData(&cmd_jpos_, VECT, "jpos_des", Atlas::n_adof);
     dm->RegisterData(&cmd_jvel_, VECT, "jvel_des", Atlas::n_adof);
-    //dm->RegisterData(&cmd_jacc_, VECT, "jacc_des", Atlas::n_adof);
+    // dm->RegisterData(&cmd_jacc_, VECT, "jacc_des", Atlas::n_adof);
     dm->RegisterData(&cmd_jtrq_, VECT, "command", Atlas::n_adof);
 
     myUtils::color_print(myColor::BoldCyan, border);
@@ -121,23 +118,6 @@ void AtlasInterface::_ParameterSetting() {
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
-        } else if (test_name == "balance_test") {
-            test_ = new BalanceTest(robot_);
-        } else if (test_name == "wpg_test") {
-            test_ = new WPGTest(robot_);
-        } else if (test_name == "rl_walking_test") {
-#if HAS_RL_DEP
-            if (!b_learning_) {
-                test_ = new RLWalkingTest(robot_);
-            } else {
-                test_ = new RLWalkingTest(robot_, mpi_idx_, env_idx_);
-            }
-#else
-            std::cout << "[Error] Dependancies for Reinforcement Learning in "
-                         "not found"
-                      << std::endl;
-            exit(0);
-#endif
         } else {
             printf(
                 "[Atlas Interface] There is no test matching test with "
