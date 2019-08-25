@@ -6,13 +6,13 @@ kv: [4  , 4   , 4   , 4   , 4  ,	4,	4 ]
 
 sim_case: 2
 lower_limit: [-90,	-65,	-180,	-65,	-180,	-10,	-180]
-upper_limit: [90,	65,	0,	65,	180,	100,	180]
+upper_limit: [0,	65,	    0,	    65,	    180,	100,	180]
 
-lower_cart: [-0.9,  -0.9,  -0.9]
-upper_cart: [0.9,  0.9,  0.9]
+lower_cart: [-1.2,  -1.2,  -1.2]
+upper_cart: [1.2,  1.2,  1.2]
 
 #dq_input: 0.0174533
-dq_input: 0.035
+dq_input: 0.07
 dx_input: 0.01
 
 
