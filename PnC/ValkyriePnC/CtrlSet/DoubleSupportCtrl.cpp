@@ -393,6 +393,8 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 }
 
 void DoubleSupportCtrl::_balancing_task_setup() {
+    double stb_dur(4.0);
+    static double stb_start_time(sp_->curr_time);
     // =========================================================================
     // COM Task
     // =========================================================================
@@ -400,16 +402,21 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
-    Eigen::Isometry3d rf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
-    Eigen::Isometry3d lf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
-
-    for (int i = 0; i < 3; ++i) {
-        com_pos_des[i] =
-            (rf_iso.translation()[i] + lf_iso.translation()[i]) / 2.0;
+    if (sp_->curr_time <= stb_start_time + stb_dur) {
+        for (int i = 0; i < 3; ++i) {
+            com_pos_des[i] = (goal_com_pos_[i] - ini_com_pos_[i]) / stb_dur *
+                                 (sp_->curr_time - stb_start_time) +
+                             ini_com_pos_[i];
+            com_vel_des[i] = (0. - ini_com_vel_[i]) / stb_dur *
+                                 (sp_->curr_time - stb_start_time) +
+                             ini_com_vel_[i];
+        }
+    } else {
+        for (int i = 0; i < 3; ++i) {
+            com_pos_des[i] = goal_com_pos_[i];
+            com_vel_des[i] = 0.;
+        }
     }
-    com_pos_des[2] = ini_com_pos_[2];
 
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = com_pos_des[i];
@@ -423,6 +430,10 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     // =========================================================================
     // Pelvis & Torso Ori Task
     // =========================================================================
+    Eigen::Isometry3d rf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+    Eigen::Isometry3d lf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
     Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
     Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
     Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
@@ -544,7 +555,19 @@ void DoubleSupportCtrl::_contact_setup() {
 void DoubleSupportCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ctrl_start_time_ = sp_->curr_time;
+
     ini_com_pos_ = robot_->getCoMPosition();
+    ini_com_vel_ = robot_->getCoMVelocity();
+    Eigen::Isometry3d rf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+    Eigen::Isometry3d lf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+    for (int i = 0; i < 3; ++i) {
+        goal_com_pos_[i] =
+            (rf_iso.translation()[i] + lf_iso.translation()[i]) / 2.0;
+    }
+    goal_com_pos_[2] = com_height_;
+
     if (sp_->b_walking)
         b_do_plan_ = true;
     else

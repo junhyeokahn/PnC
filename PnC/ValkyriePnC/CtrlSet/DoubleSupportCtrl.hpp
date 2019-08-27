@@ -40,6 +40,8 @@ class DoubleSupportCtrl : public Controller {
 
     Eigen::VectorXd jpos_ini_;
     Eigen::Vector3d ini_com_pos_;
+    Eigen::Vector3d ini_com_vel_;
+    Eigen::Vector3d goal_com_pos_;
 
     double footstep_length_;
     double footstep_width_;

@@ -46,7 +46,8 @@ void ValkyrieWorldNode::customPreStep() {
     static bool b_first_cmd(true);
     if (t_ > 2. && b_first_cmd) {
         std::cout << "first command" << std::endl;
-        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0., 4);
+        //((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0., 4);
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.15, 40);
         b_first_cmd = false;
     }
     interface_->getCommand(sensor_data_, command_);
