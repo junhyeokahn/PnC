@@ -42,14 +42,38 @@ void ValkyrieWorldNode::customPreStep() {
                           sensor_data_->lfoot_contact);
     GetForceTorqueData_();
 
-    // Walking Interface Usage 1
+    // Walking Interface Example
     static bool b_first_cmd(true);
-    if (t_ > 2. && b_first_cmd) {
-        std::cout << "first command" << std::endl;
-        //((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0., 4);
-        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.15, 40);
+    if (t_ > 1. && b_first_cmd) {
+        std::cout << "[[first command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0., 5);
         b_first_cmd = false;
     }
+    static bool b_second_cmd(true);
+    if (t_ > 11. && b_second_cmd) {
+        std::cout << "[[second command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.15, 5);
+        b_second_cmd = false;
+    }
+    static bool b_third_cmd(true);
+    if (t_ > 21. && b_third_cmd) {
+        std::cout << "[[third command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, -0.15, 5);
+        b_third_cmd = false;
+    }
+    static bool b_fourth_cmd(true);
+    if (t_ > 31. && b_fourth_cmd) {
+        std::cout << "[[fourth command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0., 0.27, 0.15, 5);
+        b_fourth_cmd = false;
+    }
+    static bool b_fifth_cmd(true);
+    if (t_ > 41. && b_fifth_cmd) {
+        std::cout << "[[fifth command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(-0.1, 0.27, 0., 5);
+        b_fifth_cmd = false;
+    }
+
     interface_->getCommand(sensor_data_, command_);
 
     if (b_plot_mpc_result_) {

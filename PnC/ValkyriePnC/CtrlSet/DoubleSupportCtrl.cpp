@@ -214,7 +214,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                             lf_end_time, lf_ct_iso, c_seq);
 
         if (sp_->num_residual_step == 0) {
-            std::cout << "left stance 0" << std::endl;
             // Add Last Step
             foot_sequence_gen_->GetFinalFootStep(dummy, rf_ct_iso);
             sp_->moving_foot_target_iso = rf_ct_iso;
@@ -225,7 +224,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                                 rf_end_time, rf_ct_iso, c_seq);
 
         } else if (sp_->num_residual_step == 1) {
-            std::cout << "left stance 1" << std::endl;
             // Add First Step
             foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_iso);
             sp_->moving_foot_target_iso = rf_ct_iso;
@@ -242,7 +240,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                                 lf_end_time, lf_ct_iso, c_seq);
         } else {
-            std::cout << "left stance 2" << std::endl;
             // Add First Step
             foot_sequence_gen_->GetNextFootStep(dummy, rf_ct_iso);
             sp_->moving_foot_target_iso = rf_ct_iso;
@@ -287,7 +284,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
                             lf_end_time, lf_ct_iso, c_seq);
 
         if (sp_->num_residual_step == 0) {
-            std::cout << "right stance 0" << std::endl;
             // Add Last Step
             foot_sequence_gen_->GetFinalFootStep(dummy, lf_ct_iso);
             sp_->moving_foot_target_iso = lf_ct_iso;
@@ -297,7 +293,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             AddContactSequence_(CentroidModel::EEfID::leftFoot, lf_st_time,
                                 lf_end_time, lf_ct_iso, c_seq);
         } else if (sp_->num_residual_step == 1) {
-            std::cout << "right stance 1" << std::endl;
             // Add First Step
             foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_iso);
             sp_->moving_foot_target_iso = lf_ct_iso;
@@ -314,7 +309,6 @@ void DoubleSupportCtrl::PlannerInitialization_() {
             AddContactSequence_(CentroidModel::EEfID::rightFoot, rf_st_time,
                                 rf_end_time, rf_ct_iso, c_seq);
         } else {
-            std::cout << "right stance 2" << std::endl;
             // Add First Step
             foot_sequence_gen_->GetNextFootStep(dummy, lf_ct_iso);
             sp_->moving_foot_target_iso = lf_ct_iso;
@@ -393,8 +387,7 @@ void DoubleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 }
 
 void DoubleSupportCtrl::_balancing_task_setup() {
-    double stb_dur(4.0);
-    static double stb_start_time(sp_->curr_time);
+    double stb_dur(2.0);
     // =========================================================================
     // COM Task
     // =========================================================================
@@ -402,14 +395,14 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
-    if (sp_->curr_time <= stb_start_time + stb_dur) {
+    if (state_machine_time_ < stb_dur) {
         for (int i = 0; i < 3; ++i) {
             com_pos_des[i] = (goal_com_pos_[i] - ini_com_pos_[i]) / stb_dur *
-                                 (sp_->curr_time - stb_start_time) +
+                                 state_machine_time_ +
                              ini_com_pos_[i];
-            com_vel_des[i] = (0. - ini_com_vel_[i]) / stb_dur *
-                                 (sp_->curr_time - stb_start_time) +
-                             ini_com_vel_[i];
+            com_vel_des[i] =
+                (0. - ini_com_vel_[i]) / stb_dur * state_machine_time_ +
+                ini_com_vel_[i];
         }
     } else {
         for (int i = 0; i < 3; ++i) {
