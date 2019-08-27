@@ -30,7 +30,6 @@ class SingleSupportCtrl : public Controller {
     void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
     void SetSwingHeight(double h) { swing_height_ = h; }
-    void SetRePlanningFlag(bool b) { b_replan_ = b; }
 
    protected:
     Eigen::VectorXd Kp_, Kd_;
@@ -46,8 +45,6 @@ class SingleSupportCtrl : public Controller {
     double footstep_length_;
     double footstep_width_;
     double com_height_;
-    bool b_replan_;
-    bool b_do_plan_;
 
     int dim_contact_;
 
@@ -56,7 +53,11 @@ class SingleSupportCtrl : public Controller {
     int moving_cop_;
     int stance_cop_;
 
-    Task* centroid_task_;
+    Eigen::Quaternion<double> ini_quat_pelvis_;
+    Eigen::Quaternion<double> ini_quat_torso_;
+    Eigen::Quaternion<double> ini_quat_foot_;
+    Eigen::Quaternion<double> des_quat_;
+
     Task* com_task_;
     Task* pelvis_ori_task_;
     Task* torso_ori_task_;
@@ -85,10 +86,4 @@ class SingleSupportCtrl : public Controller {
     void SetBSpline_();
 
     Planner* planner_;
-    Eigen::MatrixXd com_traj_;
-    Eigen::MatrixXd lmom_traj_;
-    Eigen::MatrixXd amom_traj_;
-    std::array<Eigen::MatrixXd, CentroidModel::numEEf> cop_local_traj_;
-    std::array<Eigen::MatrixXd, CentroidModel::numEEf> frc_world_traj_;
-    std::array<Eigen::MatrixXd, CentroidModel::numEEf> trq_local_traj_;
 };

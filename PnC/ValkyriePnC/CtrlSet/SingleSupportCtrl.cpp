@@ -32,7 +32,6 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
     Kp_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     Kd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
-    centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
     com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     foot_pos_task_ =
         new BasicTask(robot, BasicTaskType::LINKXYZ, 3, moving_cop_);
@@ -97,7 +96,6 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot, Planner* planner,
 }
 
 SingleSupportCtrl::~SingleSupportCtrl() {
-    delete centroid_task_;
     delete com_task_;
     delete foot_pos_task_;
     delete foot_ori_task_;
@@ -119,10 +117,6 @@ void SingleSupportCtrl::oneStep(void* _cmd) {
     sp_->prev_state_machine_time = state_machine_time_;
 
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-    if (b_do_plan_) {
-        PlannerUpdate_();
-        if (!b_replan_) b_do_plan_ = false;
-    }
     _contact_setup();
     _task_setup();
     _compute_torque_wblc(gamma);
@@ -134,28 +128,6 @@ void SingleSupportCtrl::oneStep(void* _cmd) {
     }
 
     _PostProcessing_Command();
-}
-
-void SingleSupportCtrl::PlannerUpdate_() {
-    // std::cout << "time" << std::endl;
-    // std::cout << sp_->curr_time << std::endl;
-    sp_->clock.start();
-    PlannerInitialization_();
-    planner_->DoPlan();
-    //((CentroidPlanner*)planner_)
-    //->SaveResult("SS_" + std::to_string(sp_->num_step_copy));
-    // std::cout << "Saved SS_" + std::to_string(sp_->num_step_copy) <<
-    // std::endl;
-    // std::cout << "(ss) planning takes : " << sp_->clock.stop() << " (ms)"
-    //<< std::endl;
-    ((CentroidPlanner*)planner_)
-        ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
-                      frc_world_traj_, trq_local_traj_);
-    sp_->com_des_list.clear();
-    for (int i = 0; i < com_traj_.cols(); ++i) {
-        sp_->com_des_list.push_back(
-            (Eigen::VectorXd)(com_traj_.block(0, i, 3, 1)));
-    }
 }
 
 void SingleSupportCtrl::PlannerInitialization_() {
@@ -406,7 +378,7 @@ void SingleSupportCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
 void SingleSupportCtrl::_task_setup() {
     // =========================================================================
-    // Centroid Task
+    // COM Task
     // =========================================================================
 
     Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
@@ -416,19 +388,6 @@ void SingleSupportCtrl::_task_setup() {
     planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
                              cen_vel_des, dummy);
 
-    for (int i = 0; i < 3; ++i) {
-        cen_vel_des[i] = 0.;
-        sp_->com_pos_des[i] = cen_pos_des[i + 3];
-        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-        sp_->mom_des[i] = cen_vel_des[i];
-        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    }
-
-    centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
-
-    // =========================================================================
-    // COM Task
-    // =========================================================================
     Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
@@ -441,6 +400,8 @@ void SingleSupportCtrl::_task_setup() {
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = com_pos_des[i];
         sp_->com_vel_des[i] = com_vel_des[i];
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
     }
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
@@ -477,26 +438,66 @@ void SingleSupportCtrl::_task_setup() {
     }
 
     foot_pos_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
-    // foot_pos_task_->PrintInfos();
 
     // =========================================================================
     // Foot Ori Task
     // =========================================================================
-    Eigen::VectorXd des_foot_quat = Eigen::VectorXd::Zero(4);
-    des_foot_quat << 1., 0., 0., 0.;
-    Eigen::VectorXd des_foot_so3 = Eigen::VectorXd::Zero(3);
+    double t = myUtils::smooth_changing(0, 1, ssp_dur_, state_machine_time_);
+    double tdot =
+        myUtils::smooth_changing_vel(0, 1, ssp_dur_, state_machine_time_);
+
+    Eigen::Quaternion<double> quat_ori_error =
+        des_quat_ * (ini_quat_foot_.inverse());
+    Eigen::VectorXd ang_vel = Eigen::VectorXd::Zero(3);
+    ang_vel = dart::math::quatToExp(quat_ori_error);
+
+    Eigen::VectorXd ori_increment = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd curr_ang_vel_des = Eigen::VectorXd::Zero(3);
+    Eigen::Quaternion<double> quat_increment;
+    Eigen::Quaternion<double> curr_quat_des;
+    ori_increment = ang_vel * t;
+    quat_increment = dart::math::expToQuat(ori_increment);
+    curr_quat_des = quat_increment * ini_quat_foot_;
+
+    curr_ang_vel_des = ang_vel * tdot;
+
+    Eigen::VectorXd quat_foot_des = Eigen::VectorXd::Zero(4);
+    quat_foot_des << curr_quat_des.w(), curr_quat_des.x(), curr_quat_des.y(),
+        curr_quat_des.z();
     Eigen::VectorXd ang_acc_des = Eigen::VectorXd::Zero(3);
-    foot_ori_task_->updateTask(des_foot_quat, des_foot_so3, ang_acc_des);
+
+    if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        sp_->rf_ori_quat_des = curr_quat_des;
+        for (int i = 0; i < 3; ++i) {
+            sp_->rf_ang_vel_des[i] = curr_ang_vel_des[i];
+        }
+    } else {
+        sp_->lf_ori_quat_des = curr_quat_des;
+        for (int i = 0; i < 3; ++i) {
+            sp_->lf_ang_vel_des[i] = curr_ang_vel_des[i];
+        }
+    }
+
+    foot_ori_task_->updateTask(quat_foot_des, curr_ang_vel_des, ang_acc_des);
 
     // =========================================================================
     // Pelvis & Torso Ori Task
     // =========================================================================
-    Eigen::VectorXd des_quat = Eigen::VectorXd::Zero(4);
-    des_quat << 1., 0., 0., 0.;
+    Eigen::Isometry3d rf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+    Eigen::Isometry3d lf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+    Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
+    Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
+    Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
+    Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
+    des_quat_vec << des_q.w(), des_q.x(), des_q.y(), des_q.z();
+
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
-    pelvis_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
-    torso_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
+
+    pelvis_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -511,15 +512,7 @@ void SingleSupportCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    /*    task_list_.push_back(com_task_);*/
-    // task_list_.push_back(foot_pos_task_);
-    // task_list_.push_back(foot_ori_task_);
-    // task_list_.push_back(pelvis_ori_task_);
-    // task_list_.push_back(torso_ori_task_);
-    /*task_list_.push_back(total_joint_task_);*/
-
     task_list_.push_back(com_task_);
-    // task_list_.push_back(centroid_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(foot_pos_task_);
@@ -545,7 +538,27 @@ void SingleSupportCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ctrl_start_time_ = sp_->curr_time;
     SetBSpline_();
-    b_do_plan_ = false;
+
+    ini_quat_pelvis_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
+    ini_quat_torso_ = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::torso).linear());
+
+    if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
+        ini_quat_foot_ = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame)
+                .linear());
+    } else {
+        ini_quat_foot_ = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame)
+                .linear());
+    }
+    des_quat_ = Eigen::Quaternion<double>(sp_->moving_foot_target_iso.linear());
+
+    if (sp_->num_residual_step == -1) {
+        sp_->b_walking = false;
+        std::cout << "stop at next ds" << std::endl;
+    }
 }
 
 void SingleSupportCtrl::SetBSpline_() {
@@ -556,14 +569,7 @@ void SingleSupportCtrl::SetBSpline_() {
 
     Eigen::VectorXd ini_pos =
         robot_->getBodyNodeIsometry(moving_cop_).translation();
-    Eigen::VectorXd fin_pos(3);
-    if (moving_foot_ == ValkyrieBodyNode::rightFoot) {
-        fin_pos = sp_->last_foot_pos[static_cast<int>(
-            CentroidModel::EEfID::rightFoot)];
-    } else {
-        fin_pos = sp_->last_foot_pos[static_cast<int>(
-            CentroidModel::EEfID::leftFoot)];
-    }
+    Eigen::VectorXd fin_pos = sp_->moving_foot_target_iso.translation();
 
     for (int i = 0; i < 3; ++i) {
         ini[i] = ini_pos[i];
@@ -582,8 +588,6 @@ void SingleSupportCtrl::SetBSpline_() {
     middle_pt[0][2] = swing_height_;
     fin[5] = -0.5;
     fin[8] = 5.;
-    // fin[5] = 0.;
-    // fin[8] = 0.;
     foot_traj_.SetParam(ini, fin, middle_pt, ssp_dur_);
 
     delete[] * middle_pt;
@@ -628,10 +632,6 @@ void SingleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "foot_pos_kp", tmp_vec1);
         myUtils::readParameter(node, "foot_pos_kd", tmp_vec2);
         foot_pos_task_->setGain(tmp_vec1, tmp_vec2);
-
-        myUtils::readParameter(node, "centroid_kp", tmp_vec1);
-        myUtils::readParameter(node, "centroid_kd", tmp_vec2);
-        centroid_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

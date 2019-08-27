@@ -36,7 +36,6 @@ TransitionCtrl::TransitionCtrl(RobotSystem* robot, Planner* planner,
     Kp_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     Kd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
-    centroid_task_ = new BasicTask(robot, BasicTaskType::CENTROID, 6);
     com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
@@ -73,7 +72,6 @@ TransitionCtrl::TransitionCtrl(RobotSystem* robot, Planner* planner,
 }
 
 TransitionCtrl::~TransitionCtrl() {
-    delete centroid_task_;
     delete com_task_;
     delete total_joint_task_;
     delete pelvis_ori_task_;
@@ -122,15 +120,8 @@ void TransitionCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
 void TransitionCtrl::_task_setup() {
     // =========================================================================
-    // Centroid Task
+    // COM Task
     // =========================================================================
-    double pos[3];
-    double vel[3];
-    double acc[3];
-
-    com_traj_.getCurvePoint(state_machine_time_, pos);
-    com_traj_.getCurveDerPoint(state_machine_time_, 1, vel);
-    com_traj_.getCurveDerPoint(state_machine_time_, 2, acc);
 
     Eigen::VectorXd cen_pos_des = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd cen_vel_des = Eigen::VectorXd::Zero(6);
@@ -139,19 +130,6 @@ void TransitionCtrl::_task_setup() {
     planner_->EvalTrajectory(sp_->curr_time - sp_->planning_moment, cen_pos_des,
                              cen_vel_des, dummy);
 
-    for (int i = 0; i < 3; ++i) {
-        cen_vel_des[i] = 0.;
-        sp_->com_pos_des[i] = cen_pos_des[i + 3];
-        sp_->com_vel_des[i] = cen_vel_des[i + 3] / robot_->getRobotMass();
-        sp_->mom_des[i] = cen_vel_des[i];
-        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
-    }
-
-    centroid_task_->updateTask(cen_pos_des, cen_vel_des, cen_acc_des);
-
-    // =========================================================================
-    // COM Task
-    // =========================================================================
     Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
@@ -167,6 +145,8 @@ void TransitionCtrl::_task_setup() {
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = com_pos_des[i];
         sp_->com_vel_des[i] = com_vel_des[i];
+        sp_->mom_des[i] = cen_vel_des[i];
+        sp_->mom_des[i + 3] = cen_vel_des[i + 3];
     }
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
@@ -174,12 +154,21 @@ void TransitionCtrl::_task_setup() {
     // =========================================================================
     // Pelvis & Torso Ori Task
     // =========================================================================
-    Eigen::VectorXd des_quat = Eigen::VectorXd::Zero(4);
-    des_quat << 1., 0., 0., 0.;
+    Eigen::Isometry3d rf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+    Eigen::Isometry3d lf_iso =
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+    Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
+    Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
+    Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
+    Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
+    des_quat_vec << des_q.w(), des_q.x(), des_q.y(), des_q.z();
+
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
-    pelvis_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
-    torso_ori_task_->updateTask(des_quat, des_so3, ori_acc_des);
+
+    pelvis_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -194,7 +183,6 @@ void TransitionCtrl::_task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    // task_list_.push_back(centroid_task_);
     task_list_.push_back(com_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
@@ -261,41 +249,6 @@ void TransitionCtrl::firstVisit() {
     ini_com_pos_ << robot_->getCoMPosition()[0], robot_->getCoMPosition()[1],
         robot_->getCoMPosition()[2];
     ctrl_start_time_ = sp_->curr_time;
-    SetBSpline_();
-}
-
-void TransitionCtrl::SetBSpline_() {
-    double ini[9];
-    double fin[9];
-    double** middle_pt = new double*[1];
-    middle_pt[0] = new double[3];
-
-    Eigen::Vector3d ini_pos = robot_->getCoMPosition();
-    Eigen::Vector3d ini_vel = robot_->getCoMVelocity();
-    Eigen::VectorXd fin_pos = Eigen::VectorXd::Zero(3);
-
-    if (b_increase_) {
-        fin_pos = robot_->getBodyNodeIsometry(moving_cop_).translation();
-    } else {
-        fin_pos = robot_->getBodyNodeIsometry(stance_cop_).translation();
-    }
-    fin_pos[2] = ini_pos[2];
-
-    for (int i = 0; i < 3; ++i) {
-        ini[i] = ini_pos[i];
-        ini[i + 3] = ini_vel[i];
-        ini[i + 6] = 0.;
-
-        fin[i] = fin_pos[i];
-        fin[i + 3] = 0.;
-        fin[i + 6] = 0.;
-
-        middle_pt[0][i] = (ini_pos[i] + fin_pos[i]) / 2.;
-    }
-    com_traj_.SetParam(ini, fin, middle_pt, trns_dur_);
-
-    delete[] * middle_pt;
-    delete[] middle_pt;
 }
 
 void TransitionCtrl::lastVisit() {}
@@ -319,10 +272,6 @@ void TransitionCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "com_kp", tmp_vec1);
         myUtils::readParameter(node, "com_kd", tmp_vec2);
         com_task_->setGain(tmp_vec1, tmp_vec2);
-
-        myUtils::readParameter(node, "centroid_kp", tmp_vec1);
-        myUtils::readParameter(node, "centroid_kd", tmp_vec2);
-        centroid_task_->setGain(tmp_vec1, tmp_vec2);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

@@ -20,7 +20,6 @@ class Test {
 
     virtual void TestInitialization() = 0;
     void getCommand(void* _command) {
-        AdditionalUpdate_();
         if (b_first_visit_) {
             state_list_[phase_]->firstVisit();
             b_first_visit_ = false;
@@ -37,7 +36,6 @@ class Test {
 
    protected:
     virtual int _NextPhase(const int& phase) = 0;
-    virtual void AdditionalUpdate_(){};
 
     bool b_first_visit_;
     int phase_;

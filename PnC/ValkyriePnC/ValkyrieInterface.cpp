@@ -23,6 +23,9 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
     // robot_->printRobotInfo();
     state_estimator_ = new ValkyrieStateEstimator(robot_);
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+
+    sp_->stance_foot = ValkyrieBodyNode::leftCOP_Frame;
+
     count_ = 0;
     waiting_count_ = 2;
     cmd_jpos_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
@@ -131,3 +134,21 @@ void ValkyrieInterface::GetContactSequence(
     foot_target_list = sp_->foot_target_list;
 }
 
+void ValkyrieInterface::Walk(double ft_length, double ft_width, double ori_inc,
+                             int num_step) {
+    if (sp_->b_walking) {
+        std::cout
+            << "Still Walking... Please Wait Until Ongoing Walking is Done"
+            << std::endl;
+    } else {
+        sp_->b_walking = true;
+        sp_->ft_length = ft_length;
+        sp_->ft_width = ft_width;
+        sp_->ft_ori_inc = ori_inc;
+        sp_->num_total_step = num_step;
+        sp_->num_residual_step = num_step;
+
+        ((WalkingTest*)test_)->ResetWalkingParameters();
+        ((WalkingTest*)test_)->InitiateWalkingPhase();
+    }
+}

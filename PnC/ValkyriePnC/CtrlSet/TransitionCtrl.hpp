@@ -54,7 +54,6 @@ class TransitionCtrl : public Controller {
     int moving_cop_;
     int stance_cop_;
 
-    Task* centroid_task_;
     Task* com_task_;
     Task* total_joint_task_;
     Task* pelvis_ori_task_;
@@ -73,9 +72,6 @@ class TransitionCtrl : public Controller {
 
     double ctrl_start_time_;
     ValkyrieStateProvider* sp_;
-
-    BS_Basic<3, 3, 1, 2, 2> com_traj_;
-    void SetBSpline_();
 
     Eigen::VectorXd ini_com_pos_;
 

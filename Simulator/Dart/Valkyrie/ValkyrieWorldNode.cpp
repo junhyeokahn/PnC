@@ -42,6 +42,13 @@ void ValkyrieWorldNode::customPreStep() {
                           sensor_data_->lfoot_contact);
     GetForceTorqueData_();
 
+    // Walking Interface Usage 1
+    static bool b_first_cmd(true);
+    if (t_ > 2. && b_first_cmd) {
+        std::cout << "first command" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0., 4);
+        b_first_cmd = false;
+    }
     interface_->getCommand(sensor_data_, command_);
 
     if (b_plot_mpc_result_) {
@@ -57,9 +64,6 @@ void ValkyrieWorldNode::customPreStep() {
     }
     trq_cmd_.head(6).setZero();
 
-    // trq_cmd_.setZero();
-    // Eigen::VectorXd clipped_trq =
-    // myUtils::CropVector(trq_cmd_, trq_lb_, trq_ub_, "final trq");
     robot_->setForces(trq_cmd_);
 
     count_++;
