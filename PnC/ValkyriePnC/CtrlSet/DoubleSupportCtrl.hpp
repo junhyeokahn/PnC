@@ -28,8 +28,6 @@ class DoubleSupportCtrl : public Controller {
     void SetIniDSPDuration(double time) { ini_dsp_dur_ = time; }
     void SetFinDSPDuration(double time) { fin_dsp_dur_ = time; }
     void SetSSPDuration(double time) { ssp_dur_ = time; }
-    void SetFootStepLength(double l) { footstep_length_ = l; }
-    void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
 
    protected:
@@ -43,8 +41,6 @@ class DoubleSupportCtrl : public Controller {
     Eigen::Vector3d ini_com_vel_;
     Eigen::Vector3d goal_com_pos_;
 
-    double footstep_length_;
-    double footstep_width_;
     double ini_dsp_dur_;
     double fin_dsp_dur_;
     double dsp_dur_;

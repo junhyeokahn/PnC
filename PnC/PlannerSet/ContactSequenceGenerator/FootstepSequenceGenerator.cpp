@@ -8,7 +8,7 @@ void FootstepSequenceGenerator::GetNextFootStep(
 
     if (curr_stance_ == CentroidModel::EEfID::rightFoot) {
         // right stance
-        local_vec << ft_length_, ft_spread_, 0;
+        local_vec << ft_length_, l_ft_spread_, 0;
         next_stance = CentroidModel::EEfID::leftFoot;
 
         global_vec = curr_rf_iso_.linear() * local_vec;
@@ -26,7 +26,7 @@ void FootstepSequenceGenerator::GetNextFootStep(
         curr_lf_iso_ = next_foot_iso;
     } else {
         // left stance
-        local_vec << ft_length_, -ft_spread_, 0;
+        local_vec << ft_length_, -r_ft_spread_, 0;
         next_stance = CentroidModel::EEfID::rightFoot;
 
         global_vec = curr_lf_iso_.linear() * local_vec;
@@ -51,7 +51,7 @@ void FootstepSequenceGenerator::GetFinalFootStep(
 
     if (curr_stance_ == CentroidModel::EEfID::rightFoot) {
         // right stance
-        local_vec << 0., ft_spread_, 0;
+        local_vec << 0., l_ft_spread_, 0;
         next_stance = CentroidModel::EEfID::leftFoot;
 
         global_vec = curr_rf_iso_.linear() * local_vec;
@@ -68,7 +68,7 @@ void FootstepSequenceGenerator::GetFinalFootStep(
         curr_lf_iso_ = next_foot_iso;
     } else {
         // left stance
-        local_vec << 0., -ft_spread_, 0;
+        local_vec << 0., -r_ft_spread_, 0;
         next_stance = CentroidModel::EEfID::rightFoot;
 
         global_vec = curr_lf_iso_.linear() * local_vec;

@@ -14,7 +14,8 @@ class FootstepSequenceGenerator {
     virtual ~FootstepSequenceGenerator(){};
 
     // Parameters Setting
-    void SetFootStepWidth(double v) { ft_spread_ = v; }
+    void SetRightFootStepWidth(double v) { r_ft_spread_ = v; }
+    void SetLeftFootStepWidth(double v) { l_ft_spread_ = v; }
     void SetFootStepLength(double v) { ft_length_ = v; }
     void SetFootStepOrientation(const Eigen::VectorXd &v) {
         ft_ori_.w() = v[0];
@@ -40,7 +41,8 @@ class FootstepSequenceGenerator {
                           Eigen::Isometry3d &next_foot_iso);
 
    private:
-    double ft_spread_;
+    double r_ft_spread_;
+    double l_ft_spread_;
     double ft_length_;
     Eigen::Quaternion<double> ft_ori_;
 

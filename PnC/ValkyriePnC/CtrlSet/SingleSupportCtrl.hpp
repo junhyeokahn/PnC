@@ -26,8 +26,6 @@ class SingleSupportCtrl : public Controller {
 
     void SetDSPDuration(double time) { dsp_dur_ = time; }
     void SetSSPDuration(double time) { ssp_dur_ = time; }
-    void SetFootStepLength(double l) { footstep_length_ = l; }
-    void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
     void SetSwingHeight(double h) { swing_height_ = h; }
 
@@ -42,8 +40,6 @@ class SingleSupportCtrl : public Controller {
     double swing_height_;
     double dsp_dur_;
     double ssp_dur_;
-    double footstep_length_;
-    double footstep_width_;
     double com_height_;
 
     int dim_contact_;
@@ -73,8 +69,6 @@ class SingleSupportCtrl : public Controller {
     WBLC* wblc_;
     WBLC_ExtraData* wblc_data_;
 
-    void PlannerUpdate_();
-    void PlannerInitialization_();
     void _task_setup();
     void _contact_setup();
     void _compute_torque_wblc(Eigen::VectorXd& gamma);

@@ -112,15 +112,10 @@ int WalkingTest::_NextPhase(const int& phase) {
 void WalkingTest::InitiateWalkingPhase() { b_first_visit_ = true; }
 
 void WalkingTest::ResetWalkingParameters() {
-    ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(sp_->ft_length);
-    ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(sp_->ft_length);
-    ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepLength(sp_->ft_length);
     foot_sequence_gen_->SetFootStepLength(sp_->ft_length);
 
-    ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepWidth(sp_->ft_width);
-    ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepWidth(sp_->ft_width);
-    ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepWidth(sp_->ft_width);
-    foot_sequence_gen_->SetFootStepWidth(sp_->ft_width);
+    foot_sequence_gen_->SetRightFootStepWidth(sp_->r_ft_width);
+    foot_sequence_gen_->SetLeftFootStepWidth(sp_->l_ft_width);
 
     Eigen::Quaternion<double> quat_temp = Eigen::Quaternion<double>(
         cos(sp_->ft_ori_inc / 2.0), 0, 0, sin(sp_->ft_ori_inc / 2.0));
@@ -166,16 +161,11 @@ void WalkingTest::_SettingParameter() {
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFinDSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_length", tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
-        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(tmp);
-        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepLength(tmp);
         foot_sequence_gen_->SetFootStepLength(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_width", tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepWidth(tmp);
-        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepWidth(tmp);
-        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepWidth(tmp);
-        foot_sequence_gen_->SetFootStepWidth(tmp);
+        foot_sequence_gen_->SetRightFootStepWidth(tmp);
+        foot_sequence_gen_->SetLeftFootStepWidth(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_orientation", tmp);
         Eigen::Quaternion<double> quat_temp =

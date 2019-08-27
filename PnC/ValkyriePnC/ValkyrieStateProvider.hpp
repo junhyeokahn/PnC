@@ -43,7 +43,8 @@ class ValkyrieStateProvider {
     // API related variable
     bool b_walking;
     double ft_length;
-    double ft_width;
+    double r_ft_width;
+    double l_ft_width;
     double ft_ori_inc;
     int num_total_step;
     int num_residual_step;

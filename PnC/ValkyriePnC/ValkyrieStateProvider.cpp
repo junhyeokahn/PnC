@@ -15,7 +15,8 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     // API related parameters
     b_walking = false;
     ft_length = 0.;
-    ft_width = 0.;
+    r_ft_width = 0.;
+    l_ft_width = 0.;
     ft_ori_inc = 0.;
     num_total_step = 0;
     num_residual_step = 0;
