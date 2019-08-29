@@ -28,11 +28,7 @@ class DoubleSupportCtrl : public Controller {
     void SetIniDSPDuration(double time) { ini_dsp_dur_ = time; }
     void SetFinDSPDuration(double time) { fin_dsp_dur_ = time; }
     void SetSSPDuration(double time) { ssp_dur_ = time; }
-    void SetFootStepLength(double l) { footstep_length_ = l; }
-    void SetFootStepWidth(double w) { footstep_width_ = w; }
     void SetCoMHeight(double h) { com_height_ = h; }
-    void SetWalkingDistance(double h) { walking_distance_ = h; }
-    void SetRePlanningFlag(bool b) { b_replan_ = b; }
 
    protected:
     Eigen::VectorXd Kp_, Kd_;
@@ -41,23 +37,19 @@ class DoubleSupportCtrl : public Controller {
     Eigen::VectorXd des_jacc_;
 
     Eigen::VectorXd jpos_ini_;
+    Eigen::Vector3d ini_com_pos_;
+    Eigen::Vector3d ini_com_vel_;
+    Eigen::Vector3d goal_com_pos_;
 
-    double footstep_length_;
-    double footstep_width_;
     double ini_dsp_dur_;
     double fin_dsp_dur_;
     double dsp_dur_;
     double ssp_dur_;
     double com_height_;
-    double walking_distance_;
     int dim_contact_;
 
-    bool b_replan_;
     bool b_do_plan_;
-    bool b_reached_;
-    int last_step_counter_;
 
-    Task* centroid_task_;
     Task* com_task_;
     Task* pelvis_ori_task_;
     Task* torso_ori_task_;
@@ -72,7 +64,8 @@ class DoubleSupportCtrl : public Controller {
 
     void PlannerUpdate_();
     void PlannerInitialization_();
-    void _task_setup();
+    void _balancing_task_setup();
+    void _walking_task_setup();
     void _contact_setup();
     void _compute_torque_wblc(Eigen::VectorXd& gamma);
 
@@ -88,9 +81,8 @@ class DoubleSupportCtrl : public Controller {
     std::array<Eigen::MatrixXd, CentroidModel::numEEf> frc_world_traj_;
     std::array<Eigen::MatrixXd, CentroidModel::numEEf> trq_local_traj_;
 
-    // f_ori =[w,x,y,z]
     void AddContactSequence_(
         CentroidModel::EEfID eef_id, double ini, double fin,
-        Eigen::VectorXd f_pos, Eigen::VectorXd f_ori,
+        Eigen::Isometry3d f_iso,
         std::array<std::vector<Eigen::VectorXd>, CentroidModel::numEEf>& c_seq);
 };

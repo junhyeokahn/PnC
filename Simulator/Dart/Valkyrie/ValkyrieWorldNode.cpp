@@ -42,6 +42,50 @@ void ValkyrieWorldNode::customPreStep() {
                           sensor_data_->lfoot_contact);
     GetForceTorqueData_();
 
+    // Walking Interface Example
+    static bool b_first_cmd(true);
+    if (t_ > 1. && b_first_cmd) {
+        std::cout << "[[first command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0., 5);
+        b_first_cmd = false;
+    }
+    static bool b_second_cmd(true);
+    if (t_ > 11. && b_second_cmd) {
+        std::cout << "[[second command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0.15, 5);
+        b_second_cmd = false;
+    }
+    static bool b_third_cmd(true);
+    if (t_ > 21. && b_third_cmd) {
+        std::cout << "[[third command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, -0.15, 5);
+        b_third_cmd = false;
+    }
+    static bool b_fourth_cmd(true);
+    if (t_ > 31. && b_fourth_cmd) {
+        std::cout << "[[fourth command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0., 0.27, 0.27, 0.15, 5);
+        b_fourth_cmd = false;
+    }
+    static bool b_fifth_cmd(true);
+    if (t_ > 41. && b_fifth_cmd) {
+        std::cout << "[[fifth command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(-0.1, 0.27, 0.27, 0., 5);
+        b_fifth_cmd = false;
+    }
+    static bool b_sixth_cmd(true);
+    if (t_ > 55. && b_sixth_cmd) {
+        std::cout << "[[sixth command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0., 0.27, 0.2, 0., 7);
+        b_sixth_cmd = false;
+    }
+    static bool b_seventh_cmd(true);
+    if (t_ > 70. && b_seventh_cmd) {
+        std::cout << "[[seventh command]]" << std::endl;
+        ((ValkyrieInterface*)interface_)->Walk(0., 0.2, 0.27, 0., 7);
+        b_seventh_cmd = false;
+    }
+
     interface_->getCommand(sensor_data_, command_);
 
     if (b_plot_mpc_result_) {
@@ -57,9 +101,6 @@ void ValkyrieWorldNode::customPreStep() {
     }
     trq_cmd_.head(6).setZero();
 
-    // trq_cmd_.setZero();
-    // Eigen::VectorXd clipped_trq =
-    // myUtils::CropVector(trq_cmd_, trq_lb_, trq_ub_, "final trq");
     robot_->setForces(trq_cmd_);
 
     count_++;

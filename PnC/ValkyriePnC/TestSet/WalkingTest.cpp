@@ -14,7 +14,6 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
 
     num_step_ = 0;
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
-    sp_->stance_foot = ValkyrieBodyNode::leftCOP_Frame;
 
     centroid_planner_param_ = new CentroidPlannerParameter(
         cfg_["planner_configuration"], robot_->getRobotMass());
@@ -87,31 +86,19 @@ void WalkingTest::TestInitialization() {
 int WalkingTest::_NextPhase(const int& phase) {
     int next_phase = phase + 1;
     myUtils::color_print(myColor::BoldGreen,
-                         "[Phase " + std::to_string(next_phase) + "]");
-    Eigen::Vector3d next_local_frame_location;
+                         "[[Phase " + std::to_string(next_phase) + "]]");
 
     if (phase == WKPhase::double_contact_1) {
         ++num_step_;
-        printf("%i th step : ", num_step_);
-        printf("Right Leg Swing\n");
+        sp_->num_residual_step -= 1;
         sp_->stance_foot = ValkyrieBodyNode::leftCOP_Frame;
-
-        // Global Frame Update
-        next_local_frame_location =
-            robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame)
-                .translation();
+        printf("Right Leg Swing\n");
     }
     if (phase == WKPhase::double_contact_2) {
         ++num_step_;
-        printf("%i th step : ", num_step_);
-        printf("Left Leg Swing\n");
-
+        sp_->num_residual_step -= 1;
         sp_->stance_foot = ValkyrieBodyNode::rightCOP_Frame;
-
-        // Global Frame Update
-        next_local_frame_location =
-            robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame)
-                .translation();
+        printf("Left Leg Swing\n");
     }
     sp_->num_step_copy = num_step_;
 
@@ -120,6 +107,21 @@ int WalkingTest::_NextPhase(const int& phase) {
     } else {
         return next_phase;
     }
+}
+
+void WalkingTest::InitiateWalkingPhase() { b_first_visit_ = true; }
+
+void WalkingTest::ResetWalkingParameters() {
+    foot_sequence_gen_->SetFootStepLength(sp_->ft_length);
+
+    foot_sequence_gen_->SetRightFootStepWidth(sp_->r_ft_width);
+    foot_sequence_gen_->SetLeftFootStepWidth(sp_->l_ft_width);
+
+    Eigen::Quaternion<double> quat_temp = Eigen::Quaternion<double>(
+        cos(sp_->ft_ori_inc / 2.0), 0, 0, sin(sp_->ft_ori_inc / 2.0));
+    Eigen::VectorXd tmp_vec = Eigen::VectorXd::Zero(4);
+    tmp_vec << quat_temp.w(), quat_temp.x(), quat_temp.y(), quat_temp.z();
+    foot_sequence_gen_->SetFootStepOrientation(tmp_vec);
 }
 
 void WalkingTest::_SettingParameter() {
@@ -159,16 +161,18 @@ void WalkingTest::_SettingParameter() {
         ((DoubleSupportCtrl*)ds_ctrl_)->SetFinDSPDuration(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_length", tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepLength(tmp);
-        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepLength(tmp);
-        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepLength(tmp);
         foot_sequence_gen_->SetFootStepLength(tmp);
 
         myUtils::readParameter(test_cfg, "footstep_width", tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetFootStepWidth(tmp);
-        ((SingleSupportCtrl*)r_ss_ctrl_)->SetFootStepWidth(tmp);
-        ((SingleSupportCtrl*)l_ss_ctrl_)->SetFootStepWidth(tmp);
-        foot_sequence_gen_->SetFootStepWidth(tmp);
+        foot_sequence_gen_->SetRightFootStepWidth(tmp);
+        foot_sequence_gen_->SetLeftFootStepWidth(tmp);
+
+        myUtils::readParameter(test_cfg, "footstep_orientation", tmp);
+        Eigen::Quaternion<double> quat_temp =
+            Eigen::Quaternion<double>(cos(tmp / 2.0), 0, 0, sin(tmp / 2.0));
+        tmp_vec = Eigen::VectorXd::Zero(4);
+        tmp_vec << quat_temp.w(), quat_temp.x(), quat_temp.y(), quat_temp.z();
+        foot_sequence_gen_->SetFootStepOrientation(tmp_vec);
 
         myUtils::readParameter(test_cfg, "com_height", tmp);
         ((DoubleSupportCtrl*)ds_ctrl_)->SetCoMHeight(tmp);
@@ -179,19 +183,11 @@ void WalkingTest::_SettingParameter() {
         ((TransitionCtrl*)rs_end_trns_ctrl_)->SetCoMHeight(tmp);
         ((TransitionCtrl*)ls_end_trns_ctrl_)->SetCoMHeight(tmp);
 
-        myUtils::readParameter(test_cfg, "walking_distance", tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetWalkingDistance(tmp);
-
         myUtils::readParameter(test_cfg, "trns_duration", tmp);
         ((TransitionCtrl*)rs_start_trns_ctrl_)->SetTRNSDuration(tmp);
         ((TransitionCtrl*)ls_start_trns_ctrl_)->SetTRNSDuration(tmp);
         ((TransitionCtrl*)rs_end_trns_ctrl_)->SetTRNSDuration(tmp);
         ((TransitionCtrl*)ls_end_trns_ctrl_)->SetTRNSDuration(tmp);
-
-        myUtils::readParameter(test_cfg, "replan", b_tmp);
-        ((DoubleSupportCtrl*)ds_ctrl_)->SetRePlanningFlag(b_tmp);
-        ((SingleSupportCtrl*)r_ss_ctrl_)->SetRePlanningFlag(b_tmp);
-        ((SingleSupportCtrl*)l_ss_ctrl_)->SetRePlanningFlag(b_tmp);
 
         myUtils::readParameter(test_cfg, "swing_height", tmp);
         ((SingleSupportCtrl*)r_ss_ctrl_)->SetSwingHeight(tmp);
@@ -204,6 +200,3 @@ void WalkingTest::_SettingParameter() {
         exit(0);
     }
 }
-
-void WalkingTest::AdditionalUpdate_() {}
-

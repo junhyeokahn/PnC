@@ -25,11 +25,13 @@ class WalkingTest : public Test {
     virtual ~WalkingTest();
     virtual void TestInitialization();
 
+    void ResetWalkingParameters();
+    void InitiateWalkingPhase();
+
    protected:
     int num_step_;
     ValkyrieStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
-    virtual void AdditionalUpdate_();
     void _SettingParameter();
 
     FootstepSequenceGenerator* foot_sequence_gen_;

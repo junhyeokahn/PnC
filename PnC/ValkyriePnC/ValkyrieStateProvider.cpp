@@ -12,6 +12,15 @@ ValkyrieStateProvider* ValkyrieStateProvider::getStateProvider(
 ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     myUtils::pretty_constructor(1, "Valkyrie State Provider");
 
+    // API related parameters
+    b_walking = false;
+    ft_length = 0.;
+    r_ft_width = 0.;
+    l_ft_width = 0.;
+    ft_ori_inc = 0.;
+    num_total_step = 0;
+    num_residual_step = 0;
+
     num_step_copy = 0;
     phase_copy = 0;
     robot_ = _robot;
@@ -47,6 +56,26 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     lf_pos_des = Eigen::VectorXd::Zero(3);
     lf_vel_des = Eigen::VectorXd::Zero(3);
 
+    rf_ori_quat = Eigen::Quaternion<double>::Identity();
+    rf_ang_vel = Eigen::VectorXd::Zero(3);
+    lf_ori_quat = Eigen::Quaternion<double>::Identity();
+    lf_ang_vel = Eigen::VectorXd::Zero(3);
+
+    rf_ori_quat_des = Eigen::Quaternion<double>::Identity();
+    rf_ang_vel_des = Eigen::VectorXd::Zero(3);
+    lf_ori_quat_des = Eigen::Quaternion<double>::Identity();
+    lf_ang_vel_des = Eigen::VectorXd::Zero(3);
+
+    pelvis_ori = Eigen::Quaternion<double>::Identity();
+    pelvis_ang_vel = Eigen::VectorXd::Zero(3);
+    torso_ori = Eigen::Quaternion<double>::Identity();
+    torso_ang_vel = Eigen::VectorXd::Zero(3);
+
+    pelvis_ori_des = Eigen::Quaternion<double>::Identity();
+    pelvis_ang_vel_des = Eigen::VectorXd::Zero(3);
+    torso_ori_des = Eigen::Quaternion<double>::Identity();
+    torso_ang_vel_des = Eigen::VectorXd::Zero(3);
+
     r_rf = Eigen::VectorXd::Zero(6);
     l_rf = Eigen::VectorXd::Zero(6);
     r_rf_des = Eigen::VectorXd::Zero(6);
@@ -79,6 +108,31 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&lf_pos_des, VECT, "lf_pos_des", 3);
     data_manager->RegisterData(&lf_vel_des, VECT, "lf_vel_des", 3);
 
+    data_manager->RegisterData(&rf_ori_quat, QUATERNION, "rf_ori_quat", 4);
+    data_manager->RegisterData(&rf_ang_vel, VECT, "rf_ang_vel", 3);
+    data_manager->RegisterData(&lf_ori_quat, QUATERNION, "lf_ori_quat", 4);
+    data_manager->RegisterData(&lf_ang_vel, VECT, "lf_ang_vel", 3);
+
+    data_manager->RegisterData(&rf_ori_quat_des, QUATERNION, "rf_ori_quat_des",
+                               4);
+    data_manager->RegisterData(&rf_ang_vel_des, VECT, "rf_ang_vel_des", 3);
+    data_manager->RegisterData(&lf_ori_quat_des, QUATERNION, "lf_ori_quat_des",
+                               4);
+    data_manager->RegisterData(&lf_ang_vel_des, VECT, "lf_ang_vel_des", 3);
+
+    data_manager->RegisterData(&pelvis_ori, QUATERNION, "pelvis_ori", 4);
+    data_manager->RegisterData(&pelvis_ang_vel, VECT, "pelvis_ang_vel", 3);
+    data_manager->RegisterData(&torso_ori, QUATERNION, "torso_ori", 4);
+    data_manager->RegisterData(&torso_ang_vel, VECT, "torso_ang_vel", 3);
+
+    data_manager->RegisterData(&pelvis_ori_des, QUATERNION, "pelvis_ori_des",
+                               4);
+    data_manager->RegisterData(&pelvis_ang_vel_des, VECT, "pelvis_ang_vel_des",
+                               3);
+    data_manager->RegisterData(&torso_ori_des, QUATERNION, "torso_ori_des", 4);
+    data_manager->RegisterData(&torso_ang_vel_des, VECT, "torso_ang_vel_des",
+                               3);
+
     data_manager->RegisterData(&r_rf_des, VECT, "r_rf_des", 6);
     data_manager->RegisterData(&l_rf_des, VECT, "l_rf_des", 6);
     data_manager->RegisterData(&r_rf, VECT, "r_rf", 6);
@@ -103,6 +157,27 @@ void ValkyrieStateProvider::saveCurrentData() {
                  .translation();
     lf_vel = robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::leftCOP_Frame)
                  .tail(3);
-    // myUtils::pretty_print(rf_pos, std::cout, "right foot");
-    // myUtils::pretty_print(lf_pos, std::cout, "left foot");
+
+    rf_ori_quat = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame).linear());
+    rf_ang_vel =
+        robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::rightCOP_Frame)
+            .head(3);
+    lf_ori_quat = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame).linear());
+    lf_ang_vel =
+        robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::leftCOP_Frame)
+            .head(3);
+
+    pelvis_ori = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
+
+    pelvis_ang_vel =
+        robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::pelvis).head(3);
+
+    torso_ori = Eigen::Quaternion<double>(
+        robot_->getBodyNodeIsometry(ValkyrieBodyNode::torso).linear());
+
+    torso_ang_vel =
+        robot_->getBodyNodeSpatialVelocity(ValkyrieBodyNode::torso).head(3);
 }
