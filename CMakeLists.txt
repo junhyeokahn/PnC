@@ -38,8 +38,6 @@ find_package(Bullet)
 if(BULLET_FOUND)
     include_directories(${BULLET_INCLUDE_DIRS})
 endif()
-message(${BULLET_INCLUDE_DIRS})
-message(${BULLET_LIBRARIES})
 
 # Zmq
 find_package(ZMQ)
