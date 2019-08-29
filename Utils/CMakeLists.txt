@@ -1,5 +1,5 @@
 FILE(GLOB_RECURSE sources "*.cpp")
-FILE(GLOB general_headers "General/*.hpp")
+FILE(GLOB general_headers "General/*.hpp" "*.h")
 FILE(GLOB io_headers "IO/*.hpp")
 FILE(GLOB math_headers "Math/*.hpp" "*.h")
 
