@@ -3,21 +3,21 @@
 #include <PnC/Test.hpp>
 
 class DracoStateProvider;
-class TVRPlanner;
+class Planner;
+class CentroidPlannerParameter;
+class FootstepSequenceGenerator;
 
-namespace WkPhase {
-constexpr int initiation = 0;
-constexpr int lift_up = 1;
-constexpr int double_contact_1 = 2;
-constexpr int right_swing_start_trans = 3;
-constexpr int right_swing = 4;
-constexpr int right_swing_end_trans = 5;
-constexpr int double_contact_2 = 6;
-constexpr int left_swing_start_trans = 7;
-constexpr int left_swing = 8;
-constexpr int left_swing_end_trans = 9;
-constexpr int NUM_WALKING_PHASE = 10;
-};  // namespace WkPhase
+namespace WKPhase {
+constexpr int double_contact_1 = 0;
+constexpr int right_swing_start_trans = 1;
+constexpr int right_swing = 2;
+constexpr int right_swing_end_trans = 3;
+constexpr int double_contact_2 = 4;
+constexpr int left_swing_start_trans = 5;
+constexpr int left_swing = 6;
+constexpr int left_swing_end_trans = 7;
+constexpr int NUM_WALKING_PHASE = 8;
+};  // namespace WKPhase
 
 class WalkingTest : public Test {
    public:
@@ -25,25 +25,28 @@ class WalkingTest : public Test {
     virtual ~WalkingTest();
     virtual void TestInitialization();
 
+    void ResetWalkingParameters();
+    void InitiateWalkingPhase();
+
    protected:
     int num_step_;
-    DracoStateProvider* sp_;
+    ValkyrieStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
     void _SettingParameter();
 
-    TVRPlanner* reversal_planner_;
+    FootstepSequenceGenerator* foot_sequence_gen_;
+    Planner* centroid_planner_;
+    CentroidPlannerParameter* centroid_planner_param_;
 
-    Controller* jpos_ctrl_;
-    Controller* body_up_ctrl_;
-    Controller* body_fix_ctrl_;
-    // Right
-    Controller* right_swing_start_trans_ctrl_;
-    Controller* right_swing_ctrl_;
-    Controller* right_swing_end_trans_ctrl_;
-    // Left
-    Controller* left_swing_start_trans_ctrl_;
-    Controller* left_swing_ctrl_;
-    Controller* left_swing_end_trans_ctrl_;
+    Controller* ds_ctrl_;
+
+    Controller* l_ss_ctrl_;
+    Controller* r_ss_ctrl_;
+
+    Controller* rs_start_trns_ctrl_;
+    Controller* rs_end_trns_ctrl_;
+    Controller* ls_start_trns_ctrl_;
+    Controller* ls_end_trns_ctrl_;
 
     YAML::Node cfg_;
 };

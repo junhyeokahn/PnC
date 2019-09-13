@@ -1,14 +1,13 @@
 #include <math.h>
 #include <stdio.h>
-#include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
+#include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
+#include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/TestSet/TestSet.hpp>
-#include <PnC/RobotSystem/RobotSystem.hpp>
-#include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/pseudo_inverse.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 #include <string>
 
 DracoInterface::DracoInterface() : EnvInterface() {
@@ -18,258 +17,81 @@ DracoInterface::DracoInterface() : EnvInterface() {
     }
     myUtils::color_print(myColor::BoldCyan, border);
     myUtils::pretty_constructor(0, "Draco Interface");
-    mpi_idx_ = 0;
-    env_idx_ = 0;
-    b_learning_ = false;
-
-    robot_ =
-        // new RobotSystem(6, THIS_COM
-        // "RobotModel/Robot/Draco/DracoPnCOld.urdf");
-        new RobotSystem(6,
-                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
-    // robot_->printRobotInfo();
-
-    test_cmd_ = new DracoCommand();
-    test_cmd_->turn_off = false;
-    test_cmd_->q = Eigen::VectorXd::Zero(10);
-    test_cmd_->qdot = Eigen::VectorXd::Zero(10);
-    test_cmd_->jtrq = Eigen::VectorXd::Zero(10);
-
-    state_estimator_ = new DracoStateEstimator(robot_);
-    sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    waiting_count_ = 10;
-
-    cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-
-    data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    rfoot_ati_ = Eigen::VectorXd::Zero(6);
-    lfoot_ati_ = Eigen::VectorXd::Zero(6);
-
-    stop_test_ = false;
-
-    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
-                                                "running_time");
-    DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT, "jpos_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT, "jvel_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT, "command",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT, "torque",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(
-        &data_temperature_, VECT, "temperature", robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_motor_current_, VECT,
-                                                "motor_current",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati",
-                                                6);
-    DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
-                                                6);
-
-    _ParameterSetting();
-
-    myUtils::color_print(myColor::BoldCyan, border);
-}
-
-DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
-    std::string border = "=";
-    for (int i = 0; i < 79; ++i) {
-        border += "=";
-    }
-    mpi_idx_ = mpi_idx;
-    env_idx_ = env_idx;
-    b_learning_ = true;
-    myUtils::color_print(myColor::BoldCyan, border);
-    myUtils::pretty_constructor(
-        0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) +
-               ", ENV : " + std::to_string(env_idx) + " )");
 
     robot_ = new RobotSystem(
-        6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+        6, THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     // robot_->printRobotInfo();
-
-    test_cmd_ = new DracoCommand();
-    test_cmd_->turn_off = false;
-    test_cmd_->q = Eigen::VectorXd::Zero(10);
-    test_cmd_->qdot = Eigen::VectorXd::Zero(10);
-    test_cmd_->jtrq = Eigen::VectorXd::Zero(10);
-
     state_estimator_ = new DracoStateEstimator(robot_);
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    waiting_count_ = 10;
+    sp_->stance_foot = DracoBodyNode::leftCOP_Frame;
 
-    cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    count_ = 0;
+    waiting_count_ = 2;
+    cmd_jpos_ = Eigen::VectorXd::Zero(Draco::n_adof);
+    cmd_jvel_ = Eigen::VectorXd::Zero(Draco::n_adof);
+    cmd_jtrq_ = Eigen::VectorXd::Zero(Draco::n_adof);
 
-    data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    rfoot_ati_ = Eigen::VectorXd::Zero(6);
-    lfoot_ati_ = Eigen::VectorXd::Zero(6);
-
-    stop_test_ = false;
-
-    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
-                                                "running_time");
-    DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT, "jpos_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT, "jvel_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT, "command",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT, "torque",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(
-        &data_temperature_, VECT, "temperature", robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_motor_current_, VECT,
-                                                "motor_current",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati",
-                                                6);
-    DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
-                                                6);
+    prev_planning_moment_ = 0.;
 
     _ParameterSetting();
 
     myUtils::color_print(myColor::BoldCyan, border);
+
+    DataManager* data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", Draco::n_adof);
+    data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", Draco::n_adof);
+    data_manager->RegisterData(&cmd_jtrq_, VECT, "command", Draco::n_adof);
 }
 
 DracoInterface::~DracoInterface() {
-    delete test_;
-    delete test_cmd_;
-    delete state_estimator_;
     delete robot_;
+    delete state_estimator_;
+    delete test_;
 }
 
 void DracoInterface::getCommand(void* _data, void* _command) {
     DracoCommand* cmd = ((DracoCommand*)_command);
     DracoSensorData* data = ((DracoSensorData*)_data);
 
-    if (!_Initialization(data, cmd)) {
-        state_estimator_->update(data);
-        test_->getCommand(test_cmd_);
-
-        stop_test_ = _UpdateTestCommand(test_cmd_);
-        if (stop_test_) {
-            _SetStopCommand(data, cmd);
-        } else {
-            _CopyCommand(cmd);
-        }
+    if (!Initialization_(data, cmd)) {
+        state_estimator_->Update(data);
+        test_->getCommand(cmd);
+        CropTorque_(cmd);
     }
 
-    // Save Data
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        data_torque_[i] = data->jtrq[i];
-        data_temperature_[i] = data->temperature[i];
-        data_motor_current_[i] = data->motor_current[i];
-    }
-    rfoot_ati_ = data->rfoot_ati;
-    lfoot_ati_ = data->lfoot_ati;
+    cmd_jtrq_ = cmd->jtrq;
+    cmd_jvel_ = cmd->qdot;
+    cmd_jpos_ = cmd->q;
 
-    running_time_ = (double)(count_)*DracoAux::ServoRate;
     ++count_;
+    running_time_ = (double)(count_)*DracoAux::servo_rate;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
 }
 
-bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd) {
-    bool over_limit(false);
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        // JPos limit check
-        if (test_cmd->q[i] > jpos_max_[i])
-            cmd_jpos_[i] = jpos_max_[i];
-        else if (test_cmd->q[i] < jpos_min_[i])
-            cmd_jpos_[i] = jpos_min_[i];
-        else
-            cmd_jpos_[i] = test_cmd->q[i];
-
-        // Velocity limit
-        if (test_cmd->qdot[i] > jvel_max_[i])
-            over_limit = true;
-        else if (test_cmd->qdot[i] < jvel_min_[i])
-            over_limit = true;
-        else
-            cmd_jvel_[i] = test_cmd->qdot[i];
-
-        // Torque limit
-        if (test_cmd->jtrq[i] > jtrq_max_[i]) {
-            // over_limit = true;
-            test_cmd->jtrq[i] = jtrq_max_[i];
-            cmd_jtrq_[i] = test_cmd->jtrq[i];
-        } else if (test_cmd->jtrq[i] < jtrq_min_[i]) {
-            // over_limit = true;
-            test_cmd->jtrq[i] = jtrq_min_[i];
-            cmd_jtrq_[i] = test_cmd->jtrq[i];
-        } else {
-            cmd_jtrq_[i] = test_cmd->jtrq[i];
-        }
-    }
-    return over_limit;
-}
-
-void DracoInterface::_SetStopCommand(DracoSensorData* data, DracoCommand* cmd) {
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        cmd->jtrq[i] = 0.;
-        cmd->q[i] = data->q[i];
-        cmd->qdot[i] = 0.;
-    }
-}
-
-void DracoInterface::_CopyCommand(DracoCommand* cmd) {
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        cmd->jtrq[i] = cmd_jtrq_[i];
-        cmd->q[i] = cmd_jpos_[i];
-        cmd->qdot[i] = cmd_jvel_[i];
-    }
-}
-
-bool DracoInterface::_Initialization(DracoSensorData* data, DracoCommand* cmd) {
-    static bool test_initialized(false);
-    if (!test_initialized) {
-        test_->TestInitialization();
-        test_initialized = true;
-    }
-    if (count_ < waiting_count_) {
-        _SetStopCommand(data, cmd);
-        state_estimator_->initialization(data);
-        DataManager::GetDataManager()->start();
-        return true;
-    }
-    return false;
+void DracoInterface::CropTorque_(DracoCommand* cmd) {
+    // cmd->jtrq = myUtils::CropVector(cmd->jtrq,
+    // robot_->GetTorqueLowerLimits(), robot_->GetTorqueUpperLimits(), "clip trq
+    // in interface");
 }
 
 void DracoInterface::_ParameterSetting() {
     try {
-        YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/Draco/INTERFACE.yaml");
+        YAML::Node cfg =
+            YAML::LoadFile(THIS_COM "Config/Draco/INTERFACE.yaml");
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
-        if (test_name == "joint_test") {
-            test_ = new JointTest(robot_);
-        } else if (test_name == "body_test") {
-            test_ = new BodyTest(robot_);
+        if (test_name == "balance_test") {
+            test_ = new BalanceTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
         } else {
             printf(
-                "[Draco Interface] There is no test matching test with the "
-                "name\n");
+                "[Draco Interface] There is no test matching test with "
+                "the name\n");
             exit(0);
         }
-        myUtils::readParameter(cfg, "jpos_max", jpos_max_);
-        myUtils::readParameter(cfg, "jpos_min", jpos_min_);
-        myUtils::readParameter(cfg, "jvel_max", jvel_max_);
-        myUtils::readParameter(cfg, "jvel_min", jvel_min_);
-        myUtils::readParameter(cfg, "jtrq_max", jtrq_max_);
-        myUtils::readParameter(cfg, "jtrq_min", jtrq_min_);
-
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -278,16 +100,56 @@ void DracoInterface::_ParameterSetting() {
     }
 }
 
-Eigen::Isometry3d DracoInterface::GetTargetIso() {
-    Eigen::Isometry3d target_iso = Eigen::Isometry3d::Identity();
-    Eigen::VectorXd target_pos = Eigen::VectorXd::Zero(3);
-    for (int i = 0; i < 2; ++i) {
-        target_pos[i] = sp_->des_location[i];
+bool DracoInterface::Initialization_(DracoSensorData* _sensor_data,
+                                        DracoCommand* _command) {
+    static bool test_initialized(false);
+    if (!test_initialized) {
+        test_->TestInitialization();
+        test_initialized = true;
     }
-    target_iso.translation() = target_pos;
-    target_iso.linear() = sp_->des_quat.toRotationMatrix();
-    return target_iso;
+    if (count_ < waiting_count_) {
+        state_estimator_->Initialization(_sensor_data);
+        DataManager::GetDataManager()->start();
+        return true;
+    }
+    return false;
 }
 
-Eigen::Vector3d DracoInterface::GetGuidedFoot() { return sp_->guided_foot; }
-Eigen::Vector3d DracoInterface::GetAdjustedFoot() { return sp_->adjusted_foot; }
+bool DracoInterface::IsTrajectoryUpdated() {
+    if (prev_planning_moment_ == sp_->planning_moment) {
+        prev_planning_moment_ = sp_->planning_moment;
+        return false;
+    } else {
+        prev_planning_moment_ = sp_->planning_moment;
+        return true;
+    }
+}
+
+void DracoInterface::GetCoMTrajectory(
+    std::vector<Eigen::VectorXd>& com_des_list) {
+    com_des_list = sp_->com_des_list;
+}
+void DracoInterface::GetContactSequence(
+    std::vector<Eigen::Isometry3d>& foot_target_list) {
+    foot_target_list = sp_->foot_target_list;
+}
+
+void DracoInterface::Walk(double ft_length, double r_ft_width,
+                             double l_ft_width, double ori_inc, int num_step) {
+    if (sp_->b_walking) {
+        std::cout
+            << "Still Walking... Please Wait Until Ongoing Walking is Done"
+            << std::endl;
+    } else {
+        sp_->b_walking = true;
+        sp_->ft_length = ft_length;
+        sp_->r_ft_width = r_ft_width;
+        sp_->l_ft_width = l_ft_width;
+        sp_->ft_ori_inc = ori_inc;
+        sp_->num_total_step = num_step;
+        sp_->num_residual_step = num_step;
+
+        ((WalkingTest*)test_)->ResetWalkingParameters();
+        ((WalkingTest*)test_)->InitiateWalkingPhase();
+    }
+}

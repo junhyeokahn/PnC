@@ -1,31 +1,45 @@
 #pragma once
 
 #include "PnC/EnvInterface.hpp"
+#include "PnC/Test.hpp"
+#include "PnC/DracoPnC/DracoDefinition.hpp"
 
-class DracoStateEstimator;
 class DracoStateProvider;
+class DracoStateEstimator;
 
 class DracoSensorData {
    public:
-    Eigen::VectorXd imu_ang_vel;
-    Eigen::VectorXd imu_acc;
+    DracoSensorData() {
+        q = Eigen::VectorXd::Zero(Draco::n_adof);
+        qdot = Eigen::VectorXd::Zero(Draco::n_adof);
+        virtual_q = Eigen::VectorXd::Zero(Draco::n_vdof);
+        virtual_qdot = Eigen::VectorXd::Zero(Draco::n_vdof);
+        lf_wrench = Eigen::VectorXd::Zero(6);
+        rf_wrench = Eigen::VectorXd::Zero(6);
+        rfoot_contact = false;
+        lfoot_contact = false;
+    }
+    virtual ~DracoSensorData() {}
+
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
-    Eigen::VectorXd jtrq;
-    Eigen::VectorXd temperature;
-    Eigen::VectorXd motor_current;
-    Eigen::VectorXd bus_voltage;
-    Eigen::VectorXd bus_current;
-    Eigen::VectorXd rotor_inertia;
-    Eigen::VectorXd rfoot_ati;
-    Eigen::VectorXd lfoot_ati;
+    Eigen::VectorXd virtual_q;
+    Eigen::VectorXd virtual_qdot;
+    Eigen::VectorXd lf_wrench;
+    Eigen::VectorXd rf_wrench;
     bool rfoot_contact;
     bool lfoot_contact;
 };
 
 class DracoCommand {
    public:
-    bool turn_off;
+    DracoCommand() {
+        q = Eigen::VectorXd::Zero(Draco::n_adof);
+        qdot = Eigen::VectorXd::Zero(Draco::n_adof);
+        jtrq = Eigen::VectorXd::Zero(Draco::n_adof);
+    }
+    virtual ~DracoCommand() {}
+
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
@@ -33,46 +47,30 @@ class DracoCommand {
 
 class DracoInterface : public EnvInterface {
    protected:
-    int waiting_count_;
-    int mpi_idx_;
-    int env_idx_;
-    bool b_learning_;
-
     void _ParameterSetting();
-    bool _Initialization(DracoSensorData*, DracoCommand*);
-    bool _UpdateTestCommand(DracoCommand* test_cmd);
-    void _SetStopCommand(DracoSensorData*, DracoCommand* cmd);
-    void _CopyCommand(DracoCommand* cmd);
 
-    DracoCommand* test_cmd_;
     DracoStateEstimator* state_estimator_;
     DracoStateProvider* sp_;
 
-    Eigen::VectorXd cmd_jtrq_;
+    void CropTorque_(DracoCommand*);
+    bool Initialization_(DracoSensorData*, DracoCommand*);
+
+    int count_;
+    int waiting_count_;
     Eigen::VectorXd cmd_jpos_;
     Eigen::VectorXd cmd_jvel_;
-    Eigen::VectorXd data_torque_;
-    Eigen::VectorXd data_temperature_;
-    Eigen::VectorXd data_motor_current_;
-    Eigen::VectorXd rfoot_ati_;
-    Eigen::VectorXd lfoot_ati_;
+    Eigen::VectorXd cmd_jtrq_;
 
-    // safety
-    Eigen::VectorXd jpos_max_;
-    Eigen::VectorXd jpos_min_;
-    Eigen::VectorXd jvel_max_;
-    Eigen::VectorXd jvel_min_;
-    Eigen::VectorXd jtrq_max_;
-    Eigen::VectorXd jtrq_min_;
-    bool stop_test_;
+    double prev_planning_moment_;
 
    public:
     DracoInterface();
-    DracoInterface(int mpi_idx, int env_idx);
     virtual ~DracoInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
+    void Walk(double ft_length, double r_ft_width, double l_ft_width,
+              double ori_inc, int num_step);
 
-    Eigen::Isometry3d GetTargetIso();
-    Eigen::Vector3d GetGuidedFoot();
-    Eigen::Vector3d GetAdjustedFoot();
+    void GetCoMTrajectory(std::vector<Eigen::VectorXd>& com_des_list);
+    void GetContactSequence(std::vector<Eigen::Isometry3d>& foot_target_list);
+    bool IsTrajectoryUpdated();
 };

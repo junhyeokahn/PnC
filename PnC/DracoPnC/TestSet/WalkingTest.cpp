@@ -1,241 +1,197 @@
+#include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
+#include <PnC/PlannerSet/ContactSequenceGenerator/FootstepSequenceGenerator.hpp>
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
+#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
-#include <PnC/DracoPnC/TestSet/TestSet.hpp>
-#include <PnC/PlannerSet/LIPMPlanner/TVRPlanner.hpp>
 #include <Utils/IO/DataManager.hpp>
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
-     cfg_ = YAML::LoadFile(THIS_COM"Config/Draco/TEST/WALKING_EXP_TEST.yaml");
-    //cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_SIM_TEST.yaml");
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_TEST.yaml");
 
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
-    sp_->stance_foot = "lFoot";
-    sp_->global_pos_local[1] = 0.15;
-    reversal_planner_ = new TVRPlanner();
-    phase_ = WkPhase::initiation;
+
+    centroid_planner_param_ = new CentroidPlannerParameter(
+        cfg_["planner_configuration"], robot_->getRobotMass());
+    centroid_planner_ = new CentroidPlanner(centroid_planner_param_);
+    foot_sequence_gen_ = new FootstepSequenceGenerator();
+
+    phase_ = WKPhase::double_contact_1;
 
     state_list_.clear();
 
-    jpos_ctrl_ = new JPosTargetCtrl(robot);
-    body_up_ctrl_ = new DoubleContactTransCtrl(robot);
-    body_fix_ctrl_ = new BodyCtrl(robot);
-    // Swing Controller Selection
-    right_swing_ctrl_ =
-        new BodyFootPlanningCtrl(robot_, "rFoot", reversal_planner_);
-    left_swing_ctrl_ =
-        new BodyFootPlanningCtrl(robot_, "lFoot", reversal_planner_);
+    ds_ctrl_ =
+        new DoubleSupportCtrl(robot, centroid_planner_, foot_sequence_gen_);
 
-    // Right
-    right_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", false);
-    right_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "rFoot", true);
-    // Left
-    left_swing_start_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", false);
-    left_swing_end_trans_ctrl_ =
-        new SingleContactTransCtrl(robot, "lFoot", true);
+    r_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
+                                       DracoBodyNode::rightFoot);
+    l_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
+                                       DracoBodyNode::leftFoot);
+
+    rs_start_trns_ctrl_ = new TransitionCtrl(
+        robot, centroid_planner_, DracoBodyNode::rightFoot, false);
+    rs_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                           DracoBodyNode::rightFoot, true);
+    ls_start_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                             DracoBodyNode::leftFoot, false);
+    ls_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
+                                           DracoBodyNode::leftFoot, true);
 
     _SettingParameter();
 
-    state_list_.push_back(jpos_ctrl_);
-    state_list_.push_back(body_up_ctrl_);
-    state_list_.push_back(body_fix_ctrl_);
-    state_list_.push_back(right_swing_start_trans_ctrl_);
-    state_list_.push_back(right_swing_ctrl_);
-    state_list_.push_back(right_swing_end_trans_ctrl_);
-    state_list_.push_back(body_fix_ctrl_);
-    state_list_.push_back(left_swing_start_trans_ctrl_);
-    state_list_.push_back(left_swing_ctrl_);
-    state_list_.push_back(left_swing_end_trans_ctrl_);
-
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_pos_des_), VECT3,
-        "rfoot_pos_des", 3);
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_pos_des_), VECT3,
-        "lfoot_pos_des", 3);
-
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_vel_des_), VECT3,
-        "rfoot_vel_des", 3);
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_vel_des_), VECT3,
-        "lfoot_vel_des", 3);
-
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)right_swing_ctrl_)->curr_foot_acc_des_), VECT3,
-        "rfoot_acc_des", 3);
-    DataManager::GetDataManager()->RegisterData(
-        &(((SwingPlanningCtrl*)left_swing_ctrl_)->curr_foot_acc_des_), VECT3,
-        "lfoot_acc_des", 3);
+    state_list_.push_back(ds_ctrl_);
+    state_list_.push_back(rs_start_trns_ctrl_);
+    state_list_.push_back(r_ss_ctrl_);
+    state_list_.push_back(rs_end_trns_ctrl_);
+    state_list_.push_back(ds_ctrl_);
+    state_list_.push_back(ls_start_trns_ctrl_);
+    state_list_.push_back(l_ss_ctrl_);
+    state_list_.push_back(ls_end_trns_ctrl_);
 }
 
 WalkingTest::~WalkingTest() {
-    delete jpos_ctrl_;
-    delete body_up_ctrl_;
-    delete right_swing_start_trans_ctrl_;
-    delete right_swing_ctrl_;
-    delete right_swing_end_trans_ctrl_;
-    delete body_fix_ctrl_;
-    delete left_swing_start_trans_ctrl_;
-    delete left_swing_ctrl_;
-    delete left_swing_end_trans_ctrl_;
+    delete centroid_planner_;
+    delete foot_sequence_gen_;
+    delete centroid_planner_param_;
 
-    delete reversal_planner_;
+    delete ds_ctrl_;
+    delete rs_start_trns_ctrl_;
+    delete rs_end_trns_ctrl_;
+    delete ls_start_trns_ctrl_;
+    delete ls_end_trns_ctrl_;
+    delete l_ss_ctrl_;
+    delete r_ss_ctrl_;
 }
 
 void WalkingTest::TestInitialization() {
-    reversal_planner_->PlannerInitialization(
-        cfg_["planner_configuration"]["velocity_reversal_pln"]);
+    ds_ctrl_->ctrlInitialization(cfg_["control_configuration"]["ds_ctrl"]);
 
-    jpos_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["joint_position_ctrl"]);
-    body_up_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["double_contact_trans_ctrl"]);
-    body_fix_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["body_ctrl"]);
+    rs_start_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["rs_start_trns_ctrl"]);
+    rs_end_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["rs_end_trns_ctrl"]);
+    ls_start_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["ls_start_trns_ctrl"]);
+    ls_end_trns_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["ls_end_trns_ctrl"]);
 
-    right_swing_start_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
-    right_swing_end_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
-    left_swing_start_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
-    left_swing_end_trans_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["single_contact_trans_ctrl"]);
-
-    right_swing_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["right_body_foot_planning_ctrl"]);
-    left_swing_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["left_body_foot_planning_ctrl"]);
+    r_ss_ctrl_->ctrlInitialization(cfg_["control_configuration"]["r_ss_ctrl"]);
+    l_ss_ctrl_->ctrlInitialization(cfg_["control_configuration"]["l_ss_ctrl"]);
 }
 
 int WalkingTest::_NextPhase(const int& phase) {
     int next_phase = phase + 1;
     myUtils::color_print(myColor::BoldGreen,
-                         "[Phase " + std::to_string(next_phase) + "]");
-    Eigen::Vector3d next_local_frame_location;
+                         "[[Phase " + std::to_string(next_phase) + "]]");
 
-    if (phase == WkPhase::double_contact_1) {
+    if (phase == WKPhase::double_contact_1) {
         ++num_step_;
-        printf("%i th step : ", num_step_);
+        sp_->num_residual_step -= 1;
+        sp_->stance_foot = DracoBodyNode::leftCOP_Frame;
         printf("Right Leg Swing\n");
-        sp_->stance_foot = "lFoot";
-
-        // Global Frame Update
-        next_local_frame_location =
-            robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter)
-                .translation();
-        sp_->global_pos_local += next_local_frame_location;
     }
-    if (phase == WkPhase::double_contact_2) {
+    if (phase == WKPhase::double_contact_2) {
         ++num_step_;
-        printf("%i th step : ", num_step_);
+        sp_->num_residual_step -= 1;
+        sp_->stance_foot = DracoBodyNode::rightCOP_Frame;
         printf("Left Leg Swing\n");
-
-        sp_->stance_foot = "rFoot";
-
-        // Global Frame Update
-        next_local_frame_location =
-            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter)
-                .translation();
-        sp_->global_pos_local += next_local_frame_location;
     }
     sp_->num_step_copy = num_step_;
 
-    // !! TEST !!
-    if (((phase == WkPhase::double_contact_1) || (phase == WkPhase::double_contact_2)) && (num_step_ > 1)) {
-        sp_->global_pos_local[0] = sp_->first_LED_x + (next_local_frame_location[0] - sp_->q[0]);
-        sp_->global_pos_local[1] = sp_->first_LED_y + (next_local_frame_location[1] - sp_->q[1]);
-    }
-     // !! TEST
-
-    if (next_phase == WkPhase::NUM_WALKING_PHASE) {
-        return WkPhase::double_contact_1;
+    if (next_phase == WKPhase::NUM_WALKING_PHASE) {
+        return WKPhase::double_contact_1;
     } else {
         return next_phase;
     }
+}
+
+void WalkingTest::InitiateWalkingPhase() { b_first_visit_ = true; }
+
+void WalkingTest::ResetWalkingParameters() {
+    foot_sequence_gen_->SetFootStepLength(sp_->ft_length);
+
+    foot_sequence_gen_->SetRightFootStepWidth(sp_->r_ft_width);
+    foot_sequence_gen_->SetLeftFootStepWidth(sp_->l_ft_width);
+
+    Eigen::Quaternion<double> quat_temp = Eigen::Quaternion<double>(
+        cos(sp_->ft_ori_inc / 2.0), 0, 0, sin(sp_->ft_ori_inc / 2.0));
+    Eigen::VectorXd tmp_vec = Eigen::VectorXd::Zero(4);
+    tmp_vec << quat_temp.w(), quat_temp.x(), quat_temp.y(), quat_temp.z();
+    foot_sequence_gen_->SetFootStepOrientation(tmp_vec);
 }
 
 void WalkingTest::_SettingParameter() {
     try {
         double tmp;
         bool b_tmp;
-        Eigen::VectorXd tmp_vec(10);
+        Eigen::VectorXd tmp_vec;
         std::string tmp_str;
 
         YAML::Node test_cfg = cfg_["test_configuration"];
+        myUtils::readParameter(test_cfg, "dsp_duration", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetDSPDuration(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetDSPDuration(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetDSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetDSPDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "start_phase", phase_);
+        myUtils::readParameter(test_cfg, "ssp_duration", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetSSPDuration(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetSSPDuration(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetSSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetSSPDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "initial_jpos", tmp_vec);
-        ((JPosTargetCtrl*)jpos_ctrl_)->setTargetPosition(tmp_vec);
+        myUtils::readParameter(test_cfg, "ini_dsp_duration", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetIniDSPDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetIniDSPDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "body_height", tmp);
-        ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceHeight(tmp);
-        ((BodyCtrl*)body_fix_ctrl_)->setStanceHeight(tmp);
-        ((SingleContactTransCtrl*)right_swing_start_trans_ctrl_)
-            ->setStanceHeight(tmp);
-        ((SingleContactTransCtrl*)right_swing_end_trans_ctrl_)
-            ->setStanceHeight(tmp);
-        ((SingleContactTransCtrl*)left_swing_start_trans_ctrl_)
-            ->setStanceHeight(tmp);
-        ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)
-            ->setStanceHeight(tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setStanceHeight(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setStanceHeight(tmp);
+        myUtils::readParameter(test_cfg, "fin_dsp_duration", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetFinDSPDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "com_height_for_omega", tmp);
-        ((TVRPlanner*)reversal_planner_)->setOmega(tmp);
+        myUtils::readParameter(test_cfg, "footstep_length", tmp);
+        foot_sequence_gen_->SetFootStepLength(tmp);
 
-        myUtils::readParameter(test_cfg, "jpos_initialization_time", tmp);
-        ((JPosTargetCtrl*)jpos_ctrl_)->setMovingTime(tmp);
+        myUtils::readParameter(test_cfg, "footstep_width", tmp);
+        foot_sequence_gen_->SetRightFootStepWidth(tmp);
+        foot_sequence_gen_->SetLeftFootStepWidth(tmp);
 
-        myUtils::readParameter(test_cfg, "com_lifting_time", tmp);
-        ((DoubleContactTransCtrl*)body_up_ctrl_)->setStanceTime(tmp);
+        myUtils::readParameter(test_cfg, "footstep_orientation", tmp);
+        Eigen::Quaternion<double> quat_temp =
+            Eigen::Quaternion<double>(cos(tmp / 2.0), 0, 0, sin(tmp / 2.0));
+        tmp_vec = Eigen::VectorXd::Zero(4);
+        tmp_vec << quat_temp.w(), quat_temp.x(), quat_temp.y(), quat_temp.z();
+        foot_sequence_gen_->SetFootStepOrientation(tmp_vec);
 
-        myUtils::readParameter(test_cfg, "stance_time", tmp);
-        ((BodyCtrl*)body_fix_ctrl_)->setStanceTime(tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyStanceTime(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->notifyStanceTime(tmp);
+        myUtils::readParameter(test_cfg, "com_height", tmp);
+        ((DoubleSupportCtrl*)ds_ctrl_)->SetCoMHeight(tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetCoMHeight(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetCoMHeight(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetCoMHeight(tmp);
 
-        myUtils::readParameter(test_cfg, "swing_time", tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setSwingTime(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setSwingTime(tmp);
+        myUtils::readParameter(test_cfg, "trns_duration", tmp);
+        ((TransitionCtrl*)rs_start_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)ls_start_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)rs_end_trns_ctrl_)->SetTRNSDuration(tmp);
+        ((TransitionCtrl*)ls_end_trns_ctrl_)->SetTRNSDuration(tmp);
 
-        myUtils::readParameter(test_cfg, "st_transition_time", tmp);
-        ((SingleContactTransCtrl*)right_swing_start_trans_ctrl_)
-            ->setTransitionTime(tmp);
-        ((SingleContactTransCtrl*)right_swing_end_trans_ctrl_)
-            ->setTransitionTime(tmp);
-        ((SingleContactTransCtrl*)left_swing_start_trans_ctrl_)
-            ->setTransitionTime(tmp);
-        ((SingleContactTransCtrl*)left_swing_end_trans_ctrl_)
-            ->setTransitionTime(tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->notifyTransitionTime(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->notifyTransitionTime(tmp);
-
-        myUtils::readParameter(test_cfg, "replanning", b_tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setReplanning(b_tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setReplanning(b_tmp);
-
-        myUtils::readParameter(test_cfg, "double_stance_mix_ratio", tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setDoubleStanceRatio(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setDoubleStanceRatio(tmp);
-
-        myUtils::readParameter(test_cfg, "transition_phase_mix_ratio", tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setTransitionPhaseRatio(tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setTransitionPhaseRatio(tmp);
-
-        myUtils::readParameter(test_cfg, "contact_switch_check", b_tmp);
-        ((SwingPlanningCtrl*)right_swing_ctrl_)->setContactSwitchCheck(b_tmp);
-        ((SwingPlanningCtrl*)left_swing_ctrl_)->setContactSwitchCheck(b_tmp);
+        myUtils::readParameter(test_cfg, "swing_height", tmp);
+        ((SingleSupportCtrl*)r_ss_ctrl_)->SetSwingHeight(tmp);
+        ((SingleSupportCtrl*)l_ss_ctrl_)->SetSwingHeight(tmp);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
