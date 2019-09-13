@@ -30,8 +30,8 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     double t_;
     double servo_rate_;
     int n_dof_;
-    double kp_;
-    double kd_;
+    Eigen::VectorXd kp_;
+    Eigen::VectorXd kd_;
     Eigen::VectorXd trq_lb_;
     Eigen::VectorXd trq_ub_;
 

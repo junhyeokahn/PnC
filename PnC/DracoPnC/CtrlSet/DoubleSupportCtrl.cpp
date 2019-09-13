@@ -4,9 +4,9 @@
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
-#include <PnC/DracoPnC/ValkyrieDefinition.hpp>
-#include <PnC/DracoPnC/ValkyrieInterface.hpp>
-#include <PnC/DracoPnC/ValkyrieStateProvider.hpp>
+#include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/IO/DataManager.hpp>
@@ -30,10 +30,8 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
-    pelvis_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3,
-                                     ValkyrieBodyNode::pelvis);
     torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3,
-                                    ValkyrieBodyNode::torso);
+                                    DracoBodyNode::Torso);
 
     std::vector<bool> act_list;
     act_list.resize(Draco::n_dof, true);
@@ -43,9 +41,9 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     wblc_ = new WBLC(act_list);
     wblc_data_ = new WBLC_ExtraData();
     rfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.7);
+        robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
     lfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.7);
+        robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Draco::n_dof, 100.0);
@@ -59,13 +57,12 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 2500.);
 
-    sp_ = ValkyrieStateProvider::getStateProvider(robot);
+    sp_ = DracoStateProvider::getStateProvider(robot);
 }
 
 DoubleSupportCtrl::~DoubleSupportCtrl() {
     delete com_task_;
     delete total_joint_task_;
-    delete pelvis_ori_task_;
     delete torso_ori_task_;
 
     delete kin_wbc_;
@@ -154,13 +151,13 @@ void DoubleSupportCtrl::PlannerInitialization_() {
     eef_frc[static_cast<int>(CentroidModel::EEfID::leftFoot)] << 0., 0., 0.5;
 
     iso[static_cast<int>(CentroidModel::EEfID::rightFoot)] =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
     iso[static_cast<int>(CentroidModel::EEfID::leftFoot)] =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter);
     iso[static_cast<int>(CentroidModel::EEfID::rightHand)] =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightPalm);
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootFront);
     iso[static_cast<int>(CentroidModel::EEfID::leftHand)] =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftPalm);
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootFront);
 
     for (int i = 0; i < CentroidModel::numEEf; ++i) {
         Eigen::VectorXd tmp_vec = Eigen::VectorXd::Zero(4);
@@ -421,12 +418,12 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // =========================================================================
-    // Pelvis & Torso Ori Task
+    // Torso Ori Task
     // =========================================================================
     Eigen::Isometry3d rf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
     Eigen::Isometry3d lf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter);
     Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
     Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
     Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
@@ -436,7 +433,6 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
-    pelvis_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
     torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
@@ -453,7 +449,6 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
@@ -494,12 +489,12 @@ void DoubleSupportCtrl::_walking_task_setup() {
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // =========================================================================
-    // Pelvis & Torso Ori Task
+    // Torso Ori Task
     // =========================================================================
     Eigen::Isometry3d rf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
     Eigen::Isometry3d lf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter);
     Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
     Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
     Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
@@ -509,7 +504,6 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
-    pelvis_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
     torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
@@ -526,7 +520,6 @@ void DoubleSupportCtrl::_walking_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
@@ -552,9 +545,9 @@ void DoubleSupportCtrl::firstVisit() {
     ini_com_pos_ = robot_->getCoMPosition();
     ini_com_vel_ = robot_->getCoMVelocity();
     Eigen::Isometry3d rf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
     Eigen::Isometry3d lf_iso =
-        robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame);
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter);
     for (int i = 0; i < 3; ++i) {
         goal_com_pos_[i] =
             (rf_iso.translation()[i] + lf_iso.translation()[i]) / 2.0;

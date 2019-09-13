@@ -51,7 +51,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
                         osgGA::GUIActionAdapter& /*aa*/) {
         if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
             if (ea.getKey() == 'f') {
-                int numStepProgress(50);
+                int numStepProgress(1);
                 for (int i = 0; i < numStepProgress; ++i) {
                     worldnode_->customPreStep();
                     worldnode_->getWorld()->step();
@@ -107,8 +107,8 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     // std::cout << robot->getPositions() << std::endl;
     // std::cout << "robot total mass" << std::endl;
     // std::cout << robot->getMass() << std::endl;
-    std::cout << "robot position" << std::endl;
-    std::cout << robot->getPositions() << std::endl;
+    //std::cout << "robot position" << std::endl;
+    //std::cout << robot->getPositions() << std::endl;
 
     exit(0);
 }
@@ -121,7 +121,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    int initPos(2);  // 0 : Home, 1 : Simulation, 2 : Experiment
+    int initPos(1);  // 0 : Home, 1 : Simulation, 2 : Experiment
     Eigen::VectorXd q = robot->getPositions();
 
     switch (initPos) {
@@ -174,8 +174,6 @@ int main(int argc, char** argv) {
     bool b_display_joint_frame;
     bool b_display_target_frame;
     bool b_joint_limit_enforced;
-    bool b_show;
-    int num_steps_per_cycle;
     double servo_rate;
     try {
         YAML::Node simulation_cfg =
@@ -187,10 +185,7 @@ int main(int argc, char** argv) {
                                b_display_target_frame);
         myUtils::readParameter(simulation_cfg, "joint_limit_enforced",
                                b_joint_limit_enforced);
-        myUtils::readParameter(simulation_cfg, "num_steps_per_cycle",
-                               num_steps_per_cycle);
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
-        myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -206,14 +201,8 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
-    dart::dynamics::SkeletonPtr star =
-        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/star.urdf");
-    dart::dynamics::SkeletonPtr torus =
-        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/torus.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
-    world->addSkeleton(star);
-    world->addSkeleton(torus);
 
     // =========================================================================
     // Friction & Restitution Coefficient
@@ -276,71 +265,39 @@ int main(int argc, char** argv) {
     // =========================================================================
     //_printRobotModel(robot);
 
-    osg::ref_ptr<osgShadow::MinimalShadowMap> msm =
-        new osgShadow::LightSpacePerspectiveShadowMapDB;
-
-    float minLightMargin = 10.f;
-    float maxFarPlane = 0;
-    unsigned int texSize = 1024;
-    unsigned int baseTexUnit = 0;
-    unsigned int shadowTexUnit = 1;
-
-    msm->setMinLightMargin(minLightMargin);
-    msm->setMaxFarPlane(maxFarPlane);
-    msm->setTextureSize(::osg::Vec2s(texSize, texSize));
-    msm->setShadowTextureCoordIndex(shadowTexUnit);
-    msm->setShadowTextureUnit(shadowTexUnit);
-    msm->setBaseTextureCoordIndex(baseTexUnit);
-    msm->setBaseTextureUnit(baseTexUnit);
-
     // =========================================================================
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<DracoWorldNode> node;
-    if (argc > 1) {
-        node = new DracoWorldNode(world, msm, std::stoi(argv[1]),
-                                  std::stoi(argv[2]));
-    } else {
-        node = new DracoWorldNode(world, msm);
-        b_show = true;
-    }
-    node->setNumStepsPerCycle(num_steps_per_cycle);
+    node = new DracoWorldNode(world);
+    node->setNumStepsPerCycle(30);
 
     // =========================================================================
     // Create and Set Viewer
     // =========================================================================
-    if (b_show) {
-        dart::gui::osg::Viewer viewer;
-        viewer.addWorldNode(node);
-        viewer.simulate(false);
-        viewer.switchHeadlights(false);
-        msm->setLight(viewer.getLightSource(0)->getLight());
-        ::osg::Vec3 p1(1.0, 0.2, 1.0);
-        p1 = p1 * 0.7;
-        viewer.getLightSource(0)->getLight()->setPosition(
-            ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
-        viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-        viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
-                                         GL_DEPTH_BUFFER_BIT);
-        viewer.addEventHandler(new OneStepProgress(node));
+    dart::gui::osg::Viewer viewer;
+    viewer.addWorldNode(node);
+    viewer.simulate(false);
+    viewer.switchHeadlights(false);
+    ::osg::Vec3 p1(1.0, 0.2, 1.0);
+    p1 = p1 * 0.7;
+    viewer.getLightSource(0)->getLight()->setPosition(
+        ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
+    viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
+    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    viewer.addEventHandler(new OneStepProgress(node));
 
-        if (isRecord) {
-            std::cout << "[Video Record Enable]" << std::endl;
-            viewer.record(THIS_COM "/ExperimentVideo");
-        }
-
-        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 500, 500);
-        viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
-            ::osg::Vec3(0.0, 0.0, 1.0));
-        viewer.setCameraManipulator(viewer.getCameraManipulator());
-        viewer.run();
-    } else {
-        while (true) {
-            node->customPreStep();
-            node->getWorld()->step();
-            node->customPostStep();
-        }
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM "/ExperimentVideo");
     }
+
+    // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(1440, 0, 500, 500);
+    viewer.getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    viewer.setCameraManipulator(viewer.getCameraManipulator());
+    viewer.run();
+
 }

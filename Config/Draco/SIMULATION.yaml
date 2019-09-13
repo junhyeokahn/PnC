@@ -1,25 +1,12 @@
 is_record: false
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
-num_steps_per_cycle: 30
+show_joint_frame: false
 hanging_height: 0.83
 display_joint_frame: false
 display_target_frame: true
 joint_limit_enforced: true
 initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
-
-plot_adjusted_foot: false
-plot_guided_foot: false
-camera_manipulator: false
-print_computation_time: false
-#release_time: 4.20
-release_time: 1000
-
-### Toggle for RL ###
-show_viewer: true
-#show_viewer: false
-check_collision: true
-#check_collision: false
-
+plot_mpc_result: true
 
 control_configuration:
   kp: [100 , 100 , 100 , 100 , 10 , 100 , 100 , 100 , 100 , 10]

@@ -30,7 +30,7 @@ class WalkingTest : public Test {
 
    protected:
     int num_step_;
-    ValkyrieStateProvider* sp_;
+    DracoStateProvider* sp_;
     virtual int _NextPhase(const int& phase);
     void _SettingParameter();
 

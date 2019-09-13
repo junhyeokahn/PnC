@@ -16,88 +16,89 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world)
     b_plot_mpc_result_ = false;
 
     trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
+    kp_ = Eigen::VectorXd::Zero(n_dof_-6);
+    kd_ = Eigen::VectorXd::Zero(n_dof_-6);
 
-    interface_ = new DracoInterface();
-    sensor_data_ = new DracoSensorData();
-    command_ = new DracoCommand();
+    Interface_ = new DracoInterface();
+    SensorData_ = new DracoSensorData(); Command_ = new DracoCommand();
 
     SetParams_();
 }
 
 DracoWorldNode::~DracoWorldNode() {
-    delete interface_;
-    delete sensor_data_;
-    delete command_;
+    delete Interface_;
+    delete SensorData_;
+    delete Command_;
 }
 
 void DracoWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
 
-    sensor_data_->q = robot_->getPositions().tail(n_dof_ - 6);
-    sensor_data_->virtual_q = robot_->getPositions().head(6);
-    sensor_data_->qdot = robot_->getVelocities().tail(n_dof_ - 6);
-    sensor_data_->virtual_qdot = robot_->getVelocities().head(6);
+    SensorData_->q = robot_->getPositions().tail(n_dof_ - 6);
+    SensorData_->virtual_q = robot_->getPositions().head(6);
+    SensorData_->qdot = robot_->getVelocities().tail(n_dof_ - 6);
+    SensorData_->virtual_qdot = robot_->getVelocities().head(6);
 
-    GetContactSwitchData_(sensor_data_->rfoot_contact,
-                          sensor_data_->lfoot_contact);
+    GetContactSwitchData_(SensorData_->rfoot_contact,
+                          SensorData_->lfoot_contact);
     GetForceTorqueData_();
 
     // Walking Interface Example
     static bool b_first_cmd(true);
     if (t_ > 1. && b_first_cmd) {
         std::cout << "[[first command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0., 5);
+        ((DracoInterface*)Interface_)->Walk(0.15, 0.27, 0.27, 0., 5);
         b_first_cmd = false;
     }
     static bool b_second_cmd(true);
     if (t_ > 11. && b_second_cmd) {
         std::cout << "[[second command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0.15, 5);
+        ((DracoInterface*)Interface_)->Walk(0.15, 0.27, 0.27, 0.15, 5);
         b_second_cmd = false;
     }
     static bool b_third_cmd(true);
     if (t_ > 21. && b_third_cmd) {
         std::cout << "[[third command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0.15, 0.27, 0.27, -0.15, 5);
+        ((DracoInterface*)Interface_)->Walk(0.15, 0.27, 0.27, -0.15, 5);
         b_third_cmd = false;
     }
     static bool b_fourth_cmd(true);
     if (t_ > 31. && b_fourth_cmd) {
         std::cout << "[[fourth command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0., 0.27, 0.27, 0.15, 5);
+        ((DracoInterface*)Interface_)->Walk(0., 0.27, 0.27, 0.15, 5);
         b_fourth_cmd = false;
     }
     static bool b_fifth_cmd(true);
     if (t_ > 41. && b_fifth_cmd) {
         std::cout << "[[fifth command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(-0.1, 0.27, 0.27, 0., 5);
+        ((DracoInterface*)Interface_)->Walk(-0.1, 0.27, 0.27, 0., 5);
         b_fifth_cmd = false;
     }
     static bool b_sixth_cmd(true);
     if (t_ > 55. && b_sixth_cmd) {
         std::cout << "[[sixth command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0., 0.27, 0.2, 0., 7);
+        ((DracoInterface*)Interface_)->Walk(0., 0.27, 0.2, 0., 7);
         b_sixth_cmd = false;
     }
     static bool b_seventh_cmd(true);
     if (t_ > 70. && b_seventh_cmd) {
         std::cout << "[[seventh command]]" << std::endl;
-        ((DracoInterface*)interface_)->Walk(0., 0.2, 0.27, 0., 7);
+        ((DracoInterface*)Interface_)->Walk(0., 0.2, 0.27, 0., 7);
         b_seventh_cmd = false;
     }
 
-    interface_->getCommand(sensor_data_, command_);
+    Interface_->getCommand(SensorData_, Command_);
 
     if (b_plot_mpc_result_) {
-        if (((DracoInterface*)interface_)->IsTrajectoryUpdated()) {
+        if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {
             PlotMPCResult_();
         }
     }
 
-    trq_cmd_.tail(n_dof_ - 6) = command_->jtrq;
+    trq_cmd_.tail(n_dof_ - 6) = Command_->jtrq;
     for (int i = 0; i < n_dof_ - 6; ++i) {
-        trq_cmd_[i + 6] += kp_ * (command_->q[i] - sensor_data_->q[i]) +
-                           kd_ * (command_->qdot[i] - sensor_data_->qdot[i]);
+        trq_cmd_[i + 6] += kp_[i] * (Command_->q[i] - SensorData_->q[i]) +
+                           kd_[i] * (Command_->qdot[i] - SensorData_->qdot[i]);
     }
     trq_cmd_.head(6).setZero();
 
@@ -111,8 +112,8 @@ void DracoWorldNode::PlotMPCResult_() {
     std::vector<Eigen::VectorXd> com_des_list;
     std::vector<Eigen::Isometry3d> contact_sequence;
 
-    ((DracoInterface*)interface_)->GetCoMTrajectory(com_des_list);
-    ((DracoInterface*)interface_)->GetContactSequence(contact_sequence);
+    ((DracoInterface*)Interface_)->GetCoMTrajectory(com_des_list);
+    ((DracoInterface*)Interface_)->GetContactSequence(contact_sequence);
     int n_traj = com_des_list.size();
     int n_contact = contact_sequence.size();
 
@@ -171,11 +172,11 @@ void DracoWorldNode::PlotMPCResult_() {
 
 void DracoWorldNode::GetContactSwitchData_(bool& rfoot_contact,
                                               bool& lfoot_contact) {
-    Eigen::VectorXd rf = robot_->getBodyNode("rightCOP_Frame")
+    Eigen::VectorXd rf = robot_->getBodyNode("rFootCenter")
                              ->getWorldTransform()
                              .translation();
     Eigen::VectorXd lf =
-        robot_->getBodyNode("leftCOP_Frame")->getWorldTransform().translation();
+        robot_->getBodyNode("lFootCenter")->getWorldTransform().translation();
 
     // myUtils::pretty_print(rf, std::cout, "right_sole");
     // myUtils::pretty_print(lf, std::cout, "left_sole");
@@ -234,7 +235,7 @@ void DracoWorldNode::GetForceTorqueData_() {
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
-                    robot_->getBodyNode("leftCOP_Frame")
+                    robot_->getBodyNode("lFootCenter")
                         ->getTransform(dart::dynamics::Frame::World());
                 Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
@@ -255,7 +256,7 @@ void DracoWorldNode::GetForceTorqueData_() {
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
-                    robot_->getBodyNode("rightCOP_Frame")
+                    robot_->getBodyNode("rFootCenter")
                         ->getTransform(dart::dynamics::Frame::World());
                 Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
@@ -267,6 +268,6 @@ void DracoWorldNode::GetForceTorqueData_() {
         }
     }
 
-    sensor_data_->lf_wrench = lf_wrench;
-    sensor_data_->rf_wrench = rf_wrench;
+    SensorData_->lf_wrench = lf_wrench;
+    SensorData_->rf_wrench = rf_wrench;
 }

@@ -49,13 +49,11 @@ class SingleSupportCtrl : public Controller {
     int moving_cop_;
     int stance_cop_;
 
-    Eigen::Quaternion<double> ini_quat_pelvis_;
     Eigen::Quaternion<double> ini_quat_torso_;
     Eigen::Quaternion<double> ini_quat_foot_;
     Eigen::Quaternion<double> des_quat_;
 
     Task* com_task_;
-    Task* pelvis_ori_task_;
     Task* torso_ori_task_;
     Task* foot_pos_task_;
     Task* foot_ori_task_;

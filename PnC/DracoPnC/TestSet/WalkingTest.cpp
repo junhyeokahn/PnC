@@ -10,7 +10,7 @@
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_TEST.yaml");
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_SIM_TEST.yaml");
 
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);
@@ -28,18 +28,18 @@ WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
         new DoubleSupportCtrl(robot, centroid_planner_, foot_sequence_gen_);
 
     r_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
-                                       DracoBodyNode::rightFoot);
+                                       DracoBodyNode::rAnkle);
     l_ss_ctrl_ = new SingleSupportCtrl(robot, centroid_planner_,
-                                       DracoBodyNode::leftFoot);
+                                       DracoBodyNode::lAnkle);
 
     rs_start_trns_ctrl_ = new TransitionCtrl(
-        robot, centroid_planner_, DracoBodyNode::rightFoot, false);
+        robot, centroid_planner_, DracoBodyNode::rAnkle, false);
     rs_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
-                                           DracoBodyNode::rightFoot, true);
+                                           DracoBodyNode::rAnkle, true);
     ls_start_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
-                                             DracoBodyNode::leftFoot, false);
+                                             DracoBodyNode::lAnkle, false);
     ls_end_trns_ctrl_ = new TransitionCtrl(robot, centroid_planner_,
-                                           DracoBodyNode::leftFoot, true);
+                                           DracoBodyNode::lAnkle, true);
 
     _SettingParameter();
 
@@ -91,13 +91,13 @@ int WalkingTest::_NextPhase(const int& phase) {
     if (phase == WKPhase::double_contact_1) {
         ++num_step_;
         sp_->num_residual_step -= 1;
-        sp_->stance_foot = DracoBodyNode::leftCOP_Frame;
+        sp_->stance_foot = DracoBodyNode::lFootCenter;
         printf("Right Leg Swing\n");
     }
     if (phase == WKPhase::double_contact_2) {
         ++num_step_;
         sp_->num_residual_step -= 1;
-        sp_->stance_foot = DracoBodyNode::rightCOP_Frame;
+        sp_->stance_foot = DracoBodyNode::rFootCenter;
         printf("Left Leg Swing\n");
     }
     sp_->num_step_copy = num_step_;

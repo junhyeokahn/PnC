@@ -5,7 +5,7 @@
 #include <PnC/Controller.hpp>
 #include <PnC/PlannerSet/CentroidPlanner/CentroidPlanner.hpp>
 
-class ValkyrieStateProvider;
+class DracoStateProvider;
 class RobotSystem;
 class WBLC;
 class WBLC_ExtraData;
@@ -51,7 +51,6 @@ class DoubleSupportCtrl : public Controller {
     bool b_do_plan_;
 
     Task* com_task_;
-    Task* pelvis_ori_task_;
     Task* torso_ori_task_;
     Task* total_joint_task_;
 
@@ -70,7 +69,7 @@ class DoubleSupportCtrl : public Controller {
     void _compute_torque_wblc(Eigen::VectorXd& gamma);
 
     double ctrl_start_time_;
-    ValkyrieStateProvider* sp_;
+    DracoStateProvider* sp_;
 
     FootstepSequenceGenerator* foot_sequence_gen_;
     Planner* planner_;

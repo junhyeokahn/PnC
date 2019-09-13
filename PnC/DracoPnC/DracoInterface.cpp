@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
+//#include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
 #include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
@@ -24,7 +24,7 @@ DracoInterface::DracoInterface() : EnvInterface() {
     state_estimator_ = new DracoStateEstimator(robot_);
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    sp_->stance_foot = DracoBodyNode::leftCOP_Frame;
+    sp_->stance_foot = DracoBodyNode::lFootCenter;
 
     count_ = 0;
     waiting_count_ = 2;
@@ -51,6 +51,16 @@ DracoInterface::~DracoInterface() {
 }
 
 void DracoInterface::getCommand(void* _data, void* _command) {
+
+//TEST
+    std::cout << "rfoot center" << std::endl;
+    std::cout << robot_->getBodyNodeIsometry("rFootCenter").translation() << std::endl;
+    std::cout << "lfoot center" << std::endl;
+    std::cout << robot_->getBodyNodeIsometry("lFootCenter").translation() << std::endl;
+    std::cout << "com pos" << std::endl;
+    std::cout << robot_->getCoMPosition() << std::endl;
+//TEST
+
     DracoCommand* cmd = ((DracoCommand*)_command);
     DracoSensorData* data = ((DracoSensorData*)_data);
 
@@ -65,7 +75,7 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     cmd_jpos_ = cmd->q;
 
     ++count_;
-    running_time_ = (double)(count_)*DracoAux::servo_rate;
+    running_time_ = (double)(count_)*DracoAux::ServoRate;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
 }
@@ -82,9 +92,10 @@ void DracoInterface::_ParameterSetting() {
             YAML::LoadFile(THIS_COM "Config/Draco/INTERFACE.yaml");
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
-        if (test_name == "balance_test") {
-            test_ = new BalanceTest(robot_);
-        } else if (test_name == "walking_test") {
+        //if (test_name == "balance_test") {
+            //test_ = new BalanceTest(robot_);
+        //} 
+        if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
         } else {
             printf(
