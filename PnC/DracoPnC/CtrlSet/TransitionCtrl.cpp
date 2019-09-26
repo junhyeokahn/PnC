@@ -239,6 +239,7 @@ void TransitionCtrl::_contact_setup() {
 }
 
 void TransitionCtrl::firstVisit() {
+    std::cout << "transition" << std::endl;
     jpos_ini_ = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
     ini_com_pos_ = Eigen::VectorXd::Zero(3);
     ini_com_pos_ << robot_->getCoMPosition()[0], robot_->getCoMPosition()[1],

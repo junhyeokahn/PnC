@@ -51,7 +51,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
                         osgGA::GUIActionAdapter& /*aa*/) {
         if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
             if (ea.getKey() == 'f') {
-                int numStepProgress(1);
+                int numStepProgress(30);
                 for (int i = 0; i < numStepProgress; ++i) {
                     worldnode_->customPreStep();
                     worldnode_->getWorld()->step();
@@ -134,7 +134,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            q[2] = 1.193;
+            q[2] = 0.9;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
             q[lHipPitchIdx] = alpha;

@@ -52,15 +52,6 @@ DracoInterface::~DracoInterface() {
 
 void DracoInterface::getCommand(void* _data, void* _command) {
 
-//TEST
-    std::cout << "rfoot center" << std::endl;
-    std::cout << robot_->getBodyNodeIsometry("rFootCenter").translation() << std::endl;
-    std::cout << "lfoot center" << std::endl;
-    std::cout << robot_->getBodyNodeIsometry("lFootCenter").translation() << std::endl;
-    std::cout << "com pos" << std::endl;
-    std::cout << robot_->getCoMPosition() << std::endl;
-//TEST
-
     DracoCommand* cmd = ((DracoCommand*)_command);
     DracoSensorData* data = ((DracoSensorData*)_data);
 
@@ -69,15 +60,24 @@ void DracoInterface::getCommand(void* _data, void* _command) {
         test_->getCommand(cmd);
         CropTorque_(cmd);
     }
+    
 
     cmd_jtrq_ = cmd->jtrq;
     cmd_jvel_ = cmd->qdot;
     cmd_jpos_ = cmd->q;
 
+    //std::cout << cmd_jtrq_ << std::endl;
+    //std::cout << "========" << std::endl;
+    //std::cout << cmd_jvel_ << std::endl;
+    //std::cout << "========" << std::endl;
+    //std::cout << cmd_jpos_ << std::endl;
+    //std::cout << "========" << std::endl;
+
     ++count_;
     running_time_ = (double)(count_)*DracoAux::ServoRate;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase();
+
 }
 
 void DracoInterface::CropTorque_(DracoCommand* cmd) {

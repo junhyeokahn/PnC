@@ -85,12 +85,12 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     // myUtils::pretty_print(delta_q, std::cout, "delta q");
     // myUtils::pretty_print(qdot, std::cout, "qdot");
     // myUtils::pretty_print(qddot, std::cout, "qddot");
-    // Eigen::MatrixXd test = Jt * N_pre;
-    // myUtils::pretty_print(test, std::cout, "Jt1N1");
-    // Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
-    // JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    // std::cout << "svd" << std::endl;
-    // std::cout << svd1.singularValues() << std::endl;
+     //Eigen::MatrixXd test = Jt * N_pre;
+     //myUtils::pretty_print(test, std::cout, "Jt1N1");
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
+     //JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << "svd1" << std::endl;
+     //std::cout << svd1.singularValues() << std::endl;
 
     for (int i(1); i < task_list.size(); ++i) {
         task = task_list[i];
@@ -121,11 +121,11 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
         // myUtils::pretty_print(delta_q, std::cout, "delta q");
         // myUtils::pretty_print(qdot, std::cout, "qdot");
         // xdot_c = Jc * delta_q;
-        // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
-        // Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
-        // JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        // std::cout << "svd" << std::endl;
-        // std::cout << svd2.singularValues() << std::endl;
+         //myUtils::pretty_print(xdot_c, std::cout, "contact vel");
+         //Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
+         //JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
+         //std::cout << "svd2" << std::endl;
+         //std::cout << svd2.singularValues() << std::endl;
 
         // For the next task
         _BuildProjectionMatrix(JtPre, N_nx);

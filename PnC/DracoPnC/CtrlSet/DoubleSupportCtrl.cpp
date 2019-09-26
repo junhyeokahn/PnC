@@ -30,8 +30,7 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
-    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3,
-                                    DracoBodyNode::Torso);
+    torso_RxRy_task_ = new BodyRxRyTask(robot);
 
     std::vector<bool> act_list;
     act_list.resize(Draco::n_dof, true);
@@ -63,7 +62,7 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
 DoubleSupportCtrl::~DoubleSupportCtrl() {
     delete com_task_;
     delete total_joint_task_;
-    delete torso_ori_task_;
+    delete torso_RxRy_task_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -86,9 +85,11 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Draco::n_adof);
     _contact_setup();
     if (sp_->b_walking) {
+        //std::cout << "walking" << std::endl;
         _walking_task_setup();
     } else {
         _balancing_task_setup();
+        //std::cout << "balancing" << std::endl;
     }
     _compute_torque_wblc(gamma);
 
@@ -102,6 +103,7 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void DoubleSupportCtrl::PlannerUpdate_() {
+    std::cout << "planning" << std::endl;
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
@@ -418,7 +420,7 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // =========================================================================
-    // Torso Ori Task
+    // Torso RxRy Task
     // =========================================================================
     Eigen::Isometry3d rf_iso =
         robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
@@ -433,7 +435,7 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
-    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_RxRy_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -449,7 +451,7 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(torso_ori_task_);
+    //task_list_.push_back(torso_RxRy_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -504,7 +506,7 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
-    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_RxRy_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -520,7 +522,7 @@ void DoubleSupportCtrl::_walking_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(torso_ori_task_);
+    task_list_.push_back(torso_RxRy_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================

@@ -51,7 +51,7 @@ class DoubleSupportCtrl : public Controller {
     bool b_do_plan_;
 
     Task* com_task_;
-    Task* torso_ori_task_;
+    Task* torso_RxRy_task_;
     Task* total_joint_task_;
 
     ContactSpec* rfoot_contact_;
