@@ -9,6 +9,7 @@ class DracoSensorData {
    public:
     Eigen::VectorXd imu_ang_vel;
     Eigen::VectorXd imu_acc;
+    Eigen::VectorXd imu_mag;
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
@@ -34,9 +35,6 @@ class DracoCommand {
 class DracoInterface : public EnvInterface {
    protected:
     int waiting_count_;
-    int mpi_idx_;
-    int env_idx_;
-    bool b_learning_;
 
     void _ParameterSetting();
     bool _Initialization(DracoSensorData*, DracoCommand*);
@@ -71,8 +69,4 @@ class DracoInterface : public EnvInterface {
     DracoInterface(int mpi_idx, int env_idx);
     virtual ~DracoInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
-
-    Eigen::Isometry3d GetTargetIso();
-    Eigen::Vector3d GetGuidedFoot();
-    Eigen::Vector3d GetAdjustedFoot();
 };

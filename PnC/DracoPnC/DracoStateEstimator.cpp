@@ -4,6 +4,7 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/StateEstimator/BasicAccumulation.hpp>
 #include <PnC/DracoPnC/StateEstimator/BodyEstimator.hpp>
+#include <PnC/DracoPnC/StateEstimator/IMUFrameEstimator.hpp>
 #include <PnC/Filters/Basic/filters.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -18,13 +19,16 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     global_body_euler_zyx_.setZero();
     global_body_quat_ = Eigen::Quaternion<double>::Identity();
     global_body_euler_zyx_dot_.setZero();
-    ori_est_ = new BasicAccumulation();
+    virtual_q_ = Eigen::VectorXd::Zero(6);
+    virtual_qdot_ = Eigen::VectorXd::Zero(6);
 
+    ori_est_ = new BasicAccumulation();
     mocap_x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
     mocap_y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
     y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     body_est_ = new BodyEstimator(robot);
+    imu_frame_est_ = new IMUFrameEstimator(robot);
 }
 
 DracoStateEstimator::~DracoStateEstimator() {
@@ -34,6 +38,7 @@ DracoStateEstimator::~DracoStateEstimator() {
     delete mocap_y_vel_est_;
     delete x_vel_est_;
     delete y_vel_est_;
+    delete imu_frame_est_;
 }
 
 void DracoStateEstimator::initialization(DracoSensorData* data) {
@@ -46,6 +51,9 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
     ori_est_->estimatorInitialization(torso_acc, torso_ang_vel);
     ori_est_->getEstimatedState(global_body_euler_zyx_,
                                 global_body_euler_zyx_dot_);
+    imu_frame_est_->estimatorInitialization(data->imu_acc, data->imu_ang_vel,
+                                            data->imu_mag);
+    imu_frame_est_->getVirtualJointPosAndVel(virtual_q_, virtual_qdot_);
     global_body_quat_ = Eigen::Quaternion<double>(
         dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
     body_est_->Initialization(global_body_quat_);
@@ -64,10 +72,10 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
     sp_->saveCurrentData();
 }
 
-void DracoStateEstimator::MapToTorso_(const Eigen::VectorXd & imu_acc,
-                      const Eigen::VectorXd & imu_angvel,
-                      std::vector<double> & torso_acc,
-                      std::vector<double> & torso_angvel){
+void DracoStateEstimator::MapToTorso_(const Eigen::VectorXd& imu_acc,
+                                      const Eigen::VectorXd& imu_angvel,
+                                      std::vector<double>& torso_acc,
+                                      std::vector<double>& torso_angvel) {
     Eigen::MatrixXd R_world_imu = Eigen::MatrixXd::Zero(3, 3);
     Eigen::MatrixXd R_world_torso = Eigen::MatrixXd::Zero(3, 3);
     Eigen::MatrixXd R_torso_imu = Eigen::MatrixXd::Zero(3, 3);
@@ -86,7 +94,6 @@ void DracoStateEstimator::MapToTorso_(const Eigen::VectorXd & imu_acc,
         torso_acc[i] = t_acc_local[i];
         torso_angvel[i] = t_angvel_local[i];
     }
-
 }
 
 void DracoStateEstimator::update(DracoSensorData* data) {
@@ -97,10 +104,12 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     MapToTorso_(data->imu_acc, data->imu_ang_vel, torso_acc, torso_ang_vel);
 
     ori_est_->setSensorData(torso_acc, torso_ang_vel);
-
-
     ori_est_->getEstimatedState(global_body_euler_zyx_,
                                 global_body_euler_zyx_dot_);
+    imu_frame_est_->estimatorInitialization(data->imu_acc, data->imu_ang_vel,
+                                            data->imu_mag);
+    imu_frame_est_->getVirtualJointPosAndVel(virtual_q_, virtual_qdot_);
+
     global_body_quat_ = Eigen::Quaternion<double>(
         dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
