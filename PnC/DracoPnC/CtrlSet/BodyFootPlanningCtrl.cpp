@@ -317,8 +317,8 @@ void BodyFootPlanningCtrl::_Replanning(Eigen::Vector3d& target_loc) {
         // com_pos[i] += body_pt_offset_[i];
 
         // !! TEST !!
-        com_vel[i] = sp_->qdot[i];
-        // com_vel[i] = sp_->est_mocap_body_vel[i];
+        // com_vel[i] = sp_->qdot[i];
+        com_vel[i] = sp_->est_mocap_body_vel[i];
     }
 
     printf("planning com state: %f, %f, %f, %f\n", com_pos[0], com_pos[1],
@@ -446,8 +446,6 @@ bool BodyFootPlanningCtrl::endOfPhase() {
                    state_machine_time_, end_time_);
             return true;
         }
-    }
-    if (b_contact_switch_check_) {
         contact_check_with_ankle = false;
     }
 
