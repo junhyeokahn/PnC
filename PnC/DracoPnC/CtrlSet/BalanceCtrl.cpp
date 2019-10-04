@@ -43,18 +43,33 @@ BalanceCtrl::BalanceCtrl(RobotSystem* robot) : Controller(robot) {
     kin_wbc_ = new KinWBC(act_list);
     wblc_ = new WBLC(act_list);
     wblc_data_ = new WBLC_ExtraData();
-    rfoot_contact_ = new SurfaceContactSpec(
-        robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
-    lfoot_contact_ = new SurfaceContactSpec(
-        robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    //Surface Contact
+    //rfoot_contact_ = new SurfaceContactSpec(
+        //robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
+    //lfoot_contact_ = new SurfaceContactSpec(
+        //robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
+
+    //Line Contact
+    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);    
+    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);    
+    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);    
+    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);    
+
+    //dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    dim_contact_ = rfoot_front_contact_->getDim() + lfoot_front_contact_->getDim() +
+                    rfoot_back_contact_->getDim() + lfoot_back_contact_->getDim();
 
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Draco::n_dof, 100.0);
     wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 0.1);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] =
+    wblc_data_->W_rf_[rfoot_front_contact_->getFzIndex()] = 0.01;
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getFzIndex()] =
         0.01;
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
+                lfoot_front_contact_->getFzIndex()] = 0.01;
+
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
+                lfoot_front_contact_->getDim() + lfoot_back_contact_->getFzIndex()] = 0.01;
 
     // torque limit default setting
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
@@ -70,8 +85,12 @@ BalanceCtrl::~BalanceCtrl() {
     //delete torso_ori_task_;
     delete wblc_;
     delete wblc_data_;
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
+    //delete rfoot_contact_;
+    //delete lfoot_contact_;
 }
 
 void BalanceCtrl::oneStep(void* _cmd) {
@@ -162,11 +181,21 @@ void BalanceCtrl::_task_setup() {
 }
 
 void BalanceCtrl::_contact_setup() {
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
+    //rfoot_contact_->updateContactSpec();
+    //lfoot_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    //contact_list_.push_back(rfoot_contact_);
+    //contact_list_.push_back(lfoot_contact_);
+
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
+
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 }
 
 void BalanceCtrl::firstVisit() {
