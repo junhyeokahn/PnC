@@ -31,12 +31,27 @@ bool BodyRxRyTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     ori_err_so3 = dart::math::quatToExp(quat_ori_err);
 
     // (Rx, Ry)
-     
         // pos_err[i] = myUtils::bind_half_pi(ori_err_so3[i]);
-        pos_err[0] = (ori_err_so3[1]);
-        vel_des[0] = _vel_des[1];
-        acc_des[0] = _acc_des[1];
-    
+    //for (int i = 0; i < 2; ++i) {
+        //pos_err[i] = (ori_err_so3[i]);
+        //vel_des[i] = _vel_des[i];
+        //acc_des[i] = _acc_des[i];
+    //}
+
+        // (Ry,Rz)
+        //pos_err[0] = (ori_err_so3[1]);
+        //vel_des[0] = _vel_des[1];
+        //acc_des[0] = _acc_des[1];
+
+        //pos_err[1] = (ori_err_so3[2]);
+        //vel_des[1] = _vel_des[2];
+        //acc_des[1] = _acc_des[2];
+
+    // (Rx,Rz)
+        pos_err[0] = (ori_err_so3[0]);
+        vel_des[0] = _vel_des[0];
+        acc_des[0] = _acc_des[0];
+
         pos_err[1] = (ori_err_so3[2]);
         vel_des[1] = _vel_des[2];
         acc_des[1] = _acc_des[2];
@@ -56,8 +71,18 @@ bool BodyRxRyTask::_UpdateTaskJacobian() {
     // Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(DracoBodyNode::Torso);
     Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(DracoBodyNode::Torso);
     // (Rx, Ry)
+    //Jt_.block(0, 0, 2, robot_->getNumDofs()) =
+        //Jtmp.block(0, 0, 2, robot_->getNumDofs());
+
+    // (Ry, Rz)
+    //Jt_.block(0, 0, 1, robot_->getNumDofs()) =
+        //Jtmp.block(1, 0, 1, robot_->getNumDofs());
+    //Jt_.block(1, 0, 1, robot_->getNumDofs()) =
+        //Jtmp.block(2, 0, 1, robot_->getNumDofs());
+
+    // (Rx, Rz)
     Jt_.block(0, 0, 1, robot_->getNumDofs()) =
-        Jtmp.block(1, 0, 1, robot_->getNumDofs());
+        Jtmp.block(0, 0, 1, robot_->getNumDofs());
     Jt_.block(1, 0, 1, robot_->getNumDofs()) =
         Jtmp.block(2, 0, 1, robot_->getNumDofs());
     // Jt_.block(2, 0, 1, robot_->getNumDofs()) = Jtmp.block(5, 0, 1,

@@ -1,2 +1,4 @@
 add_subdirectory(Dart)
-add_subdirectory(Bullet)
+if(BULLET_FOUND)
+    add_subdirectory(Bullet)
+endif()

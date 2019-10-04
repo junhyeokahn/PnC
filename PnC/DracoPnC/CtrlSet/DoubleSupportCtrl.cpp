@@ -31,6 +31,7 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
     torso_RxRy_task_ = new BodyRxRyTask(robot);
+    torso_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
 
     std::vector<bool> act_list;
     act_list.resize(Draco::n_dof, true);
@@ -43,6 +44,8 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
         robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
     lfoot_contact_ = new SurfaceContactSpec(
         robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
+
+
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Draco::n_dof, 100.0);
@@ -57,12 +60,25 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
     wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 2500.);
 
     sp_ = DracoStateProvider::getStateProvider(robot);
+
+
+    // TEST
+    //rfoot_front_contact_ = new PointContactSpec(
+        //robot_, DracoBodyNode::rFootFront, 0.7);
+    //rfoot_back_contact_ = new PointContactSpec(
+        //robot_, DracoBodyNode::rFootBack, 0.7);
+    //lfoot_front_contact_ = new PointContactSpec(
+        //robot_, DracoBodyNode::lFootFront, 0.7);
+    //lfoot_back_contact_ = new PointContactSpec(
+        //robot_, DracoBodyNode::lFootBack, 0.7);
+    // TEST
 }
 
 DoubleSupportCtrl::~DoubleSupportCtrl() {
     delete com_task_;
     delete total_joint_task_;
     delete torso_RxRy_task_;
+    delete torso_ori_task_;
 
     delete kin_wbc_;
     delete wblc_;
@@ -436,6 +452,7 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
     torso_RxRy_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -452,6 +469,7 @@ void DoubleSupportCtrl::_balancing_task_setup() {
     // =========================================================================
     task_list_.push_back(com_task_);
     //task_list_.push_back(torso_RxRy_task_);
+    task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -507,6 +525,7 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
 
     torso_RxRy_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+    torso_ori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
 
     // =========================================================================
     // Joint Pos Task
@@ -522,7 +541,8 @@ void DoubleSupportCtrl::_walking_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(torso_RxRy_task_);
+    //task_list_.push_back(torso_RxRy_task_);
+    task_list_.push_back(torso_ori_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -538,6 +558,17 @@ void DoubleSupportCtrl::_contact_setup() {
 
     contact_list_.push_back(rfoot_contact_);
     contact_list_.push_back(lfoot_contact_);
+
+    //TEST
+    //rfoot_front_contact_->updateContactSpec();
+    //rfoot_back_contact_->updateContactSpec();
+    //lfoot_front_contact_->updateContactSpec();
+    //lfoot_back_contact_->updateContactSpec();
+    //contact_list_.push_back(rfoot_front_contact_);
+    //contact_list_.push_back(rfoot_back_contact_);
+    //contact_list_.push_back(lfoot_front_contact_);
+    //contact_list_.push_back(lfoot_back_contact_);
+    //TEST
 }
 
 void DoubleSupportCtrl::firstVisit() {

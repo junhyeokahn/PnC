@@ -52,10 +52,19 @@ class DoubleSupportCtrl : public Controller {
 
     Task* com_task_;
     Task* torso_RxRy_task_;
+    Task* torso_ori_task_;
     Task* total_joint_task_;
 
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
+
+
+    // TEST
+    //ContactSpec* rfoot_front_contact_;
+    //ContactSpec* rfoot_back_contact_;
+    //ContactSpec* lfoot_front_contact_;
+    //ContactSpec* lfoot_back_contact_;
+    // TEST
 
     KinWBC* kin_wbc_;
     WBLC* wblc_;

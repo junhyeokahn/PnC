@@ -35,6 +35,7 @@ include_directories(${DART_INCLUDE_DIRS})
 
 # Bullet
 find_package(Bullet)
+set(BULLET_FOUND false)
 if(BULLET_FOUND)
     include_directories(${BULLET_INCLUDE_DIRS})
 endif()

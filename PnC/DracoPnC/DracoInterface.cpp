@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-//#include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
+#include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
 #include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
@@ -92,10 +92,10 @@ void DracoInterface::_ParameterSetting() {
             YAML::LoadFile(THIS_COM "Config/Draco/INTERFACE.yaml");
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
-        //if (test_name == "balance_test") {
-            //test_ = new BalanceTest(robot_);
-        //} 
-        if (test_name == "walking_test") {
+        if (test_name == "balancing_test") {
+            test_ = new BalanceTest(robot_);
+        } 
+        else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
         } else {
             printf(
