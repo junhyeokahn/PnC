@@ -48,45 +48,45 @@ void DracoWorldNode::customPreStep() {
     static bool b_first_cmd(true);
     if (t_ > 1. && b_first_cmd) {
         std::cout << "[[first command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0.1, 0.33, 0.33, 0., 5);
+        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0., 5);
         b_first_cmd = false;
     }
-    //static bool b_second_cmd(true);
-    //if (t_ > 11. && b_second_cmd) {
-        //std::cout << "[[second command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0.15, 0.27, 0.27, 0.15, 5);
-        //b_second_cmd = false;
-    //}
-    //static bool b_third_cmd(true);
-    //if (t_ > 21. && b_third_cmd) {
-        //std::cout << "[[third command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0.15, 0.27, 0.27, -0.15, 5);
-        //b_third_cmd = false;
-    //}
-    //static bool b_fourth_cmd(true);
-    //if (t_ > 31. && b_fourth_cmd) {
-        //std::cout << "[[fourth command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0., 0.27, 0.27, 0.15, 5);
-        //b_fourth_cmd = false;
-    //}
-    //static bool b_fifth_cmd(true);
-    //if (t_ > 41. && b_fifth_cmd) {
-        //std::cout << "[[fifth command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(-0.1, 0.27, 0.27, 0., 5);
-        //b_fifth_cmd = false;
-    //}
-    //static bool b_sixth_cmd(true);
-    //if (t_ > 55. && b_sixth_cmd) {
-        //std::cout << "[[sixth command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0., 0.27, 0.2, 0., 7);
-        //b_sixth_cmd = false;
-    //}
-    //static bool b_seventh_cmd(true);
-    //if (t_ > 70. && b_seventh_cmd) {
-        //std::cout << "[[seventh command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0., 0.2, 0.27, 0., 7);
-        //b_seventh_cmd = false;
-    //}
+    static bool b_second_cmd(true);
+    if (t_ > 11. && b_second_cmd) {
+        std::cout << "[[second command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0.1, 5);
+        b_second_cmd = false;
+    }
+    static bool b_third_cmd(true);
+    if (t_ > 21. && b_third_cmd) {
+        std::cout << "[[third command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, -0.1, 5);
+        b_third_cmd = false;
+    }
+    static bool b_fourth_cmd(true);
+    if (t_ > 31. && b_fourth_cmd) {
+        std::cout << "[[fourth command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0., 0.33, 0.33, 0.1, 5);
+        b_fourth_cmd = false;
+    }
+    static bool b_fifth_cmd(true);
+    if (t_ > 41. && b_fifth_cmd) {
+        std::cout << "[[fifth command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(-0.1, 0.33, 0.33, 0., 5);
+        b_fifth_cmd = false;
+    }
+    static bool b_sixth_cmd(true);
+    if (t_ > 55. && b_sixth_cmd) {
+        std::cout << "[[sixth command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0., 0.33, 0.3, 0., 7);
+        b_sixth_cmd = false;
+    }
+    static bool b_seventh_cmd(true);
+    if (t_ > 70. && b_seventh_cmd) {
+        std::cout << "[[seventh command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0., 0.3, 0.33, 0., 7);
+        b_seventh_cmd = false;
+    }
 
     Interface_->getCommand(SensorData_, Command_);
 
