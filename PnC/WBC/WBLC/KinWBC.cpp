@@ -59,9 +59,9 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
 
      //myUtils::saveVector(delta_q, "delta_q0");
      //myUtils::saveVector(task->pos_err, "delta_x0");
-     myUtils::color_print(myColor::Red, "======== 0 ========");
-     myUtils::pretty_print(task->pos_err, std::cout, "com error");
-     myUtils::pretty_print(delta_q, std::cout, "delta_q");
+     //myUtils::color_print(myColor::Red, "======== 0 ========");
+     //myUtils::pretty_print(task->pos_err, std::cout, "com error");
+     //myUtils::pretty_print(delta_q, std::cout, "delta_q");
     qdot = JtPre_pinv * (task->vel_des);
     // qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
     qddot = JtPre_pinv * (task->op_cmd - JtDotQdot);
@@ -87,20 +87,20 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     // myUtils::pretty_print(qdot, std::cout, "qdot");
     // myUtils::pretty_print(qddot, std::cout, "qddot");
      //Eigen::MatrixXd test = Jt * N_pre;
-     Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
-     JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
-     std::cout << "J_CoM * N_c" << std::endl;
-     std::cout << svd1.singularValues() << std::endl;
-     std::cout << "U matix" << std::endl;
-     std::cout << svd1.matrixU() << std::endl;
-     std::cout << "V matix" << std::endl;
-     std::cout << svd1.matrixV() << std::endl;
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
+     //JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << "J_CoM * N_c" << std::endl;
+     //std::cout << svd1.singularValues() << std::endl;
+     //std::cout << "U matix" << std::endl;
+     //std::cout << svd1.matrixU() << std::endl;
+     //std::cout << "V matix" << std::endl;
+     //std::cout << svd1.matrixV() << std::endl;
 
-     Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
-     Jt, Eigen::ComputeThinU | Eigen::ComputeThinV);
-     std::cout << "J_CoM" << std::endl;
-     std::cout << svd2.singularValues() << std::endl;
-     std::cout << svd2.matrixU() << std::endl;
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
+     //Jt, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << "J_CoM" << std::endl;
+     //std::cout << svd2.singularValues() << std::endl;
+     //std::cout << svd2.matrixU() << std::endl;
 
     for (int i(1); i < task_list.size(); ++i) {
         task = task_list[i];

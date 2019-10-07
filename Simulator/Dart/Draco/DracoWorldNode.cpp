@@ -45,12 +45,12 @@ void DracoWorldNode::customPreStep() {
     GetForceTorqueData_();
 
     // Walking Interface Example
-    //static bool b_first_cmd(true);
-    //if (t_ > 1. && b_first_cmd) {
-        //std::cout << "[[first command]]" << std::endl;
-        //((DracoInterface*)Interface_)->Walk(0., 0.30, 0.30, 0., 5);
-        //b_first_cmd = false;
-    //}
+    static bool b_first_cmd(true);
+    if (t_ > 1. && b_first_cmd) {
+        std::cout << "[[first command]]" << std::endl;
+        ((DracoInterface*)Interface_)->Walk(0.1, 0.33, 0.33, 0., 5);
+        b_first_cmd = false;
+    }
     //static bool b_second_cmd(true);
     //if (t_ > 11. && b_second_cmd) {
         //std::cout << "[[second command]]" << std::endl;
