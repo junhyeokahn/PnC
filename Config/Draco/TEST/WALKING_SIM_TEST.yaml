@@ -106,7 +106,7 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        max_rf_z: 500
+        max_rf_z: 300
         min_rf_z: 3
 
     rs_end_trns_ctrl:
@@ -115,7 +115,7 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        max_rf_z: 500
+        max_rf_z: 300
         min_rf_z: 3
 
     ls_start_trns_ctrl:
@@ -124,7 +124,7 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        max_rf_z: 500
+        max_rf_z: 300
         min_rf_z: 3
 
     ls_end_trns_ctrl:
@@ -133,7 +133,7 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        max_rf_z: 500
+        max_rf_z: 300
         min_rf_z: 3
 
     r_ss_ctrl:
@@ -142,8 +142,8 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        foot_pos_kp: [50., 50., 50.]
-        foot_pos_kd: [5., 5., 5.]
+        foot_pos_kp: [200., 400., 100.]
+        foot_pos_kd: [20., 40., 10.]
 
     l_ss_ctrl:
         kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
@@ -151,5 +151,5 @@ control_configuration:
         com_kp: [1000.,1000.,100.]
         com_kd: [100., 100., 10.]
 
-        foot_pos_kp: [50., 50., 50.]
-        foot_pos_kd: [5., 5., 5.]
+        foot_pos_kp: [200., 400., 100.]
+        foot_pos_kd: [20., 40., 10.]

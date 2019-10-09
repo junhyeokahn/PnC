@@ -316,6 +316,11 @@ void SingleSupportCtrl::_task_setup() {
     task_list_.push_back(foot_ori_task_);
     task_list_.push_back(total_joint_task_);
 
+    //task_list_.push_back(com_task_);
+    //task_list_.push_back(foot_pos_task_);
+    //task_list_.push_back(torso_ori_task_);
+    //task_list_.push_back(foot_ori_task_);
+    //task_list_.push_back(total_joint_task_);
     // =========================================================================
     // Solve Inv Kinematics
     // =========================================================================

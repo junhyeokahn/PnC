@@ -48,7 +48,7 @@ void DracoWorldNode::customPreStep() {
     static bool b_first_cmd(true);
     if (t_ > 1. && b_first_cmd) {
         std::cout << "[[first command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0., 5);
+        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0., 15);
         b_first_cmd = false;
     }
     static bool b_second_cmd(true);
@@ -72,7 +72,7 @@ void DracoWorldNode::customPreStep() {
     static bool b_fifth_cmd(true);
     if (t_ > 41. && b_fifth_cmd) {
         std::cout << "[[fifth command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(-0.1, 0.33, 0.33, 0., 5);
+        ((DracoInterface*)Interface_)->Walk(-0.05, 0.33, 0.33, 0., 5);
         b_fifth_cmd = false;
     }
     static bool b_sixth_cmd(true);
