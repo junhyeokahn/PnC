@@ -50,4 +50,10 @@ class DracoStateEstimator {
                      const Eigen::VectorXd& imu_angvel,
                      std::vector<double>& torso_acc,
                      std::vector<double>& torso_angvel);
+    void MapToTorso2_(const Eigen::VectorXd& imu_acc,
+                      const Eigen::VectorXd& imu_ang_vel,
+                      const Eigen::VectorXd& imu_mag,
+                      Eigen::VectorXd& torso_acc,
+                      Eigen::VectorXd& torso_ang_vel,
+                      Eigen::VectorXd& torso_mag);
 };

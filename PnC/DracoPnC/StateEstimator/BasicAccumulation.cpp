@@ -41,9 +41,9 @@ void BasicAccumulation::setSensorData(const std::vector<double>& acc,
     Eigen::Quaternion<double> delta_quat_body =
         dart::math::expToQuat(body_omega * DracoAux::ServoRate);
 
-    Eigen::MatrixXd R_global_to_imu =
+    Eigen::MatrixXd R_global_to_torso =
         global_ori_quat_.normalized().toRotationMatrix();
-    global_ang_vel_ = R_global_to_imu * body_omega;
+    global_ang_vel_ = R_global_to_torso * body_omega;
 
     // Perform orientation update via integration
     global_ori_quat_ = global_ori_quat_ * delta_quat_body;

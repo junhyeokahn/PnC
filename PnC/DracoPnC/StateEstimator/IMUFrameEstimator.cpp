@@ -33,7 +33,7 @@ IMUFrameEstimator::IMUFrameEstimator(RobotSystem* robot) : filtered_acc_(3) {
 
     // TODO: find good cutoff frequency
     // TODO: do we need filters for angvel & mag?
-    cutoff_freq_ = 2.0 * M_PI * 1.0;  // 1Hz // (2*pi*frequency) rads/s
+    cutoff_freq_ = 2.0 * M_PI * 30.0;  // 1Hz // (2*pi*frequency) rads/s
     for (int i(0); i < 3; ++i) {
         filtered_acc_[i] =
             new digital_lp_filter(cutoff_freq_, DracoAux::ServoRate);
@@ -255,7 +255,7 @@ void IMUFrameEstimator::getVirtualJointPosAndVel(Eigen::VectorXd& vq,
     vqdot = Eigen::VectorXd::Zero(6);
 
     Eigen::VectorXd euler_zyx =
-        dart::math::matrixToEulerZYX(imuTroot_.linear());
+        dart::math::matrixToEulerZYX(worldQimu_.toRotationMatrix());
     // euler zyx
     for (int i = 0; i < 3; ++i) {
         vq[i + 3] = euler_zyx[i];
@@ -267,4 +267,8 @@ void IMUFrameEstimator::getVirtualJointPosAndVel(Eigen::VectorXd& vq,
         vqdot[i] = world_root_pris_vel_[i];
         vqdot[i + 3] = euler_zyx_dot[i];
     }
+
+    std::cout << "est2" << std::endl;
+    myUtils::pretty_print(vq, std::cout, "virtual q");
+    myUtils::pretty_print(vqdot, std::cout, "virtual qdot");
 }

@@ -87,6 +87,13 @@ void DracoWorldNode::customPreStep() {
     mSensorData->qdot = mSkel->getVelocities().tail(10);
     mSensorData->jtrq = mSkel->getForces().tail(10);
 
+    std::cout << "==============================================" << std::endl;
+    std::cout << "Sim" << std::endl;
+    myUtils::pretty_print((Eigen::VectorXd)(mSkel->getPositions().head(6)),
+                          std::cout, "vrtual_q");
+    myUtils::pretty_print((Eigen::VectorXd)(mSkel->getVelocities().head(6)),
+                          std::cout, "vrtual_qdot");
+
     UpdateLedData_();
     _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc,
                   mSensorData->imu_mag);
@@ -152,7 +159,7 @@ void DracoWorldNode::UpdateLedData_() {
 void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
                                    Eigen::VectorXd& acc,
                                    Eigen::VectorXd& imu_mag) {
-    imu_mag[0] = 1.;
+    // angvel
     Eigen::VectorXd ang_vel_local =
         mSkel->getBodyNode("IMU")
             ->getSpatialVelocity(dart::dynamics::Frame::World(),
@@ -162,9 +169,17 @@ void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
     ang_vel = ang_vel_local;
     Eigen::MatrixXd R_world_imu(3, 3);
     R_world_imu = mSkel->getBodyNode("IMU")->getWorldTransform().linear();
+    // acc
+    Eigen::Vector3d linear_imu_acc =
+        mSkel->getBodyNode("IMU")->getCOMLinearAcceleration();
     Eigen::Vector3d global_grav(0, 0, 9.81);
-    Eigen::Vector3d local_grav = R_world_imu.transpose() * global_grav;
-    acc = local_grav;
+    // acc = R_world_imu.transpose() * (global_grav + linear_imu_acc);
+    acc = R_world_imu.transpose() * (global_grav);
+
+    // mag
+    Eigen::VectorXd global_mag = Eigen::VectorXd::Zero(3);
+    global_mag[0] = 1.;
+    imu_mag = R_world_imu.transpose() * global_mag;
 }
 
 void DracoWorldNode::_check_foot_contact(bool& rfoot_contact,
