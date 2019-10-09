@@ -33,12 +33,6 @@ link_directories("/usr/local/lib")
 find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
-# Bullet
-find_package(Bullet)
-if(BULLET_FOUND)
-    include_directories(${BULLET_INCLUDE_DIRS})
-endif()
-
 # Zmq
 find_package(ZMQ)
 if(ZMQ_FOUND)
