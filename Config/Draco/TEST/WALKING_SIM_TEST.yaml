@@ -1,17 +1,23 @@
 test_configuration:
     # Temporal parameters
-    ini_dsp_duration: 0.8
-    dsp_duration: 0.6
-    fin_dsp_duration: 0.6
-    ssp_duration: 0.3
-    trns_duration: 0.03
+    #ini_dsp_duration: 0.8
+    #dsp_duration: 0.6
+    #fin_dsp_duration: 0.6
+    #ssp_duration: 0.3
+    #trns_duration: 0.03
+
+    ini_dsp_duration: 0.3
+    dsp_duration: 0.3
+    fin_dsp_duration: 0.3
+    ssp_duration: 0.25
+    trns_duration: 0.01
 
     # Walking parameters
-    com_height: 0.9
+    com_height: 0.70
     footstep_width: 0.27
     footstep_length: 0.15
-    footstep_orientation: 0.15
-    swing_height: 0.11
+    footstep_orientation: 0.
+    swing_height: 0.05
 
 planner_configuration:
     # ==========================================================================
@@ -42,16 +48,16 @@ planner_configuration:
 
         friction_coeff: 0.7
         friction_cone: LinearCone  # Types: LinearCone, SocCone #
-        torque_range: [-100.0, 100.0]
-        eef_offset_rf: [ 0.0189,  0.00,  0.00]
-        eef_offset_lf: [ 0.0189,  0.00,  0.00]
+        torque_range: [-200.0, 200.0]
+        eef_offset_rf: [ 0.015,  0.00,  0.00]
+        eef_offset_lf: [ 0.015,  0.00,  0.00]
         eef_offset_rh: [ 0.20,  0.00,  0.48]
         eef_offset_lh: [-0.20,  0.00,  0.48]
-        cop_range_rf: [-0.06, 0.06, -0.02, 0.02]
-        cop_range_lf: [-0.06, 0.06, -0.02, 0.02]
+        cop_range_rf: [-0.05, 0.05, -0.002, 0.002]
+        cop_range_lf: [-0.05, 0.05, -0.002, 0.002]
         cop_range_rh: [-0.03,  0.03, -0.03,  0.03]
         cop_range_lh: [-0.03,  0.03, -0.03,  0.03]
-        max_eef_lengths: [1.1,  1.1,  0.60,  0.60]
+        max_eef_lengths: [0.9,  0.9,  0.60,  0.60]
 
         ####################
         # Dynamics weights #
@@ -61,7 +67,7 @@ planner_configuration:
         w_trq_leg:       1.000
         w_com:           [ 10000,  10000,  10000]
         w_amom:          [ 0.500,  0.500,  0.500]
-        w_lmom:          [ 0.010,  0.005,  0.001]
+        w_lmom:          [ 0.010,  0.005,  1.001]
         w_amomd:         [ 0.100,  0.400,  0.100]
         w_lmomd:         [ 0.015,  0.015,  0.015]
         w_amom_final:    [ 10.00,  10.00,  10.00]
@@ -89,62 +95,61 @@ planner_configuration:
 
 control_configuration:
     ds_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
-
+        kp: [ 100, 100, 100, 100, 70, 100, 100, 100, 100, 70]
+        kd: [ 10, 10, 10, 10, 3,10, 10, 10, 10, 3]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
     rs_start_trns_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        max_rf_z: 1500
+        max_rf_z: 300
         min_rf_z: 3
 
     rs_end_trns_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        max_rf_z: 1500
+        max_rf_z: 300
         min_rf_z: 3
 
     ls_start_trns_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        max_rf_z: 1500
+        max_rf_z: 300
         min_rf_z: 3
 
     ls_end_trns_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        max_rf_z: 1500
+        max_rf_z: 300
         min_rf_z: 3
 
     r_ss_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        foot_pos_kp: [150., 150., 150.]
-        foot_pos_kd: [10., 10., 10.]
+        foot_pos_kp: [200., 400., 100.]
+        foot_pos_kd: [20., 40., 10.]
 
     l_ss_ctrl:
-        kp: [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
-        kd: [ 70, 70, 70, 70, 70, 70, 70, 70, 70, 70]
-        com_kp: [5000., 15000., 5000.]
-        com_kd: [500., 1500., 500.]
+        kp: [ 70, 70, 70, 70, 7, 70, 70, 70, 70, 7]
+        kd: [ 5, 5, 5, 5, 1,5, 5, 5, 5, 1]
+        com_kp: [1000.,1000.,100.]
+        com_kd: [100., 100., 10.]
 
-        foot_pos_kp: [150., 150., 150.]
-        foot_pos_kd: [10., 10., 10.]
+        foot_pos_kp: [200., 400., 100.]
+        foot_pos_kd: [20., 40., 10.]

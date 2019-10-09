@@ -4,7 +4,7 @@
 
 KinWBC::KinWBC(const std::vector<bool>& act_joint)
     : num_act_joint_(0),
-      threshold_(0.001)
+      threshold_(0.005)
 // threshold_(0.005)
 // threshold_(0.003)
 {
@@ -57,10 +57,11 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
 
     delta_q = JtPre_pinv * (task->pos_err);
 
-    // myUtils::saveVector(delta_q, "delta_q0");
-    // myUtils::saveVector(task->pos_err, "delta_x0");
-    // myUtils::pretty_print(task->pos_err, std::cout, "com error");
-    // myUtils::pretty_print(delta_q, std::cout, "delta_q");
+     //myUtils::saveVector(delta_q, "delta_q0");
+     //myUtils::saveVector(task->pos_err, "delta_x0");
+     //myUtils::color_print(myColor::Red, "======== 0 ========");
+     //myUtils::pretty_print(task->pos_err, std::cout, "com error");
+     //myUtils::pretty_print(delta_q, std::cout, "delta_q");
     qdot = JtPre_pinv * (task->vel_des);
     // qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
     qddot = JtPre_pinv * (task->op_cmd - JtDotQdot);
@@ -72,7 +73,7 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     _BuildProjectionMatrix(JtPre, N_nx);
     N_pre = Nc * N_nx;
 
-    // myUtils::color_print(myColor::Red, "======== 0 ========");
+     //myUtils::color_print(myColor::Red, "======== 0 ========");
     // Eigen::VectorXd xdot_c = Jc * delta_q;
     // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
     // myUtils::pretty_print(Jt, std::cout, "task Jt");
@@ -80,17 +81,26 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     // myUtils::pretty_print(Nc, std::cout, "Nc");
     // myUtils::pretty_print(JtPre, std::cout, "JtNc");
     // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
-    // myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
+     //myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
     // myUtils::pretty_print(task->vel_des, std::cout, "vel_des");
-    // myUtils::pretty_print(delta_q, std::cout, "delta q");
+     //myUtils::pretty_print(delta_q, std::cout, "delta q");
     // myUtils::pretty_print(qdot, std::cout, "qdot");
     // myUtils::pretty_print(qddot, std::cout, "qddot");
-    // Eigen::MatrixXd test = Jt * N_pre;
-    // myUtils::pretty_print(test, std::cout, "Jt1N1");
-    // Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
-    // JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    // std::cout << "svd" << std::endl;
-    // std::cout << svd1.singularValues() << std::endl;
+     //Eigen::MatrixXd test = Jt * N_pre;
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
+     //JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << "J_CoM * N_c" << std::endl;
+     //std::cout << svd1.singularValues() << std::endl;
+     //std::cout << "U matix" << std::endl;
+     //std::cout << svd1.matrixU() << std::endl;
+     //std::cout << "V matix" << std::endl;
+     //std::cout << svd1.matrixV() << std::endl;
+
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
+     //Jt, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << "J_CoM" << std::endl;
+     //std::cout << svd2.singularValues() << std::endl;
+     //std::cout << svd2.matrixU() << std::endl;
 
     for (int i(1); i < task_list.size(); ++i) {
         task = task_list[i];
@@ -102,30 +112,30 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
         _PseudoInverse(JtPre, JtPre_pinv);
         delta_q =
             prev_delta_q + JtPre_pinv * (task->pos_err - Jt * prev_delta_q);
-        // myUtils::saveVector(delta_q, "delta_q" + std::to_string(i));
-        // myUtils::saveVector(task->pos_err, "delta_x" + std::to_string(i));
+         //myUtils::saveVector(delta_q, "delta_q" + std::to_string(i));
+         //myUtils::saveVector(task->pos_err, "delta_x" + std::to_string(i));
         qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt * prev_qdot);
         // qddot = prev_qddot +
         // JtPre_pinv * (task->acc_des - JtDotQdot - Jt * prev_qddot);
         qddot = prev_qddot +
                 JtPre_pinv * (task->op_cmd - JtDotQdot - Jt * prev_qddot);
 
-        // myUtils::color_print(myColor::Red,
+         //myUtils::color_print(myColor::Red,
         //"======== " + std::to_string(i) + " ========");
         // myUtils::pretty_print(Jt, std::cout, "Jt");
         // myUtils::pretty_print(N_pre, std::cout, "N_pre");
         // myUtils::pretty_print(JtPre, std::cout, "JtPre");
         // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
-        // myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
+         //myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
         // myUtils::pretty_print(task->vel_des, std::cout, "vel_des");
-        // myUtils::pretty_print(delta_q, std::cout, "delta q");
+         //myUtils::pretty_print(delta_q, std::cout, "delta q");
         // myUtils::pretty_print(qdot, std::cout, "qdot");
         // xdot_c = Jc * delta_q;
-        // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
-        // Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
-        // JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        // std::cout << "svd" << std::endl;
-        // std::cout << svd2.singularValues() << std::endl;
+         //myUtils::pretty_print(xdot_c, std::cout, "contact vel");
+         //Eigen::JacobiSVD<Eigen::MatrixXd> svd2(
+         //JtPre, Eigen::ComputeThinU | Eigen::ComputeThinV);
+         //std::cout << "svd2" << std::endl;
+         //std::cout << svd2.singularValues() << std::endl;
 
         // For the next task
         _BuildProjectionMatrix(JtPre, N_nx);

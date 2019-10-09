@@ -49,18 +49,36 @@ TransitionCtrl::TransitionCtrl(RobotSystem* robot, Planner* planner,
     kin_wbc_ = new KinWBC(act_list);
     wblc_ = new WBLC(act_list);
     wblc_data_ = new WBLC_ExtraData();
-    rfoot_contact_ = new SurfaceContactSpec(
-        robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
-    lfoot_contact_ = new SurfaceContactSpec(
-        robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+    //rfoot_contact_ = new SurfaceContactSpec(
+        //robot_, DracoBodyNode::rFootCenter, 0.085, 0.02, 0.7);
+    //lfoot_contact_ = new SurfaceContactSpec(
+        //robot_, DracoBodyNode::lFootCenter, 0.085, 0.02, 0.7);
+    //dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+
+    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);    
+    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);    
+    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);    
+    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);    
+
+    dim_contact_ = rfoot_front_contact_->getDim() + lfoot_front_contact_->getDim() +
+                    rfoot_back_contact_->getDim() + lfoot_back_contact_->getDim();
+
 
     wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Draco::n_dof, 100.0);
     wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 0.1);
     wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] =
+    //wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
+    //wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] =
+        //0.01;
+
+    wblc_data_->W_rf_[rfoot_front_contact_->getFzIndex()] = 0.01;
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getFzIndex()] =
         0.01;
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
+                lfoot_front_contact_->getFzIndex()] = 0.01;
+    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
+                lfoot_front_contact_->getDim() + lfoot_back_contact_->getFzIndex()] = 0.01;
+
 
     // torque limit default setting
     wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
@@ -78,8 +96,13 @@ TransitionCtrl::~TransitionCtrl() {
     delete wblc_;
     delete wblc_data_;
 
-    delete rfoot_contact_;
-    delete lfoot_contact_;
+    delete rfoot_front_contact_;
+    delete rfoot_back_contact_;
+    delete lfoot_front_contact_;
+    delete lfoot_back_contact_;
+
+    //delete rfoot_contact_;
+    //delete lfoot_contact_;
 }
 
 void TransitionCtrl::oneStep(void* _cmd) {
@@ -209,36 +232,49 @@ void TransitionCtrl::_contact_setup() {
         rf_weight_z = (alpha)*0.5 + (1. - alpha) * 0.01;          // 0.01->0.5
         foot_weight = 0.001 * (alpha) + 1000. * (1. - alpha);  // 1000 -> 0.001
     }
-    rfoot_contact_->updateContactSpec();
-    lfoot_contact_->updateContactSpec();
 
-    contact_list_.push_back(rfoot_contact_);
-    contact_list_.push_back(lfoot_contact_);
+    rfoot_front_contact_->updateContactSpec();
+    rfoot_back_contact_->updateContactSpec();
+    lfoot_front_contact_->updateContactSpec();
+    lfoot_back_contact_->updateContactSpec();
+
+    contact_list_.push_back(rfoot_front_contact_);
+    contact_list_.push_back(rfoot_back_contact_);
+    contact_list_.push_back(lfoot_front_contact_);
+    contact_list_.push_back(lfoot_back_contact_);
 
     int jidx_offset(0);
     if (moving_foot_ == DracoBodyNode::lAnkle) {
-        jidx_offset = rfoot_contact_->getDim();
-        for (int i = 0; i < lfoot_contact_->getDim(); ++i) {
+        jidx_offset = rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim();
+        for (int i = 0; i < lfoot_front_contact_->getDim() + lfoot_back_contact_->getDim(); ++i) {
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
-        wblc_data_->W_rf_[lfoot_contact_->getFzIndex() + jidx_offset] =
+        wblc_data_->W_rf_[lfoot_front_contact_->getFzIndex() + jidx_offset] =
+            rf_weight_z;
+        wblc_data_->W_rf_[lfoot_front_contact_->getDim() + lfoot_back_contact_->getFzIndex() + jidx_offset] =
             rf_weight_z;
 
-        ((SurfaceContactSpec*)lfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(upper_lim);
+
     } else if (moving_foot_ == DracoBodyNode::rAnkle) {
-        for (int i(0); i < rfoot_contact_->getDim(); ++i) {
+        for (int i(0); i < rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim(); ++i) {
             wblc_data_->W_rf_[i + jidx_offset] = rf_weight;
             wblc_data_->W_xddot_[i + jidx_offset] = foot_weight;
         }
-        wblc_data_->W_rf_[rfoot_contact_->getFzIndex() + jidx_offset] =
+        wblc_data_->W_rf_[rfoot_front_contact_->getFzIndex() + jidx_offset] =
+            rf_weight_z;
+        wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getFzIndex() + jidx_offset] =
             rf_weight_z;
 
-        ((SurfaceContactSpec*)rfoot_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(upper_lim);
+        ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(upper_lim);
     }
 }
 
 void TransitionCtrl::firstVisit() {
+    std::cout << "transition" << std::endl;
     jpos_ini_ = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
     ini_com_pos_ = Eigen::VectorXd::Zero(3);
     ini_com_pos_ << robot_->getCoMPosition()[0], robot_->getCoMPosition()[1],

@@ -33,19 +33,6 @@ link_directories("/usr/local/lib")
 find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
-# Zmq
-find_package(ZMQ)
-if(ZMQ_FOUND)
-    include_directories(${ZMQ_INCLUDE_DIRS})
-endif()
-set(ZMQ_FOUND FALSE)
-
-# Protobuf
-find_package(Protobuf)
-if(Protobuf_FOUND)
-    include_directories(${Protobuf_INCLUDE_DIRS})
-endif()
-
 # Eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
@@ -91,10 +78,5 @@ endif()
 ## Configuration File
 ##=============================================================================
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
-if (ZMQ_FOUND AND Protobuf_FOUND)
-    SET (HAS_RL_DEP true)
-else()
-    SET (HAS_RL_DEP false)
-endif()
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
 install(FILES ${PROJECT_SOURCE_DIR}/Configuration.h DESTINATION "${INSTALL_INCLUDE_DIR}")
