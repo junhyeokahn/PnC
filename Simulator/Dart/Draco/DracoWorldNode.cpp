@@ -6,74 +6,16 @@
 #include <Utils/IO/IOUtilities.hpp>
 
 DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
-                               osgShadow::MinimalShadowMap* msm, int mpi_idx,
-                               int env_idx)
-    : dart::gui::osg::WorldNode(_world, msm),
-      count_(0),
-      t_(0.0),
-      servo_rate_(0.001),
-      mpi_idx_(mpi_idx),
-      env_idx_(env_idx) {
-    world_ = _world;
-    mSkel = world_->getSkeleton("Draco");
-    mGround = world_->getSkeleton("ground_skeleton");
-    mStar = world_->getSkeleton("star");
-    mTorus = world_->getSkeleton("torus");
-    mDof = mSkel->getNumDofs();
-    mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-    b_parallel_ = true;
-
-    SetParameters_();
-
-    led_pos_announcer_ = new DracoLedPosAnnouncer();
-    led_pos_announcer_->start();
-    UpdateLedData_();
-
-    mInterface = new DracoInterface(mpi_idx, env_idx);
-
-    mSensorData = new DracoSensorData();
-    mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
-    mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
-    mSensorData->q = Eigen::VectorXd::Zero(10);
-    mSensorData->qdot = Eigen::VectorXd::Zero(10);
-    mSensorData->jtrq = Eigen::VectorXd::Zero(10);
-    mSensorData->temperature = Eigen::VectorXd::Zero(10);
-    mSensorData->motor_current = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_voltage = Eigen::VectorXd::Zero(10);
-    mSensorData->bus_current = Eigen::VectorXd::Zero(10);
-    mSensorData->rotor_inertia = Eigen::VectorXd::Zero(10);
-    mSensorData->rfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->lfoot_ati = Eigen::VectorXd::Zero(6);
-    mSensorData->rfoot_contact = false;
-    mSensorData->lfoot_contact = false;
-
-    mCommand = new DracoCommand();
-    mCommand->turn_off = false;
-    mCommand->q = Eigen::VectorXd::Zero(10);
-    mCommand->qdot = Eigen::VectorXd::Zero(10);
-    mCommand->jtrq = Eigen::VectorXd::Zero(10);
-
-    DataManager* data_manager = DataManager::GetDataManager();
-    q_sim_ = Eigen::VectorXd::Zero(16);
-    data_manager->RegisterData(&q_sim_, VECT, "q_sim", 16);
-}
-
-DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
                                osgShadow::MinimalShadowMap* msm)
     : dart::gui::osg::WorldNode(_world, msm),
       count_(0),
       t_(0.0),
-      servo_rate_(0.001),
-      mpi_idx_(0),
-      env_idx_(0) {
+      servo_rate_(0.001) {
     world_ = _world;
     mSkel = world_->getSkeleton("Draco");
     mGround = world_->getSkeleton("ground_skeleton");
-    mStar = world_->getSkeleton("star");
-    mTorus = world_->getSkeleton("torus");
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
-    b_parallel_ = false;
 
     SetParameters_();
 
@@ -86,6 +28,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mSensorData = new DracoSensorData();
     mSensorData->imu_ang_vel = Eigen::VectorXd::Zero(3);
     mSensorData->imu_acc = Eigen::VectorXd::Zero(3);
+    mSensorData->imu_mag = Eigen::VectorXd::Zero(3);
     mSensorData->q = Eigen::VectorXd::Zero(10);
     mSensorData->qdot = Eigen::VectorXd::Zero(10);
     mSensorData->jtrq = Eigen::VectorXd::Zero(10);
@@ -125,28 +68,11 @@ void DracoWorldNode::SetParameters_() {
         myUtils::readParameter(simulation_cfg, "release_time", mReleaseTime);
         myUtils::readParameter(simulation_cfg, "check_collision",
                                b_check_collision_);
-        myUtils::readParameter(simulation_cfg, "show_viewer", b_show_viewer_);
-        myUtils::readParameter(simulation_cfg, "display_target_frame",
-                               b_plot_target_);
-        myUtils::readParameter(simulation_cfg, "plot_guided_foot",
-                               b_plot_guided_foot_);
-        myUtils::readParameter(simulation_cfg, "plot_adjusted_foot",
-                               b_plot_adjusted_foot_);
-        myUtils::readParameter(simulation_cfg, "camera_manipulator",
-                               b_camera_manipulator_);
         myUtils::readParameter(simulation_cfg, "print_computation_time",
                                b_print_computation_time);
         YAML::Node control_cfg = simulation_cfg["control_configuration"];
         myUtils::readParameter(control_cfg, "kp", mKp);
         myUtils::readParameter(control_cfg, "kd", mKd);
-        if (!b_parallel_) b_show_viewer_ = true;
-
-        if (!b_show_viewer_) {
-            b_plot_target_ = false;
-            b_plot_guided_foot_ = false;
-            b_plot_adjusted_foot_ = false;
-            b_camera_manipulator_ = false;
-        }
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -162,13 +88,9 @@ void DracoWorldNode::customPreStep() {
     mSensorData->jtrq = mSkel->getForces().tail(10);
 
     UpdateLedData_();
-    _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc);
+    _get_imu_data(mSensorData->imu_ang_vel, mSensorData->imu_acc,
+                  mSensorData->imu_mag);
     _check_foot_contact(mSensorData->rfoot_contact, mSensorData->lfoot_contact);
-
-    if (b_plot_target_) PlotTargetLocation_();
-    if (b_plot_guided_foot_) PlotGuidedFootLocation_();
-    if (b_plot_adjusted_foot_) PlotAdjustedFootLocation_();
-    if (b_camera_manipulator_) UpdateCameraPos_();
 
     if (b_check_collision_) {
         _check_collision();
@@ -228,7 +150,9 @@ void DracoWorldNode::UpdateLedData_() {
 }
 
 void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
-                                   Eigen::VectorXd& acc) {
+                                   Eigen::VectorXd& acc,
+                                   Eigen::VectorXd& imu_mag) {
+    // angvel
     Eigen::VectorXd ang_vel_local =
         mSkel->getBodyNode("IMU")
             ->getSpatialVelocity(dart::dynamics::Frame::World(),
@@ -238,9 +162,17 @@ void DracoWorldNode::_get_imu_data(Eigen::VectorXd& ang_vel,
     ang_vel = ang_vel_local;
     Eigen::MatrixXd R_world_imu(3, 3);
     R_world_imu = mSkel->getBodyNode("IMU")->getWorldTransform().linear();
+    // acc
+    Eigen::Vector3d linear_imu_acc =
+        mSkel->getBodyNode("IMU")->getCOMLinearAcceleration();
     Eigen::Vector3d global_grav(0, 0, 9.81);
-    Eigen::Vector3d local_grav = R_world_imu.transpose() * global_grav;
-    acc = local_grav;
+    // acc = R_world_imu.transpose() * (global_grav + linear_imu_acc);
+    acc = R_world_imu.transpose() * (global_grav);
+
+    // mag
+    Eigen::VectorXd global_mag = Eigen::VectorXd::Zero(3);
+    global_mag[0] = 1.;
+    imu_mag = R_world_imu.transpose() * global_mag;
 }
 
 void DracoWorldNode::_check_foot_contact(bool& rfoot_contact,
@@ -311,43 +243,4 @@ void DracoWorldNode::_check_collision() {
             exit(0);
         }
     }
-}
-
-void DracoWorldNode::PlotTargetLocation_() {
-    dart::dynamics::SimpleFramePtr frame =
-        world_->getSimpleFrame("target_frame");
-    Eigen::Isometry3d tf = ((DracoInterface*)mInterface)->GetTargetIso();
-    frame->setTransform(tf);
-}
-
-void DracoWorldNode::UpdateCameraPos_() {
-    Eigen::Isometry3d torso_iso = mSkel->getBodyNode("Torso")->getTransform();
-    Eigen::Vector3d torso_vec = torso_iso.translation();
-    mViewer->getCameraManipulator()->setHomePosition(
-        ::osg::Vec3(torso_vec[0] + 2, torso_vec[1] - 6., torso_vec[2] + 2),
-        ::osg::Vec3(torso_vec[0], torso_vec[1], torso_vec[2]),
-        ::osg::Vec3(0.0, 0.0, 1.0));
-    mViewer->setCameraManipulator(mViewer->getCameraManipulator());
-}
-
-void DracoWorldNode::PlotGuidedFootLocation_() {
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
-    q[5] = 0.001;
-    Eigen::Vector3d guided_foot =
-        ((DracoInterface*)mInterface)->GetGuidedFoot();
-    q[3] = guided_foot[0];
-    q[4] = guided_foot[1];
-    mTorus->setPositions(q);
-    mTorus->setVelocities(Eigen::VectorXd::Zero(6));
-}
-
-void DracoWorldNode::PlotAdjustedFootLocation_() {
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(6);
-    q[5] = 0.001;
-    Eigen::Vector3d adjusted_foot =
-        ((DracoInterface*)mInterface)->GetAdjustedFoot();
-    q[3] = adjusted_foot[0];
-    q[4] = adjusted_foot[1];
-    mStar->setPositions(q);
-    mStar->setVelocities(Eigen::VectorXd::Zero(6));
 }

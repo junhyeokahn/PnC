@@ -29,19 +29,6 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
     }
 }
 
-void addTargetFrame(const dart::simulation::WorldPtr& world) {
-    dart::gui::osg::InteractiveFramePtr frame =
-        std::make_shared<dart::gui::osg::InteractiveFrame>(
-            dart::dynamics::Frame::World(), "target_frame");
-    for (int i = 0; i < 3; ++i) {
-        frame->getTool(dart::gui::osg::InteractiveTool::PLANAR, i)
-            ->setEnabled(false);
-        frame->getTool(dart::gui::osg::InteractiveTool::ANGULAR, i)
-            ->setEnabled(false);
-    }
-    world->addSimpleFrame(frame);
-}
-
 class OneStepProgress : public osgGA::GUIEventHandler {
    public:
     OneStepProgress(DracoWorldNode* worldnode) : worldnode_(worldnode) {}
@@ -172,9 +159,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     bool isRecord;
     bool b_display_joint_frame;
-    bool b_display_target_frame;
     bool b_joint_limit_enforced;
-    bool b_show;
     int num_steps_per_cycle;
     double servo_rate;
     try {
@@ -183,14 +168,11 @@ int main(int argc, char** argv) {
         myUtils::readParameter(simulation_cfg, "is_record", isRecord);
         myUtils::readParameter(simulation_cfg, "display_joint_frame",
                                b_display_joint_frame);
-        myUtils::readParameter(simulation_cfg, "display_target_frame",
-                               b_display_target_frame);
         myUtils::readParameter(simulation_cfg, "joint_limit_enforced",
                                b_joint_limit_enforced);
         myUtils::readParameter(simulation_cfg, "num_steps_per_cycle",
                                num_steps_per_cycle);
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
-        myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
@@ -206,14 +188,8 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
-    dart::dynamics::SkeletonPtr star =
-        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/star.urdf");
-    dart::dynamics::SkeletonPtr torus =
-        urdfLoader.parseSkeleton(THIS_COM "RobotModel/Object/torus.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
-    world->addSkeleton(star);
-    world->addSkeleton(torus);
 
     // =========================================================================
     // Friction & Restitution Coefficient
@@ -224,23 +200,6 @@ int main(int argc, char** argv) {
     robot->getBodyNode("Torso")->setFrictionCoeff(friction);
     ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
     robot->getBodyNode("Torso")->setRestitutionCoeff(restit);
-
-    // robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootFront2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootBack2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootFront2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("lFootBack2")->setFrictionCoeff(friction);
-    // robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootFront2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("rFootBack2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootFront2")->setRestitutionCoeff(restit);
-    // robot->getBodyNode("lFootBack2")->setRestitutionCoeff(restit);
 
     robot->getBodyNode("rAnkle")->setFrictionCoeff(friction);
     robot->getBodyNode("lAnkle")->setFrictionCoeff(friction);
@@ -255,11 +214,6 @@ int main(int argc, char** argv) {
     // Display Joints Frame
     // =========================================================================
     if (b_display_joint_frame) displayJointFrames(world, robot);
-
-    // =========================================================================
-    // Display Target Frame
-    // =========================================================================
-    if (b_display_target_frame) addTargetFrame(world);
 
     // =========================================================================
     // Initial configuration
@@ -297,50 +251,35 @@ int main(int argc, char** argv) {
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<DracoWorldNode> node;
-    if (argc > 1) {
-        node = new DracoWorldNode(world, msm, std::stoi(argv[1]),
-                                  std::stoi(argv[2]));
-    } else {
-        node = new DracoWorldNode(world, msm);
-        b_show = true;
-    }
+    node = new DracoWorldNode(world, msm);
     node->setNumStepsPerCycle(num_steps_per_cycle);
 
     // =========================================================================
     // Create and Set Viewer
     // =========================================================================
-    if (b_show) {
-        dart::gui::osg::Viewer viewer;
-        viewer.addWorldNode(node);
-        viewer.simulate(false);
-        viewer.switchHeadlights(false);
-        msm->setLight(viewer.getLightSource(0)->getLight());
-        ::osg::Vec3 p1(1.0, 0.2, 1.0);
-        p1 = p1 * 0.7;
-        viewer.getLightSource(0)->getLight()->setPosition(
-            ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
-        viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-        viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
-                                         GL_DEPTH_BUFFER_BIT);
-        viewer.addEventHandler(new OneStepProgress(node));
+    dart::gui::osg::Viewer viewer;
+    viewer.addWorldNode(node);
+    viewer.simulate(false);
+    viewer.switchHeadlights(false);
+    msm->setLight(viewer.getLightSource(0)->getLight());
+    ::osg::Vec3 p1(1.0, 0.2, 1.0);
+    p1 = p1 * 0.7;
+    viewer.getLightSource(0)->getLight()->setPosition(
+        ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
+    viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
+    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    viewer.addEventHandler(new OneStepProgress(node));
 
-        if (isRecord) {
-            std::cout << "[Video Record Enable]" << std::endl;
-            viewer.record(THIS_COM "/ExperimentVideo");
-        }
-
-        // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 500, 500);
-        viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
-            ::osg::Vec3(0.0, 0.0, 1.0));
-        viewer.setCameraManipulator(viewer.getCameraManipulator());
-        viewer.run();
-    } else {
-        while (true) {
-            node->customPreStep();
-            node->getWorld()->step();
-            node->customPostStep();
-        }
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM "/ExperimentVideo");
     }
+
+    // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    viewer.setUpViewInWindow(1440, 0, 500, 500);
+    viewer.getCameraManipulator()->setHomePosition(
+        ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),
+        ::osg::Vec3(0.0, 0.0, 1.0));
+    viewer.setCameraManipulator(viewer.getCameraManipulator());
+    viewer.run();
 }

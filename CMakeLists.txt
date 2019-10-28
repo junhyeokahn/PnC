@@ -33,45 +33,11 @@ link_directories("/usr/local/lib")
 find_package(DART 6.8 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
-# Zmq
-find_package(ZMQ)
-if(ZMQ_FOUND)
-    include_directories(${ZMQ_INCLUDE_DIRS})
-endif()
-
-# Protobuf
-find_package(Protobuf)
-set(Protobuf_FOUND False)
-if(Protobuf_FOUND)
-    include_directories(${Protobuf_INCLUDE_DIRS})
-endif()
-
-# Pybind11
-set(USE_PYBIND11 False)
-if(USE_PYBIND11)
-  message("-- Enable Pybind11")
-  find_package(PythonAnaconda)
-else()
-  message("-- Disable Pybind11")
-endif()
-
 # Eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
 endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
-
-# Gurobi
-find_package(Gurobi)
-if(GUROBI_FOUND)
-  include_directories(${GUROBI_INCLUDE_DIRS})
-endif()
-
-# Mosek
-find_package(Mosek)
-if(MOSEK_FOUND)
-  include_directories(${MOSEK_INCLUDE_DIRS})
-endif()
 
 # GTest
 find_package(GTest)
@@ -91,26 +57,13 @@ add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
-if(Protobuf_FOUND AND ZMQ_FOUND)
-    add_subdirectory(Messages)
-endif()
-if(USE_PYBIND11)
-  add_subdirectory(Bindings)
-endif()
 if(GTEST_FOUND)
   add_subdirectory(UnitTest)
 endif()
-add_subdirectory(ReinforcementLearning)
-
 
 ##=============================================================================
 ## Configuration File
 ##=============================================================================
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
-if (ZMQ_FOUND AND Protobuf_FOUND)
-    SET (HAS_RL_DEP true)
-else()
-    SET (HAS_RL_DEP false)
-endif()
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
 install(FILES ${PROJECT_SOURCE_DIR}/Configuration.h DESTINATION "${INSTALL_INCLUDE_DIR}")

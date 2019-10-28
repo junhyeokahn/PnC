@@ -176,4 +176,15 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
     return ret;
 }
 
+double QuatToYaw(const Eigen::Quaternion<double> q) {
+    // to match equation from:
+    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    const double& q0 = q.w();
+    const double& q1 = q.x();
+    const double& q2 = q.y();
+    const double& q3 = q.z();
+
+    return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
+}
+
 }  // namespace myUtils

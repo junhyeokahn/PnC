@@ -1,9 +1,6 @@
 add_subdirectory(DracoPnC)
-add_subdirectory(FixedAtlasPnC)
-add_subdirectory(AtlasPnC)
 add_subdirectory(WBC)
 add_subdirectory(PlannerSet)
-add_subdirectory(CartPolePnC)
 add_subdirectory(RobotSystem)
 add_subdirectory(Filters)
 

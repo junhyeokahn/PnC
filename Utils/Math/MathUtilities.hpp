@@ -62,4 +62,7 @@ Eigen::VectorXd eulerIntegration(const Eigen::VectorXd& x,
 Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
                                   const Eigen::VectorXd& alpha,
                                   const Eigen::VectorXd& alphad, double dt);
+
+double QuatToYaw(const Eigen::Quaternion<double> q);
+
 }  // namespace myUtils

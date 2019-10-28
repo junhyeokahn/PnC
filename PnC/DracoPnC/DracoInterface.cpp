@@ -18,79 +18,10 @@ DracoInterface::DracoInterface() : EnvInterface() {
     }
     myUtils::color_print(myColor::BoldCyan, border);
     myUtils::pretty_constructor(0, "Draco Interface");
-    mpi_idx_ = 0;
-    env_idx_ = 0;
-    b_learning_ = false;
 
     robot_ =
         // new RobotSystem(6, THIS_COM
         // "RobotModel/Robot/Draco/DracoPnCOld.urdf");
-        new RobotSystem(6,
-                        THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
-    // robot_->printRobotInfo();
-
-    test_cmd_ = new DracoCommand();
-    test_cmd_->turn_off = false;
-    test_cmd_->q = Eigen::VectorXd::Zero(10);
-    test_cmd_->qdot = Eigen::VectorXd::Zero(10);
-    test_cmd_->jtrq = Eigen::VectorXd::Zero(10);
-
-    state_estimator_ = new DracoStateEstimator(robot_);
-    sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    waiting_count_ = 10;
-
-    cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-
-    data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    rfoot_ati_ = Eigen::VectorXd::Zero(6);
-    lfoot_ati_ = Eigen::VectorXd::Zero(6);
-
-    stop_test_ = false;
-
-    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
-                                                "running_time");
-    DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT, "jpos_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT, "jvel_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT, "command",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT, "torque",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(
-        &data_temperature_, VECT, "temperature", robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_motor_current_, VECT,
-                                                "motor_current",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati",
-                                                6);
-    DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
-                                                6);
-
-    _ParameterSetting();
-
-    myUtils::color_print(myColor::BoldCyan, border);
-}
-
-DracoInterface::DracoInterface(int mpi_idx, int env_idx) : EnvInterface() {
-    std::string border = "=";
-    for (int i = 0; i < 79; ++i) {
-        border += "=";
-    }
-    mpi_idx_ = mpi_idx;
-    env_idx_ = env_idx;
-    b_learning_ = true;
-    myUtils::color_print(myColor::BoldCyan, border);
-    myUtils::pretty_constructor(
-        0, "Draco Interface ( MPI : " + std::to_string(mpi_idx) +
-               ", ENV : " + std::to_string(env_idx) + " )");
-
-    robot_ =
         new RobotSystem(6,
                         THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
     // robot_->printRobotInfo();
@@ -258,23 +189,6 @@ void DracoInterface::_ParameterSetting() {
             test_ = new BodyTest(robot_);
         } else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
-        } else if (test_name == "turning_test") {
-            test_ = new TurningTest(robot_);
-        } else if (test_name == "balancing_test") {
-            test_ = new BalancingTest(robot_);
-        } else if (test_name == "rl_walking_test") {
-#if HAS_RL_DEP
-            if (!b_learning_) {
-                test_ = new RLWalkingTest(robot_);
-            } else {
-                test_ = new RLWalkingTest(robot_, mpi_idx_, env_idx_);
-            }
-#else
-            std::cout << "[Error] Dependancies for Reinforcement Learning in "
-                         "not found"
-                      << std::endl;
-            exit(0);
-#endif
         } else {
             printf(
                 "[Draco Interface] There is no test matching test with the "
@@ -295,17 +209,3 @@ void DracoInterface::_ParameterSetting() {
         exit(0);
     }
 }
-
-Eigen::Isometry3d DracoInterface::GetTargetIso() {
-    Eigen::Isometry3d target_iso = Eigen::Isometry3d::Identity();
-    Eigen::VectorXd target_pos = Eigen::VectorXd::Zero(3);
-    for (int i = 0; i < 2; ++i) {
-        target_pos[i] = sp_->des_location[i];
-    }
-    target_iso.translation() = target_pos;
-    target_iso.linear() = sp_->des_quat.toRotationMatrix();
-    return target_iso;
-}
-
-Eigen::Vector3d DracoInterface::GetGuidedFoot() { return sp_->guided_foot; }
-Eigen::Vector3d DracoInterface::GetAdjustedFoot() { return sp_->adjusted_foot; }
