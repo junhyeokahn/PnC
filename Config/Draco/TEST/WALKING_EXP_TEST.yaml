@@ -4,7 +4,7 @@ test_configuration:
     initial_jpos: [0., -0.1, -0.9, 1.7, 0.71, 0., 0.08, -0.9, 1.7, 0.71]
 
     body_height: 0.98
-    com_height_for_omega: 0.98
+    com_height_for_omega: 1.0
 
     jpos_initialization_time: 2.0
     com_lifting_time: 2.0
@@ -37,32 +37,31 @@ control_configuration:
 
     body_ctrl:
         kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 7   , 8   , 3   , 0 , 3  , 7   , 8   , 3   , 0  ]
+        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
 
     single_contact_trans_ctrl:
         max_rf_z: 550
         min_rf_z: 0
 
         kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
-        kd: [3  , 7   , 8   , 3   , 0 , 3  , 8   , 7   , 3   , 0  ]
+        kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
 
     left_body_foot_planning_ctrl:
         planner_name: velocity_reversal_lipm
         swing_height: 0.11
         push_down_height: 0.0
 
-        #default_target_foot_location: [0.02, 0.11, 0.0]
-        default_target_foot_location: [-0.02, 0.11, 0.0]
-        #default_target_foot_location: [-0.04, 0.11, 0.0]
+        #default_target_foot_location: [-0.03, 0.11, 0.0]
+        #default_target_foot_location: [-0.01, 0.11, 0.0]
+        default_target_foot_location: [-0.01, 0.10, 0.0]
 
         kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
         kd: [3  , 7   , 8   , 3   , 0 , 3  , 7   , 8   , 3   , 0  ]
 
-        body_pt_offset: [0.08, 0.00]
-        #body_pt_offset: [0.06, -0.00]
+        body_pt_offset: [0.06, -0.00]
         foot_landing_offset: [0., 0.]
 
-        fin_ankle: 1.25
+        fin_ankle: 1.4
         switch_vel_threshold: -2.8
 
         fin_foot_z_vel: -0.5
@@ -73,18 +72,17 @@ control_configuration:
         swing_height: 0.11
         push_down_height: 0.0
 
-        #default_target_foot_location: [0.02, -0.11, 0.0]
-        default_target_foot_location: [-0.02, -0.11, 0.0]
-        #default_target_foot_location: [-0.04, -0.11, 0.0]
+        #default_target_foot_location: [-0.03, -0.11, 0.0]
+        #default_target_foot_location: [-0.01, -0.11, 0.0]
+        default_target_foot_location: [-0.01, -0.10, 0.0]
 
         kp: [80 , 170 , 170 , 170 , 5 , 80 , 170 , 170 , 170 , 5 ]
         kd: [3  , 8   , 8   , 3   , 0 , 3  , 8   , 8   , 3   , 0  ]
 
-        body_pt_offset: [0.08, 0.00]
-        #body_pt_offset: [0.06, -0.00]
+        body_pt_offset: [0.06, -0.00]
         foot_landing_offset: [0., 0.]
 
-        fin_ankle: 1.25
+        fin_ankle: 1.4
         switch_vel_threshold: -2.8
 
         fin_foot_z_vel: -0.5
@@ -97,17 +95,5 @@ planner_configuration:
         y_step_length_limit: [0.20, 0.55]
         com_velocity_limit: [0.0, 1.3]
 
-        #t_prime: [0.20 , 0.19]
-        #kappa: [-0.10, -0.14]
-
-        #t_prime: [0.21 , 0.20]
-        #kappa: [-0.08, -0.13]
-
-        #t_prime: [0.16 , 0.20]
-        #kappa: [-0.08, -0.13]
-
-        #t_prime: [0.22 , 0.20]
-        #kappa: [-0.08, -0.13]
-
-        t_prime: [0.22 , 0.20]
+        t_prime: [0.21 , 0.20]
         kappa: [-0.08, -0.13]

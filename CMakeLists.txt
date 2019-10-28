@@ -41,6 +41,7 @@ endif()
 
 # Protobuf
 find_package(Protobuf)
+set(Protobuf_FOUND False)
 if(Protobuf_FOUND)
     include_directories(${Protobuf_INCLUDE_DIRS})
 endif()
