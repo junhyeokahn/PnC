@@ -7,7 +7,7 @@ class RobotSystem;
 enum BalancingTestPhase{
     BT_initial_jpos = 0,
     BT_lift_up = 1,
-    BT_body_ctrl = 2,
+    BT_com_ctrl = 2,
     NUM_BT_PHASE
 };
 
@@ -23,8 +23,7 @@ class BalancingTest: public Test{
 
         Controller* jpos_target_ctrl_;
         Controller* body_lift_ctrl_;
-        Controller* balancing_ctrl_;
-        Controller* kin_balancing_ctrl_;
+        Controller* com_ctrl_;
 
         YAML::Node cfg_;
 };

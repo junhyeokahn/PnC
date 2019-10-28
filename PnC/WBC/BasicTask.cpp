@@ -14,24 +14,24 @@ BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
             assert(dim_task_ = robot_->getNumActuatedDofs());
             task_type_string_ = "Joint";
             for (int i = 0; i < dim_task_; ++i) {
-                kp_[i] = 100.;
-                kd_[i] = 5.;
+                kp_[i] = 0.;
+                kd_[i] = 0.;
             }
             break;
         case BasicTaskType::LINKXYZ:
             assert(dim_task_ = 3);
             task_type_string_ = "LinkXYZ";
             for (int i = 0; i < dim_task_; ++i) {
-                kp_[i] = 150.;
-                kd_[i] = 10.;
+                kp_[i] = 0.;
+                kd_[i] = 0.;
             }
             break;
         case BasicTaskType::LINKORI:
             assert(dim_task_ = 3);
             task_type_string_ = "LinkRPY";
             for (int i = 0; i < dim_task_; ++i) {
-                kp_[i] = 130.;
-                kd_[i] = 10.;
+                kp_[i] = 0.;
+                kd_[i] = 0.;
             }
             break;
         case BasicTaskType::CENTROID:
@@ -39,19 +39,19 @@ BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
             task_type_string_ = "Centroid";
             for (int i = 0; i < 3; ++i) {
                 kp_[i] = 0.;
-                kd_[i] = 100.;
+                kd_[i] = 0.;
             }
             for (int i = 3; i < 6; ++i) {
-                kp_[i] = 200.;
-                kd_[i] = 20.;
+                kp_[i] = 0.;
+                kd_[i] = 0.;
             }
             break;
         case BasicTaskType::COM:
             assert(dim_task_ = 3);
             task_type_string_ = "CoM";
             for (int i = 0; i < 3; ++i) {
-                kp_[i] = 150.;
-                kd_[i] = 10.;
+                kp_[i] = 0.;
+                kd_[i] = 0.;
             }
             break;
         default:

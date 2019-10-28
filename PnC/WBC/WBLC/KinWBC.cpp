@@ -57,7 +57,8 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
 
     delta_q = JtPre_pinv * (task->pos_err);
     qdot = JtPre_pinv * (task->vel_des);
-    qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
+    //qddot = JtPre_pinv * (task->acc_des - JtDotQdot);
+    qddot = JtPre_pinv * (task->op_cmd - JtDotQdot);
 
     Eigen::VectorXd prev_delta_q = delta_q;
     Eigen::VectorXd prev_qdot = qdot;
@@ -97,8 +98,10 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
         delta_q =
             prev_delta_q + JtPre_pinv * (task->pos_err - Jt * prev_delta_q);
         qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt * prev_qdot);
+        //qddot = prev_qddot +
+                //JtPre_pinv * (task->acc_des - JtDotQdot - Jt * prev_qddot);
         qddot = prev_qddot +
-                JtPre_pinv * (task->acc_des - JtDotQdot - Jt * prev_qddot);
+                JtPre_pinv * (task->op_cmd - JtDotQdot - Jt * prev_qddot);
 
         // myUtils::color_print(myColor::Red,
         //"======== " + std::to_string(i) + " ========");

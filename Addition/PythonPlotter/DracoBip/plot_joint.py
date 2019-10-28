@@ -27,6 +27,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
             np.genfromtxt(file_path+'jvel_des.txt', delimiter=None, dtype=(float))
     data_qdot = \
             np.genfromtxt(file_path+'qdot.txt', delimiter=None, dtype=(float))
+            
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
     num_leg_joint = 5
     

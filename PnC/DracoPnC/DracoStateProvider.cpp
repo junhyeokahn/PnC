@@ -47,6 +47,9 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     first_LED_x = 0.;
     first_LED_y = 0.;
 
+    com_pos_des.setZero();
+    com_vel_des.setZero();
+
     DataManager* data_manager = DataManager::GetDataManager();
 
     data_manager->RegisterData(&curr_time, DOUBLE, "time");
@@ -73,7 +76,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3);
     data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3);
-    data_manager->RegisterData(&com_vel, VECT3, "est_com_vel", 3);
+    //data_manager->RegisterData(&com_vel, VECT3, "est_com_vel", 3);
+
+    data_manager->RegisterData(&com_pos_des, VECT3, "com_pos_des", 3);
+    data_manager->RegisterData(&com_vel_des, VECT3, "com_vel_des", 3);
 
     data_manager->RegisterData(&est_mocap_body_pos, VECT3, "est_mocap_body_pos",
                                3);

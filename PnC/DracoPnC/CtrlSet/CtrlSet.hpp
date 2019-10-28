@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/CtrlSet/BodyCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/CoMCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/BodyFootPlanningCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/DoubleContactTransCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/JPosSwingCtrl.hpp>

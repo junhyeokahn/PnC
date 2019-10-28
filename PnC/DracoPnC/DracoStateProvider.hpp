@@ -50,6 +50,10 @@ class DracoStateProvider {
     Eigen::Vector3d com_vel;
     Eigen::Vector3d est_com_vel;
 
+    Eigen::Vector3d com_pos_des;
+    Eigen::Vector3d com_vel_des;
+
+
     int num_step_copy;
     int phase_copy;
 

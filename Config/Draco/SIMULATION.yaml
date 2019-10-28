@@ -12,7 +12,7 @@ plot_guided_foot: false
 camera_manipulator: false
 print_computation_time: false
 #release_time: 4.20
-release_time: 1000
+release_time: 10
 
 ### Toggle for RL ###
 show_viewer: true
