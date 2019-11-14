@@ -25,7 +25,7 @@ test_configuration:
 control_configuration:
 
     joint_position_ctrl:
-        kp: [100 , 100 , 100 , 100 , 50. , 100 , 100 , 100 , 100 , 50. ]
+        kp: [200 , 200 , 200 , 200 , 100. , 200 , 200 , 200 , 200 , 100. ]
         kd: [3   , 3   , 3   , 3   , 1.   , 3   , 3   , 3   , 3   , 1.  ]
 
     double_contact_trans_ctrl:

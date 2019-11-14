@@ -138,6 +138,7 @@ void CoMCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 }
 
 void CoMCtrl::task_setup() {
+
     // =========================================================================
     // Com Task
     // =========================================================================
@@ -218,6 +219,7 @@ void CoMCtrl::firstVisit() {
     }
     //myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com_pos");
     //exit(0);
+    goal_com_pos_[0] += des_com_offset_x_;
     goal_com_pos_[2] = target_com_height_;
 }
 
@@ -242,6 +244,7 @@ void CoMCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "com_kp", com_kp);
         myUtils::readParameter(node, "com_kd", com_kd);
         com_task_->setGain(com_kp, com_kd);
+        myUtils::readParameter(node, "desired_offset_x", des_com_offset_x_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

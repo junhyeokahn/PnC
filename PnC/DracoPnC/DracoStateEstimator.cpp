@@ -66,6 +66,7 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->com_pos = robot_->getCoMPosition();
     sp_->com_vel = robot_->getCoMVelocity();
+    sp_->dcm = robot_->getCoMPosition() + robot_->getCoMVelocity() /sp_->omega; 
 
     ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
@@ -149,6 +150,7 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->com_pos = robot_->getCoMPosition();
     sp_->com_vel = robot_->getCoMVelocity();
+    sp_->dcm = robot_->getCoMPosition() + robot_->getCoMVelocity() /sp_->omega; 
 
     static bool visit_once(false);
     if ((sp_->phase_copy == 2) && (!visit_once)) {

@@ -62,4 +62,6 @@ class CoMCtrl : public Controller {
 
     double ctrl_start_time_;
     DracoStateProvider* sp_;
+
+    double des_com_offset_x_;
 };

@@ -56,7 +56,7 @@ void JPosTargetCtrl::oneStep(void* _cmd) {
     _jpos_task_setup();
     _jpos_ctrl_wbdc(gamma);
 
-    double ramp_period(0.5);
+    double ramp_period(0.5);//(10);
     double ramp(1.0);
     if (state_machine_time_ < ramp_period)
         ramp = state_machine_time_ / ramp_period;

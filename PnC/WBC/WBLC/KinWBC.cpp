@@ -4,9 +4,9 @@
 
 KinWBC::KinWBC(const std::vector<bool>& act_joint)
     : num_act_joint_(0),
-      threshold_(0.001)
-// threshold_(0.005)
-// threshold_(0.003)
+      //threshold_(0.001)
+ //threshold_(0.005)
+ threshold_(0.003)
 {
     myUtils::pretty_constructor(3, "Kin WBC");
     num_qdot_ = act_joint.size();
@@ -70,14 +70,14 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     // myUtils::color_print(myColor::Red, "======== 0 ========");
     // Eigen::VectorXd xdot_c = Jc * delta_q;
     // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
-    // myUtils::pretty_print(Jt, std::cout, "task Jt");
+     //myUtils::pretty_print(Jt, std::cout, "task Jt");
     // myUtils::pretty_print(Jc, std::cout, "Jc");
     // myUtils::pretty_print(Nc, std::cout, "Nc");
-    // myUtils::pretty_print(JtPre, std::cout, "JtNc");
-    // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
+     //myUtils::pretty_print(JtPre, std::cout, "JtNc");
+     //myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
     // myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
     // myUtils::pretty_print(task->vel_des, std::cout, "vel_des");
-    // myUtils::pretty_print(delta_q, std::cout, "delta q");
+     //myUtils::pretty_print(delta_q, std::cout, "delta q");
     // myUtils::pretty_print(qdot, std::cout, "qdot");
     // myUtils::pretty_print(qddot, std::cout, "qddot");
     // Eigen::MatrixXd test = Jt * N_pre;
@@ -103,15 +103,15 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
         qddot = prev_qddot +
                 JtPre_pinv * (task->op_cmd - JtDotQdot - Jt * prev_qddot);
 
-        // myUtils::color_print(myColor::Red,
+         //myUtils::color_print(myColor::Red,
         //"======== " + std::to_string(i) + " ========");
         // myUtils::pretty_print(Jt, std::cout, "Jt");
         // myUtils::pretty_print(N_pre, std::cout, "N_pre");
         // myUtils::pretty_print(JtPre, std::cout, "JtPre");
-        // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
+         //myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
         // myUtils::pretty_print(task->pos_err, std::cout, "pos_err");
         // myUtils::pretty_print(task->vel_des, std::cout, "vel_des");
-        // myUtils::pretty_print(delta_q, std::cout, "delta q");
+         //myUtils::pretty_print(delta_q, std::cout, "delta q");
         // myUtils::pretty_print(qdot, std::cout, "qdot");
         // xdot_c = Jc * delta_q;
         // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
@@ -129,6 +129,7 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     }
     // xdot_c = Jc * delta_q;
     // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
+    //myUtils::pretty_print(delta_q, std::cout, "delta_q");
     for (int i(0); i < num_act_joint_; ++i) {
         jpos_cmd[i] = curr_config[act_jidx_[i]] + delta_q[act_jidx_[i]];
         jvel_cmd[i] = qdot[act_jidx_[i]];

@@ -3,6 +3,7 @@
 #include <PnC/Test.hpp>
 
 class RobotSystem;
+class DracoStateProvider;
 
 enum BalancingTestPhase{
     BT_initial_jpos = 0,
@@ -26,4 +27,5 @@ class BalancingTest: public Test{
         Controller* com_ctrl_;
 
         YAML::Node cfg_;
+        DracoStateProvider* sp_;
 };

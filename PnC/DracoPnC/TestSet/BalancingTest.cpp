@@ -1,6 +1,7 @@
 #include <PnC/DracoPnC/TestSet/TestSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
 
 BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Balancing Test");
@@ -12,6 +13,8 @@ BalancingTest::BalancingTest(RobotSystem* robot) : Test(robot) {
     jpos_target_ctrl_ = new JPosTargetCtrl(robot);
     body_lift_ctrl_ = new DoubleContactTransCtrl(robot);
     com_ctrl_ = new CoMCtrl(robot);
+
+    sp_ = DracoStateProvider::getStateProvider(robot_);
 
     state_list_.push_back(jpos_target_ctrl_);
     state_list_.push_back(body_lift_ctrl_);
@@ -55,6 +58,7 @@ void BalancingTest::_SettingParameter() {
 
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((CoMCtrl*)com_ctrl_)->setCoMHeight(tmp_val);
+        sp_-> omega = sqrt(9.81/tmp_val);
 
         myUtils::readParameter(test_cfg, "stabilization_duration", tmp_val);
         ((CoMCtrl*)com_ctrl_)->SetStabilizationDuration(tmp_val);
