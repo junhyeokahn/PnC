@@ -3,10 +3,8 @@
 // Constructor 
 CMPC::CMPC(){
   // Set Defaults
+  robot_mass = 50; // kg mass of the robot
   horizon = 20; // Default horizon to 10 steps
-
-
-
 }
 
 // Destructor
@@ -60,8 +58,8 @@ void CMPC::assemble_vec_to_matrix(const int & n, const int & m, const Eigen::Vec
 
 // Given dt, current x state, f_Mat, and r_feet. Find the next state, x1 
 void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-                              const double & mass, const Eigen::MatrixXd & I_body,
-                              Eigen::VectorXd & x_next){
+                                    const Eigen::MatrixXd & I_body,
+                                    Eigen::VectorXd & x_next){
   // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
   double roll = x_current[0]; double pitch = x_current[1]; double yaw = x_current[2];
   // std::cout << "x_current:" << x_current.transpose() << std::endl;
@@ -87,7 +85,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
   pddot.setZero();
   pddot += grav_vec;
   for(int i = 0; i < f_Mat.cols(); i++){
-    pddot += ((1.0/mass)*f_Mat.col(i));
+    pddot += ((1.0/robot_mass)*f_Mat.col(i));
   }
   pdot = pddot*dt + pdot_prior;   // CoM velocity
   p = 0.5*pddot*dt*dt + pdot_prior*dt + p_prior;   // CoM position
@@ -140,7 +138,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
 
 // Inputs: m, I, current yaw, and footstep locations.
 // Output: A, B matrix to be used for zero-order hold MPC
-void CMPC::cont_time_state_space(const double & mass, const Eigen::MatrixXd & I_body, const double & psi_in,
+void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_body, const double & psi_in,
                            const Eigen::MatrixXd & r_feet, 
                            Eigen::MatrixXd & A, Eigen::MatrixXd & B){
 	// Get System State: Current Robot yaw
@@ -165,7 +163,7 @@ void CMPC::cont_time_state_space(const double & mass, const Eigen::MatrixXd & I_
 	Eigen::MatrixXd eye3 = Eigen::MatrixXd::Identity(3,3);	
 	for(int i = 0; i < n_Fr; i++){
 		B.block(6, i*3, 3, 3) = I_inv*skew_sym_mat(r_feet.col(i)); 
-		B.block(9, i*3, 3, 3) = eye3*1.0/mass;
+		B.block(9, i*3, 3, 3) = eye3*1.0/robot_mass;
 	}
 
   #ifdef MPC_PRINT_ALL
@@ -518,8 +516,8 @@ void CMPC::print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out){
 }
 
 void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-               const double & robot_mass, const Eigen::MatrixXd & I_body, 
-               const double & mpc_dt, Eigen::VectorXd & f_vec_out){
+                     const Eigen::MatrixXd & I_body, 
+                     const double & mpc_dt, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
@@ -537,7 +535,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   Eigen::MatrixXd B(13, 3*n_Fr); B.setZero();
   int n = A.cols();
   int m = B.cols();
-  cont_time_state_space(robot_mass, I_body, psi_yaw, r_feet, A, B);
+  cont_time_state_space(I_body, psi_yaw, r_feet, A, B);
 
   // create discrete time state space matrices
   Eigen::MatrixXd Adt(n,n); Adt.setZero();
@@ -565,9 +563,9 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   Eigen::VectorXd vecS_cost(n);
   //        <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
   // vecS_cost << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 0.10, 0.0;
-  vecS_cost << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 0.10, 0.0;
+  vecS_cost << 10.0, 10.0, 100.0, 20.0, 20.0, 500.0, 0.5, 0.5, 3.0, 2.0, 2, 1.0, 0.0;
   Eigen::MatrixXd S_cost = vecS_cost.asDiagonal();
-  double control_alpha = 4e-5;
+  double control_alpha = 1e-5;//4e-5;
   get_qp_costs(n, m, vecS_cost, control_alpha, Sqp, Kqp);
 
   #ifdef MPC_TIME_ALL
@@ -607,7 +605,8 @@ void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd
 
 void CMPC::simulate_toy_mpc(){
   // System Params
-  double robot_mass = 10; // kg mass of the robot
+  setRobotMass(50); // 50kg
+
   Eigen::MatrixXd I_body = Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
   I_body(0,0) = 5;
   I_body(0,1) = 2;
@@ -680,7 +679,7 @@ void CMPC::simulate_toy_mpc(){
   get_constant_desired_x(x_des, X_des);
 
   // Solve the MPC
-  solve_mpc(x0, X_des, r_feet, robot_mass, I_body, mpc_dt, f_vec_out);
+  solve_mpc(x0, X_des, r_feet, I_body, mpc_dt, f_vec_out);
   print_f_vec(n_Fr, f_vec_out);
   // Populate force output from 1 horizon.
   assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
@@ -689,7 +688,7 @@ void CMPC::simulate_toy_mpc(){
   double sim_dt = 1e-3;
   Eigen::VectorXd x_prev(n); x_prev = x0;
   Eigen::VectorXd x_next(n); x_next.setZero();
-  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, robot_mass, I_body, x_next);
+  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_body, x_next);
 
   // Simulate MPC for x seconds
   double total_sim_time = 7.0;
@@ -711,7 +710,7 @@ void CMPC::simulate_toy_mpc(){
     // Solve new MPC every mpc control tick
     if ((cur_time - last_control_time) > mpc_dt){
 
-      solve_mpc(x_prev, X_des, r_feet, robot_mass, I_body, mpc_dt, f_vec_out);      
+      solve_mpc(x_prev, X_des, r_feet, I_body, mpc_dt, f_vec_out);      
       assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);
@@ -729,7 +728,7 @@ void CMPC::simulate_toy_mpc(){
     }
 
     // Integrate the robot dynamics
-    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, robot_mass, I_body, x_next);
+    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_body, x_next);
     // Update x
     x_prev = x_next;
     // Increment time
