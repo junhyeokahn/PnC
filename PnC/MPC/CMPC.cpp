@@ -5,6 +5,9 @@ CMPC::CMPC(){
   // Set Defaults
   robot_mass = 50; // kg mass of the robot
   horizon = 20; // Default horizon to 10 steps
+  mpc_dt = 0.025; // MPC time interval per horizon steo
+  // by default this assumes that the inertia provided is in the body frame and needs to be expressed in the world frame.
+  rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated
 }
 
 // Destructor
@@ -58,7 +61,7 @@ void CMPC::assemble_vec_to_matrix(const int & n, const int & m, const Eigen::Vec
 
 // Given dt, current x state, f_Mat, and r_feet. Find the next state, x1 
 void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-                                    const Eigen::MatrixXd & I_body,
+                                    const Eigen::MatrixXd & I_robot,
                                     Eigen::VectorXd & x_next){
   // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
   double roll = x_current[0]; double pitch = x_current[1]; double yaw = x_current[2];
@@ -74,7 +77,13 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
   Eigen::MatrixXd Rz = R_yaw(yaw);
 
   Eigen::MatrixXd R_zyx = Rz*Ry*Rx;
-  Eigen::MatrixXd I_world = R_zyx * I_body * R_zyx.transpose(); // Inertia matrix aligned to CoM frame.
+
+  Eigen::MatrixXd I_world;
+  if (rotate_inertia){
+    I_world = R_zyx * I_robot * R_zyx.transpose(); // Inertia matrix aligned to CoM frame.
+  }else{
+    I_world = I_robot;
+  }
 
   // CoM acceleration, velocity, and position
   Eigen::VectorXd pddot(3); // pddot = 1/m sum(f_i) - g
@@ -138,13 +147,19 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
 
 // Inputs: m, I, current yaw, and footstep locations.
 // Output: A, B matrix to be used for zero-order hold MPC
-void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_body, const double & psi_in,
+void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_robot, const double & psi_in,
                            const Eigen::MatrixXd & r_feet, 
                            Eigen::MatrixXd & A, Eigen::MatrixXd & B){
 	// Get System State: Current Robot yaw
 	Eigen::MatrixXd Rz = R_yaw(psi_in);
 
-	Eigen::MatrixXd I_world = Rz * I_body * Rz.transpose(); // Inertia matrix aligned to CoM frame.
+  Eigen::MatrixXd I_world;
+  if (rotate_inertia){
+    I_world = Rz * I_robot * Rz.transpose(); // Inertia matrix aligned to CoM frame.
+  }else{
+    I_world = I_robot;
+  }
+
 	Eigen::MatrixXd I_inv = I_world.inverse(); // Inverse
 
   	// Number of reaction forces equal to number of feet contacts
@@ -170,8 +185,8 @@ void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_body, const double & 
   	std::cout << "Rz:" << std::endl;
   	std::cout << Rz << std::endl;
 
-  	std::cout << "I_body:" << std::endl;
-  	std::cout << I_body << std::endl;
+  	std::cout << "I_robot:" << std::endl;
+  	std::cout << I_robot << std::endl;
 
   	std::cout << "I_world:" << std::endl;
   	std::cout << I_world << std::endl;
@@ -194,7 +209,7 @@ void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_body, const double & 
 }
 
 
-void CMPC::discrete_time_state_space(const double & dt, const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt){
+void CMPC::discrete_time_state_space(const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt){
 	// p.215 Raymond DeCarlo: Linear Systems: A State Variable Approach with Numerical Implementation, Prentice Hall, NJ, 1989
 	int n = A.cols() + B.cols();
 	Eigen::MatrixXd AB(n,n);
@@ -203,7 +218,7 @@ void CMPC::discrete_time_state_space(const double & dt, const Eigen::MatrixXd & 
 	AB.block(0, 0, A.cols(), A.cols()) = A;
 	AB.block(0, A.cols(), A.cols(), B.cols()) = B;
 
-	expAB = (AB*dt).exp();
+	expAB = (AB*mpc_dt).exp();
 
 	Adt = expAB.block(0, 0, A.cols(), A.cols());
 	Bdt = expAB.block(0, A.cols(), A.cols(), B.cols());
@@ -213,7 +228,7 @@ void CMPC::discrete_time_state_space(const double & dt, const Eigen::MatrixXd & 
   	std::cout << Adt << std::endl;
 
   	std::cout << "Bdt" << std::endl;
-  	std::cout << Bdt*dt << std::endl;
+  	std::cout << Bdt*mpc_dt << std::endl;
   #endif
 }
 
@@ -516,8 +531,7 @@ void CMPC::print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out){
 }
 
 void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-                     const Eigen::MatrixXd & I_body, 
-                     const double & mpc_dt, Eigen::VectorXd & f_vec_out){
+                     const Eigen::MatrixXd & I_robot, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
@@ -535,12 +549,12 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   Eigen::MatrixXd B(13, 3*n_Fr); B.setZero();
   int n = A.cols();
   int m = B.cols();
-  cont_time_state_space(I_body, psi_yaw, r_feet, A, B);
+  cont_time_state_space(I_robot, psi_yaw, r_feet, A, B);
 
   // create discrete time state space matrices
   Eigen::MatrixXd Adt(n,n); Adt.setZero();
   Eigen::MatrixXd Bdt(n, m); Bdt.setZero();
-  discrete_time_state_space(mpc_dt, A, B, Adt, Bdt);
+  discrete_time_state_space(A, B, Adt, Bdt);
 
   // create A and B QP matrices
   Eigen::MatrixXd Aqp(n*horizon, n); Aqp.setZero();
@@ -606,13 +620,15 @@ void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd
 void CMPC::simulate_toy_mpc(){
   // System Params
   setRobotMass(50); // 50kg
+  setHorizon(20); // 10 timesteps 
+  setDt(0.025); // 0.025s per horizon
 
-  Eigen::MatrixXd I_body = Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
-  I_body(0,0) = 5;
-  I_body(0,1) = 2;
-  I_body(1,0) = 2;
-  I_body(1,1) = 5;
-  I_body(2,2) = 2.5;
+  Eigen::MatrixXd I_robot = Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
+  I_robot(0,0) = 5;
+  I_robot(0,1) = 2;
+  I_robot(1,0) = 2;
+  I_robot(1,1) = 5;
+  I_robot(2,2) = 2.5;
 
   // starting robot state
   // Current reduced state of the robot
@@ -655,8 +671,6 @@ void CMPC::simulate_toy_mpc(){
   r_feet(0, 3) = -foot_length/2.0; // x
   r_feet(1, 3) = nominal_width/2.0; //y
 
-  double mpc_dt = 0.025;
-
   int n_Fr = r_feet.cols(); // Number of contacts
   int n = 13;
   int m = 3*n_Fr;
@@ -679,7 +693,7 @@ void CMPC::simulate_toy_mpc(){
   get_constant_desired_x(x_des, X_des);
 
   // Solve the MPC
-  solve_mpc(x0, X_des, r_feet, I_body, mpc_dt, f_vec_out);
+  solve_mpc(x0, X_des, r_feet, I_robot, f_vec_out);
   print_f_vec(n_Fr, f_vec_out);
   // Populate force output from 1 horizon.
   assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
@@ -688,7 +702,7 @@ void CMPC::simulate_toy_mpc(){
   double sim_dt = 1e-3;
   Eigen::VectorXd x_prev(n); x_prev = x0;
   Eigen::VectorXd x_next(n); x_next.setZero();
-  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_body, x_next);
+  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_robot, x_next);
 
   // Simulate MPC for x seconds
   double total_sim_time = 7.0;
@@ -710,7 +724,7 @@ void CMPC::simulate_toy_mpc(){
     // Solve new MPC every mpc control tick
     if ((cur_time - last_control_time) > mpc_dt){
 
-      solve_mpc(x_prev, X_des, r_feet, I_body, mpc_dt, f_vec_out);      
+      solve_mpc(x_prev, X_des, r_feet, I_robot, f_vec_out);      
       assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);
@@ -728,7 +742,7 @@ void CMPC::simulate_toy_mpc(){
     }
 
     // Integrate the robot dynamics
-    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_body, x_next);
+    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_robot, x_next);
     // Update x
     x_prev = x_next;
     // Increment time

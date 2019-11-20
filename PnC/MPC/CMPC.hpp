@@ -24,23 +24,29 @@ class CMPC{
 public: 
 	CMPC();
 	~CMPC();
-	// double robot_mass;
-	// Eigen::MatrixXd I_body;
+	// Eigen::MatrixXd I_robot;
 
 	// Eigen::VectorXd x0; 
 	// Eigen::MatrixXd r_feet; // each column is a vector of contact locations [x,y,z]^T 
 
-	double robot_mass; // kg mass of the robot
 	int horizon;// mpc horizon (number of steps);
+	double mpc_dt; // mpc time interval per horizon steo
+	double robot_mass; // kg mass of the robot
+	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
+						 // If the inertia is expressed in body frame this needs to be true.
+						 // Otherwise if the inertia is already updated to be in the world frame, this can be set to false.
+
 	// double mpc_dt = 0.025;
 
 	void updateRobotWorldInertia(const Eigen::MatrixXd & world_inertia_in);
 	void updateContacts(const Eigen::MatrixXd & r_in);
 
-	void setRobotMass(const double & robot_mass_in){robot_mass = robot_mass_in;}
-	void setRobotWorldInertia(const Eigen::MatrixXd & world_inertia_in);
-	void setDt(const double & dt);	// MPC dt interval per horizon
-	void setHorizon(const double & dt);	// MPC dt interval per horizon
+	void setRobotMass(const double & robot_mass_in){ robot_mass = robot_mass_in; }
+	void rotateBodyInertia(bool & rotate_inertia_in){ rotate_inertia = rotate_inertia_in; }
+
+	void setRobotInertia(const Eigen::MatrixXd & inertia_in);
+	void setDt(const double & mpc_dt_in){mpc_dt = mpc_dt_in;}	// MPC dt interval per horizon
+	void setHorizon(const int & horizon_in){ horizon = horizon_in;}	// MPC horizon (number of steps)
 
 	void setStartingState(const Eigen::VectorXd & x0_in);
 
@@ -63,12 +69,12 @@ private:
 
 
 	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-	                              const Eigen::MatrixXd & I_body,
+	                              const Eigen::MatrixXd & I_robot,
 	                              Eigen::VectorXd & x_next);
-	void cont_time_state_space(const Eigen::MatrixXd & I_body, const double & psi_in,
+	void cont_time_state_space(const Eigen::MatrixXd & I_robot, const double & psi_in,
 	                           const Eigen::MatrixXd & r_feet, 
 	                           Eigen::MatrixXd & A, Eigen::MatrixXd & B);
-	void discrete_time_state_space(const double & dt, const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt);
+	void discrete_time_state_space(const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt);
 
 	void qp_matrices(const Eigen::MatrixXd & Adt, const Eigen::MatrixXd & Bdt, Eigen::MatrixXd & Aqp, Eigen::MatrixXd & Bqp);
 	void get_force_constraints(const int & n_Fr, Eigen::MatrixXd & CMat, Eigen::VectorXd & cvec);
@@ -81,8 +87,7 @@ private:
 					  Eigen::VectorXd & f_vec_out);
 	
 	void solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-	               const Eigen::MatrixXd & I_body, 
-	               const double & mpc_dt, Eigen::VectorXd & f_vec_out);
+	               const Eigen::MatrixXd & I_robot, Eigen::VectorXd & f_vec_out);
 
 
 
