@@ -1,5 +1,6 @@
 add_subdirectory(DracoPnC)
 add_subdirectory(WBC)
+add_subdirectory(MPC)
 add_subdirectory(PlannerSet)
 add_subdirectory(RobotSystem)
 add_subdirectory(Filters)

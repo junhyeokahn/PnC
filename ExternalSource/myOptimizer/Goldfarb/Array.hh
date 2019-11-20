@@ -2504,7 +2504,7 @@ namespace GolDIdnani{
   template <typename T>
   GMatr<T> dot_prod(const GVect<T>& a, const GMatr<T>& b)
   {
-    if (a.size() != b.ncols())
+    if (a.size() != b.nrows())
       throw std::logic_error("Error matrix dot product: dimensions of the vector and matrix are not compatible");
     GMatr<T> tmp(1, b.ncols());
     for (unsigned int j = 0; j < tmp.ncols(); j++)
