@@ -1,7 +1,13 @@
 #include <PnC/MPC/CMPC.hpp>
 
 // Constructor 
-CMPC::CMPC(){}
+CMPC::CMPC(){
+  // Set Defaults
+  horizon = 20; // Default horizon to 10 steps
+
+
+
+}
 
 // Destructor
 CMPC::~CMPC(){}
@@ -33,12 +39,12 @@ Eigen::MatrixXd CMPC::R_yaw(const double & psi){
 	return Rz; 
 }
 
-Eigen::MatrixXd CMPC::skew_sym_mat(const Eigen::MatrixXd & r){
-  Eigen::MatrixXd cm(3,3);
-  cm << 0.f, -r(2), r(1),
-    r(2), 0.f, -r(0),
-    -r(1), r(0), 0.f;
-  return cm;
+Eigen::MatrixXd CMPC::skew_sym_mat(const Eigen::MatrixXd & v){
+  Eigen::MatrixXd ssm(3,3);
+  ssm << 0.f, -v(2), v(1),
+    v(2), 0.f, -v(0),
+    -v(1), v(0), 0.f;
+  return ssm;
 }
 
 // Transform input vector to nxm matrix. Vector must have dimension n*m.
@@ -214,7 +220,7 @@ void CMPC::discrete_time_state_space(const double & dt, const Eigen::MatrixXd & 
 }
 
 // Zero order hold qp matrices
-void CMPC::qp_matrices(const int & horizon, const Eigen::MatrixXd & Adt, const Eigen::MatrixXd & Bdt, Eigen::MatrixXd & Aqp, Eigen::MatrixXd & Bqp){
+void CMPC::qp_matrices(const Eigen::MatrixXd & Adt, const Eigen::MatrixXd & Bdt, Eigen::MatrixXd & Aqp, Eigen::MatrixXd & Bqp){
 	if (horizon < 1){
 		std::cerr << "Error! MPC horizon must be at least 1 timestep long." << std::endl;
 	}
@@ -310,7 +316,7 @@ void CMPC::get_force_constraints(const int & n_Fr, Eigen::MatrixXd & CMat, Eigen
   #endif
 }
 
-void CMPC::get_qp_constraints(const int & horizon, const Eigen::MatrixXd & CMat, const Eigen::VectorXd & cvec, Eigen::MatrixXd & Cqp, Eigen::VectorXd & cvec_qp){
+void CMPC::get_qp_constraints(const Eigen::MatrixXd & CMat, const Eigen::VectorXd & cvec, Eigen::MatrixXd & Cqp, Eigen::VectorXd & cvec_qp){
 	Cqp.setZero();
 	cvec_qp.setZero();
 
@@ -335,7 +341,7 @@ void CMPC::get_qp_constraints(const int & horizon, const Eigen::MatrixXd & CMat,
 
 }
 
-void CMPC::get_qp_costs(const int & n, const int & m, const int & horizon, const Eigen::VectorXd & vecS_cost, const double & control_alpha, Eigen::MatrixXd & Sqp, Eigen::MatrixXd & Kqp){
+void CMPC::get_qp_costs(const int & n, const int & m, const Eigen::VectorXd & vecS_cost, const double & control_alpha, Eigen::MatrixXd & Sqp, Eigen::MatrixXd & Kqp){
 	Eigen::MatrixXd S_cost = vecS_cost.asDiagonal();
 	Sqp.setZero();
 	for (int i = 0; i < horizon; i++){
@@ -499,7 +505,7 @@ void CMPC::solve_mpc_qp(const Eigen::MatrixXd & Aqp,  const Eigen::MatrixXd & Bq
   #endif
 }
 
-void print_f_vec(int & horizon, int & n_Fr, const Eigen::VectorXd & f_vec_out){
+void CMPC::print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out){
   for(int i = 0; i < horizon; i++){
     std::cout << "horizon:" << i+1 << std::endl;
 
@@ -513,7 +519,7 @@ void print_f_vec(int & horizon, int & n_Fr, const Eigen::VectorXd & f_vec_out){
 
 void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
                const double & robot_mass, const Eigen::MatrixXd & I_body, 
-               const int & horizon, const double & mpc_dt, Eigen::VectorXd & f_vec_out){
+               const double & mpc_dt, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
@@ -541,7 +547,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   // create A and B QP matrices
   Eigen::MatrixXd Aqp(n*horizon, n); Aqp.setZero();
   Eigen::MatrixXd Bqp(n*horizon, m*horizon); Bqp.setZero();
-  qp_matrices(horizon, Adt, Bdt, Aqp, Bqp);
+  qp_matrices(Adt, Bdt, Aqp, Bqp);
 
   // create force constraint matrices and vectors
   Eigen::MatrixXd CMat(6*n_Fr,3*n_Fr); // the QP constraint matrix for n_Fr reaction forces 
@@ -550,7 +556,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 
   Eigen::MatrixXd Cqp(horizon*6*n_Fr, horizon*3*n_Fr);
   Eigen::VectorXd cvec_qp(horizon*6*n_Fr);
-  get_qp_constraints(horizon, CMat, cvec, Cqp, cvec_qp);
+  get_qp_constraints(CMat, cvec, Cqp, cvec_qp);
 
   // Cost matrices (Values similar to cheetah 3)
   Eigen::MatrixXd Sqp(n*horizon, n*horizon);
@@ -562,7 +568,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   vecS_cost << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 0.10, 0.0;
   Eigen::MatrixXd S_cost = vecS_cost.asDiagonal();
   double control_alpha = 4e-5;
-  get_qp_costs(n, m, horizon, vecS_cost, control_alpha, Sqp, Kqp);
+  get_qp_costs(n, m, vecS_cost, control_alpha, Sqp, Kqp);
 
   #ifdef MPC_TIME_ALL
     // End
@@ -582,17 +588,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 }
 
 
-void CMPC::get_desired_x(const int & horizon, Eigen::VectorXd & X_ref){
-	Eigen::VectorXd x_des(13);
-
-	x_des.setZero();
-  x_des[0] = 0.0; //M_PI/8; //des roll orientation
-  x_des[1] = 0.0 ;//-M_PI/8; //des pitch orientation
-  x_des[2] = M_PI/12; // Yaw orientation
-
-  x_des[3] = -0.1;//;0.75; // Set desired z height to be 0.75m from the ground
-	x_des[5] = 0.75;//;0.75; // Set desired z height to be 0.75m from the ground
-
+void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd & X_ref){
 	X_ref = Eigen::VectorXd(horizon*13);
 	X_ref.setZero();
 	for(int i = 0; i < horizon; i++){
@@ -660,7 +656,6 @@ void CMPC::simulate_toy_mpc(){
   r_feet(0, 3) = -foot_length/2.0; // x
   r_feet(1, 3) = nominal_width/2.0; //y
 
-  int horizon = 10;
   double mpc_dt = 0.025;
 
   int n_Fr = r_feet.cols(); // Number of contacts
@@ -670,13 +665,23 @@ void CMPC::simulate_toy_mpc(){
   Eigen::VectorXd f_vec_out(m*horizon);
   Eigen::MatrixXd f_Mat(3, n_Fr); f_Mat.setZero();
 
-  // Get desired reference
+  // Get constant desired reference
+  Eigen::VectorXd x_des(n);
+
+  x_des.setZero();
+  x_des[0] = 0.0; //M_PI/8; //des roll orientation
+  x_des[1] = 0.0 ;//-M_PI/8; //des pitch orientation
+  x_des[2] = M_PI/12; // Yaw orientation
+
+  x_des[3] = -0.1;//;0.75; // Set desired z height to be 0.75m from the ground
+  x_des[5] = 0.75;//;0.75; // Set desired z height to be 0.75m from the ground
+
   Eigen::VectorXd X_des(n*horizon);
-  get_desired_x(horizon, X_des);
+  get_constant_desired_x(x_des, X_des);
 
   // Solve the MPC
-  solve_mpc(x0, X_des, r_feet, robot_mass, I_body, horizon, mpc_dt, f_vec_out);
-  print_f_vec(horizon, n_Fr, f_vec_out);
+  solve_mpc(x0, X_des, r_feet, robot_mass, I_body, mpc_dt, f_vec_out);
+  print_f_vec(n_Fr, f_vec_out);
   // Populate force output from 1 horizon.
   assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
 
@@ -706,7 +711,7 @@ void CMPC::simulate_toy_mpc(){
     // Solve new MPC every mpc control tick
     if ((cur_time - last_control_time) > mpc_dt){
 
-      solve_mpc(x_prev, X_des, r_feet, robot_mass, I_body, horizon, mpc_dt, f_vec_out);      
+      solve_mpc(x_prev, X_des, r_feet, robot_mass, I_body, mpc_dt, f_vec_out);      
       assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);
