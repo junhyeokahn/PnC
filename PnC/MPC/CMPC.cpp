@@ -11,6 +11,9 @@ CMPC::CMPC(){
 
   // by default this assumes that the inertia provided is in the body frame and needs to be expressed in the world frame.
   rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated
+
+  // DO NOT CHANGE
+  gravity_acceleration = -9.81;
 }
 
 // Destructor
@@ -93,7 +96,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
   Eigen::VectorXd pdot(3);  // pdot = pddot*dt + pdot prior;
   Eigen::VectorXd p(3);     // p = 0.5*pddot*dt*dt + pdot_prior*dt + p_prior;
 
-  Eigen::VectorXd grav_vec(3); grav_vec.setZero(); grav_vec[2] = -9.81;
+  Eigen::VectorXd grav_vec(3); grav_vec.setZero(); grav_vec[2] = gravity_acceleration;
   pddot.setZero();
   pddot += grav_vec;
   for(int i = 0; i < f_Mat.cols(); i++){
@@ -141,7 +144,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
   x_next.segment(3, 3) = p;
   x_next.segment(6, 3) = omega;
   x_next.segment(9, 3) = pdot;
-  x_next[12] = -9.81;
+  x_next[12] = gravity_acceleration;
 
   // std::cout << "x_next:" << x_next.transpose() << std::endl;
 
@@ -531,7 +534,7 @@ void CMPC::print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out){
 }
 
 void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-                     const Eigen::MatrixXd & I_robot, Eigen::VectorXd & f_vec_out){
+                     const Eigen::MatrixXd & I_robot, Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
@@ -597,6 +600,12 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 
   // Solve MPC
   solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, Cqp, cvec_qp, f_vec_out);
+
+  // Compute prediction of state evolution after an interval of mpc_dt
+  x_pred = (Aqp*x0 + Bqp*f_vec_out).head(n);
+  #ifdef MPC_PRINT_ALL
+    std::cout << "Predicted next state after dt = " << mpc_dt << " : "  << x_pred.transpose() << std::endl;
+  #endif
 }
 
 
@@ -642,7 +651,7 @@ void CMPC::simulate_toy_mpc(){
   x0[3] = 0.0; // x translation error
   x0[4] = 0.0; // y translation error
   x0[5] = 0.75; // Height
-  x0[12] = -9.81;  
+  x0[12] = gravity_acceleration;  
 
   // Feet Configuration
   // Set Foot contact locations
@@ -695,8 +704,10 @@ void CMPC::simulate_toy_mpc(){
   Eigen::VectorXd X_des(n*horizon);
   get_constant_desired_x(x_des, X_des);
 
+  Eigen::VectorXd x_pred(n); // Container to hold the predicted state after 1 horizon timestep 
+
   // Solve the MPC
-  solve_mpc(x0, X_des, r_feet, I_robot, f_vec_out);
+  solve_mpc(x0, X_des, r_feet, I_robot, x_pred, f_vec_out);
   print_f_vec(n_Fr, f_vec_out);
   // Populate force output from 1 horizon.
   assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
@@ -727,7 +738,7 @@ void CMPC::simulate_toy_mpc(){
     // Solve new MPC every mpc control tick
     if ((cur_time - last_control_time) > mpc_dt){
 
-      solve_mpc(x_prev, X_des, r_feet, I_robot, f_vec_out);      
+      solve_mpc(x_prev, X_des, r_feet, I_robot, x_pred, f_vec_out);      
       assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);

@@ -41,7 +41,6 @@ public:
 
 	// double mpc_dt = 0.025;
 
-	void updateRobotWorldInertia(const Eigen::MatrixXd & world_inertia_in);
 	void updateContacts(const Eigen::MatrixXd & r_in);
 
 	void setRobotMass(const double robot_mass_in){ robot_mass = robot_mass_in; }
@@ -68,7 +67,8 @@ public:
 	void get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd & X_ref);
 
 private:
-	Eigen::MatrixXd R_roll(const double & phi);
+	double gravity_acceleration;
+  	Eigen::MatrixXd R_roll(const double & phi);
 	Eigen::MatrixXd R_pitch(const double & theta);
 	Eigen::MatrixXd R_yaw(const double & psi);
 
@@ -94,8 +94,9 @@ private:
 					  const Eigen::MatrixXd & Cqp, const Eigen::VectorXd & cvec_qp,
 					  Eigen::VectorXd & f_vec_out);
 	
+	// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13	
 	void solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-	               const Eigen::MatrixXd & I_robot, Eigen::VectorXd & f_vec_out);
+	               const Eigen::MatrixXd & I_robot, Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out);
 
 
 
