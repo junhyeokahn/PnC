@@ -437,6 +437,8 @@ void CMPC::solve_mpc_qp(const Eigen::MatrixXd & Aqp,  const Eigen::MatrixXd & Bq
   // std::cout << "g" << std::endl;
   // std::cout << g.transpose() << std::endl;
 
+  // To Do: Add caching. Use previous solution as initial guess 
+
   // Quadprog matrices vectors
   GolDIdnani::GMatr<double> G, CE, CI;
   GolDIdnani::GVect<double> g0, ce0, ci0, x;  
