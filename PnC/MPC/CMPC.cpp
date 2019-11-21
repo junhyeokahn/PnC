@@ -4,15 +4,17 @@
 CMPC::CMPC(){
   // Set Defaults
   robot_mass = 50; // kg mass of the robot
+  I_robot = Eigen::MatrixXd::Identity(3,3); // initialize as the inertia matrix w.r.t to the body. 
+  rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated to the world frame
+  // If I_robot is expressed in world frame and is regularly updated to be always in world, then rotate_inertia should be false
+
   horizon = 20; // Default horizon to 10 steps
   mpc_dt = 0.025; // MPC time interval per horizon steo
   mu = 0.9; // coefficient of friction
   fz_max = 500; // maximum z reaction force for one force vector.
 
-  // by default this assumes that the inertia provided is in the body frame and needs to be expressed in the world frame.
-  rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated
-
-  I_robot = Eigen::MatrixXd::Identity(3,3); // since rotate_inertia is true, this is the Inertia matrix w.r.t to the body. 
+  // The latest force output computed by the MPC as the control input for the robot.
+  latest_f_vec_out = Eigen::VectorXd(0);
 
   // DO NOT CHANGE
   gravity_acceleration = -9.81;
@@ -20,6 +22,22 @@ CMPC::CMPC(){
 
 // Destructor
 CMPC::~CMPC(){}
+
+// Helper function which returns a 13-vector given the state of the robot. 
+// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13 
+Eigen::VectorXd CMPC::getx0(const double roll, const double pitch, const double yaw,
+            const double com_x, const double com_y, const double com_z,
+            const double roll_rate, const double pitch_rate, const double yaw_rate,
+            const double com_x_rate, const double com_y_rate, const double com_z_rate){
+  Eigen::VectorXd x0(13);
+  x0.setZero();
+  x0 << roll, pitch, yaw, // Theta \in R^3 
+        com_x, com_y, com_z,  // p \in R^3
+        roll_rate, pitch_rate, yaw_rate, // omega \in R^3
+        com_x_rate, com_y_rate, com_z_rate, // pdot \in R^3
+        gravity_acceleration; // g \in R
+  return x0;
+}
 
 Eigen::MatrixXd CMPC::R_roll(const double & phi){
   Eigen::MatrixXd Rx(3,3);
@@ -600,6 +618,8 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 
   // Solve MPC
   solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, Cqp, cvec_qp, f_vec_out);
+  // Locally store the output force
+  latest_f_vec_out = f_vec_out;
 
   // Compute prediction of state evolution after an interval of mpc_dt
   x_pred = (Aqp*x0 + Bqp*f_vec_out).head(n);
@@ -628,13 +648,7 @@ void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd
 
 void CMPC::simulate_toy_mpc(){
   // System Params
-  setRobotMass(50); // (kilograms) 50kg
-  setHorizon(20); // 10 timesteps 
-  setDt(0.025); // (seconds) 0.025s per horizon
-
-  setMu(0.9); //  friction coefficient
-  setMaxFz(500); // (Newtons) maximum vertical reaction force. 
-
+  setRobotMass(50); // (kilograms) 
   Eigen::MatrixXd I_robot_body = 10.0*Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
   // I_robot_body(0,0) = 5;
   // I_robot_body(0,1) = 2;
@@ -644,19 +658,30 @@ void CMPC::simulate_toy_mpc(){
   setRobotInertia(I_robot_body);
 
 
-  // starting robot state
+  // MPC Params
+  setHorizon(20); // horizon timesteps 
+  setDt(0.025); // (seconds) per horizon
+  setMu(0.9); //  friction coefficient
+  setMaxFz(500); // (Newtons) maximum vertical reaction force. 
+
+
+  // Starting robot state
   // Current reduced state of the robot
   // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
   Eigen::VectorXd x0(13); 
-  x0.setZero();
-  x0[2] = 0.0; //M_PI/24.0;; // Yaw orientation
-  x0[3] = 0.0; // x translation error
-  x0[4] = 0.0; // y translation error
-  x0[5] = 0.75; // Height
-  x0[12] = gravity_acceleration;  
+
+  double init_roll(0), init_pitch(0), init_yaw(0), 
+         init_com_x(0), init_com_y(0), init_com_z(0.75), 
+         init_roll_rate(0), init_pitch_rate(0), init_yaw_rate(0),
+         init_com_x_rate(0), init_com_y_rate(0), init_com_z_rate(0);
+
+  x0 = getx0(init_roll, init_pitch, init_yaw,
+            init_com_x, init_com_y, init_com_z,
+            init_roll_rate, init_pitch_rate, init_yaw_rate,
+            init_com_x_rate, init_com_y_rate, init_com_z_rate);
 
   // Feet Configuration
-  // Set Foot contact locations
+  // Set Foot contact locations w.r.t world
   Eigen::MatrixXd r_feet(3, 4); // Each column is a reaction force in x,y,z 
   r_feet.setZero();
   double foot_length = 0.05; // 5cm distance between toe and heel
