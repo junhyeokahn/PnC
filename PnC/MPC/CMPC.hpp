@@ -14,7 +14,7 @@
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 
 // #define MPC_PRINT_ALL 
-// #define MPC_TIME_ALL 
+#define MPC_TIME_ALL 
 
 // We are following the MPC formulation from:
 // Di Carlo, Jared, et al. "Dynamic locomotion in the mit cheetah 3 through convex model-predictive control." 
@@ -72,7 +72,7 @@ public:
 	// All values are in wold frame
 	// Inputs:
 	// 		x0 = [Theta, p, omega, pdot, g] \in \mathbf{R}^{13}    (Starting state of the system) 		
-	// 		X_des \in \mathbf{R}^{13*horizon} 				     (Refernece or desired state evolution) 
+	// 		X_des \in \mathbf{R}^{13*horizon} 				     (Reference or desired state evolution) 
 	// 		r_feet \in \mathbf{R}^{3 x number_of_point_contacts} (Matrix of point contact locations where each column is the xyz location of the contact)
 	// Outputs:
 	//		x_pred \in \mathbf{R}^{13} - The predicted state after a time interval of mpc_dt has dimension  

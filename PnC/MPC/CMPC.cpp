@@ -555,10 +555,15 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
                      Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
+    std::chrono::high_resolution_clock::time_point t_qp_all_start;
+    std::chrono::high_resolution_clock::time_point t_qp_all_end;
+    double dur_qp_all = 0.0;
+
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
     std::chrono::high_resolution_clock::time_point t_mat_setup_end;
     double dur_mat_setup = 0.0;
     // Start
+    t_qp_all_start = std::chrono::high_resolution_clock::now();
     t_mat_setup_start = std::chrono::high_resolution_clock::now();
   #endif
 
@@ -623,7 +628,16 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 
   // Compute prediction of state evolution after an interval of mpc_dt
   x_pred = (Aqp*x0 + Bqp*f_vec_out).head(n);
-  #ifdef MPC_PRINT_ALL
+
+  #ifdef MPC_TIME_ALL
+    // End
+    t_qp_all_end = std::chrono::high_resolution_clock::now();
+    dur_qp_all = std::chrono::duration_cast< std::chrono::duration<double> >(t_qp_all_end - t_qp_all_start).count();
+    std::cout << "QP overall time took " <<  dur_qp_all << " seconds." << std::endl; 
+    std::cout << "QP overall rate " << (1.0/ dur_qp_all) << " Hz" << std::endl; 
+  #endif
+
+  #ifdef MPC_TIME_ALL
     std::cout << "Predicted next state after dt = " << mpc_dt << " : "  << x_pred.transpose() << std::endl;
   #endif
 }
@@ -659,7 +673,7 @@ void CMPC::simulate_toy_mpc(){
 
 
   // MPC Params
-  setHorizon(20); // horizon timesteps 
+  setHorizon(10); // horizon timesteps 
   setDt(0.025); // (seconds) per horizon
   setMu(0.9); //  friction coefficient
   setMaxFz(500); // (Newtons) maximum vertical reaction force. 
