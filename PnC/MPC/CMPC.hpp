@@ -24,7 +24,7 @@ class CMPC{
 public: 
 	CMPC();
 	~CMPC();
-	// Eigen::MatrixXd I_robot;
+
 
 	// Eigen::VectorXd x0; 
 	// Eigen::MatrixXd r_feet; // each column is a vector of contact locations [x,y,z]^T 
@@ -35,6 +35,7 @@ public:
 	double fz_max; // maximum z reaction force for one force vector.
 
 	double robot_mass; // kg mass of the robot
+	Eigen::MatrixXd I_robot; // Robot inertia
 	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
 						 // If the inertia is expressed in body frame this needs to be true.
 						 // Otherwise if the inertia is already updated to be in the world frame, this can be set to false.
@@ -46,7 +47,7 @@ public:
 	void setRobotMass(const double robot_mass_in){ robot_mass = robot_mass_in; }
 	void rotateBodyInertia(bool rotate_inertia_in){ rotate_inertia = rotate_inertia_in; }
 
-	void setRobotInertia(const Eigen::MatrixXd & inertia_in);
+	void setRobotInertia(const Eigen::MatrixXd & inertia_in){ I_robot = inertia_in; }
 	void setDt(const double mpc_dt_in){mpc_dt = mpc_dt_in;}	// MPC dt interval per horizon
 	void setHorizon(const int & horizon_in){ horizon = horizon_in;}	// MPC horizon (number of steps)
 
@@ -74,12 +75,9 @@ private:
 
 	Eigen::MatrixXd skew_sym_mat(const Eigen::MatrixXd & v);
 
-	// I_robot is the inertia of the robot. If the values are in the body frame, then rotate_inertia must be set to true.
-	// if I_robot is expressed in the world frame then rotate_inertia must be set to false.
 	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-	                              const Eigen::MatrixXd & I_robot,
 	                              Eigen::VectorXd & x_next);
-	void cont_time_state_space(const Eigen::MatrixXd & I_robot, const double & psi_in,
+	void cont_time_state_space(const double & psi_in,
 	                           const Eigen::MatrixXd & r_feet, 
 	                           Eigen::MatrixXd & A, Eigen::MatrixXd & B);
 	void discrete_time_state_space(const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt);
@@ -96,7 +94,7 @@ private:
 	
 	// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13	
 	void solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-	               const Eigen::MatrixXd & I_robot, Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out);
+	               Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out);
 
 
 

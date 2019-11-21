@@ -12,6 +12,8 @@ CMPC::CMPC(){
   // by default this assumes that the inertia provided is in the body frame and needs to be expressed in the world frame.
   rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated
 
+  I_robot = Eigen::MatrixXd::Identity(3,3); // since rotate_inertia is true, this is the Inertia matrix w.r.t to the body. 
+
   // DO NOT CHANGE
   gravity_acceleration = -9.81;
 }
@@ -67,7 +69,6 @@ void CMPC::assemble_vec_to_matrix(const int & n, const int & m, const Eigen::Vec
 
 // Given dt, current x state, f_Mat, and r_feet. Find the next state, x1 
 void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-                                    const Eigen::MatrixXd & I_robot,
                                     Eigen::VectorXd & x_next){
   // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
   double roll = x_current[0]; double pitch = x_current[1]; double yaw = x_current[2];
@@ -153,8 +154,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
 
 // Inputs: m, I, current yaw, and footstep locations.
 // Output: A, B matrix to be used for zero-order hold MPC
-void CMPC::cont_time_state_space(const Eigen::MatrixXd & I_robot, const double & psi_in,
-                           const Eigen::MatrixXd & r_feet, 
+void CMPC::cont_time_state_space(const double & psi_in, const Eigen::MatrixXd & r_feet, 
                            Eigen::MatrixXd & A, Eigen::MatrixXd & B){
 	// Get System State: Current Robot yaw
 	Eigen::MatrixXd Rz = R_yaw(psi_in);
@@ -534,7 +534,7 @@ void CMPC::print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out){
 }
 
 void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, const Eigen::MatrixXd & r_feet,
-                     const Eigen::MatrixXd & I_robot, Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out){
+                     Eigen::VectorXd & x_pred, Eigen::VectorXd & f_vec_out){
   #ifdef MPC_TIME_ALL
     // Time the QP solve
     std::chrono::high_resolution_clock::time_point t_mat_setup_start;
@@ -552,7 +552,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   Eigen::MatrixXd B(13, 3*n_Fr); B.setZero();
   int n = A.cols();
   int m = B.cols();
-  cont_time_state_space(I_robot, psi_yaw, r_feet, A, B);
+  cont_time_state_space(psi_yaw, r_feet, A, B);
 
   // create discrete time state space matrices
   Eigen::MatrixXd Adt(n,n); Adt.setZero();
@@ -635,12 +635,14 @@ void CMPC::simulate_toy_mpc(){
   setMu(0.9); //  friction coefficient
   setMaxFz(500); // (Newtons) maximum vertical reaction force. 
 
-  Eigen::MatrixXd I_robot = Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
-  I_robot(0,0) = 5;
-  I_robot(0,1) = 2;
-  I_robot(1,0) = 2;
-  I_robot(1,1) = 5;
-  I_robot(2,2) = 2.5;
+  Eigen::MatrixXd I_robot_body = 10.0*Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
+  // I_robot_body(0,0) = 5;
+  // I_robot_body(0,1) = 2;
+  // I_robot_body(1,0) = 2;
+  // I_robot_body(1,1) = 5;
+  // I_robot_body(2,2) = 2.5;
+  setRobotInertia(I_robot_body);
+
 
   // starting robot state
   // Current reduced state of the robot
@@ -707,7 +709,7 @@ void CMPC::simulate_toy_mpc(){
   Eigen::VectorXd x_pred(n); // Container to hold the predicted state after 1 horizon timestep 
 
   // Solve the MPC
-  solve_mpc(x0, X_des, r_feet, I_robot, x_pred, f_vec_out);
+  solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
   print_f_vec(n_Fr, f_vec_out);
   // Populate force output from 1 horizon.
   assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
@@ -716,7 +718,7 @@ void CMPC::simulate_toy_mpc(){
   double sim_dt = 1e-3;
   Eigen::VectorXd x_prev(n); x_prev = x0;
   Eigen::VectorXd x_next(n); x_next.setZero();
-  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_robot, x_next);
+  integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, x_next);
 
   // Simulate MPC for x seconds
   double total_sim_time = 7.0;
@@ -738,7 +740,7 @@ void CMPC::simulate_toy_mpc(){
     // Solve new MPC every mpc control tick
     if ((cur_time - last_control_time) > mpc_dt){
 
-      solve_mpc(x_prev, X_des, r_feet, I_robot, x_pred, f_vec_out);      
+      solve_mpc(x_prev, X_des, r_feet, x_pred, f_vec_out);      
       assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3*n_Fr), f_Mat);
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);
@@ -756,7 +758,7 @@ void CMPC::simulate_toy_mpc(){
     }
 
     // Integrate the robot dynamics
-    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, I_robot, x_next);
+    integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, x_next);
     // Update x
     x_prev = x_next;
     // Increment time
