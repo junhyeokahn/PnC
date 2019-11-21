@@ -6,6 +6,9 @@ CMPC::CMPC(){
   robot_mass = 50; // kg mass of the robot
   horizon = 20; // Default horizon to 10 steps
   mpc_dt = 0.025; // MPC time interval per horizon steo
+  mu = 0.9; // coefficient of friction
+  fz_max = 500; // maximum z reaction force for one force vector.
+
   // by default this assumes that the inertia provided is in the body frame and needs to be expressed in the world frame.
   rotate_inertia = true; // whether or not the inertia (expressed in the body frame) needs to be rotated
 }
@@ -283,9 +286,6 @@ void CMPC::qp_matrices(const Eigen::MatrixXd & Adt, const Eigen::MatrixXd & Bdt,
 void CMPC::get_force_constraints(const int & n_Fr, Eigen::MatrixXd & CMat, Eigen::VectorXd & cvec){
 	// Unilateral constraints on the force vector
 	// CMat * u + cvec >= 0
-	double mu = 0.9; // coefficient of friction
-	double fz_max = 500; // maximum z reaction force for one force vector.
-
 	Eigen::MatrixXd cfmat(6,3); // the constraint matrix for a single force vector	
 	Eigen::VectorXd cfvec(6); // the constraint vector for a single force vector	
 
@@ -619,9 +619,12 @@ void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd
 
 void CMPC::simulate_toy_mpc(){
   // System Params
-  setRobotMass(50); // 50kg
+  setRobotMass(50); // (kilograms) 50kg
   setHorizon(20); // 10 timesteps 
-  setDt(0.025); // 0.025s per horizon
+  setDt(0.025); // (seconds) 0.025s per horizon
+
+  setMu(0.9); //  friction coefficient
+  setMaxFz(500); // (Newtons) maximum vertical reaction force. 
 
   Eigen::MatrixXd I_robot = Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
   I_robot(0,0) = 5;

@@ -31,6 +31,9 @@ public:
 
 	int horizon;// mpc horizon (number of steps);
 	double mpc_dt; // mpc time interval per horizon steo
+	double mu; // coefficient of friction
+	double fz_max; // maximum z reaction force for one force vector.
+
 	double robot_mass; // kg mass of the robot
 	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
 						 // If the inertia is expressed in body frame this needs to be true.
@@ -41,12 +44,16 @@ public:
 	void updateRobotWorldInertia(const Eigen::MatrixXd & world_inertia_in);
 	void updateContacts(const Eigen::MatrixXd & r_in);
 
-	void setRobotMass(const double & robot_mass_in){ robot_mass = robot_mass_in; }
-	void rotateBodyInertia(bool & rotate_inertia_in){ rotate_inertia = rotate_inertia_in; }
+	void setRobotMass(const double robot_mass_in){ robot_mass = robot_mass_in; }
+	void rotateBodyInertia(bool rotate_inertia_in){ rotate_inertia = rotate_inertia_in; }
 
 	void setRobotInertia(const Eigen::MatrixXd & inertia_in);
-	void setDt(const double & mpc_dt_in){mpc_dt = mpc_dt_in;}	// MPC dt interval per horizon
+	void setDt(const double mpc_dt_in){mpc_dt = mpc_dt_in;}	// MPC dt interval per horizon
 	void setHorizon(const int & horizon_in){ horizon = horizon_in;}	// MPC horizon (number of steps)
+
+	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
+	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
+
 
 	void setStartingState(const Eigen::VectorXd & x0_in);
 
@@ -67,7 +74,8 @@ private:
 
 	Eigen::MatrixXd skew_sym_mat(const Eigen::MatrixXd & v);
 
-
+	// I_robot is the inertia of the robot. If the values are in the body frame, then rotate_inertia must be set to true.
+	// if I_robot is expressed in the world frame then rotate_inertia must be set to false.
 	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
 	                              const Eigen::MatrixXd & I_robot,
 	                              Eigen::VectorXd & x_next);
