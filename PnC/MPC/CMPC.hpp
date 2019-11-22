@@ -69,7 +69,7 @@ public:
 	void get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd & X_ref);
 
 	// The main solve MPC routine 
-	// All values are in wold frame
+	// All the values are in world frame
 	// Inputs:
 	// 		x0 = [Theta, p, omega, pdot, g] \in \mathbf{R}^{13}    (Starting state of the system) 		
 	// 		X_des \in \mathbf{R}^{13*horizon} 				     (Reference or desired state evolution) 
@@ -90,13 +90,13 @@ private:
   	Eigen::MatrixXd R_roll(const double & phi);
 	Eigen::MatrixXd R_pitch(const double & theta);
 	Eigen::MatrixXd R_yaw(const double & psi);
-	Eigen::MatrixXd skew_sym_mat(const Eigen::MatrixXd & v);
+	Eigen::MatrixXd skew_sym_mat(const Eigen::VectorXd & v);
 
 	void assemble_vec_to_matrix(const int & n, const int & m, const Eigen::VectorXd & vec, Eigen::MatrixXd & mat_out);
 
 	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
 	                              Eigen::VectorXd & x_next);
-	void cont_time_state_space(const double & psi_in,
+	void cont_time_state_space(const Eigen::VectorXd & x_current,
 	                           const Eigen::MatrixXd & r_feet, 
 	                           Eigen::MatrixXd & A, Eigen::MatrixXd & B);
 	void discrete_time_state_space(const Eigen::MatrixXd & A, const Eigen::MatrixXd & B, Eigen::MatrixXd & Adt, Eigen::MatrixXd & Bdt);
@@ -105,6 +105,9 @@ private:
 	void get_force_constraints(const int & n_Fr, Eigen::MatrixXd & CMat, Eigen::VectorXd & cvec);
 	void get_qp_constraints(const Eigen::MatrixXd & CMat, const Eigen::VectorXd & cvec, Eigen::MatrixXd & Cqp, Eigen::VectorXd & cvec_qp);
 	void get_qp_costs(const int & n, const int & m, const Eigen::VectorXd & vecS_cost, const double & control_alpha, Eigen::MatrixXd & Sqp, Eigen::MatrixXd & Kqp);
+
+	// Converts location of the feet expressed in world frame to the CoM frame. We assume the CoM orientation frame is always aligned with world.
+	void convert_r_feet_to_com_frame(const Eigen::VectorXd & p_com, const Eigen::MatrixXd & r_feet, Eigen::MatrixXd & r_feet_com);
 
 	void solve_mpc_qp(const Eigen::MatrixXd & Aqp,  const Eigen::MatrixXd & Bqp, const Eigen::VectorXd & X_ref, 
 					  const Eigen::VectorXd & x0,   const Eigen::MatrixXd & Sqp, const Eigen::MatrixXd & Kqp, 

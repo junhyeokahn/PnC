@@ -66,12 +66,27 @@ Eigen::MatrixXd CMPC::R_yaw(const double & psi){
 	return Rz; 
 }
 
-Eigen::MatrixXd CMPC::skew_sym_mat(const Eigen::MatrixXd & v){
+Eigen::MatrixXd CMPC::skew_sym_mat(const Eigen::VectorXd & v){
   Eigen::MatrixXd ssm(3,3);
-  ssm << 0.f, -v(2), v(1),
-    v(2), 0.f, -v(0),
-    -v(1), v(0), 0.f;
+  ssm << 0.f, -v[2], v[1],
+    v[2], 0.f, -v[0],
+    -v[1], v[0], 0.f;
   return ssm;
+}
+
+void CMPC::convert_r_feet_to_com_frame(const Eigen::VectorXd & p_com, const Eigen::MatrixXd & r_feet, Eigen::MatrixXd & r_feet_com){
+  r_feet_com = r_feet;
+  for(int i = 0; i < r_feet.cols(); i++){
+    r_feet_com.col(i) = r_feet.col(i) - p_com;
+  }
+  // std::cout << "p_com" << std::endl;
+  // std::cout << p_com << std::endl;  
+
+  // std::cout << "r_feet:" << std::endl;
+  // std::cout << r_feet << std::endl; 
+
+  // std::cout << "r_feet_com:" << std::endl;
+  // std::cout << r_feet_com << std::endl;   
 }
 
 // Transform input vector to nxm matrix. Vector must have dimension n*m.
@@ -110,6 +125,10 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
     I_world = I_robot;
   }
 
+  // Convert r_feet to be expressed in the CoM frame
+  Eigen::MatrixXd r_feet_com = r_feet;
+  convert_r_feet_to_com_frame(p_prior, r_feet, r_feet_com);
+
   // CoM acceleration, velocity, and position
   Eigen::VectorXd pddot(3); // pddot = 1/m sum(f_i) - g
   Eigen::VectorXd pdot(3);  // pdot = pddot*dt + pdot prior;
@@ -137,7 +156,7 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
 
   Eigen::VectorXd moments(3); moments.setZero();
   for(int i = 0; i < f_Mat.cols(); i++){
-    moments += skew_sym_mat(r_feet.col(i))*f_Mat.col(i);
+    moments += skew_sym_mat(r_feet_com.col(i))*f_Mat.col(i);
   }
   omega_dot = I_world.inverse()*(moments - skew_sym_mat(omega_prior)*(I_world*omega_prior)) ;
   omega = omega_dot*dt + omega_prior;
@@ -172,10 +191,12 @@ void CMPC::integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x
 
 // Inputs: m, I, current yaw, and footstep locations.
 // Output: A, B matrix to be used for zero-order hold MPC
-void CMPC::cont_time_state_space(const double & psi_in, const Eigen::MatrixXd & r_feet, 
+void CMPC::cont_time_state_space(const Eigen::VectorXd & x_current, const Eigen::MatrixXd & r_feet, 
                            Eigen::MatrixXd & A, Eigen::MatrixXd & B){
-	// Get System State: Current Robot yaw
-	Eigen::MatrixXd Rz = R_yaw(psi_in);
+	// Get System State: CoM and Current Robot yaw
+  Eigen::VectorXd p_com = x_current.segment(3,3);
+  double psi_yaw = x_current[2];
+	Eigen::MatrixXd Rz = R_yaw(psi_yaw);
 
   Eigen::MatrixXd I_world;
   if (rotate_inertia){
@@ -186,8 +207,13 @@ void CMPC::cont_time_state_space(const double & psi_in, const Eigen::MatrixXd & 
 
 	Eigen::MatrixXd I_inv = I_world.inverse(); // Inverse
 
-  	// Number of reaction forces equal to number of feet contacts
-  	int n_Fr = r_feet.cols();
+
+  // Convert r_feet to be expressed in the CoM frame
+  Eigen::MatrixXd r_feet_com = r_feet;
+  convert_r_feet_to_com_frame(p_com, r_feet, r_feet_com);
+
+	// Number of reaction forces equal to number of feet contacts
+	int n_Fr = r_feet_com.cols();
 
 	// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
 	// There is an additional gravity state.
@@ -201,7 +227,7 @@ void CMPC::cont_time_state_space(const double & psi_in, const Eigen::MatrixXd & 
 	B = Eigen::MatrixXd::Zero(13, 3*n_Fr);
 	Eigen::MatrixXd eye3 = Eigen::MatrixXd::Identity(3,3);	
 	for(int i = 0; i < n_Fr; i++){
-		B.block(6, i*3, 3, 3) = I_inv*skew_sym_mat(r_feet.col(i)); 
+		B.block(6, i*3, 3, 3) = I_inv*skew_sym_mat(r_feet_com.col(i)); 
 		B.block(9, i*3, 3, 3) = eye3*1.0/robot_mass;
 	}
 
@@ -218,8 +244,8 @@ void CMPC::cont_time_state_space(const double & psi_in, const Eigen::MatrixXd & 
   	std::cout << "I_inv:" << std::endl;
   	std::cout << I_inv << std::endl;
 
-  	std::cout << "r_feet:" << std::endl;
-  	std::cout << r_feet << std::endl;
+  	std::cout << "r_feet_com:" << std::endl;
+  	std::cout << r_feet_com << std::endl;
 
   	std::cout << "A:" << std::endl;
   	std::cout << A << std::endl;
@@ -576,8 +602,8 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   Eigen::MatrixXd A(13,13); A.setZero();
   Eigen::MatrixXd B(13, 3*n_Fr); B.setZero();
   int n = A.cols();
-  int m = B.cols();
-  cont_time_state_space(psi_yaw, r_feet, A, B);
+  int m = B.cols(); 
+  cont_time_state_space(x0, r_feet, A, B);
 
   // create discrete time state space matrices
   Eigen::MatrixXd Adt(n,n); Adt.setZero();
@@ -604,10 +630,10 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
 
   Eigen::VectorXd vecS_cost(n);
   //        <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
-  // vecS_cost << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 0.10, 0.0;
+  // vecS_cost << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
   vecS_cost << 10.0, 10.0, 100.0, 20.0, 20.0, 500.0, 0.5, 0.5, 3.0, 2.0, 2, 1.0, 0.0;
   Eigen::MatrixXd S_cost = vecS_cost.asDiagonal();
-  double control_alpha = 1e-5;//4e-5;
+  double control_alpha = 1e-5; //4e-5
   get_qp_costs(n, m, vecS_cost, control_alpha, Sqp, Kqp);
 
   #ifdef MPC_TIME_ALL
@@ -666,19 +692,17 @@ void CMPC::simulate_toy_mpc(){
   // System Params
   setRobotMass(50); // (kilograms) 
   Eigen::MatrixXd I_robot_body = 10.0*Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
-  // I_robot_body(0,0) = 5;
-  // I_robot_body(0,1) = 2;
-  // I_robot_body(1,0) = 2;
-  // I_robot_body(1,1) = 5;
-  // I_robot_body(2,2) = 2.5;
+  // I_robot_body(0,0) = 07;
+  // I_robot_body(1,1) = 0.26;
+  // I_robot_body(2,2) = 0.242;
   setRobotInertia(I_robot_body);
 
 
   // MPC Params
-  setHorizon(10); // horizon timesteps 
+  setHorizon(20); // horizon timesteps 
   setDt(0.025); // (seconds) per horizon
   setMu(0.9); //  friction coefficient
-  setMaxFz(500); // (Newtons) maximum vertical reaction force. 
+  setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
 
 
   // Starting robot state
@@ -687,7 +711,7 @@ void CMPC::simulate_toy_mpc(){
   Eigen::VectorXd x0(13); 
 
   double init_roll(0), init_pitch(0), init_yaw(0), 
-         init_com_x(0), init_com_y(0), init_com_z(0.75), 
+         init_com_x(0), init_com_y(0), init_com_z(0.25), 
          init_roll_rate(0), init_pitch_rate(0), init_yaw_rate(0),
          init_com_x_rate(0), init_com_y_rate(0), init_com_z_rate(0);
 
@@ -741,7 +765,7 @@ void CMPC::simulate_toy_mpc(){
   x_des[1] = 0.0 ;//-M_PI/8; //des pitch orientation
   x_des[2] = M_PI/12; // Yaw orientation
 
-  x_des[3] = -0.1;//;0.75; // Set desired z height to be 0.75m from the ground
+  x_des[3] = 0.0;//-0.1;//;0.75; // Set desired z height to be 0.75m from the ground
   x_des[5] = 0.75;//;0.75; // Set desired z height to be 0.75m from the ground
 
   Eigen::VectorXd X_des(n*horizon);
