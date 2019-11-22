@@ -20,11 +20,25 @@ public:
                const Eigen::VectorXd & Fd,                
                Eigen::VectorXd & tau_cmd, Eigen::VectorXd & qddot_cmd);
 
+    // w_task_heirarchy_in:
+    //  - sets relative weight between task priority
+    //  - must have dimension equal to the number of tasks.
+    // w_rf_contacts_in (for target wrench minimization only)
+    //  - sets relative weight to distribute the foces between contacts 
+    //  - must have dimension equal to the number of contacts
+    // w_contact_weight_in  
+    //  - sets the relative weight of the contact forces and the task hierarchies
+    void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
+
+    // If true, we try to minimize for a target wrench value. Fd \in mathbf{R}^6.
+    // If false, we try to minimize the desired contact forces term by term: Fd \in mathbf{R}^(n). n = dim of reaction force
+    bool target_wrench_minimization;
+
     // Weight of task hierarchies
     Eigen::VectorXd w_task_heirarchy;
-
     // Weights of contact reaction forces
     Eigen::VectorXd w_rf_contacts;
+    double w_contact_weight;
 
     // Tikhonov regularization
     double lambda_qddot; 
@@ -60,6 +74,9 @@ private:
     // Inequality
     GolDIdnani::GMatr<double> CI;
     GolDIdnani::GVect<double> ci0;
+
+    // Creates a stack of contact jacobians that are weighted by w_rf_contacts
+    Eigen::MatrixXd WeightedContactStack(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in);
 
 };
 
