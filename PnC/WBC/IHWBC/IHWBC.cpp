@@ -118,6 +118,9 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		vf = -w_contact_weight*Fd.transpose()*(Jf);
     }
 
+    // Create Equality Constraints
+    // Create Inequality Constraints
+
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts
