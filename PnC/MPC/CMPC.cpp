@@ -699,7 +699,7 @@ void CMPC::simulate_toy_mpc(){
 
 
   // MPC Params
-  setHorizon(20); // horizon timesteps 
+  setHorizon(10); // horizon timesteps 
   setDt(0.025); // (seconds) per horizon
   setMu(0.9); //  friction coefficient
   setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.

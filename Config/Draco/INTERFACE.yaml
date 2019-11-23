@@ -1,8 +1,8 @@
 #test_name: joint_test
 # test_name: body_test
 # test_name: walking_test
-test_name: balancing_test
-# test_name: mpc_test
+# test_name: balancing_test
+test_name: mpc_test
 
 
 #1test_name: rl_walking_test
