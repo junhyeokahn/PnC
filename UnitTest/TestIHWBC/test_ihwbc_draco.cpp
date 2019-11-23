@@ -1,13 +1,55 @@
+#include "gtest/gtest.h"
+
 #include <Configuration.h>
 #include <Eigen/Dense>
 #include <Utils/IO/IOUtilities.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include "gtest/gtest.h"
+
+#include <PnC/WBC/IHWBC/IHWBC.hpp>
+
+
+void setInitialConfiguration(RobotSystem* & robot) {
+    int lKneeIdx = robot->getDofIdx("lKnee");
+    int lHipPitchIdx = robot->getDofIdx("lHipPitch");
+    int rKneeIdx = robot->getDofIdx("rKnee");
+    int rHipPitchIdx = robot->getDofIdx("rHipPitch");
+    int lAnkleIdx = robot->getDofIdx("lAnkle");
+    int rAnkleIdx = robot->getDofIdx("rAnkle");
+
+    Eigen::VectorXd q = robot->getQ();
+    Eigen::VectorXd qdot(robot->getNumDofs()); 
+    qdot.setZero();
+
+    q[2] = 1.193;
+    double alpha(-M_PI / 4.);
+    double beta(M_PI / 5.5);
+    q[lHipPitchIdx] = alpha;
+    q[lKneeIdx] = beta - alpha;
+    q[rHipPitchIdx] = alpha;
+    q[rKneeIdx] = beta - alpha;
+    q[lAnkleIdx] = M_PI / 2 - beta;
+    q[rAnkleIdx] = M_PI / 2 - beta;
+
+    robot->updateSystem(q, qdot);
+}
+
 
 TEST(IHWBC, robot) {
     RobotSystem* robot;
     robot = new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+
+    setInitialConfiguration(robot);
     std::cout << "q:" << robot->getQ().transpose() << std::endl;
+
+    //  Initialize actuated list
+    std::vector<bool> act_list;
+    act_list.resize(robot->getNumDofs(), true);
+    for (int i(0); i < robot->getNumVirtualDofs(); ++i){
+	    act_list[i] = false;	
+    } 
+
+    // Initialize IHWBC
+    IHWBC* ihwbc = new IHWBC(act_list);
 }
 
 
