@@ -177,16 +177,20 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     	Ptot.block(num_qdot_, num_qdot_, dim_contacts_, dim_contacts_) = Pf;
     	vtot.tail(dim_contacts_) = vf;
     }
-    // Prepare QP size
-    prepareQPSizes();
 
-    // Set Quadprog Costs
-    setQuadProgCosts(Ptot, vtot);
+    // Create the Dynamic Equality Constraint
+	Eigen::MatrixXd dyn_CE(6, num_qdot_ + dim_contacts_);
+	Eigen::VectorXd dyn_ce0(6);
 
-    // Create Equality Constraints
-    // Create Inequality Constraints
+	dyn_CE.block(0, 0, 6, num_qdot_) = Sf_*A_;
+	dyn_CE.block(0, num_qdot_, 6, dim_contacts_) = -Sf_*Jc_.transpose();
+    dyn_ce0 = Sf_ * (cori_ + grav_);
 
     // Solve Quadprog
+    prepareQPSizes(); // Prepare QP size
+    setQuadProgCosts(Ptot, vtot); // Set Quadprog Costs
+    setEqualityConstraints(dyn_CE, dyn_ce0); // Create Equality Constraints
+    // Create Inequality Constraints
     solveQP();
 }
 
@@ -224,7 +228,7 @@ void IHWBC::buildContactStacks(const std::vector<ContactSpec*> & contact_list, c
 void IHWBC::prepareQPSizes(){
 	n_quadprog_ = num_qdot_ + dim_contacts_; // Number of decision Variables
 	p_quadprog_ = 0; 		 				 // Number of Inequality constraints
-	m_quadprog_ = 0; 		 				 // Number of Equality Constraints
+	m_quadprog_ = 6; 		 				 // Number of Equality Constraints
 
 	qp_dec_vars_ = Eigen::VectorXd::Zero(n_quadprog_);
 	qddot_result_ = Eigen::VectorXd::Zero(num_qdot_);
@@ -256,6 +260,22 @@ void IHWBC::setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::Vector
 	}
 }
 
+void IHWBC::setEqualityConstraints(const Eigen::MatrixXd & Eq_mat, const Eigen::VectorXd & Eq_vec){
+  // Populate Inequality Constraint Matrix
+  // CE^T = Sf(A - Jc^T )
+  for(int i = 0; i < m_quadprog_; i++){
+    for(int j = 0; j < n_quadprog_; j++){
+      CE[j][i] = Eq_mat(i,j);
+    }
+  }
+
+  // Populate Inequality Constraint Vector
+  // ce0 = Sf(b + g)
+  for(int i = 0; i < m_quadprog_; i++){
+    ce0[i] = Eq_vec[i];
+  }
+}
+
 void IHWBC::solveQP(){
 	double qp_result = solve_quadprog(G, g0, CE, ce0, CI, ci0, x);
 
@@ -270,15 +290,6 @@ void IHWBC::solveQP(){
 	myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
 	myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
 	myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
-
-}
-
-void IHWBC::setEqualityConstraints(){
-	Eigen::MatrixXd dyn_CE(6, n_quadprog_);
-	Eigen::VectorXd dyn_ce0(6);
-
-	// dyn_CE.block(0, 0, 6, num_qdot_) = Sf_*A_;
-	// dyn_CE.block(0, 6, 6, dim_contacts_) = Sf_*Jc_;
 
 }
 

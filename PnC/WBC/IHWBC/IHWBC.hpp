@@ -99,7 +99,7 @@ private:
 
     void prepareQPSizes();
     void setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::VectorXd & v_cost);
-    void setEqualityConstraints();
+    void setEqualityConstraints(const Eigen::MatrixXd & Eq_mat, const Eigen::VectorXd & Eq_vec);
 
     void solveQP();
 
