@@ -11,7 +11,7 @@
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 
-void setInitialConfiguration(RobotSystem* & robot) {
+void getInitialConfiguration(RobotSystem* & robot, Eigen::VectorXd & q_out, Eigen::VectorXd & qdot_out) {
     int lKneeIdx = robot->getDofIdx("lKnee");
     int lHipPitchIdx = robot->getDofIdx("lHipPitch");
     int rKneeIdx = robot->getDofIdx("rKnee");
@@ -33,7 +33,8 @@ void setInitialConfiguration(RobotSystem* & robot) {
     q[lAnkleIdx] = M_PI / 2 - beta;
     q[rAnkleIdx] = M_PI / 2 - beta;
 
-    robot->updateSystem(q, qdot);
+    q_out = q;
+    qdot_out = qdot;
 }
 
 
@@ -59,6 +60,11 @@ TEST(IHWBC, robot) {
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
     task_list.push_back(total_joint_task);
 
+    // Set Task Gains
+    Eigen::VectorXd kp_jp = Eigen::VectorXd::Ones(Draco::n_adof); 
+    Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
+    total_joint_task->setGain(kp_jp, kd_jp);
+
     // Create the contacts
     ContactSpec* rfoot_front_contact = new PointContactSpec(robot, DracoBodyNode::rFootFront, 0.7);
     ContactSpec* rfoot_back_contact = new PointContactSpec(robot, DracoBodyNode::rFootBack, 0.7);
@@ -70,15 +76,25 @@ TEST(IHWBC, robot) {
     contact_list.push_back(lfoot_front_contact);
     contact_list.push_back(lfoot_back_contact);
 
-    setInitialConfiguration(robot);
-    std::cout << "q:" << robot->getQ().transpose() << std::endl;
+    Eigen::VectorXd q, qdot;
+    getInitialConfiguration(robot, q, qdot);
+    robot->updateSystem(q, qdot);
+    myUtils::pretty_print(q, std::cout, "q");
 
+	// Set the desired task values
+   	Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
+    Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
+    Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+    total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
+
+    myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
+
+    // Update dynamics
 	Eigen::MatrixXd A = robot->getMassMatrix();
 	Eigen::MatrixXd Ainv = robot->getInvMassMatrix();
 	Eigen::MatrixXd grav = robot->getGravity();
 	Eigen::MatrixXd coriolis = robot->getCoriolis();
 
-	// Set the desired task values
 	// Containers
 	Eigen::VectorXd tau_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Torque Command output from IHBC
 	Eigen::VectorXd qddot_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Joint Acceleration Command output from IHBC	
@@ -87,13 +103,21 @@ TEST(IHWBC, robot) {
     for(int i = 0; i < contact_list.size(); i++){
     	contact_dim_size += contact_list[i]->getDim();
     }
-    std::cout << "contact_dim_size:" << contact_dim_size << std::endl;
+    ASSERT_EQ(contact_dim_size, 12);
 
     Eigen::VectorXd Fd(contact_dim_size);
 
+    // Initialize QP weights
+ 	Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
+ 	w_task_heirarchy[0] = 1e-3;
+ 	double w_contact_weight = 1.0; // Contact Weight
 
+    // Set QP weights
+ 	ihwbc->setQPWeights(w_task_heirarchy, w_contact_weight);
+
+ 	// Update and solve QP
+ 	ihwbc->updateSetting(A, Ainv, coriolis, grav);
     ihwbc->solve(task_list, contact_list, Fd, tau_cmd, qddot_cmd);
-
 
 	// myUtils::pretty_print(A, std::cout, "A");
 }

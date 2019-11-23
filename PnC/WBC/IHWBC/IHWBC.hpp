@@ -29,6 +29,7 @@ public:
     // w_contact_weight_in  
     //  - sets the relative weight of the contact forces and the task hierarchies
     void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
+    void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in);
 
     // If true, we try to minimize for a target wrench value. Fd \in mathbf{R}^6.
     // If false, we try to minimize the desired contact forces term by term: Fd \in mathbf{R}^(n). n = dim of reaction force

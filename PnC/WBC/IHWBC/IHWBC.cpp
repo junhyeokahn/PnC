@@ -56,7 +56,15 @@ void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in,
 	w_task_heirarchy = w_task_heirarchy_in;
 	w_rf_contacts = w_rf_contacts_in;
 	w_contact_weight = w_contact_weight_in;
+	b_weights_set_ = true;
 }
+
+void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in){
+	w_task_heirarchy = w_task_heirarchy_in;
+	w_contact_weight = w_contact_weight_in;	
+	b_weights_set_ = true;
+}
+
 
 void IHWBC::updateSetting(const Eigen::MatrixXd & A,
 		                 const Eigen::MatrixXd & Ainv,
@@ -110,6 +118,7 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     	task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
         task->getCommand(xddot);       
+
         Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
         vt += (w_task_heirarchy[i]*(-(JtDotQdot-xddot).transpose()*Jt));
     }
