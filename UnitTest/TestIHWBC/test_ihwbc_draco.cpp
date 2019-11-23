@@ -105,15 +105,19 @@ TEST(IHWBC, robot) {
     }
     ASSERT_EQ(contact_dim_size, 12);
 
-    Eigen::VectorXd Fd(contact_dim_size);
+    Eigen::VectorXd Fd(contact_dim_size); Fd.setZero();
 
     // Initialize QP weights
  	Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
  	w_task_heirarchy[0] = 1e-3;
- 	double w_contact_weight = 1.0; // Contact Weight
+ 	double w_contact_weight = 2.0; // Contact Weight
+
+ 	double lambda_qddot = 1e-16;
+ 	double lambda_Fr = 1e-16;
 
     // Set QP weights
  	ihwbc->setQPWeights(w_task_heirarchy, w_contact_weight);
+ 	ihwbc->setRegularizationTerms(lambda_qddot, lambda_Fr);
 
  	// Update and solve QP
  	ihwbc->updateSetting(A, Ainv, coriolis, grav);

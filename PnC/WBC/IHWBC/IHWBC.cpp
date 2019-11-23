@@ -65,6 +65,10 @@ void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const doub
 	b_weights_set_ = true;
 }
 
+void IHWBC::setRegularizationTerms(const double lambda_qddot_in, const double lambda_Fr_in){
+	lambda_qddot = lambda_qddot_in;	
+	lambda_Fr = lambda_Fr_in;
+}
 
 void IHWBC::updateSetting(const Eigen::MatrixXd & A,
 		                 const Eigen::MatrixXd & Ainv,
@@ -81,7 +85,7 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		          const std::vector<ContactSpec*> & contact_list,
 		          const Eigen::VectorXd & Fd,
 		          Eigen::VectorXd & tau_cmd, Eigen::VectorXd & qddot_cmd){
-    if(!b_updatesetting_) { printf("[Warning] IHWBC setting is not done\n"); }
+    if(!b_updatesetting_) { printf("[Warning] IHWBC setting A, Ainv, cori, and grav terms have not been done\n"); }
 
 	if(!b_weights_set_){
 		printf("[Warning] Weights for IHBWC has not been set. Setting 1.0 to all weights \n");
@@ -126,10 +130,13 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
     // Target Contact Forces / Wrenches Cost Matrices
     int dim_contacts = 0;
+    for(int i = 0; i < contact_list.size(); i++){
+    	dim_contacts += contact_list[i]->getDim();
+    }
+
     if (!target_wrench_minimization){
 	    // w_f*||Fd - Fr||^2_2 + lambda_Fr*||Fr||
 	    // Target Force Minimization (term by term)
-	    dim_contacts = Fd.size();
 
 	    // Force Contact Costs
 	    Pf = (w_contact_weight + lambda_Fr)*Eigen::MatrixXd::Identity(dim_contacts, dim_contacts);
@@ -139,9 +146,6 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 	    // w_f*||Fw -  Sf* [wrf_1 *J^Tc_1, ..., wrf_n *J^Tc_n]*F_r_i|| + lambda_Fr*||Fr||
 	    // = w_f*||Fw -  Sf* [wrf_1 *Jc_1; ... ; wrf_n *J^c_n]^T*F_r_i|| + lambda_Fr*||Fr||
 	    // Count dimension of contacts from the contact_list
-	    for(int i = 0; i < contact_list.size(); i++){
-	    	dim_contacts += contact_list[i]->getDim();
-	    }
 
 	    // Stack contact Jacobians with weighting
 		Eigen::MatrixXd weighted_Jc;
@@ -153,6 +157,19 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		// Force Contact Costs
 		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts, dim_contacts);
 		vf = -w_contact_weight*Fd.transpose()*(Jf);
+    }
+
+    // Set total cost matrix and vector
+    Eigen::MatrixXd Ptot(num_qdot_ + dim_contacts, num_qdot_ + dim_contacts);
+    Eigen::VectorXd vtot(num_qdot_ + dim_contacts); 
+    Ptot.setZero(); vtot.setZero(); 
+    
+    // Assign Block Cost Matrices  
+    Ptot.block(0, 0, num_qdot_, num_qdot_) = Pt;
+    vtot.head(num_qdot_) = vt;
+    if (dim_contacts > 0){
+    	Ptot.block(num_qdot_, num_qdot_, dim_contacts, dim_contacts) = Pf;
+    	vtot.tail(dim_contacts) = vf;
     }
 
     // Create Equality Constraints
