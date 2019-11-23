@@ -159,6 +159,8 @@ TEST(IHWBC, no_target_reaction_force) {
     contact_list.push_back(lfoot_front_contact);
     contact_list.push_back(lfoot_back_contact);
 
+    // ((PointContactSpec*)rfoot_front_contact)->setMaxFz(100.0);
+
 	rfoot_front_contact->updateContactSpec();
 	rfoot_back_contact->updateContactSpec();
 	lfoot_front_contact->updateContactSpec();

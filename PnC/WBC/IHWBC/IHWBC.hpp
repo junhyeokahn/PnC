@@ -51,7 +51,11 @@ private:
     int num_qdot_; // Number of degrees of freedom
     int num_act_joint_; // Actuated Joints
     int num_passive_; // Passive Joints
-    int dim_contacts_;
+    int dim_contacts_; // Dimension of Contacts
+    int dim_contact_constraints_; // Dimension of Contact Constraints
+
+    int dim_dec_vars_;
+    int dim_inequality_constraints_;
 
     // Selection Matrices
     Eigen::MatrixXd Sa_; // Actuated joint
@@ -66,6 +70,10 @@ private:
     // Contact Jacobians
     Eigen::MatrixXd Jc_;
     Eigen::MatrixXd Jc_weighted_;
+
+    //Contact Constraints
+    Eigen::MatrixXd Uf_;
+    Eigen::VectorXd uf_ieq_vec_;
 
     bool b_weights_set_;
     bool b_updatesetting_;
@@ -100,7 +108,7 @@ private:
     void prepareQPSizes();
     void setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::VectorXd & v_cost);
     void setEqualityConstraints(const Eigen::MatrixXd & Eq_mat, const Eigen::VectorXd & Eq_vec);
-
+    void setInequalityConstraints(const Eigen::MatrixXd & IEq_mat, const Eigen::VectorXd & IEq_vec);
     void solveQP();
 
 };
