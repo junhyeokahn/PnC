@@ -126,21 +126,32 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     	task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
         task->getCommand(xddot);       
-
+        // Add to Costs
         Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
         vt += (w_task_heirarchy[i]*(-(JtDotQdot-xddot).transpose()*Jt));
     }
     Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
 
+ //    double w_contact_task_weight = 1.0;
+ //    // No acceleration at contacts:
+	// for (int i = 0; i < contact_list.size(); i++){
+	// 	contact_list[i]->getContactJacobian(Jt);
+	// 	contact_list[i]->getJcDotQdot(JtDotQdot);
+	// 	xddot = Eigen::VectorXd::Zero(contact_list[i]->getDim());
+	// 	// Add to Costs
+ //        Pt += (w_contact_task_weight*(Jt.transpose()*Jt));
+ //        vt += (w_contact_task_weight*(-(JtDotQdot-xddot).transpose()*Jt));		
+	// }    
+
     // Prepare contact dimensions
-    dim_contacts_ = 0;
+    dim_contacts_ = 0;     
     if (contact_list.size() > 0){
 	    // Construct Contact Jacobians
 	    buildContactStacks(contact_list, w_rf_contacts);    	
-	    // Target Contact Forces / Wrenches Cost Matrices
-	    for(int i = 0; i < contact_list.size(); i++){
+		for (int i = 0; i < contact_list.size(); i++){
+	        // Increment total contact dimension
 	    	dim_contacts_ += contact_list[i]->getDim();
-	    }
+		}
     }
 
     if (!target_wrench_minimization){
