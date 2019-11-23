@@ -78,6 +78,23 @@ TEST(IHWBC, robot) {
 	Eigen::MatrixXd grav = robot->getGravity();
 	Eigen::MatrixXd coriolis = robot->getCoriolis();
 
+	// Set the desired task values
+	// Containers
+	Eigen::VectorXd tau_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Torque Command output from IHBC
+	Eigen::VectorXd qddot_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Joint Acceleration Command output from IHBC	
+
+	int contact_dim_size = 0;
+    for(int i = 0; i < contact_list.size(); i++){
+    	contact_dim_size += contact_list[i]->getDim();
+    }
+    std::cout << "contact_dim_size:" << contact_dim_size << std::endl;
+
+    Eigen::VectorXd Fd(contact_dim_size);
+
+
+    ihwbc->solve(task_list, contact_list, Fd, tau_cmd, qddot_cmd);
+
+
 	// myUtils::pretty_print(A, std::cout, "A");
 }
 

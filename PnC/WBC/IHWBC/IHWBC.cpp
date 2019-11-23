@@ -2,7 +2,10 @@
 
 // Constructor
 IHWBC::IHWBC(const std::vector<bool> & act_list): 
-	num_act_joint_(0), num_passive_(0), b_updatesetting_(false), target_wrench_minimization(false) {
+	num_act_joint_(0), num_passive_(0), 
+	b_weights_set_(false),
+	b_updatesetting_(false), 
+	target_wrench_minimization(false) {
     myUtils::pretty_constructor(1, "IHWBC");
     // Set Number of degrees of freedom
     num_qdot_ = act_list.size();
@@ -47,6 +50,14 @@ IHWBC::IHWBC(const std::vector<bool> & act_list):
 // Destructor
 IHWBC::~IHWBC(){}
 
+void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, 
+                         const Eigen::VectorXd & w_rf_contacts_in, 
+                         const double & w_contact_weight_in){
+	w_task_heirarchy = w_task_heirarchy_in;
+	w_rf_contacts = w_rf_contacts_in;
+	w_contact_weight = w_contact_weight_in;
+}
+
 void IHWBC::updateSetting(const Eigen::MatrixXd & A,
 		                 const Eigen::MatrixXd & Ainv,
 		                 const Eigen::VectorXd & cori,
@@ -63,6 +74,22 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		          const Eigen::VectorXd & Fd,
 		          Eigen::VectorXd & tau_cmd, Eigen::VectorXd & qddot_cmd){
     if(!b_updatesetting_) { printf("[Warning] IHWBC setting is not done\n"); }
+
+	if(!b_weights_set_){
+		printf("[Warning] Weights for IHBWC has not been set. Setting 1.0 to all weights \n");
+		w_task_heirarchy = Eigen::VectorXd::Zero(task_list.size());
+		w_rf_contacts = Eigen::VectorXd::Zero(contact_list.size());
+
+		for(int i = 0; i < task_list.size(); i++){
+			w_task_heirarchy[i] = 1.0;
+		}
+		for(int i = 0; i < contact_list.size(); i++){
+			w_rf_contacts[i] = 1.0;
+		}
+		w_contact_weight = 1.0;
+	}
+
+
     // Task Matrices and Vectors
     Eigen::MatrixXd Jt, Jc; 
     Eigen::VectorXd JtDotQdot, xddot;

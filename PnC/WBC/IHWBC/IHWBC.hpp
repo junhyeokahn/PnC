@@ -59,6 +59,7 @@ private:
     Eigen::VectorXd cori_;
     Eigen::VectorXd grav_;	
 
+    bool b_weights_set_;
     bool b_updatesetting_;
 
     // Quadprog Variables
