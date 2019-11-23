@@ -77,12 +77,76 @@ TEST(IHWBC, robot) {
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
 
+    task_list.push_back(body_rpz_task_);
+    task_list.push_back(rfoot_center_rz_xyz_task);
+    task_list.push_back(lfoot_center_rz_xyz_task);
     task_list.push_back(total_joint_task);
 
     // Set Task Gains
+    Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
+    body_rpz_task_->setGain(kp_body, kd_body);
+
+    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
+    Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
+    rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+    lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+
     Eigen::VectorXd kp_jp = Eigen::VectorXd::Ones(Draco::n_adof); 
     Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
     total_joint_task->setGain(kp_jp, kd_jp);
+
+
+	// Set the desired task values
+    // Body Task
+    Eigen::VectorXd body_pos_des(7); body_pos_des.setZero();
+    Eigen::VectorXd body_vel_des(6); body_vel_des.setZero();    
+    Eigen::VectorXd body_acc_des(6); body_acc_des.setZero();
+    Eigen::Quaternion<double> body_des_quat(1, 0, 0, 0);
+
+    body_pos_des[0] = body_des_quat.w();
+    body_pos_des[1] = body_des_quat.x();
+    body_pos_des[2] = body_des_quat.y();
+    body_pos_des[3] = body_des_quat.z();
+
+    body_pos_des[4] = q[0];
+    body_pos_des[5] = q[1];
+    body_pos_des[6] = q[2];// + 0.02;
+   	
+   	body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
+
+   	// Foot Task
+    Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
+    Eigen::VectorXd lfoot_pos_des(7); lfoot_pos_des.setZero();
+    Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();    
+    Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
+
+    Eigen::Quaternion<double> rfoot_ori_act(robot->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
+    Eigen::Quaternion<double> lfoot_ori_act(robot->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
+
+    rfoot_pos_des[0] = rfoot_ori_act.w();
+    rfoot_pos_des[1] = rfoot_ori_act.x();
+    rfoot_pos_des[2] = rfoot_ori_act.y();
+    rfoot_pos_des[3] = rfoot_ori_act.z();
+    rfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+
+    lfoot_pos_des[0] = lfoot_ori_act.w();
+    lfoot_pos_des[1] = lfoot_ori_act.x();
+    lfoot_pos_des[2] = lfoot_ori_act.y();
+    lfoot_pos_des[3] = lfoot_ori_act.z();
+    lfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+
+   	// Joint Position Task
+   	Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
+    Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
+    Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+    total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
+
+    myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
+    myUtils::pretty_print(rfoot_pos_des, std::cout, "rfoot_pos_des");
+    myUtils::pretty_print(lfoot_pos_des, std::cout, "lfoot_pos_des");
+    myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
+
 
     // Create the contacts
     ContactSpec* rfoot_front_contact = new PointContactSpec(robot, DracoBodyNode::rFootFront, 0.7);
@@ -95,13 +159,10 @@ TEST(IHWBC, robot) {
     contact_list.push_back(lfoot_front_contact);
     contact_list.push_back(lfoot_back_contact);
 
-	// Set the desired task values
-   	Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
-    Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
-    Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
-    total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
-
-    myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
+	rfoot_front_contact->updateContactSpec();
+	rfoot_back_contact->updateContactSpec();
+	lfoot_front_contact->updateContactSpec();
+	lfoot_back_contact->updateContactSpec();
 
     // Update dynamics
 	Eigen::MatrixXd A = robot->getMassMatrix();
@@ -123,8 +184,13 @@ TEST(IHWBC, robot) {
 
     // Initialize QP weights
  	Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
- 	w_task_heirarchy[0] = 1e-3;
- 	double w_contact_weight = 2.0; // Contact Weight
+
+ 	w_task_heirarchy[0] = 1e-2; // Body
+ 	w_task_heirarchy[1] = 10.0; // rfoot
+ 	w_task_heirarchy[2] = 10.0; // lfoot
+ 	w_task_heirarchy[3] = 1e-6; // joint
+
+ 	double w_contact_weight = 1e-10;//2.0; // Contact Weight
 
  	double lambda_qddot = 1e-16;
  	double lambda_Fr = 1e-16;

@@ -126,9 +126,10 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     	task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
         task->getCommand(xddot);       
+        myUtils::pretty_print(xddot, std::cout, "xddot");
         // Add to Costs
         Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
-        vt += (w_task_heirarchy[i]*(-(JtDotQdot-xddot).transpose()*Jt));
+        vt += (w_task_heirarchy[i]*((JtDotQdot-xddot).transpose()*Jt));
     }
     Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
 
@@ -192,6 +193,9 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     setEqualityConstraints(dyn_CE, dyn_ce0); // Create Equality Constraints
     // Create Inequality Constraints
     solveQP();
+
+    tau_cmd = Sa_*(A_*qddot_result_ + cori_ + grav_ - Jc_.transpose()*Fr_result_);
+    qddot_cmd = Sa_*qddot_result_;
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts
@@ -207,10 +211,13 @@ void IHWBC::buildContactStacks(const std::vector<ContactSpec*> & contact_list, c
     int dim_rf = contact_list[0]->getDim();
     int dim_new_rf;
 
+    myUtils::pretty_print(Jc, std::cout, "Jc1");
+
+
     for(int i(1); i<contact_list.size(); ++i){
         contact_list[i]->getContactJacobian(Jc);
         dim_new_rf = contact_list[i]->getDim();
-
+        myUtils::pretty_print(Jc, std::cout, "Jc");
         // Stack Jc normally
         Jc_.conservativeResize(dim_rf + dim_new_rf, num_qdot_);
         Jc_.block(dim_rf, 0, dim_new_rf, num_qdot_) = Jc;
