@@ -43,7 +43,7 @@ void getInitialConfiguration(RobotSystem* & robot, Eigen::VectorXd & q_out, Eige
 //   2) Term-by-term minimization minimization
 //   3) Desired Contact Wrench minimization
 
-TEST(IHWBC, robot) {
+TEST(IHWBC, no_target_reaction_force) {
     RobotSystem* robot;
     robot = new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
 
@@ -72,6 +72,7 @@ TEST(IHWBC, robot) {
 	// Body RxRyZ tasks or CoM xyz task or Linear Momentum Task
 	// Body Rx Ry Rz
 	// Foot location task.
+	// Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
     Task* body_rpz_task_ = new BodyRxRyZTask(robot);
     Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
@@ -142,11 +143,10 @@ TEST(IHWBC, robot) {
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
-    myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
-    myUtils::pretty_print(rfoot_pos_des, std::cout, "rfoot_pos_des");
-    myUtils::pretty_print(lfoot_pos_des, std::cout, "lfoot_pos_des");
-    myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
-
+    // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
+    // myUtils::pretty_print(rfoot_pos_des, std::cout, "rfoot_pos_des");
+    // myUtils::pretty_print(lfoot_pos_des, std::cout, "lfoot_pos_des");
+    // myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
 
     // Create the contacts
     ContactSpec* rfoot_front_contact = new PointContactSpec(robot, DracoBodyNode::rFootFront, 0.7);
@@ -185,13 +185,20 @@ TEST(IHWBC, robot) {
     // Initialize QP weights
  	Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
 
- 	w_task_heirarchy[0] = 1e-2; // Body
- 	w_task_heirarchy[1] = 10.0; // rfoot
- 	w_task_heirarchy[2] = 10.0; // lfoot
+ 	// Contact Tasks have weight 1.0
+ 	// Pose Tasks have weight 1e-4
+ 	// Joint Posture Tasks have weight 1e-6
+ 	w_task_heirarchy[0] = 1e-4; // Body
+ 	w_task_heirarchy[1] = 1.0; // rfoot
+ 	w_task_heirarchy[2] = 1.0; // lfoot
  	w_task_heirarchy[3] = 1e-6; // joint
 
- 	double w_contact_weight = 1e-10;//2.0; // Contact Weight
+ 	// When Fd is zero, the contact weight should be smaller than the 
+ 	// tasks to encourage using the reaction forces instead of qddot 
+ 	// for satisfying the floating base dynamics.
+ 	double w_contact_weight = 1e-10; // Contact Weight
 
+ 	// Regularization terms should always be the lowest cost. 
  	double lambda_qddot = 1e-16;
  	double lambda_Fr = 1e-16;
 
