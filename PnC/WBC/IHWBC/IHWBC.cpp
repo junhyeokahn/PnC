@@ -132,9 +132,15 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     }
     Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
 
-    // Target Contact Forces / Wrenches Cost Matrices
-    for(int i = 0; i < contact_list.size(); i++){
-    	dim_contacts_ += contact_list[i]->getDim();
+    // Prepare contact dimensions
+    dim_contacts_ = 0;
+    if (contact_list.size() > 0){
+	    // Construct Contact Jacobians
+	    buildContactStacks(contact_list, w_rf_contacts);    	
+	    // Target Contact Forces / Wrenches Cost Matrices
+	    for(int i = 0; i < contact_list.size(); i++){
+	    	dim_contacts_ += contact_list[i]->getDim();
+	    }
     }
 
     if (!target_wrench_minimization){
@@ -150,12 +156,9 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 	    // = w_f*||Fw -  Sf* [wrf_1 *Jc_1; ... ; wrf_n *J^c_n]^T*F_r_i|| + lambda_Fr*||Fr||
 	    // Count dimension of contacts from the contact_list
 
-	    // Stack contact Jacobians with weighting
-		Eigen::MatrixXd weighted_Jc;
-	    weighted_Jc = WeightedContactStack(contact_list, w_rf_contacts);
-
+    	// Use Weighted Jacobian Stack
 		Eigen::MatrixXd Jf = Eigen::MatrixXd(6, num_qdot_);	
-		Jf = Sf_*(weighted_Jc.transpose()); // Container to save computation
+		Jf = Sf_*(Jc_weighted_.transpose()); // Container to save computation
 
 		// Force Contact Costs
 		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
@@ -188,10 +191,14 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts
-Eigen::MatrixXd IHWBC::WeightedContactStack(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in){
-    Eigen::MatrixXd Jc_stack, Jc;	
+void IHWBC::buildContactStacks(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in){
+    Eigen::MatrixXd Jc;	
 	contact_list[0]->getContactJacobian(Jc);
-	Jc_stack = w_rf_contacts_in[0]*Jc;
+
+	Jc_ = Jc;
+	if (target_wrench_minimization){
+		Jc_weighted_ = w_rf_contacts_in[0]*Jc;		
+	}
 
     int dim_rf = contact_list[0]->getDim();
     int dim_new_rf;
@@ -199,15 +206,19 @@ Eigen::MatrixXd IHWBC::WeightedContactStack(const std::vector<ContactSpec*> & co
     for(int i(1); i<contact_list.size(); ++i){
         contact_list[i]->getContactJacobian(Jc);
         dim_new_rf = contact_list[i]->getDim();
-        // Jc stack with relative weighting
-        Jc_stack.conservativeResize(dim_rf + dim_new_rf, num_qdot_);
-        Jc_stack.block(dim_rf, 0, dim_new_rf, num_qdot_) = w_rf_contacts_in[i]*Jc;
 
+        // Stack Jc normally
+        Jc_.conservativeResize(dim_rf + dim_new_rf, num_qdot_);
+        Jc_.block(dim_rf, 0, dim_new_rf, num_qdot_) = Jc;
+
+        // Jc stack with relative weighting
+        if (target_wrench_minimization){
+	        Jc_weighted_.conservativeResize(dim_rf + dim_new_rf, num_qdot_);
+	        Jc_weighted_.block(dim_rf, 0, dim_new_rf, num_qdot_) = w_rf_contacts_in[i]*Jc;
+        }
         // Increase reaction force dimension
         dim_rf += dim_new_rf;
     }
-    return Jc_stack;
-
 }
 
 void IHWBC::prepareQPSizes(){
@@ -261,3 +272,30 @@ void IHWBC::solveQP(){
 	myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
 
 }
+
+void IHWBC::setEqualityConstraints(){
+	Eigen::MatrixXd dyn_CE(6, n_quadprog_);
+	Eigen::VectorXd dyn_ce0(6);
+
+	// dyn_CE.block(0, 0, 6, num_qdot_) = Sf_*A_;
+	// dyn_CE.block(0, 6, 6, dim_contacts_) = Sf_*Jc_;
+
+}
+
+/*
+
+Eigen::MatrixXd dyn_CE(dim_eq_cstr_, dim_opt_);
+Eigen::VectorXd dyn_ce0(dim_eq_cstr_);
+
+Aqddot + b + g = Jc^T Fr
+
+Sf(Aqddot + b + g - Jc^T Fr = 0)
+
+Sf*A*qddot + Sf*(b+g) - (Sf*Jc^T) Fr = 0)
+
+Sf*A*qddot + Sf*(b+g) - (Sf*Jc^T) Fr = 0)
+
+[Sf*A - Sf*Jc^T] [qddot, Fr] = 0
+
+
+*/

@@ -63,6 +63,10 @@ private:
     Eigen::VectorXd cori_;
     Eigen::VectorXd grav_;	
 
+    // Contact Jacobians
+    Eigen::MatrixXd Jc_;
+    Eigen::MatrixXd Jc_weighted_;
+
     bool b_weights_set_;
     bool b_updatesetting_;
 
@@ -91,13 +95,13 @@ private:
     Eigen::VectorXd qddot_result_;
     Eigen::VectorXd Fr_result_;
 
+    void buildContactStacks(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in);
+
     void prepareQPSizes();
     void setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::VectorXd & v_cost);
+    void setEqualityConstraints();
 
     void solveQP();
-
-    // Creates a stack of contact jacobians that are weighted by w_rf_contacts
-    Eigen::MatrixXd WeightedContactStack(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in);
 
 };
 
