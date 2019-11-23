@@ -11,16 +11,18 @@ plot_adjusted_foot: false
 plot_guided_foot: false
 camera_manipulator: false
 print_computation_time: false
-#release_time: 4.20
-release_time: 10
+# release_time: 4.20
+release_time: 100
 
 ### Toggle for RL ###
 show_viewer: true
 #show_viewer: false
-check_collision: true
-#check_collision: false
+# check_collision: true
+check_collision: false
 
 
 control_configuration:
-  kp: [100 , 100 , 100 , 100 , 10 , 100 , 100 , 100 , 100 , 10]
-  kd: [20  , 20  , 20  , 20  , 1  , 20  , 20  , 20  , 20  , 1]
+  # kp: [100 , 100 , 100 , 100 , 10 , 100 , 100 , 100 , 100 , 10]
+  # kd: [20  , 20  , 20  , 20  , 1  , 20  , 20  , 20  , 20  , 1]
+  kp: [0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0]
+  kd: [0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0  , 0]

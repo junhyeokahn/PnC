@@ -1,0 +1,9 @@
+test_configuration:
+    initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
+    jpos_initialization_time: 2.0
+    jpos_ctrl_time: 1000.0
+
+control_configuration:
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 100. , 100 , 100 , 100 , 100 , 100. ]
+        kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]

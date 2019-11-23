@@ -37,6 +37,16 @@ bool FootRzXYZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
         acc_des[i + 1] = _acc_des[i + 3];
     }
 
+    Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
+    vel_act.head(1) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(1);
+    vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).tail(3);
+
+    // op_cmd
+    for (int i(0); i < dim_task_; ++i) {
+        op_cmd[i] = acc_des[i] + kp_[i] * pos_err[i] +
+                    kd_[i] * (vel_des[i] - vel_act[i]);
+    }
+
     // myUtils::pretty_print(des_ori, std::cout, "ori_des");
     // myUtils::pretty_print(ori_act, std::cout, "ori_act");
     // myUtils::pretty_print(pos_err, std::cout, "pos_err in bodyrpz");

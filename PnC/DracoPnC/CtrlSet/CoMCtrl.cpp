@@ -135,6 +135,8 @@ void CoMCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     //for (int i = 0; i < wblc_data_->Fr_.size(); ++i) {
         //sp_->reaction_forces[i] = wblc_data_->Fr_[i];
     //}
+    // Eigen::VectorXd Fr_out = wblc_data_->Fr_;
+    // myUtils::pretty_print(Fr_out, std::cout, "Fr_out");    
 }
 
 void CoMCtrl::task_setup() {

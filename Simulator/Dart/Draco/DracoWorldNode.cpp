@@ -107,11 +107,15 @@ void DracoWorldNode::customPreStep() {
         printf("time: %f\n", clock_.stop());
     }
 
+
+    mTorqueCommand.setZero();
+
     // Low level FeedForward and Position Control
     mTorqueCommand.tail(10) = mCommand->jtrq;
+    // myUtils::pretty_print(mTorqueCommand, std::cout, "ff_torques");
     for (int i = 0; i < 10; ++i) {
         mTorqueCommand[i + 6] +=
-            mKp[i] * (mCommand->q[i] - mSensorData->q[i]) +
+            mKp[i] * (mCommand->q[i] - mSensorData->q[i]) + 
             mKd[i] * (mCommand->qdot[i] - mSensorData->qdot[i]);
     }
     mTorqueCommand.head(6).setZero();
@@ -128,7 +132,11 @@ void DracoWorldNode::customPreStep() {
         }
     }
 
-    // mTorqueCommand.setZero();
+    // std::cout << "q" << std::endl;
+    // std::cout << mSkel->getPositions().transpose() << std::endl;
+
+    // myUtils::pretty_print(mTorqueCommand, std::cout, "torques");
+
     mSkel->setForces(mTorqueCommand);
 
     count_++;
@@ -209,11 +217,12 @@ void DracoWorldNode::_hold_rot() {
     mTorqueCommand[3] = kp * (-q[3]) + kd * (-v[3]);
     mTorqueCommand[4] = kp * (-q[4]) + kd * (-v[4]);
     mTorqueCommand[5] = kp * (-q[5]) + kd * (-v[5]);
-}
+}   
 
 void DracoWorldNode::_hold_xy() {
     static double des_x = (mSkel->getPositions())[0];
     static double des_y = (mSkel->getPositions())[1];
+    static double des_z = (mSkel->getPositions())[2];
     static double des_xdot(0.);
     static double des_ydot(0.);
 
@@ -225,6 +234,7 @@ void DracoWorldNode::_hold_xy() {
 
     mTorqueCommand[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);
     mTorqueCommand[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
+    mTorqueCommand[2] = kp * (des_z - q[2]) + kd * (0.0 - v[2]);
 }
 
 void DracoWorldNode::_check_collision() {

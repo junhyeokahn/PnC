@@ -8,6 +8,7 @@ add_library(DracoPnC SHARED ${sources})
 target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
+                               myMPC
                                myWBC
                                myFilters
                                myPlanner)

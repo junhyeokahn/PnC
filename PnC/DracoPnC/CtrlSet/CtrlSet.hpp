@@ -6,3 +6,4 @@
 #include <PnC/DracoPnC/CtrlSet/JPosTargetCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/SingleContactTransCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/SwingPlanningCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/IVDJPosTargetCtrl.hpp>

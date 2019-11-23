@@ -28,6 +28,7 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 # System
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
+link_directories("/usr/include") # In order to use eigen3
 
 # Dart
 find_package(DART 6.8 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
