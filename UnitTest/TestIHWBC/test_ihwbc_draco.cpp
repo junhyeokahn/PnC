@@ -9,6 +9,7 @@
 // Draco Specific
 #include <PnC/DracoPnC/ContactSet/ContactSet.hpp>
 #include <PnC/DracoPnC/CtrlSet/CtrlSet.hpp>
+#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 
 void getInitialConfiguration(RobotSystem* & robot, Eigen::VectorXd & q_out, Eigen::VectorXd & qdot_out) {
@@ -37,6 +38,10 @@ void getInitialConfiguration(RobotSystem* & robot, Eigen::VectorXd & q_out, Eige
     qdot_out = qdot;
 }
 
+// Test 3 types of IHWBC:
+//   1) No target reaction force minimization
+//   2) Term-by-term minimization minimization
+//   3) Desired Contact Wrench minimization
 
 TEST(IHWBC, robot) {
     RobotSystem* robot;
@@ -52,12 +57,26 @@ TEST(IHWBC, robot) {
     // Initialize IHWBC
     IHWBC* ihwbc = new IHWBC(act_list);
 
+    // Initialize and Update the robot
+    Eigen::VectorXd q, qdot;
+    getInitialConfiguration(robot, q, qdot);
+    robot->updateSystem(q, qdot);
+    myUtils::pretty_print(q, std::cout, "q");    
+
     // Task and Contact list
 	std::vector<Task*> task_list;
 	std::vector<ContactSpec*> contact_list;
 
     // Create Tasks
+
+	// Body RxRyZ tasks or CoM xyz task or Linear Momentum Task
+	// Body Rx Ry Rz
+	// Foot location task.
+    Task* body_rpz_task_ = new BodyRxRyZTask(robot);
+    Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
+    Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
+
     task_list.push_back(total_joint_task);
 
     // Set Task Gains
@@ -75,11 +94,6 @@ TEST(IHWBC, robot) {
     contact_list.push_back(rfoot_back_contact);
     contact_list.push_back(lfoot_front_contact);
     contact_list.push_back(lfoot_back_contact);
-
-    Eigen::VectorXd q, qdot;
-    getInitialConfiguration(robot, q, qdot);
-    robot->updateSystem(q, qdot);
-    myUtils::pretty_print(q, std::cout, "q");
 
 	// Set the desired task values
    	Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);

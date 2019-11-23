@@ -132,17 +132,6 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     }
     Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
 
- //    double w_contact_task_weight = 1.0;
- //    // No acceleration at contacts:
-	// for (int i = 0; i < contact_list.size(); i++){
-	// 	contact_list[i]->getContactJacobian(Jt);
-	// 	contact_list[i]->getJcDotQdot(JtDotQdot);
-	// 	xddot = Eigen::VectorXd::Zero(contact_list[i]->getDim());
-	// 	// Add to Costs
- //        Pt += (w_contact_task_weight*(Jt.transpose()*Jt));
- //        vt += (w_contact_task_weight*(-(JtDotQdot-xddot).transpose()*Jt));		
-	// }    
-
     // Prepare contact dimensions
     dim_contacts_ = 0;     
     if (contact_list.size() > 0){
