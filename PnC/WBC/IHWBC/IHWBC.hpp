@@ -31,8 +31,10 @@ public:
     void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
     void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in);
     void setRegularizationTerms(const double lambda_qddot_in, const double lambda_Fr_in); 
+
     // If true, we try to minimize for a target wrench value. Fd \in mathbf{R}^6.
     // If false, we try to minimize the desired contact forces term by term: Fd \in mathbf{R}^(n). n = dim of reaction force
+    void setTargetWrenchMinimization(const bool target_wrench_minimization_in); 
     bool target_wrench_minimization;
 
     // Weight of task hierarchies
@@ -49,6 +51,7 @@ private:
     int num_qdot_; // Number of degrees of freedom
     int num_act_joint_; // Actuated Joints
     int num_passive_; // Passive Joints
+    int dim_contacts_;
 
     // Selection Matrices
     Eigen::MatrixXd Sa_; // Actuated joint
@@ -63,6 +66,11 @@ private:
     bool b_weights_set_;
     bool b_updatesetting_;
 
+    // Quadprog sizes
+    int n_quadprog_ = 1; // Number of Decision Variables
+    int p_quadprog_ = 0; // Number of Inequality Constraints
+    int m_quadprog_ = 0; // Number of Equality Constraints
+
     // Quadprog Variables
     GolDIdnani::GVect<double> x;
     // Cost
@@ -76,6 +84,17 @@ private:
     // Inequality
     GolDIdnani::GMatr<double> CI;
     GolDIdnani::GVect<double> ci0;
+
+
+    // Quadprog Result Containers
+    Eigen::VectorXd qp_dec_vars_;
+    Eigen::VectorXd qddot_result_;
+    Eigen::VectorXd Fr_result_;
+
+    void prepareQPSizes();
+    void setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::VectorXd & v_cost);
+
+    void solveQP();
 
     // Creates a stack of contact jacobians that are weighted by w_rf_contacts
     Eigen::MatrixXd WeightedContactStack(const std::vector<ContactSpec*> & contact_list, const Eigen::VectorXd & w_rf_contacts_in);

@@ -3,6 +3,7 @@
 // Constructor
 IHWBC::IHWBC(const std::vector<bool> & act_list): 
 	num_act_joint_(0), num_passive_(0), 
+	dim_contacts_(0),
 	b_weights_set_(false),
 	b_updatesetting_(false), 
 	target_wrench_minimization(false) {
@@ -70,6 +71,10 @@ void IHWBC::setRegularizationTerms(const double lambda_qddot_in, const double la
 	lambda_Fr = lambda_Fr_in;
 }
 
+void IHWBC::setTargetWrenchMinimization(const bool target_wrench_minimization_in){
+	target_wrench_minimization = target_wrench_minimization_in;
+}
+
 void IHWBC::updateSetting(const Eigen::MatrixXd & A,
 		                 const Eigen::MatrixXd & Ainv,
 		                 const Eigen::VectorXd & cori,
@@ -101,7 +106,6 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		w_contact_weight = 1.0;
 	}
 
-
     // Task Matrices and Vectors
     Eigen::MatrixXd Jt, Jc; 
     Eigen::VectorXd JtDotQdot, xddot;
@@ -129,9 +133,8 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
 
     // Target Contact Forces / Wrenches Cost Matrices
-    int dim_contacts = 0;
     for(int i = 0; i < contact_list.size(); i++){
-    	dim_contacts += contact_list[i]->getDim();
+    	dim_contacts_ += contact_list[i]->getDim();
     }
 
     if (!target_wrench_minimization){
@@ -139,8 +142,8 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 	    // Target Force Minimization (term by term)
 
 	    // Force Contact Costs
-	    Pf = (w_contact_weight + lambda_Fr)*Eigen::MatrixXd::Identity(dim_contacts, dim_contacts);
-	    vf = -w_contact_weight*Fd.transpose()*Eigen::MatrixXd::Identity(dim_contacts, dim_contacts);    	
+	    Pf = (w_contact_weight + lambda_Fr)*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
+	    vf = -w_contact_weight*Fd.transpose()*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);    	
     }else{
 	    // Target Wrench Minimization
 	    // w_f*||Fw -  Sf* [wrf_1 *J^Tc_1, ..., wrf_n *J^Tc_n]*F_r_i|| + lambda_Fr*||Fr||
@@ -155,26 +158,33 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 		Jf = Sf_*(weighted_Jc.transpose()); // Container to save computation
 
 		// Force Contact Costs
-		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts, dim_contacts);
+		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
 		vf = -w_contact_weight*Fd.transpose()*(Jf);
     }
 
     // Set total cost matrix and vector
-    Eigen::MatrixXd Ptot(num_qdot_ + dim_contacts, num_qdot_ + dim_contacts);
-    Eigen::VectorXd vtot(num_qdot_ + dim_contacts); 
+    Eigen::MatrixXd Ptot(num_qdot_ + dim_contacts_, num_qdot_ + dim_contacts_);
+    Eigen::VectorXd vtot(num_qdot_ + dim_contacts_); 
     Ptot.setZero(); vtot.setZero(); 
     
     // Assign Block Cost Matrices  
     Ptot.block(0, 0, num_qdot_, num_qdot_) = Pt;
     vtot.head(num_qdot_) = vt;
-    if (dim_contacts > 0){
-    	Ptot.block(num_qdot_, num_qdot_, dim_contacts, dim_contacts) = Pf;
-    	vtot.tail(dim_contacts) = vf;
+    if (dim_contacts_ > 0){
+    	Ptot.block(num_qdot_, num_qdot_, dim_contacts_, dim_contacts_) = Pf;
+    	vtot.tail(dim_contacts_) = vf;
     }
+    // Prepare QP size
+    prepareQPSizes();
+
+    // Set Quadprog Costs
+    setQuadProgCosts(Ptot, vtot);
 
     // Create Equality Constraints
     // Create Inequality Constraints
 
+    // Solve Quadprog
+    solveQP();
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts
@@ -197,5 +207,57 @@ Eigen::MatrixXd IHWBC::WeightedContactStack(const std::vector<ContactSpec*> & co
         dim_rf += dim_new_rf;
     }
     return Jc_stack;
+
+}
+
+void IHWBC::prepareQPSizes(){
+	n_quadprog_ = num_qdot_ + dim_contacts_; // Number of decision Variables
+	p_quadprog_ = 0; 		 				 // Number of Inequality constraints
+	m_quadprog_ = 0; 		 				 // Number of Equality Constraints
+
+	qp_dec_vars_ = Eigen::VectorXd::Zero(n_quadprog_);
+	qddot_result_ = Eigen::VectorXd::Zero(num_qdot_);
+	Fr_result_ = Eigen::VectorXd::Zero(dim_contacts_);
+
+	// Decision Variables
+	x.resize(n_quadprog_);
+	// Objective
+	G.resize(n_quadprog_, n_quadprog_);
+	g0.resize(n_quadprog_);
+	// Equality Constraints
+	CE.resize(n_quadprog_, m_quadprog_);
+	ce0.resize(m_quadprog_);
+	// Inequality Constraints
+	CI.resize(n_quadprog_, p_quadprog_);  
+	ci0.resize(p_quadprog_);
+}
+
+void IHWBC::setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::VectorXd & v_cost){
+	// Set G
+	for(int i = 0; i < n_quadprog_; i++){
+		for(int j = 0; j < n_quadprog_; j++){
+			G[i][j] = P_cost(i,j);
+		}
+	}
+	// Set g0
+	for(int i = 0; i < n_quadprog_; i++){
+		g0[i] = v_cost[i];
+	}
+}
+
+void IHWBC::solveQP(){
+	double qp_result = solve_quadprog(G, g0, CE, ce0, CI, ci0, x);
+
+	// Populate qd result from QP answer
+	for(int i = 0; i < n_quadprog_; i++){
+		qp_dec_vars_[i] = x[i];
+	}
+	// Store results
+	qddot_result_ = qp_dec_vars_.head(num_qdot_);
+	Fr_result_ = qp_dec_vars_.tail(dim_contacts_);
+
+	myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
+	myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
+	myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
 
 }
