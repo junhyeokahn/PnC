@@ -141,10 +141,6 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     if (contact_list.size() > 0){
 	    // Construct Contact Jacobians
 	    buildContactStacks(contact_list, w_rf_contacts);    	
-		// for (int i = 0; i < contact_list.size(); i++){
-	 //        // Increment total contact dimension
-	 //    	dim_contacts_ += contact_list[i]->getDim();
-		// }
     }
 
     if (!target_wrench_minimization){
@@ -185,6 +181,8 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     dim_dec_vars_ = num_qdot_ + dim_contacts_;
 
     // Create the Dynamic Equality Constraint
+    // CE^T = Sf(A - Jc^T )
+    // ce0 = Sf(b + g)
 	Eigen::MatrixXd dyn_CE(6, dim_dec_vars_);
 	Eigen::VectorXd dyn_ce0(6);
     // Floating Base Dynamics
@@ -197,6 +195,7 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     Eigen::MatrixXd dyn_CI(dim_inequality_constraints_, dim_dec_vars_); 
     Eigen::VectorXd dyn_ci0(dim_inequality_constraints_);
     // Contact Constraints
+    // U*Fr + *ci0*Fr >= 0   
     dyn_CI.setZero(); dyn_ci0.setZero();
     dyn_CI.block(0, num_qdot_, dim_contact_constraints_, dim_contacts_) = Uf_;
     dyn_ci0.segment(0, dim_contact_constraints_) = -uf_ieq_vec_;
@@ -206,6 +205,12 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     myUtils::pretty_print(dyn_ci0, std::cout, "dyn_ci0");
 
     // To Do: Torque Constraints
+    // tau_min <= Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) <= tau_max
+    // Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) >= tau_min
+    //   => Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) - tau_min >= 0
+    // Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) <= tau_max    
+    //   => -Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) + tau_max >= 0
+
     // To Do: Joint Limit Constraints
 
     // Solve Quadprog
@@ -322,10 +327,6 @@ void IHWBC::setQuadProgCosts(const Eigen::MatrixXd & P_cost, const Eigen::Vector
 }
 
 void IHWBC::setEqualityConstraints(const Eigen::MatrixXd & Eq_mat, const Eigen::VectorXd & Eq_vec){
-  // Populate Equality Constraint Matrix
-  // CE^T = Sf(A - Jc^T )
-  // Populate Equality Constraint Vector
-  // ce0 = Sf(b + g)
   for(int i = 0; i < m_quadprog_; i++){
     for(int j = 0; j < n_quadprog_; j++){
       CE[j][i] = Eq_mat(i,j);
@@ -336,8 +337,6 @@ void IHWBC::setEqualityConstraints(const Eigen::MatrixXd & Eq_mat, const Eigen::
 }
 
 void IHWBC::setInequalityConstraints(const Eigen::MatrixXd & IEq_mat, const Eigen::VectorXd & IEq_vec){
-    // Populate Inequality Constraint Matrix:
-    // U*Fr + *ci0*Fr >= 0   
     for (int i = 0; i < p_quadprog_; ++i) {
       for (int j = 0; j < n_quadprog_; ++j) {
           CI[j][i] = IEq_mat(i, j);
