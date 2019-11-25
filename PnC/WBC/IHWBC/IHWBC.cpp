@@ -150,28 +150,44 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     if (contact_list.size() > 0){
 	    // Construct Contact Jacobians
 	    buildContactStacks(contact_list, w_rf_contacts);    	
-    }
 
-    if (!target_wrench_minimization){
-	    // w_f*||Fd - Fr||^2_2 + lambda_Fr*||Fr||
-	    // Target Force Minimization (term by term)
+        if (!target_wrench_minimization){
+    	    // w_f*||Fd - Fr||^2_2 + lambda_Fr*||Fr||
+    	    // Target Force Minimization (term by term)
 
-	    // Force Contact Costs
-	    Pf = (w_contact_weight + lambda_Fr)*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
-	    vf = -w_contact_weight*Fd.transpose()*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);    	
-    }else{
-	    // Target Wrench Minimization
-	    // w_f*||Fw -  Sf* [wrf_1 *J^Tc_1, ..., wrf_n *J^Tc_n]*F_r_i|| + lambda_Fr*||Fr||
-	    // = w_f*||Fw -  Sf* [wrf_1 *Jc_1; ... ; wrf_n *J^c_n]^T*F_r_i|| + lambda_Fr*||Fr||
-	    // Count dimension of contacts from the contact_list
+    	    // Force Contact Costs
+    	    Pf = (w_contact_weight + lambda_Fr)*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
+    	    vf = -w_contact_weight*Fd.transpose()*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);    	
+        }else{
+    	    // Target Wrench Minimization
+    	    // w_f*||Fw -  Sf* [wrf_1 *J^Tc_1, ..., wrf_n *J^Tc_n]*F_r_i|| + lambda_Fr*||Fr||
+    	    // = w_f*||Fw -  Sf* [wrf_1 *Jc_1; ... ; wrf_n *J^c_n]^T*F_r_i|| + lambda_Fr*||Fr||
+    	    // Count dimension of contacts from the contact_list
 
-    	// Use Weighted Jacobian Stack
-		Eigen::MatrixXd Jf = Eigen::MatrixXd(6, num_qdot_);	
-		Jf = Sf_*(Jc_weighted_.transpose()); // Container to save computation
+        	// Use Weighted Jacobian Stack
+    		Eigen::MatrixXd Jf = Eigen::MatrixXd(6, num_qdot_);	
+    		Jf = Sf_*(Jc_weighted_.transpose()); // Container to save computation
 
-		// Force Contact Costs
-		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
-		vf = -w_contact_weight*Fd.transpose()*(Jf);
+            myUtils::pretty_print(Jf, std::cout, "Jf");
+
+    		// Force Contact Costs
+    		Pf = w_contact_weight*(Jf.transpose()*Jf)  + lambda_Fr*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
+    		vf = -w_contact_weight*Fd.transpose()*(Jf);
+
+            // Distribution matrix
+            // Eigen::MatrixXd D_Fr(dim_contacts_, dim_contacts_); D_Fr.setIdentity();
+            // int idx_offset = 0;
+            // int dim_rf;
+            // for(int i = 0; i < contact_list.size(); i++){
+            //     dim_rf = contact_list[i]->getDim();
+            //     D_Fr.block(idx_offset, idx_offset, dim_rf, dim_rf) = w_rf_contacts[i]*Eigen::MatrixXd::Identity(dim_rf, dim_rf);
+            //     idx_offset += dim_rf;
+            // }
+            // myUtils::pretty_print(D_Fr, std::cout, "D_Fr");
+            // Pf += (w_contact_weight*D_Fr);
+            // vf += (-w_contact_weight*Fd.transpose()*(D_Fr));
+
+        }
     }
 
     // Set total cost matrix and vector
