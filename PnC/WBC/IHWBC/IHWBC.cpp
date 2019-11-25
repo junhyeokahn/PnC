@@ -53,6 +53,15 @@ IHWBC::IHWBC(const std::vector<bool> & act_list):
 // Destructor
 IHWBC::~IHWBC(){}
 
+// Returns the joint acceleration computed by the QP
+void IHWBC::getQddotResult(Eigen::VectorXd & qddot_out){
+    qddot_out = qddot_result_;
+}
+// Returns the reaction forces computed by the QP
+void IHWBC::getFrResult(Eigen::VectorXd & Fr_out){
+    Fr_out = Fr_result_;
+}
+
 void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, 
                          const Eigen::VectorXd & w_rf_contacts_in, 
                          const double & w_contact_weight_in){
@@ -200,9 +209,9 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     dyn_CI.block(0, num_qdot_, dim_contact_constraints_, dim_contacts_) = Uf_;
     dyn_ci0.segment(0, dim_contact_constraints_) = -uf_ieq_vec_;
 
-    myUtils::pretty_print(Uf_, std::cout, "Uf_");
-    myUtils::pretty_print(uf_ieq_vec_, std::cout, "uf_ieq_vec_");
-    myUtils::pretty_print(dyn_ci0, std::cout, "dyn_ci0");
+    // myUtils::pretty_print(Uf_, std::cout, "Uf_");
+    // myUtils::pretty_print(uf_ieq_vec_, std::cout, "uf_ieq_vec_");
+    // myUtils::pretty_print(dyn_ci0, std::cout, "dyn_ci0");
 
     // To Do: Torque Constraints
     // tau_min <= Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) <= tau_max
@@ -228,7 +237,6 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
     qddot_cmd = Sa_*qddot_result_;
 
-    myUtils::pretty_print(tau_cmd, std::cout, "tau_cmd");
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts
@@ -356,9 +364,9 @@ void IHWBC::solveQP(){
 	qddot_result_ = qp_dec_vars_.head(num_qdot_);
 	Fr_result_ = qp_dec_vars_.tail(dim_contacts_);
 
-	myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
-	myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
-	myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
+	// myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
+	// myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
+	// myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
 
 }
 

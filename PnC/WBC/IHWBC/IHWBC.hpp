@@ -20,6 +20,12 @@ public:
                const Eigen::VectorXd & Fd,                
                Eigen::VectorXd & tau_cmd, Eigen::VectorXd & qddot_cmd);
 
+
+    // Returns the joint acceleration computed by the QP
+    void getQddotResult(Eigen::VectorXd & qddot_out);
+    // Returns the reaction forces computed by the QP
+    void getFrResult(Eigen::VectorXd & Fr_out);
+
     // w_task_heirarchy_in:
     //  - sets relative weight between task priority
     //  - must have dimension equal to the number of tasks.
