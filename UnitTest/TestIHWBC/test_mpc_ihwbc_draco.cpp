@@ -47,7 +47,8 @@ TEST(MPC, toy_mpc){
   Eigen::MatrixXd I_robot_body = 5.0*Eigen::MatrixXd::Identity(3,3); // Body Inertia matrix 
 
   // System Params
-  convex_mpc.setRobotMass(50); // (kilograms) 
+  double robot_mass = 50; //kg
+  convex_mpc.setRobotMass(robot_mass); // (kilograms) 
   convex_mpc.setRobotInertia(I_robot_body);
 
   // MPC Params
@@ -70,7 +71,7 @@ TEST(MPC, toy_mpc){
   Eigen::VectorXd x0(13); 
 
   double init_roll(0), init_pitch(0), init_yaw(0), 
-         init_com_x(0), init_com_y(0), init_com_z(0.65), 
+         init_com_x(0), init_com_y(0), init_com_z(0.25), 
          init_roll_rate(0), init_pitch_rate(0), init_yaw_rate(0),
          init_com_x_rate(0), init_com_y_rate(0), init_com_z_rate(0);
 
@@ -105,7 +106,7 @@ TEST(MPC, toy_mpc){
   int m = 3*n_Fr;
 
   Eigen::VectorXd f_vec_out(m*horizon);
-  // Eigen::MatrixXd f_Mat(3, n_Fr); f_Mat.setZero();
+  Eigen::MatrixXd f_Mat(3, n_Fr); f_Mat.setZero();
 
   // Get constant desired reference
   Eigen::VectorXd x_des(n);
@@ -125,6 +126,17 @@ TEST(MPC, toy_mpc){
 
   // Solve the MPC
   convex_mpc.solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
-  convex_mpc.print_f_vec(n_Fr, f_vec_out);
+  // convex_mpc.print_f_vec(n_Fr, f_vec_out);
 
+  double total_z_force = 0.0;
+  f_Mat = convex_mpc.getMatComputedGroundForces();
+  for (int j = 0; j < f_Mat.cols(); j++){
+    std::cout << "  f" << j << ":" << f_Mat.col(j).transpose() << std::endl;
+    total_z_force += f_Mat.col(j)[2];
+  }
+
+  std::cout << "total z force = " << total_z_force << std::endl;
+
+  double robot_weight = robot_mass*9.81;
+  ASSERT_GE(total_z_force, robot_weight);
 }

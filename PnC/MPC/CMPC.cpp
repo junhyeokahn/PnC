@@ -613,6 +613,8 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
     t_mat_setup_start = std::chrono::high_resolution_clock::now();
   #endif
 
+  // Store matrix of r_feet locally
+  r_feet_ = r_feet;
   int n_Fr = r_feet.cols();
 
   // create continuous time state space matrices
@@ -703,7 +705,15 @@ void CMPC::get_constant_desired_x(const Eigen::VectorXd & x_des, Eigen::VectorXd
 }
 
 
-
+// Matrix of reaction force. Each column is the reaction force at the i-th foott.
+Eigen::MatrixXd CMPC::getMatComputedGroundForces(){
+  Eigen::MatrixXd fMat;
+  int n_Fr = r_feet_.cols();
+  if (n_Fr > 0){
+    assemble_vec_to_matrix(3, n_Fr, latest_f_vec_out.head(3*n_Fr), fMat);    
+  }
+  return fMat;
+}
 
 void CMPC::simulate_toy_mpc(){
   // System Params
@@ -827,7 +837,7 @@ void CMPC::simulate_toy_mpc(){
       last_control_time = cur_time;      
       f_cmd.head(m) = f_vec_out.head(m);
 
-      if (!print_for_plots){      
+      if (!print_for_plots){
         std::cout << "  Computed MPC Forces" << std::endl;
         printf("  f0:(%0.3f,%0.3f,%0.3f)\n", f_cmd[0], f_cmd[1], f_cmd[2]);
         printf("  f1:(%0.3f,%0.3f,%0.3f)\n", f_cmd[3], f_cmd[4], f_cmd[5]);

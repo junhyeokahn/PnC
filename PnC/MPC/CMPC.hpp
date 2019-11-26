@@ -53,6 +53,10 @@ public:
 
 	// Gets the latest computed ground forces for control
 	Eigen::VectorXd getComputedGroundForces(){return latest_f_vec_out;}
+	// Get computed ground forces in matrix form where the columns are the ground reaction forces
+	// in the same order as r_feet. 
+	Eigen::MatrixXd getMatComputedGroundForces();
+
 
 	void setRobotMass(const double robot_mass_in){ robot_mass = robot_mass_in; }
 	// Whether or not the inertia needs to be rotated to the world frame. 
@@ -94,6 +98,8 @@ public:
 
 
 private:
+	Eigen::MatrixXd r_feet_; // Store the value of r_feet locally.
+
 	double gravity_acceleration;
   	Eigen::MatrixXd R_roll(const double & phi);
 	Eigen::MatrixXd R_pitch(const double & theta);
