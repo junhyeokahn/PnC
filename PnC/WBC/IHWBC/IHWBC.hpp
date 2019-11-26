@@ -30,8 +30,12 @@ public:
     //  - sets relative weight between task priority
     //  - must have dimension equal to the number of tasks.
     // w_rf_contacts_in (for target wrench minimization only)
+    //  - note that ||w_rf_contacts_in||_1 = 1.0
+    //      - ie: sum of w_rf_contacts[i] = 1.0
+    //      - a higher number on the i-th contact will put more force on that contact
     //  - sets relative weight to distribute the foces between contacts 
     //  - must have dimension equal to the number of contacts
+    //
     // w_contact_weight_in  
     //  - sets the relative weight of the contact forces and the task hierarchies
     void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
@@ -75,7 +79,6 @@ private:
 
     // Contact Jacobians
     Eigen::MatrixXd Jc_;
-    Eigen::MatrixXd Jc_weighted_;
     std::vector<Eigen::MatrixXd> Jc_list_;
 
     //Contact Constraints

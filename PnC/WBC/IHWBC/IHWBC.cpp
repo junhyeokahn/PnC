@@ -262,9 +262,6 @@ void IHWBC::buildContactStacks(const std::vector<ContactSpec*> & contact_list, c
     Jc_list_.push_back(Jc);
 
     Jc_ = Jc;
-    if (target_wrench_minimization){
-        Jc_weighted_ = w_rf_contacts_in[0]*Jc;      
-    }
 
     int dim_rf = contact_list[0]->getDim();
     int dim_rf_cstr = contact_list[0]->getDimRFConstratint();
@@ -281,11 +278,6 @@ void IHWBC::buildContactStacks(const std::vector<ContactSpec*> & contact_list, c
 
         // Store Jc
         Jc_list_.push_back(Jc);
-        // Jc stack with relative weighting
-        if (target_wrench_minimization){
-            Jc_weighted_.conservativeResize(dim_rf + dim_new_rf, num_qdot_);
-            Jc_weighted_.block(dim_rf, 0, dim_new_rf, num_qdot_) = w_rf_contacts_in[i]*Jc;
-        }
 
         // Uf
         contact_list[i]->getRFConstraintMtx(Uf);
