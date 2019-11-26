@@ -315,7 +315,7 @@ TEST(IHWBC, term_by_term_rf_computation) {
 
     body_pos_des[4] = q[0];
     body_pos_des[5] = q[1];
-    body_pos_des[6] = q[2] + 0.02;
+    body_pos_des[6] = q[2];
     
     body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
 
@@ -530,7 +530,7 @@ TEST(IHWBC, term_by_term_rf_computation_no_body_task) {
 
     body_pos_des[4] = q[0];
     body_pos_des[5] = q[1];
-    body_pos_des[6] = q[2] + 0.02;
+    body_pos_des[6] = q[2];// + 0.02;
     
     // body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
 
@@ -745,7 +745,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
 
     body_pos_des[4] = q[0];
     body_pos_des[5] = q[1];
-    body_pos_des[6] = q[2] + 0.02;
+    body_pos_des[6] = q[2];
     
     // body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
 
@@ -825,8 +825,10 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     Eigen::VectorXd w_rf_contacts(contact_list.size());  // Vector of task priority weighs
 
     for(int i = 0; i < contact_list.size(); i++){
-        w_rf_contacts[i] = 1.0;
+        w_rf_contacts[i] = 1.0/contact_list.size();
     }
+    w_rf_contacts[0] = 0.35;
+    w_rf_contacts[1] = 0.15;
 
     // Contact Tasks have weight 1.0
     // Pose Tasks have weight 1e-4
@@ -882,8 +884,8 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     std::cout << "robot mass*grav = " << robot->getRobotMass()*9.81 << std::endl;
     std::cout << "total_Fz:" << total_Fz << std::endl;
 
-    // Assert that computed reaction forces must be less than 1 Newton
+    // Assert that computed reaction forces must be less than 10 Newtons
     double diff_Fz = robot->getRobotMass()*9.81 - total_Fz;
-    ASSERT_LE(std::fabs(diff_Fz), 1.0);
+    ASSERT_LE(std::fabs(diff_Fz), 10.0);
 
 }

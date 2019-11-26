@@ -76,6 +76,7 @@ private:
     // Contact Jacobians
     Eigen::MatrixXd Jc_;
     Eigen::MatrixXd Jc_weighted_;
+    std::vector<Eigen::MatrixXd> Jc_list_;
 
     //Contact Constraints
     Eigen::MatrixXd Uf_;
