@@ -674,8 +674,9 @@ TEST(IHWBC, term_by_term_rf_computation_no_body_task) {
 
 }
 
-
-// The body task is optional if we trust the MPC behavior
+// Similar to above, the body task is optional if we know the desired reaction force.
+// If we want to enforce both, we have to select whether we want to weigh the reaction force tracking
+// or the body task tracking more. We use w_contact_weight to regulate the relationship
 TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     RobotSystem* robot;
     robot = new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
@@ -706,7 +707,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     // Body Rx Ry Rz
     // Foot location task.
     // Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
-    // Task* body_rpz_task_ = new BodyRxRyZTask(robot);
+    Task* body_rpz_task_ = new BodyRxRyZTask(robot);
     Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
@@ -719,7 +720,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     // Set Task Gains
     Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
-    // body_rpz_task_->setGain(kp_body, kd_body);
+    body_rpz_task_->setGain(kp_body, kd_body);
 
     Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
     Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
@@ -747,7 +748,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     body_pos_des[5] = q[1];
     body_pos_des[6] = q[2];
     
-    // body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
+    body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
 
     // Foot Task
     Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
@@ -824,6 +825,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
     Eigen::VectorXd w_rf_contacts(contact_list.size());  // Vector of task priority weighs
 
+    // Note that the distribution of contact weighting must sum to 1.0
     for(int i = 0; i < contact_list.size(); i++){
         w_rf_contacts[i] = 1.0/contact_list.size();
     }
@@ -844,9 +846,11 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
 
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
     // MPC or planner
+    // Any of these should work.
     // double w_contact_weight = 1e-10; // Contact Weight
-    double w_contact_weight = 1.0; // Contact Weight
+    // double w_contact_weight = 1.0; // Contact Weight
     // double w_contact_weight = 1.0/(robot->getRobotMass()*9.81);
+    double w_contact_weight = 1e-4/(robot->getRobotMass()*9.81);
 
     // Regularization terms should always be the lowest cost. 
     double lambda_qddot = 1e-16;
