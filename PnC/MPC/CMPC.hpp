@@ -14,7 +14,7 @@
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 
 // #define MPC_PRINT_ALL 
-#define MPC_TIME_ALL 
+// #define MPC_TIME_ALL 
 
 // We are following the MPC formulation from:
 // Di Carlo, Jared, et al. "Dynamic locomotion in the mit cheetah 3 through convex model-predictive control." 
@@ -39,6 +39,11 @@ public:
 
 	Eigen::VectorXd latest_f_vec_out; // Container holding the the latest computed force output for control (not to be confused with the force at the end of the horizon)
 
+  	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+	// last term is gravity and should always be 0,0
+	// cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
+	Eigen::VectorXd cost_vec;  
+
 	// Helper function which returns a 13-vector given the state of the robot. 
 	// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13	
 	Eigen::VectorXd getx0(const double roll, const double pitch, const double yaw,
@@ -59,6 +64,9 @@ public:
 
 	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
 	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
+
+  	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
 
 	// Human readable prints out of f_vec_out. 
 	void print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out);

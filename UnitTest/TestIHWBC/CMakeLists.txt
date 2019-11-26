@@ -1,7 +1,17 @@
 add_executable(test_ihwbc_draco test_ihwbc_draco.cpp)
 target_link_libraries(test_ihwbc_draco ${DART_LIBRARIES}
-    		                            DracoPnC
-	        	                        myUtils
+                                        DracoPnC
+                                        myUtils
                                         gtest
                                         gtest_main
                                         pthread)
+
+
+add_executable(test_mpc_ihwbc_draco test_mpc_ihwbc_draco.cpp)
+target_link_libraries(test_mpc_ihwbc_draco ${DART_LIBRARIES}
+                                        DracoPnC
+                                        myUtils
+                                        gtest
+                                        gtest_main
+                                        pthread)
+
