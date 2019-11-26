@@ -707,7 +707,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     // Body Rx Ry Rz
     // Foot location task.
     // Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
-    Task* body_rpz_task_ = new BodyRxRyZTask(robot);
+    // Task* body_rpz_task_ = new BodyRxRyZTask(robot);
     Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
@@ -720,7 +720,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     // Set Task Gains
     Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
-    body_rpz_task_->setGain(kp_body, kd_body);
+    // body_rpz_task_->setGain(kp_body, kd_body);
 
     Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
     Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
@@ -748,7 +748,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     body_pos_des[5] = q[1];
     body_pos_des[6] = q[2];
     
-    body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
+    // body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
 
     // Foot Task
     Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
@@ -868,6 +868,7 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     // QP dec variable results
     Eigen::VectorXd qddot_res;
     Eigen::VectorXd Fr_res;
+    Eigen::VectorXd Fr_sum;
 
     ihwbc->getQddotResult(qddot_res);
     ihwbc->getFrResult(Fr_res);
@@ -876,10 +877,12 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     int idx_offset = 0;
     for(int i = 0; i < contact_list.size(); i++){
         total_Fz += Fr_res[idx_offset + contact_list[i]->getFzIndex()];
+        Fr_sum += Fr_res.segment(idx_offset, contact_list[i]->getDim());
         idx_offset += contact_list[i]->getDim();
     }
 
     myUtils::pretty_print(Fd, std::cout, "Fd");
+    myUtils::pretty_print(Fr_sum, std::cout, "Fr_sum");
     myUtils::pretty_print(tau_cmd, std::cout, "tau_cmd");
     myUtils::pretty_print(qddot_cmd, std::cout, "qddot_cmd");
     myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
@@ -888,8 +891,78 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     std::cout << "robot mass*grav = " << robot->getRobotMass()*9.81 << std::endl;
     std::cout << "total_Fz:" << total_Fz << std::endl;
 
+    std::cout << "Fr_sum.norm() = " << Fr_sum.norm() << std::endl;
+
     // Assert that computed reaction forces must be less than 10 Newtons
     double diff_Fz = robot->getRobotMass()*9.81 - total_Fz;
     ASSERT_LE(std::fabs(diff_Fz), 10.0);
+
+}
+
+Eigen::MatrixXd R_yaw(const double & psi){
+    Eigen::MatrixXd Rz(3,3);
+    Rz.setZero();
+    Rz << cos(psi), -sin(psi),  0.0,
+            sin(psi),  cos(psi),  0.0,
+            0.0,         0.0,     1.0;
+    return Rz; 
+}
+
+
+// Timer
+#include <chrono>
+
+TEST(IHWBC, robot_centroidal_inertia) {
+    RobotSystem* robot;
+    robot = new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+
+    // Initialize and Update the robot
+    Eigen::VectorXd q, qdot;
+    getInitialConfiguration(robot, q, qdot);
+
+    // Start Time
+    std::chrono::high_resolution_clock::time_point t_Ig_start;
+    std::chrono::high_resolution_clock::time_point t_Ig_end;
+    double dur_Ig = 0.0;
+
+    t_Ig_start = std::chrono::high_resolution_clock::now();
+
+    robot->updateSystem(q, qdot);
+
+    // End Time
+    t_Ig_end = std::chrono::high_resolution_clock::now();
+    dur_Ig = std::chrono::duration_cast< std::chrono::duration<double> >(t_Ig_end - t_Ig_start).count();    
+
+    // std::cout << "Ig compute time = " << dur_Ig << std::endl;
+
+    Eigen::MatrixXd Ig_o = robot->getCentroidInertia();
+    Eigen::MatrixXd I_body_o = Ig_o.block(0,0,3,3);
+
+    myUtils::pretty_print(Ig_o, std::cout, "Ig_o");
+    myUtils::pretty_print(I_body_o, std::cout, "I_body_o");
+
+    double psi = M_PI/12.0; 
+    int n = 10;
+    double dt_Ig_average = 0.0;
+    for(int i = 0; i < 10; i++){
+        q[5] = psi*(i+1);
+        t_Ig_start = std::chrono::high_resolution_clock::now();
+        robot->updateSystem(q, qdot);        
+        t_Ig_end = std::chrono::high_resolution_clock::now();
+        dur_Ig = std::chrono::duration_cast< std::chrono::duration<double> >(t_Ig_end - t_Ig_start).count();    
+        dt_Ig_average += (dur_Ig/n);
+    }
+
+    // Eigen::MatrixXd Ig_yaw = robot->getCentroidInertia();
+    // Eigen::MatrixXd I_body_yaw = Ig_yaw.block(0,0,3,3);
+    // Eigen::MatrixXd I_body_yaw_test = R_yaw(psi)*I_body_o*R_yaw(psi).transpose();
+
+    // myUtils::pretty_print(I_body_yaw, std::cout, "I_body_yaw");
+    // myUtils::pretty_print(I_body_yaw_test, std::cout, "I_body_yaw_test");
+
+    // double robot_mass = robot->getRobotMass();
+    // std::cout << "robot_mass = " << robot_mass << std::endl;
+
+    std::cout << "Avg centroidal inertia computation time = " << dt_Ig_average << std::endl;
 
 }
