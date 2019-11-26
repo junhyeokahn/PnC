@@ -42,6 +42,9 @@ public:
     void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in);
     void setRegularizationTerms(const double lambda_qddot_in, const double lambda_Fr_in); 
 
+    void setTorqueLimits(const Eigen::VectorXd & tau_min_in, const Eigen::VectorXd & tau_max_in);
+    void enableTorqueLimits(const bool b_torque_limit_in);
+
     // If true, we try to minimize for a target wrench value. Fd \in mathbf{R}^6.
     // If false, we try to minimize the desired contact forces term by term: Fd \in mathbf{R}^(n). n = dim of reaction force
     void setTargetWrenchMinimization(const bool target_wrench_minimization_in); 
@@ -85,8 +88,13 @@ private:
     Eigen::MatrixXd Uf_;
     Eigen::VectorXd uf_ieq_vec_;
 
+    // Set Torque limits
+    Eigen::VectorXd tau_min_;
+    Eigen::VectorXd tau_max_;    
+
     bool b_weights_set_;
     bool b_updatesetting_;
+    bool b_torque_limits_;
 
     // Quadprog sizes
     int n_quadprog_ = 1; // Number of Decision Variables

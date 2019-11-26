@@ -82,8 +82,8 @@ void IVDJPosTargetCtrl::_jpos_ctrl_wbdc(Eigen::VectorXd& gamma) {
     gamma = (A_*qddot_des + coriolis_ + grav_).tail( robot_->getNumActuatedDofs() );
 
     Eigen::VectorXd grav_tail = grav_.tail( robot_->getNumActuatedDofs() );
-    myUtils::pretty_print(gamma, std::cout, "gamma");    
-    myUtils::pretty_print(grav_tail, std::cout, "grav_tail");    
+    // myUtils::pretty_print(gamma, std::cout, "gamma");    
+    // myUtils::pretty_print(grav_tail, std::cout, "grav_tail");    
 
     // wbdc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     // wbdc_->makeTorque(task_list_, contact_list_, gamma, wbdc_data_);

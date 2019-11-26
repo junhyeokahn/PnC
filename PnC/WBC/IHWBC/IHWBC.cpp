@@ -6,6 +6,7 @@ IHWBC::IHWBC(const std::vector<bool> & act_list):
     dim_contacts_(0),
     b_weights_set_(false),
     b_updatesetting_(false), 
+    b_torque_limits_(false),
     target_wrench_minimization(false) {
     myUtils::pretty_constructor(1, "IHWBC");
     // Set Number of degrees of freedom
@@ -48,6 +49,8 @@ IHWBC::IHWBC(const std::vector<bool> & act_list):
     lambda_qddot = 1e-16;
     lambda_Fr = 1e-16;
 
+    tau_min_ = -100*Eigen::VectorXd::Ones(num_act_joint_);
+    tau_max_ = 100*Eigen::VectorXd::Ones(num_act_joint_);
 }
 
 // Destructor
@@ -84,6 +87,14 @@ void IHWBC::setRegularizationTerms(const double lambda_qddot_in, const double la
 
 void IHWBC::setTargetWrenchMinimization(const bool target_wrench_minimization_in){
     target_wrench_minimization = target_wrench_minimization_in;
+}
+
+void IHWBC::setTorqueLimits(const Eigen::VectorXd & tau_min_in, const Eigen::VectorXd & tau_max_in){
+    tau_min_ = tau_min_in;
+    tau_max_ = tau_max_in;
+}
+void IHWBC::enableTorqueLimits(const bool b_torque_limit_in){
+    b_torque_limits_ = b_torque_limit_in;
 }
 
 void IHWBC::updateSetting(const Eigen::MatrixXd & A,
@@ -206,24 +217,38 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
     // Create the Dynamic Inequality Constraint
     dim_inequality_constraints_ = dim_contact_constraints_;
+    // Check if torque limits are enabled
+    if (b_torque_limits_){
+        dim_inequality_constraints_ += 2*num_act_joint_;
+    }
+
     Eigen::MatrixXd dyn_CI(dim_inequality_constraints_, dim_dec_vars_); 
     Eigen::VectorXd dyn_ci0(dim_inequality_constraints_);
+    dyn_CI.setZero(); dyn_ci0.setZero();
+
     // Contact Constraints
     // U*Fr + *ci0*Fr >= 0   
-    dyn_CI.setZero(); dyn_ci0.setZero();
-    dyn_CI.block(0, num_qdot_, dim_contact_constraints_, dim_contacts_) = Uf_;
-    dyn_ci0.segment(0, dim_contact_constraints_) = -uf_ieq_vec_;
+    if (dim_contact_constraints_ > 0){
+        dyn_CI.block(0, num_qdot_, dim_contact_constraints_, dim_contacts_) = Uf_;
+        dyn_ci0.segment(0, dim_contact_constraints_) = -uf_ieq_vec_;       
+    }
+
+    int row_offset = dim_contact_constraints_;
+    if (b_torque_limits_){
+        // Torque limits
+        // Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) - tau_min >= 0
+        dyn_CI.block(row_offset, 0, num_act_joint_, num_qdot_) = Sa_*A_;
+        dyn_CI.block(row_offset, num_qdot_, num_act_joint_, dim_contacts_) = -Sa_*Jc_.transpose();
+        dyn_ci0.segment(row_offset, num_act_joint_) = Sa_*(cori_ + grav_) - tau_min_;
+        // -Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) + tau_max >= 0
+        dyn_CI.block(row_offset + num_act_joint_, 0, num_act_joint_, num_qdot_) = -Sa_*A_;
+        dyn_CI.block(row_offset + num_act_joint_, num_qdot_, num_act_joint_, dim_contacts_) = Sa_*Jc_.transpose();
+        dyn_ci0.segment(row_offset + num_act_joint_, num_act_joint_) = -Sa_*(cori_ + grav_) + tau_max_;
+    }
 
     // myUtils::pretty_print(Uf_, std::cout, "Uf_");
     // myUtils::pretty_print(uf_ieq_vec_, std::cout, "uf_ieq_vec_");
     // myUtils::pretty_print(dyn_ci0, std::cout, "dyn_ci0");
-
-    // To Do: Torque Constraints
-    // tau_min <= Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) <= tau_max
-    // Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) >= tau_min
-    //   => Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) - tau_min >= 0
-    // Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) <= tau_max    
-    //   => -Sa_(Aqddot - Jc_.transpose*Fr + cori_ + grav_ ) + tau_max >= 0
 
     // To Do: Joint Limit Constraints
 
