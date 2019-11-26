@@ -251,6 +251,16 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
     // myUtils::pretty_print(dyn_ci0, std::cout, "dyn_ci0");
 
     // To Do: Joint Limit Constraints
+    // Naive formulation:
+    // q + qdot*dt + qddot*dt*dt/2 >= q_min
+    //  => qddot*dt*dt/2 + (qdot*dt + q - q_min) >= 0
+    // q + qdot*dt + qddot*dt*dt/2 <= q_max
+    //  => -(qddot*dt*dt/2 + qdot*dt + q) + q_max >= 0
+    //  => -qddot*dt*dt/2  (-qdot*dt - q + q_max) >= 0
+    // Better Formulation which considers velocity sign changes and viability
+    // qddot_min <= qddot <= qddot_max (from Del Prete: Del Prete, Andrea. "Joint position and velocity bounds in discrete-time acceleration/torque control of robot manipulators." IEEE Robotics and Automation Letters 3.1 (2017): 281-288.
+    // => qddot - qddot_min >= 0
+    // => -qddot + qddot_max >= 0
 
     // Solve Quadprog
     prepareQPSizes(); // Prepare QP size
