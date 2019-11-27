@@ -7,3 +7,4 @@
 #include <PnC/DracoPnC/CtrlSet/SingleContactTransCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/SwingPlanningCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/IVDJPosTargetCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/MPCBalanceCtrl.hpp>

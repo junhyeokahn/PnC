@@ -12,8 +12,10 @@ MPCTest::MPCTest(RobotSystem* robot) : Test(robot) {
     state_list_.clear();
 
     jpos_target_ctrl_ = new IVDJPosTargetCtrl(robot);
+    mpc_ctrl_ = new MPCBalanceCtrl(robot);
 
     state_list_.push_back(jpos_target_ctrl_);
+    state_list_.push_back(mpc_ctrl_);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
     _SettingParameter();
@@ -27,13 +29,14 @@ MPCTest::~MPCTest() {
 
 void MPCTest::TestInitialization() {
     jpos_target_ctrl_->ctrlInitialization(cfg_["control_configuration"]["joint_position_ctrl"]);
+    mpc_ctrl_->ctrlInitialization(cfg_["control_configuration"]["com_ctrl"]);
 }
 
 int MPCTest::_NextPhase(const int & phase) {
     int next_phase = phase + 1;
     printf("next phase: %i\n", next_phase);
     if (next_phase == NUM_MPCT_PHASE) {
-        return MPCTestPhase::MPCT_initial_jpos;
+        return MPCTestPhase::MPCT_force_ctrl;
     }
     else return next_phase;
 }
@@ -52,7 +55,17 @@ void MPCTest::_SettingParameter() {
 
         myUtils::readParameter(test_cfg, "jpos_ctrl_time", tmp_val);
         ((IVDJPosTargetCtrl*)jpos_target_ctrl_)->setTotalCtrlTime(tmp_val);
+
+        myUtils::readParameter(test_cfg, "com_height", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setCoMHeight(tmp_val);
+        sp_-> omega = sqrt(9.81/tmp_val);
         
+        myUtils::readParameter(test_cfg, "stabilization_duration", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->SetStabilizationDuration(tmp_val);
+
+        myUtils::readParameter(test_cfg, "com_ctrl_time", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setStanceTime(tmp_val);
+
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

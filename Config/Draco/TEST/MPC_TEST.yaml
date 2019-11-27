@@ -1,9 +1,21 @@
 test_configuration:
     initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
     jpos_initialization_time: 2.0
-    jpos_ctrl_time: 1000.0
+    jpos_ctrl_time: 2.0
+
+    com_height: 0.7
+    stabilization_duration: 2.0
+    com_ctrl_time: 1000000.0
 
 control_configuration:
     joint_position_ctrl:
         kp: [100 , 100 , 100 , 100 , 100. , 100 , 100 , 100 , 100 , 100. ]
         kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
+
+    com_ctrl:
+        kp: [80 , 170 , 170 , 170 , 60 , 80 , 170 , 170 , 170 , 60 ]
+        kd: [3  , 8   , 8   , 3   , 2  , 3  , 8   , 8   , 3   , 2  ]
+        com_kp: [50, 50, 10]
+        com_kd: [0, 5, 1]
+
+        desired_offset_x: 0.0

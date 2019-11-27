@@ -7,7 +7,7 @@ class DracoStateProvider;
 
 enum MPCTestPhase{
     MPCT_initial_jpos = 0,
-    // MPCT_force_ctrl = 1,
+    MPCT_force_ctrl = 1,
     NUM_MPCT_PHASE
 };
 
@@ -22,6 +22,7 @@ class MPCTest: public Test{
         void _SettingParameter();
 
         Controller* jpos_target_ctrl_;
+        Controller* mpc_ctrl_;
 
         YAML::Node cfg_;
         DracoStateProvider* sp_;
