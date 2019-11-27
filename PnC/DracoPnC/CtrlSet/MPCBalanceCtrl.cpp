@@ -114,6 +114,7 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
 
     contact_setup();
     _mpc_setup();
+    _mpc_Xdes_setup();
 
     task_setup();
     _compute_torque_wblc(gamma);
@@ -171,19 +172,31 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
     int n = convex_mpc->getStateVecDim(); // This is always size 13.
     mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
 
+    double t_predict = 0.0;
+    // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
     for(int i = 0; i < mpc_horizon_; i++){
+        // Time 
+        t_predict = state_machine_time_ + (i+1)*mpc_dt_;
+
         mpc_Xdes_[i*n + 0] = 0.0; // Desired Roll
         mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
-        // Set CoM Position and velocity
-        mpc_Xdes_[i*n + 3] = goal_com_pos_[0]; // Desired com x
-        mpc_Xdes_[i*n + 4] = goal_com_pos_[1]; // Desired com y
-        mpc_Xdes_[i*n + 5] = goal_com_pos_[2]; // Desired com z
+        // Set CoM Position
+        mpc_Xdes_[i*n + 3] = myUtils::smooth_changing(ini_com_pos_[0], goal_com_pos_[0], stab_dur_, t_predict); // Desired com x
+        mpc_Xdes_[i*n + 4] = myUtils::smooth_changing(ini_com_pos_[1], goal_com_pos_[1], stab_dur_, t_predict); // Desired com y
+        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
+
+        // Set CoM Velocity
+        mpc_Xdes_[i*n + 9] = myUtils::smooth_changing_vel(ini_com_vel_[0], 0., stab_dur_, t_predict); // Desired com x vel
+        mpc_Xdes_[i*n + 10] = myUtils::smooth_changing_vel(ini_com_vel_[1], 0., stab_dur_, t_predict); // Desired com y
+        mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
+
+        // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
-    // if (state_machine_time_ < stab_dur_) {
-    // com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i], goal_com_pos_[i], stab_dur_, state_machine_time_);
-    // com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_vel_[i], 0., stab_dur_, state_machine_time_);
+  
+  
+
 
 }
 
