@@ -78,6 +78,7 @@ class RobotSystem {
         dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
     void updateSystem(const Eigen::VectorXd& q_, const Eigen::VectorXd& qdot_,
                       bool isUpdatingCentroid_ = true);
+    void updateCentroidFrame();
 
     Eigen::Isometry3d getBodyNodeIsometry(
         const std::string& name_,
