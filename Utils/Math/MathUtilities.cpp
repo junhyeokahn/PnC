@@ -195,7 +195,7 @@ Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const d
     Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitZ());
 
     Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
-    return q;
+    return q.normalized();
 }
 
 

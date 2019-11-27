@@ -316,16 +316,15 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     // Body Rx Ry Rz
     // Foot location task.
     // Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
-    Task* body_rpz_task_ = new BodyRxRyZTask(robot);
-
     Task* com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
-    Task* body_rpy_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+    Task* body_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
 
     Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
 
-    task_list.push_back(body_rpz_task_);
+    task_list.push_back(com_task_);
+    task_list.push_back(body_ori_task_);
     task_list.push_back(rfoot_center_rz_xyz_task);
     task_list.push_back(lfoot_center_rz_xyz_task);
     task_list.push_back(total_joint_task);
@@ -333,7 +332,6 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     // Set Task Gains
     Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
-    body_rpz_task_->setGain(kp_body, kd_body);
 
     Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
     Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
@@ -350,8 +348,9 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
 
     Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_body_rpy = 1.0*Eigen::VectorXd::Ones(3);
-    body_rpy_task_->setGain(kp_body_rpy, kd_body_rpy);
+    body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
+    // Set the desired task values
     // COM Task
     Eigen::VectorXd com_pos_des(3); com_pos_des.setZero();
     Eigen::VectorXd com_vel_des(3); com_vel_des.setZero();    
@@ -368,23 +367,24 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
     myUtils::pretty_print(com_pos_des, std::cout, "com_pos_des");
 
-    // Set the desired task values
-    // Body Task
-    Eigen::VectorXd body_pos_des(7); body_pos_des.setZero();
-    Eigen::VectorXd body_vel_des(6); body_vel_des.setZero();    
-    Eigen::VectorXd body_acc_des(6); body_acc_des.setZero();
-    Eigen::Quaternion<double> body_des_quat(1, 0, 0, 0);
+    // Set Body Orientation task values
+    Eigen::VectorXd body_ori_des(4); body_ori_des.setZero();
+    Eigen::VectorXd body_ori_vel_des(3); body_ori_vel_des.setZero();    
+    Eigen::VectorXd body_ori_acc_des(3); body_ori_acc_des.setZero();
+    Eigen::Quaternion<double> body_ori_des_quat(1, 0, 0, 0);
 
-    body_pos_des[0] = body_des_quat.w();
-    body_pos_des[1] = body_des_quat.x();
-    body_pos_des[2] = body_des_quat.y();
-    body_pos_des[3] = body_des_quat.z();
+    body_ori_des_quat = myUtils::EulerZYXtoQuat(des_roll, des_pitch, des_yaw);
+    body_ori_des[0] = body_ori_des_quat.w();
+    body_ori_des[1] = body_ori_des_quat.x();
+    body_ori_des[2] = body_ori_des_quat.y();
+    body_ori_des[3] = body_ori_des_quat.z();
 
-    body_pos_des[4] = q[0];
-    body_pos_des[5] = q[1];
-    body_pos_des[6] = q[2];
-    
-    body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
+    body_ori_vel_des = myUtils::EulerZYXRatestoAngVel(des_roll, des_pitch, des_yaw,
+                                                      des_roll_rate, des_pitch_rate, des_yaw_rate);
+    body_ori_task_->updateTask(body_ori_des, body_ori_vel_des, body_ori_acc_des);
+
+    myUtils::pretty_print(body_ori_des, std::cout, "body_ori_des");
+    myUtils::pretty_print(body_ori_vel_des, std::cout, "body_ori_vel_des");
 
     // Foot Task
     Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
@@ -456,13 +456,6 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
 
     Eigen::VectorXd Fd(contact_dim_size); Fd.setZero();
 
-    // Distribute reaction forces equally according to the mass of the robot
-    // double Fz_dist = (robot->getRobotMass()*9.81)/contact_list.size();
-    int idx_offset = 0;
-    // for(int i = 0; i < contact_list.size(); i++){
-    //     Fd[idx_offset + contact_list[i]->getFzIndex()] = Fz_dist;
-    //     idx_offset += contact_list[i]->getDim();
-    // }
 
     // Set desired forces based on the MPC output 
     Fd = Fd_current;
@@ -473,18 +466,14 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     // Contact Tasks have weight 1.0
     // Pose Tasks have weight 1e-4
     // Joint Posture Tasks have weight 1e-6
-    w_task_heirarchy[0] = 1e-4; // Body
-    w_task_heirarchy[1] = 1.0; // rfoot
-    w_task_heirarchy[2] = 1.0; // lfoot
-    w_task_heirarchy[3] = 1e-6; // joint
+    w_task_heirarchy[0] = 1e-4; // COM
+    w_task_heirarchy[1] = 1e-4; // Body Ori
+    w_task_heirarchy[2] = 1.0; // rfoot
+    w_task_heirarchy[3] = 1.0; // lfoot
+    w_task_heirarchy[4] = 1e-6; // joint
 
-    // w_task_heirarchy[0] = 1.0; // rfoot
-    // w_task_heirarchy[1] = 1.0; // lfoot
-    // w_task_heirarchy[2] = 1e-6; // joint
 
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
-    // Keeping it the same magnitude as the body task seems to have some benefits.
-    // double w_contact_weight = 1e-4/(robot->getRobotMass()*9.81);
     double w_contact_weight = 1e-2/(robot->getRobotMass()*9.81);
 
     // Regularization terms should always be the lowest cost. 
@@ -513,6 +502,7 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     ihwbc->getQddotResult(qddot_res);
     ihwbc->getFrResult(Fr_res);
 
+    int idx_offset = 0;
     double total_Fz = 0;
     idx_offset = 0;
     for(int i = 0; i < contact_list.size(); i++){
