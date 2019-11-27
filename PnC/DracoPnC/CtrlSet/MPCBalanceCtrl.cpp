@@ -120,7 +120,11 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     _mpc_solve();
 
     task_setup();
-    _compute_torque_wblc(gamma);
+
+    _compute_torque_ihwbc(gamma);
+
+    // _compute_torque_wblc(gamma);
+
 
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
@@ -148,8 +152,8 @@ void MPCBalanceCtrl::_mpc_setup(){
         mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
     }
     // myUtils::pretty_print(mpc_r_feet_, std::cout, "mpc_r_feet_");
-    Eigen::VectorXd q_current = robot_->getQ();
-    Eigen::VectorXd qdot_current = robot_->getQdot();
+    q_current_ = robot_->getQ();
+    qdot_current_ = robot_->getQdot();
 
     com_current_ = robot_->getCoMPosition();
     com_rate_current_ = robot_->getCoMVelocity();
@@ -157,9 +161,9 @@ void MPCBalanceCtrl::_mpc_setup(){
     // Starting robot state
     // Current reduced state of the robot
     // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    double init_roll(q_current[3]), init_pitch(q_current[4]), init_yaw(q_current[5]), 
+    double init_roll(q_current_[3]), init_pitch(q_current_[4]), init_yaw(q_current_[5]), 
          init_com_x(com_current_[0]), init_com_y(com_current_[1]), init_com_z(com_current_[2]), 
-         init_roll_rate(qdot_current[3]), init_pitch_rate(qdot_current[4]), init_yaw_rate(qdot_current[5]),
+         init_roll_rate(qdot_current_[3]), init_pitch_rate(qdot_current_[4]), init_yaw_rate(qdot_current_[5]),
          init_com_x_rate(com_rate_current_[0]), init_com_y_rate(com_rate_current_[1]), init_com_z_rate(com_rate_current_[2]);
 
     mpc_x0_ = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
@@ -190,7 +194,7 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
         // Set CoM Position
-        mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
+        mpc_Xdes_[i*n + 3] = midfeet_pos_[0] - 0.25;
         mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
         mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
 
@@ -212,7 +216,7 @@ void MPCBalanceCtrl::_mpc_solve(){
 
     // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
     // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
-    myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
+    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
 
 }
 
@@ -247,7 +251,87 @@ void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     // myUtils::pretty_print(Fr_out, std::cout, "Fr_out");    
 }
 
+void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
+    // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
+    w_contact_weight_ = 1e-4/(robot_->getRobotMass()*9.81);
+    // Regularization terms should always be the lowest cost. 
+    lambda_qddot_ = 1e-16;
+    lambda_Fr_ = 1e-16;
+
+    // Modify Rotor Inertia
+    Eigen::MatrixXd A_rotor = A_;
+    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+        A_rotor(i + robot_->getNumVirtualDofs(),
+                i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
+    }
+    Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
+
+    // Enable Torque Limits
+    ihwbc->enableTorqueLimits(true);
+    double tau_lim = 100.0;    
+    Eigen::VectorXd tau_min = -tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
+    Eigen::VectorXd tau_max = tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
+    ihwbc->setTorqueLimits(tau_min, tau_max);
+
+    // Set QP weights
+    ihwbc->setQPWeights(w_task_heirarchy_, w_contact_weight_);
+    ihwbc->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
+
+    // QP dec variable results
+    Eigen::VectorXd qddot_res;
+    Eigen::VectorXd Fr_res;
+
+    ihwbc->getQddotResult(qddot_res);
+    ihwbc->getFrResult(Fr_res);
+
+    // Update and solve QP
+    ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
+    ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_, tau_cmd_, qddot_cmd_);
+
+    // Compute desired joint position and velocities for the low-level
+    Eigen::VectorXd ac_qdot_current = qdot_current_.tail(robot_->getNumActuatedDofs());
+    Eigen::VectorXd ac_q_current = q_current_.tail(robot_->getNumActuatedDofs());
+
+    qdot_des_ = ac_qdot_current + qddot_cmd_*ihwbc_dt_; 
+    q_des_    = ac_q_current + ac_qdot_current*ihwbc_dt_ + 
+                0.5*qddot_cmd_*ihwbc_dt_*ihwbc_dt_; 
+
+
+    gamma = tau_cmd_;
+    des_jvel_ = qdot_des_;
+    des_jpos_ = q_des_;
+
+    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
+    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+    // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
+    // myUtils::pretty_print(qdot_des_, std::cout, "qdot_des_");
+    // myUtils::pretty_print(q_des_, std::cout, "q_des_");
+
+    // myUtils::pretty_print(ac_qdot_current, std::cout, "ac_qdot_current");
+    // myUtils::pretty_print(ac_q_current, std::cout, "ac_q_current");
+
+    // myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
+    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+
+}
+
 void MPCBalanceCtrl::task_setup() {
+    // Set desired com and body orientation from predicted state 
+    double des_roll = mpc_x_pred_[0];
+    double des_pitch = mpc_x_pred_[1];
+    double des_yaw = mpc_x_pred_[2];
+
+    double des_pos_x = mpc_x_pred_[3];
+    double des_pos_y = mpc_x_pred_[4];
+    double des_pos_z = mpc_x_pred_[5];
+
+    double des_roll_rate = mpc_x_pred_[6];
+    double des_pitch_rate = mpc_x_pred_[7];
+    double des_yaw_rate = mpc_x_pred_[8];
+
+    double des_vel_x = mpc_x_pred_[9];
+    double des_vel_y = mpc_x_pred_[10];
+    double des_vel_z = mpc_x_pred_[11];
 
     // =========================================================================
     // Com Task
@@ -269,6 +353,15 @@ void MPCBalanceCtrl::task_setup() {
             com_acc_des[i] = 0.;
         }
     }
+
+    // com_pos_des[0] = des_pos_x;
+    // com_pos_des[1] = des_pos_y;
+    // com_pos_des[2] = des_pos_z;
+
+    // com_vel_des[0] = des_vel_x;
+    // com_vel_des[1] = des_vel_y;
+    // com_vel_des[2] = des_vel_z;
+
     for (int i = 0; i < 3; ++i) {
     sp_->com_pos_des[i] = com_pos_des[i];
     sp_->com_vel_des[i] = com_vel_des[i];
@@ -279,7 +372,20 @@ void MPCBalanceCtrl::task_setup() {
     // =========================================================================
     // Body Ori Task
     // =========================================================================
+    Eigen::VectorXd body_ori_des(4); body_ori_des.setZero();
+    Eigen::VectorXd body_ori_vel_des(3); body_ori_vel_des.setZero();    
+    Eigen::VectorXd body_ori_acc_des(3); body_ori_acc_des.setZero();
+    Eigen::Quaternion<double> body_ori_des_quat(1, 0, 0, 0);
 
+    body_ori_des_quat = myUtils::EulerZYXtoQuat(des_roll, des_pitch, des_yaw);
+    body_ori_des[0] = body_ori_des_quat.w();
+    body_ori_des[1] = body_ori_des_quat.x();
+    body_ori_des[2] = body_ori_des_quat.y();
+    body_ori_des[3] = body_ori_des_quat.z();
+
+    body_ori_vel_des = myUtils::EulerZYXRatestoAngVel(des_roll, des_pitch, des_yaw,
+                                                      des_roll_rate, des_pitch_rate, des_yaw_rate);
+    body_ori_task_->updateTask(body_ori_des, body_ori_vel_des, body_ori_acc_des);
 
     // =========================================================================
     // Foot Center Tasks
@@ -321,7 +427,17 @@ void MPCBalanceCtrl::task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
+    task_list_.push_back(body_ori_task_);
+    task_list_.push_back(rfoot_center_rz_xyz_task);
+    task_list_.push_back(lfoot_center_rz_xyz_task);    
     task_list_.push_back(total_joint_task_);
+
+    w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    w_task_heirarchy_[0] = 1e-4; // COM
+    w_task_heirarchy_[1] = 1e-4; // Body Ori
+    w_task_heirarchy_[2] = 1.0; // rfoot
+    w_task_heirarchy_[3] = 1.0; // lfoot
+    w_task_heirarchy_[4] = 1e-6; // joint    
 
     // =========================================================================
     // Solve Inv Kinematics
@@ -380,7 +496,7 @@ void MPCBalanceCtrl::firstVisit() {
     Eigen::VectorXd cost_vec(13);
     // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
     cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
-    double cost_factor = 8.0;
+    double cost_factor = 9.0;//8.0;
     cost_vec *= cost_factor;
     convex_mpc->setCostVec(cost_vec);
 
@@ -428,5 +544,9 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_body_rpy = 1.0*Eigen::VectorXd::Ones(3);
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
+
+
+    // Set IHWBC dt integration time
+    ihwbc_dt_ = 1e-2;
 
 }

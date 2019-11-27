@@ -77,6 +77,23 @@ class MPCBalanceCtrl : public Controller {
 
     double des_com_offset_x_;
 
+    // ihwbc
+    Eigen::VectorXd q_current_;
+    Eigen::VectorXd qdot_current_;
+
+    Eigen::VectorXd w_task_heirarchy_;
+    double w_contact_weight_;
+    double lambda_qddot_;
+    double lambda_Fr_;
+    void _compute_torque_ihwbc(Eigen::VectorXd& gamma);
+
+    double ihwbc_dt_;
+    Eigen::VectorXd tau_cmd_;
+    Eigen::VectorXd qddot_cmd_;
+    Eigen::VectorXd qdot_des_;
+    Eigen::VectorXd q_des_;
+
+
     // MPC Functions
     void _mpc_setup();
     void _mpc_Xdes_setup();
