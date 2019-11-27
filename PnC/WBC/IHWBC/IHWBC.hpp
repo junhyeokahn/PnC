@@ -1,3 +1,6 @@
+#ifndef H_IMPLICIT_HIERARCHY_WBC
+#define H_IMPLICIT_HIERARCHY_WBC
+
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -131,3 +134,4 @@ private:
 
 };
 
+#endif

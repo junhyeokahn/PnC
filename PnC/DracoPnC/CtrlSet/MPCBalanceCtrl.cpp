@@ -6,11 +6,13 @@
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
+#include <PnC/WBC/IHWBC/IHWBC.hpp>
+#include <PnC/MPC/CMPC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
 MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
-    myUtils::pretty_constructor(2, "COM Ctrl");
+    myUtils::pretty_constructor(2, "MPC Balance Ctrl");
 
     stab_dur_ = 5.;
     end_time_ = 1000.;
@@ -31,6 +33,10 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     com_task_ = new BasicTask(robot_, BasicTaskType::COM, 3);
     total_joint_task_ = new BasicTask(robot_, BasicTaskType::JOINT, Draco::n_adof);
 
+    body_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+    rfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::rFootCenter);
+    lfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::lFootCenter);
+
     // contact
     rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
     rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
@@ -46,10 +52,17 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     dim_contact_ = rfoot_front_contact_->getDim() + lfoot_front_contact_->getDim() +
                    rfoot_back_contact_->getDim() + lfoot_back_contact_->getDim();
 
+    // Convex MPC
+    convex_mpc = new CMPC();
+
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for (int i(0); i < robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
+
+    // IHWBC
+    ihwbc = new IHWBC(act_list);
+
 
     kin_wbc_ = new KinWBC(act_list);
     wblc_ = new WBLC(act_list);
@@ -201,6 +214,7 @@ void MPCBalanceCtrl::contact_setup() {
     contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
+
 }
 
 void MPCBalanceCtrl::firstVisit() {
@@ -223,6 +237,26 @@ void MPCBalanceCtrl::firstVisit() {
     //exit(0);
     goal_com_pos_[0] += des_com_offset_x_;
     goal_com_pos_[2] = target_com_height_;
+
+
+   // Get the initial robot inertia
+    robot_->updateCentroidFrame();
+    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+
+    // System Params
+    double robot_mass = robot_->getRobotMass(); //kg
+    convex_mpc->setRobotMass(robot_mass); // (kilograms) 
+    convex_mpc->setRobotInertia(I_body);
+
+    // MPC Params
+    int horizon = 10;
+    convex_mpc->setHorizon(horizon); // horizon timesteps 
+    convex_mpc->setDt(0.025); // (seconds) per horizon
+    convex_mpc->setMu(0.7); //  friction coefficient
+    convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
+    convex_mpc->rotateBodyInertia(false); // Assume we are always providing the world inertia
+
 }
 
 void MPCBalanceCtrl::lastVisit() {}

@@ -330,9 +330,6 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     task_list.push_back(total_joint_task);
 
     // Set Task Gains
-    Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
-
     Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
     Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
     rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);

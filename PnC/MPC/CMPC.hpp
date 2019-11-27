@@ -1,3 +1,6 @@
+#ifndef H_CONVEX_MPC
+#define H_CONVEX_MPC
+
 // Standard
 #include <math.h>
 #include <iostream>
@@ -130,3 +133,5 @@ private:
 
 
 };
+
+#endif

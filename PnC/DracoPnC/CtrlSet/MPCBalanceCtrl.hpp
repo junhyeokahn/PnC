@@ -8,6 +8,8 @@ class WBLC;
 class WBLC_ExtraData;
 class KinWBC;
 class ContactSpec;
+class CMPC;
+class IHWBC;
 
 class MPCBalanceCtrl : public Controller {
    public:
@@ -41,6 +43,10 @@ class MPCBalanceCtrl : public Controller {
     Task* com_task_;
     Task* total_joint_task_;
 
+    Task* body_ori_task_;
+    Task* rfoot_center_rz_xyz_task;
+    Task* lfoot_center_rz_xyz_task;
+
     ContactSpec* rfoot_front_contact_;
     ContactSpec* rfoot_back_contact_;
     ContactSpec* lfoot_front_contact_;
@@ -49,6 +55,11 @@ class MPCBalanceCtrl : public Controller {
     KinWBC* kin_wbc_;
     WBLC* wblc_;
     WBLC_ExtraData* wblc_data_;
+
+    // Convex MPC
+    CMPC* convex_mpc;
+    // IHWBC
+    IHWBC* ihwbc;
 
     double target_com_height_;
     double stab_dur_;
@@ -65,3 +76,4 @@ class MPCBalanceCtrl : public Controller {
 
     double des_com_offset_x_;
 };
+
