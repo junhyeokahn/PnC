@@ -187,4 +187,40 @@ double QuatToYaw(const Eigen::Quaternion<double> q) {
     return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
 }
 
+// ZYX extrinsic rotations (roll pitch yaw values are based on rotating about the fixed frame.
+// World Orientation is R = Rz*Ry*Rx
+Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw){
+    Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitX());
+    Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitZ());
+
+    Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
+    return q;
+}
+
+
+// ZYX extrinsic rotation rates to world angular velocity
+// angular vel = [wx, wy, wz]
+Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
+                                      const double roll_rate, const double pitch_rate, const double yaw_rate){
+    // From Robot Dynamics Lecture Notes - Robotic Systems Lab, ETH Zurich
+    // Equation (2.86). The matrix has been reordered so that omega = E*[r;p;y]
+    Eigen::Vector3d rpy_rates; 
+    rpy_rates << roll_rate, pitch_rate, yaw_rate;
+
+    Eigen::MatrixXd E(3,3); 
+
+    double y = pitch;   
+    double z = yaw;
+
+    E << cos(y)*cos(z), -sin(z),   0,
+         cos(y)*sin(z),  cos(z),   0,
+           -sin(y)    ,     0    , 1;
+
+    return E*rpy_rates;
+}
+
+
+
+
 }  // namespace myUtils

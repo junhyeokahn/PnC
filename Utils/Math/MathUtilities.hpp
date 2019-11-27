@@ -65,4 +65,13 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
 
 double QuatToYaw(const Eigen::Quaternion<double> q);
 
+// ZYX extrinsic rotations (roll pitch yaw values are based on sequential rotation about the fixed frame.
+// World Orientation is R = Rz*Ry*Rx
+Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw);
+
+// ZYX extrinsic rotation rates to world angular velocity
+// angular vel = [wx, wy, wz]
+Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
+                                      const double roll_rate, const double pitch_rate, const double yaw_rate);
+
 }  // namespace myUtils

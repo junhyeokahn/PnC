@@ -3,6 +3,7 @@
 #include <Configuration.h>
 #include <Eigen/Dense>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 // Robot, mpc and whole body controller
 #include <PnC/RobotSystem/RobotSystem.hpp>
@@ -28,7 +29,7 @@ void getInitialConfiguration(RobotSystem* & robot, Eigen::VectorXd & q_out, Eige
     Eigen::VectorXd qdot(robot->getNumDofs()); 
     qdot.setZero();
 
-    q[2] = 1.193;
+    q[2] = 0.893; //1.193;
     double alpha(-M_PI / 4.);
     double beta(M_PI / 5.5);
     q[lHipPitchIdx] = alpha;
@@ -142,6 +143,21 @@ TEST(MPC, toy_mpc){
   ASSERT_GE(total_z_force, robot_weight);
 }
 
+TEST(MPC_IHWBC, zyx_rates_to_ang_vel){
+    Eigen::Vector3d rpy; 
+    Eigen::Vector3d rpy_rate; 
+    rpy << 0, M_PI/4.0, M_PI/4.0;
+    rpy_rate << 0.0, 0.0, 5.0;
+
+    Eigen::Vector3d ang_vel = myUtils::EulerZYXRatestoAngVel(rpy[0], rpy[1], rpy[2],
+                                                             rpy_rate[0], rpy_rate[1], rpy_rate[2]);
+
+    ASSERT_DOUBLE_EQ(ang_vel[0], 0.0);
+    ASSERT_DOUBLE_EQ(ang_vel[1], 0.0);
+    ASSERT_DOUBLE_EQ(ang_vel[2], 5.0);
+
+}
+
 // Torque limit test
 TEST(MPC_IHWBC, mpc_ihwbc_test) {
     RobotSystem* robot;
@@ -235,9 +251,11 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     x_des[1] = q[4];//-M_PI/8; //des pitch orientation
     x_des[2] = q[5]; // Yaw orientation
 
-    x_des[3] = robot_com[0]; // Set desired com x pos to be current
-    x_des[4] = robot_com[1]; // Set desired com y pos to be current
-    x_des[5] = robot_com[2] + 0.05;//;0.75; // Set desired z height to be the current + a small increment
+    x_des[3] = robot_com[0] - 0.05; // Set desired com x pos
+    x_des[4] = robot_com[1]; // Set desired com y pos 
+    x_des[5] = robot_com[2] + 0.045;//;0.75; // Set desired z height to be the current + a small increment
+
+    myUtils::pretty_print(x_des, std::cout, "x_des");
 
     Eigen::VectorXd X_des(n*horizon);
     convex_mpc.get_constant_desired_x(x_des, X_des);
@@ -247,6 +265,7 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     // Solve the MPC
     convex_mpc.solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
 
+    myUtils::pretty_print(x_pred, std::cout, "x_pred");
 
     double total_z_force = 0.0;
     f_Mat = convex_mpc.getMatComputedGroundForces();
@@ -256,11 +275,27 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
         total_z_force += f_Mat.col(j)[2];
     }
 
-
     Eigen::VectorXd Fd_current = convex_mpc.getComputedGroundForces();
 
     std::cout << "total z force = " << total_z_force << std::endl;
     myUtils::pretty_print(Fd_current , std::cout, "Fd_current");
+
+    // Set desired com and body orientation from predicted state 
+    double des_roll = x_pred[0];
+    double des_pitch = x_pred[1];
+    double des_yaw = x_pred[2];
+
+    double des_pos_x = x_pred[3];
+    double des_pos_y = x_pred[4];
+    double des_pos_z = x_pred[5];
+
+    double des_roll_rate = x_pred[6];
+    double des_pitch_rate = x_pred[7];
+    double des_yaw_rate = x_pred[8];
+
+    double des_vel_x = x_pred[9];
+    double des_vel_y = x_pred[10];
+    double des_vel_z = x_pred[11];
 
     //  Initialize IHWBC
     //  Initialize actuated list
@@ -282,6 +317,10 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     // Foot location task.
     // Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
     Task* body_rpz_task_ = new BodyRxRyZTask(robot);
+
+    Task* com_task_ = new BasicTask(robot, BasicTaskType::COM, 3);
+    Task* body_rpy_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+
     Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
     Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
     Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
@@ -305,6 +344,29 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
     total_joint_task->setGain(kp_jp, kd_jp);
 
+    Eigen::VectorXd kp_com = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_com = 1.0*Eigen::VectorXd::Ones(3);
+    com_task_->setGain(kp_com, kd_com);
+
+    Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body_rpy = 1.0*Eigen::VectorXd::Ones(3);
+    body_rpy_task_->setGain(kp_body_rpy, kd_body_rpy);
+
+    // COM Task
+    Eigen::VectorXd com_pos_des(3); com_pos_des.setZero();
+    Eigen::VectorXd com_vel_des(3); com_vel_des.setZero();    
+    Eigen::VectorXd com_acc_des(3); com_acc_des.setZero();
+
+    com_pos_des[0] = des_pos_x;
+    com_pos_des[1] = des_pos_y;
+    com_pos_des[2] = des_pos_z;
+
+    com_vel_des[0] = des_vel_x;
+    com_vel_des[1] = des_vel_y;
+    com_vel_des[2] = des_vel_z;
+
+    com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
+    myUtils::pretty_print(com_pos_des, std::cout, "com_pos_des");
 
     // Set the desired task values
     // Body Task
@@ -422,7 +484,8 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
 
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
     // Keeping it the same magnitude as the body task seems to have some benefits.
-    double w_contact_weight = 1e-4/(robot->getRobotMass()*9.81);
+    // double w_contact_weight = 1e-4/(robot->getRobotMass()*9.81);
+    double w_contact_weight = 1e-2/(robot->getRobotMass()*9.81);
 
     // Regularization terms should always be the lowest cost. 
     double lambda_qddot = 1e-16;
