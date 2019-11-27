@@ -69,11 +69,27 @@ class MPCBalanceCtrl : public Controller {
 
     void task_setup();
     void contact_setup();
+
     void _compute_torque_wblc(Eigen::VectorXd& gamma);
 
     double ctrl_start_time_;
     DracoStateProvider* sp_;
 
     double des_com_offset_x_;
+
+    // MPC Functions
+    void _mpc_setup();
+    void _mpc_Xdes_setup();
+    void _mpc_solve();
+
+    // MPC Variables
+    double mpc_horizon_;
+    double mpc_dt_; 
+    Eigen::VectorXd mpc_Fd_out_;
+    Eigen::VectorXd mpc_x_pred_;
+    Eigen::VectorXd mpc_r_feet_;
+    Eigen::VectorXd mpc_Xdes_;
+
+
 };
 

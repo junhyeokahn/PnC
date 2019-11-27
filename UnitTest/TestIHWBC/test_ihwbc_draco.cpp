@@ -141,6 +141,9 @@ TEST(IHWBC, no_target_reaction_force) {
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
     Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
     // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
@@ -344,6 +347,9 @@ TEST(IHWBC, term_by_term_rf_computation) {
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
     Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
     // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
@@ -559,6 +565,9 @@ TEST(IHWBC, term_by_term_rf_computation_no_body_task) {
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
     Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
     // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
@@ -775,6 +784,9 @@ TEST(IHWBC, desired_contact_wrench_computation_no_body_task) {
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
     Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
     // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
@@ -1070,6 +1082,9 @@ TEST(IHWBC, torque_limit_test) {
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
     Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
     Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
 
     // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");

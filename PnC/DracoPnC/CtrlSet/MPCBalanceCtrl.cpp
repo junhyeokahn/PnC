@@ -54,6 +54,8 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
     // Convex MPC
     convex_mpc = new CMPC();
+    mpc_horizon_ = 10; // steps
+    mpc_dt_ = 0.025; // seconds per step
 
     // wbc
     std::vector<bool> act_list;
@@ -109,7 +111,10 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
     contact_setup();
+    _mpc_setup();
+
     task_setup();
     _compute_torque_wblc(gamma);
 
@@ -119,6 +124,72 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
     _PostProcessing_Command();
+}
+
+void MPCBalanceCtrl::_mpc_setup(){
+    // Get the initial robot inertia
+    robot_->updateCentroidFrame();
+    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+    convex_mpc->setRobotInertia(I_body);
+
+    // Update Feet Configuration
+    // Set Foot contact locations w.r.t world
+    Eigen::MatrixXd r_feet(3, contact_list_.size()); // Each column is a reaction force in x,y,z 
+    r_feet.setZero();
+
+    int link_id = 0;
+    for (int i = 0; i < contact_list_.size(); i++){
+        link_id = ((PointContactSpec*)contact_list_[i])->get_link_idx();
+        r_feet.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
+    }
+    // myUtils::pretty_print(r_feet, std::cout, "r_feet");
+    Eigen::VectorXd q_current = robot_->getQ();
+    Eigen::VectorXd qdot_current = robot_->getQdot();
+
+    Eigen::Vector3d com_current = robot_->getCoMPosition();
+    Eigen::Vector3d com_rate_current = robot_->getCoMVelocity();
+
+    // Starting robot state
+    // Current reduced state of the robot
+    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
+    Eigen::VectorXd x0(13); 
+    double init_roll(q_current[3]), init_pitch(q_current[4]), init_yaw(q_current[5]), 
+         init_com_x(com_current[0]), init_com_y(com_current[1]), init_com_z(com_current[2]), 
+         init_roll_rate(qdot_current[3]), init_pitch_rate(qdot_current[4]), init_yaw_rate(qdot_current[5]),
+         init_com_x_rate(com_rate_current[0]), init_com_y_rate(com_rate_current[1]), init_com_z_rate(com_rate_current[2]);
+
+    x0 = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
+                           init_com_x, init_com_y, init_com_z,
+                           init_roll_rate, init_pitch_rate, init_yaw_rate,
+                           init_com_x_rate, init_com_y_rate, init_com_z_rate);
+
+    // Set the desired system evolution
+}
+
+void MPCBalanceCtrl::_mpc_Xdes_setup(){
+    int n = convex_mpc->getStateVecDim(); // This is always size 13.
+    mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
+
+    for(int i = 0; i < mpc_horizon_; i++){
+        mpc_Xdes_[i*n + 0] = 0.0; // Desired Roll
+        mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
+        mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
+
+        // Set CoM Position and velocity
+        mpc_Xdes_[i*n + 3] = goal_com_pos_[0]; // Desired com x
+        mpc_Xdes_[i*n + 4] = goal_com_pos_[1]; // Desired com y
+        mpc_Xdes_[i*n + 5] = goal_com_pos_[2]; // Desired com z
+    }
+    // if (state_machine_time_ < stab_dur_) {
+    // com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i], goal_com_pos_[i], stab_dur_, state_machine_time_);
+    // com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_vel_[i], 0., stab_dur_, state_machine_time_);
+
+}
+
+void MPCBalanceCtrl::_mpc_solve(){
+    // Solve the mpc
+    // convex_mpc.solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
 }
 
 void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
@@ -182,6 +253,37 @@ void MPCBalanceCtrl::task_setup() {
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // =========================================================================
+    // Body Ori Task
+    // =========================================================================
+
+
+    // =========================================================================
+    // Foot Center Tasks
+    // =========================================================================
+    Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
+    Eigen::VectorXd lfoot_pos_des(7); lfoot_pos_des.setZero();
+    Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();    
+    Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
+
+    Eigen::Quaternion<double> rfoot_ori_act(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
+    Eigen::Quaternion<double> lfoot_ori_act(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
+
+    rfoot_pos_des[0] = rfoot_ori_act.w();
+    rfoot_pos_des[1] = rfoot_ori_act.x();
+    rfoot_pos_des[2] = rfoot_ori_act.y();
+    rfoot_pos_des[3] = rfoot_ori_act.z();
+    rfoot_pos_des.tail(3) = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+
+    lfoot_pos_des[0] = lfoot_ori_act.w();
+    lfoot_pos_des[1] = lfoot_ori_act.x();
+    lfoot_pos_des[2] = lfoot_ori_act.y();
+    lfoot_pos_des[3] = lfoot_ori_act.z();
+    lfoot_pos_des.tail(3) = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+
+    // =========================================================================
     // Joint Pos Task
     // =========================================================================
     Eigen::VectorXd jpos_des = jpos_ini_;
@@ -239,23 +341,24 @@ void MPCBalanceCtrl::firstVisit() {
     goal_com_pos_[2] = target_com_height_;
 
 
-   // Get the initial robot inertia
-    robot_->updateCentroidFrame();
-    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-
+    // MPC Initial Setup 
     // System Params
     double robot_mass = robot_->getRobotMass(); //kg
     convex_mpc->setRobotMass(robot_mass); // (kilograms) 
-    convex_mpc->setRobotInertia(I_body);
 
-    // MPC Params
-    int horizon = 10;
-    convex_mpc->setHorizon(horizon); // horizon timesteps 
-    convex_mpc->setDt(0.025); // (seconds) per horizon
+    convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
+    convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(0.7); //  friction coefficient
     convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
     convex_mpc->rotateBodyInertia(false); // Assume we are always providing the world inertia
+
+    // Set the cost vector
+    Eigen::VectorXd cost_vec(13);
+    // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+    cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
+    double cost_factor = 8.0;
+    cost_vec *= cost_factor;
+    convex_mpc->setCostVec(cost_vec);
 
 }
 
@@ -287,4 +390,19 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
                   << std::endl;
         exit(0);
     }
+
+    // Set Task Gains
+    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
+    Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
+    rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+    lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+
+    Eigen::VectorXd kp_jp = Eigen::VectorXd::Ones(Draco::n_adof); 
+    Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
+    total_joint_task_->setGain(kp_jp, kd_jp);
+
+    Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body_rpy = 1.0*Eigen::VectorXd::Ones(3);
+    body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
+
 }

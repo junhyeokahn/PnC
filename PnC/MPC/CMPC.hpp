@@ -47,6 +47,9 @@ public:
 	// cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
 	Eigen::VectorXd cost_vec;  
 
+	// Returns the state vector size of the MPC per horizon.
+	int getStateVecDim(){return 13;}
+
 	// Helper function which returns a 13-vector given the state of the robot. 
 	// x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13	
 	Eigen::VectorXd getx0(const double roll, const double pitch, const double yaw,

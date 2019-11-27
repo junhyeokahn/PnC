@@ -397,12 +397,16 @@ TEST(MPC_IHWBC, mpc_ihwbc_test) {
     rfoot_pos_des[2] = rfoot_ori_act.y();
     rfoot_pos_des[3] = rfoot_ori_act.z();
     rfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+
 
     lfoot_pos_des[0] = lfoot_ori_act.w();
     lfoot_pos_des[1] = lfoot_ori_act.x();
     lfoot_pos_des[2] = lfoot_ori_act.y();
     lfoot_pos_des[3] = lfoot_ori_act.z();
     lfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+
 
     // Joint Position Task
     Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
