@@ -85,10 +85,18 @@ class MPCBalanceCtrl : public Controller {
     // MPC Variables
     double mpc_horizon_;
     double mpc_dt_; 
-    Eigen::VectorXd mpc_Fd_out_;
-    Eigen::VectorXd mpc_x_pred_;
-    Eigen::VectorXd mpc_r_feet_;
+
+    Eigen::VectorXd mpc_x0_;
     Eigen::VectorXd mpc_Xdes_;
+    Eigen::MatrixXd mpc_r_feet_;
+    Eigen::VectorXd mpc_x_pred_;
+    Eigen::VectorXd mpc_Fd_out_;
+
+    Eigen::VectorXd mpc_Fd_des_;
+
+    Eigen::Vector3d com_current_;
+    Eigen::Vector3d com_rate_current_;
+    Eigen::Vector3d midfeet_pos_;
 
 
 };

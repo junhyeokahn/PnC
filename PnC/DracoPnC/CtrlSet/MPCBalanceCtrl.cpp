@@ -113,8 +113,11 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     contact_setup();
+
+    // Setup and solve the MPC 
     _mpc_setup();
     _mpc_Xdes_setup();
+    _mpc_solve();
 
     task_setup();
     _compute_torque_wblc(gamma);
@@ -136,36 +139,40 @@ void MPCBalanceCtrl::_mpc_setup(){
 
     // Update Feet Configuration
     // Set Foot contact locations w.r.t world
-    Eigen::MatrixXd r_feet(3, contact_list_.size()); // Each column is a reaction force in x,y,z 
-    r_feet.setZero();
+    mpc_r_feet_ = Eigen::MatrixXd::Zero(3, contact_list_.size()); // Each column is a reaction force in x,y,z 
+    mpc_r_feet_.setZero();
 
     int link_id = 0;
     for (int i = 0; i < contact_list_.size(); i++){
         link_id = ((PointContactSpec*)contact_list_[i])->get_link_idx();
-        r_feet.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
+        mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
     }
-    // myUtils::pretty_print(r_feet, std::cout, "r_feet");
+    // myUtils::pretty_print(mpc_r_feet_, std::cout, "mpc_r_feet_");
     Eigen::VectorXd q_current = robot_->getQ();
     Eigen::VectorXd qdot_current = robot_->getQdot();
 
-    Eigen::Vector3d com_current = robot_->getCoMPosition();
-    Eigen::Vector3d com_rate_current = robot_->getCoMVelocity();
+    com_current_ = robot_->getCoMPosition();
+    com_rate_current_ = robot_->getCoMVelocity();
 
     // Starting robot state
     // Current reduced state of the robot
     // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    Eigen::VectorXd x0(13); 
     double init_roll(q_current[3]), init_pitch(q_current[4]), init_yaw(q_current[5]), 
-         init_com_x(com_current[0]), init_com_y(com_current[1]), init_com_z(com_current[2]), 
+         init_com_x(com_current_[0]), init_com_y(com_current_[1]), init_com_z(com_current_[2]), 
          init_roll_rate(qdot_current[3]), init_pitch_rate(qdot_current[4]), init_yaw_rate(qdot_current[5]),
-         init_com_x_rate(com_rate_current[0]), init_com_y_rate(com_rate_current[1]), init_com_z_rate(com_rate_current[2]);
+         init_com_x_rate(com_rate_current_[0]), init_com_y_rate(com_rate_current_[1]), init_com_z_rate(com_rate_current_[2]);
 
-    x0 = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
+    mpc_x0_ = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
                            init_com_x, init_com_y, init_com_z,
                            init_roll_rate, init_pitch_rate, init_yaw_rate,
                            init_com_x_rate, init_com_y_rate, init_com_z_rate);
 
-    // Set the desired system evolution
+
+    midfeet_pos_ = 0.5*(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation() + 
+                        robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation());
+
+    // myUtils::pretty_print(midfeet_pos_, std::cout, "midfeet_pos_");
+
 }
 
 void MPCBalanceCtrl::_mpc_Xdes_setup(){
@@ -183,26 +190,30 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
         // Set CoM Position
-        mpc_Xdes_[i*n + 3] = myUtils::smooth_changing(ini_com_pos_[0], goal_com_pos_[0], stab_dur_, t_predict); // Desired com x
-        mpc_Xdes_[i*n + 4] = myUtils::smooth_changing(ini_com_pos_[1], goal_com_pos_[1], stab_dur_, t_predict); // Desired com y
+        mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
+        mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
         mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
 
         // Set CoM Velocity
-        mpc_Xdes_[i*n + 9] = myUtils::smooth_changing_vel(ini_com_vel_[0], 0., stab_dur_, t_predict); // Desired com x vel
-        mpc_Xdes_[i*n + 10] = myUtils::smooth_changing_vel(ini_com_vel_[1], 0., stab_dur_, t_predict); // Desired com y
+        mpc_Xdes_[i*n + 10] = 0.0;
+        mpc_Xdes_[i*n + 9] = 0.0;
         mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
-
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
-  
-  
 
-
+    // std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
+  
 }
 
 void MPCBalanceCtrl::_mpc_solve(){
     // Solve the mpc
-    // convex_mpc.solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
+    convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
+    mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
+
+    // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
+    // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
+    myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
+
 }
 
 void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
