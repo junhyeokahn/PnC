@@ -671,7 +671,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   // Solve MPC
   solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, Cqp, cvec_qp, f_vec_out);
   // Locally store the output force
-  latest_f_vec_out = f_vec_out;
+  latest_f_vec_out = f_vec_out.head(m);
 
   // Compute prediction of state evolution after an interval of mpc_dt
   x_pred = (Aqp*x0 + Bqp*f_vec_out).head(n);
