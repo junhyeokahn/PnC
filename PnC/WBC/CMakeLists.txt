@@ -21,4 +21,4 @@ install(FILES ${wblc_headers} DESTINATION
 install(FILES ${wbdc_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/WBC/WBDC")
 install(FILES ${ihwbc_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/PnC/WBC/WBDC")
+    "${INSTALL_INCLUDE_DIR}/PnC/WBC/IHWBC")
