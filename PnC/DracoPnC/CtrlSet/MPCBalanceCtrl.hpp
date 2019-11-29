@@ -58,6 +58,8 @@ class MPCBalanceCtrl : public Controller {
 
     // Convex MPC
     CMPC* convex_mpc;
+    double last_control_time_;
+
     // IHWBC
     IHWBC* ihwbc;
 

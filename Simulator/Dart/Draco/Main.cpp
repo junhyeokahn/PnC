@@ -108,7 +108,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
     int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
 
-    int initPos(2);  // 0 : Home, 1 : Simulation, 2 : Experiment
+    int initPos(1);  // 0 : Home, 1 : Simulation, 2 : Experiment
     Eigen::VectorXd q = robot->getPositions();
 
     switch (initPos) {
@@ -121,7 +121,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            q[2] = 1.193;
+            q[2] = 0.893;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
             q[lHipPitchIdx] = alpha;

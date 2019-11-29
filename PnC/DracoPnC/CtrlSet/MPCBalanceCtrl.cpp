@@ -54,8 +54,9 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
     // Convex MPC
     convex_mpc = new CMPC();
-    mpc_horizon_ = 10; // steps
+    mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
+    last_control_time_ = -0.001;
 
     // wbc
     std::vector<bool> act_list;
@@ -112,26 +113,33 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    contact_setup();
+    if ((state_machine_time_ - last_control_time_) > mpc_dt_){
+        last_control_time_ = state_machine_time_;
+        contact_setup();
 
-    // Setup and solve the MPC 
-    _mpc_setup();
-    _mpc_Xdes_setup();
-    _mpc_solve();
+        // Setup and solve the MPC 
+        _mpc_setup();
+        _mpc_Xdes_setup();
+        _mpc_solve();
 
-    task_setup();
+        task_setup();
 
-    _compute_torque_ihwbc(gamma);
+        _compute_torque_ihwbc(gamma);
 
-    // _compute_torque_wblc(gamma);
+        // _compute_torque_wblc(gamma);
 
 
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
-        ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
-        ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
+        for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+            ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
+            ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
+            ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
+        }
+        _PostProcessing_Command();
+
+    }else{
+
     }
-    _PostProcessing_Command();
+
 }
 
 void MPCBalanceCtrl::_mpc_setup(){
@@ -158,12 +166,14 @@ void MPCBalanceCtrl::_mpc_setup(){
     com_current_ = robot_->getCoMPosition();
     com_rate_current_ = robot_->getCoMVelocity();
 
+    myUtils::pretty_print(com_current_, std::cout, "com_current_");
+
     // Starting robot state
     // Current reduced state of the robot
     // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    double init_roll(q_current_[3]), init_pitch(q_current_[4]), init_yaw(q_current_[5]), 
+    double init_roll(q_current_[5]), init_pitch(q_current_[4]), init_yaw(q_current_[3]), 
          init_com_x(com_current_[0]), init_com_y(com_current_[1]), init_com_z(com_current_[2]), 
-         init_roll_rate(qdot_current_[3]), init_pitch_rate(qdot_current_[4]), init_yaw_rate(qdot_current_[5]),
+         init_roll_rate(qdot_current_[5]), init_pitch_rate(qdot_current_[4]), init_yaw_rate(qdot_current_[3]),
          init_com_x_rate(com_rate_current_[0]), init_com_y_rate(com_rate_current_[1]), init_com_z_rate(com_rate_current_[2]);
 
     mpc_x0_ = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
@@ -194,9 +204,9 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
         // Set CoM Position
-        mpc_Xdes_[i*n + 3] = midfeet_pos_[0] - 0.25;
+        mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
         mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
-        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
+        mpc_Xdes_[i*n + 5] = goal_com_pos_[2]; //myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
 
         // Set CoM Velocity
         mpc_Xdes_[i*n + 10] = 0.0;
@@ -205,7 +215,7 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
 
-    // std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
+    std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
   
 }
 
@@ -253,7 +263,7 @@ void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
 void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
-    w_contact_weight_ = 1e-4/(robot_->getRobotMass()*9.81);
+    w_contact_weight_ = 1e-2/(robot_->getRobotMass()*9.81);
     // Regularization terms should always be the lowest cost. 
     lambda_qddot_ = 1e-16;
     lambda_Fr_ = 1e-16;
@@ -281,12 +291,12 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     Eigen::VectorXd qddot_res;
     Eigen::VectorXd Fr_res;
 
-    ihwbc->getQddotResult(qddot_res);
-    ihwbc->getFrResult(Fr_res);
-
     // Update and solve QP
     ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
     ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_, tau_cmd_, qddot_cmd_);
+
+    ihwbc->getQddotResult(qddot_res);
+    ihwbc->getFrResult(Fr_res);
 
     // Compute desired joint position and velocities for the low-level
     Eigen::VectorXd ac_qdot_current = qdot_current_.tail(robot_->getNumActuatedDofs());
@@ -301,7 +311,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
 
-    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
+    myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
     // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
     // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
     // myUtils::pretty_print(qdot_des_, std::cout, "qdot_des_");
@@ -311,7 +321,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // myUtils::pretty_print(ac_q_current, std::cout, "ac_q_current");
 
     // myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
-    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+    myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 
 }
 
@@ -426,18 +436,23 @@ void MPCBalanceCtrl::task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    task_list_.push_back(com_task_);
-    task_list_.push_back(body_ori_task_);
+    // task_list_.push_back(com_task_);
+    // task_list_.push_back(body_ori_task_);
     task_list_.push_back(rfoot_center_rz_xyz_task);
     task_list_.push_back(lfoot_center_rz_xyz_task);    
     task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    w_task_heirarchy_[0] = 1e-4; // COM
-    w_task_heirarchy_[1] = 1e-4; // Body Ori
-    w_task_heirarchy_[2] = 1.0; // rfoot
-    w_task_heirarchy_[3] = 1.0; // lfoot
-    w_task_heirarchy_[4] = 1e-6; // joint    
+    // w_task_heirarchy_[0] = 1e-4; // COM
+    // w_task_heirarchy_[1] = 1e-4; // Body Ori
+    // w_task_heirarchy_[2] = 1.0; // rfoot
+    // w_task_heirarchy_[3] = 1.0; // lfoot
+    // w_task_heirarchy_[4] = 1e-6; // joint    
+
+    w_task_heirarchy_[0] = 1.0; // rfoot
+    w_task_heirarchy_[1] = 1.0; // lfoot
+    w_task_heirarchy_[2] = 1e-6; // joint    
+
 
     // =========================================================================
     // Solve Inv Kinematics
@@ -486,17 +501,28 @@ void MPCBalanceCtrl::firstVisit() {
     double robot_mass = robot_->getRobotMass(); //kg
     convex_mpc->setRobotMass(robot_mass); // (kilograms) 
 
+    // robot_->updateCentroidFrame();
+    // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+    // Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+    // convex_mpc->setRobotInertia(I_body);
+
+    // myUtils::pretty_print(I_body, std::cout, "I_body");
+
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(0.7); //  friction coefficient
     convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
-    convex_mpc->rotateBodyInertia(false); // Assume we are always providing the world inertia
+    convex_mpc->rotateBodyInertia(false); // False: Assume we are always providing the world inertia
+                                         // True: We provide body inertia once
 
     // Set the cost vector
     Eigen::VectorXd cost_vec(13);
     // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
-    cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
-    double cost_factor = 9.0;//8.0;
+    // cost_vec << 0.25, 0.25, 0.25, 1.0, 1.0, 10.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
+    // cost_vec << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0;
+    // cost_vec << 0.1, 0.1, 0.1, 10.0, 0.0, 100.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0;
+    cost_vec << 0.1, 0.25, 0.1, 10.0, 1.0, 1.0, 0.00, 0.00, 0.00,  1.0, 1.0, 1.0, 0.0;
+    double cost_factor = 1.0;//8.0;
     cost_vec *= cost_factor;
     convex_mpc->setCostVec(cost_vec);
 
@@ -532,17 +558,17 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 
     // Set Task Gains
-    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
+    Eigen::VectorXd kp_foot = 10*Eigen::VectorXd::Ones(4); 
     Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
     rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
     lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
 
-    Eigen::VectorXd kp_jp = Eigen::VectorXd::Ones(Draco::n_adof); 
+    Eigen::VectorXd kp_jp = 10*Eigen::VectorXd::Ones(Draco::n_adof); 
     Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
     total_joint_task_->setGain(kp_jp, kd_jp);
 
-    Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_body_rpy = 1.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kp_body_rpy = 10*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body_rpy = 0.1*Eigen::VectorXd::Ones(3);
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
 

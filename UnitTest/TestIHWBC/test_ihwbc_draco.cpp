@@ -1206,3 +1206,233 @@ TEST(IHWBC, torque_limit_test) {
 
 }
 
+
+
+// Torque limit test
+TEST(IHWBC, jpos_test) {
+    RobotSystem* robot;
+    robot = new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
+
+    //  Initialize actuated list
+    std::vector<bool> act_list;
+    act_list.resize(robot->getNumDofs(), true);
+    for (int i(0); i < robot->getNumVirtualDofs(); ++i){
+        act_list[i] = false;    
+    } 
+
+    // Initialize IHWBC
+    IHWBC* ihwbc = new IHWBC(act_list);
+
+    // Initialize and Update the robot
+    Eigen::VectorXd q, qdot;
+    getInitialConfiguration(robot, q, qdot);
+    robot->updateSystem(q, qdot);
+    // myUtils::pretty_print(q, std::cout, "q");    
+
+    // Task and Contact list
+    std::vector<Task*> task_list;
+    std::vector<ContactSpec*> contact_list;
+
+    // Create Tasks
+
+    // Body RxRyZ tasks or CoM xyz task or Linear Momentum Task
+    // Body Rx Ry Rz
+    // Foot location task.
+    // Joint Position Task. It appears that it's important to have this task to ensure that uncontrolled qddot does not blow up
+    Task* body_rpz_task_ = new BodyRxRyZTask(robot);
+    Task* rfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::rFootCenter);
+    Task* lfoot_center_rz_xyz_task = new FootRzXYZTask(robot, DracoBodyNode::lFootCenter);
+    Task* total_joint_task = new BasicTask(robot, BasicTaskType::JOINT, Draco::n_adof);
+
+    // task_list.push_back(body_rpz_task_);
+    // task_list.push_back(rfoot_center_rz_xyz_task);
+    // task_list.push_back(lfoot_center_rz_xyz_task);
+    task_list.push_back(total_joint_task);
+
+    // Set Task Gains
+    Eigen::VectorXd kp_body = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body = 1.0*Eigen::VectorXd::Ones(3);
+    body_rpz_task_->setGain(kp_body, kd_body);
+
+    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
+    Eigen::VectorXd kd_foot = 1.0*Eigen::VectorXd::Ones(4);
+    rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+    lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+
+    Eigen::VectorXd kp_jp = Eigen::VectorXd::Ones(Draco::n_adof); 
+    Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
+    total_joint_task->setGain(kp_jp, kd_jp);
+
+
+    // Set the desired task values
+    // Body Task
+    Eigen::VectorXd body_pos_des(7); body_pos_des.setZero();
+    Eigen::VectorXd body_vel_des(6); body_vel_des.setZero();    
+    Eigen::VectorXd body_acc_des(6); body_acc_des.setZero();
+    Eigen::Quaternion<double> body_des_quat(1, 0, 0, 0);
+
+    body_pos_des[0] = body_des_quat.w();
+    body_pos_des[1] = body_des_quat.x();
+    body_pos_des[2] = body_des_quat.y();
+    body_pos_des[3] = body_des_quat.z();
+
+    body_pos_des[4] = q[0];
+    body_pos_des[5] = q[1];
+    body_pos_des[6] = q[2];
+    
+    body_rpz_task_->updateTask(body_pos_des, body_vel_des, body_acc_des);
+
+    // Foot Task
+    Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
+    Eigen::VectorXd lfoot_pos_des(7); lfoot_pos_des.setZero();
+    Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();    
+    Eigen::VectorXd foot_acc_des(6); foot_acc_des.setZero();
+
+    Eigen::Quaternion<double> rfoot_ori_act(robot->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
+    Eigen::Quaternion<double> lfoot_ori_act(robot->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
+
+    rfoot_pos_des[0] = rfoot_ori_act.w();
+    rfoot_pos_des[1] = rfoot_ori_act.x();
+    rfoot_pos_des[2] = rfoot_ori_act.y();
+    rfoot_pos_des[3] = rfoot_ori_act.z();
+    rfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+
+    lfoot_pos_des[0] = lfoot_ori_act.w();
+    lfoot_pos_des[1] = lfoot_ori_act.x();
+    lfoot_pos_des[2] = lfoot_ori_act.y();
+    lfoot_pos_des[3] = lfoot_ori_act.z();
+    lfoot_pos_des.tail(3) = robot->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+
+    // Joint Position Task
+    Eigen::VectorXd jpos_des = 0.95*robot->getQ().tail(Draco::n_adof);
+    Eigen::VectorXd jvel_des(Draco::n_adof);  jvel_des.setZero();
+    Eigen::VectorXd jacc_des(Draco::n_adof);  jacc_des.setZero();
+
+    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+    total_joint_task->updateTask(jpos_des, jvel_des, jacc_des);
+
+    // myUtils::pretty_print(body_pos_des, std::cout, "body_pos_des");
+    // myUtils::pretty_print(rfoot_pos_des, std::cout, "rfoot_pos_des");
+    // myUtils::pretty_print(lfoot_pos_des, std::cout, "lfoot_pos_des");
+    // myUtils::pretty_print(jpos_des, std::cout, "jpos_des");
+
+    // Create the contacts
+    ContactSpec* rfoot_front_contact = new PointContactSpec(robot, DracoBodyNode::rFootFront, 0.7);
+    ContactSpec* rfoot_back_contact = new PointContactSpec(robot, DracoBodyNode::rFootBack, 0.7);
+    ContactSpec* lfoot_front_contact = new PointContactSpec(robot, DracoBodyNode::lFootFront, 0.7);
+    ContactSpec* lfoot_back_contact = new PointContactSpec(robot, DracoBodyNode::lFootBack, 0.7);
+
+    // contact_list.push_back(rfoot_front_contact);
+    // contact_list.push_back(rfoot_back_contact);
+    // contact_list.push_back(lfoot_front_contact);
+    // contact_list.push_back(lfoot_back_contact);
+
+    // ((PointContactSpec*)rfoot_front_contact)->setMaxFz(100.0);
+
+    rfoot_front_contact->updateContactSpec();
+    rfoot_back_contact->updateContactSpec();
+    lfoot_front_contact->updateContactSpec();
+    lfoot_back_contact->updateContactSpec();
+
+    // Update dynamics
+    Eigen::MatrixXd A = robot->getMassMatrix();
+    Eigen::MatrixXd Ainv = robot->getInvMassMatrix();
+    Eigen::VectorXd grav = robot->getGravity();
+    Eigen::MatrixXd coriolis = robot->getCoriolis();
+
+    // myUtils::pretty_print(A, std::cout, "A");
+
+    // Containers
+    Eigen::VectorXd tau_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Torque Command output from IHBC
+    Eigen::VectorXd qddot_cmd(robot->getNumDofs() - robot->getNumVirtualDofs()); // Joint Acceleration Command output from IHBC 
+
+    int contact_dim_size = 0;
+    for(int i = 0; i < contact_list.size(); i++){
+        contact_dim_size += contact_list[i]->getDim();
+    }
+    // ASSERT_EQ(contact_dim_size, 12);
+
+    Eigen::VectorXd Fd(contact_dim_size); Fd.setZero();
+
+    // Distribute reaction forces equally according to the mass of the robot
+    double Fz_dist = (robot->getRobotMass()*9.81)/contact_list.size();
+    int idx_offset = 0;
+    for(int i = 0; i < contact_list.size(); i++){
+        Fd[idx_offset + contact_list[i]->getFzIndex()] = Fz_dist;
+        idx_offset += contact_list[i]->getDim();
+    }
+
+    // Initialize QP weights
+    Eigen::VectorXd w_task_heirarchy(task_list.size());  // Vector of task priority weighs
+
+    // Contact Tasks have weight 1.0
+    // Pose Tasks have weight 1e-4
+    // Joint Posture Tasks have weight 1e-6
+    // w_task_heirarchy[0] = 1e-4; // Body
+    // w_task_heirarchy[1] = 1.0; // rfoot
+    // w_task_heirarchy[2] = 1.0; // lfoot
+    w_task_heirarchy[0] = 1e-6; // joint
+
+    // w_task_heirarchy[0] = 1.0; // rfoot
+    // w_task_heirarchy[1] = 1.0; // lfoot
+    // w_task_heirarchy[2] = 1e-6; // joint
+
+    // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
+    // Keeping it the same magnitude as the body task seems to have some benefits.
+    double w_contact_weight = 1e-4/(robot->getRobotMass()*9.81);
+
+    // Regularization terms should always be the lowest cost. 
+    double lambda_qddot = 1e-16;
+    double lambda_Fr = 1e-16;
+
+    // Enable Torque Limits
+    ihwbc->enableTorqueLimits(true);
+    double tau_lim = 30.0;
+    Eigen::VectorXd tau_min = -tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
+    Eigen::VectorXd tau_max = tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
+    ihwbc->setTorqueLimits(tau_min, tau_max);
+
+    // Set QP weights
+    ihwbc->setQPWeights(w_task_heirarchy, w_contact_weight);
+    ihwbc->setRegularizationTerms(lambda_qddot, lambda_Fr);
+
+    // Update and solve QP
+    ihwbc->updateSetting(A, Ainv, coriolis, grav);
+    ihwbc->solve(task_list, contact_list, Fd, tau_cmd, qddot_cmd);
+
+    // QP dec variable results
+    Eigen::VectorXd qddot_res;
+    Eigen::VectorXd Fr_res;
+
+    ihwbc->getQddotResult(qddot_res);
+    ihwbc->getFrResult(Fr_res);
+
+    double total_Fz = 0;
+    idx_offset = 0;
+    for(int i = 0; i < contact_list.size(); i++){
+        total_Fz += Fr_res[idx_offset + contact_list[i]->getFzIndex()];
+        idx_offset += contact_list[i]->getDim();
+    }
+
+    myUtils::pretty_print(Fd, std::cout, "Fd");
+    myUtils::pretty_print(tau_cmd, std::cout, "tau_cmd");
+    myUtils::pretty_print(qddot_cmd, std::cout, "qddot_cmd");
+    myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
+    myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+    std::cout << "robot mass = " << robot->getRobotMass() << std::endl;
+    std::cout << "robot mass*grav = " << robot->getRobotMass()*9.81 << std::endl;
+    std::cout << "total_Fz:" << total_Fz << std::endl;
+
+    // Assert that the computed torques are less than the set limit
+    for(int i = 0; i < tau_cmd.size(); i++){
+       ASSERT_LE(std::fabs(tau_cmd[i]), (tau_lim+0.001));
+    }
+
+    Eigen::VectorXd qddot_test = Eigen::VectorXd::Zero(robot->getNumDofs());
+    qddot_test[2] = -9.81;
+    std::cout << "Aqddot = " << (A*qddot_test).transpose() << std::endl;
+    std::cout << "grav = " << grav.transpose() << std::endl;
+
+}
+
