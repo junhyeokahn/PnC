@@ -224,12 +224,12 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         // Set CoM Position
         mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
         mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
-        mpc_Xdes_[i*n + 5] = goal_com_pos_[2]; //myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
+        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
 
         // Set CoM Velocity
         mpc_Xdes_[i*n + 10] = 0.0;
         mpc_Xdes_[i*n + 9] = 0.0;
-        mpc_Xdes_[i*n + 11] = 0.0; //myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
+        mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
 
@@ -454,22 +454,22 @@ void MPCBalanceCtrl::task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    task_list_.push_back(com_task_);
-    task_list_.push_back(body_ori_task_);
+    // task_list_.push_back(com_task_);
+    // task_list_.push_back(body_ori_task_);
     task_list_.push_back(rfoot_center_rz_xyz_task);
     task_list_.push_back(lfoot_center_rz_xyz_task);    
     task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    w_task_heirarchy_[0] = 1e-4; // COM
-    w_task_heirarchy_[1] = 1e-4; // Body Ori
-    w_task_heirarchy_[2] = 1.0; // rfoot
-    w_task_heirarchy_[3] = 1.0; // lfoot
-    w_task_heirarchy_[4] = 1e-6; // joint    
+    // w_task_heirarchy_[0] = 1e-4; // COM
+    // w_task_heirarchy_[1] = 1e-4; // Body Ori
+    // w_task_heirarchy_[2] = 1.0; // rfoot
+    // w_task_heirarchy_[3] = 1.0; // lfoot
+    // w_task_heirarchy_[4] = 1e-6; // joint    
 
-    // w_task_heirarchy_[0] = 1.0; // rfoot
-    // w_task_heirarchy_[1] = 1.0; // lfoot
-    // w_task_heirarchy_[2] = 1e-6; // joint    
+    w_task_heirarchy_[0] = 1.0; // rfoot
+    w_task_heirarchy_[1] = 1.0; // lfoot
+    w_task_heirarchy_[2] = 1e-6; // joint    
 
 
     // =========================================================================
@@ -543,7 +543,7 @@ void MPCBalanceCtrl::firstVisit() {
     // cost_vec << 0.1, 0.5, 0.1, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
     // cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
     // cost_vec << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 1000.0, 0.0;
-    cost_vec << 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;
+    cost_vec << 2.5, 2.5, 2.5, 5.0, 5.0, 5.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0;
     // cost_vec << 0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.1, 1.0, 1.0, 10.0, 10.0, 10.0, 0.0;
     double cost_factor = 1.0;//8.0;
     cost_vec *= cost_factor;
