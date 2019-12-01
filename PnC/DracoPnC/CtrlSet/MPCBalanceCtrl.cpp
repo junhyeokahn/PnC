@@ -524,7 +524,7 @@ void MPCBalanceCtrl::firstVisit() {
     Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
     convex_mpc->setRobotInertia(I_body);
 
-    // myUtils::pretty_print(I_body, std::cout, "I_body");
+    myUtils::pretty_print(I_body, std::cout, "I_body");
 
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
@@ -543,8 +543,8 @@ void MPCBalanceCtrl::firstVisit() {
     // cost_vec << 0.1, 0.5, 0.1, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
     // cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
     // cost_vec << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 1000.0, 0.0;
-    // cost_vec << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-    cost_vec << 0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;
+    cost_vec << 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;
+    // cost_vec << 0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.1, 1.0, 1.0, 10.0, 10.0, 10.0, 0.0;
     double cost_factor = 1.0;//8.0;
     cost_vec *= cost_factor;
     convex_mpc->setCostVec(cost_vec);
