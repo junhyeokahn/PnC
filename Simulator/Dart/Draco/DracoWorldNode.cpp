@@ -225,6 +225,8 @@ void DracoWorldNode::_hold_xy() {
     static double des_z = (mSkel->getPositions())[2];
     static double des_xdot(0.);
     static double des_ydot(0.);
+    static double des_zdot(0.);
+
 
     Eigen::VectorXd q = mSkel->getPositions();
     Eigen::VectorXd v = mSkel->getVelocities();
@@ -234,7 +236,7 @@ void DracoWorldNode::_hold_xy() {
 
     mTorqueCommand[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);
     mTorqueCommand[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
-    // mTorqueCommand[2] = kp * (des_z - q[2]) + kd * (0.0 - v[2]);
+    // mTorqueCommand[2] = kp * (des_z - q[2]) + kd * (des_zdot - v[2]);
 }
 
 void DracoWorldNode::_check_collision() {

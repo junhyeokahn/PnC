@@ -1,5 +1,6 @@
 test_configuration:
     initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
+    # initial_jpos: [0., 0., -0.785, -0.214, 0.785, 0., 0, -0.785, -0.214, 0.785]
     jpos_initialization_time: 2.0
     jpos_ctrl_time: 2.0
 
