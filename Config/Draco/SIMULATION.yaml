@@ -1,18 +1,21 @@
 is_record: false
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
 num_steps_per_cycle: 30
-hanging_height: 0.83
+hanging_height: 0.8729 #0.83
 display_joint_frame: true
 display_target_frame: true
 joint_limit_enforced: true
-initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
+#initial_configuration: [0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03]
+# initial_configuration: [0., 0., -0.8, 1.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
+initial_configuration: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+
 
 plot_adjusted_foot: false
 plot_guided_foot: false
 camera_manipulator: false
 print_computation_time: false
-release_time: 0.00
-# release_time: 4.20
+# release_time: 0.50
+release_time: 4.20
 # release_time: 100   
 
 ### Toggle for RL ###

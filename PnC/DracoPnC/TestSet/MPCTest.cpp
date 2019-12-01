@@ -8,8 +8,8 @@ MPCTest::MPCTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "MPC Test");
     cfg_ = YAML::LoadFile(THIS_COM"Config/Draco/TEST/MPC_TEST.yaml");
 
-    // phase_ = MPCTestPhase::MPCT_initial_jpos;
-    phase_  = MPCTestPhase::MPCT_force_ctrl;
+    phase_ = MPCTestPhase::MPCT_initial_jpos;
+    // phase_  = MPCTestPhase::MPCT_force_ctrl;
     state_list_.clear();
 
     jpos_target_ctrl_ = new IVDJPosTargetCtrl(robot);
