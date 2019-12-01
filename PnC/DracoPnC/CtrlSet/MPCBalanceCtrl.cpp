@@ -345,21 +345,21 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 void MPCBalanceCtrl::task_setup() {
     // Set desired com and body orientation from predicted state 
-    double des_roll = mpc_Xdes_[0];
-    double des_pitch = mpc_Xdes_[1];
-    double des_yaw = mpc_Xdes_[2];
+    double des_roll = mpc_x_pred_[0];
+    double des_pitch = mpc_x_pred_[1];
+    double des_yaw = mpc_x_pred_[2];
 
-    double des_pos_x = mpc_Xdes_[3];
-    double des_pos_y = mpc_Xdes_[4];
-    double des_pos_z = mpc_Xdes_[5];
+    double des_pos_x = mpc_x_pred_[3];
+    double des_pos_y = mpc_x_pred_[4];
+    double des_pos_z = mpc_x_pred_[5];
 
-    double des_roll_rate = mpc_Xdes_[6];
-    double des_pitch_rate = mpc_Xdes_[7];
-    double des_yaw_rate = mpc_Xdes_[8];
+    double des_roll_rate = mpc_x_pred_[6];
+    double des_pitch_rate = mpc_x_pred_[7];
+    double des_yaw_rate = mpc_x_pred_[8];
 
-    double des_vel_x = mpc_Xdes_[9];
-    double des_vel_y = mpc_Xdes_[10];
-    double des_vel_z = mpc_Xdes_[11];
+    double des_vel_x = mpc_x_pred_[9];
+    double des_vel_y = mpc_x_pred_[10];
+    double des_vel_z = mpc_x_pred_[11];
 
     // =========================================================================
     // Com Task
@@ -454,22 +454,22 @@ void MPCBalanceCtrl::task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
-    // task_list_.push_back(com_task_);
-    // task_list_.push_back(body_ori_task_);
+    task_list_.push_back(com_task_);
+    task_list_.push_back(body_ori_task_);
     task_list_.push_back(rfoot_center_rz_xyz_task);
     task_list_.push_back(lfoot_center_rz_xyz_task);    
     task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    // w_task_heirarchy_[0] = 1e-4; // COM
-    // w_task_heirarchy_[1] = 1e-4; // Body Ori
-    // w_task_heirarchy_[2] = 1.0; // rfoot
-    // w_task_heirarchy_[3] = 1.0; // lfoot
-    // w_task_heirarchy_[4] = 1e-6; // joint    
+    w_task_heirarchy_[0] = 1e-4; // COM
+    w_task_heirarchy_[1] = 1e-4; // Body Ori
+    w_task_heirarchy_[2] = 1.0; // rfoot
+    w_task_heirarchy_[3] = 1.0; // lfoot
+    w_task_heirarchy_[4] = 1e-6; // joint    
 
-    w_task_heirarchy_[0] = 1.0; // rfoot
-    w_task_heirarchy_[1] = 1.0; // lfoot
-    w_task_heirarchy_[2] = 1e-6; // joint    
+    // w_task_heirarchy_[0] = 1.0; // rfoot
+    // w_task_heirarchy_[1] = 1.0; // lfoot
+    // w_task_heirarchy_[2] = 1e-6; // joint    
 
 
     // =========================================================================
