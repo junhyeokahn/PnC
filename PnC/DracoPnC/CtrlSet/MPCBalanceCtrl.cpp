@@ -363,7 +363,8 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     sp_->qddot_cmd = qddot_res;    
 
     // Store desired reaction force data
-    sp_->reaction_forces = Fr_res;
+    sp_->reaction_forces = mpc_Fd_des_;
+    sp_->filtered_rf = Fr_res;
 
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
     // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");

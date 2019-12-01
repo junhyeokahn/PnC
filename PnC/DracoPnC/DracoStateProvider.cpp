@@ -33,6 +33,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     b_lfoot_contact = 0;
     qddot_cmd = Eigen::VectorXd::Zero(16);
     reaction_forces = Eigen::VectorXd::Zero(12);
+    filtered_rf = Eigen::VectorXd::Zero(12);
     led_kin_data = Eigen::VectorXd::Zero(9);
 
     rfoot_center_pos.setZero();
@@ -68,6 +69,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&b_lfoot_contact, INT, "lfoot_contact", 1);
 
     data_manager->RegisterData(&reaction_forces, VECT, "reaction_force", 12);
+    data_manager->RegisterData(&filtered_rf, VECT, "filtered_rf", 12);
     data_manager->RegisterData(&qddot_cmd, VECT, "qddot_cmd", 16);
 
     data_manager->RegisterData(&rfoot_center_pos, VECT3, "rfoot_pos", 3);

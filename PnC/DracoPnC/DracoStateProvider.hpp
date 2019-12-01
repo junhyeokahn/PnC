@@ -34,6 +34,7 @@ class DracoStateProvider {
 
     Eigen::VectorXd qddot_cmd;
     Eigen::VectorXd reaction_forces;
+    Eigen::VectorXd filtered_rf;
 
     Eigen::Vector3d rfoot_center_pos;
     Eigen::Vector3d lfoot_center_pos;
