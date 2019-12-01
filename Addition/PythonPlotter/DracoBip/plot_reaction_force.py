@@ -6,7 +6,7 @@ import os
 
 
 file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
-dim_single_rf = 5
+dim_single_rf = 6
 ## read files
 data_rf_cmd = \
 np.genfromtxt(file_path+'reaction_force.txt', delimiter=None, dtype=(float))
