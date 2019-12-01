@@ -242,7 +242,7 @@ void MPCBalanceCtrl::_mpc_solve(){
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
 
-    // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
+    myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
     myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
 
@@ -281,7 +281,7 @@ void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
 
 void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
-    w_contact_weight_ = 1e-10/(robot_->getRobotMass()*9.81);
+    w_contact_weight_ = 1e-2/(robot_->getRobotMass()*9.81);
     // Regularization terms should always be the lowest cost. 
     lambda_qddot_ = 1e-16;
     lambda_Fr_ = 1e-16;
@@ -532,6 +532,7 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
     convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
                                          // True: We provide body inertia once
+    convex_mpc->setControlAlpha(1e-12);
 
     // Set the cost vector
     Eigen::VectorXd cost_vec(13);
@@ -540,7 +541,10 @@ void MPCBalanceCtrl::firstVisit() {
     // cost_vec << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0;
     // cost_vec << 0.1, 0.1, 0.1, 10.0, 0.0, 100.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0;
     // cost_vec << 0.1, 0.5, 0.1, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
-    cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
+    // cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
+    // cost_vec << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 1000.0, 0.0;
+    // cost_vec << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+    cost_vec << 0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;
     double cost_factor = 1.0;//8.0;
     cost_vec *= cost_factor;
     convex_mpc->setCostVec(cost_vec);

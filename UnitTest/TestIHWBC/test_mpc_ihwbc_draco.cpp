@@ -54,7 +54,7 @@ TEST(MPC, toy_mpc){
   convex_mpc.setRobotInertia(I_robot_body);
 
   // MPC Params
-  int horizon = 10;
+  int horizon = 1;
   convex_mpc.setHorizon(horizon); // horizon timesteps 
   convex_mpc.setDt(0.025); // (seconds) per horizon
   convex_mpc.setMu(0.7); //  friction coefficient
@@ -63,9 +63,10 @@ TEST(MPC, toy_mpc){
   // Set the cost vector
   Eigen::VectorXd cost_vec(13);
   // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
-  cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
+  // cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
+  cost_vec << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0;
   convex_mpc.setCostVec(cost_vec);
-
+  convex_mpc.setControlAlpha(1e-12);
 
   // Starting robot state
   // Current reduced state of the robot
@@ -73,7 +74,7 @@ TEST(MPC, toy_mpc){
   Eigen::VectorXd x0(13); 
 
   double init_roll(0), init_pitch(0), init_yaw(0), 
-         init_com_x(0), init_com_y(0), init_com_z(0.25), 
+         init_com_x(0), init_com_y(0), init_com_z(0.75), 
          init_roll_rate(0), init_pitch_rate(0), init_yaw_rate(0),
          init_com_x_rate(0), init_com_y_rate(0), init_com_z_rate(0);
 
@@ -128,6 +129,8 @@ TEST(MPC, toy_mpc){
 
   // Solve the MPC
   convex_mpc.solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);
+  myUtils::pretty_print(x0, std::cout, "x0");
+  myUtils::pretty_print(x_pred, std::cout, "x_pred");
   // convex_mpc.print_f_vec(n_Fr, f_vec_out);
 
   double total_z_force = 0.0;
@@ -140,7 +143,7 @@ TEST(MPC, toy_mpc){
   std::cout << "total z force = " << total_z_force << std::endl;
 
   double robot_weight = robot_mass*9.81;
-  ASSERT_GE(total_z_force, robot_weight);
+  ASSERT_GE((total_z_force+1e-3), robot_weight);
 }
 
 TEST(MPC_IHWBC, zyx_rates_to_ang_vel){
