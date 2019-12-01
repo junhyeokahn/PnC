@@ -34,8 +34,8 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     scale = [speed_ratio_lin * torque_const*eff, \
             speed_ratio_rot * torque_const*eff, \
             speed_ratio_rot * torque_const*eff];
-    # data_qddot_cmd = \
-            # np.genfromtxt(file_path+'qddot_cmd.txt', delimiter=None, dtype=(float))
+    data_qddot_cmd = \
+            np.genfromtxt(file_path+'qddot_cmd.txt', delimiter=None, dtype=(float))
     
     data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
     
@@ -203,7 +203,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig.canvas.set_window_title('qddot (floating)')
     for i in range(1,7,1):
         ax1 = plt.subplot(6, 1, i)
-        # plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1], "r-")
+        plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1], "r-")
         # phase marker #
         for j in phseChange:
             # phase line
@@ -223,7 +223,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig.canvas.set_window_title('qddot (left)')
     for i in range(1,num_leg_joint + 1,1):
         ax1 = plt.subplot(num_leg_joint, 1, i)
-        # plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1 + 6], "r-")
+        plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1 + 6], "r-")
         plt.grid(True)
         # phase marker #
         for j in phseChange:
@@ -243,7 +243,7 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
     fig.canvas.set_window_title('qddot (right)')
     for i in range(1, num_leg_joint + 1,1):
         ax1 = plt.subplot(num_leg_joint, 1, i)
-        # plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1 + 9], "r-")
+        plt.plot(data_x, data_qddot_cmd[xMinIndex:xMaxIndex, i-1 + 9], "r-")
         # phase marker #
         for j in phseChange:
             # phase line

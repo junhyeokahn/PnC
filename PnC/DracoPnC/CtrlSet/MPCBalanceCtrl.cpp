@@ -353,6 +353,9 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
 
+    // Store desired qddot
+    sp_->qddot_cmd = qddot_res;    
+
     // Store desired reaction force data
     sp_->reaction_forces = Fr_res;
 
