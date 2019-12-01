@@ -58,6 +58,9 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_dt_ = 0.025; // seconds per step
     last_control_time_ = -0.001;
 
+    mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
+    alpha_fd_ = 0.9;
+
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
@@ -335,7 +338,10 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // Update and solve QP
     ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
-    ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_, tau_cmd_, qddot_cmd_);
+
+    mpc_Fd_des_filtered_ = alpha_fd_*mpc_Fd_des_ + (1.0-alpha_fd_)*mpc_Fd_des_filtered_;
+
+    ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_filtered_, tau_cmd_, qddot_cmd_);
 
     ihwbc->getQddotResult(qddot_res);
     ihwbc->getFrResult(Fr_res);
@@ -349,7 +355,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
                 0.5*qddot_cmd_*ihwbc_dt_*ihwbc_dt_; 
 
 
-    gamma = tau_cmd_ + 5.0*(q_des_ - ac_q_current) + 0.5*(qdot_des_ - ac_qdot_current);
+    gamma = tau_cmd_;// + 5.0*(q_des_ - ac_q_current) + 0.5*(qdot_des_ - ac_qdot_current);
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
 

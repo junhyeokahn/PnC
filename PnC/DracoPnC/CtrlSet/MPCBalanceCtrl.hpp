@@ -113,6 +113,8 @@ class MPCBalanceCtrl : public Controller {
     Eigen::VectorXd mpc_Fd_out_;
 
     Eigen::VectorXd mpc_Fd_des_;
+    Eigen::VectorXd mpc_Fd_des_filtered_;
+    double alpha_fd_;
 
     Eigen::Vector3d com_current_;
     Eigen::Vector3d com_rate_current_;
