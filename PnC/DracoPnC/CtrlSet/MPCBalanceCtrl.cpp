@@ -349,7 +349,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
                 0.5*qddot_cmd_*ihwbc_dt_*ihwbc_dt_; 
 
 
-    gamma = tau_cmd_;
+    gamma = tau_cmd_ + 5.0*(q_des_ - ac_q_current) + 0.5*(qdot_des_ - ac_qdot_current);
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
 
@@ -563,7 +563,7 @@ void MPCBalanceCtrl::firstVisit() {
     // cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
     // cost_vec << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 1000.0, 0.0;
     // cost_vec << 2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0;
-    cost_vec << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0;    
+    cost_vec << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;    
     double cost_factor = 1.0;//8.0;
     cost_vec *= cost_factor;
     convex_mpc->setCostVec(cost_vec);
