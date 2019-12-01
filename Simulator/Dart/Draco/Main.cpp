@@ -121,7 +121,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            q[2] = 0.893;
+            q[2] = 0.8729; //0.893;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
             q[lHipPitchIdx] = alpha;

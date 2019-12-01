@@ -95,6 +95,7 @@ void DracoInterface::getCommand(void* _data, void* _command) {
         } else {
             _CopyCommand(cmd);
         }
+        // _CopyCommand(cmd);
     }
 
     // Save Data

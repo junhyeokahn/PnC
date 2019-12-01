@@ -62,6 +62,7 @@ class MPCBalanceCtrl : public Controller {
 
     // IHWBC
     IHWBC* ihwbc;
+    Eigen::VectorXd gamma_old_;
 
     double target_com_height_;
     double stab_dur_;

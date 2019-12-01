@@ -277,9 +277,9 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
     Eigen::VectorXd tau_mpc = Sa_*(-Jc_.transpose()*Fd); 
 
-    myUtils::pretty_print(tau_cmd, std::cout, "ihwbc tau_cmd");
-    myUtils::pretty_print(tau_mpc, std::cout, "tau_mpc");
-    tau_cmd = tau_mpc;
+    // myUtils::pretty_print(tau_cmd, std::cout, "ihwbc tau_cmd");
+    // myUtils::pretty_print(tau_mpc, std::cout, "tau_mpc");
+    // tau_cmd = tau_mpc;
 
 
     qddot_cmd = Sa_*qddot_result_;

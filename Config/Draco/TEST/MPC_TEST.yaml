@@ -16,6 +16,6 @@ control_configuration:
         kp: [80 , 170 , 170 , 170 , 60 , 80 , 170 , 170 , 170 , 60 ]
         kd: [3  , 8   , 8   , 3   , 2  , 3  , 8   , 8   , 3   , 2  ]
         com_kp: [50, 50, 50]
-        com_kd: [0, 0, 0]
+        com_kd: [5, 5, 5]
 
         desired_offset_x: 0.0
