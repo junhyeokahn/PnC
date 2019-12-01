@@ -157,10 +157,10 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
 
 void MPCBalanceCtrl::_mpc_setup(){
     // // Get the initial robot inertia
-    // robot_->updateCentroidFrame();
-    // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-    // Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-    // convex_mpc->setRobotInertia(I_body);
+    robot_->updateCentroidFrame();
+    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+    convex_mpc->setRobotInertia(I_body);
     // myUtils::pretty_print(I_body, std::cout, "I_body");
 
     // Update Feet Configuration
@@ -519,18 +519,18 @@ void MPCBalanceCtrl::firstVisit() {
     double robot_mass = robot_->getRobotMass(); //kg
     convex_mpc->setRobotMass(robot_mass); // (kilograms) 
 
-    robot_->updateCentroidFrame();
-    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-    convex_mpc->setRobotInertia(I_body);
+    // robot_->updateCentroidFrame();
+    // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+    // Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+    // convex_mpc->setRobotInertia(I_body);
 
-    myUtils::pretty_print(I_body, std::cout, "I_body");
+    // myUtils::pretty_print(I_body, std::cout, "I_body");
 
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(0.7); //  friction coefficient
     convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
-    convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
+    convex_mpc->rotateBodyInertia(false); // False: Assume we are always providing the world inertia
                                          // True: We provide body inertia once
     convex_mpc->setControlAlpha(1e-12);
 
