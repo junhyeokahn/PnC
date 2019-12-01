@@ -4,8 +4,8 @@ test_configuration:
     jpos_initialization_time: 2.0
     jpos_ctrl_time: 2.0
 
-    com_height: 0.75
-    stabilization_duration: 2.0
+    com_height: 0.7
+    stabilization_duration: 4.0
     com_ctrl_time: 1000000.0
 
 control_configuration:

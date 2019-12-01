@@ -180,7 +180,7 @@ void MPCBalanceCtrl::_mpc_setup(){
     com_current_ = robot_->getCoMPosition();
     com_rate_current_ = robot_->getCoMVelocity();
 
-    myUtils::pretty_print(com_current_, std::cout, "com_current_");
+    // myUtils::pretty_print(com_current_, std::cout, "com_current_");
 
     // Starting robot state
     // Current reduced state of the robot
@@ -211,6 +211,11 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
     int n = convex_mpc->getStateVecDim(); // This is always size 13.
     mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
 
+    double magnitude = 0.01;
+    double T = 2.0;
+    double freq = 1/T;
+    double omega = 2 * M_PI * freq;
+
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
     for(int i = 0; i < mpc_horizon_; i++){
@@ -223,18 +228,37 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
 
         // Set CoM Position
         mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
+        // mpc_Xdes_[i*n + 3] = midfeet_pos_[0] + magnitude*cos(omega * t_predict); 
+
         mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
+        // mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*cos(omega * t_predict); 
+
+        // mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
         mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
+        // mpc_Xdes_[i*n + 5] = ini_com_pos_[2] + magnitude*cos(omega * t_predict); 
+
 
         // Set CoM Velocity
-        mpc_Xdes_[i*n + 10] = 0.0;
         mpc_Xdes_[i*n + 9] = 0.0;
+        // mpc_Xdes_[i*n + 9] = -omega *magnitude*sin(omega * t_predict); 
+
+        mpc_Xdes_[i*n + 10] = 0.0;
+        // mpc_Xdes_[i*n + 10] = -omega *magnitude*sin(omega * t_predict); 
+
+        // mpc_Xdes_[i*n + 11] = 0.0;
         mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
+        // mpc_Xdes_[i*n + 11] = -omega *magnitude*sin(omega * t_predict); 
+
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
 
-    std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
-  
+    // std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
+    
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = mpc_Xdes_[i+3];
+        sp_->com_vel_des[i] = mpc_Xdes_[i+9];
+    }
+
 }
 
 void MPCBalanceCtrl::_mpc_solve(){
@@ -242,8 +266,8 @@ void MPCBalanceCtrl::_mpc_solve(){
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
 
-    myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
-    myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
+    // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
+    // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
 
 }
@@ -296,7 +320,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // Enable Torque Limits
     ihwbc->enableTorqueLimits(true);
-    double tau_lim = 100.0;    
+    double tau_lim = 70; //100.0;    
     Eigen::VectorXd tau_min = -tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
     Eigen::VectorXd tau_max = tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
     ihwbc->setTorqueLimits(tau_min, tau_max);
@@ -329,8 +353,8 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
 
-    myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
-    myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
+    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
     // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
     // myUtils::pretty_print(qdot_des_, std::cout, "qdot_des_");
     // myUtils::pretty_print(q_des_, std::cout, "q_des_");
@@ -339,7 +363,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // myUtils::pretty_print(ac_q_current, std::cout, "ac_q_current");
 
     // myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
-    myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 
 }
 
@@ -389,11 +413,6 @@ void MPCBalanceCtrl::task_setup() {
     com_vel_des[0] = des_vel_x;
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
-
-    for (int i = 0; i < 3; ++i) {
-        sp_->com_pos_des[i] = com_pos_des[i];
-        sp_->com_vel_des[i] = com_vel_des[i];
-    }
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
