@@ -143,11 +143,15 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         // gamma = -1.0*Eigen::VectorXd::Ones(robot_->getNumActuatedDofs());
         for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
             ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
+            ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
+            ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
         }
         _PostProcessing_Command();        
     }
     // myUtils::pretty_print(gamma_old_, std::cout, "gamma_old_");
     // myUtils::pretty_print(gamma, std::cout, "gamma");
+    // myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_");
+    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");
 
 }
 
@@ -386,10 +390,10 @@ void MPCBalanceCtrl::task_setup() {
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
 
-    // for (int i = 0; i < 3; ++i) {
-    // sp_->com_pos_des[i] = com_pos_des[i];
-    // sp_->com_vel_des[i] = com_vel_des[i];
-    // }
+    for (int i = 0; i < 3; ++i) {
+        sp_->com_pos_des[i] = com_pos_des[i];
+        sp_->com_vel_des[i] = com_vel_des[i];
+    }
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
