@@ -12,6 +12,7 @@ CMPC::CMPC(){
   mpc_dt = 0.025; // MPC time interval per horizon steo
   mu = 0.9; // coefficient of friction
   fz_max = 500; // maximum z reaction force for one force vector.
+  control_alpha_ = 1e-5; //4e-5
 
   // The latest force output computed by the MPC as the control input for the robot.
   latest_f_vec_out = Eigen::VectorXd(0);
@@ -469,7 +470,7 @@ void CMPC::solve_mpc_qp(const Eigen::MatrixXd & Aqp,  const Eigen::MatrixXd & Bq
   Eigen::VectorXd v1 = (Aqp*x0).eval() - X_ref; 
 
   H = 2.0*(m1*Bqp + Kqp);
-  g_qp.noalias() = m1*v1;	
+  g_qp.noalias() = 2.0*m1*v1;	
 
   #ifdef MPC_TIME_ALL
     t_qp_mult_end = std::chrono::high_resolution_clock::now();
@@ -652,8 +653,7 @@ void CMPC::solve_mpc(const Eigen::VectorXd & x0, const Eigen::VectorXd & X_des, 
   // //        <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
   // vecS_cost << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
   // vecS_cost << 10.0, 10.0, 100.0, 20.0, 20.0, 500.0, 0.5, 0.5, 3.0, 2.0, 2, 1.0, 0.0;
-  double control_alpha = 1e-5; //4e-5
-  get_qp_costs(n, m, cost_vec, control_alpha, Sqp, Kqp);
+  get_qp_costs(n, m, cost_vec, control_alpha_, Sqp, Kqp);
 
   #ifdef MPC_TIME_ALL
     // End

@@ -35,6 +35,7 @@ public:
 	double mpc_dt; // mpc time interval per horizon steo
 	double mu; // coefficient of friction
 	double fz_max; // maximum z reaction force for one force vector.
+	double control_alpha_; // Regularization term on the controls
 
 	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
 						 // If the inertia is expressed in body frame this needs to be true.
@@ -77,6 +78,8 @@ public:
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
+
+	void setControlAlpha(const double control_alpha_in){control_alpha_ = control_alpha_in;}
 
 	// Human readable prints out of f_vec_out. 
 	void print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out);
