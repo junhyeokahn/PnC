@@ -55,7 +55,9 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     convex_mpc = new CMPC();
     mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
-    last_control_time_ = -0.001;
+    mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
+    mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
+    mpc_control_alpha_ = 1e-12; // Regularizatio nterm on the reaction force
 
     mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
     alpha_fd_ = 0.9;
@@ -69,9 +71,23 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     for (int i(0); i < robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
 
     // IHWBC
+    last_control_time_ = -0.001;
     ihwbc = new IHWBC(act_list);
     gamma_old_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    // Regularization terms should always be the lowest cost. 
+    lambda_qddot_ = 1e-16;
+    lambda_Fr_ = 1e-16;
+
+    // Relative task weighting
+    w_task_rfoot_ = 1.0;
+    w_task_lfoot_ = 1.0;
+    w_task_com_ = 1e-4;
+    w_task_body_ = 1e-4;
+    w_task_joint_ = 1e-6;
+
+    // Relative reaction force tracking weight compared to tasks
+    // Must be high if desired reaction force is nonzero. 
     w_contact_weight_ = 1e-2; 
 
     // Initialize State Provider
@@ -246,10 +262,6 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
     // 1e-2/(robot_->getRobotMass()*9.81);
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
-
-    // Regularization terms should always be the lowest cost. 
-    lambda_qddot_ = 1e-16;
-    lambda_Fr_ = 1e-16;
 
     // Modify Rotor Inertia
     Eigen::MatrixXd A_rotor = A_;
@@ -431,15 +443,15 @@ void MPCBalanceCtrl::task_setup() {
     task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    w_task_heirarchy_[0] = 1e-4; // COM
-    w_task_heirarchy_[1] = 1e-4; // Body Ori
-    w_task_heirarchy_[2] = 1.0; // rfoot
-    w_task_heirarchy_[3] = 1.0; // lfoot
-    w_task_heirarchy_[4] = 1e-6; // joint    
+    w_task_heirarchy_[0] = w_task_com_; // COM
+    w_task_heirarchy_[1] = w_task_body_; // Body Ori
+    w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
+    w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
+    w_task_heirarchy_[4] = w_task_joint_; // joint    
 
-    // w_task_heirarchy_[0] = 1.0; // rfoot
-    // w_task_heirarchy_[1] = 1.0; // lfoot
-    // w_task_heirarchy_[2] = 1e-6; // joint    
+    // w_task_heirarchy_[0] = w_task_rfoot_; // rfoot
+    // w_task_heirarchy_[1] = w_task_lfoot_; // lfoot
+    // w_task_heirarchy_[2] = w_task_joint_; // joint    
 
 }
 
@@ -489,17 +501,18 @@ void MPCBalanceCtrl::firstVisit() {
 
     // myUtils::pretty_print(I_body, std::cout, "I_body");
 
-    std::cout << "MPC Horizon:" << mpc_horizon_ << std::endl;
-    std::cout << "MPC DT:" << mpc_dt_ << std::endl;
-    std::cout << "MPC Alpha:" << alpha_fd_ << std::endl;
+    std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
+    std::cout << "MPC dt:" << mpc_dt_ << std::endl;
+    std::cout << "MPC control alpha:" << mpc_control_alpha_ << std::endl;
+    std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
-    convex_mpc->setMu(0.7); //  friction coefficient
-    convex_mpc->setMaxFz(500); // (Newtons) maximum vertical reaction force per foot.
+    convex_mpc->setMu(mpc_mu_); //  friction coefficient
+    convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
     convex_mpc->rotateBodyInertia(false); // False: Assume we are always providing the world inertia
                                          // True: We provide body inertia once
-    convex_mpc->setControlAlpha(1e-12);
+    convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
 
     // Set the cost vector
     convex_mpc->setCostVec(mpc_cost_vec_);

@@ -74,6 +74,12 @@ class MPCBalanceCtrl : public Controller {
     Eigen::VectorXd qdot_current_;
 
     Eigen::VectorXd w_task_heirarchy_;
+    double w_task_rfoot_;
+    double w_task_lfoot_;
+    double w_task_com_;
+    double w_task_body_;
+    double w_task_joint_;
+
     double w_contact_weight_;
     double lambda_qddot_;
     double lambda_Fr_;
@@ -94,6 +100,9 @@ class MPCBalanceCtrl : public Controller {
     // MPC Variables
     double mpc_horizon_;
     double mpc_dt_; 
+    double mpc_mu_;
+    double mpc_max_fz_;
+    double mpc_control_alpha_;
 
     Eigen::VectorXd mpc_cost_vec_;
     Eigen::VectorXd mpc_x0_;
