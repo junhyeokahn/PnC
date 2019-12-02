@@ -511,7 +511,7 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setMu(mpc_mu_); //  friction coefficient
     convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
     convex_mpc->rotateBodyInertia(false); // False: Assume we are always providing the world inertia
-                                         // True: We provide body inertia once
+                                          // True: We provide body inertia once
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
 
     // Set the cost vector
@@ -532,19 +532,38 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                robot_->getNumActuatedDofs());
 
-    Eigen::VectorXd com_kp = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd com_kd = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
+    Eigen::VectorXd kd_foot = 10.0*Eigen::VectorXd::Ones(4);
+
+    Eigen::VectorXd com_kp = 50.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd com_kd = 5.0*Eigen::VectorXd::Zero(3);
+
+    Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_body_rpy = 10.0*Eigen::VectorXd::Ones(3);
+
+    Eigen::VectorXd kp_jp = 10*Eigen::VectorXd::Ones(Draco::n_adof); 
+    Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
+
     try {
-        myUtils::readParameter(node, "kp", Kp_);
-        myUtils::readParameter(node, "kd", Kd_);
+        myUtils::readParameter(node, "foot_rz_xyz_kp", kp_foot);
+        myUtils::readParameter(node, "foot_rz_xyz_kd", kd_foot);
+
         myUtils::readParameter(node, "com_kp", com_kp);
         myUtils::readParameter(node, "com_kd", com_kd);
-        com_task_->setGain(com_kp, com_kd);
+
+        myUtils::readParameter(node, "body_kp", kp_body_rpy);
+        myUtils::readParameter(node, "body_kd", kd_body_rpy);
+
+        myUtils::readParameter(node, "joint_kp", kp_jp);
+        myUtils::readParameter(node, "joint_kd", kd_jp);
+
+        myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
+
         myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
         myUtils::readParameter(node, "mpc_dt", mpc_dt_);
         myUtils::readParameter(node, "mpc_alpha_fd", alpha_fd_);
         myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
-        myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
+
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -554,21 +573,15 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 
     // Set Task Gains
-    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(4); 
-    Eigen::VectorXd kd_foot = 10.0*Eigen::VectorXd::Ones(4);
     rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
     lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
-
-    Eigen::VectorXd kp_jp = 10*Eigen::VectorXd::Ones(Draco::n_adof); 
-    Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
+    com_task_->setGain(com_kp, com_kd);
     total_joint_task_->setGain(kp_jp, kd_jp);
-
-    Eigen::VectorXd kp_body_rpy = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_body_rpy = 10.0*Eigen::VectorXd::Ones(3);
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
-
     // Set IHWBC dt integration time
-    ihwbc_dt_ = 1e-2;
+    // This should be the control loop rate. 
+    // Since we force the controller to only change commands every MPC rate, this is what we set to instead.
+    ihwbc_dt_ = mpc_dt_; //1e-2;
 
 }

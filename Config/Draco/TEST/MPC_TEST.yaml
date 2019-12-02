@@ -15,10 +15,18 @@ control_configuration:
         kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
 
     com_ctrl:
-        kp: [80 , 170 , 170 , 170 , 60 , 80 , 170 , 170 , 170 , 60 ]
-        kd: [3  , 8   , 8   , 3   , 2  , 3  , 8   , 8   , 3   , 2  ]
+        # Task Weights
+        foot_rz_xyz_kp: [100, 100, 100, 100]
+        foot_rz_xyz_kd: [10, 10, 10, 10]
+
         com_kp: [50, 50, 50]
         com_kd: [5, 5, 5]
+
+        body_kp: [100, 100, 100]
+        body_kd: [10, 10, 10]
+
+        joint_kp: [10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 ]
+        joint_kd: [1  , 1   , 1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
         w_contact_weight: 1e-2 
