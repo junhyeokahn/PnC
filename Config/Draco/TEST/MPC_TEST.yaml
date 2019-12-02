@@ -10,7 +10,7 @@ test_configuration:
     com_ctrl_time: 1000000.0
 
     # Left and right sway
-    sway_start_time: 1000000.0 #6 # seconds
+    sway_start_time: 6 # seconds
     sway_magnitude: 0.01 # meters
     sway_period: 2 # seconds
 
@@ -36,13 +36,16 @@ control_configuration:
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
         w_contact_weight: 1e-2 
 
+        # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
+        ihwbc_alpha_fd: 0.9 # Value between [0,1]. 
+
         # MPC Parameters
         # Predicion Horizon
         mpc_horizon: 10 # number of horizon steps 
         # Prediction Interval
         mpc_dt: 0.025 # seconds
-        # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
-        mpc_alpha_fd: 0.9 # Value between [0,1]. 
+        # Regularization Term on the reaction forces
+        mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
 
         # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
         # th - World Roll, Pitch Yaw

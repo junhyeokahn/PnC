@@ -566,12 +566,12 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "joint_kd", kd_jp);
 
         myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
+        myUtils::readParameter(node, "ihwbc_alpha_fd", alpha_fd_);
 
         myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
         myUtils::readParameter(node, "mpc_dt", mpc_dt_);
-        myUtils::readParameter(node, "mpc_alpha_fd", alpha_fd_);
         myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
-
+        myUtils::readParameter(node, "mpc_control_alpha", mpc_control_alpha_);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
