@@ -4,8 +4,6 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
-#include <PnC/WBC/WBLC/KinWBC.hpp>
-#include <PnC/WBC/WBLC/WBLC.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
 #include <PnC/MPC/CMPC.hpp>
 #include <Utils/IO/DataManager.hpp>
@@ -71,29 +69,6 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
     gamma_old_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    kin_wbc_ = new KinWBC(act_list);
-    wblc_ = new WBLC(act_list);
-
-    wblc_data_ = new WBLC_ExtraData();
-
-    wblc_data_->W_qddot_ =
-        Eigen::VectorXd::Constant(robot_->getNumDofs(), 100.0);
-
-    wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 1.0);
-    wblc_data_->W_rf_[rfoot_front_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getFzIndex()] =
-        0.01;
-    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
-        lfoot_front_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_front_contact_->getDim() + rfoot_back_contact_->getDim() +
-        lfoot_front_contact_->getDim() + lfoot_back_contact_->getFzIndex()] = 0.01;
-
-    wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-
-    wblc_data_->tau_min_ =
-        Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), -100.);
-    wblc_data_->tau_max_ =
-        Eigen::VectorXd::Constant(robot_->getNumActuatedDofs(), 100.);
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 }
@@ -101,10 +76,6 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 MPCBalanceCtrl::~MPCBalanceCtrl() {
     delete com_task_;
     delete total_joint_task_;
-
-    delete kin_wbc_;
-    delete wblc_;
-    delete wblc_data_;
 
     delete rfoot_front_contact_;
     delete rfoot_back_contact_;
@@ -126,14 +97,12 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         _mpc_Xdes_setup();
         _mpc_solve();
 
+        // Setup the tasks and compute torque from IHWBC
         task_setup();
-
         _compute_torque_ihwbc(gamma);
- 
-        // gamma = 2.0*Eigen::VectorXd::Ones(robot_->getNumActuatedDofs());
-        gamma_old_ = gamma;
-        // _compute_torque_wblc(gamma);
 
+        // Store the desired feed forward torque command 
+        gamma_old_ = gamma;
 
         for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
             ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
@@ -273,37 +242,6 @@ void MPCBalanceCtrl::_mpc_solve(){
     // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
 
-}
-
-void MPCBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
-    // WBLC
-    Eigen::MatrixXd A_rotor = A_;
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        A_rotor(i + robot_->getNumVirtualDofs(),
-                i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
-    }
-    Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
-
-    wblc_->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
-    Eigen::VectorXd des_jacc_cmd =
-        des_jacc_ +
-        Kp_.cwiseProduct(des_jpos_ -
-                         sp_->q.segment(robot_->getNumVirtualDofs(),
-                                        robot_->getNumActuatedDofs())) +
-        Kd_.cwiseProduct(des_jvel_ -
-                         sp_->qdot.tail(robot_->getNumActuatedDofs()));
-
-    wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
-
-    // myUtils::pretty_print(des_jacc_, std::cout, "des_jacc");
-    // myUtils::pretty_print(des_jacc_cmd, std::cout, "des_jacc_cmd");
-
-    sp_->qddot_cmd = wblc_data_->qddot_;
-    //for (int i = 0; i < wblc_data_->Fr_.size(); ++i) {
-        //sp_->reaction_forces[i] = wblc_data_->Fr_[i];
-    //}
-    // Eigen::VectorXd Fr_out = wblc_data_->Fr_;
-    // myUtils::pretty_print(Fr_out, std::cout, "Fr_out");    
 }
 
 void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
@@ -503,12 +441,6 @@ void MPCBalanceCtrl::task_setup() {
     // w_task_heirarchy_[1] = 1.0; // lfoot
     // w_task_heirarchy_[2] = 1e-6; // joint    
 
-
-    // =========================================================================
-    // Solve Inv Kinematics
-    // =========================================================================
-    kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
-                                des_jvel_, des_jacc_);
 }
 
 void MPCBalanceCtrl::contact_setup() {

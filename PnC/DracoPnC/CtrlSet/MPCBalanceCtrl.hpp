@@ -4,9 +4,6 @@
 
 class DracoStateProvider;
 class RobotSystem;
-class WBLC;
-class WBLC_ExtraData;
-class KinWBC;
 class ContactSpec;
 class CMPC;
 class IHWBC;
@@ -52,10 +49,6 @@ class MPCBalanceCtrl : public Controller {
     ContactSpec* lfoot_front_contact_;
     ContactSpec* lfoot_back_contact_;
 
-    KinWBC* kin_wbc_;
-    WBLC* wblc_;
-    WBLC_ExtraData* wblc_data_;
-
     // Convex MPC
     CMPC* convex_mpc;
     double last_control_time_;
@@ -72,8 +65,6 @@ class MPCBalanceCtrl : public Controller {
 
     void task_setup();
     void contact_setup();
-
-    void _compute_torque_wblc(Eigen::VectorXd& gamma);
 
     double ctrl_start_time_;
     DracoStateProvider* sp_;
