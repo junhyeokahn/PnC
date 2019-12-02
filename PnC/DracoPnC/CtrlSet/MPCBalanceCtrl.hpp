@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
+#include <Utils/General/Clock.hpp>
 
 class DracoStateProvider;
 class RobotSystem;
@@ -37,6 +38,8 @@ class MPCBalanceCtrl : public Controller {
     void SetStabilizationDuration(double time){
         stab_dur_ = time;
     }
+
+    Clock clock_;
 
    protected:
     Eigen::VectorXd Kp_, Kd_;

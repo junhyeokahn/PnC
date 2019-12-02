@@ -59,6 +59,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
     mpc_control_alpha_ = 1e-12; // Regularizatio nterm on the reaction force
 
+    mpc_Fd_des_ = Eigen::VectorXd::Zero(12);
     mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
     alpha_fd_ = 0.9;
 
@@ -123,10 +124,13 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
 
     // Setup the tasks and compute torque from IHWBC
     task_setup();
+    // clock_.start();
     _compute_torque_ihwbc(gamma);
+    // printf("time: %f\n", clock_.stop());
 
     // Store the desired feed forward torque command 
     gamma_old_ = gamma;
+
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
@@ -151,6 +155,9 @@ void MPCBalanceCtrl::_mpc_setup(){
         convex_mpc->setRobotInertia(I_body);
         // myUtils::pretty_print(I_body, std::cout, "I_world");       
     }
+
+    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, stab_dur_, state_machine_time_ );
+    convex_mpc->setMaxFz(smooth_max_fz); // (Newtons) maximum vertical reaction force per foot.
 
     // Update Feet Configuration
     // Set Foot contact locations w.r.t world
@@ -304,6 +311,9 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     ihwbc->getFrResult(Fr_res);
 
     // Compute desired joint position and velocities for the low-level
+    q_current_ = robot_->getQ();
+    qdot_current_ = robot_->getQdot();
+
     Eigen::VectorXd ac_qdot_current = qdot_current_.tail(robot_->getNumActuatedDofs());
     Eigen::VectorXd ac_q_current = q_current_.tail(robot_->getNumActuatedDofs());
 
@@ -527,7 +537,6 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(mpc_mu_); //  friction coefficient
-    convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
     if (mpc_use_approx_inertia_){
         convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
                                               // True: We provide body inertia once        
