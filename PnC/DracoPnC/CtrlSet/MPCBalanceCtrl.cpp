@@ -109,23 +109,24 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    if ((state_machine_time_ - last_control_time_) > mpc_dt_){
-        last_control_time_ = state_machine_time_;
-        contact_setup();
+    // Setup the contacts
+    contact_setup();
 
+    // Run the MPC at every MPC tick
+    if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
+        last_control_time_ = state_machine_time_;
         // // Setup and solve the MPC 
         _mpc_setup();
         _mpc_Xdes_setup();
         _mpc_solve();
-
-        // Setup the tasks and compute torque from IHWBC
-        task_setup();
-        _compute_torque_ihwbc(gamma);
-
-        // Store the desired feed forward torque command 
-        gamma_old_ = gamma;
     }
 
+    // Setup the tasks and compute torque from IHWBC
+    task_setup();
+    _compute_torque_ihwbc(gamma);
+
+    // Store the desired feed forward torque command 
+    gamma_old_ = gamma;
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
@@ -588,8 +589,6 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
     // Set IHWBC dt integration time
-    // This should be the control loop rate. 
-    // Since we force the controller to only change commands every MPC rate, this is what we set to instead.
-    ihwbc_dt_ = mpc_dt_; //1e-2;
+    ihwbc_dt_ = DracoAux::ServoRate;// mpc_dt_; 
 
 }
