@@ -468,6 +468,33 @@ void CMPC::get_qp_costs(const int& n, const int& m,
 
     Kqp = control_alpha * Eigen::MatrixXd::Identity(m * horizon, m * horizon);
 
+    // Cost matrix for derivative smoothing from previous solution
+    Eigen::MatrixXd D0(m, m*horizon); D0.setZero();
+    D0.block(0,0,m,m) = Eigen::MatrixXd::Identity(m,m);
+    // std::cout << "D0 = " << std::endl;
+    // std::cout << D0 << std::endl;
+
+    // Kqp = control_alpha * D0.transpose()*D0;
+    // Cost matrix for derivative smoothing for this iteration
+
+    if (horizon > 1){
+      Eigen::MatrixXd D1(m*(horizon-1), m*horizon);
+      D1.setZero();
+
+      // D1 = [I -I 0;
+      //       0 I -I] for a horizon of 3 for example
+      for(int i = 0; i < (horizon-1); i++){
+        D1.block(i*m, i*m, m, m) = Eigen::MatrixXd::Identity(m, m);
+        D1.block(i*m, (i+1)*m, m, m) = -Eigen::MatrixXd::Identity(m, m);
+      }
+      // std::cout << "D1 = " << std::endl;
+      // std::cout << D1 << std::endl;
+
+      // Kqp += (control_alpha*D0.transpose()*D0);
+    }
+
+
+
 #ifdef MPC_PRINT_ALL
     std::cout << "S_cost" << std::endl;
     std::cout << S_cost << std::endl;
