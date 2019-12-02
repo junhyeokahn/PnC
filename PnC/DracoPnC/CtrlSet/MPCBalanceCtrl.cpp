@@ -50,6 +50,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     dim_contact_ = rfoot_front_contact_->getDim() + lfoot_front_contact_->getDim() +
                    rfoot_back_contact_->getDim() + lfoot_back_contact_->getDim();
 
+    // Some helpful defaults
     // Convex MPC
     convex_mpc = new CMPC();
     mpc_horizon_ = 20; // steps
@@ -59,6 +60,9 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
     alpha_fd_ = 0.9;
 
+    mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
+    mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
+
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
@@ -66,10 +70,11 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
     // IHWBC
     ihwbc = new IHWBC(act_list);
-
     gamma_old_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+    w_contact_weight_ = 1e-2; 
 
+    // Initialize State Provider
     sp_ = DracoStateProvider::getStateProvider(robot_);
 }
 
@@ -103,23 +108,16 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
 
         // Store the desired feed forward torque command 
         gamma_old_ = gamma;
-
-        for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-            ((DracoCommand*)_cmd)->jtrq[i] = gamma[i];
-            ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
-            ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
-        }
-        _PostProcessing_Command();
-
-    }else{
-        // gamma = -1.0*Eigen::VectorXd::Ones(robot_->getNumActuatedDofs());
-        for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-            ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
-            ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
-            ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
-        }
-        _PostProcessing_Command();        
     }
+
+    // Send the Commands
+    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+        ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
+        ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
+        ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
+    }
+    _PostProcessing_Command();        
+
     // myUtils::pretty_print(gamma_old_, std::cout, "gamma_old_");
     // myUtils::pretty_print(gamma, std::cout, "gamma");
     // myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_");
@@ -206,7 +204,7 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*cos(omega * t_predict); 
 
         // mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
-        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], goal_com_pos_[2], stab_dur_, t_predict); // Desired com z
+        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, t_predict); // Desired com z
         // mpc_Xdes_[i*n + 5] = ini_com_pos_[2] + magnitude*cos(omega * t_predict); 
 
 
@@ -246,7 +244,9 @@ void MPCBalanceCtrl::_mpc_solve(){
 
 void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
-    w_contact_weight_ = 1e-2/(robot_->getRobotMass()*9.81);
+    // 1e-2/(robot_->getRobotMass()*9.81);
+    double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
+
     // Regularization terms should always be the lowest cost. 
     lambda_qddot_ = 1e-16;
     lambda_Fr_ = 1e-16;
@@ -267,7 +267,7 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     ihwbc->setTorqueLimits(tau_min, tau_max);
 
     // Set QP weights
-    ihwbc->setQPWeights(w_task_heirarchy_, w_contact_weight_);
+    ihwbc->setQPWeights(w_task_heirarchy_, local_w_contact_weight);
     ihwbc->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
 
     // QP dec variable results
@@ -474,7 +474,6 @@ void MPCBalanceCtrl::firstVisit() {
     }
     //myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com_pos");
     //exit(0);
-    goal_com_pos_[0] += des_com_offset_x_;
     goal_com_pos_[2] = target_com_height_;
 
 
@@ -490,6 +489,10 @@ void MPCBalanceCtrl::firstVisit() {
 
     // myUtils::pretty_print(I_body, std::cout, "I_body");
 
+    std::cout << "MPC Horizon:" << mpc_horizon_ << std::endl;
+    std::cout << "MPC DT:" << mpc_dt_ << std::endl;
+    std::cout << "MPC Alpha:" << alpha_fd_ << std::endl;
+
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(0.7); //  friction coefficient
@@ -499,19 +502,7 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setControlAlpha(1e-12);
 
     // Set the cost vector
-    Eigen::VectorXd cost_vec(13);
-    // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
-    // cost_vec << 0.25, 0.25, 0.25, 1.0, 1.0, 10.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
-    // cost_vec << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0;
-    // cost_vec << 0.1, 0.1, 0.1, 10.0, 0.0, 100.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0;
-    // cost_vec << 0.1, 0.5, 0.1, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
-    // cost_vec << 0.0, 0.0, 0.0, 20.0, 0.5, 100.0, 0.0, 0.0, 0.0,  0.1, 0.1, 0.1, 0.0;
-    // cost_vec << 1.0, 1.0, 10.0, 2.0, 2.0, 50.0, 0.05, 0.05, 0.30, 0.20, 0.2, 1000.0, 0.0;
-    // cost_vec << 2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0;
-    cost_vec << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;    
-    double cost_factor = 1.0;//8.0;
-    cost_vec *= cost_factor;
-    convex_mpc->setCostVec(cost_vec);
+    convex_mpc->setCostVec(mpc_cost_vec_);
 
 }
 
@@ -536,7 +527,12 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "com_kp", com_kp);
         myUtils::readParameter(node, "com_kd", com_kd);
         com_task_->setGain(com_kp, com_kd);
-        myUtils::readParameter(node, "desired_offset_x", des_com_offset_x_);
+        myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
+        myUtils::readParameter(node, "mpc_dt", mpc_dt_);
+        myUtils::readParameter(node, "mpc_alpha_fd", alpha_fd_);
+        myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
+        myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl

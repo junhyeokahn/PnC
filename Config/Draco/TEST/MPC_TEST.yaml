@@ -20,4 +20,21 @@ control_configuration:
         com_kp: [50, 50, 50]
         com_kd: [5, 5, 5]
 
-        desired_offset_x: 0.0
+        # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
+        w_contact_weight: 1e-2 
+
+        # MPC Parameters
+        # Predicion Horizon
+        mpc_horizon: 10 # number of horizon steps 
+        # Prediction Interval
+        mpc_dt: 0.025 # seconds
+        # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
+        mpc_alpha_fd: 0.9 # Value between [0,1]. 
+
+        # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+        # th - World Roll, Pitch Yaw
+        # p - World CoM X,Y,Z
+        # w - World Angular veloocity x,y,z
+        # dp - World COM Velocity x,y,z
+        # g - gravitiy (should always be 0.0!)
+        mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]

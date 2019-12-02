@@ -69,8 +69,6 @@ class MPCBalanceCtrl : public Controller {
     double ctrl_start_time_;
     DracoStateProvider* sp_;
 
-    double des_com_offset_x_;
-
     // ihwbc
     Eigen::VectorXd q_current_;
     Eigen::VectorXd qdot_current_;
@@ -97,6 +95,7 @@ class MPCBalanceCtrl : public Controller {
     double mpc_horizon_;
     double mpc_dt_; 
 
+    Eigen::VectorXd mpc_cost_vec_;
     Eigen::VectorXd mpc_x0_;
     Eigen::VectorXd mpc_Xdes_;
     Eigen::MatrixXd mpc_r_feet_;
