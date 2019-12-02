@@ -30,7 +30,7 @@ MPCTest::~MPCTest() {
 
 void MPCTest::TestInitialization() {
     jpos_target_ctrl_->ctrlInitialization(cfg_["control_configuration"]["joint_position_ctrl"]);
-    mpc_ctrl_->ctrlInitialization(cfg_["control_configuration"]["com_ctrl"]);
+    mpc_ctrl_->ctrlInitialization(cfg_["control_configuration"]["mpc_ctrl"]);
 }
 
 int MPCTest::_NextPhase(const int & phase) {
@@ -67,6 +67,12 @@ void MPCTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_ctrl_time", tmp_val);
         ((MPCBalanceCtrl*)mpc_ctrl_)->setStanceTime(tmp_val);
 
+        myUtils::readParameter(test_cfg, "sway_start_time", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayStartTime(tmp_val);
+        myUtils::readParameter(test_cfg, "sway_magnitude", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayMagnitude(tmp_val);
+        myUtils::readParameter(test_cfg, "sway_period", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayPeriod(tmp_val);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

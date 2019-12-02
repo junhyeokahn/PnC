@@ -23,6 +23,17 @@ class MPCBalanceCtrl : public Controller {
     void setCoMHeight(double height) {
         target_com_height_ = height;
     }
+
+    void setSwayStartTime(double start_time){
+        sway_start_time_ = start_time;
+    }
+    void setSwayMagnitude(double magnitude){
+        sway_magnitude_ = magnitude;
+    }
+    void setSwayPeriod(double period){
+        sway_period_ = period;
+    }
+
     void SetStabilizationDuration(double time){
         stab_dur_ = time;
     }
@@ -48,6 +59,11 @@ class MPCBalanceCtrl : public Controller {
     ContactSpec* rfoot_back_contact_;
     ContactSpec* lfoot_front_contact_;
     ContactSpec* lfoot_back_contact_;
+
+    // Sway Behavior
+    double sway_start_time_;
+    double sway_magnitude_;
+    double sway_period_;
 
     // Convex MPC
     CMPC* convex_mpc;

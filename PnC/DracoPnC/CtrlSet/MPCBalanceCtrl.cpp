@@ -197,8 +197,8 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
     int n = convex_mpc->getStateVecDim(); // This is always size 13.
     mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
 
-    double magnitude = 0.01;
-    double T = 2.0;
+    double magnitude = sway_magnitude_;
+    double T = sway_period_;
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
 
@@ -217,7 +217,9 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 3] = midfeet_pos_[0] + magnitude*cos(omega * t_predict); 
 
         mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
-        // mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*cos(omega * t_predict); 
+        if (t_predict >= sway_start_time_){
+            mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*sin(omega * (t_predict-sway_start_time_));             
+        }
 
         // mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
         mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, t_predict); // Desired com z
@@ -229,7 +231,9 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 9] = -omega *magnitude*sin(omega * t_predict); 
 
         mpc_Xdes_[i*n + 10] = 0.0;
-        // mpc_Xdes_[i*n + 10] = -omega *magnitude*sin(omega * t_predict); 
+        if (t_predict >= sway_start_time_){
+            mpc_Xdes_[i*n + 10] = omega*magnitude*cos(omega * (t_predict-sway_start_time_));             
+        }
 
         // mpc_Xdes_[i*n + 11] = 0.0;
         mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
@@ -505,6 +509,10 @@ void MPCBalanceCtrl::firstVisit() {
     std::cout << "MPC dt:" << mpc_dt_ << std::endl;
     std::cout << "MPC control alpha:" << mpc_control_alpha_ << std::endl;
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
+
+    std::cout << "sway_start_time:" << sway_start_time_ << std::endl;
+    std::cout << "sway_magnitude:" << sway_magnitude_ << std::endl;
+    std::cout << "sway_period:" << sway_period_ << std::endl;
 
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
