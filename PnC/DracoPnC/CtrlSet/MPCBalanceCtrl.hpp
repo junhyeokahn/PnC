@@ -119,6 +119,8 @@ class MPCBalanceCtrl : public Controller {
     double mpc_mu_;
     double mpc_max_fz_;
     double mpc_control_alpha_;
+    bool mpc_use_approx_inertia_;
+    Eigen::VectorXd mpc_approx_inertia_input_;
 
     Eigen::VectorXd mpc_cost_vec_;
     Eigen::VectorXd mpc_x0_;

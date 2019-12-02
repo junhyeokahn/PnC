@@ -144,11 +144,13 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
 
 void MPCBalanceCtrl::_mpc_setup(){
     // // Get the initial robot inertia
-    robot_->updateCentroidFrame();
-    Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-    Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-    convex_mpc->setRobotInertia(I_body);
-    // myUtils::pretty_print(I_body, std::cout, "I_body");
+    if (!mpc_use_approx_inertia_){
+        robot_->updateCentroidFrame();
+        Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+        Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
+        convex_mpc->setRobotInertia(I_body);
+        // myUtils::pretty_print(I_body, std::cout, "I_world");       
+    }
 
     // Update Feet Configuration
     // Set Foot contact locations w.r.t world
@@ -499,13 +501,20 @@ void MPCBalanceCtrl::firstVisit() {
     double robot_mass = robot_->getRobotMass(); //kg
     convex_mpc->setRobotMass(robot_mass); // (kilograms) 
 
-    // robot_->updateCentroidFrame();
-    // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-    // Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-    // convex_mpc->setRobotInertia(I_body);
+    if (mpc_use_approx_inertia_){
+        Eigen::MatrixXd I_body(3,3);
+        I_body << mpc_approx_inertia_input_[0], mpc_approx_inertia_input_[1], mpc_approx_inertia_input_[2],
+                  mpc_approx_inertia_input_[3], mpc_approx_inertia_input_[4], mpc_approx_inertia_input_[5],
+                  mpc_approx_inertia_input_[6], mpc_approx_inertia_input_[7], mpc_approx_inertia_input_[8];         
+        // robot_->updateCentroidFrame();
+        // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
+        // I_body = Ig_o.block(0,0,3,3);
+        // convex_mpc->setRobotInertia(I_body);
+        convex_mpc->setRobotInertia(I_body);
+        myUtils::pretty_print(I_body, std::cout, "I_body");
+    }
 
-    // myUtils::pretty_print(I_body, std::cout, "I_body");
-
+    std::cout << "MPC Use Approx Inertia:" << mpc_use_approx_inertia_ << std::endl;
     std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
     std::cout << "MPC dt:" << mpc_dt_ << std::endl;
     std::cout << "MPC control alpha:" << mpc_control_alpha_ << std::endl;
@@ -519,8 +528,13 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(mpc_mu_); //  friction coefficient
     convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
-    convex_mpc->rotateBodyInertia(false); // False: Assume we are always providing the world inertia
-                                          // True: We provide body inertia once
+    if (mpc_use_approx_inertia_){
+        convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
+                                              // True: We provide body inertia once        
+    }else{
+        convex_mpc->rotateBodyInertia(false); 
+    }
+
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
 
     // Set the cost vector
@@ -568,7 +582,12 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
 
         myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
         myUtils::readParameter(node, "ihwbc_alpha_fd", alpha_fd_);
-
+       
+        myUtils::readParameter(node, "mpc_use_approx_inertia", mpc_use_approx_inertia_);
+        if (mpc_use_approx_inertia_){
+           myUtils::readParameter(node, "mpc_approx_inertia_input", mpc_approx_inertia_input_);
+        }
+       
         myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
         myUtils::readParameter(node, "mpc_dt", mpc_dt_);
         myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);

@@ -40,6 +40,10 @@ control_configuration:
         ihwbc_alpha_fd: 0.9 # Value between [0,1]. 
 
         # MPC Parameters
+        # Whether or not to use an approximated centroidal inertia matrix
+        # if true, we use the listed inertia. if false, we compute the centroidal inertia at each time step
+        mpc_use_approx_inertia: false
+        mpc_approx_inertia_input: [4.499536, -0.024537, 0.840501, -0.024537, 3.967693, 0.014913, 0.840501, 0.014913, 1.268436]
         # Predicion Horizon
         mpc_horizon: 10 # number of horizon steps 
         # Prediction Interval
