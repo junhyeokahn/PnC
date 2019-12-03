@@ -63,4 +63,4 @@ control_configuration:
         # dp - World COM Velocity x,y,z
         # g - gravitiy (should always be 0.0!)
         # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
-        mpc_cost_vec: [0.1, 0.1, 0.1, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]        
+        mpc_cost_vec: [0.1, 0.1, 0.1, 0.75, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]        
