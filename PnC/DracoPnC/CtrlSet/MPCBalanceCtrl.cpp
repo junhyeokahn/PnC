@@ -158,7 +158,7 @@ void MPCBalanceCtrl::_mpc_setup(){
         // myUtils::pretty_print(I_body, std::cout, "I_world");       
     }
 
-    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, stab_dur_, state_machine_time_ );
+    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, contact_transition_dur_, state_machine_time_ );
     convex_mpc->setMaxFz(smooth_max_fz); // (Newtons) maximum vertical reaction force per foot.
 
     // Update Feet Configuration
@@ -224,7 +224,8 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
         mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
-        // Set CoM Position
+        // ----------------------------------------------------------------
+        // Set CoM Position -----------------------------------------------
         mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
         // mpc_Xdes_[i*n + 3] = midfeet_pos_[0] + magnitude*cos(omega * t_predict); 
 
@@ -233,12 +234,16 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
             mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*sin(omega * (t_predict-sway_start_time_));             
         }
 
-        // mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
-        mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, t_predict); // Desired com z
-        // mpc_Xdes_[i*n + 5] = ini_com_pos_[2] + magnitude*cos(omega * t_predict); 
+        // Wait for contact transition to finish
+        if (t_predict <= contact_transition_dur_){
+            mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
+        }else{
+            mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, t_predict); // Desired com z
+            // mpc_Xdes_[i*n + 5] = ini_com_pos_[2] + magnitude*cos(omega * t_predict); 
+        }
 
-
-        // Set CoM Velocity
+        // ----------------------------------------------------------------
+        // Set CoM Velocity -----------------------------------------------
         mpc_Xdes_[i*n + 9] = 0.0;
         // mpc_Xdes_[i*n + 9] = -omega *magnitude*sin(omega * t_predict); 
 
@@ -247,9 +252,15 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
             mpc_Xdes_[i*n + 10] = omega*magnitude*cos(omega * (t_predict-sway_start_time_));             
         }
 
-        // mpc_Xdes_[i*n + 11] = 0.0;
-        mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
-        // mpc_Xdes_[i*n + 11] = -omega *magnitude*sin(omega * t_predict); 
+        // Wait for contact transition to finish
+        if (t_predict <= contact_transition_dur_){
+            mpc_Xdes_[i*n + 11] = 0.0;
+        }
+        else{
+            mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, t_predict); // Desired com z
+            // mpc_Xdes_[i*n + 11] = -omega *magnitude*sin(omega * t_predict); 
+        }
+
 
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }

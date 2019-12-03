@@ -60,7 +60,10 @@ void MPCTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((MPCBalanceCtrl*)mpc_ctrl_)->setCoMHeight(tmp_val);
         sp_-> omega = sqrt(9.81/tmp_val);
-        
+ 
+        myUtils::readParameter(test_cfg, "contact_transition_duration", tmp_val);
+        ((MPCBalanceCtrl*)mpc_ctrl_)->setContactTransitionTime(tmp_val);
+
         myUtils::readParameter(test_cfg, "stabilization_duration", tmp_val);
         ((MPCBalanceCtrl*)mpc_ctrl_)->SetStabilizationDuration(tmp_val);
 

@@ -24,6 +24,10 @@ class MPCBalanceCtrl : public Controller {
         target_com_height_ = height;
     }
 
+    void setContactTransitionTime(double time){
+        contact_transition_dur_ = time;
+    }
+
     void setSwayStartTime(double start_time){
         sway_start_time_ = start_time;
     }
@@ -74,6 +78,7 @@ class MPCBalanceCtrl : public Controller {
     Eigen::VectorXd gamma_old_;
 
     double target_com_height_;
+    double contact_transition_dur_;
     double stab_dur_;
     Eigen::VectorXd ini_com_pos_;
     Eigen::VectorXd ini_com_vel_;

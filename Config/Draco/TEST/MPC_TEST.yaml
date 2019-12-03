@@ -6,11 +6,12 @@ test_configuration:
     jpos_ctrl_time: 2.0
 
     com_height: 0.7
-    stabilization_duration: 2.0
+    contact_transition_duration: 2.0 # Time to ramp up the reaction force to the current
+    stabilization_duration: 2.0 # Time to stabilize the CoM after ramping up the reaction force
     com_ctrl_time: 1000000.0
 
     # Left and right sway
-    sway_start_time: 6 # seconds
+    sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
     sway_magnitude: 0.01 # meters
     sway_period: 2 # seconds
 
