@@ -46,6 +46,52 @@ def create_figures(subfigure_width=480, subfigure_height=600, starting_figure_no
             pass
 
     # Plot Figure --------------------------------------------------------------------
+    ## plot q floating
+    fig = plt.figure(figure_number)
+    plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
+    fig.canvas.set_window_title('qfloating')
+    for i in range(1,6+1,1):
+        ax1 = plt.subplot(6, 1, i)
+        plt.plot(data_x, data_config[st_idx:end_idx, i], "b-")
+
+        # plt.legend(('command', 'pos'), loc='upper left')
+        # phase marker #
+        for j in phseChange:
+            # phase line
+            plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.grid(True)
+    plt.xlabel('time (sec)')
+    ## increment figure number and index
+    figure_number += 1
+    if plot_configuration == PLOT_HORIZONTALLY:
+        col_index += 1
+    elif plot_configuration == PLOT_VERTICALLY:
+        row_index +=1
+
+    # Plot Figure --------------------------------------------------------------------
+    ## plot qdot floating
+    fig = plt.figure(figure_number)
+    plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
+    fig.canvas.set_window_title('qdot floating')
+    for i in range(1,6+1,1):
+        ax1 = plt.subplot(6, 1, i)
+        plt.plot(data_x, data_qdot[st_idx:end_idx, i], "b-")
+
+        # plt.legend(('command', 'pos'), loc='upper left')
+        # phase marker #
+        for j in phseChange:
+            # phase line
+            plt.axvline(x=data_x[j],color='indigo',linestyle='-')
+        plt.grid(True)
+    plt.xlabel('time (sec)')
+    ## increment figure number and index
+    figure_number += 1
+    if plot_configuration == PLOT_HORIZONTALLY:
+        col_index += 1
+    elif plot_configuration == PLOT_VERTICALLY:
+        row_index +=1
+
+    # Plot Figure --------------------------------------------------------------------
     ## plot command/jpos
     fig = plt.figure(figure_number)
     plt.get_current_fig_manager().window.wm_geometry(str(subfigure_width) + "x" + str(subfigure_height) +  "+" + str(subfigure_width*col_index) + "+" + str(subfigure_height*row_index))
