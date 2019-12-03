@@ -122,16 +122,14 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         _mpc_setup();
         _mpc_Xdes_setup();
         _mpc_solve();
+        // Setup the tasks and compute torque from IHWBC
+        task_setup();
+        // clock_.start();
+        _compute_torque_ihwbc(gamma);
+        // printf("time: %f\n", clock_.stop());
+        // Store the desired feed forward torque command 
+        gamma_old_ = gamma;
     }
-
-    // Setup the tasks and compute torque from IHWBC
-    task_setup();
-    // clock_.start();
-    _compute_torque_ihwbc(gamma);
-    // printf("time: %f\n", clock_.stop());
-
-    // Store the desired feed forward torque command 
-    gamma_old_ = gamma;
 
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
@@ -637,6 +635,6 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
     // Set IHWBC dt integration time
-    ihwbc_dt_ = DracoAux::ServoRate;// mpc_dt_; 
+    ihwbc_dt_ = mpc_dt_; // DracoAux::ServoRate; 
 
 }

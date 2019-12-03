@@ -12,7 +12,7 @@ test_configuration:
 
     # Left and right sway
     sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
-    sway_magnitude: 0.00 # meters
+    sway_magnitude: 0.0 # meters
     sway_period: 2 # seconds
 
 control_configuration:
@@ -26,16 +26,16 @@ control_configuration:
         foot_rz_xyz_kd: [0, 0, 0, 0]
 
         com_kp: [0, 0, 0]
-        com_kd: [0, 0, 0]
+        com_kd: [0., 0., 0.]
 
         body_kp: [0, 0, 0]
-        body_kd: [0, 0, 0]
+        body_kd: [0.0, 0.0, 0.0]
 
         joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 1e-2 
+        w_contact_weight: 1e-1
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
@@ -53,7 +53,7 @@ control_configuration:
         mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
 
         # Parameter to smoothen the MPC result
-        mpc_delta_smooth: 1e-7 # Constant term for quadratic smoothing
+        mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
         mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
 
         # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
@@ -63,4 +63,4 @@ control_configuration:
         # dp - World COM Velocity x,y,z
         # g - gravitiy (should always be 0.0!)
         # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
-        mpc_cost_vec: [0.1, 0.1, 0.1, 0.75, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]        
+        mpc_cost_vec: [10.0, 10.0, 10.0, 25.0, 10, 10, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]        
