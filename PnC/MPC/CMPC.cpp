@@ -12,15 +12,20 @@ CMPC::CMPC() {
     // If I_robot is expressed in world frame and is regularly updated to be
     // always in world, then rotate_inertia should be false
 
+    smooth_from_prev_result_ = false;
+
     horizon = 20;           // Default horizon to 10 steps
     mpc_dt = 0.025;         // MPC time interval per horizon steo
     mu = 0.9;               // coefficient of friction
     fz_max = 500;           // maximum z reaction force for one force vector.
-    control_alpha_ = 1e-5;  // 4e-5
+    control_alpha_ = 1e-12;  // 4e-5
+    delta_smooth_ = 1e-12;   // Parameter to smoothen the results
 
     // The latest force output computed by the MPC as the control input for the
     // robot.
     latest_f_vec_out = Eigen::VectorXd(0);
+    f_prev = Eigen::VectorXd(0);
+
 
     // Set Default cost_vec
     cost_vec.resize(13);
@@ -459,7 +464,7 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
 void CMPC::get_qp_costs(const int& n, const int& m,
                         const Eigen::VectorXd& vecS_cost,
                         const double& control_alpha, Eigen::MatrixXd& Sqp,
-                        Eigen::MatrixXd& Kqp) {
+                        Eigen::MatrixXd& Kqp, Eigen::MatrixXd& D0) {
     Eigen::MatrixXd S_cost = vecS_cost.asDiagonal();
     Sqp.setZero();
     for (int i = 0; i < horizon; i++) {
@@ -469,14 +474,16 @@ void CMPC::get_qp_costs(const int& n, const int& m,
     Kqp = control_alpha * Eigen::MatrixXd::Identity(m * horizon, m * horizon);
 
     // Cost matrix for derivative smoothing from previous solution
-    Eigen::MatrixXd D0(m, m*horizon); D0.setZero();
+    D0 = Eigen::MatrixXd::Zero(m, m*horizon);
     D0.block(0,0,m,m) = Eigen::MatrixXd::Identity(m,m);
     // std::cout << "D0 = " << std::endl;
     // std::cout << D0 << std::endl;
 
-    // Kqp = control_alpha * D0.transpose()*D0;
-    // Cost matrix for derivative smoothing for this iteration
+    if (smooth_from_prev_result_){
+      Kqp += delta_smooth_ * D0.transpose()*D0;
+    }
 
+    // Cost matrix for derivative smoothing for this iteration
     if (horizon > 1){
       Eigen::MatrixXd D1(m*(horizon-1), m*horizon);
       D1.setZero();
@@ -490,7 +497,7 @@ void CMPC::get_qp_costs(const int& n, const int& m,
       // std::cout << "D1 = " << std::endl;
       // std::cout << D1 << std::endl;
 
-      // Kqp += (control_alpha*D0.transpose()*D0);
+      Kqp += (delta_smooth_*D1.transpose()*D1);
     }
 
 
@@ -502,6 +509,9 @@ void CMPC::get_qp_costs(const int& n, const int& m,
     std::cout << "Sqp" << std::endl;
     std::cout << Sqp << std::endl;
 
+    std::cout << "D0 = " << std::endl;
+    std::cout << D0 << std::endl;
+
     std::cout << "Kqp" << std::endl;
     std::cout << Kqp << std::endl;
 #endif
@@ -510,6 +520,7 @@ void CMPC::get_qp_costs(const int& n, const int& m,
 void CMPC::solve_mpc_qp(const Eigen::MatrixXd& Aqp, const Eigen::MatrixXd& Bqp,
                         const Eigen::VectorXd& X_ref, const Eigen::VectorXd& x0,
                         const Eigen::MatrixXd& Sqp, const Eigen::MatrixXd& Kqp,
+                        const Eigen::MatrixXd& D0, const Eigen::VectorXd& f_prev_in,
                         const Eigen::MatrixXd& Cqp,
                         const Eigen::VectorXd& cvec_qp,
                         Eigen::VectorXd& f_vec_out) {
@@ -540,6 +551,10 @@ void CMPC::solve_mpc_qp(const Eigen::MatrixXd& Aqp, const Eigen::MatrixXd& Bqp,
 
     H = 2.0 * (m1 * Bqp + Kqp);
     g_qp.noalias() = 2.0 * m1 * v1;
+
+    if (smooth_from_prev_result_){
+      g_qp += (-2.0*delta_smooth_*D0.transpose()*f_prev_in);
+    }
 
 #ifdef MPC_TIME_ALL
     t_qp_mult_end = std::chrono::high_resolution_clock::now();
@@ -703,6 +718,15 @@ void CMPC::solve_mpc(const Eigen::VectorXd& x0, const Eigen::VectorXd& X_des,
     B.setZero();
     int n = A.cols();
     int m = B.cols();
+
+    // Check if previous reaction force solution is valid
+    // Previous reaction force is valid if it matches the size of the current reaction force dimension
+    // If it's not valid, set it to 0 with dimension equal to m.
+    if (!(f_prev.size() > 0 && (f_prev.size() == m))){
+      f_prev = Eigen::VectorXd::Zero(m);
+    }
+
+    // Cont time state space
     cont_time_state_space(x0, r_feet, A, B);
 
     // create discrete time state space matrices
@@ -740,7 +764,8 @@ void CMPC::solve_mpc(const Eigen::VectorXd& x0, const Eigen::VectorXd& X_des,
     // dpy,  dpz,  g vecS_cost << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0,
     // 0.30, 0.20, 0.2, 0.10, 0.0; vecS_cost << 10.0, 10.0, 100.0, 20.0, 20.0,
     // 500.0, 0.5, 0.5, 3.0, 2.0, 2, 1.0, 0.0;
-    get_qp_costs(n, m, cost_vec, control_alpha_, Sqp, Kqp);
+    Eigen::MatrixXd D0(m, m*horizon);
+    get_qp_costs(n, m, cost_vec, control_alpha_, Sqp, Kqp, D0);
 
 #ifdef MPC_TIME_ALL
     // End
@@ -761,9 +786,11 @@ void CMPC::solve_mpc(const Eigen::VectorXd& x0, const Eigen::VectorXd& X_des,
 #endif
 
     // Solve MPC
-    solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, Cqp, cvec_qp, f_vec_out);
+    solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, D0, f_prev, Cqp, cvec_qp, f_vec_out);
     // Locally store the output force
     latest_f_vec_out = f_vec_out.head(m);
+    // Store the previous result
+    f_prev = latest_f_vec_out;
 
     // Compute prediction of state evolution after an interval of mpc_dt
     x_pred = (Aqp * x0 + Bqp * f_vec_out).head(n);

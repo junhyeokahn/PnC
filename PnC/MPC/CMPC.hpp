@@ -23,6 +23,9 @@
 // Di Carlo, Jared, et al. "Dynamic locomotion in the mit cheetah 3 through convex model-predictive control." 
 // 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2018.
 
+// We modify the formulation to smoothen the solutions at each iteration.
+//  There is also an optional setting to smoothen the current solution from the previous solution 
+
 class CMPC{
 public: 
 	CMPC();
@@ -36,12 +39,17 @@ public:
 	double mu; // coefficient of friction
 	double fz_max; // maximum z reaction force for one force vector.
 	double control_alpha_; // Regularization term on the controls
+	double delta_smooth_; // Parameter to smoothen the reaction force results
+
+	bool smooth_from_prev_result_; // Whether to smooth the solution of the MPC iteration using the previous result
 
 	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
 						 // If the inertia is expressed in body frame this needs to be true.
 						 // Otherwise if the inertia is already updated to be in the world frame, this can be set to false.
 
 	Eigen::VectorXd latest_f_vec_out; // Container holding the the latest computed force output for control (not to be confused with the force at the end of the horizon)
+	Eigen::VectorXd f_prev; // Previous reaction force vector for the first horizon.
+
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	// last term is gravity and should always be 0,0
@@ -75,11 +83,12 @@ public:
 
 	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
 	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
+	void setSmoothFromPrevResult(const bool smooth_prev_in){smooth_from_prev_result_ = smooth_prev_in;} // Sets whether to smoothen the current solution using the previous solution
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
-
 	void setControlAlpha(const double control_alpha_in){control_alpha_ = control_alpha_in;}
+	void setDeltaSmooth(const double delta_smooth_in){delta_smooth_ = delta_smooth_in;}
 
 	// Human readable prints out of f_vec_out. 
 	void print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out);
@@ -127,13 +136,14 @@ private:
 	void qp_matrices(const Eigen::MatrixXd & Adt, const Eigen::MatrixXd & Bdt, Eigen::MatrixXd & Aqp, Eigen::MatrixXd & Bqp);
 	void get_force_constraints(const int & n_Fr, Eigen::MatrixXd & CMat, Eigen::VectorXd & cvec);
 	void get_qp_constraints(const Eigen::MatrixXd & CMat, const Eigen::VectorXd & cvec, Eigen::MatrixXd & Cqp, Eigen::VectorXd & cvec_qp);
-	void get_qp_costs(const int & n, const int & m, const Eigen::VectorXd & vecS_cost, const double & control_alpha, Eigen::MatrixXd & Sqp, Eigen::MatrixXd & Kqp);
+	void get_qp_costs(const int & n, const int & m, const Eigen::VectorXd & vecS_cost, const double & control_alpha, Eigen::MatrixXd & Sqp, Eigen::MatrixXd & Kqp, Eigen::MatrixXd& D0);
 
 	// Converts location of the feet expressed in world frame to the CoM frame. We assume the CoM orientation frame is always aligned with world.
 	void convert_r_feet_to_com_frame(const Eigen::VectorXd & p_com, const Eigen::MatrixXd & r_feet, Eigen::MatrixXd & r_feet_com);
 
 	void solve_mpc_qp(const Eigen::MatrixXd & Aqp,  const Eigen::MatrixXd & Bqp, const Eigen::VectorXd & X_ref, 
 					  const Eigen::VectorXd & x0,   const Eigen::MatrixXd & Sqp, const Eigen::MatrixXd & Kqp, 
+                      const Eigen::MatrixXd& D0, const Eigen::VectorXd& f_prev_in,
 					  const Eigen::MatrixXd & Cqp, const Eigen::VectorXd & cvec_qp,
 					  Eigen::VectorXd & f_vec_out);
 

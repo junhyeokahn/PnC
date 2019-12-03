@@ -54,7 +54,7 @@ TEST(MPC, toy_mpc){
   convex_mpc.setRobotInertia(I_robot_body);
 
   // MPC Params
-  int horizon = 3;
+  int horizon = 1;
   convex_mpc.setHorizon(horizon); // horizon timesteps 
   convex_mpc.setDt(0.025); // (seconds) per horizon
   convex_mpc.setMu(0.7); //  friction coefficient

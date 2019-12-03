@@ -37,7 +37,7 @@ control_configuration:
         w_contact_weight: 1e-2 
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
-        ihwbc_alpha_fd: 0.9 # Value between [0,1]. 
+        ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
 
         # MPC Parameters
         # Whether or not to use an approximated centroidal inertia matrix
@@ -50,6 +50,10 @@ control_configuration:
         mpc_dt: 0.025 # seconds
         # Regularization Term on the reaction forces
         mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
+
+        # Parameter to smoothen the MPC result
+        mpc_delta_smooth: 1e-7 # Constant term for quadratic smoothing
+        mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
 
         # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
         # th - World Roll, Pitch Yaw

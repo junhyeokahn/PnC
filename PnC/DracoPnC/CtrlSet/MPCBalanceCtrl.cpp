@@ -57,7 +57,9 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_dt_ = 0.025; // seconds per step
     mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
     mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
-    mpc_control_alpha_ = 1e-12; // Regularizatio nterm on the reaction force
+    mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
+    mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
+    mpc_smooth_from_prev_ = false; // Whether to use the previous solution to smooth the current solution
 
     mpc_Fd_des_ = Eigen::VectorXd::Zero(12);
     mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
@@ -528,6 +530,9 @@ void MPCBalanceCtrl::firstVisit() {
     std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
     std::cout << "MPC dt:" << mpc_dt_ << std::endl;
     std::cout << "MPC control alpha:" << mpc_control_alpha_ << std::endl;
+    std::cout << "MPC delta smooth:" << mpc_delta_smooth_ << std::endl;
+    std::cout << "MPC Smooth from prev?:" << mpc_smooth_from_prev_ << std::endl;
+
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
     std::cout << "sway_start_time:" << sway_start_time_ << std::endl;
@@ -537,6 +542,7 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
     convex_mpc->setMu(mpc_mu_); //  friction coefficient
+    // convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
     if (mpc_use_approx_inertia_){
         convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
                                               // True: We provide body inertia once        
@@ -545,6 +551,8 @@ void MPCBalanceCtrl::firstVisit() {
     }
 
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
+    convex_mpc->setSmoothFromPrevResult(mpc_smooth_from_prev_);
+    convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
 
     // Set the cost vector
     convex_mpc->setCostVec(mpc_cost_vec_);
@@ -601,7 +609,8 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "mpc_dt", mpc_dt_);
         myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
         myUtils::readParameter(node, "mpc_control_alpha", mpc_control_alpha_);
-
+        myUtils::readParameter(node, "mpc_delta_smooth", mpc_delta_smooth_);
+        myUtils::readParameter(node, "mpc_smooth_from_prev", mpc_smooth_from_prev_);
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
