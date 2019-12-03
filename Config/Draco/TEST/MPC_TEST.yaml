@@ -1,5 +1,5 @@
 test_configuration:
-    # initial_jpos: [0., 0., -0.8, 1.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
+    # initial_jpos: [0., 0., -0.8, 0.6, 0.81, 0., 0, -0.8, 1.6, 0.81]
     initial_jpos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
 
     jpos_initialization_time: 2.0
@@ -12,7 +12,7 @@ test_configuration:
 
     # Left and right sway
     sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
-    sway_magnitude: 0.01 # meters
+    sway_magnitude: 0.00 # meters
     sway_period: 2 # seconds
 
 control_configuration:
@@ -62,4 +62,5 @@ control_configuration:
         # w - World Angular veloocity x,y,z
         # dp - World COM Velocity x,y,z
         # g - gravitiy (should always be 0.0!)
-        mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        mpc_cost_vec: [0.1, 0.1, 0.1, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]        
