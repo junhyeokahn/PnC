@@ -125,9 +125,12 @@ class MPCBalanceCtrl : public Controller {
     double mpc_max_fz_;
     double mpc_control_alpha_;
     double mpc_delta_smooth_;
+    double mpc_toe_heel_smooth_;
 
     bool mpc_smooth_from_prev_;
     bool mpc_use_approx_inertia_;
+    bool mpc_do_toe_heel_smoothing_;
+
     Eigen::VectorXd mpc_approx_inertia_input_;
 
     Eigen::VectorXd mpc_cost_vec_;

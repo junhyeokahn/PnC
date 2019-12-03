@@ -43,6 +43,10 @@ public:
 
 	bool smooth_from_prev_result_; // Whether to smooth the solution of the MPC iteration using the previous result
 
+
+	bool custom_smoothing_; // Enable user-speicified custom smoothing matrix
+	Eigen::MatrixXd Dc1; // Custom smoothing for the entire horizon
+
 	bool rotate_inertia; // whether or not the inertia needs to be rotated to the world frame. 
 						 // If the inertia is expressed in body frame this needs to be true.
 						 // Otherwise if the inertia is already updated to be in the world frame, this can be set to false.
@@ -89,6 +93,9 @@ public:
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
 	void setControlAlpha(const double control_alpha_in){control_alpha_ = control_alpha_in;}
 	void setDeltaSmooth(const double delta_smooth_in){delta_smooth_ = delta_smooth_in;}
+
+	void enableCustomSmoothing(const bool enable_custom_smoothing){custom_smoothing_ = enable_custom_smoothing;}	
+	void setCustomSmoothing(const Eigen::MatrixXd & Dc1_in){ Dc1 = Dc1_in; }
 
 	// Human readable prints out of f_vec_out. 
 	void print_f_vec(int & n_Fr, const Eigen::VectorXd & f_vec_out);

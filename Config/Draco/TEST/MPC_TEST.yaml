@@ -56,6 +56,9 @@ control_configuration:
         mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
         mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
 
+        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        mpc_do_toe_heel_smoothing: true # Whether to use toe heel smoothing
+
         # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
         # th - World Roll, Pitch Yaw
         # p - World CoM X,Y,Z

@@ -13,6 +13,7 @@ CMPC::CMPC() {
     // always in world, then rotate_inertia should be false
 
     smooth_from_prev_result_ = false;
+    custom_smoothing_ = false;
 
     horizon = 20;           // Default horizon to 10 steps
     mpc_dt = 0.025;         // MPC time interval per horizon steo
@@ -25,7 +26,6 @@ CMPC::CMPC() {
     // robot.
     latest_f_vec_out = Eigen::VectorXd(0);
     f_prev = Eigen::VectorXd(0);
-
 
     // Set Default cost_vec
     cost_vec.resize(13);
@@ -498,7 +498,14 @@ void CMPC::get_qp_costs(const int& n, const int& m,
       // std::cout << D1 << std::endl;
 
       Kqp += (delta_smooth_*D1.transpose()*D1);
+
     }
+
+    // If custom smoothing is enabled apply the cost.    
+    if (custom_smoothing_){
+      Kqp += (Dc1.transpose()*Dc1);
+    }
+
 
 
 

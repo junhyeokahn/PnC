@@ -61,8 +61,11 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
     mpc_smooth_from_prev_ = false; // Whether to use the previous solution to smooth the current solution
 
-    mpc_Fd_des_ = Eigen::VectorXd::Zero(12);
-    mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(12);
+    mpc_toe_heel_smooth_ = 1e-4; // Smoothing parameter between the toe and the heel
+    mpc_do_toe_heel_smoothing_ = false; // If custom smoothing should be done
+
+    mpc_Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
+    mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(dim_contact_);
     alpha_fd_ = 0.9;
 
     mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
@@ -542,6 +545,9 @@ void MPCBalanceCtrl::firstVisit() {
     std::cout << "MPC delta smooth:" << mpc_delta_smooth_ << std::endl;
     std::cout << "MPC Smooth from prev?:" << mpc_smooth_from_prev_ << std::endl;
 
+    std::cout << "MPC Toe Heel Smoothing:" << mpc_do_toe_heel_smoothing_ << std::endl;
+    std::cout << "MPC Toe Heel Smoothing Value:" << mpc_toe_heel_smooth_ << std::endl;   
+
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
     std::cout << "sway_start_time:" << sway_start_time_ << std::endl;
@@ -562,6 +568,26 @@ void MPCBalanceCtrl::firstVisit() {
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
     convex_mpc->setSmoothFromPrevResult(mpc_smooth_from_prev_);
     convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
+
+    //Penalize forces between the heel and the toe for each leg
+    //  toe_heel*||f_{i,toe} - f_{i,heel}|| 
+    Eigen::MatrixXd D_toe_heel(6, 12); D_toe_heel.setZero();
+    D_toe_heel.block(0,0, 3, 3) = Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;
+    D_toe_heel.block(0,3, 3, 3) = -Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;    
+    D_toe_heel.block(3,6, 3, 3) = Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;
+    D_toe_heel.block(3,9, 3, 3) = -Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;    
+    // Create Custom Toe-heel Smoothing Matrix for the horizon:
+    Eigen::MatrixXd Dc1(6*((int) mpc_horizon_), 12*((int) mpc_horizon_));
+    Dc1.setZero();
+    for(int i = 0; i < mpc_horizon_; i++){
+        Dc1.block(i*6, i*12, 6, 12) = D_toe_heel;
+    }
+ 
+    // Set the custom smoothing
+    if (mpc_do_toe_heel_smoothing_){
+        convex_mpc->enableCustomSmoothing(true);
+        convex_mpc->setCustomSmoothing(Dc1);       
+    }
 
     // Set the cost vector
     convex_mpc->setCostVec(mpc_cost_vec_);
@@ -620,6 +646,10 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "mpc_control_alpha", mpc_control_alpha_);
         myUtils::readParameter(node, "mpc_delta_smooth", mpc_delta_smooth_);
         myUtils::readParameter(node, "mpc_smooth_from_prev", mpc_smooth_from_prev_);
+
+        myUtils::readParameter(node, "mpc_toe_heel_smooth", mpc_toe_heel_smooth_);
+        myUtils::readParameter(node, "mpc_do_toe_heel_smoothing", mpc_do_toe_heel_smoothing_);
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
