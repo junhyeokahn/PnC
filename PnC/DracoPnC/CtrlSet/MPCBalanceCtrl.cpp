@@ -36,10 +36,10 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::lFootCenter);
 
     // contact
-    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
-    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
-    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);
-    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);
+    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.3);
+    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.3);
+    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.3);
+    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.3);
 
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
@@ -55,7 +55,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     convex_mpc = new CMPC();
     mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
-    mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
+    mpc_mu_ = 0.3; // Coefficient of Friction on each contact point
     mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
     mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
     mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
@@ -125,14 +125,14 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         _mpc_setup();
         _mpc_Xdes_setup();
         _mpc_solve();
-        // Setup the tasks and compute torque from IHWBC
-        task_setup();
-        // clock_.start();
-        _compute_torque_ihwbc(gamma);
-        // printf("time: %f\n", clock_.stop());
-        // Store the desired feed forward torque command 
-        gamma_old_ = gamma;
     }
+    // Setup the tasks and compute torque from IHWBC
+    task_setup();
+    // clock_.start();
+    _compute_torque_ihwbc(gamma);
+    // printf("time: %f\n", clock_.stop());
+    // Store the desired feed forward torque command 
+    gamma_old_ = gamma;
 
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
@@ -227,12 +227,12 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
 
         // ----------------------------------------------------------------
         // Set CoM Position -----------------------------------------------
-        mpc_Xdes_[i*n + 3] = midfeet_pos_[0];
-        // mpc_Xdes_[i*n + 3] = midfeet_pos_[0] + magnitude*cos(omega * t_predict); 
+        mpc_Xdes_[i*n + 3] = goal_com_pos_[0];
+        // mpc_Xdes_[i*n + 3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
 
-        mpc_Xdes_[i*n + 4] = midfeet_pos_[1];
+        mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
         if (t_predict >= sway_start_time_){
-            mpc_Xdes_[i*n + 4] = midfeet_pos_[1] + magnitude*sin(omega * (t_predict-sway_start_time_));             
+            mpc_Xdes_[i*n + 4] = goal_com_pos_[1] + magnitude*sin(omega * (t_predict-sway_start_time_));             
         }
 
         // Wait for contact transition to finish
@@ -267,7 +267,7 @@ void MPCBalanceCtrl::_mpc_Xdes_setup(){
     }
 
     // std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
-    
+
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = mpc_Xdes_[i+3];
         sp_->com_vel_des[i] = mpc_Xdes_[i+9];
@@ -293,10 +293,10 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // Modify Rotor Inertia
     Eigen::MatrixXd A_rotor = A_;
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        A_rotor(i + robot_->getNumVirtualDofs(),
-                i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
-    }
+    // for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    //     A_rotor(i + robot_->getNumVirtualDofs(),
+    //             i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
+    // }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
 
     // Enable Torque Limits
@@ -363,21 +363,21 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 void MPCBalanceCtrl::task_setup() {
     // Set desired com and body orientation from predicted state 
-    double des_roll = mpc_x_pred_[0];
-    double des_pitch = mpc_x_pred_[1];
-    double des_yaw = mpc_x_pred_[2];
+    double des_roll = mpc_Xdes_[0]; //mpc_x_pred_[0];
+    double des_pitch = mpc_Xdes_[1]; //mpc_x_pred_[1];
+    double des_yaw = mpc_Xdes_[2]; //mpc_x_pred_[2];
 
-    double des_pos_x = mpc_x_pred_[3];
-    double des_pos_y = mpc_x_pred_[4];
-    double des_pos_z = mpc_x_pred_[5];
+    double des_pos_x = mpc_Xdes_[3]; //mpc_x_pred_[3];
+    double des_pos_y = mpc_Xdes_[4]; //mpc_x_pred_[4];
+    double des_pos_z = mpc_Xdes_[5]; //mpc_x_pred_[5];
 
-    double des_roll_rate = mpc_x_pred_[6];
-    double des_pitch_rate = mpc_x_pred_[7];
-    double des_yaw_rate = mpc_x_pred_[8];
+    double des_roll_rate = mpc_Xdes_[6]; //mpc_x_pred_[6];
+    double des_pitch_rate = mpc_Xdes_[7]; //mpc_x_pred_[7];
+    double des_yaw_rate = mpc_Xdes_[8]; //mpc_x_pred_[8];
 
-    double des_vel_x = mpc_x_pred_[9];
-    double des_vel_y = mpc_x_pred_[10];
-    double des_vel_z = mpc_x_pred_[11];
+    double des_vel_x = mpc_Xdes_[9]; //mpc_x_pred_[9];
+    double des_vel_y = mpc_Xdes_[10]; //mpc_x_pred_[10];
+    double des_vel_z = mpc_Xdes_[11]; //mpc_x_pred_[11];
 
     // =========================================================================
     // Com Task
@@ -665,6 +665,6 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
 
     // Set IHWBC dt integration time
-    ihwbc_dt_ = mpc_dt_; // DracoAux::ServoRate; 
+    ihwbc_dt_ = DracoAux::ServoRate; //mpc_dt_;  
 
 }
