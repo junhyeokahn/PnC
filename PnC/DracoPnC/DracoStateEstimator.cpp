@@ -27,6 +27,7 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     mocap_y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
     y_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
+    z_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.5);
     body_est_ = new BodyEstimator(robot);
     //imu_frame_est_ = new IMUFrameEstimator(robot);
 }
@@ -38,6 +39,7 @@ DracoStateEstimator::~DracoStateEstimator() {
     delete mocap_y_vel_est_;
     delete x_vel_est_;
     delete y_vel_est_;
+    delete z_vel_est_;
     //delete imu_frame_est_;
 }
 
@@ -70,6 +72,7 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
 
     ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
+    ((AverageFilter*)z_vel_est_)->initialization(sp_->com_vel[2]);
     ((AverageFilter*)mocap_x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)mocap_y_vel_est_)->initialization(sp_->com_vel[1]);
 
@@ -166,6 +169,8 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     sp_->est_com_vel[0] = x_vel_est_->output();
     y_vel_est_->input(sp_->com_vel[1]);
     sp_->est_com_vel[1] = y_vel_est_->output();
+    z_vel_est_->input(sp_->com_vel[2]);
+    sp_->est_com_vel[2] = z_vel_est_->output();
 
     Eigen::Vector3d mocap_body_vel;
     body_est_->Update();

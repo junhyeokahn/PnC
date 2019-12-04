@@ -16,6 +16,8 @@ np.genfromtxt(file_path+'com_pos_des.txt', delimiter=None, dtype=(float))
 
 data_com_vel = \
 np.genfromtxt(file_path+'com_vel.txt', delimiter=None, dtype=(float))
+data_est_com_vel = \
+np.genfromtxt(file_path+'est_com_vel.txt', delimiter=None, dtype=(float))
 data_com_vel_des = \
 np.genfromtxt(file_path+'com_vel_des.txt', delimiter=None, dtype=(float))
 
@@ -55,6 +57,7 @@ fig.canvas.set_window_title('com vel')
 for i in range(1,4,1):
     ax1 = plt.subplot(3, 1, i)
     plt.plot(data_x, data_com_vel[st_idx:end_idx,i-1], "b-")
+    plt.plot(data_x, data_est_com_vel[st_idx:end_idx,i-1], "g-")
     plt.plot(data_x, data_com_vel_des[st_idx:end_idx,i-1], "r-")
 
     plt.grid(True)

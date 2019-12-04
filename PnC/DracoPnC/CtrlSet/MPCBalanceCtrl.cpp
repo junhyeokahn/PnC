@@ -173,11 +173,11 @@ void MPCBalanceCtrl::_mpc_setup(){
         mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
     }
     // myUtils::pretty_print(mpc_r_feet_, std::cout, "mpc_r_feet_");
-    q_current_ = robot_->getQ();
-    qdot_current_ = robot_->getQdot();
+    q_current_ = sp_->q; //robot_->getQ();
+    qdot_current_ = sp_->qdot; //robot_->getQdot();
 
-    com_current_ = robot_->getCoMPosition();
-    com_rate_current_ = robot_->getCoMVelocity();
+    com_current_ = sp_->com_pos; //robot_->getCoMPosition();
+    com_rate_current_ = sp_->est_com_vel; //robot_->getCoMVelocity();
 
     // myUtils::pretty_print(com_current_, std::cout, "com_current_");
 
@@ -325,8 +325,8 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     ihwbc->getFrResult(Fr_res);
 
     // Compute desired joint position and velocities for the low-level
-    q_current_ = robot_->getQ();
-    qdot_current_ = robot_->getQdot();
+    q_current_ = sp_->q; //robot_->getQ();
+    qdot_current_ = sp_->qdot; //robot_->getQdot();
 
     Eigen::VectorXd ac_qdot_current = qdot_current_.tail(robot_->getNumActuatedDofs());
     Eigen::VectorXd ac_q_current = q_current_.tail(robot_->getNumActuatedDofs());
@@ -504,8 +504,8 @@ void MPCBalanceCtrl::firstVisit() {
                                robot_->getNumActuatedDofs());
     ctrl_start_time_ = sp_->curr_time;
 
-    Eigen::Vector3d com_pos = robot_->getCoMPosition();
-    Eigen::Vector3d com_vel = robot_->getCoMVelocity();
+    Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
+    Eigen::Vector3d com_vel = sp_->est_com_vel ;// robot_->getCoMVelocity();
     //Eigen::VectorXd rankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
     //Eigen::VectorXd lankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
     Eigen::VectorXd rankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rAnkle).translation();
@@ -527,7 +527,7 @@ void MPCBalanceCtrl::firstVisit() {
     // MPC Initial Setup 
     // System Params
     double robot_mass = robot_->getRobotMass(); //kg
-    convex_mpc->setRobotMass(robot_mass); // (kilograms) 
+    convex_mpc->setRobotMass(robot_mass*0.9); // (kilograms) 
 
     if (mpc_use_approx_inertia_){
         Eigen::MatrixXd I_body(3,3);

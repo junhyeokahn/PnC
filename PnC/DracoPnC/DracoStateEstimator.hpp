@@ -42,6 +42,8 @@ class DracoStateEstimator {
     filter* mocap_y_vel_est_;
     filter* x_vel_est_;
     filter* y_vel_est_;
+    filter* z_vel_est_;
+
 
     void _JointUpdate(DracoSensorData* data);
     void _ConfigurationAndModelUpdate();
