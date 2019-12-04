@@ -43,21 +43,12 @@ control_configuration:
         # MPC Parameters
         # Whether or not to use an approximated centroidal inertia matrix
         # if true, we use the listed inertia. if false, we compute the centroidal inertia at each time step
-        mpc_use_approx_inertia: false
+        mpc_use_approx_inertia: true
         mpc_approx_inertia_input: [4.499536, -0.024537, 0.840501, -0.024537, 3.967693, 0.014913, 0.840501, 0.014913, 1.268436]
         # Predicion Horizon
         mpc_horizon: 10 # number of horizon steps 
         # Prediction Interval
         mpc_dt: 0.025 # seconds
-        # Regularization Term on the reaction forces
-        mpc_control_alpha: 1e-8 # Ideally it should be small to properly generate the right reaction forces
-
-        # Parameter to smoothen the MPC result
-        mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
-        mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
-
-        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
-        mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
 
         # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
         # th - World Roll, Pitch Yaw
@@ -66,5 +57,29 @@ control_configuration:
         # dp - World COM Velocity x,y,z
         # g - gravitiy (should always be 0.0!)
         # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+
+        # Robot Params
+        # Regularization Term on the reaction forces
+        mpc_control_alpha: 1e-8 # Ideally it should be small to properly generate the right reaction forces
+        mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
+        mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
+        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
         mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
+
+        # SIM parameters
+        # Parameter to smoothen the MPC result
+        # mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
+        # mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
+        # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
+        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+
+        # mpc_control_alpha: 1e-6 # Ideally it should be small to properly generate the right reaction forces
+        # mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
+        # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
+        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        # mpc_cost_vec: [250, 250, 250, 3000, 1000, 1000, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
