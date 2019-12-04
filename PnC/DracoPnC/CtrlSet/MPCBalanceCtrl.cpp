@@ -379,6 +379,10 @@ void MPCBalanceCtrl::task_setup() {
     double des_vel_y = mpc_Xdes_[10]; //mpc_x_pred_[10];
     double des_vel_z = mpc_Xdes_[11]; //mpc_x_pred_[11];
 
+    // Update predicted behavior to state estimate
+    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
+    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
+
     // =========================================================================
     // Com Task
     // =========================================================================
@@ -527,7 +531,7 @@ void MPCBalanceCtrl::firstVisit() {
     // MPC Initial Setup 
     // System Params
     double robot_mass = robot_->getRobotMass(); //kg
-    convex_mpc->setRobotMass(robot_mass*0.9); // (kilograms) 
+    convex_mpc->setRobotMass(robot_mass); // (kilograms) 
 
     if (mpc_use_approx_inertia_){
         Eigen::MatrixXd I_body(3,3);
@@ -542,6 +546,7 @@ void MPCBalanceCtrl::firstVisit() {
         myUtils::pretty_print(I_body, std::cout, "I_body");
     }
 
+    std::cout << "MPC Robot Weight:" << robot_mass << std::endl;
     std::cout << "MPC Use Approx Inertia:" << mpc_use_approx_inertia_ << std::endl;
     std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
     std::cout << "MPC dt:" << mpc_dt_ << std::endl;

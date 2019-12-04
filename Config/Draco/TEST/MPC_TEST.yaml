@@ -12,7 +12,7 @@ test_configuration:
 
     # Left and right sway
     sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
-    sway_magnitude: 0.0 # meters
+    sway_magnitude: 0.0  # meters
     sway_period: 2 # seconds
 
 control_configuration:
@@ -82,4 +82,4 @@ control_configuration:
         # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
         # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
         # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
-        # mpc_cost_vec: [250, 250, 250, 3000, 1000, 1000, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        # mpc_cost_vec: [25, 25, 25, 300, 100, 100, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

@@ -14,12 +14,18 @@ np.genfromtxt(file_path+'com_pos.txt', delimiter=None, dtype=(float))
 data_com_pos_des = \
 np.genfromtxt(file_path+'com_pos_des.txt', delimiter=None, dtype=(float))
 
+data_mpc_pred_pos = \
+np.genfromtxt(file_path+'mpc_pred_pos.txt', delimiter=None, dtype=(float))
+
 data_com_vel = \
 np.genfromtxt(file_path+'com_vel.txt', delimiter=None, dtype=(float))
 data_est_com_vel = \
 np.genfromtxt(file_path+'est_com_vel.txt', delimiter=None, dtype=(float))
 data_com_vel_des = \
 np.genfromtxt(file_path+'com_vel_des.txt', delimiter=None, dtype=(float))
+
+data_mpc_pred_vel = \
+np.genfromtxt(file_path+'mpc_pred_vel.txt', delimiter=None, dtype=(float))
 
 data_x = np.genfromtxt(file_path+'time.txt', delimiter='\n', dtype=(float))
 st_idx = 1
@@ -43,7 +49,7 @@ for i in range(1,4,1):
     ax1 = plt.subplot(3, 1, i)
     plt.plot(data_x, data_com_pos[st_idx:end_idx,i-1], "b-")
     plt.plot(data_x, data_com_pos_des[st_idx:end_idx,i-1], "r-")
-
+    plt.plot(data_x, data_mpc_pred_pos[st_idx:end_idx,i-1], "k-")
     plt.grid(True)
     for j in phseChange:
         plt.axvline(x=data_x[j],color='indigo',linestyle='-')
@@ -59,7 +65,7 @@ for i in range(1,4,1):
     plt.plot(data_x, data_com_vel[st_idx:end_idx,i-1], "b-")
     plt.plot(data_x, data_est_com_vel[st_idx:end_idx,i-1], "g-")
     plt.plot(data_x, data_com_vel_des[st_idx:end_idx,i-1], "r-")
-
+    plt.plot(data_x, data_mpc_pred_vel[st_idx:end_idx,i-1], "k-")
     plt.grid(True)
     for j in phseChange:
         plt.axvline(x=data_x[j],color='indigo',linestyle='-')
