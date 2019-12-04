@@ -50,7 +50,7 @@ control_configuration:
         # Prediction Interval
         mpc_dt: 0.025 # seconds
         # Regularization Term on the reaction forces
-        mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
+        mpc_control_alpha: 1e-8 # Ideally it should be small to properly generate the right reaction forces
 
         # Parameter to smoothen the MPC result
         mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
@@ -66,5 +66,5 @@ control_configuration:
         # dp - World COM Velocity x,y,z
         # g - gravitiy (should always be 0.0!)
         # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
-        mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
