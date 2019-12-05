@@ -22,20 +22,20 @@ control_configuration:
 
     mpc_ctrl:
         # Task Weights
-        foot_rz_xyz_kp: [1, 1, 1, 1]
+        foot_rz_xyz_kp: [1.0, 1.0, 1.0, 1.0]
         foot_rz_xyz_kd: [0, 0, 0, 0]
 
-        com_kp: [1.0, 1.0, 1.0]
+        com_kp: [50.0, 50.0, 50.0]
         com_kd: [0.0, 0.0, 0.0]
 
-        body_kp: [1.0, 1.0, 1.0]
+        body_kp: [50.0, 50.0, 50.0]
         body_kd: [0.0, 0.0, 0.0]
 
-        joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
+        joint_kp: [0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 1e-2
+        w_contact_weight: 0.0 #1e-6
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
@@ -60,13 +60,19 @@ control_configuration:
 
         # Robot Params
         # Regularization Term on the reaction forces
-        mpc_control_alpha: 1e-8 # Ideally it should be small to properly generate the right reaction forces
-        mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
-        mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
-        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
-        mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
-        mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        # mpc_control_alpha: 1e-6 # Ideally it should be small to properly generate the right reaction forces
+        # mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
+        # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
+        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        # mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
+        # mpc_control_alpha: 1e-8 # Ideally it should be small to properly generate the right reaction forces
+        # mpc_delta_smooth: 1e-5 # Constant term for quadratic smoothing
+        # mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
+        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        # mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         # SIM parameters
         # Parameter to smoothen the MPC result
@@ -77,9 +83,9 @@ control_configuration:
         # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
         # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
 
-        # mpc_control_alpha: 1e-6 # Ideally it should be small to properly generate the right reaction forces
-        # mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
-        # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
-        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
-        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
-        # mpc_cost_vec: [25, 25, 25, 300, 100, 100, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        mpc_control_alpha: 1e-6 # Ideally it should be small to properly generate the right reaction forces
+        mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
+        mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
+        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        mpc_cost_vec: [12.5, 12.5, 12.5, 225, 75, 75, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]

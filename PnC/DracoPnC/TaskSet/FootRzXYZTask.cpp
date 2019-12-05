@@ -63,8 +63,8 @@ bool FootRzXYZTask::_UpdateTaskJacobian() {
     Jt_.block(1, 0, 3, robot_->getNumDofs()) =
         Jtmp.block(3, 0, 3, robot_->getNumDofs());
     // isolate virtual joint
-    Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-        Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+    // Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+    //     Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
 
     return true;
 }
