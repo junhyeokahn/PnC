@@ -124,7 +124,7 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         // // Setup and solve the MPC 
         _mpc_setup();
         _mpc_Xdes_setup();
-        _mpc_solve();
+        // _mpc_solve();
     }
     // Setup the tasks and compute torque from IHWBC
     task_setup();
@@ -280,6 +280,10 @@ void MPCBalanceCtrl::_mpc_solve(){
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
 
+    // Update predicted behavior to state estimate
+    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
+    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
+
     // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
     // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
@@ -378,10 +382,6 @@ void MPCBalanceCtrl::task_setup() {
     double des_vel_x = mpc_Xdes_[9]; //mpc_x_pred_[9];
     double des_vel_y = mpc_Xdes_[10]; //mpc_x_pred_[10];
     double des_vel_z = mpc_Xdes_[11]; //mpc_x_pred_[11];
-
-    // Update predicted behavior to state estimate
-    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
-    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
 
     // =========================================================================
     // Com Task

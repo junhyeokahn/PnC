@@ -14,6 +14,9 @@ np.genfromtxt(file_path+'com_pos.txt', delimiter=None, dtype=(float))
 data_com_pos_des = \
 np.genfromtxt(file_path+'com_pos_des.txt', delimiter=None, dtype=(float))
 
+data_dcm_pos = \
+np.genfromtxt(file_path+'dcm.txt', delimiter=None, dtype=(float))
+
 data_mpc_pred_pos = \
 np.genfromtxt(file_path+'mpc_pred_pos.txt', delimiter=None, dtype=(float))
 
@@ -50,6 +53,7 @@ for i in range(1,4,1):
     plt.plot(data_x, data_com_pos[st_idx:end_idx,i-1], "b-")
     plt.plot(data_x, data_com_pos_des[st_idx:end_idx,i-1], "r-")
     plt.plot(data_x, data_mpc_pred_pos[st_idx:end_idx,i-1], "k-")
+    plt.plot(data_x, data_dcm_pos[st_idx:end_idx,i-1], "c-")
     plt.grid(True)
     for j in phseChange:
         plt.axvline(x=data_x[j],color='indigo',linestyle='-')
