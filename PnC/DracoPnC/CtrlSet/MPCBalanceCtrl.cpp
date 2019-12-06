@@ -36,10 +36,10 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::lFootCenter);
 
     // contact
-    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.3);
-    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.3);
-    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.3);
-    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.3);
+    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.9);
+    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.9);
+    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.9);
+    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.9);
 
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
@@ -55,7 +55,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     convex_mpc = new CMPC();
     mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
-    mpc_mu_ = 0.3; // Coefficient of Friction on each contact point
+    mpc_mu_ = 0.9; // Coefficient of Friction on each contact point
     mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
     mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
     mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
