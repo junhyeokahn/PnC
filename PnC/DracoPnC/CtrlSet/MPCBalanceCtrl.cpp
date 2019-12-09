@@ -417,13 +417,42 @@ void MPCBalanceCtrl::task_setup() {
         }
     }
 
-    com_pos_des[0] = des_pos_x;
-    com_pos_des[1] = des_pos_y;
-    com_pos_des[2] = des_pos_z;
+    // Define capture point linear momentum task:
+    // Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
+    // Eigen::Vector3d com_vel = sp_->est_com_vel ;// robot_->getCoMVelocity();
 
-    com_vel_des[0] = des_vel_x;
-    com_vel_des[1] = des_vel_y;
+    double gravity = 9.81;
+    double com_height = sp_->com_pos[2];
+    double omega_o = std::sqrt(gravity/com_height);
+
+    // Current ICP 
+    Eigen::VectorXd r_ic = sp_->com_pos.head(2) + (1.0/omega_o)*sp_->est_com_vel.head(2);
+    // Desired ICP
+    Eigen::VectorXd r_id = goal_com_pos_.head(2);
+    // Desired ICP Velocity
+    Eigen::VectorXd rdot_id = Eigen::VectorXd::Zero(2);
+
+    // Desired CMP
+    double k_ic = 20.0; // ICP task gain.
+    Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + k_ic * (r_ic - r_id);
+    // Desired Linear Momentum / Acceleration task:
+    com_acc_des.head(2) = (gravity/com_height)*( sp_->com_pos.head(2) - r_CMP_d);
+    com_acc_des[2] = 0.0;
+
+    // Zero out desired com position and velocity except for the height control.
+    com_pos_des = robot_->getCoMPosition();
+    com_vel_des = robot_->getCoMVelocity();
+    com_pos_des[2] = des_pos_z;
     com_vel_des[2] = des_vel_z;
+
+    // com_pos_des[0] = des_pos_x;
+    // com_pos_des[1] = des_pos_y;
+    // com_pos_des[2] = des_pos_z;
+
+    // com_vel_des[0] = des_vel_x;
+    // com_vel_des[1] = des_vel_y;
+    // com_vel_des[2] = des_vel_z;
+
 
     // std::cout << "com_pos_des = " << com_pos_des.transpose() << std::endl;
     // std::cout << "com_vel_des = " << com_vel_des.transpose() << std::endl;
