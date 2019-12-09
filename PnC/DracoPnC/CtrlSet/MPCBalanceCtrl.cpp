@@ -35,6 +35,11 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     rfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::rFootCenter);
     lfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::lFootCenter);
 
+    rfoot_front_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::rFootFront);
+    rfoot_back_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::rFootBack);
+    lfoot_front_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootFront);
+    lfoot_back_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootBack);
+
     // contact
     rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.9);
     rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.9);
@@ -82,7 +87,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     gamma_old_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // Regularization terms should always be the lowest cost. 
-    lambda_qddot_ = 1e-16;
+    lambda_qddot_ = 1e-14;
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
@@ -340,9 +345,13 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
                 0.5*qddot_cmd_*ihwbc_dt_*ihwbc_dt_; 
 
 
-    gamma = tau_cmd_;// + 5.0*(q_des_ - ac_q_current) + 0.5*(qdot_des_ - ac_qdot_current);
+    gamma = tau_cmd_;
     des_jvel_ = qdot_des_;
     des_jpos_ = q_des_;
+
+    // des_jpos_ = des_jpos_ + (des_jvel_* ihwbc_dt_) + (0.5 * qddot_cmd_ * ihwbc_dt_ * ihwbc_dt_);
+    // des_jvel_ = des_jvel_ + (qddot_cmd_*ihwbc_dt_);
+
 
     // Store desired qddot
     sp_->qddot_cmd = qddot_res;    
@@ -353,16 +362,20 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
     // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
-    // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
     // myUtils::pretty_print(qdot_des_, std::cout, "qdot_des_");
     // myUtils::pretty_print(q_des_, std::cout, "q_des_");
 
     // myUtils::pretty_print(ac_qdot_current, std::cout, "ac_qdot_current");
     // myUtils::pretty_print(ac_q_current, std::cout, "ac_q_current");
+    Eigen::VectorXd com_pos_cur = sp_->com_pos;
 
+    // myUtils::pretty_print(com_pos_cur, std::cout, "com_pos_cur");
     // myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
-    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+    // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
+    // myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_");
+    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");
 
+    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 }
 
 void MPCBalanceCtrl::task_setup() {
@@ -412,6 +425,10 @@ void MPCBalanceCtrl::task_setup() {
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
 
+    // std::cout << "com_pos_des = " << com_pos_des.transpose() << std::endl;
+    // std::cout << "com_vel_des = " << com_vel_des.transpose() << std::endl;
+    // std::cout << "com_acc_des = " << com_acc_des.transpose() << std::endl;    
+
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // =========================================================================
@@ -458,6 +475,27 @@ void MPCBalanceCtrl::task_setup() {
     rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
 
+
+    Eigen::VectorXd foot_pos_d(3); foot_pos_d.setZero();
+    Eigen::VectorXd foot_vel_d(3); foot_vel_d.setZero();
+    Eigen::VectorXd foot_acc_d(3); foot_acc_d.setZero();
+
+    foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();
+    rfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+    // myUtils::pretty_print(foot_pos_d, std::cout, "rfoot_front_pos");
+
+    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
+    rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+    // myUtils::pretty_print(foot_pos_d, std::cout, "rfoot_back_pos");
+
+    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
+    lfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+    // myUtils::pretty_print(foot_pos_d, std::cout, "lfoot_front_pos");
+
+    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
+    lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+    // myUtils::pretty_print(foot_pos_d, std::cout, "lfoot_back_pos");
+
     // =========================================================================
     // Joint Pos Task
     // =========================================================================
@@ -473,16 +511,35 @@ void MPCBalanceCtrl::task_setup() {
     // =========================================================================
     task_list_.push_back(com_task_);
     task_list_.push_back(body_ori_task_);
-    task_list_.push_back(rfoot_center_rz_xyz_task);
-    task_list_.push_back(lfoot_center_rz_xyz_task);    
+    // task_list_.push_back(rfoot_center_rz_xyz_task);
+    // task_list_.push_back(lfoot_center_rz_xyz_task);    
+
+    task_list_.push_back(rfoot_front_task);
+    task_list_.push_back(rfoot_back_task);    
+    task_list_.push_back(lfoot_front_task);
+    task_list_.push_back(lfoot_back_task);    
     task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    w_task_heirarchy_[0] = w_task_com_; // COM
-    w_task_heirarchy_[1] = w_task_body_; // Body Ori
+
+    w_task_heirarchy_[0] = w_task_com_; // rfoot
+    w_task_heirarchy_[1] = w_task_body_; // rfoot
     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
-    w_task_heirarchy_[4] = w_task_joint_; // joint    
+    w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
+    w_task_heirarchy_[4] = w_task_lfoot_; // rfoot
+    w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
+    w_task_heirarchy_[6] = w_task_joint_; // joint    
+
+    // w_task_heirarchy_[0] = w_task_com_; // COM
+    // w_task_heirarchy_[1] = w_task_body_; // Body Ori
+
+    // w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
+    // w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
+
+    // w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
+    // w_task_heirarchy_[4] = w_task_rfoot_; // lfoot
+    // w_task_heirarchy_[5] = w_task_lfoot_; // rfoot
+    // w_task_heirarchy_[6] = w_task_lfoot_; // lfoot
 
     // w_task_heirarchy_[0] = w_task_rfoot_; // rfoot
     // w_task_heirarchy_[1] = w_task_lfoot_; // lfoot
@@ -506,6 +563,12 @@ void MPCBalanceCtrl::contact_setup() {
 void MPCBalanceCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                robot_->getNumActuatedDofs());
+    jdot_ini_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
+                                  robot_->getNumActuatedDofs());
+
+    des_jpos_ = jpos_ini_;
+    des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
     ctrl_start_time_ = sp_->curr_time;
 
     Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
@@ -669,6 +732,16 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     // Set Task Gains
     rfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
     lfoot_center_rz_xyz_task->setGain(kp_foot, kd_foot);
+
+
+    Eigen::VectorXd kp_point_foot = kp_foot.head(3); 
+    Eigen::VectorXd kd_point_foot = kd_foot.head(3);
+
+    rfoot_front_task->setGain(kp_point_foot, kd_point_foot);
+    rfoot_back_task->setGain(kp_point_foot, kd_point_foot);
+    lfoot_front_task->setGain(kp_point_foot, kd_point_foot);
+    lfoot_back_task->setGain(kp_point_foot, kd_point_foot);
+
     com_task_->setGain(com_kp, com_kd);
     total_joint_task_->setGain(kp_jp, kd_jp);
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);

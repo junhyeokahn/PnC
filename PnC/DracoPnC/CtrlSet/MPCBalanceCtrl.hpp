@@ -49,6 +49,8 @@ class MPCBalanceCtrl : public Controller {
     Eigen::VectorXd des_jacc_;
 
     Eigen::VectorXd jpos_ini_;
+    Eigen::VectorXd jdot_ini_;
+
     double end_time_;
     int dim_contact_;
 
@@ -58,6 +60,11 @@ class MPCBalanceCtrl : public Controller {
     Task* body_ori_task_;
     Task* rfoot_center_rz_xyz_task;
     Task* lfoot_center_rz_xyz_task;
+
+    Task* rfoot_front_task;
+    Task* rfoot_back_task;
+    Task* lfoot_front_task;
+    Task* lfoot_back_task;
 
     ContactSpec* rfoot_front_contact_;
     ContactSpec* rfoot_back_contact_;

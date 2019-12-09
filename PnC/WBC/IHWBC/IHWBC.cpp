@@ -149,6 +149,10 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
         task->getTaskJacobianDotQdot(JtDotQdot);
         task->getCommand(xddot);       
 
+        // std::cout << "task " << i << " xddot : " << xddot.transpose() << std::endl;
+        // std::cout << "      Jt: " << Jt << std::endl;
+        // std::cout << "      JtDotQdot: " << JtDotQdot.transpose() << std::endl;
+
         // Add to Costs
         Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
         vt += (w_task_heirarchy[i]*((JtDotQdot-xddot).transpose()*Jt));
@@ -283,6 +287,25 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
 
     qddot_cmd = Sa_*qddot_result_;
+
+    // for(int i = 0; i < task_list.size(); i++){
+    //     task = task_list[i];
+    //     task->getTaskJacobian(Jt);
+    //     task->getTaskJacobianDotQdot(JtDotQdot);
+    //     task->getCommand(xddot);       
+    //     std::cout << "task " << i << " error : " << (xddot - (Jt*qddot_result_) -  JtDotQdot).transpose() << std::endl;
+    //     std::cout << "task " << i << " error norm : " << (xddot - (Jt*qddot_result_) -  JtDotQdot).norm() << std::endl;
+    //     std::cout << "    " << " xddot : " << (xddot).transpose() << std::endl;
+    //     std::cout << "    " << " Jtqddot : " << (Jt*qddot_result_).transpose() << std::endl;
+    //     std::cout << "    " << " JtDotQdot : " << JtDotQdot.transpose() << std::endl;
+    // }
+
+
+    // Eigen::VectorXd tau_res_test = A_*qddot_result_ + cori_ + grav_ - Jc_.transpose()*Fr_result_;
+    // myUtils::pretty_print(tau_res_test, std::cout, "tau_res_test");
+    // Eigen::VectorXd qddot_res_test = Ainv_*(tau_res_test - cori_ - grav_ + Jc_.transpose()*Fr_result_);
+    // myUtils::pretty_print(qddot_res_test, std::cout, "qddot_res_test");
+    // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
 
 }
 
