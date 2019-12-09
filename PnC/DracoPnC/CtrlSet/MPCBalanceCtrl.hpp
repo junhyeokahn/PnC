@@ -164,6 +164,8 @@ class MPCBalanceCtrl : public Controller {
     // clamping function helper
     double clamp_value(double in, double min, double max);
 
+    // compute alpha from break frequency
+    double computeAlphaGivenBreakFrequency(double hz, double dt);
 
 
 };

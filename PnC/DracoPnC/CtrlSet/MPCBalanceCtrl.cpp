@@ -133,6 +133,13 @@ double MPCBalanceCtrl::clamp_value(double in, double min, double max){
     }
 }
 
+double MPCBalanceCtrl::computeAlphaGivenBreakFrequency(double hz, double dt){
+    double omega = 2.0 * M_PI * hz;
+    double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt/2.0));
+    alpha = clamp_value(alpha, 0.0, 1.0);
+    return alpha;
+}
+
 void MPCBalanceCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
@@ -364,11 +371,24 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 
     gamma = tau_cmd_;
-    des_jvel_ = qdot_des_;
-    des_jpos_ = q_des_;
+    // des_jvel_ = qdot_des_;
+    // des_jpos_ = q_des_;
 
-    // des_jpos_ = des_jpos_ + (des_jvel_* ihwbc_dt_) + (0.5 * qddot_cmd_ * ihwbc_dt_ * ihwbc_dt_);
-    // des_jvel_ = des_jvel_ + (qddot_cmd_*ihwbc_dt_);
+
+    Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    double alphaVelocity = computeAlphaGivenBreakFrequency(25.0, ihwbc_dt_);
+    // Decay desired velocity to 0.0
+    des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
+    des_jvel_ += (qddot_cmd_*ihwbc_dt_);
+    for(int i = 0; i < des_jvel_.size(); i++){
+        des_jvel_[i] = clamp_value(des_jvel_[i], -2.0, 2.0);
+    }
+    myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
+
+    // Integrate Joint Positions
+    // Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
+    // des_jpos_ = q_des_ref;
+    des_jpos_ += (des_jvel_*ihwbc_dt_);
 
 
     // Store desired qddot
