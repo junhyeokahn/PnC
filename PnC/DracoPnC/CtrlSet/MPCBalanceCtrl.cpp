@@ -450,6 +450,11 @@ void MPCBalanceCtrl::task_setup() {
     // Desired ICP Velocity
     Eigen::VectorXd rdot_id = Eigen::VectorXd::Zero(2);
 
+    r_id[0] = mpc_Xdes_[3];
+    r_id[1] = mpc_Xdes_[4];
+    rdot_id[0] = mpc_Xdes_[9];
+    rdot_id[1] = mpc_Xdes_[10];
+
     // Desired CMP
     Eigen::VectorXd r_icp_error = (r_ic - r_id);
     icp_acc_error_ += (r_icp_error*ihwbc_dt_);
