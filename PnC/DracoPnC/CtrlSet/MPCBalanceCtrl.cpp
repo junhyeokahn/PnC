@@ -666,6 +666,10 @@ void MPCBalanceCtrl::firstVisit() {
         myUtils::pretty_print(I_body, std::cout, "I_body");
     }
 
+    std::cout << "ICP kp: " << kp_ic_ << std::endl;
+    std::cout << "ICP ki: " << ki_ic_ << std::endl;
+    std::cout << "ICP saturation error: " << icp_sat_error_ << std::endl;
+
     std::cout << "MPC Robot Weight:" << robot_mass << std::endl;
     std::cout << "MPC Use Approx Inertia:" << mpc_use_approx_inertia_ << std::endl;
     std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
@@ -749,6 +753,12 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
 
     try {
+        // ICP Control Parameters
+        myUtils::readParameter(node, "kp_icp", kp_ic_);
+        myUtils::readParameter(node, "ki_icp", ki_ic_);
+        myUtils::readParameter(node, "icp_sat_error", icp_sat_error_);
+
+
         myUtils::readParameter(node, "foot_rz_xyz_kp", kp_foot);
         myUtils::readParameter(node, "foot_rz_xyz_kd", kd_foot);
 

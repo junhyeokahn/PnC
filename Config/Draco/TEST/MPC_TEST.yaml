@@ -21,6 +21,11 @@ control_configuration:
         kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
 
     mpc_ctrl:
+        # ICP control params
+        kp_icp: 20.0 # Proportional - gain
+        ki_icp: 1.0 # Integral - gain
+        icp_sat_error: 1e-2 # Integral Error Saturation 
+
         # Task Weights
         foot_rz_xyz_kp: [1.0, 1.0, 1.0, 1.0]
         foot_rz_xyz_kd: [0, 0, 0, 0]
