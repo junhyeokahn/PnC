@@ -76,10 +76,18 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
     mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
 
+    // ICP
+    kp_ic_ = 20.0; // ICP P gain
+    ki_ic_ = 1.0;  // ICP I gain
+    icp_sat_error_ = 1e-1; //1e-2;
+    icp_acc_error_ = Eigen::VectorXd::Zero(2);
+
+
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for (int i(0); i < robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
+
 
     // IHWBC
     last_control_time_ = -0.001;
@@ -113,6 +121,16 @@ MPCBalanceCtrl::~MPCBalanceCtrl() {
     delete rfoot_back_contact_;
     delete lfoot_front_contact_;
     delete lfoot_back_contact_;
+}
+
+double MPCBalanceCtrl::clamp_value(double in, double min, double max){
+    if (in >= max){
+        return max;
+    }else if (in <= min){
+        return min;
+    }else{
+        return in;
+    }
 }
 
 void MPCBalanceCtrl::oneStep(void* _cmd) {
@@ -433,8 +451,17 @@ void MPCBalanceCtrl::task_setup() {
     Eigen::VectorXd rdot_id = Eigen::VectorXd::Zero(2);
 
     // Desired CMP
-    double k_ic = 20.0; // ICP task gain.
-    Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + k_ic * (r_ic - r_id);
+    Eigen::VectorXd r_icp_error = (r_ic - r_id);
+    icp_acc_error_ += (r_icp_error*ihwbc_dt_);
+    icp_acc_error_[0] = clamp_value(icp_acc_error_[0], -icp_sat_error_, icp_sat_error_);
+    icp_acc_error_[1] = clamp_value(icp_acc_error_[1], -icp_sat_error_, icp_sat_error_);
+
+    Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic_ * (r_icp_error) + ki_ic_*icp_acc_error_;
+
+    // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
+    // myUtils::pretty_print(icp_acc_error_, std::cout, "icp_acc_error_");
+    // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
+
     // Desired Linear Momentum / Acceleration task:
     com_acc_des.head(2) = (gravity/com_height)*( sp_->com_pos.head(2) - r_CMP_d);
     com_acc_des[2] = 0.0;
@@ -590,6 +617,7 @@ void MPCBalanceCtrl::contact_setup() {
 }
 
 void MPCBalanceCtrl::firstVisit() {
+    icp_acc_error_ = Eigen::VectorXd::Zero(2);
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                robot_->getNumActuatedDofs());
     jdot_ini_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),

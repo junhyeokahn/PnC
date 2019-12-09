@@ -155,6 +155,16 @@ class MPCBalanceCtrl : public Controller {
     Eigen::Vector3d com_rate_current_;
     Eigen::Vector3d midfeet_pos_;
 
+    // ICP Variables
+    double kp_ic_;
+    double ki_ic_;
+    double icp_sat_error_;
+    Eigen::VectorXd icp_acc_error_;
+
+    // clamping function helper
+    double clamp_value(double in, double min, double max);
+
+
 
 };
 
