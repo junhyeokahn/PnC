@@ -161,6 +161,13 @@ class MPCBalanceCtrl : public Controller {
     double icp_sat_error_;
     Eigen::VectorXd icp_acc_error_;
 
+    // Integration Parameters
+    double max_joint_vel_;
+    double velocity_break_freq_;
+
+    double max_jpos_error_;
+    double position_break_freq_;
+
     // clamping function helper
     double clamp_value(double in, double min, double max);
 

@@ -83,6 +83,13 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     icp_acc_error_ = Eigen::VectorXd::Zero(2);
 
 
+    // Integration Parameters
+    max_joint_vel_ = 2.0;
+    velocity_break_freq_ = 25.0;
+    max_jpos_error_ = 0.2;
+    position_break_freq_ = 20.0;
+
+
     // wbc
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
@@ -374,21 +381,30 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // des_jvel_ = qdot_des_;
     // des_jpos_ = q_des_;
 
-
+    // Integrate qddot for qdot and q
+    // Integrate Joint velocities
     Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    double alphaVelocity = computeAlphaGivenBreakFrequency(25.0, ihwbc_dt_);
+    double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
     // Decay desired velocity to 0.0
     des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
     des_jvel_ += (qddot_cmd_*ihwbc_dt_);
+    // Clamp Joint Velocity Values
     for(int i = 0; i < des_jvel_.size(); i++){
-        des_jvel_[i] = clamp_value(des_jvel_[i], -2.0, 2.0);
+        des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
     }
-    myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
+    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
 
     // Integrate Joint Positions
-    // Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
-    // des_jpos_ = q_des_ref;
+    Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
+    double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
+    des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
     des_jpos_ += (des_jvel_*ihwbc_dt_);
+    // Clamp desired joint position to maximum error
+    for(int i = 0; i < des_jpos_.size(); i++){
+        des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
+    }
+
+
 
 
     // Store desired qddot
@@ -695,6 +711,12 @@ void MPCBalanceCtrl::firstVisit() {
     std::cout << "ICP ki: " << ki_ic_ << std::endl;
     std::cout << "ICP saturation error: " << icp_sat_error_ << std::endl;
 
+    std::cout << "Integration Params" << std::endl;
+    std::cout << "  Max Joint Velocity: " << max_joint_vel_ << std::endl;
+    std::cout << "  Velocity Break Freq : " << velocity_break_freq_ << std::endl;
+    std::cout << "  Max Joint Position Error : " << max_jpos_error_ << std::endl;
+    std::cout << "  Position Break Freq : " << position_break_freq_ << std::endl;
+
     std::cout << "MPC Robot Weight:" << robot_mass << std::endl;
     std::cout << "MPC Use Approx Inertia:" << mpc_use_approx_inertia_ << std::endl;
     std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
@@ -783,7 +805,14 @@ void MPCBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "ki_icp", ki_ic_);
         myUtils::readParameter(node, "icp_sat_error", icp_sat_error_);
 
+        // Integration Parameters
+        myUtils::readParameter(node, "max_joint_vel", max_joint_vel_);
+        myUtils::readParameter(node, "velocity_break_freq", velocity_break_freq_);
+        
+        myUtils::readParameter(node, "max_jpos_error", max_jpos_error_);
+        myUtils::readParameter(node, "position_break_freq", position_break_freq_);
 
+        // Task Gains
         myUtils::readParameter(node, "foot_rz_xyz_kp", kp_foot);
         myUtils::readParameter(node, "foot_rz_xyz_kd", kd_foot);
 
