@@ -378,34 +378,31 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 
     gamma = tau_cmd_;
-    // des_jvel_ = qdot_des_;
-    // des_jpos_ = q_des_;
+    des_jvel_ = qdot_des_;
+    des_jpos_ = q_des_;
 
     // Integrate qddot for qdot and q
     // Integrate Joint velocities
-    Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
-    // Decay desired velocity to 0.0
-    des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
-    des_jvel_ += (qddot_cmd_*ihwbc_dt_);
-    // Clamp Joint Velocity Values
-    for(int i = 0; i < des_jvel_.size(); i++){
-        des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
-    }
-    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
+    // Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    // double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
+    // // Decay desired velocity to 0.0
+    // des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
+    // des_jvel_ += (qddot_cmd_*ihwbc_dt_);
+    // // Clamp Joint Velocity Values
+    // for(int i = 0; i < des_jvel_.size(); i++){
+    //     des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
+    // }
+    // // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
 
-    // Integrate Joint Positions
-    Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
-    double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
-    des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
-    des_jpos_ += (des_jvel_*ihwbc_dt_);
-    // Clamp desired joint position to maximum error
-    for(int i = 0; i < des_jpos_.size(); i++){
-        des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
-    }
-
-
-
+    // // Integrate Joint Positions
+    // Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
+    // double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
+    // des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
+    // des_jpos_ += (des_jvel_*ihwbc_dt_);
+    // // Clamp desired joint position to maximum error
+    // for(int i = 0; i < des_jpos_.size(); i++){
+    //     des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
+    // }
 
     // Store desired qddot
     sp_->qddot_cmd = qddot_res;    
