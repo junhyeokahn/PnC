@@ -22,8 +22,8 @@ control_configuration:
 
     mpc_ctrl:
         # ICP control params
-        kp_icp: 10.0 # Proportional - gain
-        ki_icp: 1.0 # Integral - gain
+        kp_icp: 1.0 # Proportional - gain
+        ki_icp: 0.0 # Integral - gain
         icp_sat_error: 1e-2 # Integral Error Saturation 
 
         # Velocity Integration Params
