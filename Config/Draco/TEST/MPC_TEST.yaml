@@ -22,7 +22,7 @@ control_configuration:
 
     mpc_ctrl:
         # ICP control params
-        kp_icp: 10.0 # Proportional - gain
+        kp_icp: 0.0 # Proportional - gain
         ki_icp: 0.0 # Integral - gain
         icp_sat_error: 1e-2 # Integral Error Saturation 
 
@@ -38,10 +38,10 @@ control_configuration:
         foot_rz_xyz_kd: [0, 0, 0, 0]
 
         com_kp: [50.0, 50.0, 50.0]
-        com_kd: [0.01, 0.01, 0.01]
+        com_kd: [0.0, 0.0, 0.0]
 
         body_kp: [50.0, 50.0, 50.0]
-        body_kd: [0.01, 0.01, 0.01]
+        body_kd: [0.0, 0.0, 0.0]
 
         joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]

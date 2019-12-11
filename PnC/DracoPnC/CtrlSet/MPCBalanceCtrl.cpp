@@ -106,8 +106,8 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
-    w_task_rfoot_ = 1.0;
-    w_task_lfoot_ = 1.0;
+    w_task_rfoot_ = 1e5; //100.0;
+    w_task_lfoot_ = 1e5; //100.0;
     w_task_com_ = 1e-4;
     w_task_body_ = 1e-4;
     w_task_joint_ = 1e-6;
@@ -169,7 +169,10 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
     _compute_torque_ihwbc(gamma);
     // printf("time: %f\n", clock_.stop());
     // Store the desired feed forward torque command 
-    gamma_old_ = gamma;
+
+
+    double alphaTau = (1.0 - computeAlphaGivenBreakFrequency(100.0, ihwbc_dt_));   
+    gamma_old_ = gamma*alphaTau + (1.0 - alphaTau)*gamma_old_;
 
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
@@ -372,37 +375,37 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     Eigen::VectorXd ac_qdot_current = qdot_current_.tail(robot_->getNumActuatedDofs());
     Eigen::VectorXd ac_q_current = q_current_.tail(robot_->getNumActuatedDofs());
 
-    qdot_des_ = ac_qdot_current + qddot_cmd_*ihwbc_dt_; 
+    qdot_des_ = ac_qdot_current + qddot_cmd_*ihwbc_dt_;                  
     q_des_    = ac_q_current + ac_qdot_current*ihwbc_dt_ + 
                 0.5*qddot_cmd_*ihwbc_dt_*ihwbc_dt_; 
 
 
     gamma = tau_cmd_;
-    des_jvel_ = qdot_des_;
-    des_jpos_ = q_des_;
+    // des_jvel_ = qdot_des_;
+    // des_jpos_ = q_des_;
 
     // Integrate qddot for qdot and q
     // Integrate Joint velocities
-    // Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    // double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
+    Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
     // // Decay desired velocity to 0.0
-    // des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
-    // des_jvel_ += (qddot_cmd_*ihwbc_dt_);
-    // // Clamp Joint Velocity Values
-    // for(int i = 0; i < des_jvel_.size(); i++){
-    //     des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
-    // }
-    // // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
+    des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
+    des_jvel_ += (qddot_cmd_*ihwbc_dt_);
+    // Clamp Joint Velocity Values
+    for(int i = 0; i < des_jvel_.size(); i++){
+        des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
+    }
+    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
 
     // // Integrate Joint Positions
-    // Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
-    // double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
-    // des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
-    // des_jpos_ += (des_jvel_*ihwbc_dt_);
-    // // Clamp desired joint position to maximum error
-    // for(int i = 0; i < des_jpos_.size(); i++){
-    //     des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
-    // }
+    Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
+    double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
+    des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
+    des_jpos_ += (des_jvel_*ihwbc_dt_);
+    // Clamp desired joint position to maximum error
+    for(int i = 0; i < des_jpos_.size(); i++){
+        des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
+    }
 
     // Store desired qddot
     sp_->qddot_cmd = qddot_res;    
@@ -468,6 +471,14 @@ void MPCBalanceCtrl::task_setup() {
         }
     }
 
+    if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
+        des_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(),
+                                   robot_->getNumActuatedDofs());
+        des_jvel_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
+                                   robot_->getNumActuatedDofs());       
+    }
+
+
     // Define capture point linear momentum task:
     // Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
     // Eigen::Vector3d com_vel = sp_->est_com_vel ;// robot_->getCoMVelocity();
@@ -510,13 +521,15 @@ void MPCBalanceCtrl::task_setup() {
     com_pos_des[2] = des_pos_z;
     com_vel_des[2] = des_vel_z;
 
-    // com_pos_des[0] = des_pos_x;
-    // com_pos_des[1] = des_pos_y;
-    // com_pos_des[2] = des_pos_z;
+    // Disable ICP
+    com_acc_des.setZero();
+    com_pos_des[0] = des_pos_x;
+    com_pos_des[1] = des_pos_y;
+    com_pos_des[2] = des_pos_z;
 
-    // com_vel_des[0] = des_vel_x;
-    // com_vel_des[1] = des_vel_y;
-    // com_vel_des[2] = des_vel_z;
+    com_vel_des[0] = des_vel_x;
+    com_vel_des[1] = des_vel_y;
+    com_vel_des[2] = des_vel_z;
 
 
     // std::cout << "com_pos_des = " << com_pos_des.transpose() << std::endl;
@@ -662,7 +675,7 @@ void MPCBalanceCtrl::firstVisit() {
                                   robot_->getNumActuatedDofs());
 
     des_jpos_ = jpos_ini_;
-    des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    des_jvel_ = jdot_ini_;
 
     ctrl_start_time_ = sp_->curr_time;
 

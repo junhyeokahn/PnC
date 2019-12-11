@@ -25,8 +25,8 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     prev_qdot_ = curr_qdot_;
     prev_body_euler_zyx_dot_ = global_body_euler_zyx_dot_;
 
-    joint_velocity_filter_freq_ = 25.0; // Hz
-    angular_velocity_filter_freq_ = 25.0; // Hz
+    joint_velocity_filter_freq_ = 200.0; // Hz
+    angular_velocity_filter_freq_ = 200.0; // Hz
 
     ori_est_ = new BasicAccumulation();
     mocap_x_vel_est_ = new AverageFilter(DracoAux::ServoRate, 0.01, 1.0);
@@ -61,7 +61,7 @@ double DracoStateEstimator::clamp_value(double in, double min, double max){
 
 double DracoStateEstimator::computeAlphaGivenBreakFrequency(double hz, double dt){
     double omega = 2.0 * M_PI * hz;
-    double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt/2.0));
+    double alpha = (omega*dt/2.0) / (1.0 + (omega*dt/2.0));
     alpha = clamp_value(alpha, 0.0, 1.0);
     return alpha;
 }
