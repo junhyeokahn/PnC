@@ -6,17 +6,17 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/WBC/WBDC/WBDC.hpp>
 #include <Utils/IO/DataManager.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 JPosSwingCtrl::JPosSwingCtrl(RobotSystem* _robot):Controller(_robot) {
     myUtils::pretty_constructor(2, "JPos Ctrl");
 
     end_time_ = 1000.;
-    b_jpos_set_ = false;
     des_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     ctrl_start_time_ = 0.;
 
-    set_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    jpos_target_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     amp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     freq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     phase_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -54,11 +54,11 @@ void JPosSwingCtrl::oneStep(void* _cmd){
     _jpos_task_setup();
     _jpos_ctrl_wbdc_rotor(gamma);
 
-    double ramp_time(2.0);
-    if (state_machine_time_<ramp_time) {
-        des_jvel_ *= state_machine_time_ / ramp_time;
-        gamma *= state_machine_time_ / ramp_time;
-    }
+    //double ramp_time(2.0);
+    //if (state_machine_time_<ramp_time) {
+        //des_jvel_ *= state_machine_time_ / ramp_time;
+        //gamma *= state_machine_time_ / ramp_time;
+    //}
 
     ((DracoCommand*)_cmd)->jtrq = gamma;
     ((DracoCommand*)_cmd)->q = des_jpos_;
@@ -85,29 +85,37 @@ void JPosSwingCtrl::_jpos_ctrl_wbdc_rotor(Eigen::VectorXd & gamma){
 void JPosSwingCtrl::_jpos_task_setup(){
     Eigen::VectorXd jacc_des(robot_->getNumActuatedDofs()); jacc_des.setZero();
 
+    double ini_time(4.);
     double ramp_value(0.);
-    double ramp_duration(0.5);
+    double ramp_duration(1.0);
 
-    if(state_machine_time_ < ramp_duration){
-        ramp_value = state_machine_time_/ramp_duration;
+    if((state_machine_time_-ini_time) < ramp_duration){
+        ramp_value = (state_machine_time_-ini_time)/ramp_duration;
     }else{
         ramp_value = 1.;
     }
 
-    double omega;
-
-    for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
-        omega = 2. * M_PI * freq_[i];
-        if(b_jpos_set_)
-            des_jpos_[i] = set_jpos_[i] + amp_[i] * sin(omega * state_machine_time_ + phase_[i]);
-        else
-            des_jpos_[i] = jpos_ini_[i] + amp_[i] * sin(omega * state_machine_time_ + phase_[i]);
-
-        des_jvel_[i] = amp_[i] * omega * cos(omega * state_machine_time_ + phase_[i]);
-        des_jvel_[i] *= ramp_value;
-        jacc_des[i] = -amp_[i] * omega * omega * sin(omega * state_machine_time_ + phase_[i]);
-        jacc_des[i] *= ramp_value;
+    if (state_machine_time_ < ini_time) {
+        for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+            des_jpos_[i] = myUtils::smooth_changing(jpos_ini_[i], jpos_target_[i],
+                    ini_time, state_machine_time_);
+            des_jvel_[i] = myUtils::smooth_changing_vel(
+                    jpos_ini_[i], jpos_target_[i], ini_time, state_machine_time_);
+            jacc_des[i] = myUtils::smooth_changing_acc(
+                    jpos_ini_[i], jpos_target_[i], ini_time, state_machine_time_);
+        }
+    } else {
+        for(int i(0); i<robot_->getNumActuatedDofs(); ++i){
+            double omega = 2. * M_PI * freq_[i];
+            des_jpos_[i] = jpos_target_[i] + amp_[i] * sin(omega * (state_machine_time_-ini_time) + phase_[i]);
+            des_jvel_[i] = amp_[i] * omega * cos(omega * (state_machine_time_-ini_time) + phase_[i]);
+            des_jvel_[i] *= ramp_value;
+            jacc_des[i] = -amp_[i] * omega * omega * sin(omega * (state_machine_time_-ini_time) + phase_[i]);
+            jacc_des[i] *= ramp_value;
+        }
     }
+
+
     jpos_task_->updateTask(des_jpos_, des_jvel_, jacc_des);
     task_list_.push_back(jpos_task_);
 }

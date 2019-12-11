@@ -22,8 +22,7 @@ class JPosSwingCtrl: public Controller{
 
         void setMovingTime(double time) { end_time_ = time; }
         void setPosture(const Eigen::VectorXd & set_jpos){
-            set_jpos_ = set_jpos;
-            b_jpos_set_ = true;
+            jpos_target_ = set_jpos;
         }
 
         // For sinusoidal trajectory test
@@ -43,9 +42,6 @@ class JPosSwingCtrl: public Controller{
         Eigen::VectorXd jpos_target_;
         Eigen::VectorXd des_jpos_;
         Eigen::VectorXd des_jvel_;
-
-        bool b_jpos_set_;
-        Eigen::VectorXd set_jpos_;
 
         // For sinusoidal trajectory test
         Eigen::VectorXd amp_;
