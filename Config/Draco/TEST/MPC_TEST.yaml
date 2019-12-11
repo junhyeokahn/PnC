@@ -28,7 +28,7 @@ control_configuration:
 
         # Velocity Integration Params
         max_joint_vel: 2.0 # rad/s - maximum velocity after integration
-        velocity_break_freq: 25.0 # Hz
+        velocity_break_freq: 1.0 # Hz
 
         max_jpos_error: 0.2 # radians - maximum joint position error after integration 
         position_break_freq: 0 # Hz
@@ -37,11 +37,13 @@ control_configuration:
         foot_rz_xyz_kp: [1.0, 1.0, 1.0, 1.0]
         foot_rz_xyz_kd: [0, 0, 0, 0]
 
-        com_kp: [50.0, 50.0, 50.0]
-        com_kd: [0.0, 0.0, 0.0]
+        com_kp: [25.0, 25.0, 25.0]
+        # com_kd: [0.1, 0.1, 0.1]
+        com_kd: [2.5, 2.5, 2.5] # SIM
 
-        body_kp: [50.0, 50.0, 50.0]
-        body_kd: [0.0, 0.0, 0.0]
+        body_kp: [25.0, 25.0, 25.0]
+        # body_kd: [0.1, 0.1, 0.1]
+        body_kd: [2.5, 2.5, 2.5] # SIM
 
         joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
