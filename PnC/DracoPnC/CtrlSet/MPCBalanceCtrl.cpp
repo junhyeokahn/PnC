@@ -102,7 +102,7 @@ MPCBalanceCtrl::MPCBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     gamma_old_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     // Regularization terms should always be the lowest cost. 
-    lambda_qddot_ = 1e-14;
+    lambda_qddot_ = 1e-8;
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting

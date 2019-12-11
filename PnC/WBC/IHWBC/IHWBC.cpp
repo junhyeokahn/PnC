@@ -157,7 +157,8 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
         Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
         vt += (w_task_heirarchy[i]*((JtDotQdot-xddot).transpose()*Jt));
     }
-    Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
+    // Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
+    Pt += lambda_qddot*A_;
 
     // Prepare contact dimensions
     dim_contacts_ = 0;     
