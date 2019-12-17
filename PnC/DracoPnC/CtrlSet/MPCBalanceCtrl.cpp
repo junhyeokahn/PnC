@@ -643,32 +643,17 @@ void MPCBalanceCtrl::task_setup() {
     task_list_.push_back(rfoot_back_task);    
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);    
-    task_list_.push_back(total_joint_task_);
+    // task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
-    w_task_heirarchy_[0] = w_task_com_; // rfoot
-    w_task_heirarchy_[1] = w_task_body_; // rfoot
+    w_task_heirarchy_[0] = w_task_com_; // COM
+    w_task_heirarchy_[1] = w_task_body_; // body ori
     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
     w_task_heirarchy_[4] = w_task_lfoot_; // rfoot
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
-    w_task_heirarchy_[6] = w_task_joint_; // joint    
-
-    // w_task_heirarchy_[0] = w_task_com_; // COM
-    // w_task_heirarchy_[1] = w_task_body_; // Body Ori
-
-    // w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
-    // w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
-
-    // w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
-    // w_task_heirarchy_[4] = w_task_rfoot_; // lfoot
-    // w_task_heirarchy_[5] = w_task_lfoot_; // rfoot
-    // w_task_heirarchy_[6] = w_task_lfoot_; // lfoot
-
-    // w_task_heirarchy_[0] = w_task_rfoot_; // rfoot
-    // w_task_heirarchy_[1] = w_task_lfoot_; // lfoot
-    // w_task_heirarchy_[2] = w_task_joint_; // joint    
+    // w_task_heirarchy_[6] = w_task_joint_; // joint    
 
 }
 

@@ -22,7 +22,7 @@ control_configuration:
 
     mpc_ctrl:
         # ICP control params
-        kp_icp: 10.0 # Proportional - gain
+        kp_icp: 0.0 # Proportional - gain
         ki_icp: 0.0 # Integral - gain
         icp_sat_error: 1e-2 # Integral Error Saturation 
 
@@ -49,7 +49,7 @@ control_configuration:
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 0.0 #1e-6
+        w_contact_weight: 1e-6
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
