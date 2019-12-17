@@ -38,12 +38,12 @@ control_configuration:
         foot_rz_xyz_kd: [0, 0, 0, 0]
 
         com_kp: [25.0, 25.0, 25.0]
-        # com_kd: [0.1, 0.1, 0.1]
-        com_kd: [2.5, 2.5, 2.5] # SIM
+        com_kd: [0.1, 0.1, 0.1]
+        # com_kd: [2.5, 2.5, 2.5] # SIM
 
         body_kp: [25.0, 25.0, 25.0]
-        # body_kd: [0.1, 0.1, 0.1]
-        body_kd: [2.5, 2.5, 2.5] # SIM
+        body_kd: [0.1, 0.1, 0.1]
+        # body_kd: [2.5, 2.5, 2.5] # SIM
 
         joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]

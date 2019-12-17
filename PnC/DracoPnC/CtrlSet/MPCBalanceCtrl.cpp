@@ -492,8 +492,7 @@ void MPCBalanceCtrl::task_setup() {
     if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
         des_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                    robot_->getNumActuatedDofs());
-        des_jvel_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
-                                   robot_->getNumActuatedDofs());       
+        des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());   
     }
 
 
