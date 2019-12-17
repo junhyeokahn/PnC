@@ -433,22 +433,40 @@ void MPCBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 }
 
 void MPCBalanceCtrl::task_setup() {
+    // Disable MPC
+    double des_roll = mpc_Xdes_[0];
+    double des_pitch = mpc_Xdes_[1];
+    double des_yaw = mpc_Xdes_[2];
+
+    double des_pos_x = mpc_Xdes_[3];
+    double des_pos_y = mpc_Xdes_[4];
+    double des_pos_z = mpc_Xdes_[5];
+
+    double des_roll_rate = mpc_Xdes_[6];
+    double des_pitch_rate = mpc_Xdes_[7];
+    double des_yaw_rate = mpc_Xdes_[8];
+
+    double des_vel_x = mpc_Xdes_[9];
+    double des_vel_y = mpc_Xdes_[10];
+    double des_vel_z = mpc_Xdes_[11];
+
+    // Enable MPC:
     // Set desired com and body orientation from predicted state 
-    double des_roll = mpc_Xdes_[0]; //mpc_x_pred_[0];
-    double des_pitch = mpc_Xdes_[1]; //mpc_x_pred_[1];
-    double des_yaw = mpc_Xdes_[2]; //mpc_x_pred_[2];
+    // double des_roll = mpc_x_pred_[0]; 
+    // double des_pitch = mpc_x_pred_[1]; 
+    // double des_yaw = mpc_x_pred_[2]; 
 
-    double des_pos_x = mpc_Xdes_[3]; //mpc_x_pred_[3];
-    double des_pos_y = mpc_Xdes_[4]; //mpc_x_pred_[4];
-    double des_pos_z = mpc_Xdes_[5]; //mpc_x_pred_[5];
+    // double des_pos_x = mpc_x_pred_[3]; 
+    // double des_pos_y = mpc_x_pred_[4]; 
+    // double des_pos_z = mpc_x_pred_[5]; 
 
-    double des_roll_rate = mpc_Xdes_[6]; //mpc_x_pred_[6];
-    double des_pitch_rate = mpc_Xdes_[7]; //mpc_x_pred_[7];
-    double des_yaw_rate = mpc_Xdes_[8]; //mpc_x_pred_[8];
+    // double des_roll_rate = mpc_x_pred_[6]; 
+    // double des_pitch_rate = mpc_x_pred_[7]; 
+    // double des_yaw_rate = mpc_x_pred_[8]; 
 
-    double des_vel_x = mpc_Xdes_[9]; //mpc_x_pred_[9];
-    double des_vel_y = mpc_Xdes_[10]; //mpc_x_pred_[10];
-    double des_vel_z = mpc_Xdes_[11]; //mpc_x_pred_[11];
+    // double des_vel_x = mpc_x_pred_[9]; 
+    // double des_vel_y = mpc_x_pred_[10]; 
+    // double des_vel_z = mpc_x_pred_[11]; 
 
     // =========================================================================
     // Com Task
@@ -665,7 +683,14 @@ void MPCBalanceCtrl::contact_setup() {
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
 
-}
+    // Smoothly change maximum Fz for IHWBC
+    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, contact_transition_dur_, state_machine_time_ );
+    for(int i = 0; i < contact_list_.size(); i++){
+        ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz);
+    }
+    
+
+ }
 
 void MPCBalanceCtrl::firstVisit() {
     icp_acc_error_ = Eigen::VectorXd::Zero(2);
