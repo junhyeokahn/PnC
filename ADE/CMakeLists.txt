@@ -1,9 +1,5 @@
 file(GLOB srcs "*.cpp" "*.hpp")
 
-#SET(SOURCES
-#        DracoWrapper.cpp
-#        )
-
 ADD_LIBRARY(dracoWrapper SHARED ${srcs})
 target_link_libraries(dracoWrapper ${DART_LIBRARIES}
         DracoPnC

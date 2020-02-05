@@ -1,6 +1,5 @@
 #include <ADE/DracoWrapper.hpp>
 #include <iostream>
-#include <thread>
 
 void StartControls(DracoWrapper& w) {
     bool live = true;

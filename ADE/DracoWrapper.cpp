@@ -20,7 +20,7 @@ void DracoWrapper::SetWalkCommand() {
     }
     //Todo some sort of conversion from the heading to the walking params
     //Dummy single step numbers for now
-    interface_->Walk(0., 0.33, 0.3, 0., 7);
+    interface_->Walk(0., 0.33, 0.33, 0.1, 5);
 }
 
 void DracoWrapper::Shutdown() {
