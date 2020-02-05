@@ -5,7 +5,7 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world)
+DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world, EnvInterface* interface_)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
     world_ = _world;
     robot_ = world_->getSkeleton("Draco");
@@ -19,7 +19,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world)
     kp_ = Eigen::VectorXd::Zero(n_dof_-6);
     kd_ = Eigen::VectorXd::Zero(n_dof_-6);
 
-    Interface_ = new DracoInterface();
+    Interface_ = interface_;
     SensorData_ = new DracoSensorData(); 
     Command_ = new DracoCommand();
 
@@ -43,50 +43,6 @@ void DracoWorldNode::customPreStep() {
     GetContactSwitchData_(SensorData_->rfoot_contact,
                           SensorData_->lfoot_contact);
     GetForceTorqueData_();
-
-    // Walking Interface Example
-    static bool b_first_cmd(true);
-    if (t_ > 1. && b_first_cmd) {
-        std::cout << "[[first command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0., 15);
-        b_first_cmd = false;
-    }
-    static bool b_second_cmd(true);
-    if (t_ > 11. && b_second_cmd) {
-        std::cout << "[[second command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, 0.1, 5);
-        b_second_cmd = false;
-    }
-    static bool b_third_cmd(true);
-    if (t_ > 21. && b_third_cmd) {
-        std::cout << "[[third command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0.05, 0.33, 0.33, -0.1, 5);
-        b_third_cmd = false;
-    }
-    static bool b_fourth_cmd(true);
-    if (t_ > 31. && b_fourth_cmd) {
-        std::cout << "[[fourth command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0., 0.33, 0.33, 0.1, 5);
-        b_fourth_cmd = false;
-    }
-    static bool b_fifth_cmd(true);
-    if (t_ > 41. && b_fifth_cmd) {
-        std::cout << "[[fifth command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(-0.05, 0.33, 0.33, 0., 5);
-        b_fifth_cmd = false;
-    }
-    static bool b_sixth_cmd(true);
-    if (t_ > 55. && b_sixth_cmd) {
-        std::cout << "[[sixth command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0., 0.33, 0.3, 0., 7);
-        b_sixth_cmd = false;
-    }
-    static bool b_seventh_cmd(true);
-    if (t_ > 70. && b_seventh_cmd) {
-        std::cout << "[[seventh command]]" << std::endl;
-        ((DracoInterface*)Interface_)->Walk(0., 0.3, 0.33, 0., 7);
-        b_seventh_cmd = false;
-    }
 
     Interface_->getCommand(SensorData_, Command_);
 

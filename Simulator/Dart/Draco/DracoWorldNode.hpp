@@ -38,7 +38,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     bool b_plot_mpc_result_;
 
    public:
-    DracoWorldNode(const dart::simulation::WorldPtr& world);
+    DracoWorldNode(const dart::simulation::WorldPtr& world, EnvInterface* interface_);
     virtual ~DracoWorldNode();
 
     void customPreStep() override;
