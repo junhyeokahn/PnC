@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+<project name='ADE-Draco' default='all' basedir='.'>
+	<property file='build.properties'/>
+	<taskdef name='cmake' classname='org.iainhull.ant.CmakeBuilder' classpath='${ant.lib.dir}/cmakeant-1.0.jar'/>
+
+	<target name='init'>
+		<mkdir dir='${draco.build.dir}'/> <!-- dir for swig .class files-->
+	</target>
+
+	<!-- ======================= -->
+	<!-- Standard Public Targets -->
+	<!-- ======================= -->
+
+	<target name='all' depends='draco-java,draco-cpp' description='ADE Draco.'>
+	</target>
+
+	<target name='clean' description='Removes all files and directories created by Ant during any build(s).'>
+		<delete dir='${draco.build.dir}'/>
+		<delete dir='${c.build.dir}'/>
+		<delete dir='${c.lib.dir}'/>
+		<delete dir='${swig.build.dir}'/> <!-- dir for generated swig .java files-->
+	</target>
+
+<!--	<extension-point name='test' depends='built' description='Runs all the unit tests...'/>-->
+
+	<!-- ======================== -->
+	<!-- Project Specific Targets -->
+	<!-- ======================== -->
+
+	<target name='draco-java' depends='init,draco-cpp' description='Build the java side of Draco.'>
+		<javac srcdir='${swig.build.dir}' destdir='${draco.build.dir}' includes='**' debug='${debug.enabled}' debuglevel='${debug.level}'>
+			<classpath refid='draco.classpath'/>
+		</javac>
+	</target>
+	
+	<target name='draco-cpp' depends='init' description='Build the cpp side of draco.'>
+		<cmake srcdir='${c.src.dir}' buildtype='${cmake.build.type}' bindir='${c.build.dir}' target="dracoWrapper">
+			<generator buildargs='-j ${j}'/>
+			<variable name='CMAKE_LIBRARY_OUTPUT_DIRECTORY' value='${c.lib.dir}'/>
+			<variable name='SWIG_SRC_BASE_OUTDIR' value='${swig.build.dir}'/>
+		</cmake>
+	</target>
+	
+</project>
+

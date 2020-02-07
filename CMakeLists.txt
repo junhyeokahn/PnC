@@ -14,6 +14,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-as-needed")
+
 ##=============================================================================
 ## Build Setup
 ##=============================================================================
@@ -24,6 +26,10 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 ##=============================================================================
 ## Dependancy
 ##=============================================================================
+#Swig
+FIND_PACKAGE(SWIG 3.0 REQUIRED)
+INCLUDE(UseSWIG)
+FIND_PACKAGE( JNI REQUIRED )
 
 # System
 include_directories("/usr/local/include")
@@ -70,6 +76,7 @@ add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 add_subdirectory(ADE)
+ADD_SUBDIRECTORY(swig)
 if(GTEST_FOUND)
   add_subdirectory(UnitTest)
 endif()
