@@ -15,14 +15,7 @@ include_directories(../Utils/Math)
 include_directories(${DART_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${JNI_INCLUDE_DIRS})
 
-ADD_LIBRARY(interface SHARED ${srcs})
-#target_link_libraries(interface ${DART_LIBRARIES}
-        #DracoPnC
-        #worldNode
-        #myUtils)
-
 ADD_LIBRARY(dracoWrapper SHARED ${srcs})
-#target_link_directories(dracoWrapper BEFORE PRIVATE /home/will/workspace/PnC/build/lib)
 target_link_libraries(dracoWrapper
         DracoPnC
         worldNode
