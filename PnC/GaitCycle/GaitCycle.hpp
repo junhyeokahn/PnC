@@ -12,6 +12,8 @@
 // Header
 class GaitCycle{
 public: 
+	// Default gait has active contacts
+	GaitCycle();
 	// swing_time_in: length of flight time of a particular contact point in seconds
 	// total_gait_duration_in: total time of the the gait in seconds 
 	// gait_offsets_in: time offsets in seconds to be used for the phase of a contact point. 

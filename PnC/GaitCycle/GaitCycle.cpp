@@ -6,7 +6,17 @@ GaitCycle::GaitCycle(const double swing_time_in, const double total_gait_duratio
 	setTotalGaitDuration(total_gait_duration_in);
 	setSwingTime(swing_time_in);
 	setGaitOffsets(gait_offsets_in);
+	std::cout << "[Gait Cycle] Params:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
 	std::cout << "[GaitCycle] Object Constructed." << std::endl;	
+}
+
+GaitCycle::	GaitCycle(){
+	// Set gait phase parameters
+	setTotalGaitDuration(1.0);
+	setSwingTime(0.0);
+	setGaitOffsets({0.0});
+	std::cout << "[Gait Cycle] Params:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
+	std::cout << "[GaitCycle] Object Constructed." << std::endl;		
 }
 
 GaitCycle::~GaitCycle(){
@@ -50,7 +60,7 @@ int GaitCycle::getContactStateGivenPhaseValue(const double phase_value){
 }
 
 void GaitCycle::printCurrentGaitInfo(){
-	std::cout << "[Gait Cycle] Info:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
+	std::cout << "[Gait Cycle] Params:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
 	std::cout << "  gait state: " << "t0: " << m_start_time << ", t: " << m_time << ", flight phase: " << m_flight_phase << std::endl;
 	for(int i = 0; i < m_num_contact_points; i++){
 		std::cout << "    contact index: " << i << " : " << (m_internal_gait_contact_states[i] ? std::string("ACTIVE") : std::string("FLIGHT")) 
