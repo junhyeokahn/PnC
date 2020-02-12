@@ -7,10 +7,22 @@ int main(int argc, char** argv) {
 	GaitCycle gait_cycle(swing_time, total_gait_duration, {0.0, transition_time});
 
 
-	double start_time = 0.25;
-	double time = 0.325;
-	double offset = 0.0;
-	gait_cycle.getGaitPhaseValue(start_time, time, offset);
+	// Test member functions
+	double start_time = 0.0;
+	double time = 0.375;
+	double offset = 0.25;
+	double bounded_phase_value = gait_cycle.getGaitPhaseValue(start_time, time, offset);
+
+	std::cout << "  start_time: " << start_time << std::endl;
+	std::cout << "  time: " << time << std::endl;
+	std::cout << "  offset: " << offset << std::endl;
+	std::cout << "  bounded_phase_value: " << bounded_phase_value << std::endl;
+
+	int contact_state = gait_cycle.getContactStateGivenPhaseValue(bounded_phase_value);
+	std::cout << "  contact state: " << contact_state << std::endl;	
+
+
+	gait_cycle.printCurrentGaitInfo();
 
 	return 0;
 }

@@ -6,17 +6,25 @@ GaitCycle::GaitCycle(const double swing_time_in, const double total_gait_duratio
 	if (gait_offsets_in.size() == 0){
 		std::cerr << "[GaitCycle] Warning. Size of gait offsets is 0." << std::endl;
 	}
+	// Clear and initialize internal vectors
 	m_gait_offsets.clear();
+	m_internal_gait_contact_states.clear();
 	for(int i = 0; i < gait_offsets_in.size(); i++){
+		// Store gait offsets
 		m_gait_offsets.push_back(gait_offsets_in[i]);
+		// Initialize contact states to active 
+		m_internal_gait_contact_states.push_back(1);
 	}
+	// Store number of contact poitns
+	m_num_contact_points = m_gait_offsets.size();
 
-	// Set Swing Time
-	setSwingTime(swing_time_in);
+	// Initialize internal times
+	m_time = 0.0;
+	m_start_time = 0.0;
+	updateContactStates(m_start_time, m_time);
+
 	setTotalGaitDuration(total_gait_duration_in);
-	if (m_swing_time > m_total_gait_duration){
-		std::cerr << "[GaitCycle] Warning. Swing time is larger than the total gait duration." << std::endl;
-	}
+	setSwingTime(swing_time_in);
 	std::cout << "[GaitCycle] Object Constructed." << std::endl;	
 }
 
@@ -31,30 +39,52 @@ double GaitCycle::getGaitPhaseValue(double start_time, double time, double offse
 	// Wrap Phase Value
 	double bounded_phase_value = std::fmod(phase_value, 1.0);
 
-	std::cout << "  start_time: " << start_time << std::endl;
-	std::cout << "  time: " << time << std::endl;
-	std::cout << "  offset: " << offset << std::endl;
-	std::cout << "  time_local: " << time_local << std::endl;
-
-	std::cout << "  phase_value: " << phase_value << std::endl;
-
 	if (bounded_phase_value > 0.0){
-		std::cout << "  bounded_phase_value: " << bounded_phase_value << std::endl;
 		return bounded_phase_value;
 	}else{
-		// time_local is negative (looking back into the past return 1.0 - bounded_phase_value) 
-		std::cout << "  bounded_phase_value: " << (1.0 + bounded_phase_value) << std::endl;
+		// bounded_phase_value is negative (looking back into the past,  return 1.0 - abs(bounded_phase_value)) or 1.0 + bounded_phase_value  
+		// std::cout << "  bounded_phase_value: " << (1.0 + bounded_phase_value) << std::endl;
 		return (1.0 + bounded_phase_value);
 	}
-
-
 }
 
+int GaitCycle::getContactStateGivenPhaseValue(double phase_value){
+	if (phase_value >= ((m_total_gait_duration-m_swing_time) / m_total_gait_duration) ){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+void GaitCycle::printCurrentGaitInfo(){
+	std::cout << "[Gait Cycle] Current Gait Info" << std::endl;
+	std::cout << "  gait start time: " << m_start_time << std::endl;	
+	std::cout << "  current time: " << m_time << std::endl;
+	for(int i = 0; i < m_gait_offsets.size(); i++){
+		std::cout << "  contact index: " << i << std::endl;
+		std::cout << "    offset time:" << m_gait_offsets[i] << std::endl;
+		std::cout << "    contact state:" << m_internal_gait_contact_states[i] << std::endl;
+	}
+}
+
+void GaitCycle::updateContactStates(double start_time, double time){
+	// Update the contact state given the current and start time.
+	m_start_time = start_time;
+	m_time = time;
+	for(int i = 0; i < m_num_contact_points; i++){
+		m_internal_gait_contact_states[i] = getContactStateGivenPhaseValue( getGaitPhaseValue(m_start_time, m_time, m_gait_offsets[i]) );
+	}
+
+}
 
 void GaitCycle::setSwingTime(const double swing_time_in){
 	m_swing_time = swing_time_in;
+	if (m_swing_time > m_total_gait_duration){
+		std::cerr << "[GaitCycle] Warning. Swing time is larger than the total gait duration." << std::endl;
+	}
 	std::cout << "[GaitCycle] Swing time is set to: " << m_swing_time << std::endl;
 }
+
 void GaitCycle::setTotalGaitDuration(const double total_gait_duration_in){
 	m_total_gait_duration = total_gait_duration_in;
 	std::cout << "[GaitCycle] Total gait duration is set to: " << m_total_gait_duration << std::endl;
