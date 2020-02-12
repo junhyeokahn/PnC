@@ -13,6 +13,19 @@ GaitCycle::~GaitCycle(){
 	std::cout << "[GaitCycle] Destroyed" << std::endl;	
 }
 
+// Get the state of the contact based on the index.
+int GaitCycle::getContactState(int index){
+	if (index < 0){
+		std::cout << "[GaitCycle] Warning. input index is less than 0. Returning state for index 0" << std::endl;
+		return m_internal_gait_contact_states[0];
+	}else if (index > m_num_contact_points){
+		std::cout << "[GaitCycle] Warning. input index is less than 0. Returning state for last contact point" << std::endl;
+		return m_internal_gait_contact_states[m_num_contact_points-1];		
+	}else{
+		return m_internal_gait_contact_states[index];
+	}
+}
+
 double GaitCycle::getGaitPhaseValue(const double start_time, const double time, const double offset){
 	double time_local = (time - start_time) + offset;
 	double phase_value = time_local / m_total_gait_duration;

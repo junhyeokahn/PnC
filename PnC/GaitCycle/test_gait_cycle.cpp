@@ -39,6 +39,12 @@ int main(int argc, char** argv) {
 	gait_cycle.updateContactStates(start_time, time);
 	gait_cycle.printCurrentGaitInfo();
 
+	// Get Contact States:
+	std::cout << "Test contact states getter function:" << std::endl;
+	for(int i = 0; i < 4; i++){
+		std::cout << "  contact " << i << " state: " << gait_cycle.getContactState(i) << std::endl;
+	}
+
 
 	return 0;
 }
