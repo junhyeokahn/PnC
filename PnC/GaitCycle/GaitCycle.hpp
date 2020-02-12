@@ -43,6 +43,8 @@ public:
 	void setSwingTime(const double swing_time_in);
 	// set the total gait duration
 	void setTotalGaitDuration(const double total_gait_duration_in);
+	// sets a new gait offsets 
+	void setGaitOffsets(const std::vector<double> gait_offsets_in); 
 
 	// prints the offset and the current states of the gait
 	void printCurrentGaitInfo();

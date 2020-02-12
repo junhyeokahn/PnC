@@ -5,29 +5,7 @@ GaitCycle::GaitCycle(const double swing_time_in, const double total_gait_duratio
 	// Set gait phase parameters
 	setTotalGaitDuration(total_gait_duration_in);
 	setSwingTime(swing_time_in);
-
-	// Set Gait Offsets
-	if (gait_offsets_in.size() == 0){
-		std::cerr << "[GaitCycle] Warning. Size of gait offsets is 0." << std::endl;
-	}
-	// Clear and initialize internal vectors
-	m_gait_offsets.clear();
-	m_internal_gait_contact_states.clear();
-	m_internal_gait_phase_states.clear();
-	for(int i = 0; i < gait_offsets_in.size(); i++){
-		// Store gait offsets
-		m_gait_offsets.push_back(gait_offsets_in[i]);
-		// Initialize contact states to active 
-		m_internal_gait_contact_states.push_back(1);
-		// Initialize phase states to 0.0
-		m_internal_gait_phase_states.push_back(0.0);
-	}
-	// Store number of contact poitns
-	m_num_contact_points = m_gait_offsets.size();
-
-	// Initialize internal times and contact states 
-	updateContactStates(0.0, 0.0);
-
+	setGaitOffsets(gait_offsets_in);
 	std::cout << "[GaitCycle] Object Constructed." << std::endl;	
 }
 
@@ -42,12 +20,11 @@ double GaitCycle::getGaitPhaseValue(const double start_time, const double time, 
 	// Wrap Phase Value
 	double bounded_phase_value = std::fmod(phase_value, 1.0);
 
-	if (bounded_phase_value >= 0.0){
-		return bounded_phase_value;
-	}else{
-		// bounded_phase_value is negative (looking back into the past,  return 1.0 - abs(bounded_phase_value)) or 1.0 + bounded_phase_value  
-		// std::cout << "  bounded_phase_value: " << (1.0 + bounded_phase_value) << std::endl;
+	// Check if bounded_phase_value is negative (looking back into the past, return 1.0 - abs(bounded_phase_value)) or 1.0 + bounded_phase_value  
+	if (bounded_phase_value < 0.0){
 		return (1.0 + bounded_phase_value);
+	}else{
+		return bounded_phase_value;
 	}
 }
 
@@ -60,12 +37,10 @@ int GaitCycle::getContactStateGivenPhaseValue(const double phase_value){
 }
 
 void GaitCycle::printCurrentGaitInfo(){
-	std::cout << "[Gait Cycle] Current Gait Info" << std::endl;
-	std::cout << "  gait start time: " << m_start_time << std::endl;	
-	std::cout << "  current time: " << m_time << std::endl;
-	std::cout << "  flight phase starts at: " << m_flight_phase << std::endl;
+	std::cout << "[Gait Cycle] Info:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
+	std::cout << "  gait state: " << "t0: " << m_start_time << ", t: " << m_time << ", flight phase: " << m_flight_phase << std::endl;
 	for(int i = 0; i < m_num_contact_points; i++){
-		std::cout << "  contact index: " << i << " : " << (m_internal_gait_contact_states[i] ? std::string("ACTIVE") : std::string("FLIGHT")) 
+		std::cout << "    contact index: " << i << " : " << (m_internal_gait_contact_states[i] ? std::string("ACTIVE") : std::string("FLIGHT")) 
 				  << ", offset: " << m_gait_offsets[i] 
 				  << ", phase: "  << m_internal_gait_phase_states[i] << std::endl;
 	}
@@ -94,4 +69,28 @@ void GaitCycle::setSwingTime(const double swing_time_in){
 void GaitCycle::setTotalGaitDuration(const double total_gait_duration_in){
 	m_total_gait_duration = total_gait_duration_in;
 	std::cout << "[GaitCycle] Total gait duration is set to: " << m_total_gait_duration << std::endl;
+}
+
+void GaitCycle::setGaitOffsets(const std::vector<double> gait_offsets_in){
+	// Set Gait Offsets
+	if (gait_offsets_in.size() == 0){
+		std::cerr << "[GaitCycle] Warning. Size of gait offsets is 0." << std::endl;
+	}
+	// Clear and initialize internal vectors
+	m_gait_offsets.clear();
+	m_internal_gait_contact_states.clear();
+	m_internal_gait_phase_states.clear();
+	for(int i = 0; i < gait_offsets_in.size(); i++){
+		// Store gait offsets
+		m_gait_offsets.push_back(gait_offsets_in[i]);
+		// Initialize contact states to active 
+		m_internal_gait_contact_states.push_back(1);
+		// Initialize phase states to 0.0
+		m_internal_gait_phase_states.push_back(0.0);
+	}
+	// Store number of contact poitns
+	m_num_contact_points = m_gait_offsets.size();
+
+	// Initialize internal times to 0.0 and contact states 
+	updateContactStates(0.0, 0.0);	
 }
