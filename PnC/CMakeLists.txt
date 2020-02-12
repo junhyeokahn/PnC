@@ -1,3 +1,4 @@
+add_subdirectory(BipedGaitCycle)
 add_subdirectory(DracoPnC)
 add_subdirectory(WBC)
 add_subdirectory(MPC)
