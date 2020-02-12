@@ -1,4 +1,5 @@
 add_subdirectory(DracoPnC)
+add_subdirectory(ScorpioPnC)
 add_subdirectory(AtlasPnC)
 add_subdirectory(ValkyriePnC)
 add_subdirectory(WBC)

@@ -15,6 +15,10 @@ class ScorpioCommand;
 class ScorpioWorldNode : public dart::gui::osg::WorldNode {
    private:
 
+    EnvInterface* Interface_;
+    ScorpioSensorData* SensorData_;
+    ScorpioCommand* Command_;
+
     void SetParams_();
     void GetForceTorqueData_();
 
@@ -23,7 +27,7 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     ScorpioCommand* command_scorpio_;
 
     dart::simulation::WorldPtr world_;
-    dart::dynamics::SkeletonPtr mSkel_;
+    dart::dynamics::SkeletonPtr robot_;
     //dart::dynamics::SkeletonPtr mSkel_hsr_;
     dart::dynamics::SkeletonPtr mGround_;
 
@@ -39,13 +43,16 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd trq_lb_scorpio_;
     Eigen::VectorXd trq_ub_scorpio_;
 
-    Eigen::VectorXd joint_idx_;
+    Eigen::VectorXd active_joint_idx_;
+    Eigen::VectorXd passive_joint_idx_;
     Eigen::VectorXd q_init_;
 
     Eigen::VectorXd Amp_;
     Eigen::VectorXd Freq_;
     Eigen::VectorXd kp_;
-    Eigen::VectorXd kv_;
+    Eigen::VectorXd kd_;
+
+    Eigen::VectorXd trq_cmd_;
 
     //Eigen::VectorXd cmd_hsr_;
 

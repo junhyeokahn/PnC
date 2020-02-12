@@ -110,7 +110,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot, Eigen::VectorXd
     Eigen::VectorXd conf_init(robot->getNumDofs());
     conf_init.setZero();
 
-    int mode_init(0);
+    int mode_init(1);
 
     switch(mode_init){
         case 0:{
@@ -156,6 +156,60 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot, Eigen::VectorXd
 
 }
 
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+    int lKneeIdx = robot->getDof("lKnee")->getIndexInSkeleton();
+    int lHipPitchIdx = robot->getDof("lHipPitch")->getIndexInSkeleton();
+    int rKneeIdx = robot->getDof("rKnee")->getIndexInSkeleton();
+    int rHipPitchIdx = robot->getDof("rHipPitch")->getIndexInSkeleton();
+    int lAnkleIdx = robot->getDof("lAnkle")->getIndexInSkeleton();
+    int rAnkleIdx = robot->getDof("rAnkle")->getIndexInSkeleton();
+
+    int initPos(1);  // 0 : Home, 1 : Simulation, 2 : Experiment
+    Eigen::VectorXd q = robot->getPositions();
+
+    switch (initPos) {
+        case 0: {
+            q[2] = 1.425;
+            q[lAnkleIdx] = 0.;
+            q[rAnkleIdx] = 0.;
+            // q[lAnkleIdx] = M_PI/2;
+            // q[rAnkleIdx] = M_PI/2;
+            break;
+        }
+        case 1: {
+            q[0] = 2;
+            q[3] = M_PI;
+            q[2] = 0.9;
+            double alpha(-M_PI / 4.);
+            double beta(M_PI / 5.5);
+            q[lHipPitchIdx] = alpha;
+            q[lKneeIdx] = beta - alpha;
+            q[rHipPitchIdx] = alpha;
+            q[rKneeIdx] = beta - alpha;
+            q[lAnkleIdx] = M_PI / 2 - beta;
+            q[rAnkleIdx] = M_PI / 2 - beta;
+            break;
+        }
+        case 2: {
+            YAML::Node simulation_cfg =
+                YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+            double hanging_height(0.0);
+            myUtils::readParameter(simulation_cfg, "hanging_height",
+                                   hanging_height);
+            Eigen::VectorXd init_config;
+            myUtils::readParameter(simulation_cfg, "initial_configuration",
+                                   init_config);
+            q[2] = hanging_height;
+            q.tail(10) = init_config;
+            break;
+        }
+        default:
+            std::cout << "[wrong initial pos case] in Draco/Main.cpp"
+                      << std::endl;
+    }
+
+    robot->setPositions(q);
+}
 void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	for(size_t i=0; i < robot->getNumBodyNodes(); ++i)
 	{
@@ -293,17 +347,20 @@ int main(int argc, char** argv) {
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
-    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
+    dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
         // THIS_COM"RobotModel/Robot/Draco/DracoCollision.urdf");
         //THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
         THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
+    dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
+        THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
     //dart::dynamics::SkeletonPtr hsrrobot = urdfLoader.parseSkeleton(
          //THIS_COM "RobotModel/Robot/HSR/hsrb.urdf");
 
     world->addSkeleton(ground);
-    world->addSkeleton(robot);
+    world->addSkeleton(scorpio);
+    world->addSkeleton(draco);
     //world->addSkeleton(hsrrobot);
     world->addSkeleton(table);
 
@@ -319,7 +376,7 @@ int main(int argc, char** argv) {
     // ====================
     // Display Joints Frame
     // ====================
-    if (b_display_joint_frame) displayJointFrames(world, robot);
+    if (b_display_joint_frame) displayJointFrames(world, scorpio);
     // ====================
     // Display Target Frame
     // ====================
@@ -333,22 +390,23 @@ int main(int argc, char** argv) {
     // =====================
     // Initial configuration
     // =====================
-    _setInitialConfiguration(robot, q_init);
+    _setInitialConfiguration(scorpio, q_init);
+    _setInitialConfiguration(draco);
 
     // =====================
     // Robot Mesh Color from URDF
     // =====================
-    _SetMeshColorURDF(robot); 
+    _SetMeshColorURDF(scorpio); 
 
     // =====================
     // Constraint for Closed-Loop
     // =====================
-    _SetJointConstraint(world, robot);
+    _SetJointConstraint(world, scorpio);
 
     // ================
     // Set passive joint
     // ================
-    _SetJointActuatorType(robot,actuator_type); 
+    _SetJointActuatorType(scorpio,actuator_type); 
    
     // ================
     // Print Model Info
