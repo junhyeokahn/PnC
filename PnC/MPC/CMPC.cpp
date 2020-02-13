@@ -32,9 +32,9 @@ CMPC::CMPC() {
     cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2,
         0.10, 0.0;
 
-    // set preview start time to 0.0
+    // set preview time to 0.0
     t_preview_start = 0.0; 
-
+    
     // initialize gait cycle with defaults
     gait_cycle_ptr.reset(new GaitCycle());
 
@@ -48,6 +48,10 @@ CMPC::~CMPC() {}
 
 void CMPC::setPreviewStartTime(const double t_preview_start_in){
     t_preview_start = t_preview_start_in;
+}
+
+void CMPC::setCustomGaitCycle(std::shared_ptr<GaitCycle> gait_cycle_ptr_in){
+    gait_cycle_ptr = gait_cycle_ptr_in;
 }
 
 // Sets the cost vector. for the MPC
@@ -463,10 +467,13 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
         Cqp.block(i * num_rows, i * num_cols, num_rows, num_cols) = CMat;
         cvec_qp.segment(i * num_rows, num_rows) = cvec;
 
-        // For this timestep, check which contacts are active
-        // update gait states
-        gait_cycle_ptr->updateContactStates(t_preview_start, preview_time);
+
         // std::cout << "horizon " << i << " preview time:" << preview_time << std::endl;
+        // For this timestep, check which contacts are active
+        // Update gait states
+        gait_cycle_ptr->updateContactStates(0.0, preview_time);
+        // gait_cycle_ptr->printCurrentGaitInfo();
+
         // Set maximum z force to 0.0 if the contact state is inactive
         for(int j = 0; j < num_contacts; j++){
             // get contact state and deactivate corresponding contact location if necessary            
@@ -894,7 +901,8 @@ void CMPC::simulate_toy_mpc() {
     Eigen::VectorXd x0(13);
 
     double init_roll(0), init_pitch(0), init_yaw(0), init_com_x(0),
-        init_com_y(0), init_com_z(0.25), init_roll_rate(0), init_pitch_rate(0),
+        // init_com_y(0), init_com_z(0.25), init_roll_rate(0), init_pitch_rate(0),
+        init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
         init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
         init_com_z_rate(0);
 
@@ -931,6 +939,15 @@ void CMPC::simulate_toy_mpc() {
     // Left Foot Back
     r_feet(0, 3) = -foot_length / 2.0;   // x
     r_feet(1, 3) = nominal_width / 2.0;  // y
+
+    // set custom gait cycle
+    double swing_time = 0.0625;
+    double transition_time = 0.125;
+    double biped_walking_offset = swing_time + transition_time;
+    double total_gait_duration = 2.0*swing_time + 2.0*transition_time;
+    std::shared_ptr<GaitCycle> gait_weight_transfer(new GaitCycle(swing_time, total_gait_duration, {0.0, 0.0, biped_walking_offset, biped_walking_offset}));
+    setCustomGaitCycle(gait_weight_transfer);
+    setPreviewStartTime(0.0);    
 
     int n_Fr = r_feet.cols();  // Number of contacts
     int n = 13;
@@ -993,6 +1010,7 @@ void CMPC::simulate_toy_mpc() {
     for (int i = 0; i < sim_steps; i++) {
         // Solve new MPC every mpc control tick
         if ((cur_time - last_control_time) > mpc_dt) {
+            setPreviewStartTime(cur_time);
             solve_mpc(x_prev, X_des, r_feet, x_pred, f_vec_out);
             assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3 * n_Fr), f_Mat);
             last_control_time = cur_time;

@@ -97,6 +97,7 @@ public:
 
 	// Set preview start time for the gate cycle
 	void setPreviewStartTime(const double t_preview_start_in);
+	void setCustomGaitCycle(std::shared_ptr<GaitCycle> gait_cycle_ptr_in);
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
@@ -133,7 +134,6 @@ public:
 
 private:
 	Eigen::MatrixXd r_feet_; // Store the value of r_feet locally.
-
 	double t_preview_start; // store start time of the preview.
 
 	double gravity_acceleration;
