@@ -442,13 +442,25 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
 
     int num_rows = CMat.rows();
     int num_cols = CMat.cols();
+    int num_contacts = (cvec.size() / 6); // we are assuming all contacts have 6 constraints (unilateral constraints)
 
     // Set the force constraints over the horizon
     // To DO: add 0 upperbound when reaction force should be 0.0 depending on
     // the gate cycle.
+    double preview_time = 0.0;
     for (int i = 0; i < horizon; i++) {
         Cqp.block(i * num_rows, i * num_cols, num_rows, num_cols) = CMat;
         cvec_qp.segment(i * num_rows, num_rows) = cvec;
+
+        // For this timestep, check which contacts are active
+        // preview_time += mpc_dt;
+        // // update gait states
+        // std::cout << "horizon " << i << " preview time:" << preview_time << std::endl;
+        // for(int j = 0; j < num_contacts; j++){
+        //     cvec_qp[i * num_rows + 6*j + 4] *= 0.9; // get gait state here
+        //     std::cout << "contact " << j << "state:" << cvec_qp[i * num_rows + 6*j + 4] << std::endl;           
+        // }
+
     }
 
 #ifdef MPC_PRINT_ALL
