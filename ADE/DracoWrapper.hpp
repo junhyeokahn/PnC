@@ -18,6 +18,8 @@ public:
     //Accept a command from ADE to forward to the PnC as long as Initialize has been called
     void SetWalkCommand(double ft_length, double r_ft_width, double l_ft_width,
                         double ori_inc, int num_step);
+    void SetWalkToCommand(int x, int y);
+    void SetHaltCommand();
     //Shutdown the sim and ros nodelet and destruct the PnC instance
     void Shutdown();
 };

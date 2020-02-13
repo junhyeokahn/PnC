@@ -23,6 +23,16 @@ void DracoWrapper::SetWalkCommand(double ft_length, double r_ft_width, double l_
     interface_->Walk(ft_length, r_ft_width, l_ft_width, ori_inc, num_step);
 }
 
+void DracoWrapper::SetWalkToCommand(int x, int y) {
+    myUtils::color_print(myColor::BoldRed,
+                         "[[Walking To: " + std::to_string(x) + ", " + std::to_string(y) +  "]]");
+}
+
+void DracoWrapper::SetHaltCommand() {
+    myUtils::color_print(myColor::BoldRed,
+                         "[[Halting]]");
+}
+
 void DracoWrapper::Shutdown() {
     simulator_->StopSim();
 }
