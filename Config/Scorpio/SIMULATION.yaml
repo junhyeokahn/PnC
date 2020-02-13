@@ -1,0 +1,16 @@
+is_record: false
+servo_rate: 0.001 # !!this should be match with controller servo rate!!
+#show_viewer: false
+show_viewer: true
+num_steps_per_cycle: 30
+display_joint_frame: false
+display_target_frame: true
+actuator_type: 1 # servo mode 
+#actuator_type: 1 # force mode
+q_init: [180,	-65,	180,	-65,	180]
+#q_init: [ 90,  0,	0,	0,	0]
+
+
+
+
+
