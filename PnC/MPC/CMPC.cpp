@@ -32,12 +32,23 @@ CMPC::CMPC() {
     cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2,
         0.10, 0.0;
 
+    // set preview start time to 0.0
+    t_preview_start = 0.0; 
+
+    // initialize gait cycle with defaults
+    gait_cycle_ptr.reset(new GaitCycle());
+
     // DO NOT CHANGE
     gravity_acceleration = -9.81;
 }
 
 // Destructor
 CMPC::~CMPC() {}
+
+
+void CMPC::setPreviewStartTime(const double t_preview_start_in){
+    t_preview_start = t_preview_start_in;
+}
 
 // Sets the cost vector. for the MPC
 // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,
@@ -447,19 +458,23 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
     // Set the force constraints over the horizon
     // To DO: add 0 upperbound when reaction force should be 0.0 depending on
     // the gate cycle.
-    double preview_time = 0.0;
+    double preview_time = t_preview_start;
     for (int i = 0; i < horizon; i++) {
         Cqp.block(i * num_rows, i * num_cols, num_rows, num_cols) = CMat;
         cvec_qp.segment(i * num_rows, num_rows) = cvec;
 
         // For this timestep, check which contacts are active
-        // preview_time += mpc_dt;
-        // // update gait states
+        // update gait states
+        gait_cycle_ptr->updateContactStates(t_preview_start, preview_time);
         // std::cout << "horizon " << i << " preview time:" << preview_time << std::endl;
-        // for(int j = 0; j < num_contacts; j++){
-        //     cvec_qp[i * num_rows + 6*j + 4] *= 0.9; // get gait state here
-        //     std::cout << "contact " << j << "state:" << cvec_qp[i * num_rows + 6*j + 4] << std::endl;           
-        // }
+        // Set maximum z force to 0.0 if the contact state is inactive
+        for(int j = 0; j < num_contacts; j++){
+            // get contact state and deactivate corresponding contact location if necessary            
+            cvec_qp[i * num_rows + 6*j + 4] *= static_cast<double>(gait_cycle_ptr->getContactState(j)); 
+            // std::cout << "contact " << j << "state:" << gait_cycle_ptr->getContactState(j) << std::endl;           
+        }
+        // Increment preview window
+        preview_time += mpc_dt;
 
     }
 
@@ -935,14 +950,12 @@ void CMPC::simulate_toy_mpc() {
 
     x_des[3] = 0.0;  //-0.1;//;0.75; // Set desired z height to be 0.75m from
                      //the ground
-    x_des[5] =
-        0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
+    x_des[5] = 0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
 
     Eigen::VectorXd X_des(n * horizon);
     get_constant_desired_x(x_des, X_des);
 
-    Eigen::VectorXd x_pred(
-        n);  // Container to hold the predicted state after 1 horizon timestep
+    Eigen::VectorXd x_pred(n);  // Container to hold the predicted state after 1 horizon timestep
 
     // Solve the MPC
     solve_mpc(x0, X_des, r_feet, x_pred, f_vec_out);

@@ -26,10 +26,10 @@ GaitCycle::~GaitCycle(){
 // Get the state of the contact based on the index.
 int GaitCycle::getContactState(int index){
 	if (index < 0){
-		std::cout << "[GaitCycle] Warning. input index is less than 0. Returning state for index 0" << std::endl;
+		// std::cout << "[GaitCycle] Warning. input index is less than 0. Returning state for index 0" << std::endl;
 		return m_internal_gait_contact_states[0];
-	}else if (index > m_num_contact_points){
-		std::cout << "[GaitCycle] Warning. input index is less than 0. Returning state for last contact point" << std::endl;
+	}else if (index >= m_num_contact_points){
+		// std::cout << "[GaitCycle] Warning. input index is out of bounds. Returning state for last contact point" << std::endl;
 		return m_internal_gait_contact_states[m_num_contact_points-1];		
 	}else{
 		return m_internal_gait_contact_states[index];

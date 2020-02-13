@@ -16,6 +16,10 @@
 #include <Eigen/Dense>
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 
+// Gait Cycle
+#include <PnC/GaitCycle/GaitCycle.hpp>
+#include <memory>
+
 // #define MPC_PRINT_ALL 
 // #define MPC_TIME_ALL 
 
@@ -55,6 +59,8 @@ public:
 	Eigen::VectorXd f_prev; // Previous reaction force vector for the first horizon.
 
 
+	std::shared_ptr<GaitCycle> gait_cycle_ptr; // pointer to the gait cycle object
+
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	// last term is gravity and should always be 0,0
 	// cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
@@ -88,6 +94,9 @@ public:
 	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
 	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
 	void setSmoothFromPrevResult(const bool smooth_prev_in){smooth_from_prev_result_ = smooth_prev_in;} // Sets whether to smoothen the current solution using the previous solution
+
+	// Set preview start time for the gate cycle
+	void setPreviewStartTime(const double t_preview_start_in);
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
@@ -124,6 +133,8 @@ public:
 
 private:
 	Eigen::MatrixXd r_feet_; // Store the value of r_feet locally.
+
+	double t_preview_start; // store start time of the preview.
 
 	double gravity_acceleration;
   	Eigen::MatrixXd R_roll(const double & phi);

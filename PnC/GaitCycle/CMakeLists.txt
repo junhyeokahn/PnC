@@ -6,7 +6,7 @@ target_link_libraries(myGaitCycle  myUtils)
 
 add_executable(run_test_gait_cycle test_gait_cycle.cpp)
 target_link_libraries(run_test_gait_cycle  myUtils
-										   myGaitCycle)
+                                           myGaitCycle)
 
 install(TARGETS myGaitCycle DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${GAIT_CYCLE_HEADERS} DESTINATION
