@@ -81,10 +81,11 @@ int main(int argc, char ** argv){
     // mpc smoothing options
     convex_mpc.setSmoothFromPrevResult(true);
     convex_mpc.setDeltaSmooth(1e-7);
+    // convex_mpc.setControlAlpha(1e-8);
 
-    // Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
-    // mpc_cost_vec << 2.5, 2.5, 2.5, 1.0, 1.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
-    // convex_mpc.setCostVec(mpc_cost_vec);
+    Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
+    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.0, 0.0, 0.20, 0.20, 0.2, 0.10, 0.0;        
+    convex_mpc.setCostVec(mpc_cost_vec);
 
     // Set custom gait cycle
     double swing_time = 0.2;
