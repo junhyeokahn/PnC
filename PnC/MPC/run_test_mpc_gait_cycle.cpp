@@ -26,12 +26,12 @@ Eigen::VectorXd get_mpc_Xref(CMPC & convex_mpc,
         // Get CoM value
         com_min_jerk_ref[0].getPos(t_predict, com_x); com_min_jerk_ref[0].getVel(t_predict, dcom_x);
         com_min_jerk_ref[1].getPos(t_predict, com_y); com_min_jerk_ref[1].getVel(t_predict, dcom_y);
-        com_min_jerk_ref[2].getPos(t_predict, com_y); com_min_jerk_ref[2].getVel(t_predict, dcom_z);
+        com_min_jerk_ref[2].getPos(t_predict, com_z); com_min_jerk_ref[2].getVel(t_predict, dcom_z);
 
         // Get Ori value
         ori_min_jerk_ref[0].getPos(t_predict, rx); ori_min_jerk_ref[0].getVel(t_predict, drx);
         ori_min_jerk_ref[1].getPos(t_predict, ry); ori_min_jerk_ref[1].getVel(t_predict, dry);
-        ori_min_jerk_ref[2].getPos(t_predict, ry); ori_min_jerk_ref[2].getVel(t_predict, drz);
+        ori_min_jerk_ref[2].getPos(t_predict, rz); ori_min_jerk_ref[2].getVel(t_predict, drz);
 
         // Desired RPY
         mpc_Xref[i*n + 0] = rx; // Desired Roll
@@ -49,9 +49,9 @@ Eigen::VectorXd get_mpc_Xref(CMPC & convex_mpc,
         mpc_Xref[i*n + 8] = drz; // Desired Yaw
 
         // Desired COM vel x,y,z
-        mpc_Xref[i*n + 3] = dcom_x; // Desired com x vel
-        mpc_Xref[i*n + 4] = dcom_y; // Desired com y vel
-        mpc_Xref[i*n + 5] = dcom_z; // Desired com z vel
+        mpc_Xref[i*n + 9] = dcom_x; // Desired com x vel
+        mpc_Xref[i*n + 10] = dcom_y; // Desired com y vel
+        mpc_Xref[i*n + 11] = dcom_z; // Desired com z vel
     }
 
     return mpc_Xref;
@@ -71,9 +71,10 @@ int main(int argc, char ** argv){
     convex_mpc.setRobotInertia(I_robot_body);
 
     // MPC Params
-    int horizon_length = 15;
-    convex_mpc.setHorizon(horizon_length);  // horizon timesteps
-    convex_mpc.setDt(0.025);    // (seconds) per horizon
+    int mpc_horizon = 15;
+    double mpc_dt = 0.025;
+    convex_mpc.setHorizon(mpc_horizon);  // horizon timesteps
+    convex_mpc.setDt(mpc_dt);    // (seconds) per horizon
     convex_mpc.setMu(0.9);      //  friction coefficient
     convex_mpc.setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
 
@@ -134,7 +135,7 @@ int main(int argc, char ** argv){
     int m = 3 * n_Fr;
 
     // Initialize force containers
-    Eigen::VectorXd f_vec_out(m * horizon_length);
+    Eigen::VectorXd f_vec_out(m * mpc_horizon);
     Eigen::MatrixXd f_Mat(3, n_Fr);
     f_Mat.setZero();
 
@@ -175,9 +176,7 @@ int main(int argc, char ** argv){
                                                         total_gait_duration) ); 
     }
 
-    Eigen::VectorXd x_pred(n);  // Container to hold the predicted state after 1 horizon timestep
-
-    /*
+    std::cout << "Min jerk reference" << std::endl;
     // Test minimum jerk trajectory
     double test_time = 0.0;
     double test_time_dur = 1.0;
@@ -191,7 +190,7 @@ int main(int argc, char ** argv){
         // Get CoM value
         com_min_jerk_ref[0].getPos(test_time, com_x); com_min_jerk_ref[0].getVel(test_time, dcom_x);
         com_min_jerk_ref[1].getPos(test_time, com_y); com_min_jerk_ref[1].getVel(test_time, dcom_y);
-        com_min_jerk_ref[2].getPos(test_time, com_y); com_min_jerk_ref[2].getVel(test_time, dcom_z);
+        com_min_jerk_ref[2].getPos(test_time, com_z); com_min_jerk_ref[2].getVel(test_time, dcom_z);
 
         // Get Ori value
         ori_min_jerk_ref[0].getPos(test_time, rx); ori_min_jerk_ref[0].getVel(test_time, drx);
@@ -203,7 +202,23 @@ int main(int argc, char ** argv){
         // Increment test time
         test_time += test_dt;
     }
-    */
+
+    Eigen::VectorXd x_pred(n);  // Container to hold the predicted state after 1 horizon timestep
+    Eigen::VectorXd X_ref(n * mpc_horizon);
+    // Update reference trajectory
+    X_ref = get_mpc_Xref(convex_mpc, time_start, mpc_dt, mpc_horizon, com_min_jerk_ref, ori_min_jerk_ref);
+
+    std::cout << "X reference" << std::endl;
+    // Print out the predicted reference trajectory
+    for(int i = 0; i < mpc_horizon; i++){
+        x_pred = X_ref.segment(i*n, n);
+        printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f\n",
+                x_pred[0],x_pred[1],x_pred[2],x_pred[3],x_pred[4],x_pred[5],x_pred[6],x_pred[7],x_pred[8],x_pred[9],x_pred[10],x_pred[11]);
+    }
+
+
+
+    
 
 
 }
