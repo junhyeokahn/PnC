@@ -7,6 +7,56 @@ Eigen::Vector3d des_com_xy_pos_given_feet(const Eigen::MatrixXd & r_feet){
     return 0.5*(rfoot_avg + lfoot_avg);
 }
 
+Eigen::VectorXd get_mpc_Xref(CMPC & convex_mpc,
+                             double t_start, double mpc_dt, int mpc_horizon,
+                             std::vector<MinJerk_OneDimension> & com_min_jerk_ref,
+                             std::vector<MinJerk_OneDimension> & ori_min_jerk_ref){
+    int n = convex_mpc.getStateVecDim(); // This is always size 13.
+    Eigen::VectorXd mpc_Xref = Eigen::VectorXd::Zero(n*mpc_horizon); // Create the desired state vector evolution
+
+
+    double t_predict = t_start;
+    double com_x, com_y, com_z, rx, ry, rz;
+    double dcom_x, dcom_y, dcom_z, drx, dry, drz;
+
+    for(int i = 0; i < mpc_horizon; i++){
+        // Time 
+        t_predict = t_start + (i+1)*mpc_dt;
+
+        // Get CoM value
+        com_min_jerk_ref[0].getPos(t_predict, com_x); com_min_jerk_ref[0].getVel(t_predict, dcom_x);
+        com_min_jerk_ref[1].getPos(t_predict, com_y); com_min_jerk_ref[1].getVel(t_predict, dcom_y);
+        com_min_jerk_ref[2].getPos(t_predict, com_y); com_min_jerk_ref[2].getVel(t_predict, dcom_z);
+
+        // Get Ori value
+        ori_min_jerk_ref[0].getPos(t_predict, rx); ori_min_jerk_ref[0].getVel(t_predict, drx);
+        ori_min_jerk_ref[1].getPos(t_predict, ry); ori_min_jerk_ref[1].getVel(t_predict, dry);
+        ori_min_jerk_ref[2].getPos(t_predict, ry); ori_min_jerk_ref[2].getVel(t_predict, drz);
+
+        // Desired RPY
+        mpc_Xref[i*n + 0] = rx; // Desired Roll
+        mpc_Xref[i*n + 1] = ry; // Desired Pitch
+        mpc_Xref[i*n + 2] = rz; // Desired Yaw
+
+        // Desired COM x,y,z
+        mpc_Xref[i*n + 3] = com_x; // Desired com x
+        mpc_Xref[i*n + 4] = com_y; // Desired com y
+        mpc_Xref[i*n + 5] = com_z; // Desired com z
+
+        // Desired wx, wy, wz
+        mpc_Xref[i*n + 6] = drx; // Desired Roll
+        mpc_Xref[i*n + 7] = dry; // Desired Pitch
+        mpc_Xref[i*n + 8] = drz; // Desired Yaw
+
+        // Desired COM vel x,y,z
+        mpc_Xref[i*n + 3] = dcom_x; // Desired com x vel
+        mpc_Xref[i*n + 4] = dcom_y; // Desired com y vel
+        mpc_Xref[i*n + 5] = dcom_z; // Desired com z vel
+    }
+
+    return mpc_Xref;
+}
+
 int main(int argc, char ** argv){
     CMPC convex_mpc;
     // convex_mpc.simulate_toy_mpc();
@@ -27,19 +77,18 @@ int main(int argc, char ** argv){
     convex_mpc.setMu(0.9);      //  friction coefficient
     convex_mpc.setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
 
-    // Starting robot state
-    // Current reduced state of the robot
-    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    Eigen::VectorXd x0(13);
+    // mpc smoothing options
+    convex_mpc.setSmoothFromPrevResult(true);
+    convex_mpc.setDeltaSmooth(1e-7);
 
-    double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
-           init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
-           init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
-           init_com_z_rate(0);
-
-    x0 = convex_mpc.getx0(init_roll, init_pitch, init_yaw, init_com_x, init_com_y,
-                          init_com_z, init_roll_rate, init_pitch_rate, init_yaw_rate,
-                          init_com_x_rate, init_com_y_rate, init_com_z_rate);
+    // Set custom gait cycle
+    double swing_time = 0.2;
+    double transition_time = 0.2;
+    double biped_walking_offset = swing_time + transition_time;
+    double total_gait_duration = 2.0*swing_time + 2.0*transition_time;
+    std::shared_ptr<GaitCycle> gait_weight_transfer(new GaitCycle(swing_time, total_gait_duration, {0.0, 0.0, biped_walking_offset, biped_walking_offset}));
+    convex_mpc.setCustomGaitCycle(gait_weight_transfer);
+    convex_mpc.setPreviewStartTime(0.0);
 
     // Feet Params
     double foot_length = 0.05;   // 5cm distance between toe and heel
@@ -80,14 +129,28 @@ int main(int argc, char ** argv){
     std::cout << r_feet_land << std::endl;
 
 
-    // Set custom gait cycle
-    double swing_time = 0.2;
-    double transition_time = 0.2;
-    double biped_walking_offset = swing_time + transition_time;
-    double total_gait_duration = 2.0*swing_time + 2.0*transition_time;
-    std::shared_ptr<GaitCycle> gait_weight_transfer(new GaitCycle(swing_time, total_gait_duration, {0.0, 0.0, biped_walking_offset, biped_walking_offset}));
-    convex_mpc.setCustomGaitCycle(gait_weight_transfer);
-    convex_mpc.setPreviewStartTime(0.0);
+    int n_Fr = r_feet.cols();  // Number of contacts
+    int n = 13;
+    int m = 3 * n_Fr;
+
+    // Initialize force containers
+    Eigen::VectorXd f_vec_out(m * horizon_length);
+    Eigen::MatrixXd f_Mat(3, n_Fr);
+    f_Mat.setZero();
+
+    // Starting robot state ---------------------------------------------------------------------------------------------------------------
+    // Current reduced state of the robot
+    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
+    Eigen::VectorXd x0(13);
+
+    double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
+           init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
+           init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
+           init_com_z_rate(0);
+
+    x0 = convex_mpc.getx0(init_roll, init_pitch, init_yaw, init_com_x, init_com_y,
+                          init_com_z, init_roll_rate, init_pitch_rate, init_yaw_rate,
+                          init_com_x_rate, init_com_y_rate, init_com_z_rate);
 
     // Set initial and terminal com pos and orientation
     Eigen::Vector3d ini_com_pos(init_com_x, init_com_y, init_com_z);
@@ -112,6 +175,9 @@ int main(int argc, char ** argv){
                                                         total_gait_duration) ); 
     }
 
+    Eigen::VectorXd x_pred(n);  // Container to hold the predicted state after 1 horizon timestep
+
+    /*
     // Test minimum jerk trajectory
     double test_time = 0.0;
     double test_time_dur = 1.0;
@@ -137,12 +203,7 @@ int main(int argc, char ** argv){
         // Increment test time
         test_time += test_dt;
     }
-
-
-    // int n = convex_mpc->getStateVecDim(); // This is always size 13.
-    // Eigen::VectorXd mpc_Xref = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
-
-
+    */
 
 
 }
