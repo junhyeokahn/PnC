@@ -57,6 +57,47 @@ Eigen::VectorXd get_mpc_Xref(CMPC & convex_mpc,
     return mpc_Xref;
 }
 
+
+Eigen::VectorXd get_mpc_Xref_given_des_vel(double t_start, double mpc_dt, int mpc_horizon,
+                                           Eigen::Vector3d cur_com_pos, Eigen::Vector3d des_vel, double des_height){
+    int n = 13; // This is always size 13.
+    Eigen::VectorXd mpc_Xref = Eigen::VectorXd::Zero(n*mpc_horizon); // Create the desired state vector evolution
+
+
+    double t_predict = t_start;
+    double com_x, com_y, com_z, rx, ry, rz;
+    double dcom_x, dcom_y, dcom_z, drx, dry, drz;
+
+    for(int i = 0; i < mpc_horizon; i++){
+        // Time 
+        t_predict = t_start + (i+1)*mpc_dt;
+
+        // Desired RPY
+        // mpc_Xref[i*n + 0] = rx; // Desired Roll
+        // mpc_Xref[i*n + 1] = ry; // Desired Pitch
+        // mpc_Xref[i*n + 2] = rz; // Desired Yaw
+
+        // Desired COM x,y,z
+        mpc_Xref[i*n + 3] = cur_com_pos[0] + des_vel[0]*(t_predict - t_start); // Desired com x
+        mpc_Xref[i*n + 4] = cur_com_pos[1] + des_vel[1]*(t_predict - t_start); // Desired com y
+        mpc_Xref[i*n + 5] = des_height; // Desired com z
+
+        // Desired wx, wy, wz
+        // mpc_Xref[i*n + 6] = drx; // Desired Roll
+        // mpc_Xref[i*n + 7] = dry; // Desired Pitch
+        // mpc_Xref[i*n + 8] = drz; // Desired Yaw
+
+        // Desired COM vel x,y,z
+        mpc_Xref[i*n + 9] = des_vel[0]; // Desired com x vel
+        mpc_Xref[i*n + 10] = des_vel[1]; // Desired com y vel
+        mpc_Xref[i*n + 11] = des_vel[2]; // Desired com z vel
+    }
+
+    return mpc_Xref;
+}
+
+
+
 int main(int argc, char ** argv){
     CMPC convex_mpc;
     // convex_mpc.simulate_toy_mpc();
@@ -136,7 +177,7 @@ int main(int argc, char ** argv){
     std::cout << r_feet_land << std::endl;
 
     // Initialize MPC input for the r_feet 
-    Eigen::MatrixXd r_feet_input = r_feet;
+    Eigen::MatrixXd r_feet_current = r_feet;
 
     int n_Fr = r_feet.cols();  // Number of contacts
     int n = 13;
@@ -266,7 +307,19 @@ int main(int argc, char ** argv){
     Eigen::VectorXd f_cmd(12);
     f_cmd.head(m) = f_vec_out.head(m);
 
+    printf(
+        "t, r, p, y, x, y, z, wx, wy, wz, dx, dy, dz, f0x, f0y, f0z, f1x, "
+        "f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z\n");
     bool set_once = false;
+
+
+    // Desired velocity command
+    double k_raibert = 0.0;
+    Eigen::Vector3d x_com_pos_cur(x_prev[3], x_prev[4], x_prev[5]);
+    Eigen::Vector3d x_com_vel_cur(x_prev[9], x_prev[10], x_prev[11]);
+    Eigen::Vector3d x_com_vel_des(0.0, 0.0, 0.0);
+    double des_height = init_com_z;
+
     for (int i = 0; i < sim_steps; i++) {
 
         // Do the feet update if we are stepping
@@ -277,16 +330,16 @@ int main(int argc, char ** argv){
             // std::cout << " right foot " << i << " : " << (gait_steps->getContactState(1) ? std::string("ACTIVE") : std::string("FLIGHT")) << std::endl;
             if (gait_steps->getContactState(1) == 0){
                 // If so, update the location of the feet
-                r_feet_input.col(0) = r_feet_land.col(0);
-                r_feet_input.col(1) = r_feet_land.col(1);
+                r_feet_current.col(0) = r_feet_land.col(0);
+                r_feet_current.col(1) = r_feet_land.col(1);
             }
 
             // Check if left foot is in flight
             // std::cout << " left foot " << i << " : " << (gait_steps->getContactState(2) ? std::string("ACTIVE") : std::string("FLIGHT"))  << std::endl;
             if (gait_steps->getContactState(2) == 0){
                 // If so, update the location of the feet
-                r_feet_input.col(2) = r_feet_land.col(2);
-                r_feet_input.col(3) = r_feet_land.col(3);
+                r_feet_current.col(2) = r_feet_land.col(2);
+                r_feet_current.col(3) = r_feet_land.col(3);
             }
         }else{
             if (!set_once){
@@ -296,19 +349,73 @@ int main(int argc, char ** argv){
         }
 
 
+        // // Footstep planning from desired velocity command
+        // gait_steps->updateContactStates(0.0, cur_time);
+        // // update com current pos and velocity
+        // x_com_pos_cur = Eigen::Vector3d(x_prev[3], x_prev[4], x_prev[5]);
+        // x_com_vel_cur = Eigen::Vector3d(x_prev[9], x_prev[10], x_prev[11]);
+
+        // // Plan new footstep location if we are in flight phase
+        // if (gait_steps->getContactState(1) == 0){
+        //     // Do the footstep planning here
+        //     // current foot position + raibert heuristic
+        //     r_feet_land.col(0) = r_feet_current.col(0) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+        //     r_feet_land.col(1) = r_feet_current.col(1) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+
+        //     // Land on the ground
+        //     r_feet_land(2,0) = 0.0;
+        //     r_feet_land(2,1) = 0.0;
+
+        //     // std::cout << "rfoot (swing_time/2.0)*x_com_vel_cur = " << (swing_time/2.0)*x_com_vel_cur << std::endl;
+        //     // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
+        //     std::cout << "r_feet_land.col(0).transpose() = " << r_feet_land.col(0).transpose() << std::endl;
+        //     std::cout << "r_feet_land.col(1).transpose() = " << r_feet_land.col(1).transpose() << std::endl;
+        //     // If so, update the location of the feet
+        //     r_feet_current.col(0) = r_feet_land.col(0);
+        //     r_feet_current.col(1) = r_feet_land.col(1);
+        // }
+
+        // // Check if left foot is in flight
+        // // std::cout << " left foot " << i << " : " << (gait_steps->getContactState(2) ? std::string("ACTIVE") : std::string("FLIGHT"))  << std::endl;
+        // if (gait_steps->getContactState(2) == 0){
+        //     // Do the footstep planning here
+        //     r_feet_land.col(2) = r_feet_current.col(2) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+        //     r_feet_land.col(3) = r_feet_current.col(3) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+
+        //     // Land on the ground
+        //     r_feet_land(2,2) = 0.0;
+        //     r_feet_land(2,3) = 0.0;
+
+        //     // Update the location of the feet
+        //     // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
+        //     std::cout << "r_feet_land.col(2).transpose() = " << r_feet_land.col(2).transpose() << std::endl;
+        //     std::cout << "r_feet_land.col(3).transpose() = " << r_feet_land.col(3).transpose() << std::endl;
+
+        //     r_feet_current.col(2) = r_feet_land.col(2);
+        //     r_feet_current.col(3) = r_feet_land.col(3);
+        // }
+
+
+
         // Solve new MPC every mpc control tick
         if ((cur_time - last_control_time) > mpc_dt) {
             convex_mpc.setPreviewStartTime(cur_time);
             // compute the new reference
+
+            // specified foot position
             X_ref = get_mpc_Xref(convex_mpc, cur_time, mpc_dt, mpc_horizon, com_min_jerk_ref, ori_min_jerk_ref);
-            convex_mpc.solve_mpc(x_prev, X_ref, r_feet_input, x_pred, f_vec_out);
+
+            // velocity based control
+            // X_ref = get_mpc_Xref_given_des_vel(cur_time, mpc_dt, mpc_horizon, x_com_pos_cur, x_com_vel_des, des_height);
+
+            convex_mpc.solve_mpc(x_prev, X_ref, r_feet_current, x_pred, f_vec_out);
             convex_mpc.assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3 * n_Fr), f_Mat);
             last_control_time = cur_time;
             f_cmd.head(m) = f_vec_out.head(m);
         }
 
         // Integrate the robot dynamics
-        convex_mpc.integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet_input, x_next);
+        convex_mpc.integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet_current, x_next);
         // Update x
         x_prev = x_next;
         // Increment time
@@ -324,6 +431,35 @@ int main(int argc, char ** argv){
             f_cmd[4], f_cmd[5], f_cmd[6], f_cmd[7], f_cmd[8], f_cmd[9],
             f_cmd[10], f_cmd[11]);
     }
+
+    // // Footstep planning
+    // double k_raibert = 1.0;
+    // Eigen::Vector3d x_com_vel_cur(x_prev[9], x_prev[10], x_prev[11]);
+    // Eigen::Vector3d vel_des(0.1);
+
+    // // Plan new footstep location if we are in flight phase
+    // if (gait_steps->getContactState(1) == 0){
+    //     // Do the footstep planning here
+    //     // current foot position + raibert heuristic
+    //     r_feet_land.col(0) = r_feet_current.col(0) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - vel_des);
+    //     r_feet_land.col(1) = r_feet_current.col(1) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - vel_des);
+
+    //     // If so, update the location of the feet
+    //     r_feet_current.col(0) = r_feet_land.col(0);
+    //     r_feet_current.col(1) = r_feet_land.col(1);
+    // }
+
+    // // Check if left foot is in flight
+    // // std::cout << " left foot " << i << " : " << (gait_steps->getContactState(2) ? std::string("ACTIVE") : std::string("FLIGHT"))  << std::endl;
+    // if (gait_steps->getContactState(2) == 0){
+    //     // Do the footstep planning here
+    //     r_feet_land.col(2) = r_feet_current.col(2) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - vel_des);
+    //     r_feet_land.col(3) = r_feet_current.col(3) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - vel_des);
+
+    //     // Update the location of the feet
+    //     r_feet_current.col(2) = r_feet_land.col(2);
+    //     r_feet_current.col(3) = r_feet_land.col(3);
+    // }
 
 
 
