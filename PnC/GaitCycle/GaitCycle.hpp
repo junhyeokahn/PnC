@@ -36,6 +36,8 @@ public:
 	int getContactStateGivenPhaseValue(const double phase_value);
 
 	// Updates an internal model of the contact states of the gait
+	// start_time: gait start time ie from the real clock.
+	// time: current time requested
 	void updateContactStates(const double start_time, const double time);
 
 	// Get the state of the contact based on the index.

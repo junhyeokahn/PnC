@@ -7,7 +7,7 @@ GaitCycle::GaitCycle(const double swing_time_in, const double total_gait_duratio
 	setSwingTime(swing_time_in);
 	setGaitOffsets(gait_offsets_in);
 	std::cout << "[Gait Cycle] Params:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
-	std::cout << "[GaitCycle] Object Constructed." << std::endl;	
+	std::cout << "[GaitCycle] Custom params Constructed." << std::endl;	
 }
 
 GaitCycle::	GaitCycle(){
@@ -16,7 +16,7 @@ GaitCycle::	GaitCycle(){
 	setSwingTime(0.0);
 	setGaitOffsets({0.0});
 	std::cout << "[Gait Cycle] Params:"  << " gait duration: " << m_total_gait_duration << ", swing time: " << m_swing_time  << std::endl;
-	std::cout << "[GaitCycle] Object Constructed." << std::endl;		
+	std::cout << "[GaitCycle] Default params Constructed." << std::endl;		
 }
 
 GaitCycle::~GaitCycle(){

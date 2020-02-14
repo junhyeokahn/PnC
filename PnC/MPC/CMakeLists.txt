@@ -20,6 +20,12 @@ target_link_libraries(run_test_mpc myUtils
                                    myGoldfarb
                                    myRobotSystem)
 
+add_executable(run_test_mpc_gait_cycle run_test_mpc_gait_cycle.cpp)
+target_link_libraries(run_test_mpc_gait_cycle  myMPC
+                                               myGaitCycle
+                                               myUtils
+                                               myGoldfarb
+                                               myRobotSystem)
 
 install(TARGETS myMPC DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${MPC_HEADERS} DESTINATION
