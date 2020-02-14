@@ -79,8 +79,8 @@ int main(int argc, char ** argv){
     convex_mpc.setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
 
     // mpc smoothing options
-    // convex_mpc.setSmoothFromPrevResult(true);
-    // convex_mpc.setDeltaSmooth(1e-7);
+    convex_mpc.setSmoothFromPrevResult(true);
+    convex_mpc.setDeltaSmooth(1e-7);
 
     // Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
     // mpc_cost_vec << 2.5, 2.5, 2.5, 1.0, 1.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
@@ -122,8 +122,8 @@ int main(int argc, char ** argv){
 
     // Foot landing configuration
     Eigen::MatrixXd r_feet_land = r_feet;
-    Eigen::Vector3d rfoot_translate(0.05, 0.0, 0.0);
-    Eigen::Vector3d lfoot_translate(0.05, 0.0, 0.0);
+    Eigen::Vector3d rfoot_translate(0.125, 0.0, 0.0);
+    Eigen::Vector3d lfoot_translate(0.125, 0.0, 0.0);
 
     std::cout << "r_feet start location:" << std::endl;
     std::cout << r_feet << std::endl;
