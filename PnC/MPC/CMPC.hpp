@@ -131,6 +131,9 @@ public:
 	// For testing
 	void simulate_toy_mpc();
 
+	void assemble_vec_to_matrix(const int & n, const int & m, const Eigen::VectorXd & vec, Eigen::MatrixXd & mat_out);
+	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
+	                              Eigen::VectorXd & x_next);
 
 private:
 	Eigen::MatrixXd r_feet_; // Store the value of r_feet locally.
@@ -142,10 +145,6 @@ private:
 	Eigen::MatrixXd R_yaw(const double & psi);
 	Eigen::MatrixXd skew_sym_mat(const Eigen::VectorXd & v);
 
-	void assemble_vec_to_matrix(const int & n, const int & m, const Eigen::VectorXd & vec, Eigen::MatrixXd & mat_out);
-
-	void integrate_robot_dynamics(const double & dt, const Eigen::VectorXd & x_current, const Eigen::MatrixXd & f_Mat, const Eigen::MatrixXd & r_feet,
-	                              Eigen::VectorXd & x_next);
 	void cont_time_state_space(const Eigen::VectorXd & x_current,
 	                           const Eigen::MatrixXd & r_feet, 
 	                           Eigen::MatrixXd & A, Eigen::MatrixXd & B);
