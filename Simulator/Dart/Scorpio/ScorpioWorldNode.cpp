@@ -132,11 +132,12 @@ void ScorpioWorldNode::customPreStep() {
     SensorData_->qdot = robot_->getVelocities();
     Interface_->getCommand(SensorData_, Command_);
 
-    for (int i = 0; i < a_dof_scorpio_; ++i) {
-       trq_cmd_[i] = Command_->jtrq[i] +
-                    kp_[i] * (Command_->q[i] - SensorData_->q[active_joint_idx_[i]]) +
-                    kd_[i] * (Command_->qdot[i] - SensorData_->qdot[active_joint_idx_[i]]);
-    } 
+    trq_cmd_ = Command_->jtrq;
+    //for (int i = 0; i < a_dof_scorpio_; ++i) {
+       //trq_cmd_[i] = Command_->jtrq[i]; 
+                    //kp_[i] * (Command_->q[i] - SensorData_->q[active_joint_idx_[i]]) +
+                    //kd_[i] * (Command_->qdot[i] - SensorData_->qdot[active_joint_idx_[i]]);
+    //} 
 
     SetActiveForce(trq_cmd_);
     count_++;

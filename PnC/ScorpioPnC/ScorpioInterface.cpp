@@ -60,12 +60,12 @@ void ScorpioInterface::getCommand(void* _data, void* _command) {
         //CropTorque_(cmd);
     }
 
-    //cmd_jtrq_ = cmd->jtrq;
+    cmd_jtrq_ = cmd->jtrq;
     //cmd_jvel_ = cmd->qdot;
     //cmd_jpos_ = cmd->q;
 
-    //std::cout << cmd_jtrq_ << std::endl;
-    //std::cout << "========" << std::endl;
+    std::cout << cmd_jtrq_ << std::endl;
+    std::cout << "========" << std::endl;
     //std::cout << cmd_jvel_ << std::endl;
     //std::cout << "========" << std::endl;
     //std::cout << cmd_jpos_ << std::endl;
