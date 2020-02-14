@@ -883,14 +883,14 @@ void CMPC::simulate_toy_mpc() {
     // System Params
     setRobotMass(50);  // (kilograms)
     Eigen::MatrixXd I_robot_body =
-        10.0 * Eigen::MatrixXd::Identity(3, 3);  // Body Inertia matrix
+        1.0 * Eigen::MatrixXd::Identity(3, 3);  // Body Inertia matrix
     // I_robot_body(0,0) = 07;
     // I_robot_body(1,1) = 0.26;
     // I_robot_body(2,2) = 0.242;
     setRobotInertia(I_robot_body);
 
     // MPC Params
-    setHorizon(10);  // horizon timesteps
+    setHorizon(20);  // horizon timesteps
     setDt(0.025);    // (seconds) per horizon
     setMu(0.9);      //  friction coefficient
     setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
@@ -900,9 +900,9 @@ void CMPC::simulate_toy_mpc() {
     // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
     Eigen::VectorXd x0(13);
 
-    double init_roll(0), init_pitch(0), init_yaw(0), init_com_x(0),
-        // init_com_y(0), init_com_z(0.25), init_roll_rate(0), init_pitch_rate(0),
-        init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
+    double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
+        init_com_y(0), init_com_z(0.25), init_roll_rate(0), init_pitch_rate(0),
+        // init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
         init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
         init_com_z_rate(0);
 
@@ -941,13 +941,17 @@ void CMPC::simulate_toy_mpc() {
     r_feet(1, 3) = nominal_width / 2.0;  // y
 
     // set custom gait cycle
-    double swing_time = 0.0625;
-    double transition_time = 0.125;
+    double swing_time = 0.2;
+    double transition_time = 0.2;
     double biped_walking_offset = swing_time + transition_time;
     double total_gait_duration = 2.0*swing_time + 2.0*transition_time;
     std::shared_ptr<GaitCycle> gait_weight_transfer(new GaitCycle(swing_time, total_gait_duration, {0.0, 0.0, biped_walking_offset, biped_walking_offset}));
     setCustomGaitCycle(gait_weight_transfer);
     setPreviewStartTime(0.0);    
+
+    // mpc smoothing options
+    setSmoothFromPrevResult(true);
+    setDeltaSmooth(1e-7);
 
     int n_Fr = r_feet.cols();  // Number of contacts
     int n = 13;
@@ -1000,7 +1004,7 @@ void CMPC::simulate_toy_mpc() {
     Eigen::VectorXd f_cmd(12);
     f_cmd.setZero();
 
-    bool print_for_plots = false;
+    bool print_for_plots = true;
 
     if (print_for_plots) {
         printf(
