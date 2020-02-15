@@ -1,6 +1,14 @@
 #include <PnC/MPC/CMPC.hpp>
 #include <Utils/Math/minjerk_one_dim.hpp>
 
+
+Eigen::MatrixXd skew_sym_mat(const Eigen::VectorXd& v) {
+    Eigen::MatrixXd ssm(3, 3);
+    ssm << 0.f, -v[2], v[1], v[2], 0.f, -v[0], -v[1], v[0], 0.f;
+    return ssm;
+}
+
+
 Eigen::Vector3d des_com_xy_pos_given_feet(const Eigen::MatrixXd & r_feet){
     Eigen::Vector3d rfoot_avg = 0.5*(r_feet.col(0) + r_feet.col(1));
     Eigen::Vector3d lfoot_avg = 0.5*(r_feet.col(2) + r_feet.col(3));
@@ -125,7 +133,7 @@ int main(int argc, char ** argv){
     // convex_mpc.setControlAlpha(1e-8);
 
     Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
-    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.0, 0.0, 0.20, 0.20, 0.2, 0.10, 0.0;        
+    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
     convex_mpc.setCostVec(mpc_cost_vec);
 
     // Set custom gait cycle
@@ -139,8 +147,8 @@ int main(int argc, char ** argv){
     convex_mpc.setPreviewStartTime(0.0);
 
     // Feet Params
-    double foot_length = 0.05;   // 5cm distance between toe and heel
-    double nominal_width = 0.1;  // 10cm distance between left and right feet
+    double foot_length = 0.15;   // 15cm distance between toe and heel
+    double nominal_width = 0.333657;  // 33.3cm distance between left and right feet
 
     // Initial Feet Configuration
     // Set Foot contact locations w.r.t world
@@ -164,8 +172,8 @@ int main(int argc, char ** argv){
 
     // Foot landing configuration
     Eigen::MatrixXd r_feet_land = r_feet;
-    Eigen::Vector3d rfoot_translate(0.125, 0.0, 0.0);
-    Eigen::Vector3d lfoot_translate(0.125, 0.0, 0.0);
+    Eigen::Vector3d rfoot_translate(0.4, 0.0, 0.0);
+    Eigen::Vector3d lfoot_translate(0.4, 0.0, 0.0);
 
     std::cout << "r_feet start location:" << std::endl;
     std::cout << r_feet << std::endl;
@@ -320,6 +328,9 @@ int main(int argc, char ** argv){
     Eigen::Vector3d x_com_vel_des(0.0, 0.0, 0.0);
     double des_height = init_com_z;
 
+    bool right_foot_flight_trigger = false;
+    bool left_foot_flight_trigger = false;
+
     for (int i = 0; i < sim_steps; i++) {
 
         // Do the feet update if we are stepping
@@ -348,53 +359,72 @@ int main(int argc, char ** argv){
             }
         }
 
-
+        
         // // Footstep planning from desired velocity command
         // gait_steps->updateContactStates(0.0, cur_time);
-        // // update com current pos and velocity
-        // x_com_pos_cur = Eigen::Vector3d(x_prev[3], x_prev[4], x_prev[5]);
-        // x_com_vel_cur = Eigen::Vector3d(x_prev[9], x_prev[10], x_prev[11]);
+        // update com current pos and velocity
+        x_com_pos_cur = Eigen::Vector3d(x_prev[3], x_prev[4], x_prev[5]);
+        x_com_vel_cur = Eigen::Vector3d(x_prev[9], x_prev[10], x_prev[11]);
 
         // // Plan new footstep location if we are in flight phase
+        // // Check if right foot is in flight
         // if (gait_steps->getContactState(1) == 0){
-        //     // Do the footstep planning here
-        //     // current foot position + raibert heuristic
-        //     r_feet_land.col(0) = r_feet_current.col(0) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
-        //     r_feet_land.col(1) = r_feet_current.col(1) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+        //     if (!right_foot_flight_trigger){               
+        //         // Do the footstep planning here
+        //         // current foot position + raibert heuristic
+        //         r_feet_land.col(0) = r_feet_current.col(0);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(1) = r_feet_current.col(1);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
 
-        //     // Land on the ground
-        //     r_feet_land(2,0) = 0.0;
-        //     r_feet_land(2,1) = 0.0;
+        //         // Land on the ground
+        //         r_feet_land(2,0) = 0.0;
+        //         r_feet_land(2,1) = 0.0;
 
-        //     // std::cout << "rfoot (swing_time/2.0)*x_com_vel_cur = " << (swing_time/2.0)*x_com_vel_cur << std::endl;
-        //     // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
-        //     std::cout << "r_feet_land.col(0).transpose() = " << r_feet_land.col(0).transpose() << std::endl;
-        //     std::cout << "r_feet_land.col(1).transpose() = " << r_feet_land.col(1).transpose() << std::endl;
-        //     // If so, update the location of the feet
-        //     r_feet_current.col(0) = r_feet_land.col(0);
-        //     r_feet_current.col(1) = r_feet_land.col(1);
+        //         // std::cout << "rfoot (swing_time/2.0)*x_com_vel_cur = " << (swing_time/2.0)*x_com_vel_cur << std::endl;
+        //         // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
+        //         std::cout << "r_feet_land.col(0).transpose() = " << r_feet_land.col(0).transpose() << std::endl;
+        //         std::cout << "r_feet_land.col(1).transpose() = " << r_feet_land.col(1).transpose() << std::endl;
+        //         // If so, update the location of the feet
+        //         r_feet_current.col(0) = r_feet_land.col(0);
+        //         r_feet_current.col(1) = r_feet_land.col(1);
+
+        //         right_foot_flight_trigger = true;
+        //     }
+        // }else{
+        //     // Foot is in contact
+        //     if (right_foot_flight_trigger){
+        //         right_foot_flight_trigger = false;
+        //     }
         // }
 
         // // Check if left foot is in flight
         // // std::cout << " left foot " << i << " : " << (gait_steps->getContactState(2) ? std::string("ACTIVE") : std::string("FLIGHT"))  << std::endl;
         // if (gait_steps->getContactState(2) == 0){
-        //     // Do the footstep planning here
-        //     r_feet_land.col(2) = r_feet_current.col(2) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
-        //     r_feet_land.col(3) = r_feet_current.col(3) + k_raibert*(x_com_vel_cur - x_com_vel_des); // + (swing_time/2.0)*x_com_vel_cur
+        //     if (!left_foot_flight_trigger){               
+        //         // Do the footstep planning here
+        //         r_feet_land.col(2) = r_feet_current.col(2);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(3) = r_feet_current.col(3);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
 
-        //     // Land on the ground
-        //     r_feet_land(2,2) = 0.0;
-        //     r_feet_land(2,3) = 0.0;
+        //         // Land on the ground
+        //         r_feet_land(2,2) = 0.0;
+        //         r_feet_land(2,3) = 0.0;
 
-        //     // Update the location of the feet
-        //     // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
-        //     std::cout << "r_feet_land.col(2).transpose() = " << r_feet_land.col(2).transpose() << std::endl;
-        //     std::cout << "r_feet_land.col(3).transpose() = " << r_feet_land.col(3).transpose() << std::endl;
+        //         // Update the location of the feet
+        //         // std::cout << "k_raibert*(x_com_vel_cur - x_com_vel_des) " << k_raibert*(x_com_vel_cur - x_com_vel_des) << std::endl;
+        //         std::cout << "r_feet_land.col(2).transpose() = " << r_feet_land.col(2).transpose() << std::endl;
+        //         std::cout << "r_feet_land.col(3).transpose() = " << r_feet_land.col(3).transpose() << std::endl;
 
-        //     r_feet_current.col(2) = r_feet_land.col(2);
-        //     r_feet_current.col(3) = r_feet_land.col(3);
+        //         r_feet_current.col(2) = r_feet_land.col(2);
+        //         r_feet_current.col(3) = r_feet_land.col(3);
+
+        //         left_foot_flight_trigger = true;
+        //     }
+        // }else{
+        //     // Foot is in contact. Disable trigger if actuve
+        //     if (left_foot_flight_trigger){
+        //         left_foot_flight_trigger = false;
+        //     }
         // }
-
+        
 
 
         // Solve new MPC every mpc control tick
@@ -413,6 +443,15 @@ int main(int argc, char ** argv){
             last_control_time = cur_time;
             f_cmd.head(m) = f_vec_out.head(m);
         }
+
+
+        // Eigen::Vector3d centroidal_torque;
+        // centroidal_torque.setZero();
+        // for(int i = 0; i < r_feet_current.cols(); i++){
+        //     centroidal_torque += skew_sym_mat(r_feet_current.col(i) - x_com_pos_cur)*f_cmd.segment(i*3, 3);
+        // }
+        // std::cout << " " << std::endl;
+        // std::cout << "centroidal_torque : " << centroidal_torque.transpose() << std::endl;
 
         // Integrate the robot dynamics
         convex_mpc.integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet_current, x_next);

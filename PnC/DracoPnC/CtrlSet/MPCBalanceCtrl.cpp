@@ -699,6 +699,8 @@ void MPCBalanceCtrl::firstVisit() {
         ini_com_vel_[i] = com_vel[i];
         goal_com_pos_[i] = (rankle_pos[i] + lankle_pos[i]) / 2.0;
     }
+    std::cout << "rankle_pos: " << rankle_pos.transpose() << std::endl;
+    std::cout << "lankle_pos: " << lankle_pos.transpose() << std::endl;
 
     // Set CoM X Goal to 0.0
     goal_com_pos_[0] = 0.0;
