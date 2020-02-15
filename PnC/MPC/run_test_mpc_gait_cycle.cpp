@@ -119,22 +119,6 @@ int main(int argc, char ** argv){
     // I_robot_body(2,2) = 0.242;
     convex_mpc.setRobotInertia(I_robot_body);
 
-    // MPC Params
-    int mpc_horizon = 15;
-    double mpc_dt = 0.025;
-    convex_mpc.setHorizon(mpc_horizon);  // horizon timesteps
-    convex_mpc.setDt(mpc_dt);    // (seconds) per horizon
-    convex_mpc.setMu(0.9);      //  friction coefficient
-    convex_mpc.setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
-
-    // mpc smoothing options
-    convex_mpc.setSmoothFromPrevResult(true);
-    convex_mpc.setDeltaSmooth(1e-7);
-    // convex_mpc.setControlAlpha(1e-8);
-
-    Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
-    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
-    convex_mpc.setCostVec(mpc_cost_vec);
 
     // Set custom gait cycle
     double swing_time = 0.2;
@@ -146,6 +130,25 @@ int main(int argc, char ** argv){
     convex_mpc.setCustomGaitCycle(gait_steps);
     convex_mpc.setPreviewStartTime(0.0);
 
+    // MPC Params
+    double mpc_dt = 0.025;
+    int mpc_horizon = 15; //int(total_gait_duration/mpc_dt/2.0);//15;
+    convex_mpc.setHorizon(mpc_horizon);  // horizon timesteps
+    convex_mpc.setDt(mpc_dt);    // (seconds) per horizon
+    convex_mpc.setMu(0.9);      //  friction coefficient
+    convex_mpc.setMaxFz(500);   // (Newtons) maximum vertical reaction force per foot.
+
+    // mpc smoothing options
+    convex_mpc.setSmoothFromPrevResult(true);
+    convex_mpc.setDeltaSmooth(1e-7);
+    // convex_mpc.setControlAlpha(1e-8);
+
+    Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
+    // mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
+    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
+    convex_mpc.setCostVec(mpc_cost_vec);
+
+
     // Feet Params
     double foot_length = 0.15;   // 15cm distance between toe and heel
     double nominal_width = 0.333657;  // 33.3cm distance between left and right feet
@@ -155,20 +158,35 @@ int main(int argc, char ** argv){
     Eigen::MatrixXd r_feet(3, 4);  // Each column is a reaction force in x,y,z
     r_feet.setZero();
 
+
+    // Starting robot state ---------------------------------------------------------------------------------------------------------------
+    // Current reduced state of the robot
+    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
+    Eigen::VectorXd x0(13);
+
+    double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
+           init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
+           init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
+           init_com_z_rate(0);
+
+    x0 = convex_mpc.getx0(init_roll, init_pitch, init_yaw, init_com_x, init_com_y,
+                          init_com_z, init_roll_rate, init_pitch_rate, init_yaw_rate,
+                          init_com_x_rate, init_com_y_rate, init_com_z_rate);
+
     // Flat ground contact, z = 0.0
     // 4 Contact Configuration
     // Right Foot Front
-    r_feet(0, 0) = foot_length / 2.0;     // x
-    r_feet(1, 0) = -nominal_width / 2.0;  // y
+    r_feet(0, 0) = init_com_x + (foot_length / 2.0);     // x
+    r_feet(1, 0) = init_com_y + (-nominal_width / 2.0);  // y
     // Right Foot Back
-    r_feet(0, 1) = -foot_length / 2.0;    // x
-    r_feet(1, 1) = -nominal_width / 2.0;  // y
+    r_feet(0, 1) =  init_com_x + (-foot_length / 2.0);    // x
+    r_feet(1, 1) = init_com_y + (-nominal_width / 2.0);  // y
     // Left Foot Front
-    r_feet(0, 2) = foot_length / 2.0;    // x
-    r_feet(1, 2) = nominal_width / 2.0;  // y
+    r_feet(0, 2) = init_com_x + (foot_length / 2.0);    // x
+    r_feet(1, 2) =init_com_y +  (nominal_width / 2.0);  // y
     // Left Foot Back
-    r_feet(0, 3) = -foot_length / 2.0;   // x
-    r_feet(1, 3) = nominal_width / 2.0;  // y
+    r_feet(0, 3) =  init_com_x + (-foot_length / 2.0);   // x
+    r_feet(1, 3) =init_com_y +  (nominal_width / 2.0);  // y
 
     // Foot landing configuration
     Eigen::MatrixXd r_feet_land = r_feet;
@@ -195,20 +213,6 @@ int main(int argc, char ** argv){
     Eigen::VectorXd f_vec_out(m * mpc_horizon);
     Eigen::MatrixXd f_Mat(3, n_Fr);
     f_Mat.setZero();
-
-    // Starting robot state ---------------------------------------------------------------------------------------------------------------
-    // Current reduced state of the robot
-    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    Eigen::VectorXd x0(13);
-
-    double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
-           init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
-           init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
-           init_com_z_rate(0);
-
-    x0 = convex_mpc.getx0(init_roll, init_pitch, init_yaw, init_com_x, init_com_y,
-                          init_com_z, init_roll_rate, init_pitch_rate, init_yaw_rate,
-                          init_com_x_rate, init_com_y_rate, init_com_z_rate);
 
     // Set initial and terminal com pos and orientation
     Eigen::Vector3d ini_com_pos(init_com_x, init_com_y, init_com_z);
@@ -322,17 +326,16 @@ int main(int argc, char ** argv){
 
 
     // Desired velocity command
-    double k_raibert = 0.0;
+    double k_raibert = 1.0;
     Eigen::Vector3d x_com_pos_cur(x_prev[3], x_prev[4], x_prev[5]);
     Eigen::Vector3d x_com_vel_cur(x_prev[9], x_prev[10], x_prev[11]);
-    Eigen::Vector3d x_com_vel_des(0.0, 0.0, 0.0);
+    Eigen::Vector3d x_com_vel_des(0.1, 0.0, 0.0);
     double des_height = init_com_z;
 
     bool right_foot_flight_trigger = false;
     bool left_foot_flight_trigger = false;
 
     for (int i = 0; i < sim_steps; i++) {
-
         // Do the feet update if we are stepping
         if (cur_time < total_gait_duration){
             // update r_feet if we are in the flight phase
@@ -360,20 +363,20 @@ int main(int argc, char ** argv){
         }
 
         
-        // // Footstep planning from desired velocity command
-        // gait_steps->updateContactStates(0.0, cur_time);
         // update com current pos and velocity
         x_com_pos_cur = Eigen::Vector3d(x_prev[3], x_prev[4], x_prev[5]);
         x_com_vel_cur = Eigen::Vector3d(x_prev[9], x_prev[10], x_prev[11]);
 
+        // // Footstep planning from desired velocity command
         // // Plan new footstep location if we are in flight phase
+        // gait_steps->updateContactStates(0.0, cur_time);
         // // Check if right foot is in flight
         // if (gait_steps->getContactState(1) == 0){
         //     if (!right_foot_flight_trigger){               
         //         // Do the footstep planning here
         //         // current foot position + raibert heuristic
-        //         r_feet_land.col(0) = r_feet_current.col(0);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
-        //         r_feet_land.col(1) = r_feet_current.col(1);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(0) = r_feet_current.col(0) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(1) = r_feet_current.col(1) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
 
         //         // Land on the ground
         //         r_feet_land(2,0) = 0.0;
@@ -401,8 +404,8 @@ int main(int argc, char ** argv){
         // if (gait_steps->getContactState(2) == 0){
         //     if (!left_foot_flight_trigger){               
         //         // Do the footstep planning here
-        //         r_feet_land.col(2) = r_feet_current.col(2);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
-        //         r_feet_land.col(3) = r_feet_current.col(3);// + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(2) = r_feet_current.col(2) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
+        //         r_feet_land.col(3) = r_feet_current.col(3) + (swing_time/2.0)*x_com_vel_cur + k_raibert*(x_com_vel_cur - x_com_vel_des); 
 
         //         // Land on the ground
         //         r_feet_land(2,2) = 0.0;
