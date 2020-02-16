@@ -121,7 +121,7 @@ int main(int argc, char ** argv){
 
 
     // Set custom gait cycle
-    double swing_time = 0.2;
+    double swing_time = 0.3;
     double transition_time = 0.2;
     double biped_walking_offset = swing_time + transition_time;
     double total_gait_duration = 2.0*swing_time + 2.0*transition_time;
@@ -132,7 +132,7 @@ int main(int argc, char ** argv){
 
     // MPC Params
     double mpc_dt = 0.025;
-    int mpc_horizon = 15; //int(total_gait_duration/mpc_dt/2.0);//15;
+    int mpc_horizon = int(total_gait_duration/mpc_dt/2.0);//15;
     convex_mpc.setHorizon(mpc_horizon);  // horizon timesteps
     convex_mpc.setDt(mpc_dt);    // (seconds) per horizon
     convex_mpc.setMu(0.9);      //  friction coefficient
@@ -309,7 +309,7 @@ int main(int argc, char ** argv){
     convex_mpc.integrate_robot_dynamics(sim_dt, x_prev, f_Mat, r_feet, x_next);
 
     // Simulate MPC for x seconds
-    double total_sim_time = 7.0;
+    double total_sim_time = 5.0;
     int sim_steps = static_cast<int>(total_sim_time / sim_dt);
     std::cout << "sim_steps:" << sim_steps << std::endl;
 
