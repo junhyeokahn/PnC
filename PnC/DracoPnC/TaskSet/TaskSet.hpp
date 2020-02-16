@@ -1,3 +1,4 @@
+#include <PnC/DracoPnC/TaskSet/AngularMomentumTask.hpp>
 #include <PnC/DracoPnC/TaskSet/BodyRxRyZTask.hpp>
 #include <PnC/DracoPnC/TaskSet/CoMLinBodyOriTask.hpp>
 #include <PnC/DracoPnC/TaskSet/FootRyRzTask.hpp>
