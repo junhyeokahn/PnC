@@ -190,7 +190,7 @@ int main(int argc, char ** argv){
 
     // Foot landing configuration
     Eigen::MatrixXd r_feet_land = r_feet;
-    Eigen::Vector3d rfoot_translate(0.4, 0.0, 0.0);
+    Eigen::Vector3d rfoot_translate(0.8, 0.0, 0.0);
     Eigen::Vector3d lfoot_translate(0.4, 0.0, 0.0);
 
     std::cout << "r_feet start location:" << std::endl;
@@ -281,17 +281,18 @@ int main(int argc, char ** argv){
 
 
     // Get constant desired reference
-    // Eigen::VectorXd x_des(n);
-    // x_des.setZero();
-    // x_des[0] = 0.0;        // M_PI/8; //des roll orientation
-    // x_des[1] = 0.0;        //-M_PI/8; //des pitch orientation
-    // x_des[2] = M_PI / 12;  // Yaw orientation
-    // x_des[3] = 0.0;  //-0.1;//;0.75; // Set desired z height to be 0.75m from
-    //                  //the ground
-    // x_des[5] = 0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
+    Eigen::VectorXd x_des(n);
+    x_des.setZero();
+    x_des[0] = 0.0;        // M_PI/8; //des roll orientation
+    x_des[1] = 0.0;        //-M_PI/8; //des pitch orientation
+    x_des[2] = 0.0;  // Yaw orientation
+    x_des[3] = 0.0;  //-0.1;//;0.75; // Set desired z height to be 0.75m from
+                     //the ground
+    x_des[3] = des_end_com_pos[0];  //;0.75; // Set desired z height to be 0.75m from the ground
+    x_des[5] = 0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
 
     // Eigen::VectorXd X_des(n * mpc_horizon);
-    // convex_mpc.get_constant_desired_x(x_des, X_des);
+    convex_mpc.get_constant_desired_x(x_des, X_ref);
 
     // -----------------------------------------
     // Solve the MPC
@@ -436,7 +437,7 @@ int main(int argc, char ** argv){
             // compute the new reference
 
             // specified foot position
-            X_ref = get_mpc_Xref(convex_mpc, cur_time, mpc_dt, mpc_horizon, com_min_jerk_ref, ori_min_jerk_ref);
+            // X_ref = get_mpc_Xref(convex_mpc, cur_time, mpc_dt, mpc_horizon, com_min_jerk_ref, ori_min_jerk_ref);
 
             // velocity based control
             // X_ref = get_mpc_Xref_given_des_vel(cur_time, mpc_dt, mpc_horizon, x_com_pos_cur, x_com_vel_des, des_height);
