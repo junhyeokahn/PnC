@@ -8,6 +8,11 @@
 #include <cmath>
 
 // A container that holds the state trajectory within the time horizon bounded by time_start and time_end
+
+#define STATE_TRAJECTORY_WITHIN_HORIZON_POSITION 0
+#define STATE_TRAJECTORY_WITHIN_HORIZON_VELOCITY 1
+#define STATE_TRAJECTORY_WITHIN_HORIZON_ACCELERATION 2
+
 class StateTrajectoryWithinHorizon{
 public:
     // for a given state [x, xdot], the size of dimension_in is equal to the dimension of x.
@@ -19,6 +24,8 @@ public:
     void setParams(const Eigen::VectorXd init_boundary, 
                    const Eigen::VectorXd end_boundary,
                    const double time_start, double const time_end);
+
+    Eigen::VectorXd getVal(const int index, const double time);    
 
     Eigen::VectorXd getPos(const double time);
     Eigen::VectorXd getVel(const double time);
@@ -41,6 +48,8 @@ public:
     // For CMPC, the state has the form X = [x, \dot{x}, g] where g is the gravitational constant. 
     // Therefore, X_pred = [X_1, X_2, ..., X_horizon].
 
+    // Warning. It's important that X_pred has the right dimension
+
     // double dt: time interval between knot points
     // double t_start_in, starting time of the reference trajectory
 
@@ -53,13 +62,19 @@ public:
     void setHorizon(const int horizon_in);
 
     // outputs the state value at the specified time
+    // x_out = [x_cubic(t), \dot{x}_cubic(t)]
     void getState(const double time_in, Eigen::VectorXd & x_out); 
+
+
+    Eigen::VectorXd getPos(const double time);
+    Eigen::VectorXd getVel(const double time);
+    Eigen::VectorXd getAcc(const double time);
 
 private:
     double t_start; // global start time of the trajectories
 
     int state_size;
-    int state_size_to_interpolate;
+    int dim;
     int horizon;
 
     // vector containing all the polynomial cubic fits from t_start to t_start + horizon*dt
