@@ -1,5 +1,5 @@
-SET(MPC_SOURCES CMPC.cpp)
-SET(MPC_HEADERS CMPC.hpp)
+SET(MPC_SOURCES CMPC.cpp MPCDesiredTrajectoryManager.cpp)
+SET(MPC_HEADERS CMPC.hpp MPCDesiredTrajectoryManager.hpp)
 
 add_library(myMPC SHARED ${MPC_SOURCES})
 target_link_libraries(myMPC myUtils
@@ -19,6 +19,15 @@ target_link_libraries(run_test_mpc myUtils
                                    myGaitCycle
                                    myGoldfarb
                                    myRobotSystem)
+
+
+add_executable(test_mpc_trajectory_manager test_mpc_trajectory_manager.cpp)
+target_link_libraries(test_mpc_trajectory_manager  myMPC
+                                                   myGaitCycle
+                                                   myUtils
+                                                   myGoldfarb
+                                                   myRobotSystem)
+
 
 add_executable(run_test_mpc_gait_cycle run_test_mpc_gait_cycle.cpp)
 target_link_libraries(run_test_mpc_gait_cycle  myMPC

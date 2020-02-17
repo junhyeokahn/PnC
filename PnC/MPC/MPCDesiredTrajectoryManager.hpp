@@ -1,0 +1,70 @@
+#ifndef H_MPC_DESIRED_TRAJECTORY_MANAGER
+#define H_MPC_DESIRED_TRAJECTORY_MANAGER
+
+
+#include <Utils/Math/cubicfit_one_dim.hpp>
+#include <Eigen/Dense>
+#include <vector>
+#include <cmath>
+
+// A container that holds the state trajectory within the time horizon bounded by time_start and time_end
+class StateTrajectoryWithinHorizon{
+public:
+    // for a given state [x, xdot], the size of dimension_in is equal to the dimension of x.
+    StateTrajectoryWithinHorizon(const int dimension_in);
+    ~StateTrajectoryWithinHorizon();
+
+    // init_boundary is the state [x, xdot] at the start time
+    // end_boundary is the state [x, xdot] at the end boundary
+    void setParams(const Eigen::VectorXd init_boundary, 
+                   const Eigen::VectorXd end_boundary,
+                   const double time_start, double const time_end);
+
+    Eigen::VectorXd getPos(const double time);
+    Eigen::VectorXd getVel(const double time);
+    Eigen::VectorXd getAcc(const double time);
+
+private:
+    int dimension;
+    // A vector of a polynomial cubic fit for the state within the horizon 
+    std::vector<CubicFit_OneDimension> x_cubic;
+};
+
+
+class MPCDesiredTrajectoryManager{
+public: 
+    MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in);
+    ~MPCDesiredTrajectoryManager();
+
+    // Accepts a concatenated state vector which lists the knot points of the state over the horizon
+    // Assumes that the state has the form X = [x, \dot{x}]
+    // For CMPC, the state has the form X = [x, \dot{x}, g] where g is the gravitational constant. 
+    // Therefore, X_pred = [X_1, X_2, ..., X_horizon].
+
+    // double dt: time interval between knot points
+    // double t_start_in, starting time of the reference trajectory
+
+    // Eigen::VectorXd X_start = [x_start, \dot{x}_start]; // starting state of the system
+    void setStateKnotPoints(const double dt, const double t_start_in,
+                            const Eigen::VectorXd & X_start,
+                            const Eigen::VectorXd & X_pred); 
+
+    // int horizon: number of time steps
+    void setHorizon(const int horizon_in);
+
+    // outputs the state value at the specified time
+    void getState(const double time_in, Eigen::VectorXd & x_out); 
+
+private:
+    double t_start; // global start time of the trajectories
+
+    int state_size;
+    int state_size_to_interpolate;
+    int horizon;
+
+    // vector containing all the polynomial cubic fits from t_start to t_start + horizon*dt
+    std::vector< StateTrajectoryWithinHorizon > x_piecewise_cubic;
+
+};
+
+#endif

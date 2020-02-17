@@ -291,20 +291,20 @@ int main(int argc, char ** argv){
     }
 
 
-    // CubicFit_OneDimension cubicfit_test(Eigen::Vector2d(-1.0, 3.0), 
-    //                                     Eigen::Vector2d(1.0, 3.0), 
-    //                                     0.0, 
-    //                                     2.0);
+    CubicFit_OneDimension cubicfit_test(Eigen::Vector2d(-1.0, 3.0), 
+                                        Eigen::Vector2d(1.0, 3.0), 
+                                        0.0, 
+                                        2.0);
 
-    // double cubic_dt = 0.1;
-    // int n_cubic_fit_test = static_cast<int>(2.0/cubic_dt);
+    double cubic_dt = 0.1;
+    int n_cubic_fit_test = static_cast<int>(2.0/cubic_dt);
 
-    // double c_t, c_pos, c_vel, c_acc;
-    // for(int i = 0; i < n_cubic_fit_test+1; i++){
-    //     c_t = i*cubic_dt;
-    //     cubicfit_test.getPos(c_t, c_pos); cubicfit_test.getVel(c_t, c_vel);  cubicfit_test.getAcc(c_t, c_acc);        
-    //     printf("t: %0.3f, p: %0.3f, v: %0.3f, a: %0.3f\n", c_t, c_pos, c_vel, c_acc);
-    // }
+    double c_t, c_pos, c_vel, c_acc;
+    for(int i = 0; i < n_cubic_fit_test+1; i++){
+        c_t = i*cubic_dt;
+        cubicfit_test.getPos(c_t, c_pos); cubicfit_test.getVel(c_t, c_vel);  cubicfit_test.getAcc(c_t, c_acc);        
+        printf("t: %0.3f, p: %0.3f, v: %0.3f, a: %0.3f\n", c_t, c_pos, c_vel, c_acc);
+    }
 
 
 

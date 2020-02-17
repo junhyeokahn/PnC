@@ -5,8 +5,8 @@ CubicFit_OneDimension::CubicFit_OneDimension(){
     Initialization();
 }
 // Parameter Constructor
-CubicFit_OneDimension::CubicFit_OneDimension(const Eigen::Vector2d & init, const Eigen::Vector2d & end,
-        const double & time_start, const double & time_end){
+CubicFit_OneDimension::CubicFit_OneDimension(const Eigen::Vector2d init, const Eigen::Vector2d end,
+        const double time_start, const double time_end){
     Initialization();
     setParams(init, end, time_start, time_end);
 }
@@ -27,8 +27,8 @@ void CubicFit_OneDimension::Initialization(){
     tf = 1.0;
 }
 
-void CubicFit_OneDimension::setParams(const Eigen::Vector2d & init, const Eigen::Vector2d & end,
-        const double & time_start, const double & time_end){
+void CubicFit_OneDimension::setParams(const Eigen::Vector2d init, const Eigen::Vector2d end,
+        const double time_start, const double time_end){
     // Set the Parameters
     init_cond = init;
     end_cond = end;
@@ -49,7 +49,7 @@ void CubicFit_OneDimension::setParams(const Eigen::Vector2d & init, const Eigen:
 
 }
 
-void CubicFit_OneDimension::getPos(const double & time, double & pos){
+void CubicFit_OneDimension::getPos(const double time, double & pos){
     double t;
     if (time <= to){
         t = to;
@@ -60,7 +60,7 @@ void CubicFit_OneDimension::getPos(const double & time, double & pos){
     }
     pos = a_coeffs[0] + a_coeffs[1]*t + a_coeffs[2]*std::pow(t,2) + a_coeffs[3]*std::pow(t,3);
 }
-void CubicFit_OneDimension::getVel(const double & time, double & vel){
+void CubicFit_OneDimension::getVel(const double time, double & vel){
     double t;
     if (time <= to){
         t = to;
@@ -71,7 +71,7 @@ void CubicFit_OneDimension::getVel(const double & time, double & vel){
     }
     vel = a_coeffs[1] + 2.0*a_coeffs[2]*t + 3.0*a_coeffs[3]*std::pow(t,2);
 }
-void CubicFit_OneDimension::getAcc(const double & time, double & acc){
+void CubicFit_OneDimension::getAcc(const double time, double & acc){
     double t;
     if (time <= to){
         t = to;

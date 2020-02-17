@@ -11,18 +11,18 @@ class CubicFit_OneDimension{
     public:
         // Constructors
         CubicFit_OneDimension();
-        CubicFit_OneDimension(const Eigen::Vector2d & init, const Eigen::Vector2d & end,
-                const double & time_start, const double & time_end);
+        CubicFit_OneDimension(const Eigen::Vector2d init, const Eigen::Vector2d end,
+                const double time_start, const double time_end);
 
-        void setParams(const Eigen::Vector2d & init, const Eigen::Vector2d & end,
-                const double & time_start, const double & time_end);
+        void setParams(const Eigen::Vector2d init, const Eigen::Vector2d end,
+                const double time_start, const double time_end);
 
         // Functions
         void test_func();
 
-        void getPos(const double & time, double & pos);
-        void getVel(const double & time, double & vel);
-        void getAcc(const double & time, double & acc);
+        void getPos(const double time, double & pos);
+        void getVel(const double time, double & vel);
+        void getAcc(const double time, double & acc);
 
         void printParameters();
 
