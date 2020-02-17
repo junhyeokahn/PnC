@@ -65,6 +65,52 @@ Eigen::VectorXd get_mpc_Xref(CMPC & convex_mpc,
     return mpc_Xref;
 }
 
+Eigen::VectorXd get_mpc_Xref_two_steps(const double t_start, const double mpc_dt, const int mpc_horizon,
+                                       const Eigen::VectorXd x_des_step1, const Eigen::VectorXd x_des_step2,
+                                       double t_ref_change){
+    int n = 13; // This is always size 13.
+    Eigen::VectorXd mpc_Xref = Eigen::VectorXd::Zero(n*mpc_horizon); // Create the desired state vector evolution
+
+
+    double t_predict = t_start;
+    double com_x, com_y, com_z, rx, ry, rz;
+    double dcom_x, dcom_y, dcom_z, drx, dry, drz;
+
+    Eigen::VectorXd x_des = x_des_step1;
+
+    for(int i = 0; i < mpc_horizon; i++){
+        // Time 
+        t_predict = t_start + (i+1)*mpc_dt;
+
+        // Change the reference for the upcoming step
+        if (t_predict >= t_ref_change){
+            x_des = x_des_step2;
+        }
+
+        // Desired RPY
+        mpc_Xref[i*n + 0] = x_des[0]; // Desired Roll
+        mpc_Xref[i*n + 1] = x_des[1]; // Desired Pitch
+        mpc_Xref[i*n + 2] = x_des[2]; // Desired Yaw
+
+        // Desired COM x,y,z
+        mpc_Xref[i*n + 3] = x_des[3]; // Desired com x
+        mpc_Xref[i*n + 4] = x_des[4]; // Desired com y
+        mpc_Xref[i*n + 5] = x_des[5]; // Desired com z
+
+        // Desired wx, wy, wz
+        mpc_Xref[i*n + 6] = x_des[6]; // Desired Roll
+        mpc_Xref[i*n + 7] = x_des[7]; // Desired Pitch
+        mpc_Xref[i*n + 8] = x_des[8]; // Desired Yaw
+
+        // Desired COM vel x,y,z
+        mpc_Xref[i*n + 9] = x_des[9]; // Desired com x vel
+        mpc_Xref[i*n + 10] = x_des[10]; // Desired com y vel
+        mpc_Xref[i*n + 11] = x_des[11]; // Desired com z vel
+    }
+
+    return mpc_Xref;
+}
+
 
 Eigen::VectorXd get_mpc_Xref_given_des_vel(double t_start, double mpc_dt, int mpc_horizon,
                                            Eigen::Vector3d cur_com_pos, Eigen::Vector3d des_vel, double des_height){
@@ -196,8 +242,15 @@ int main(int argc, char ** argv){
     std::cout << "r_feet start location:" << std::endl;
     std::cout << r_feet << std::endl;
 
-    r_feet_land.col(0) += rfoot_translate; r_feet_land.col(1) += rfoot_translate;
     r_feet_land.col(2) += lfoot_translate; r_feet_land.col(3) += lfoot_translate;
+    Eigen::Vector3d des_end_com_pos_step1 = des_com_xy_pos_given_feet(r_feet_land);
+    des_end_com_pos_step1 += Eigen::Vector3d(0.0, 0.0, init_com_z);
+
+
+    r_feet_land.col(0) += rfoot_translate; r_feet_land.col(1) += rfoot_translate;
+    Eigen::Vector3d des_end_com_pos_step2 = des_com_xy_pos_given_feet(r_feet_land);
+    des_end_com_pos_step2 += Eigen::Vector3d(0.0, 0.0, init_com_z);
+
 
     std::cout << "r_feet landing location:" << std::endl;
     std::cout << r_feet_land << std::endl;
@@ -286,10 +339,13 @@ int main(int argc, char ** argv){
     x_des[0] = 0.0;        // M_PI/8; //des roll orientation
     x_des[1] = 0.0;        //-M_PI/8; //des pitch orientation
     x_des[2] = 0.0;  // Yaw orientation
-    x_des[3] = 0.0;  //-0.1;//;0.75; // Set desired z height to be 0.75m from
-                     //the ground
-    x_des[3] = des_end_com_pos[0];  //;0.75; // Set desired z height to be 0.75m from the ground
+    x_des[3] = des_end_com_pos[0]; //des_end_com_pos[0];  //;0.75; // Set desired z height to be 0.75m from the ground
     x_des[5] = 0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
+
+    // Get constant desired reference
+    Eigen::VectorXd x_des_step1(n), x_des_step2(n);
+    x_des_step1 = x_des;
+    x_des_step2 = x_des; x_des_step2[3];
 
     // Eigen::VectorXd X_des(n * mpc_horizon);
     convex_mpc.get_constant_desired_x(x_des, X_ref);
@@ -441,6 +497,13 @@ int main(int argc, char ** argv){
 
             // velocity based control
             // X_ref = get_mpc_Xref_given_des_vel(cur_time, mpc_dt, mpc_horizon, x_com_pos_cur, x_com_vel_des, des_height);
+
+
+            // change reference for upcoming footstep
+            X_ref = get_mpc_Xref_two_steps(cur_time, mpc_dt, mpc_horizon,
+                                           x_des_step1, x_des_step2,
+                                           (swing_time + transition_time*3.0/2.0));
+
 
             convex_mpc.solve_mpc(x_prev, X_ref, r_feet_current, x_pred, f_vec_out);
             convex_mpc.assemble_vec_to_matrix(3, n_Fr, f_vec_out.head(3 * n_Fr), f_Mat);
