@@ -40,7 +40,7 @@ private:
 
 class MPCDesiredTrajectoryManager{
 public: 
-    MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in);
+    MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in);
     ~MPCDesiredTrajectoryManager();
 
     // Accepts a concatenated state vector which lists the knot points of the state over the horizon
@@ -49,22 +49,24 @@ public:
     // Therefore, X_pred = [X_1, X_2, ..., X_horizon].
 
     // Warning. It's important that X_pred has the right dimension
-
-    // double dt: time interval between knot points
     // double t_start_in, starting time of the reference trajectory
 
     // Eigen::VectorXd X_start = [x_start, \dot{x}_start]; // starting state of the system
-    void setStateKnotPoints(const double dt, const double t_start_in,
+    void setStateKnotPoints(const double t_start_in,
                             const Eigen::VectorXd & X_start,
                             const Eigen::VectorXd & X_pred); 
 
     // int horizon: number of time steps
     void setHorizon(const int horizon_in);
+    // double dt: time interval between knot points. Usually equal to the MPC dt
+    void setDt(const double dt_in);
 
     // outputs the state value at the specified time
     // x_out = [x_cubic(t), \dot{x}_cubic(t)]
     void getState(const double time_in, Eigen::VectorXd & x_out); 
 
+    // helper function which gives the index to use for the piecewise cubic function
+    int getHorizonIndex(const double time);
 
     Eigen::VectorXd getPos(const double time);
     Eigen::VectorXd getVel(const double time);
@@ -72,6 +74,7 @@ public:
 
 private:
     double t_start; // global start time of the trajectories
+    double dt_internal;
 
     int state_size;
     int dim;
@@ -79,6 +82,7 @@ private:
 
     // vector containing all the polynomial cubic fits from t_start to t_start + horizon*dt
     std::vector< StateTrajectoryWithinHorizon > x_piecewise_cubic;
+
 
 };
 

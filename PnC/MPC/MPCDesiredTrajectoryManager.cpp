@@ -63,10 +63,12 @@ Eigen::VectorXd StateTrajectoryWithinHorizon::getAcc(const double time){
 }
 
 
-MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in){
+MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in){
     state_size = state_size_in;
     dim = floor(state_size/2);
     setHorizon(horizon_in);
+    setDt(dt_in);
+    t_start = 0.0;
     // std::cout << "state_size = " << state_size << std::endl;
     // std::cout << "dim = " << dim << std::endl;
     std::cout << "[MPCDesiredTrajectoryManager] Constructed" << std::endl;  
@@ -85,8 +87,11 @@ void MPCDesiredTrajectoryManager::setHorizon(const int horizon_in){
     }
 }
 
+void MPCDesiredTrajectoryManager::setDt(const double dt_in){
+    dt_internal = dt_in;
+}
 
-void MPCDesiredTrajectoryManager::setStateKnotPoints(const double dt, const double t_start_in,
+void MPCDesiredTrajectoryManager::setStateKnotPoints(const double t_start_in,
                                                      const Eigen::VectorXd & X_start,
                                                      const Eigen::VectorXd & X_pred){
     // Initialize trajectory start time
@@ -99,8 +104,8 @@ void MPCDesiredTrajectoryManager::setStateKnotPoints(const double dt, const doub
     Eigen::VectorXd end_boundary(2*dim);
 
     for(int i = 0; i < horizon; i++){
-        t_horizon_begin = t_start + i*dt;
-        t_horizon_end = t_start + (i+1)*dt;
+        t_horizon_begin = t_start + i*dt_internal;
+        t_horizon_end = t_start + (i+1)*dt_internal;
 
         // Get the boundary conditions. The first boundary condition is the current state of the robot
         if (i == 0){
@@ -116,10 +121,33 @@ void MPCDesiredTrajectoryManager::setStateKnotPoints(const double dt, const doub
         // Set the boundary conditions on the cubic polynomial
         x_piecewise_cubic[i].setParams(init_boundary, end_boundary, t_horizon_begin, t_horizon_end);
     }
-
-
 }
 
+int MPCDesiredTrajectoryManager::getHorizonIndex(const double time){
+    // get index to use for the piecewise cubic polynomial
+    int horizon_index = (time - t_start)/dt_internal;
+    // clamp index within bounds
+    if (horizon_index < 0){
+        horizon_index = 0;
+    }    
+    else if (horizon_index >= x_piecewise_cubic.size()){
+        horizon_index = x_piecewise_cubic.size() - 1;
+    }
+    return horizon_index;    
+}
+
+Eigen::VectorXd MPCDesiredTrajectoryManager::getPos(const double time){
+    // return the position
+    return x_piecewise_cubic[getHorizonIndex(time)].getPos(time);
+}
+Eigen::VectorXd MPCDesiredTrajectoryManager::getVel(const double time){
+    // return the velocity
+    return x_piecewise_cubic[getHorizonIndex(time)].getVel(time);
+}
+Eigen::VectorXd MPCDesiredTrajectoryManager::getAcc(const double time){
+    // return the acceleration
+    return x_piecewise_cubic[getHorizonIndex(time)].getAcc(time);
+}
 
 
 
