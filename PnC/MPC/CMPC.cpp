@@ -35,6 +35,10 @@ CMPC::CMPC() {
     // set preview time to 0.0
     t_preview_start = 0.0; 
     
+    // Initialize state and force over horizon
+    X_pred = Eigen::VectorXd(13*horizon);
+    F_out = Eigen::VectorXd(0);
+
     // initialize gait cycle with defaults
     gait_cycle_ptr.reset(new GaitCycle());
 
@@ -45,6 +49,12 @@ CMPC::CMPC() {
 // Destructor
 CMPC::~CMPC() {}
 
+// MPC horizon (number of steps)
+void CMPC::setHorizon(const int & horizon_in){ 
+    horizon = horizon_in;
+    // set X_pred to the correct size
+    X_pred = Eigen::VectorXd(13*horizon);
+} 
 
 void CMPC::setPreviewStartTime(const double t_preview_start_in){
     t_preview_start = t_preview_start_in;
@@ -829,12 +839,17 @@ void CMPC::solve_mpc(const Eigen::VectorXd& x0, const Eigen::VectorXd& X_des,
     // Solve MPC
     solve_mpc_qp(Aqp, Bqp, X_des, x0, Sqp, Kqp, D0, f_prev, Cqp, cvec_qp, f_vec_out);
     // Locally store the output force
-    latest_f_vec_out = f_vec_out.head(m);
+    F_out = f_vec_out;
+    latest_f_vec_out = F_out.head(m);
     // Store the previous result
     f_prev = latest_f_vec_out;
 
-    // Compute prediction of state evolution after an interval of mpc_dt
-    x_pred = (Aqp * x0 + Bqp * f_vec_out).head(n);
+    // Compute prediction of state evolution 
+    X_pred = (Aqp * x0 + Bqp * f_vec_out);
+    // get the prediction after an interval of mpc_dt
+    x_pred = X_pred.head(n);
+
+
 
 #ifdef MPC_TIME_ALL
     // End

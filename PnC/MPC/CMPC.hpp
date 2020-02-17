@@ -58,6 +58,8 @@ public:
 	Eigen::VectorXd latest_f_vec_out; // Container holding the the latest computed force output for control (not to be confused with the force at the end of the horizon)
 	Eigen::VectorXd f_prev; // Previous reaction force vector for the first horizon.
 
+	Eigen::VectorXd X_pred; // dimension: (13*horizon) state prediction over the horizon. [x_{k+1}, x_{k+2}, ..., x_{k+horizon}]
+	Eigen::VectorXd F_out;  // dimension: (n_Fr*horizon) forces to exert over the horizon. [f_{k}, f_{k+1}, ..., f_{k - 1 + horizon}]
 
 	std::shared_ptr<GaitCycle> gait_cycle_ptr; // pointer to the gait cycle object
 
@@ -82,6 +84,11 @@ public:
 	// in the same order as r_feet. 
 	Eigen::MatrixXd getMatComputedGroundForces();
 
+	// Gets the computed forces over the horizon
+	Eigen::VectorXd getForcesOverHorizon(){return F_out;}
+	// Gets the predicted state evolution over the horizon
+	Eigen::VectorXd getXpredOverHorizon(){return X_pred;}
+
 
 	void setRobotMass(const double robot_mass_in){ robot_mass = robot_mass_in; }
 	// Whether or not the inertia needs to be rotated to the world frame. 
@@ -89,7 +96,7 @@ public:
 
 	void setRobotInertia(const Eigen::MatrixXd & inertia_in){ I_robot = inertia_in; }
 	void setDt(const double mpc_dt_in){mpc_dt = mpc_dt_in;}	// MPC dt interval per horizon
-	void setHorizon(const int & horizon_in){ horizon = horizon_in;}	// MPC horizon (number of steps)
+	void setHorizon(const int & horizon_in);	// MPC horizon (number of steps)
 
 	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
 	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
