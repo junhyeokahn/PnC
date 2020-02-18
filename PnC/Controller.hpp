@@ -5,6 +5,7 @@
 #include <PnC/WBC/Task.hpp>
 #include <PnC/WBC/ContactSpec.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <memory>
 
 class Controller{
 public:
