@@ -58,24 +58,24 @@ void MPCStandTest::_SettingParameter() {
         ((IVDJPosTargetCtrl*)jpos_target_ctrl_)->setTotalCtrlTime(tmp_val);
 
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setCoMHeight(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setCoMHeight(tmp_val);
         sp_-> omega = sqrt(9.81/tmp_val);
  
         myUtils::readParameter(test_cfg, "contact_transition_duration", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setContactTransitionTime(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setContactTransitionTime(tmp_val);
 
         myUtils::readParameter(test_cfg, "stabilization_duration", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->SetStabilizationDuration(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->SetStabilizationDuration(tmp_val);
 
         myUtils::readParameter(test_cfg, "com_ctrl_time", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setStanceTime(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setStanceTime(tmp_val);
 
         myUtils::readParameter(test_cfg, "sway_start_time", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayStartTime(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setSwayStartTime(tmp_val);
         myUtils::readParameter(test_cfg, "sway_magnitude", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayMagnitude(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setSwayMagnitude(tmp_val);
         myUtils::readParameter(test_cfg, "sway_period", tmp_val);
-        ((MPCBalanceCtrl*)mpc_ctrl_)->setSwayPeriod(tmp_val);
+        ((MPCStandCtrl*)mpc_ctrl_)->setSwayPeriod(tmp_val);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

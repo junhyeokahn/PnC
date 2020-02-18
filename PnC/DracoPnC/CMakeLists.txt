@@ -9,6 +9,7 @@ target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
                                myMPC
+                               myGaitCycle
                                myWBC
                                myFilters
                                myPlanner)
