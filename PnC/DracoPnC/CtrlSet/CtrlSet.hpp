@@ -8,3 +8,4 @@
 #include <PnC/DracoPnC/CtrlSet/SwingPlanningCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/IVDJPosTargetCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/MPCBalanceCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/MPCStandCtrl.hpp>

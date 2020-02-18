@@ -3,3 +3,4 @@
 #include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
 #include <PnC/DracoPnC/TestSet/BalancingTest.hpp>
 #include <PnC/DracoPnC/TestSet/MPCTest.hpp>
+#include <PnC/DracoPnC/TestSet/MPCStandTest.hpp>
