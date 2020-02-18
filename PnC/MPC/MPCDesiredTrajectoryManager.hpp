@@ -90,4 +90,9 @@ private:
 
 };
 
+namespace mpc_trajectory_manager_test{
+    // Function which tests this object
+    void test_object();
+}
+
 #endif
