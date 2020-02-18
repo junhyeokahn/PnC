@@ -147,12 +147,11 @@ void DracoInterface::GetContactSequence(
 
 void DracoInterface::Walk(double ft_length, double r_ft_width,
                              double l_ft_width, double ori_inc, int num_step) {
-    if (sp_->b_walking) {
-        std::cout
-            << "Still Walking... Please Wait Until Ongoing Walking is Done"
-            << std::endl;
+    if (!(sp_->b_ready_to_walk)) {
+        std::cout << "Not Ready to Walk... Please Wait." << std::endl;
     } else {
         sp_->b_walking = true;
+        sp_->b_ready_to_walk = false;
         sp_->ft_length = ft_length;
         sp_->r_ft_width = r_ft_width;
         sp_->l_ft_width = l_ft_width;
@@ -163,4 +162,78 @@ void DracoInterface::Walk(double ft_length, double r_ft_width,
         ((WalkingTest*)test_)->ResetWalkingParameters();
         ((WalkingTest*)test_)->InitiateWalkingPhase();
     }
+}
+
+void DracoInterface::WalkInX(double x, double max_delta_x){
+    int n_step_x = std::abs(static_cast<int>(std::floor(x / max_delta_x) + 1));
+    double ft_length = x / n_step_x;
+
+    std::cout << "-------------------------------" << std::endl;
+    std::cout << "n_step_x : " << n_step_x << std::endl;
+    std::cout << "ft_length : " << ft_length << std::endl;
+    std::cout << "-------------------------------" << std::endl;
+
+    Walk(ft_length, 0.33, 0.33, 0., n_step_x);
+}
+
+void DracoInterface::WalkInY(double y, double max_delta_y){
+    int n_step_y = std::abs(static_cast<int>(std::floor(y / max_delta_y) + 1));
+    double r_ft_width = 0.33 - y / n_step_y;
+    double l_ft_width = 0.33 + y / n_step_y;
+
+    std::cout << "-------------------------------" << std::endl;
+    std::cout << "n_step_y : " << n_step_y << std::endl;
+    std::cout << "r_ft_width : " << r_ft_width << std::endl;
+    std::cout << "l_ft_width : " << l_ft_width << std::endl;
+    std::cout << "-------------------------------" << std::endl;
+    Walk(0., r_ft_width, l_ft_width, 0., n_step_y);
+}
+
+void DracoInterface::Turn(double th, double max_delta_th){
+    int n_step_th = std::abs(static_cast<int>(std::floor(th / max_delta_th) + 1));
+    double ori_inc = th / n_step_th;
+
+    std::cout << "-------------------------------" << std::endl;
+    std::cout << "n_step_th : " << n_step_th << std::endl;
+    std::cout << "ori_inc : " << ori_inc << std::endl;
+    std::cout << "-------------------------------" << std::endl;
+    Walk(0., 0.33, 0.33, ori_inc, n_step_th);
+}
+
+void DracoInterface::WalkToRelativePositionAndOrientation(double x, double y,
+                                                          double th,
+                                                          double max_delta_x,
+                                                          double max_delta_y,
+                                                          double max_delta_th){
+
+    int n_step_x = std::abs(static_cast<int>(std::floor(x / max_delta_x) + 1));
+    int n_step_y = std::abs(static_cast<int>(std::floor(y / max_delta_y) + 1));
+    int n_step_th = std::abs(static_cast<int>(std::floor(th / max_delta_th) + 1));
+    int n_step = std::max(std::max(n_step_x, n_step_y), n_step_th);
+
+    double ft_length = x / n_step;
+    double r_ft_width = 0.33 - y / n_step;
+    double l_ft_width = 0.33 + y / n_step;
+    double ori_inc = th / n_step;
+
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "x : " << x << std::endl;
+    std::cout << "y : " << y << std::endl;
+    std::cout << "th  : " << th << std::endl;
+    std::cout << "num x step : " << n_step_x << std::endl;
+    std::cout << "num y step : " << n_step_y << std::endl;
+    std::cout << "num th step : " << n_step_th << std::endl;
+    std::cout << "num step : " << n_step << std::endl;
+    std::cout << "ft_length : " << ft_length << std::endl;
+    std::cout << "r_ft_length : " << r_ft_width << std::endl;
+    std::cout << "l_ft_length : " << l_ft_width << std::endl;
+    std::cout << "ori_inc : " << ori_inc << std::endl;
+    std::cout << "--------------------------------" << std::endl;
+
+
+    Walk(ft_length, r_ft_width, l_ft_width, ori_inc, n_step);
+}
+
+bool DracoInterface::IsReadyForNextCommand(){
+    return sp_->b_ready_to_walk;
 }

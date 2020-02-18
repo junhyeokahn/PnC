@@ -442,6 +442,9 @@ void DoubleSupportCtrl::_balancing_task_setup() {
             com_pos_des[i] = goal_com_pos_[i];
             com_vel_des[i] = 0.;
         }
+        if (state_machine_time_ > stb_dur + 2.) {
+            sp_->b_ready_to_walk = true;
+        }
     }
 
     for (int i = 0; i < 3; ++i) {

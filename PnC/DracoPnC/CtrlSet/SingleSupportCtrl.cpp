@@ -341,7 +341,6 @@ void SingleSupportCtrl::_contact_setup() {
 }
 
 void SingleSupportCtrl::firstVisit() {
-    std::cout << "singlesupport" << std::endl;
     jpos_ini_ = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
     ctrl_start_time_ = sp_->curr_time;
     SetBSpline_();
