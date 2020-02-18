@@ -163,6 +163,10 @@ int main(int argc, char ** argv){
     // I_robot_body(0,0) = 07;
     // I_robot_body(1,1) = 0.26;
     // I_robot_body(2,2) = 0.242;
+    I_robot_body << 4.499536, -0.024537, 0.840501, -0.024537, 3.967693, 0.014913, 0.840501, 0.014913, 1.268436;
+
+    std::cout << "I robot body:" << std::endl;
+    std::cout << I_robot_body << std::endl;
     convex_mpc.setRobotInertia(I_robot_body);
 
 
@@ -191,7 +195,8 @@ int main(int argc, char ** argv){
 
     Eigen::VectorXd mpc_cost_vec = Eigen::VectorXd::Zero(13);
     // mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
-    mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
+    // mpc_cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.10, 0.0;        
+    mpc_cost_vec << 2.5, 2.5, 2.5, 10.0, 10.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
     convex_mpc.setCostVec(mpc_cost_vec);
 
 
