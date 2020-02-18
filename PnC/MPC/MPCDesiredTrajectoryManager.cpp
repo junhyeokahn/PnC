@@ -69,8 +69,6 @@ MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in
     setHorizon(horizon_in);
     setDt(dt_in);
     t_start = 0.0;
-    // std::cout << "state_size = " << state_size << std::endl;
-    // std::cout << "dim = " << dim << std::endl;
     std::cout << "[MPCDesiredTrajectoryManager] Constructed" << std::endl;  
 }
 
@@ -149,17 +147,8 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getAcc(const double time){
     return x_piecewise_cubic[getHorizonIndex(time)].getAcc(time);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void MPCDesiredTrajectoryManager::getState(const double time_in, Eigen::VectorXd & x_out){
+    x_out = Eigen::VectorXd::Zero(2*dim);
+    x_out.head(dim) = getPos(time_in);
+    x_out.tail(dim) = getVel(time_in);
+}

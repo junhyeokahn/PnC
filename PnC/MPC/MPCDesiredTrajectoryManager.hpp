@@ -46,6 +46,8 @@ public:
     // Accepts a concatenated state vector which lists the knot points of the state over the horizon
     // Assumes that the state has the form X = [x, \dot{x}]
     // For CMPC, the state has the form X = [x, \dot{x}, g] where g is the gravitational constant. 
+    //    this class automatically handles the CMPC case due to the implementation.
+
     // Therefore, X_pred = [X_1, X_2, ..., X_horizon].
 
     // Warning. It's important that X_pred has the right dimension
@@ -63,6 +65,8 @@ public:
 
     // outputs the state value at the specified time
     // x_out = [x_cubic(t), \dot{x}_cubic(t)]
+    
+    // time_in is clamped between (t_start and t_start + horizon*dt_internal)
     void getState(const double time_in, Eigen::VectorXd & x_out); 
 
     // helper function which gives the index to use for the piecewise cubic function
