@@ -177,8 +177,10 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            q[0] = 2;
-            q[3] = M_PI;
+            //q[0] = 2;
+            //q[3] = M_PI;
+            q[0] = 0;
+            q[3] = 0;
             q[2] = 0.9;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
@@ -368,6 +370,16 @@ int main(int argc, char** argv) {
     // ==================================
     // Friction & Restitution Coefficient
     // ==================================
+    double friction(10.);
+    double restit(0.0);
+    ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
+    draco->getBodyNode("Torso")->setFrictionCoeff(friction);
+    ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
+    draco->getBodyNode("Torso")->setRestitutionCoeff(restit);
+    draco->getBodyNode("rAnkle")->setFrictionCoeff(friction);
+    draco->getBodyNode("lAnkle")->setFrictionCoeff(friction);
+    draco->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
+    draco->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -381,11 +393,6 @@ int main(int argc, char** argv) {
     // Display Target Frame
     // ====================
     if (b_display_target_frame) addTargetFrame(world);
-
-    // ====================
-    // Add Collision Object
-    // ====================
-    //_addFootCollisionObject(robot);
 
     // =====================
     // Initial configuration
@@ -435,7 +442,7 @@ int main(int argc, char** argv) {
         viewer.simulate(false);
         viewer.switchHeadlights(false);
         ::osg::Vec3 p1(1.0, 0.2, 1.0);
-        p1 = p1 * 0.7;
+        p1 = p1 * 0.5;
         viewer.getLightSource(0)->getLight()->setPosition(
             ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
         viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
