@@ -216,7 +216,7 @@ int main(int argc, char ** argv){
     Eigen::VectorXd x0(13);
 
     double init_roll(0), init_pitch(0), init_yaw(0.0), init_com_x(0),
-           init_com_y(0), init_com_z(0.75), init_roll_rate(0), init_pitch_rate(0),
+           init_com_y(0), init_com_z(0.70), init_roll_rate(0), init_pitch_rate(0),
            init_yaw_rate(0), init_com_x_rate(0), init_com_y_rate(0),
            init_com_z_rate(0);
 
@@ -362,8 +362,8 @@ int main(int argc, char ** argv){
     x_des[0] = 0.0;        // M_PI/8; //des roll orientation
     x_des[1] = 0.0;        //-M_PI/8; //des pitch orientation
     x_des[2] = 0.0;  // Yaw orientation
-    x_des[3] = des_end_com_pos[0]; //des_end_com_pos[0];  //;0.75; // Set desired z height to be 0.75m from the ground
-    x_des[5] = 0.75;  //;0.75; // Set desired z height to be 0.75m from the ground
+    x_des[3] = des_end_com_pos[0]; //des_end_com_pos[0];  
+    x_des[5] = 0.70; // Set desired z height to be 0.70m from the ground
 
     // Get constant desired reference
     Eigen::VectorXd x_des_step1(n), x_des_step2(n);
