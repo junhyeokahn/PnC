@@ -82,7 +82,16 @@ class MPCStandCtrl : public Controller {
     CMPC* convex_mpc;
     double last_control_time_;
 
-    GaitCycle* no_gait_;
+    std::shared_ptr<GaitCycle> no_gait_;
+    std::shared_ptr<GaitCycle> biped_gait_;
+    // Set custom gait cycle
+    double gait_swing_time_;
+    double gait_transition_time_;
+    double gait_biped_walking_offset_;
+    double gait_total_gait_duration_;
+
+    bool gait_set_once_;
+
     MPCDesiredTrajectoryManager* mpc_desired_trajectory_manager_;
     MPCDesiredTrajectoryManager* mpc_actual_trajectory_manager_;
 

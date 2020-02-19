@@ -81,7 +81,17 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_t_start_solve_ = 0.0;
     mpc_solved_once_ = false; // Whether the MPC has been solved at least once
 
-    no_gait_ = new GaitCycle();
+    // Gait
+    no_gait_ = std::make_shared<GaitCycle>();
+    // Set custom gait cycle
+    gait_swing_time_ = 0.3;
+    gait_transition_time_ = 0.2;
+    gait_biped_walking_offset_ = gait_swing_time_ + gait_transition_time_;
+    gait_total_gait_duration_ = 2.0*gait_swing_time_ + 2.0*gait_transition_time_;
+    biped_gait_ = std::shared_ptr<GaitCycle>(new GaitCycle(gait_swing_time_, gait_total_gait_duration_, {0.0, 0.0, gait_biped_walking_offset_, gait_biped_walking_offset_}));
+    gait_set_once_ = false;
+
+    // Trajectory managers
     mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
     mpc_actual_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
 
@@ -156,6 +166,9 @@ void MPCStandCtrl::oneStep(void* _cmd) {
 
     // Setup the contacts
     contact_setup();
+
+    // update the gait depending on the swing foot
+    // To Do
 
     // Run the MPC at every MPC tick
     // if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
@@ -255,6 +268,14 @@ void MPCStandCtrl::_mpc_Xdes_setup(){
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
 
+    // Set custom gait cycle
+    // if (state_machine_time_ >= sway_start_time_){
+    //     if (!gait_set_once_){
+    //         convex_mpc->setCustomGaitCycle(biped_gait_);            
+    //         gait_set_once_ = true;
+    //     }
+    // }
+
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
     for(int i = 0; i < mpc_horizon_; i++){
@@ -318,6 +339,7 @@ void MPCStandCtrl::_mpc_Xdes_setup(){
 void MPCStandCtrl::_mpc_solve(){
     // Solve the mpc
     mpc_t_start_solve_ = state_machine_time_;
+    convex_mpc->setPreviewStartTime(mpc_t_start_solve_);
 
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
