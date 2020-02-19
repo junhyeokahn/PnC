@@ -174,7 +174,7 @@ void MPCStandCtrl::oneStep(void* _cmd) {
     // To Do
 
     // Run the MPC at every MPC tick
-    double policy_delay = mpc_dt_*2.0;//(mpc_dt_*mpc_horizon_/2.0);
+    double policy_delay = mpc_dt_;//(mpc_dt_*mpc_horizon_/2.0);
     // if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
     if ( (((state_machine_time_ - last_control_time_) > policy_delay) && !simulate_mpc_solved_) || (last_control_time_ < 0)){
         // // Setup and solve the MPC 
