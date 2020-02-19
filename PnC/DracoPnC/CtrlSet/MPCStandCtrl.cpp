@@ -158,7 +158,8 @@ void MPCStandCtrl::oneStep(void* _cmd) {
     contact_setup();
 
     // Run the MPC at every MPC tick
-    if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
+    // if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
+    if (((state_machine_time_ - last_control_time_) > (mpc_dt_*mpc_horizon_/2.0) ) || (last_control_time_ < 0)){
         last_control_time_ = state_machine_time_;
         // // Setup and solve the MPC 
         _mpc_setup();
@@ -336,9 +337,6 @@ void MPCStandCtrl::_mpc_solve(){
         mpc_solved_once_ = true;
     }
 
-    // Update predicted behavior to state estimate
-    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
-    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
 }
 
 void MPCStandCtrl::_updateTrajectories(){
@@ -460,7 +458,11 @@ void MPCStandCtrl::task_setup() {
 
     // Enable MPC:
     // Set desired com and body orientation from predicted state 
-    mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+    // mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+    mpc_desired_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+    // Update the behavior
+    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
+    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
 
     double des_roll = mpc_x_pred_[0]; 
     double des_pitch = mpc_x_pred_[1]; 
