@@ -3,6 +3,7 @@
 
 
 #include <Utils/Math/cubicfit_one_dim.hpp>
+#include <Utils/Math/linearfit_one_dim.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <cmath>
@@ -12,6 +13,10 @@
 #define STATE_TRAJECTORY_WITHIN_HORIZON_POSITION 0
 #define STATE_TRAJECTORY_WITHIN_HORIZON_VELOCITY 1
 #define STATE_TRAJECTORY_WITHIN_HORIZON_ACCELERATION 2
+
+#define STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT 2
+#define STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT 0
+
 
 class StateTrajectoryWithinHorizon{
 public:
@@ -25,18 +30,20 @@ public:
                    const Eigen::VectorXd end_boundary,
                    const double time_start, double const time_end);
 
-    Eigen::VectorXd getVal(const int index, const double time);    
+    Eigen::VectorXd getVal(const int index, const double time,
+                           int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT);    
 
-    Eigen::VectorXd getPos(const double time);
-    Eigen::VectorXd getVel(const double time);
-    Eigen::VectorXd getAcc(const double time);
+    Eigen::VectorXd getPos(const double time, const int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT);
+    Eigen::VectorXd getVel(const double time, const int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT);
+    Eigen::VectorXd getAcc(const double time, const int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT);
 
 private:
     int dimension;
     // A vector of a polynomial cubic fit for the state within the horizon 
     std::vector<CubicFit_OneDimension> x_cubic;
+    // A vector of a linear fit for the state within the horizon 
+    std::vector<LinearFit_OneDimension> x_linear;
 };
-
 
 class MPCDesiredTrajectoryManager{
 public: 
@@ -85,6 +92,10 @@ public:
     Eigen::VectorXd getVel(const double time);
     Eigen::VectorXd getAcc(const double time);
 
+    void setLinearInterpolate(bool val);
+    void setCubicInterpolate(bool val);
+    void setLinearInterpolateFirstStatetoNext(bool val);
+
 private:
     double t_start; // global start time of the trajectories
     double dt_internal;
@@ -93,13 +104,17 @@ private:
     int dim;
     int horizon;
 
+    // options:
+    bool linear_interpolate_start_and_knotpoints;
+    bool linear_interpolate_states;
+
     // store initial start value
     Eigen::VectorXd X_start_internal; 
     // vector containing the knot points
     Eigen::VectorXd X_pred_internal; 
 
-    // vector containing all the polynomial cubic fits from t_start to t_start + horizon*dt
-    std::vector< StateTrajectoryWithinHorizon > x_piecewise_cubic;
+    // vector containing all the polynomial fits from t_start to t_start + horizon*dt
+    std::vector< StateTrajectoryWithinHorizon > x_trajectory;
 
 
 };

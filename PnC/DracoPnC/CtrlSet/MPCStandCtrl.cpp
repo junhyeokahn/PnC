@@ -94,9 +94,10 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     // Trajectory managers
     mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
     mpc_actual_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+    // mpc_actual_trajectory_manager_->setLinearInterpolateFirstStatetoNext(true);
 
     // Integration Parameters
-    max_joint_vel_ = 2.0;
+     max_joint_vel_ = 2.0;
     velocity_break_freq_ = 25.0;
     max_jpos_error_ = 0.2;
     position_break_freq_ = 20.0;

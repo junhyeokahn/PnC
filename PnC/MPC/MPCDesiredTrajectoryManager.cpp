@@ -5,6 +5,7 @@ StateTrajectoryWithinHorizon::StateTrajectoryWithinHorizon(const int dimension_i
     dimension = dimension_in;
     for(int i = 0; i < dimension; i++){
         x_cubic.push_back(CubicFit_OneDimension());     
+        x_linear.push_back(LinearFit_OneDimension());
     }
     // std::cout << "[StateTrajectoryWithinHorizon] cubic fit for state size " << dimension << " constructed" << std::endl;
 
@@ -21,45 +22,61 @@ void StateTrajectoryWithinHorizon::setParams(const Eigen::VectorXd init_boundary
         x_cubic[i].setParams(Eigen::Vector2d(init_boundary[i], init_boundary[dimension + i]),
                              Eigen::Vector2d(end_boundary[i], end_boundary[dimension + i]), 
                              time_start, time_end);        
+        x_linear[i].setParams(init_boundary[i], end_boundary[i], 
+                              time_start, time_end);
     }
 
 }
 
 // returns an output vector with size equal to dimension. 
-Eigen::VectorXd StateTrajectoryWithinHorizon::getVal(const int index, const double time){
+Eigen::VectorXd StateTrajectoryWithinHorizon::getVal(const int index, const double time, const int fit_type){
     Eigen::VectorXd out(dimension); 
     double val;
     if (index == STATE_TRAJECTORY_WITHIN_HORIZON_POSITION){
         for(int i = 0; i < dimension; i++){
-            x_cubic[i].getPos(time, val);
+            if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT){
+                x_cubic[i].getPos(time, val);
+            }else if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT){
+                x_linear[i].getPos(time, val);
+            }
             out[i] = val;
         }
     }
     else if (index == STATE_TRAJECTORY_WITHIN_HORIZON_VELOCITY){
         for(int i = 0; i < dimension; i++){
-            x_cubic[i].getVel(time, val);
+            if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT){
+                x_cubic[i].getVel(time, val);
+            }else if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT){
+                x_linear[i].getVel(time, val);
+            }
             out[i] = val;
         }
+
     }else if (index == STATE_TRAJECTORY_WITHIN_HORIZON_ACCELERATION){
         for(int i = 0; i < dimension; i++){
-            x_cubic[i].getAcc(time, val);
+            if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT){
+                x_cubic[i].getAcc(time, val);
+            }else if (fit_type == STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT){
+                x_linear[i].getAcc(time, val);
+            }
             out[i] = val;
         }
     }else{
         out.setZero();
     }
+
     return out;
 }
 
-Eigen::VectorXd StateTrajectoryWithinHorizon::getPos(const double time){
-    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_POSITION, time);
+Eigen::VectorXd StateTrajectoryWithinHorizon::getPos(const double time, const int fit_type){
+    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_POSITION, time, fit_type);
 }
 
-Eigen::VectorXd StateTrajectoryWithinHorizon::getVel(const double time){
-    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_VELOCITY, time);
+Eigen::VectorXd StateTrajectoryWithinHorizon::getVel(const double time, const int fit_type){
+    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_VELOCITY, time, fit_type);
 }
-Eigen::VectorXd StateTrajectoryWithinHorizon::getAcc(const double time){
-    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_ACCELERATION, time);
+Eigen::VectorXd StateTrajectoryWithinHorizon::getAcc(const double time, const int fit_type){
+    return getVal(STATE_TRAJECTORY_WITHIN_HORIZON_ACCELERATION, time, fit_type);
 }
 
 
@@ -70,8 +87,21 @@ MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in
     setDt(dt_in);
     t_start = 0.0;
 
+    linear_interpolate_start_and_knotpoints = false;
+    linear_interpolate_states  = false;
+
     X_start_internal = Eigen::VectorXd::Zero(state_size);
     std::cout << "[MPCDesiredTrajectoryManager] Constructed" << std::endl;  
+}
+
+void MPCDesiredTrajectoryManager::setLinearInterpolate(bool val){
+    linear_interpolate_states = val;
+}
+void MPCDesiredTrajectoryManager::setCubicInterpolate(bool val){
+    linear_interpolate_states = !val;
+}
+void MPCDesiredTrajectoryManager::setLinearInterpolateFirstStatetoNext(bool val){
+    linear_interpolate_start_and_knotpoints = val;
 }
 
 MPCDesiredTrajectoryManager::~MPCDesiredTrajectoryManager(){
@@ -82,9 +112,9 @@ void MPCDesiredTrajectoryManager::setHorizon(const int horizon_in){
     horizon = horizon_in;
     X_pred_internal = Eigen::VectorXd::Zero(horizon*state_size);
     // Clear the piecewise cubic container
-    x_piecewise_cubic.clear();
+    x_trajectory.clear();
     for(int i = 0; i < horizon; i++){
-        x_piecewise_cubic.push_back(StateTrajectoryWithinHorizon(dim));       
+        x_trajectory.push_back(StateTrajectoryWithinHorizon(dim));       
     }
 }
 
@@ -124,7 +154,7 @@ void MPCDesiredTrajectoryManager::setStateKnotPoints(const double t_start_in,
         end_boundary.tail(dim) = X_pred.segment(i*state_size + dim, dim);
 
         // Set the boundary conditions on the cubic polynomial
-        x_piecewise_cubic[i].setParams(init_boundary, end_boundary, t_horizon_begin, t_horizon_end);
+        x_trajectory[i].setParams(init_boundary, end_boundary, t_horizon_begin, t_horizon_end);
     }
 }
 
@@ -135,23 +165,41 @@ int MPCDesiredTrajectoryManager::getHorizonIndex(const double time){
     if (horizon_index < 0){
         horizon_index = 0;
     }    
-    else if (horizon_index >= x_piecewise_cubic.size()){
-        horizon_index = x_piecewise_cubic.size() - 1;
+    else if (horizon_index >= x_trajectory.size()){
+        horizon_index = x_trajectory.size() - 1;
     }
     return horizon_index;    
 }
 
 Eigen::VectorXd MPCDesiredTrajectoryManager::getPos(const double time){
     // return the position
-    return x_piecewise_cubic[getHorizonIndex(time)].getPos(time);
+    int index = getHorizonIndex(time);
+    int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
+
+    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+        fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
+    }
+
+    return x_trajectory[index].getPos(time, fit_type);
 }
 Eigen::VectorXd MPCDesiredTrajectoryManager::getVel(const double time){
     // return the velocity
-    return x_piecewise_cubic[getHorizonIndex(time)].getVel(time);
+    int index = getHorizonIndex(time);
+    int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
+    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+        fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
+    }
+
+    return x_trajectory[index].getVel(time, fit_type);
 }
 Eigen::VectorXd MPCDesiredTrajectoryManager::getAcc(const double time){
     // return the acceleration
-    return x_piecewise_cubic[getHorizonIndex(time)].getAcc(time);
+    int index = getHorizonIndex(time);
+    int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
+    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+        fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
+    }
+    return x_trajectory[index].getAcc(time, fit_type);
 }
 
 void MPCDesiredTrajectoryManager::getState(const double time_in, Eigen::VectorXd & x_out){
@@ -242,6 +290,7 @@ namespace mpc_trajectory_manager_test{
         double time_start = 0.0;
         std::cout << "Pre fit" << std::endl;
         trajectory_manager.setStateKnotPoints(time_start, X_start, X_pred); 
+        // trajectory_manager.setLinearInterpolateFirstStatetoNext(true);
         std::cout << "Post fit" << std::endl;
 
         Eigen::VectorXd x_traj; 
