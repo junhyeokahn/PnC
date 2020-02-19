@@ -81,6 +81,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_t_start_solve_ = 0.0;
     mpc_solved_once_ = false; // Whether the MPC has been solved at least once
 
+    simulate_mpc_solved_ = false;
+
     // Gait
     no_gait_ = std::make_shared<GaitCycle>();
     // Set custom gait cycle
@@ -172,18 +174,26 @@ void MPCStandCtrl::oneStep(void* _cmd) {
     // To Do
 
     // Run the MPC at every MPC tick
+    double policy_delay = mpc_dt_*2.0;//(mpc_dt_*mpc_horizon_/2.0);
     // if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
-    if (((state_machine_time_ - last_control_time_) > (mpc_dt_*mpc_horizon_/2.0) ) || (last_control_time_ < 0)){
-        last_control_time_ = state_machine_time_;
+    if ( (((state_machine_time_ - last_control_time_) > policy_delay) && !simulate_mpc_solved_) || (last_control_time_ < 0)){
         // // Setup and solve the MPC 
         _mpc_setup();
         _mpc_Xdes_setup();
         _mpc_solve();
-
+        simulate_mpc_solved_ = true;
         // update the trajectories
-        _updateTrajectories();
+        // _updateTrajectories();
 
     }
+
+    // simulate policy delay
+   if (((state_machine_time_ - last_control_time_) > 2*policy_delay) || (last_control_time_ < 0)){
+       _updateTrajectories();
+        last_control_time_ = state_machine_time_;
+        simulate_mpc_solved_ = false;
+   }
+
     // Setup the tasks and compute torque from IHWBC
     task_setup();
     // clock_.start();
@@ -344,7 +354,12 @@ void MPCStandCtrl::_mpc_solve(){
 
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
-   
+
+}
+
+void MPCStandCtrl::_updateTrajectories(){
+    // Updates the reference trajectory that the IHWBC will follow given a new plan from the MPC
+
     // Create the MPC trajectory which starts at the mpc_t_start_solve_ time
     mpc_desired_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
                             mpc_x0_,
@@ -360,10 +375,6 @@ void MPCStandCtrl::_mpc_solve(){
         mpc_solved_once_ = true;
     }
 
-}
-
-void MPCStandCtrl::_updateTrajectories(){
-    // Updates the reference trajectory that the IHWBC will follow given a new plan from the MPC
 
     // Get the current value of the previous reference trajectory
     Eigen::VectorXd x_ref_start;
