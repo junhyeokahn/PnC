@@ -69,6 +69,15 @@ public:
     // time_in is clamped between (t_start and t_start + horizon*dt_internal)
     void getState(const double time_in, Eigen::VectorXd & x_out); 
 
+    // Returns the input knot points
+    Eigen::VectorXd getXpredVector();
+
+    // Returns the knot points that are after this time.
+    Eigen::VectorXd getTruncatedXpredVector(const double time);
+
+    // Returns a vector of knotpoints, equal to the horizon, spaced by dt_internal excluding the input time
+    Eigen::VectorXd getInterpolatedXpredVector(const double time);
+
     // helper function which gives the index to use for the piecewise cubic function
     int getHorizonIndex(const double time);
 
@@ -83,6 +92,11 @@ private:
     int state_size;
     int dim;
     int horizon;
+
+    // store initial start value
+    Eigen::VectorXd X_start_internal; 
+    // vector containing the knot points
+    Eigen::VectorXd X_pred_internal; 
 
     // vector containing all the polynomial cubic fits from t_start to t_start + horizon*dt
     std::vector< StateTrajectoryWithinHorizon > x_piecewise_cubic;

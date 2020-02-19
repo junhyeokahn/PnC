@@ -78,6 +78,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
     mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
 
+    mpc_t_start_solve_ = 0.0;
+    mpc_solved_once_ = false; // Whether the MPC has been solved at least once
 
     no_gait_ = new GaitCycle();
     mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
@@ -162,6 +164,10 @@ void MPCStandCtrl::oneStep(void* _cmd) {
         _mpc_setup();
         _mpc_Xdes_setup();
         _mpc_solve();
+
+        // update the trajectories
+        _updateTrajectories();
+
     }
     // Setup the tasks and compute torque from IHWBC
     task_setup();
@@ -310,12 +316,44 @@ void MPCStandCtrl::_mpc_Xdes_setup(){
 
 void MPCStandCtrl::_mpc_solve(){
     // Solve the mpc
+    mpc_t_start_solve_ = state_machine_time_;
+
     convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
     mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
+   
+    // Create the MPC trajectory which starts at the mpc_t_start_solve_ time
+    mpc_desired_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
+                            mpc_x0_,
+                            convex_mpc->getXpredOverHorizon()); 
+
+    if (!mpc_solved_once_){
+        // This is the first time the MPC is solved,
+        mpc_actual_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
+                                        mpc_x0_,
+                                        convex_mpc->getXpredOverHorizon()); 
+
+        // Set that this mpc has been solved at least once
+        mpc_solved_once_ = true;
+    }
 
     // Update predicted behavior to state estimate
     sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
     sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
+}
+
+void MPCStandCtrl::_updateTrajectories(){
+    // Updates the reference trajectory that the IHWBC will follow given a new plan from the MPC
+
+    // Get the current value of the previous reference trajectory
+    Eigen::VectorXd x_ref_start;
+    mpc_actual_trajectory_manager_->getState(state_machine_time_, x_ref_start);
+
+    // Interpolate between the current reference value and the new knotpoints
+    // Update the reference trajectories
+    mpc_actual_trajectory_manager_->setStateKnotPoints(state_machine_time_, 
+                                                       x_ref_start,
+                                                       mpc_desired_trajectory_manager_->getInterpolatedXpredVector(state_machine_time_));
+
 }
 
 void MPCStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
@@ -422,6 +460,8 @@ void MPCStandCtrl::task_setup() {
 
     // Enable MPC:
     // Set desired com and body orientation from predicted state 
+    mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+
     double des_roll = mpc_x_pred_[0]; 
     double des_pitch = mpc_x_pred_[1]; 
     double des_yaw = mpc_x_pred_[2]; 

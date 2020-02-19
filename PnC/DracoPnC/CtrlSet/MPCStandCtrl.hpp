@@ -131,6 +131,12 @@ class MPCStandCtrl : public Controller {
     void _mpc_Xdes_setup();
     void _mpc_solve();
 
+    void _updateTrajectories();
+
+    double mpc_t_start_solve_; // starting time for the mpc to solve
+    bool mpc_solved_once_;
+
+
     // MPC Variables
     double mpc_horizon_;
     double mpc_dt_; 

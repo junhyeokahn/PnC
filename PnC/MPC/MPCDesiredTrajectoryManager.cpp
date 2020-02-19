@@ -69,6 +69,8 @@ MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in
     setHorizon(horizon_in);
     setDt(dt_in);
     t_start = 0.0;
+
+    X_start_internal = Eigen::VectorXd::Zero(state_size);
     std::cout << "[MPCDesiredTrajectoryManager] Constructed" << std::endl;  
 }
 
@@ -78,6 +80,7 @@ MPCDesiredTrajectoryManager::~MPCDesiredTrajectoryManager(){
 
 void MPCDesiredTrajectoryManager::setHorizon(const int horizon_in){
     horizon = horizon_in;
+    X_pred_internal = Eigen::VectorXd::Zero(horizon*state_size);
     // Clear the piecewise cubic container
     x_piecewise_cubic.clear();
     for(int i = 0; i < horizon; i++){
@@ -100,6 +103,10 @@ void MPCDesiredTrajectoryManager::setStateKnotPoints(const double t_start_in,
     // Initialize the boundary conditions
     Eigen::VectorXd init_boundary(2*dim);
     Eigen::VectorXd end_boundary(2*dim);
+
+    // Locally copy X_start and X_pred
+    X_start_internal = X_start;
+    X_pred_internal = X_pred;
 
     for(int i = 0; i < horizon; i++){
         t_horizon_begin = t_start + i*dt_internal;
@@ -148,9 +155,32 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getAcc(const double time){
 }
 
 void MPCDesiredTrajectoryManager::getState(const double time_in, Eigen::VectorXd & x_out){
-    x_out = Eigen::VectorXd::Zero(2*dim);
+    x_out = X_start_internal;
     x_out.head(dim) = getPos(time_in);
-    x_out.tail(dim) = getVel(time_in);
+    x_out.segment(dim, dim) = getVel(time_in);
+}
+
+Eigen::VectorXd MPCDesiredTrajectoryManager::getXpredVector(){
+    return X_pred_internal;
+}
+
+// Returns the knot points that are after this time. if time exceeds the horizon, returns the last knotpoint
+Eigen::VectorXd MPCDesiredTrajectoryManager::getTruncatedXpredVector(const double time){
+    int index = getHorizonIndex(time);
+    return X_pred_internal.tail((horizon-index)*state_size);
+}
+
+// Returns a vector of knotpoints, equal to the horizon, spaced by dt_internal excluding the input time
+Eigen::VectorXd MPCDesiredTrajectoryManager::getInterpolatedXpredVector(const double time){
+    Eigen::VectorXd X_pred_interpolated = X_pred_internal;
+    Eigen::VectorXd X_pred_knotpoint(state_size);
+    double t_local = time;
+    for(int i = 0; i < horizon; i++){
+        t_local = time + (i+1)*dt_internal;
+        getState(t_local, X_pred_knotpoint);
+        X_pred_interpolated.segment(i*state_size, state_size) = X_pred_knotpoint;
+    }
+    return X_pred_interpolated;
 }
 
 
