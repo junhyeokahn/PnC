@@ -94,6 +94,9 @@ class MPCStandCtrl : public Controller {
 
     bool gait_set_once_;
 
+    MPCDesiredTrajectoryManager* mpc_old_trajectory_;
+    MPCDesiredTrajectoryManager* mpc_new_trajectory_;
+
     MPCDesiredTrajectoryManager* mpc_desired_trajectory_manager_;
     MPCDesiredTrajectoryManager* mpc_actual_trajectory_manager_;
 

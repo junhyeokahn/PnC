@@ -96,6 +96,10 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     // Trajectory managers
     mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
     mpc_actual_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+
+    mpc_old_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+    mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+
     // mpc_actual_trajectory_manager_->setLinearInterpolateFirstStatetoNext(true);
 
     // Integration Parameters
@@ -174,9 +178,8 @@ void MPCStandCtrl::oneStep(void* _cmd) {
     // To Do
 
     // Run the MPC at every MPC tick
-    double policy_delay = mpc_dt_;//(mpc_dt_*mpc_horizon_/2.0);
-    // if (((state_machine_time_ - last_control_time_) > mpc_dt_) || (last_control_time_ < 0)){
-    if ( (((state_machine_time_ - last_control_time_) > policy_delay) && !simulate_mpc_solved_) || (last_control_time_ < 0)){
+    double policy_delay = mpc_dt_;
+    if ( (!simulate_mpc_solved_) || (last_control_time_ < 0)){
         // // Setup and solve the MPC 
         _mpc_setup();
         _mpc_Xdes_setup();
@@ -188,7 +191,7 @@ void MPCStandCtrl::oneStep(void* _cmd) {
     }
 
     // simulate policy delay
-   if (((state_machine_time_ - last_control_time_) > 2*policy_delay) || (last_control_time_ < 0)){
+   if (((state_machine_time_ - last_control_time_) > policy_delay) || (last_control_time_ < 0)){
        _updateTrajectories();
         last_control_time_ = state_machine_time_;
         simulate_mpc_solved_ = false;
@@ -365,15 +368,28 @@ void MPCStandCtrl::_updateTrajectories(){
                             mpc_x0_,
                             convex_mpc->getXpredOverHorizon()); 
 
+
     if (!mpc_solved_once_){
         // This is the first time the MPC is solved,
         mpc_actual_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
                                         mpc_x0_,
                                         convex_mpc->getXpredOverHorizon()); 
 
+        mpc_old_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+                                        mpc_x0_,
+                                        convex_mpc->getXpredOverHorizon()); 
         // Set that this mpc has been solved at least once
         mpc_solved_once_ = true;
+    }else{
+        // store the old trajectory
+        mpc_old_trajectory_->setStateKnotPoints(mpc_new_trajectory_->getStartTime(),
+                                                mpc_new_trajectory_->getXStartVector(),
+                                                mpc_new_trajectory_->getXpredVector());         
     }
+    mpc_new_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+                                    mpc_x0_,
+                                    convex_mpc->getXpredOverHorizon()); 
+
 
 
     // Get the current value of the previous reference trajectory
@@ -494,6 +510,23 @@ void MPCStandCtrl::task_setup() {
     // Set desired com and body orientation from predicted state 
     // mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
     mpc_desired_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+
+    Eigen::VectorXd x_traj_old;
+    Eigen::VectorXd x_traj_new;
+    double merge_time = mpc_dt_;
+    double s_merge = (state_machine_time_ - last_control_time_)/merge_time; ;
+    mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
+    mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
+    // clamp s
+    if (s_merge >= 1){
+        s_merge = 1.0;
+    }else if (s_merge <= 0){
+        s_merge = 0.0;
+    }
+    mpc_x_pred_ = s_merge*x_traj_new + (1 - s_merge)*x_traj_old;
+
+
+
     // Update the behavior
     sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
     sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);

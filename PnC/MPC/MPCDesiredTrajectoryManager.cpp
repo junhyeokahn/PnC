@@ -212,6 +212,15 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getXpredVector(){
     return X_pred_internal;
 }
 
+// Returns the input state vector
+Eigen::VectorXd MPCDesiredTrajectoryManager::getXStartVector(){
+    return X_start_internal;
+}
+// Returns the global start time of the trajectories
+double MPCDesiredTrajectoryManager::getStartTime(){
+    return t_start;
+}
+
 // Returns the knot points that are after this time. if time exceeds the horizon, returns the last knotpoint
 Eigen::VectorXd MPCDesiredTrajectoryManager::getTruncatedXpredVector(const double time){
     int index = getHorizonIndex(time);

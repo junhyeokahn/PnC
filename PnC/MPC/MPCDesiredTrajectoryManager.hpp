@@ -76,8 +76,12 @@ public:
     // time_in is clamped between (t_start and t_start + horizon*dt_internal)
     void getState(const double time_in, Eigen::VectorXd & x_out); 
 
+    // Returns the input state vector
+    Eigen::VectorXd getXStartVector();
     // Returns the input knot points
     Eigen::VectorXd getXpredVector();
+    // Returns the global start time of the trajectories
+    double getStartTime();
 
     // Returns the knot points that are after this time.
     Eigen::VectorXd getTruncatedXpredVector(const double time);
