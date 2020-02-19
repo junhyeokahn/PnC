@@ -8,6 +8,8 @@
 #include <PnC/MPC/CMPC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <PnC/MPC/MPCDesiredTrajectoryManager.hpp>
+#include <PnC/GaitCycle/GaitCycle.hpp>
 
 MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "MPC Stand Ctrl");
@@ -41,10 +43,10 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_back_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootBack);
 
     // contact
-    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.9);
-    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.9);
-    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.9);
-    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.9);
+    rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
+    rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
+    lfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);
+    lfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);
 
     contact_list_.clear();
     contact_list_.push_back(rfoot_front_contact_);
@@ -60,7 +62,7 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     convex_mpc = new CMPC();
     mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
-    mpc_mu_ = 0.9; // Coefficient of Friction on each contact point
+    mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
     mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
     mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
     mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
@@ -76,12 +78,10 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
     mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
 
-    // ICP
-    kp_ic_ = 20.0; // ICP P gain
-    ki_ic_ = 1.0;  // ICP I gain
-    icp_sat_error_ = 1e-1; //1e-2;
-    icp_acc_error_ = Eigen::VectorXd::Zero(2);
 
+    no_gait_ = new GaitCycle();
+    mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+    mpc_actual_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
 
     // Integration Parameters
     max_joint_vel_ = 2.0;
@@ -212,14 +212,13 @@ void MPCStandCtrl::_mpc_setup(){
         link_id = ((PointContactSpec*)contact_list_[i])->get_link_idx();
         mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
     }
-    // myUtils::pretty_print(mpc_r_feet_, std::cout, "mpc_r_feet_");
-    q_current_ = sp_->q; //robot_->getQ();
-    qdot_current_ = sp_->qdot; //robot_->getQdot();
 
-    com_current_ = sp_->com_pos; //robot_->getCoMPosition();
-    com_rate_current_ = sp_->est_com_vel; //robot_->getCoMVelocity();
+    // Update States
+    q_current_ = sp_->q;
+    qdot_current_ = sp_->qdot;
 
-    // myUtils::pretty_print(com_current_, std::cout, "com_current_");
+    com_current_ = sp_->com_pos;
+    com_rate_current_ = sp_->est_com_vel;
 
     // Starting robot state
     // Current reduced state of the robot
@@ -234,14 +233,8 @@ void MPCStandCtrl::_mpc_setup(){
                            init_roll_rate, init_pitch_rate, init_yaw_rate,
                            init_com_x_rate, init_com_y_rate, init_com_z_rate);
 
-
     midfeet_pos_ = 0.5*(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation() + 
                         robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation());
-
-    // myUtils::pretty_print(midfeet_pos_, std::cout, "midfeet_pos_");
-    // myUtils::pretty_print(q_current_, std::cout, "q_current_");
-    // myUtils::pretty_print(qdot_current_, std::cout, "qdot_current_");
-    // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
 
 
 }
@@ -323,24 +316,19 @@ void MPCStandCtrl::_mpc_solve(){
     // Update predicted behavior to state estimate
     sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
     sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
-
-    // myUtils::pretty_print(mpc_x0_, std::cout, "mpc_x0_");
-    // myUtils::pretty_print(mpc_x_pred_, std::cout, "mpc_x_pred_");
-    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
-
 }
 
 void MPCStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
-    // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the 
+    // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the mpc
     // 1e-2/(robot_->getRobotMass()*9.81);
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
 
     // Modify Rotor Inertia
     Eigen::MatrixXd A_rotor = A_;
-    // for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-    //     A_rotor(i + robot_->getNumVirtualDofs(),
-    //             i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
-    // }
+    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+        A_rotor(i + robot_->getNumVirtualDofs(),
+                i + robot_->getNumVirtualDofs()) += sp_->rotor_inertia[i];
+    }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
 
     // Enable Torque Limits
@@ -381,8 +369,6 @@ void MPCStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 
     gamma = tau_cmd_;
-    // des_jvel_ = qdot_des_;
-    // des_jpos_ = q_des_;
 
     // Integrate qddot for qdot and q
     // Integrate Joint velocities
@@ -414,22 +400,6 @@ void MPCStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     sp_->reaction_forces = mpc_Fd_des_;
     sp_->filtered_rf = Fr_res;
 
-    // myUtils::pretty_print(mpc_Fd_des_, std::cout, "mpc_Fd_des_");
-    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
-    // myUtils::pretty_print(qdot_des_, std::cout, "qdot_des_");
-    // myUtils::pretty_print(q_des_, std::cout, "q_des_");
-
-    // myUtils::pretty_print(ac_qdot_current, std::cout, "ac_qdot_current");
-    // myUtils::pretty_print(ac_q_current, std::cout, "ac_q_current");
-    Eigen::VectorXd com_pos_cur = sp_->com_pos;
-
-    // myUtils::pretty_print(com_pos_cur, std::cout, "com_pos_cur");
-    // myUtils::pretty_print(qddot_res, std::cout, "qddot_res");
-    // myUtils::pretty_print(qddot_cmd_, std::cout, "qddot_cmd_");
-    // myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_");
-    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");
-
-    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 }
 
 void MPCStandCtrl::task_setup() {
@@ -468,26 +438,7 @@ void MPCStandCtrl::task_setup() {
     double des_vel_y = mpc_x_pred_[10]; 
     double des_vel_z = mpc_x_pred_[11]; 
 
-    // =========================================================================
-    // Com Task
-    // =========================================================================
-    Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
-
-    if (state_machine_time_ < stab_dur_) {
-        for (int i = 0; i < 3; ++i) {
-            com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i], goal_com_pos_[i], stab_dur_, state_machine_time_);
-            com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_vel_[i], 0., stab_dur_, state_machine_time_);
-            com_acc_des[i] = 0.;
-        }
-    } else {
-        for (int i = 0; i < 3; ++i) {
-            com_pos_des[i] = goal_com_pos_[i];
-            com_vel_des[i] = 0.;
-            com_acc_des[i] = 0.;
-        }
-    }
+    Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
     if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
         des_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(),
@@ -496,49 +447,6 @@ void MPCStandCtrl::task_setup() {
     }
 
 
-    // Define capture point linear momentum task:
-    // Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
-    // Eigen::Vector3d com_vel = sp_->est_com_vel ;// robot_->getCoMVelocity();
-
-    double gravity = 9.81;
-    double com_height = sp_->com_pos[2];
-    double omega_o = std::sqrt(gravity/com_height);
-
-    // Current ICP 
-    Eigen::VectorXd r_ic = sp_->com_pos.head(2) + (1.0/omega_o)*sp_->est_com_vel.head(2);
-    // Desired ICP
-    Eigen::VectorXd r_id = goal_com_pos_.head(2);
-    // Desired ICP Velocity
-    Eigen::VectorXd rdot_id = Eigen::VectorXd::Zero(2);
-
-    r_id[0] = mpc_Xdes_[3];
-    r_id[1] = mpc_Xdes_[4];
-    rdot_id[0] = mpc_Xdes_[9];
-    rdot_id[1] = mpc_Xdes_[10];
-
-    // Desired CMP
-    Eigen::VectorXd r_icp_error = (r_ic - r_id);
-    icp_acc_error_ += (r_icp_error*ihwbc_dt_);
-    icp_acc_error_[0] = clamp_value(icp_acc_error_[0], -icp_sat_error_, icp_sat_error_);
-    icp_acc_error_[1] = clamp_value(icp_acc_error_[1], -icp_sat_error_, icp_sat_error_);
-
-    Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic_ * (r_icp_error) + ki_ic_*icp_acc_error_;
-
-    // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
-    // myUtils::pretty_print(icp_acc_error_, std::cout, "icp_acc_error_");
-    // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
-
-    // Desired Linear Momentum / Acceleration task:
-    com_acc_des.head(2) = (gravity/com_height)*( sp_->com_pos.head(2) - r_CMP_d);
-    com_acc_des[2] = 0.0;
-
-    // Zero out desired com position and velocity except for the height control.
-    com_pos_des = robot_->getCoMPosition();
-    com_vel_des = robot_->getCoMVelocity();
-    com_pos_des[2] = des_pos_z;
-    com_vel_des[2] = des_vel_z;
-
-    // Disable ICP
     com_acc_des.setZero();
     com_pos_des[0] = des_pos_x;
     com_pos_des[1] = des_pos_y;
@@ -547,7 +455,6 @@ void MPCStandCtrl::task_setup() {
     com_vel_des[0] = des_vel_x;
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
-
 
     // std::cout << "com_pos_des = " << com_pos_des.transpose() << std::endl;
     // std::cout << "com_vel_des = " << com_vel_des.transpose() << std::endl;
@@ -677,7 +584,6 @@ void MPCStandCtrl::contact_setup() {
  }
 
 void MPCStandCtrl::firstVisit() {
-    icp_acc_error_ = Eigen::VectorXd::Zero(2);
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                robot_->getNumActuatedDofs());
     jdot_ini_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
@@ -728,10 +634,6 @@ void MPCStandCtrl::firstVisit() {
         myUtils::pretty_print(I_body, std::cout, "I_body");
     }
 
-    std::cout << "ICP kp: " << kp_ic_ << std::endl;
-    std::cout << "ICP ki: " << ki_ic_ << std::endl;
-    std::cout << "ICP saturation error: " << icp_sat_error_ << std::endl;
-
     std::cout << "Integration Params" << std::endl;
     std::cout << "  Max Joint Velocity: " << max_joint_vel_ << std::endl;
     std::cout << "  Velocity Break Freq : " << velocity_break_freq_ << std::endl;
@@ -769,6 +671,12 @@ void MPCStandCtrl::firstVisit() {
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
     convex_mpc->setSmoothFromPrevResult(mpc_smooth_from_prev_);
     convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
+
+    // Set reference trajectory params
+    mpc_desired_trajectory_manager_->setHorizon(mpc_horizon_);
+    mpc_desired_trajectory_manager_->setDt(mpc_dt_);
+    mpc_actual_trajectory_manager_->setHorizon(mpc_horizon_);
+    mpc_actual_trajectory_manager_->setDt(mpc_dt_);
 
     //Penalize forces between the heel and the toe for each leg
     //  toe_heel*||f_{i,toe} - f_{i,heel}|| 
@@ -821,11 +729,6 @@ void MPCStandCtrl::ctrlInitialization(const YAML::Node& node) {
     Eigen::VectorXd kd_jp = 0.1*Eigen::VectorXd::Ones(Draco::n_adof);
 
     try {
-        // ICP Control Parameters
-        myUtils::readParameter(node, "kp_icp", kp_ic_);
-        myUtils::readParameter(node, "ki_icp", ki_ic_);
-        myUtils::readParameter(node, "icp_sat_error", icp_sat_error_);
-
         // Integration Parameters
         myUtils::readParameter(node, "max_joint_vel", max_joint_vel_);
         myUtils::readParameter(node, "velocity_break_freq", velocity_break_freq_);

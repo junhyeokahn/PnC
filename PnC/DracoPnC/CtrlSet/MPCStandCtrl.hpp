@@ -7,6 +7,8 @@ class RobotSystem;
 class ContactSpec;
 class CMPC;
 class IHWBC;
+class MPCDesiredTrajectoryManager;
+class GaitCycle;
 
 class MPCStandCtrl : public Controller {
    public:
@@ -79,6 +81,10 @@ class MPCStandCtrl : public Controller {
     // Convex MPC
     CMPC* convex_mpc;
     double last_control_time_;
+
+    GaitCycle* no_gait_;
+    MPCDesiredTrajectoryManager* mpc_desired_trajectory_manager_;
+    MPCDesiredTrajectoryManager* mpc_actual_trajectory_manager_;
 
     // IHWBC
     IHWBC* ihwbc;
@@ -154,12 +160,6 @@ class MPCStandCtrl : public Controller {
     Eigen::Vector3d com_current_;
     Eigen::Vector3d com_rate_current_;
     Eigen::Vector3d midfeet_pos_;
-
-    // ICP Variables
-    double kp_ic_;
-    double ki_ic_;
-    double icp_sat_error_;
-    Eigen::VectorXd icp_acc_error_;
 
     // Integration Parameters
     double max_joint_vel_;

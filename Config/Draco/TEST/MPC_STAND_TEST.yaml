@@ -20,12 +20,7 @@ control_configuration:
         kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
 
     mpc_ctrl:
-        # ICP control params
-        kp_icp: 0.0 # Proportional - gain
-        ki_icp: 0.0 # Integral - gain
-        icp_sat_error: 1e-2 # Integral Error Saturation 
-
-        # Velocity Integration Params
+         # Velocity Integration Params
         max_joint_vel: 2.0 # rad/s - maximum velocity after integration
         velocity_break_freq: 2.0 # Hz # 1.0 # Higher value decays to 0.0 faster
 
@@ -38,12 +33,10 @@ control_configuration:
 
         com_kp: [50.0, 50.0, 50.0]
         com_kd: [2.5, 2.5, 2.5]
-        # com_kd: [2.5, 2.5, 2.5] # SIM
-
+ 
         body_kp: [50.0, 50.0, 50.0]
         body_kd: [2.5, 2.5, 2.5]
-        # body_kd: [2.5, 2.5, 2.5] # SIM
-
+ 
         joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
