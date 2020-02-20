@@ -465,9 +465,9 @@ void MPCStandCtrl::task_setup() {
     // double des_pos_y = mpc_Xdes_[4];
     // double des_pos_z = mpc_Xdes_[5];
 
-    // double des_roll_rate = mpc_Xdes_[6];
-    // double des_pitch_rate = mpc_Xdes_[7];
-    // double des_yaw_rate = mpc_Xdes_[8];
+    // double des_rx_rate = mpc_Xdes_[6];
+    // double des_ry_rate = mpc_Xdes_[7];
+    // double des_rz_rate = mpc_Xdes_[8];
 
     // double des_vel_x = mpc_Xdes_[9];
     // double des_vel_y = mpc_Xdes_[10];
@@ -507,13 +507,17 @@ void MPCStandCtrl::task_setup() {
     double des_pos_y = mpc_x_pred_[4]; 
     double des_pos_z = mpc_x_pred_[5]; 
 
-    double des_roll_rate = mpc_x_pred_[6]; 
-    double des_pitch_rate = mpc_x_pred_[7]; 
-    double des_yaw_rate = mpc_x_pred_[8]; 
+    double des_rx_rate = mpc_x_pred_[6]; 
+    double des_ry_rate = mpc_x_pred_[7]; 
+    double des_rz_rate = mpc_x_pred_[8]; 
 
     double des_vel_x = mpc_x_pred_[9]; 
     double des_vel_y = mpc_x_pred_[10]; 
     double des_vel_z = mpc_x_pred_[11]; 
+
+    double des_rx_acc = xddot_traj_des[0]; 
+    double des_ry_acc = xddot_traj_des[1]; 
+    double des_rz_acc = xddot_traj_des[2]; 
 
     double des_acc_x = xddot_traj_des[3]; 
     double des_acc_y = xddot_traj_des[4]; 
@@ -562,8 +566,11 @@ void MPCStandCtrl::task_setup() {
     body_ori_des[2] = body_ori_des_quat.y();
     body_ori_des[3] = body_ori_des_quat.z();
 
-    body_ori_vel_des = myUtils::EulerZYXRatestoAngVel(des_roll, des_pitch, des_yaw,
-                                                      des_roll_rate, des_pitch_rate, des_yaw_rate);
+    // body_ori_vel_des = myUtils::EulerZYXRatestoAngVel(des_roll, des_pitch, des_yaw,
+    //                                                   des_rx_rate, des_ry_rate, des_rz_rate);
+
+    body_ori_vel_des = Eigen::Vector3d(des_rx_rate, des_ry_rate, des_rz_rate);        
+    body_ori_acc_des = Eigen::Vector3d(des_rx_acc, des_ry_acc, des_rz_acc);
     body_ori_task_->updateTask(body_ori_des, body_ori_vel_des, body_ori_acc_des);
 
     // =========================================================================
