@@ -50,13 +50,13 @@ void DracoWorldNode::customPreStep() {
 
     static bool b_first_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        ((DracoInterface*)Interface_)->WalkInY(-0.8);
+        ((DracoInterface*)Interface_)->WalkInY(-0.9);
         b_first_cmd = false;
     }
 
     static bool b_seventh_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
-        ((DracoInterface*)Interface_)->WalkInX(1.2);
+        ((DracoInterface*)Interface_)->WalkInX(2.5);
         b_seventh_cmd = false;
     }
 
@@ -131,6 +131,13 @@ void DracoWorldNode::customPreStep() {
     //}
 
     Interface_->getCommand(SensorData_, Command_);
+
+    std::cout << "------------------------" << std::endl;
+    std::cout << "t :" << t_ << std::endl;
+    std::cout << "q :" << std::endl;
+    std::cout << (SensorData_->q.head(6)) << std::endl;
+    std::cout << "jtrq :"  << std::endl;
+    std::cout << (Command_->jtrq.tail(6))  << std::endl;
 
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {

@@ -52,7 +52,7 @@ ScorpioWorldNode::ScorpioWorldNode(const dart::simulation::WorldPtr& _world)
     draco_sensordata_= new DracoSensorData(); 
     draco_cmd_ = new DracoCommand();
 
-    scorpio_trq_cmd_ = Eigen::VectorXd::Zero(a_dof_scorpio_);
+    //scorpio_trq_cmd_ = Eigen::VectorXd::Zero(a_dof_scorpio_);
 
 
     draco_n_dof_ = draco_->getNumDofs();
@@ -163,17 +163,17 @@ void ScorpioWorldNode::customPreStep() {
 
     GetContactSwitchData_(draco_sensordata_->rfoot_contact,
                           draco_sensordata_->lfoot_contact);
-    GetForceTorqueData_();
+    //GetForceTorqueData_();
 
     static bool b_first_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInY(-0.8);
+        ((DracoInterface*)draco_interface_)->WalkInY(-0.9);
         b_first_cmd = false;
     }
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(1.2);
+        ((DracoInterface*)draco_interface_)->WalkInX(2.2);
         b_second_cmd = false;
     }
 
@@ -184,6 +184,13 @@ void ScorpioWorldNode::customPreStep() {
     }
 
     draco_interface_->getCommand(draco_sensordata_, draco_cmd_);
+
+    //std::cout << "------------------------" << std::endl;
+    //std::cout << "t :" << t_ << std::endl;
+    //std::cout << "q :" << std::endl;
+    //std::cout << (draco_sensordata_->q.head(6)) << std::endl;
+    //std::cout << "jtrq :"  << std::endl;
+    //std::cout << (draco_cmd_->jtrq.tail(6))  << std::endl;
 
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)draco_interface_)->IsTrajectoryUpdated()) {

@@ -48,11 +48,11 @@ void OSCPosCtrl::oneStep(void* _cmd) {
     Eigen::VectorXd end_effector_vel_act = robot_->getBodyNodeSpatialVelocity("end_effector").tail(3); 
 
     for (int i = 0; i < 3; ++i) {
-            end_effector_pos_des[i] = myUtils::smooth_changing(ini_pos_[i], target_pos_[i],
+            end_effector_pos_des[i] = myUtils::smooth_changing(ini_pos_[i], ini_pos_[i] + target_pos_[i],
                                                              end_time_, state_machine_time_);
-            end_effector_vel_des[i] = myUtils::smooth_changing_vel(ini_pos_[i], target_pos_[i],
+            end_effector_vel_des[i] = myUtils::smooth_changing_vel(ini_pos_[i], ini_pos_[i] + target_pos_[i],
                                                                     end_time_, state_machine_time_);
-            end_effector_acc_ff[i] = myUtils::smooth_changing_acc(ini_pos_[i], target_pos_[i],
+            end_effector_acc_ff[i] = myUtils::smooth_changing_acc(ini_pos_[i], ini_pos_[i] + target_pos_[i],
                                                                     end_time_, state_machine_time_);
             end_effector_acc_des[i] =
                 end_effector_acc_ff[i] + end_effector_kp_[i] * (end_effector_pos_des[i] - end_effector_pos_act[i]) 

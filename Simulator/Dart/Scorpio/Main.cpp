@@ -106,7 +106,7 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot, Eigen::VectorXd & q_init) {
-    
+
     Eigen::VectorXd conf_init(robot->getNumDofs());
     conf_init.setZero();
 
@@ -177,11 +177,8 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            //q[0] = 2;
+            //q[0] = 2.5;
             //q[3] = M_PI;
-            q[0] = 0.;
-            q[1] = -0.7;
-            q[3] = 0;
             q[2] = 0.9;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
@@ -222,7 +219,7 @@ void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	    dart::dynamics::ShapeNode* sn = bn->getShapeNode(j);
 	    if(sn->getVisualAspect())
 	    {
-	      dart::dynamics::MeshShape* ms = 
+	      dart::dynamics::MeshShape* ms =
 		  dynamic_cast<dart::dynamics::MeshShape*>(sn->getShape().get());
 	      if(ms)
 		ms->setColorMode(dart::dynamics::MeshShape::SHAPE_COLOR);
@@ -231,12 +228,21 @@ void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	}
 }
 
+void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
+    for (int i = 0; i < robot->getNumJoints(); ++i) {
+        dart::dynamics::Joint* joint = robot->getJoint(i);
+        // std::cout << i << "th" << std::endl;
+        // std::cout << joint->isPositionLimitEnforced() << std::endl;
+        joint->setPositionLimitEnforced(true);
+    }
+}
+
 void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::SkeletonPtr robot){
     dart::dynamics::BodyNode* bd1 = robot->getBodyNode("link1");
     dart::dynamics::BodyNode* bd2 = robot->getBodyNode("link4_end");
    Eigen::Vector3d offset(0.09, 0.1225, -0.034975);
     Eigen::Vector3d joint_pos1 = bd1->getTransform()*offset;
-    dart::constraint::BallJointConstraintPtr cl1 = 
+    dart::constraint::BallJointConstraintPtr cl1 =
         std::make_shared<dart::constraint::BallJointConstraint>(bd1,bd2,joint_pos1);
 
     Eigen::Vector3d pos_b1 = bd1->getTransform().translation();
@@ -245,7 +251,7 @@ void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::Ske
     dart::dynamics::BodyNode* bd3 = robot->getBodyNode("link5");
     dart::dynamics::BodyNode* bd4 = robot->getBodyNode("link8_end");
     Eigen::Vector3d joint_pos2 = bd3->getTransform()*offset;
-    dart::constraint::BallJointConstraintPtr cl2 = 
+    dart::constraint::BallJointConstraintPtr cl2 =
         std::make_shared<dart::constraint::BallJointConstraint>(bd3,bd4,joint_pos2);
 
     world->getConstraintSolver()->addConstraint(cl1);
@@ -270,7 +276,7 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
     passive1->setActuatorType(dart::dynamics::Joint::PASSIVE);
     passive2->setActuatorType(dart::dynamics::Joint::PASSIVE);
     passive3->setActuatorType(dart::dynamics::Joint::PASSIVE);
-    
+
     dart::dynamics::Joint* active1 = robot->getJoint("joint1");
     dart::dynamics::Joint* active2 = robot->getJoint("joint2");
     dart::dynamics::Joint* active3 = robot->getJoint("joint5");
@@ -286,7 +292,7 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
         active2->setActuatorType(dart::dynamics::Joint::SERVO);
         active3->setActuatorType(dart::dynamics::Joint::SERVO);
         active4->setActuatorType(dart::dynamics::Joint::SERVO);
-        active5->setActuatorType(dart::dynamics::Joint::SERVO); 
+        active5->setActuatorType(dart::dynamics::Joint::SERVO);
         active6->setActuatorType(dart::dynamics::Joint::SERVO);
         active7->setActuatorType(dart::dynamics::Joint::SERVO);
 
@@ -297,10 +303,10 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
         active2->setActuatorType(dart::dynamics::Joint::FORCE);
         active3->setActuatorType(dart::dynamics::Joint::FORCE);
         active4->setActuatorType(dart::dynamics::Joint::FORCE);
-        active5->setActuatorType(dart::dynamics::Joint::FORCE); 
+        active5->setActuatorType(dart::dynamics::Joint::FORCE);
         active6->setActuatorType(dart::dynamics::Joint::FORCE);
         active7->setActuatorType(dart::dynamics::Joint::FORCE);
-   
+
         std::cout<<"***** joint types are initialized: Force mode. "<<std::endl;
     }
     std::cout<<"======================================================"<<std::endl;
@@ -381,6 +387,11 @@ int main(int argc, char** argv) {
     draco->getBodyNode("lAnkle")->setFrictionCoeff(friction);
     draco->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
     draco->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
+    table->getBodyNode("baseLink")->setFrictionCoeff(friction);
+    table->getBodyNode("baseLink")->setRestitutionCoeff(restit);
+    scorpio->getBodyNode("gripper_body")->setFrictionCoeff(friction);
+    scorpio->getBodyNode("gripper_body")->setRestitutionCoeff(restit);
+
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -400,11 +411,12 @@ int main(int argc, char** argv) {
     // =====================
     _setInitialConfiguration(scorpio, q_init);
     _setInitialConfiguration(draco);
+    _setJointLimitConstraint(draco);
 
     // =====================
     // Robot Mesh Color from URDF
     // =====================
-    _SetMeshColorURDF(scorpio); 
+    _SetMeshColorURDF(scorpio);
 
     // =====================
     // Constraint for Closed-Loop
@@ -414,8 +426,8 @@ int main(int argc, char** argv) {
     // ================
     // Set passive joint
     // ================
-    _SetJointActuatorType(scorpio,actuator_type); 
-   
+    _SetJointActuatorType(scorpio,actuator_type);
+
     // ================
     // Print Model Info
     // ================
@@ -430,8 +442,8 @@ int main(int argc, char** argv) {
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
     // node = new ScorpioWorldNodeReach(world);
-    
-    node->setNumStepsPerCycle(num_steps_per_cycle);
+
+    node->setNumStepsPerCycle(30);
 
     // =====================
     // Create and Set Viewer
