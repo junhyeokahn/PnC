@@ -94,13 +94,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     gait_set_once_ = false;
 
     // Trajectory managers
-    mpc_desired_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
-    mpc_actual_trajectory_manager_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
-
     mpc_old_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
     mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
-
-    // mpc_actual_trajectory_manager_->setLinearInterpolateFirstStatetoNext(true);
 
     // Integration Parameters
      max_joint_vel_ = 2.0;
@@ -358,20 +353,8 @@ void MPCStandCtrl::_mpc_solve(){
 }
 
 void MPCStandCtrl::_updateTrajectories(){
-    // Updates the reference trajectory that the IHWBC will follow given a new plan from the MPC
-
-    // Create the MPC trajectory which starts at the mpc_t_start_solve_ time
-    mpc_desired_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
-                            mpc_x0_,
-                            convex_mpc->getXpredOverHorizon()); 
-
-
+    // Updates the reference trajectories that the IHWBC will follow given a new plan from the MPC
     if (!mpc_solved_once_){
-        // This is the first time the MPC is solved,
-        mpc_actual_trajectory_manager_->setStateKnotPoints(mpc_t_start_solve_,
-                                        mpc_x0_,
-                                        convex_mpc->getXpredOverHorizon()); 
-
         mpc_old_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
                                         mpc_x0_,
                                         convex_mpc->getXpredOverHorizon()); 
@@ -386,19 +369,6 @@ void MPCStandCtrl::_updateTrajectories(){
     mpc_new_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
                                     mpc_x0_,
                                     convex_mpc->getXpredOverHorizon()); 
-
-
-
-    // Get the current value of the previous reference trajectory
-    Eigen::VectorXd x_ref_start;
-    mpc_actual_trajectory_manager_->getState(state_machine_time_, x_ref_start);
-
-    // Interpolate between the current reference value and the new knotpoints
-    // Update the reference trajectories
-    mpc_actual_trajectory_manager_->setStateKnotPoints(state_machine_time_, 
-                                                       x_ref_start,
-                                                       mpc_desired_trajectory_manager_->getInterpolatedXpredVector(state_machine_time_));
-
 }
 
 void MPCStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
@@ -505,9 +475,6 @@ void MPCStandCtrl::task_setup() {
 
     // Enable MPC:
     // Set desired com and body orientation from predicted state 
-    // mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
-    // mpc_desired_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
-
     Eigen::VectorXd x_traj_old;
     Eigen::VectorXd x_traj_new;
     double merge_time = mpc_dt_/2.0;
@@ -779,11 +746,6 @@ void MPCStandCtrl::firstVisit() {
     convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
 
     // Set reference trajectory params
-    mpc_desired_trajectory_manager_->setHorizon(mpc_horizon_);
-    mpc_desired_trajectory_manager_->setDt(mpc_dt_);
-    mpc_actual_trajectory_manager_->setHorizon(mpc_horizon_);
-    mpc_actual_trajectory_manager_->setDt(mpc_dt_);
-
     mpc_old_trajectory_->setHorizon(mpc_horizon_);
     mpc_old_trajectory_->setDt(mpc_dt_);
     mpc_new_trajectory_->setHorizon(mpc_horizon_);
