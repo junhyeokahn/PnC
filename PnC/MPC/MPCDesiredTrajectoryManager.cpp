@@ -87,7 +87,6 @@ MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in
     setDt(dt_in);
     t_start = 0.0;
 
-    linear_interpolate_start_and_knotpoints = false;
     linear_interpolate_states  = false;
 
     X_start_internal = Eigen::VectorXd::Zero(state_size);
@@ -99,9 +98,6 @@ void MPCDesiredTrajectoryManager::setLinearInterpolate(bool val){
 }
 void MPCDesiredTrajectoryManager::setCubicInterpolate(bool val){
     linear_interpolate_states = !val;
-}
-void MPCDesiredTrajectoryManager::setLinearInterpolateFirstStatetoNext(bool val){
-    linear_interpolate_start_and_knotpoints = val;
 }
 
 MPCDesiredTrajectoryManager::~MPCDesiredTrajectoryManager(){
@@ -176,7 +172,7 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getPos(const double time){
     int index = getHorizonIndex(time);
     int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
 
-    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+    if (linear_interpolate_states){
         fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
     }
 
@@ -186,7 +182,7 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getVel(const double time){
     // return the velocity
     int index = getHorizonIndex(time);
     int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
-    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+    if (linear_interpolate_states){
         fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
     }
 
@@ -196,7 +192,7 @@ Eigen::VectorXd MPCDesiredTrajectoryManager::getAcc(const double time){
     // return the acceleration
     int index = getHorizonIndex(time);
     int fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_CUBIC_FIT;
-    if (((index == 0) && linear_interpolate_start_and_knotpoints) || linear_interpolate_states){
+    if (linear_interpolate_states){
         fit_type = STATE_TRAJECTORY_WITHIN_HORIZON_LINEAR_FIT;
     }
     return x_trajectory[index].getAcc(time, fit_type);

@@ -108,8 +108,7 @@ private:
     int dim;
     int horizon;
 
-    // options:
-    bool linear_interpolate_start_and_knotpoints;
+    // option:
     bool linear_interpolate_states;
 
     // store initial start value
