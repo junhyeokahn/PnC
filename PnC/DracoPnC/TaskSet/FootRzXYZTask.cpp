@@ -38,8 +38,10 @@ bool FootRzXYZTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     }
 
     Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
-    vel_act.head(1) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(1);
-    vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).tail(3);
+    // vel_act.head(1) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(1);
+    // vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).tail(3);
+    vel_act.head(1) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(1);
+    vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
 
     // op_cmd
     for (int i(0); i < dim_task_; ++i) {
@@ -74,7 +76,6 @@ bool FootRzXYZTask::_UpdateTaskJDotQdot() {
         robot_->getBodyNodeJacobianDot(link_idx_) * robot_->getQdot();
     JtDotQdot_.segment(0, 1) = v_tmp.segment(2, 1);
     JtDotQdot_.tail(3) = v_tmp.tail(3);
-
-    JtDotQdot_.setZero();
+    // JtDotQdot_.setZero();
     return true;
 }
