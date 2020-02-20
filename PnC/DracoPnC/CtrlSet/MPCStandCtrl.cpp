@@ -42,6 +42,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_front_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootFront);
     lfoot_back_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootBack);
 
+    ang_momentum_task = new AngularMomentumTask(robot_, 0.001);
+
     // contact
     rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
     rfoot_back_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
@@ -125,6 +127,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     w_task_com_ = 1e-4;
     w_task_body_ = 1e-4;
     w_task_joint_ = 1e-6;
+
+    w_task_ang_momentum_ = 1e-5;
 
     // Relative reaction force tracking weight compared to tasks
     // Must be high if desired reaction force is nonzero. 
@@ -621,6 +625,22 @@ void MPCStandCtrl::task_setup() {
     // myUtils::pretty_print(foot_pos_d, std::cout, "lfoot_back_pos");
 
     // =========================================================================
+    // Angular Momentum Task
+    // =========================================================================
+    Eigen::Vector3d des_ang_vel(des_rx_rate, des_ry_rate, des_rz_rate);
+    Eigen::Vector3d des_ang_acc(des_rx_acc, des_ry_acc, des_rz_acc);
+
+    Eigen::Vector3d des_ang_momentum; des_ang_momentum.setZero();
+    Eigen::Vector3d des_ang_momentum_rate; des_ang_momentum_rate.setZero();
+    Eigen::MatrixXd I_g = Eigen::MatrixXd::Zero(3, 3);
+    Eigen::MatrixXd I_g_tmp = robot_->getCentroidInertia();
+
+    I_g = I_g_tmp.block(0, 0, 3, 3);
+    des_ang_momentum = I_g*des_ang_vel;
+    des_ang_momentum_rate = I_g*des_ang_acc;
+    ang_momentum_task->updateTask(Eigen::Vector3d(0,0,0), des_ang_momentum, des_ang_momentum_rate);
+
+    // =========================================================================
     // Joint Pos Task
     // =========================================================================
     Eigen::VectorXd jpos_des = jpos_ini_;
@@ -643,15 +663,18 @@ void MPCStandCtrl::task_setup() {
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);    
     // task_list_.push_back(total_joint_task_);
+    // task_list_.push_back(ang_momentum_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
     w_task_heirarchy_[0] = w_task_com_; // COM
     w_task_heirarchy_[1] = w_task_body_; // body ori
     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
+    w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
     w_task_heirarchy_[4] = w_task_lfoot_; // rfoot
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
+    // w_task_heirarchy_[6] = w_task_ang_momentum_; // angular momentum
+
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
 
 }

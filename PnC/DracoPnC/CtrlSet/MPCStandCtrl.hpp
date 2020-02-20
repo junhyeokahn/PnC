@@ -68,6 +68,8 @@ class MPCStandCtrl : public Controller {
     Task* lfoot_front_task;
     Task* lfoot_back_task;
 
+    Task* ang_momentum_task;
+
     ContactSpec* rfoot_front_contact_;
     ContactSpec* rfoot_back_contact_;
     ContactSpec* lfoot_front_contact_;
@@ -125,6 +127,8 @@ class MPCStandCtrl : public Controller {
     double w_task_com_;
     double w_task_body_;
     double w_task_joint_;
+
+    double w_task_ang_momentum_;
 
     double w_contact_weight_;
     double lambda_qddot_;
