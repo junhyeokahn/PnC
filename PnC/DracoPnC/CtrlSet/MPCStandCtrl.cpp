@@ -784,6 +784,11 @@ void MPCStandCtrl::firstVisit() {
     mpc_actual_trajectory_manager_->setHorizon(mpc_horizon_);
     mpc_actual_trajectory_manager_->setDt(mpc_dt_);
 
+    mpc_old_trajectory_->setHorizon(mpc_horizon_);
+    mpc_old_trajectory_->setDt(mpc_dt_);
+    mpc_new_trajectory_->setHorizon(mpc_horizon_);
+    mpc_new_trajectory_->setDt(mpc_dt_);
+
     //Penalize forces between the heel and the toe for each leg
     //  toe_heel*||f_{i,toe} - f_{i,heel}|| 
     Eigen::MatrixXd D_toe_heel(6, 12); D_toe_heel.setZero();
