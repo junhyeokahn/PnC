@@ -56,7 +56,7 @@ private:
 	double t_walk_start_ = 0.0;
 
 	Eigen::Vector3d x_com_start_;
-	Eigen::Vector3d x_ori_start_;
+	Eigen::Quaterniond x_ori_start_;
 	DracoFootstep left_foot_start_;
 	DracoFootstep right_foot_start_;
 

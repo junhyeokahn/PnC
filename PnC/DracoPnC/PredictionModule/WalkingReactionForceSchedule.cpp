@@ -10,7 +10,7 @@ WalkingReactionForceSchedule::~WalkingReactionForceSchedule(){
 }
 
 // default is to return the max z force
-double WalkingReactionForceSchedule::getMaxNormalForce(int index, double time){
+double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const double time){
 	// if index is out of bounds or time requested is earlier than 
 	if 	( ((index < 0) || (index >= footstep_list.size())) ||
 		  (time <= t_walk_start) ){
@@ -19,7 +19,7 @@ double WalkingReactionForceSchedule::getMaxNormalForce(int index, double time){
 }
 
 // Set the footsteps for the walking reaction force schedule
-void WalkingReactionForceSchedule::setFootsteps(double t_walk_start_in, std::vector<DracoFootstep> & footstep_list_in){
+void WalkingReactionForceSchedule::setFootsteps(const double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in){
 	t_walk_start = t_walk_start_in;
 	// Clear internal data then copy footsteps
 	footstep_list.clear();

@@ -11,10 +11,10 @@ public:
 	virtual ~WalkingReactionForceSchedule();
 
 	// default is to return the max z force
-	virtual double getMaxNormalForce(int index, double time);
+	virtual double getMaxNormalForce(const int index, const double time);
 
 	// Set the footsteps for the walking reaction force schedule
-	void setFootsteps(double t_walk_start_in, std::vector<DracoFootstep> & footstep_list_in);
+	void setFootsteps(const double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
 
 private:
 	double t_walk_start = 0.0;

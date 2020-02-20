@@ -15,10 +15,10 @@ void WalkingReferenceTrajectoryModule::setStartingConfiguration(const Eigen::Vec
 							  const Eigen::Quaterniond x_ori_start_in,
 							  const DracoFootstep & left_foot_start_in, 
 							  const DracoFootstep & right_foot_start_in){
-	// x_com_start_ = x_com_start_in;
-	// x_ori_start_ = x_ori_start_in;
-	// left_foot_start_ = left_foot_start_in;
-	// right_foot_start_ = right_foot_start_in;
+	x_com_start_ = x_com_start_in;
+	x_ori_start_ = x_ori_start_in;
+	left_foot_start_ = left_foot_start_in;
+	right_foot_start_ = right_foot_start_in;
 }
 
 //set the footsteps and starting time to walk
@@ -33,7 +33,7 @@ void WalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, cons
 	}
 
 	// set footsteps on the reaction force schedule
-	walking_rfs_ptr->setFootsteps(t_walk_start_in, footstep_list_);
+	walking_rfs_ptr->setFootsteps(t_walk_start_in, footstep_list_in);
 
 }
 
