@@ -31,6 +31,11 @@ public:
   void setLeftSide();
   void setMidFoot();
 
+  void setWalkingParams(const double double_contact_transition_time_in,
+                        const double contact_transition_time_in,
+                        const double swing_time_in,
+                        const double swing_height_in);
+
   // Left or right side
   int robot_side;
 

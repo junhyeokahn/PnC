@@ -43,6 +43,17 @@ void DracoFootstep::setMidFoot(){
   robot_side = DRACO_MID_FOOTSTEP;
 }
 
+void DracoFootstep::setWalkingParams(const double double_contact_transition_time_in,
+                                     const double contact_transition_time_in,
+                                     const double swing_time_in,
+                                     const double swing_height_in){
+
+  double_contact_transition_time = double_contact_transition_time_in;
+  contact_transition_time = contact_transition_time_in;
+  swing_time = swing_time_in;
+  swing_height = swing_height;
+}
+
 void DracoFootstep::common_initialization(){
 	R_ori = orientation.toRotationMatrix();	
 

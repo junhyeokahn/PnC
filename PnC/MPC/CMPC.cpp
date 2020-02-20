@@ -41,6 +41,7 @@ CMPC::CMPC() {
 
     // initialize gait cycle with defaults
     gait_cycle_ptr.reset(new GaitCycle());
+    reaction_force_schedule_ptr.reset(new ReactionForceSchedule());
 
     // DO NOT CHANGE
     gravity_acceleration = -9.81;
@@ -55,6 +56,11 @@ void CMPC::setHorizon(const int & horizon_in){
     // set X_pred to the correct size
     X_pred = Eigen::VectorXd(13*horizon);
 } 
+
+void CMPC::setMaxFz(const double fz_max_in){
+    fz_max = fz_max_in;
+    reaction_force_schedule_ptr->setDefaultMaxNormalForce(fz_max_in);
+} // Set the maximum z reaction force for one force vector
 
 void CMPC::setPreviewStartTime(const double t_preview_start_in){
     t_preview_start = t_preview_start_in;
@@ -487,7 +493,7 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
         // Set maximum z force to 0.0 if the contact state is inactive
         for(int j = 0; j < num_contacts; j++){
             // get contact state and deactivate corresponding contact location if necessary            
-            cvec_qp[i * num_rows + 6*j + 4] *= static_cast<double>(gait_cycle_ptr->getContactState(j)); 
+            cvec_qp[i * num_rows + 6*j + 4] *= ( static_cast<double>(gait_cycle_ptr->getContactState(j)) * reaction_force_schedule_ptr->getMaxNormalForce(j, preview_time)); 
             // std::cout << "contact " << j << "state:" << gait_cycle_ptr->getContactState(j) << std::endl;           
         }
         // Increment preview window

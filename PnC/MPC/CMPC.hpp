@@ -20,6 +20,9 @@
 #include <PnC/GaitCycle/GaitCycle.hpp>
 #include <memory>
 
+// Reaction Force Schedule
+#include <PnC/MPC/ReactionForceSchedule.hpp>
+
 // #define MPC_PRINT_ALL 
 // #define MPC_TIME_ALL 
 
@@ -62,6 +65,7 @@ public:
 	Eigen::VectorXd F_out;  // dimension: (n_Fr*horizon) forces to exert over the horizon. [f_{k}, f_{k+1}, ..., f_{k - 1 + horizon}]
 
 	std::shared_ptr<GaitCycle> gait_cycle_ptr; // pointer to the gait cycle object
+	std::shared_ptr<ReactionForceSchedule> reaction_force_schedule_ptr; // pointer to the reaction force schedule
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	// last term is gravity and should always be 0,0
@@ -99,7 +103,7 @@ public:
 	void setHorizon(const int & horizon_in);	// MPC horizon (number of steps)
 
 	void setMu(const double mu_in){ mu = mu_in;} // Set the coefficient of friction
-	void setMaxFz(const double fz_max_in){ fz_max = fz_max_in;} // Set the maximum z reaction force for one force vector
+	void setMaxFz(const double fz_max_in); // Set the maximum z reaction force for one force vector
 	void setSmoothFromPrevResult(const bool smooth_prev_in){smooth_from_prev_result_ = smooth_prev_in;} // Sets whether to smoothen the current solution using the previous solution
 
 	// Set preview start time for the gate cycle
