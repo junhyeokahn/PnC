@@ -489,6 +489,10 @@ void MPCStandCtrl::task_setup() {
     }
     mpc_x_pred_ = s_merge*x_traj_new + (1 - s_merge)*x_traj_old;
 
+    // Get desired accelerations
+    Eigen::VectorXd xddot_traj_old = mpc_old_trajectory_->getAcc(state_machine_time_);
+    Eigen::VectorXd xddot_traj_new = mpc_new_trajectory_->getAcc(state_machine_time_); 
+    Eigen::VectorXd xddot_traj_des = s_merge*xddot_traj_new + (1 - s_merge)*xddot_traj_old;
 
 
     // Update the behavior
@@ -511,6 +515,11 @@ void MPCStandCtrl::task_setup() {
     double des_vel_y = mpc_x_pred_[10]; 
     double des_vel_z = mpc_x_pred_[11]; 
 
+    double des_acc_x = xddot_traj_des[3]; 
+    double des_acc_y = xddot_traj_des[4]; 
+    double des_acc_z = xddot_traj_des[5]; 
+
+
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
     if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
@@ -528,6 +537,10 @@ void MPCStandCtrl::task_setup() {
     com_vel_des[0] = des_vel_x;
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
+
+    com_acc_des[0] = des_acc_x; 
+    com_acc_des[1] = des_acc_y; 
+    com_acc_des[2] = des_acc_z; 
 
     // std::cout << "com_pos_des = " << com_pos_des.transpose() << std::endl;
     // std::cout << "com_vel_des = " << com_vel_des.transpose() << std::endl;
