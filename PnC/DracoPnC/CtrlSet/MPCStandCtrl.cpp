@@ -185,9 +185,6 @@ void MPCStandCtrl::oneStep(void* _cmd) {
         _mpc_Xdes_setup();
         _mpc_solve();
         simulate_mpc_solved_ = true;
-        // update the trajectories
-        // _updateTrajectories();
-
     }
 
     // simulate policy delay
@@ -509,11 +506,11 @@ void MPCStandCtrl::task_setup() {
     // Enable MPC:
     // Set desired com and body orientation from predicted state 
     // mpc_actual_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
-    mpc_desired_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
+    // mpc_desired_trajectory_manager_->getState(state_machine_time_, mpc_x_pred_);
 
     Eigen::VectorXd x_traj_old;
     Eigen::VectorXd x_traj_new;
-    double merge_time = mpc_dt_;
+    double merge_time = mpc_dt_/2.0;
     double s_merge = (state_machine_time_ - last_control_time_)/merge_time; ;
     mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
     mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
