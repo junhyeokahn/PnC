@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/PredictionModule/draco_footstep.hpp>
+#include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 
 DracoFootstep::DracoFootstep(){
 	position.setZero();
@@ -55,8 +55,8 @@ void DracoFootstep::common_initialization(){
   }
 
   // Set Local Frame Contact Point List
-  local_contact_point_list[0] = Eigen::Vector3d(sole_length/2.0, 0.0, 0.0);
-  local_contact_point_list[1] = Eigen::Vector3d(-sole_length/2.0, 0.0, 0.0);
+  local_contact_point_list[0] = Eigen::Vector3d(toe_dist_from_center/2.0, 0.0, 0.0);
+  local_contact_point_list[1] = Eigen::Vector3d(-heel_dist_from_center/2.0, 0.0, 0.0);
   // Set Global Frame Contact Point List
   updateContactLocations();
 

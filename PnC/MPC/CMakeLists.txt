@@ -1,5 +1,9 @@
-SET(MPC_SOURCES CMPC.cpp MPCDesiredTrajectoryManager.cpp)
-SET(MPC_HEADERS CMPC.hpp MPCDesiredTrajectoryManager.hpp)
+SET(MPC_SOURCES CMPC.cpp 
+                MPCDesiredTrajectoryManager.cpp
+                ReactionForceSchedule.cpp)
+SET(MPC_HEADERS CMPC.hpp 
+                MPCDesiredTrajectoryManager.hpp
+                ReactionForceSchedule.hpp)
 
 add_library(myMPC SHARED ${MPC_SOURCES})
 target_link_libraries(myMPC myUtils

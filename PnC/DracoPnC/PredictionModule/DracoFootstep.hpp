@@ -9,8 +9,7 @@
 #define DRACO_RIGHT_FOOTSTEP 1
 #define DRACO_MID_FOOTSTEP 2
 
-// Data container for a footstep object
- 
+// Data container for a footstep by Draco
 
 class DracoFootstep{
 public:
@@ -40,12 +39,9 @@ public:
   int getSide();
   void printInfo();
 
-  // length of the soles
-  double sole_length = 0.2;
-
-  // location of the front and back contacts from the center of the foot.
-  double foot_front = 0.015;
-  double foot_back = 0.015;
+  // distance of toe and heel contacts from the center of the foot.
+  double toe_dist_from_center = 0.015;
+  double heel_dist_from_center = 0.015;
 
   std::vector<Eigen::Vector3d> local_contact_point_list;
   std::vector<Eigen::Vector3d> global_contact_point_list;
