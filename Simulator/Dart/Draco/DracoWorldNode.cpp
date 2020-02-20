@@ -50,39 +50,39 @@ void DracoWorldNode::customPreStep() {
 
     static bool b_first_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        ((DracoInterface*)Interface_)->WalkInX(0.7);
+        ((DracoInterface*)Interface_)->WalkInY(-0.8);
         b_first_cmd = false;
     }
 
     static bool b_seventh_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
-        ((DracoInterface*)Interface_)->WalkInX(-0.7);
+        ((DracoInterface*)Interface_)->WalkInX(1.2);
         b_seventh_cmd = false;
     }
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        ((DracoInterface*)Interface_)->WalkInY(-0.3);
+        ((DracoInterface*)Interface_)->Turn(M_PI/2.0);
         b_second_cmd = false;
     }
 
-    static bool b_sixth_cmd(true);
-    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_sixth_cmd) {
-        ((DracoInterface*)Interface_)->WalkInY(0.3);
-        b_sixth_cmd = false;
-    }
+    //static bool b_sixth_cmd(true);
+    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_sixth_cmd) {
+        //((DracoInterface*)Interface_)->WalkInY(0.3);
+        //b_sixth_cmd = false;
+    //}
 
-    static bool b_third_cmd(true);
-    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_third_cmd) {
-        ((DracoInterface*)Interface_)->Turn(0.7);
-        b_third_cmd = false;
-    }
+    //static bool b_third_cmd(true);
+    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_third_cmd) {
+        //((DracoInterface*)Interface_)->Turn(0.7);
+        //b_third_cmd = false;
+    //}
 
-    static bool b_fourth_cmd(true);
-    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
-        ((DracoInterface*)Interface_)->Turn(-0.7);
-        b_fourth_cmd = false;
-    }
+    //static bool b_fourth_cmd(true);
+    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
+        //((DracoInterface*)Interface_)->Turn(-0.7);
+        //b_fourth_cmd = false;
+    //}
 
     // =========================================================================
     // Walk Method Example

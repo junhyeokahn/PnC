@@ -179,7 +179,8 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
         case 1: {
             //q[0] = 2;
             //q[3] = M_PI;
-            q[0] = 0;
+            q[0] = 0.;
+            q[1] = -0.7;
             q[3] = 0;
             q[2] = 0.9;
             double alpha(-M_PI / 4.);
