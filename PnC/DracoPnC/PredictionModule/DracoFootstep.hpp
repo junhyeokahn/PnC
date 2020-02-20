@@ -43,6 +43,12 @@ public:
   double toe_dist_from_center = 0.015;
   double heel_dist_from_center = 0.015;
 
+  // default walking parameters
+  double double_contact_transition_time = 0.0; // seconds
+  double contact_transition_time = 0.2; // seconds
+  double swing_time = 0.3; // seconds
+  double swing_height = 0.05; // meters
+
   std::vector<Eigen::Vector3d> local_contact_point_list;
   std::vector<Eigen::Vector3d> global_contact_point_list;
 
