@@ -1,3 +1,5 @@
+#ifndef WALKING_REFERENCE_TRAJECTORY_MODULE_H
+#define WALKING_REFERENCE_TRAJECTORY_MODULE_H
 
 // Given:
 //	  - starting time
@@ -16,11 +18,15 @@
 // 
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
+#include <PnC/MPC/ReactionForceSchedule.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReactionForceSchedule.hpp>
 #include <Eigen/Dense>
-#include <memory>
 
 #include <stdio.h>
+#include <vector>
+#include <map>
+#include <memory>
+
 
 // states
 #define DRACO_STATE_DS 0 // double support state
@@ -30,11 +36,15 @@
 #define QUERY_BEFORE_TRAJECTORY -1 // if the query occurs before the trajectories
 #define QUERY_AFTER_TRAJECTORY -2  // if the query occurs after the trajectories
 
+class WalkingReactionForceSchedule;
+
 class WalkingReferenceTrajectoryModule{
 public:
 	// Initialize by assigning the contact indices to a robot side.
 	WalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in);
 	~WalkingReferenceTrajectoryModule();
+
+	friend class WalkingReactionForceSchedule;
 
 	void setStartingConfiguration(const Eigen::Vector3d x_com_start_in,
 								  const Eigen::Quaterniond x_ori_start_in,
@@ -50,8 +60,7 @@ public:
 
 	// gets the references 
 	int getState(const double time);
-	void getMPCRefCom(const double time, Eigen::Vector3d & x_com);
-	void getMPCRefOri(const double time, Eigen::Quaterniond & x_ori);
+	void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
 	double getMaxNormalForce(int index, double time);
 
 
@@ -80,3 +89,5 @@ private:
 	std::vector<DracoFootstep> footstep_list_; // list of footsteps
 	std::map<int, double> early_contact_times_;
 };
+
+#endif

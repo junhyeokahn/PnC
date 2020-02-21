@@ -1,36 +1,27 @@
 #include <PnC/DracoPnC/PredictionModule/WalkingReactionForceSchedule.hpp>
 
-WalkingReactionForceSchedule::WalkingReactionForceSchedule(): 
+WalkingReactionForceSchedule::WalkingReactionForceSchedule(WalkingReferenceTrajectoryModule* reference_traj_module_in): 
 	ReactionForceSchedule(){
-	t_walk_start_ = 0.0;
+	reference_traj_module = reference_traj_module_in;
 }
 
 WalkingReactionForceSchedule::~WalkingReactionForceSchedule(){
-
 }
 
-void WalkingReactionForceSchedule::setContactIndexToSide(const std::vector<int> & index_to_side_in){
-    index_to_side_ = index_to_side_in;
+void WalkingReactionForceSchedule::testFunction(){
+	std::cout << "hello size of footstep list is " << reference_traj_module->footstep_list_.size() << std::endl;
+
 }
 
 // default is to return the max z force
 double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const double time){
 	// if index is out of bounds or time requested is earlier than 
-	if 	( ((index < 0) || (index >= footstep_list_.size())) ||
-		  (time <= t_walk_start_) ){
+	if 	( ((index < 0) || (index >= reference_traj_module->footstep_list_.size())) ||
+		  (time <= reference_traj_module->t_walk_start_) ){
 		return default_max_z_force_;
 	}
 }
 
-// Set the footsteps for the walking reaction force schedule
-void WalkingReactionForceSchedule::setFootsteps(const double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in){
-	t_walk_start_ = t_walk_start_in;
-	// Clear internal data then copy footsteps
-	footstep_list_.clear();
-	early_contact_times_.clear();
-	for(int i = 0; i < footstep_list_in.size(); i++){
-		footstep_list_.push_back(footstep_list_in[i]);
-	}
-}
+
 
 

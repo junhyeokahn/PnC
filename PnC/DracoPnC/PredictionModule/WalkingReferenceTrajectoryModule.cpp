@@ -4,7 +4,7 @@ WalkingReferenceTrajectoryModule::WalkingReferenceTrajectoryModule(const std::ve
     t_walk_start_ = 0.0;
 
     // Initialize object pointers
-    reaction_force_schedule_ptr.reset(new WalkingReactionForceSchedule());
+    reaction_force_schedule_ptr.reset(new WalkingReactionForceSchedule(this));
     walking_rfs_ptr = std::static_pointer_cast<WalkingReactionForceSchedule>(reaction_force_schedule_ptr);
 
     setContactIndexToSide(index_to_side_in);
@@ -16,7 +16,6 @@ WalkingReferenceTrajectoryModule::~WalkingReferenceTrajectoryModule(){}
 void WalkingReferenceTrajectoryModule::setContactIndexToSide(const std::vector<int> & index_to_side_in){
     index_to_side_ = index_to_side_in;
 }
-
 
 // set the starting configuration
 void WalkingReferenceTrajectoryModule::setStartingConfiguration(const Eigen::Vector3d x_com_start_in,
@@ -37,7 +36,6 @@ void WalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, cons
     early_contact_times_.clear();
     footstep_list_ = footstep_list_in;
     // set footsteps on the reaction force schedule
-    walking_rfs_ptr->setFootsteps(t_walk_start_in, footstep_list_in);
 }
 
 // gets the references 
@@ -55,33 +53,70 @@ int WalkingReferenceTrajectoryModule::getState(const double time){
     return DRACO_STATE_DS;
 }
 
-void WalkingReferenceTrajectoryModule::getMPCRefCom(const double time, Eigen::Vector3d & x_com){
+void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
+    // Set output to initial
+    x_com_out = x_com_start_;
+    x_ori_out = x_ori_start_;
     if (time < t_walk_start_){
-        x_com = x_com_start_;
+        return;
     }
 
-    // Set desired CoM position to the be the midfeet position
-    // of the foot landing location and the stance foot location
-
-
-}
-void WalkingReferenceTrajectoryModule::getMPCRefOri(const double time, Eigen::Quaterniond & x_ori){
-    if (time < t_walk_start_){
-        x_ori = x_ori_start_;
+    // check the initial stance foot 
+    DracoFootstep stance_foot = left_foot_start_;
+    if (footstep_list_.size() > 0){
+        if (footstep_list_[0].robot_side == DRACO_RIGHT_FOOTSTEP){
+            stance_foot = left_foot_start_;
+        }else  if (footstep_list_[0].robot_side == DRACO_LEFT_FOOTSTEP){
+            stance_foot = right_foot_start_;
+        }
+    }else{
+        return;
     }
 
-    // Set desired Orientation to the be the midfeet orientation
-    // of the foot landing location and the stance foot location
+    // Go through the footstep list and set the CoM to the be the midfoot position of the stance and landing foot
+    // set orientation to be the the midfoot orientation
+    DracoFootstep landing_foot;
+    DracoFootstep midfoot;
+    double t_footstep_start = t_walk_start_;
 
+    for(int i = 0; i < footstep_list_.size(); i++){
+        // only update if the time query is greater than the starting footstep time
+        if (time >= t_footstep_start){
+            // set new landing foot and compute the midfoot
+            landing_foot = footstep_list_[i];
+            midfoot.computeMidfeet(stance_foot, landing_foot, midfoot);
+            // set com x,y to midfoot
+            x_com_out.head(2) = midfoot.position.head(2);
+            // adjust com z height
+            x_com_out[2] += (landing_foot.position[2] - stance_foot.position[2]);  
+            // set orientation reference to midfoot
+            x_ori_out = midfoot.orientation;
+
+            // change the stance foot
+            stance_foot = landing_foot;     
+            // update new footstep start and repeat
+            t_footstep_start += (footstep_list_[i].double_contact_time + 
+                                 footstep_list_[i].contact_transition_time +
+                                 footstep_list_[i].swing_time +
+                                 footstep_list_[i].contact_transition_time);
+            continue;
+        }else{
+            return;
+        }
+    }
+
+    return;
 }
+
+
 double WalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
-    early_contact_times_[index] = time;
 }
 
 // set that a particular contact was hit early
 // index: DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
 // time: time of early contact
 void WalkingReferenceTrajectoryModule::setEarlyFootContact(const int index, const double time){
+    early_contact_times_[index] = time;
 }
 
 
@@ -112,41 +147,3 @@ bool WalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double ti
     // Query time happens after the trajectories.
     return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

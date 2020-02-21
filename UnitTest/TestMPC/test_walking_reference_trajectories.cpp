@@ -54,4 +54,6 @@ TEST(ReferenceTest, simple_test){
 	walking_reference_module.setFootsteps(t_walk_start, footstep_list);
 
 
+	walking_reference_module.walking_rfs_ptr->testFunction();
+
 }
