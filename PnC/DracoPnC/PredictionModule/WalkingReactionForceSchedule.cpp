@@ -65,10 +65,10 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
                     t_o = t_early;
                     // Compute transition force
                     Fz_out = clampMaxFz((Fz/delta_t)*(time-t_o));
+                    break;
                 }
-            }else{
-                Fz_out = 0.0;
             }
+            Fz_out = 0.0;
             break;
         }
 
@@ -100,6 +100,7 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
 
     // Assumption that only one foot contact at a time enters a transition state.
     // check if the contact index query matches the robot side. 
+    // if it doesn't match, this foot is not in a contact transition phase. return default value
     if (reference_traj_module->index_to_side_[index] != reference_traj_module->footstep_list_[footstep_index].robot_side){
         return default_max_z_force_;
     }

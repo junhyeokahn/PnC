@@ -63,11 +63,16 @@ public:
 	void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
 	double getMaxNormalForce(int index, double time);
 
+	// If true, populates the new footstep landing location
+	// If false, the MPC should use the current location of the foot
+	// bool getFutureMPCFootstep(time, DracoFootstep & footstep_landing_location);
 
 	// set that a particular contact was hit early
 	// index: DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
 	// time: time of early contact
 	void setEarlyFootContact(const int index, const double time);
+
+	void setEarlyFootSideContact(const int robot_side, const double time);
 
 
 	// helper function to identify which footstep is in swing

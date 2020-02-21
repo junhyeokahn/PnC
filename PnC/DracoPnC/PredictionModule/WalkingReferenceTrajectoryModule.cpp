@@ -133,6 +133,15 @@ void WalkingReferenceTrajectoryModule::setEarlyFootContact(const int index, cons
     early_contact_times_[index] = time;
 }
 
+void WalkingReferenceTrajectoryModule::setEarlyFootSideContact(const int robot_side, const double time){     
+    for(int i = 0; i < side_to_contact_indices[robot_side].size(); i++){
+        early_contact_times_[side_to_contact_indices[robot_side][i]] = time;
+    }
+}
+
+
+
+
 
 // helper function to identify which footstep is in swing
 // if false. the foot is in not in swing for the time queried or there was an early contact
