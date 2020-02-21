@@ -1,6 +1,5 @@
 #include <Utils/Math/hermite_quaternion_curve.hpp>
 
-
 /*
 An implementation of the Hermite Quaternion Curve from:
 Kim, Myoung-Jun, Myung-Soo Kim, and Sung Yong Shin. 

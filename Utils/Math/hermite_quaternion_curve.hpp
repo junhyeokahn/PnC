@@ -6,6 +6,9 @@
 #include <math.h>
 #include <algorithm>
 
+// Hermite Quaternion curve for global frame quaternion trajectory given desired angular velocity start and end.
+// also computes global frame angular velocity and angular acceleration between for s \in [0,1]
+
 class HermiteQuaternionCurve{
 public:
 	HermiteQuaternionCurve(const Eigen::Quaterniond & quat_start, const Eigen::Vector3d & angular_velocity_start,
