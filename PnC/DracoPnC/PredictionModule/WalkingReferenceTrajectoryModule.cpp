@@ -43,6 +43,7 @@ void WalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, cons
 // Check if we are in double support or one of the legs are in swing.
 int WalkingReferenceTrajectoryModule::getState(const double time){
     int foot_index;
+    // Check if we are in swing. 
     if (whichFootstepIndexInSwing(time, foot_index)){
         if (footstep_list_[foot_index].robot_side == DRACO_LEFT_FOOTSTEP){
             return DRACO_STATE_LLS; // Left leg swing
