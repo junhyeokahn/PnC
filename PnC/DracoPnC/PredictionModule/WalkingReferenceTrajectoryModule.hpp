@@ -8,11 +8,9 @@
 //    - sequence of footsteps to take,
 //
 // This class provides information about:
-//     Contact schedule c(t): (binary value if contact is active or not)
-//	   State schedule s(t): (left leg single support, right leg single support, double support)	
+//	   State schedule s(t): (left leg single swing, right leg single swing, double support)	
 //	   MPC CoM and orientation reference: x_com(t), x_ori(t)
 //     Reaction force schedule: f(t)
-//	   Left and Right Foot location x_rf(t), x_lf(t)
 //
 // There is also an interface to provide early contact times.
 // 
@@ -23,10 +21,6 @@
 #include <memory>
 
 #include <stdio.h>
-
-// Interpolators
-#include <Utils/Math/hermite_curve_vec.hpp>
-#include <Utils/Math/hermite_quaternion_curve.hpp>
 
 // states
 #define DRACO_STATE_DS 0 // double support state
@@ -85,13 +79,4 @@ private:
 	// List of footsteps
 	std::vector<DracoFootstep> footstep_list_; // list of footsteps
 	std::map<int, double> early_contact_times_;
-
-	// Containers for trajectories
-	std::shared_ptr<HermiteCurveVec> foot_pos_traj;
-	std::shared_ptr<HermiteQuaternionCurve> foot_ori_traj_0;
-	std::shared_ptr<HermiteQuaternionCurve> foot_ori_traj_1;
-
-
-
-
 };
