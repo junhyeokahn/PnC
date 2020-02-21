@@ -17,7 +17,7 @@ public:
 	double getDefaultMaxNormalForce();
 
 	// Default max z force
-	double default_max_z_force = 500;
+	double default_max_z_force_ = 500;
 };
 
 

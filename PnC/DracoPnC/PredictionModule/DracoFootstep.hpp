@@ -31,7 +31,7 @@ public:
   void setLeftSide();
   void setMidFoot();
 
-  void setWalkingParams(const double double_contact_transition_time_in,
+  void setWalkingParams(const double double_contact_time_in,
                         const double contact_transition_time_in,
                         const double swing_time_in,
                         const double swing_height_in);
@@ -49,7 +49,7 @@ public:
   double heel_dist_from_center = 0.05;
 
   // default walking parameters
-  double double_contact_transition_time = 0.0; // seconds
+  double double_contact_time = 0.03; // seconds
   double contact_transition_time = 0.2; // seconds
   double swing_time = 0.3; // seconds
   double swing_height = 0.05; // meters

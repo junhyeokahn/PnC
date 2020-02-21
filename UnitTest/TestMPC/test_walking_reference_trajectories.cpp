@@ -3,7 +3,11 @@
 #include <Utils/IO/IOUtilities.hpp>
 
 TEST(ReferenceTest, simple_test){
-	WalkingReferenceTrajectoryModule walking_reference_module;
+	std::vector<int> index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
+									  DRACO_LEFT_FOOTSTEP, DRACO_LEFT_FOOTSTEP};
+
+
+	WalkingReferenceTrajectoryModule walking_reference_module(index_to_side);
 
 	// Initialize Necessary States
 	// CoM Height
@@ -16,6 +20,7 @@ TEST(ReferenceTest, simple_test){
     double nominal_width = 0.333657;  // 33.3cm distance between left and right feet
 	lf_start.setPosOriSide(Eigen::Vector3d(0.0, nominal_width, 0.0), Eigen::Quaterniond(1, 0, 0, 0), DRACO_LEFT_FOOTSTEP);
 	rf_start.setPosOriSide(Eigen::Vector3d(0.0, -nominal_width, 0.0), Eigen::Quaterniond(1, 0, 0, 0), DRACO_RIGHT_FOOTSTEP);
+
 
 
 	// Initialize Footsteps
@@ -34,6 +39,19 @@ TEST(ReferenceTest, simple_test){
 	right_footstep1.printInfo();
 	std::cout << "lf step 1" << std::endl;
 	left_footstep1.printInfo();
+
+
+	// left then right footstep
+	std::vector<DracoFootstep> footstep_list;
+	footstep_list.push_back(left_footstep1);
+	footstep_list.push_back(right_footstep1);
+
+	double t_walk_start = 0.5;
+ 	walking_reference_module.setStartingConfiguration(x_com_pos_in,
+													  x_ori_start_in,
+								  					  lf_start,
+								  					  rf_start);
+	walking_reference_module.setFootsteps(t_walk_start, footstep_list);
 
 
 }
