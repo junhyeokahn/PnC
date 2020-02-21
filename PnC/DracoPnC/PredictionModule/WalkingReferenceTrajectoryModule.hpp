@@ -77,6 +77,7 @@ public:
 
 private:
 	std::vector<int> index_to_side_;
+	std::map<int, std::vector<int> > side_to_contact_indices;
 
 	double t_walk_start_ = 0.0;
 

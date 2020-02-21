@@ -15,6 +15,18 @@ WalkingReferenceTrajectoryModule::~WalkingReferenceTrajectoryModule(){}
 
 void WalkingReferenceTrajectoryModule::setContactIndexToSide(const std::vector<int> & index_to_side_in){
     index_to_side_ = index_to_side_in;
+
+    side_to_contact_indices.clear();
+    side_to_contact_indices[DRACO_LEFT_FOOTSTEP] = {};
+    side_to_contact_indices[DRACO_RIGHT_FOOTSTEP] = {};
+    for(int i = 0; i < index_to_side_.size(); i++){
+        if (index_to_side_[i] == DRACO_LEFT_FOOTSTEP){
+            side_to_contact_indices[DRACO_LEFT_FOOTSTEP].push_back(i);     
+        }else {
+            side_to_contact_indices[DRACO_RIGHT_FOOTSTEP].push_back(i);                 
+        }
+    }
+
 }
 
 // set the starting configuration
@@ -122,7 +134,7 @@ void WalkingReferenceTrajectoryModule::setEarlyFootContact(const int index, cons
 
 
 // helper function to identify which footstep is in swing
-// if false. the foot is in not in swing for the time queried
+// if false. the foot is in not in swing for the time queried or there was an early contact
 bool WalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double time, int & footstep_index){
     if (time < t_walk_start_){
         return false;
@@ -138,7 +150,14 @@ bool WalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double ti
 
         if ((t_footstep_swing_start <= time) && (time <= t_footstep_swing_end)){
 
-            // add check if time is after an early contact for this footstep
+            // Go through the contact indices for this side of the foot
+            for (int j = 0; j < side_to_contact_indices[ footstep_list_[i].robot_side ].size() ; j++){
+                // If there are early contacts 
+                if ( (early_contact_times_.count(j) > 0) && (time >= early_contact_times_[j]) &&
+                     (early_contact_times_[j] >= t_footstep_swing_start)){               
+                    return false;
+                }
+            }
 
             footstep_index = i;
             return true;

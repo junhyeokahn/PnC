@@ -23,6 +23,9 @@ public:
 
 	void testFunction();
 
+private:
+	double clampMaxFz(double Fz_in);
+
 };
 
 #endif
