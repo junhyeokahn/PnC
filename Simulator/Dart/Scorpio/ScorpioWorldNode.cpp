@@ -173,7 +173,7 @@ void ScorpioWorldNode::customPreStep() {
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(2.2);
+        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
         b_second_cmd = false;
     }
 
@@ -181,6 +181,12 @@ void ScorpioWorldNode::customPreStep() {
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_third_cmd) {
         ((DracoInterface*)draco_interface_)->Turn(M_PI/2.0);
         b_third_cmd = false;
+    }
+
+    static bool b_fourth_cmd(true);
+    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
+        ((DracoInterface*)draco_interface_)->WalkInX(0.61);
+        b_fourth_cmd = false;
     }
 
     draco_interface_->getCommand(draco_sensordata_, draco_cmd_);

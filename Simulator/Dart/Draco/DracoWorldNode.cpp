@@ -48,17 +48,17 @@ void DracoWorldNode::customPreStep() {
     // WalkToRelativePositionAndOrientation Method Example
     // =========================================================================
 
-    static bool b_first_cmd(true);
-    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        ((DracoInterface*)Interface_)->WalkInY(-0.9);
-        b_first_cmd = false;
-    }
+    //static bool b_first_cmd(true);
+    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
+        //((DracoInterface*)Interface_)->WalkInY(-0.9);
+        //b_first_cmd = false;
+    //}
 
-    static bool b_seventh_cmd(true);
-    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
-        ((DracoInterface*)Interface_)->WalkInX(2.5);
-        b_seventh_cmd = false;
-    }
+    //static bool b_seventh_cmd(true);
+    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
+        //((DracoInterface*)Interface_)->WalkInX(2.15);
+        //b_seventh_cmd = false;
+    //}
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_second_cmd) {
@@ -66,11 +66,11 @@ void DracoWorldNode::customPreStep() {
         b_second_cmd = false;
     }
 
-    //static bool b_sixth_cmd(true);
-    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_sixth_cmd) {
-        //((DracoInterface*)Interface_)->WalkInY(0.3);
-        //b_sixth_cmd = false;
-    //}
+    static bool b_sixth_cmd(true);
+    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_sixth_cmd) {
+        ((DracoInterface*)Interface_)->WalkInX(0.61);
+        b_sixth_cmd = false;
+    }
 
     //static bool b_third_cmd(true);
     //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_third_cmd) {
@@ -132,12 +132,12 @@ void DracoWorldNode::customPreStep() {
 
     Interface_->getCommand(SensorData_, Command_);
 
-    std::cout << "------------------------" << std::endl;
-    std::cout << "t :" << t_ << std::endl;
-    std::cout << "q :" << std::endl;
-    std::cout << (SensorData_->q.head(6)) << std::endl;
-    std::cout << "jtrq :"  << std::endl;
-    std::cout << (Command_->jtrq.tail(6))  << std::endl;
+    //std::cout << "------------------------" << std::endl;
+    //std::cout << "t :" << t_ << std::endl;
+    //std::cout << "q :" << std::endl;
+    //std::cout << (SensorData_->q.head(6)) << std::endl;
+    //std::cout << "jtrq :"  << std::endl;
+    //std::cout << (Command_->jtrq.tail(6))  << std::endl;
 
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {

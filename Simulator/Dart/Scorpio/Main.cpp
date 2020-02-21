@@ -357,20 +357,15 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
-        // THIS_COM"RobotModel/Robot/Draco/DracoCollision.urdf");
-        //THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
         THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
-    //dart::dynamics::SkeletonPtr hsrrobot = urdfLoader.parseSkeleton(
-         //THIS_COM "RobotModel/Robot/HSR/hsrb.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
     world->addSkeleton(draco);
-    //world->addSkeleton(hsrrobot);
     world->addSkeleton(table);
 
 
@@ -387,11 +382,6 @@ int main(int argc, char** argv) {
     draco->getBodyNode("lAnkle")->setFrictionCoeff(friction);
     draco->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
     draco->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
-    table->getBodyNode("baseLink")->setFrictionCoeff(friction);
-    table->getBodyNode("baseLink")->setRestitutionCoeff(restit);
-    scorpio->getBodyNode("gripper_body")->setFrictionCoeff(friction);
-    scorpio->getBodyNode("gripper_body")->setRestitutionCoeff(restit);
-
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -469,10 +459,10 @@ int main(int argc, char** argv) {
         }
 
         //viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 700, 500);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
-           ::osg::Vec3(7.14, 7.28, 2.5) *0.5 , ::osg::Vec3(0.0, 0.1, 0.4)*0.5,
-            ::osg::Vec3(0.0, 0.0, 0.8)*0.5);
+            ::osg::Vec3(6.14, 2.28, 3.0) * 1.5, ::osg::Vec3(1.0, 0.2, 0.5),
+            ::osg::Vec3(0.0, 0.0, 1.0));
         viewer.setCameraManipulator(viewer.getCameraManipulator());
         viewer.run();
     } else {
