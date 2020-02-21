@@ -45,8 +45,8 @@ public:
   void printInfo();
 
   // distance of toe and heel contacts from the center of the foot.
-  double toe_dist_from_center = 0.015;
-  double heel_dist_from_center = 0.015;
+  double toe_dist_from_center = 0.1;
+  double heel_dist_from_center = 0.05;
 
   // default walking parameters
   double double_contact_transition_time = 0.0; // seconds

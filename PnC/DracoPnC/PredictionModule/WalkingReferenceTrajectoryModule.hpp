@@ -22,6 +22,8 @@
 #include <Eigen/Dense>
 #include <memory>
 
+#include <stdio.h>
+
 // states
 #define DRACO_STATE_DS 0 // double support state
 #define DRACO_STATE_LLS 1 // left leg swing state

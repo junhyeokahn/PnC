@@ -6,8 +6,8 @@
 #include <math.h>
 #include <algorithm>
 
-// Hermite Quaternion curve for global frame quaternion trajectory given desired angular velocity start and end.
-// also computes global frame angular velocity and angular acceleration between for s \in [0,1]
+// Hermite Quaternion curve for global frame quaternion trajectory given boundary conditions
+// also computes global frame angular velocity and angular acceleration for s \in [0,1]
 
 class HermiteQuaternionCurve{
 public:

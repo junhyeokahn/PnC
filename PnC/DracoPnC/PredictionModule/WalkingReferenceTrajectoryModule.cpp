@@ -4,6 +4,7 @@ WalkingReferenceTrajectoryModule::WalkingReferenceTrajectoryModule(){
 	t_walk_start_ = 0.0;
 	reaction_force_schedule_ptr.reset(new WalkingReactionForceSchedule());
 	walking_rfs_ptr = std::static_pointer_cast<WalkingReactionForceSchedule>(reaction_force_schedule_ptr);
+	std::cout << "[WalkingReferenceTrajectoryModule] Constructed" << std::endl;
 
 }
 

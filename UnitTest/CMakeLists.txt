@@ -14,3 +14,5 @@ add_test(NAME test_my_yaml COMMAND test_my_yaml)
 
 add_subdirectory(TestKalman)
 add_subdirectory(TestIHWBC)
+
+add_subdirectory(TestMPC)
