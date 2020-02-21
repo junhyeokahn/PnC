@@ -123,6 +123,7 @@ void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eig
 
 
 double WalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
+    return walking_rfs_ptr->getMaxNormalForce(index,time);
 }
 
 // set that a particular contact was hit early
