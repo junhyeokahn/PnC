@@ -92,6 +92,11 @@ Eigen::VectorXd get_mpc_Xref_two_steps(const double t_start, const double mpc_dt
         mpc_Xref[i*n + 1] = x_des[1]; // Desired Pitch
         mpc_Xref[i*n + 2] = x_des[2]; // Desired Yaw
 
+        // Change the reference for the upcoming step
+        if (t_predict >= t_ref_change){
+            mpc_Xref[i*n + 2] = M_PI/4.0; 
+        }
+
         // Desired COM x,y,z
         mpc_Xref[i*n + 3] = x_des[3]; // Desired com x
         mpc_Xref[i*n + 4] = x_des[4]; // Desired com y

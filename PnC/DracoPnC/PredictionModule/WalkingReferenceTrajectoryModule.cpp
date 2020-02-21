@@ -66,6 +66,18 @@ int WalkingReferenceTrajectoryModule::getState(const double time){
     return DRACO_STATE_DS;
 }
 
+// If true, populates the new footstep landing location
+// If false, the MPC should use the current location of the foot
+bool WalkingReferenceTrajectoryModule::getFutureMPCFootstep(double time, DracoFootstep & footstep_landing_location){
+    int foot_index;
+    if (whichFootstepIndexInSwing(time, foot_index)){
+        footstep_landing_location = footstep_list_[foot_index];
+        return true;
+    }else{
+        return false;
+    }
+}
+
 void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
     // Set output to initial
     x_com_out = x_com_start_;
@@ -138,10 +150,6 @@ void WalkingReferenceTrajectoryModule::setEarlyFootSideContact(const int robot_s
         early_contact_times_[side_to_contact_indices[robot_side][i]] = time;
     }
 }
-
-
-
-
 
 // helper function to identify which footstep is in swing
 // if false. the foot is in not in swing for the time queried or there was an early contact
