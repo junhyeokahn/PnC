@@ -15,9 +15,14 @@ void WalkingReactionForceSchedule::testFunction(){
 
 // default is to return the max z force
 double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const double time){
-    // if index is out of bounds or time requested is earlier than 
-    if  ( ((index < 0) || (index >= reference_traj_module->footstep_list_.size())) ||
+    // if index is out of bounds or time requested is earlier than walking start time
+    if  ( ((index < 0) || (index >= reference_traj_module->index_to_side_.size())) ||
           (time <= reference_traj_module->t_walk_start_) ){
+        return default_max_z_force_;
+    }
+
+    // if the footstep list is empty, return the default max z force
+    if (reference_traj_module->footstep_list_.size() == 0){
         return default_max_z_force_;
     }
 
@@ -28,8 +33,11 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
 
     double delta_t, t_o;
     double Fz = default_max_z_force_;
-    double Fz_out = Fz;
+    double Fz_out = default_max_z_force_;
+
+    int footstep_index;
     for(int i = 0; i < reference_traj_module->footstep_list_.size(); i++){
+        footstep_index = i;
         // First Contact Transition
         // Decrease Max Z force from default max to 0.0 
         t_footstep_contact_transition_start = t_footstep_contact_transition_end + 
@@ -45,7 +53,7 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
             // compute transition force
             t_o = t_footstep_contact_transition_start;
             Fz_out = Fz + (-Fz/delta_t)*(time-t_o);
-            return Fz_out;
+            break;
         }
 
         // Swing Phase
@@ -60,7 +68,8 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
             //     return default_max_z_force_;
             // }
             // return Fz_out;
-            return 0.0;
+            Fz_out = 0.0;
+            break;
         }
 
 
@@ -80,19 +89,20 @@ double WalkingReactionForceSchedule::getMaxNormalForce(const int index, const do
 
             // clamp maximum force out if the contact was detected early
             if (Fz_out >= default_max_z_force_){
-                return default_max_z_force_;
+                Fz_out = default_max_z_force_;
             }
-            return Fz_out;
+            break;
         }
 
     }
 
-    // query time is not within the contact transition phase
-    return default_max_z_force_;
+    // Assumption that only one foot contact at a time enters a transition state.
+    // check if the contact index query matches the robot side. 
+    if (reference_traj_module->index_to_side_[index] != reference_traj_module->footstep_list_[footstep_index].robot_side){
+        return default_max_z_force_;
+    }
 
-
-
-
+    return Fz_out;
 }
 
 
