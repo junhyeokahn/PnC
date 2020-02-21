@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 // Implements the polynomial:
 // x(t) = a0 + a_1*t + a_2*t^2 + a_3*t^3 + a_4*t^4 + a_5*t^5
