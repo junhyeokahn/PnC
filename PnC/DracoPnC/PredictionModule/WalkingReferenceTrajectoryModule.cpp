@@ -180,6 +180,9 @@ bool WalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double ti
             footstep_index = i;
             return true;
         }
+        // end the footstep transition to compute the next fotostep times properly.
+        t_footstep_swing_end += footstep_list_[i].contact_transition_time;
+
     }
 
     // Query time happens after the trajectories.

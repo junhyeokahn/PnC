@@ -75,7 +75,10 @@ TEST(ReferenceTest, simple_test){
 	walking_reference_module.setEarlyFootSideContact(footstep_list[0].robot_side,  t_early);
 	std::cout << "t_early = " << t_early << std::endl;
 
-	printf("t, state, com_x_r, com_y_r, com_z_r, qx_r, qx_y, qx_z, qx_w, fz0, fz1, fz2, fz3\n");
+	DracoFootstep mpc_landing_loc_ref = rf_start;
+	bool use_prediction = false;
+
+	printf("t, state, com_x_r, com_y_r, com_z_r, qx_r, qx_y, qx_z, qx_w, fz0, fz1, fz2, fz3, land_x, land_y, land_z, side, use_land_prediction\n");
 	for(int i = 0; i < (n_total+1); i++){
 		t_query = i*dt;
 		state = walking_reference_module.getState(t_query);
@@ -85,10 +88,14 @@ TEST(ReferenceTest, simple_test){
 			max_z_force[j] = walking_reference_module.getMaxNormalForce(j, t_query);			
 		}
 
-		printf("%0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f\n",
+		// check whether to use the predicted footstep or the current foot location
+		use_prediction = walking_reference_module.getFutureMPCFootstep(t_query, mpc_landing_loc_ref);
+
+		printf("%0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i, %i\n",
 				t_query, state, x_com_ref[0], x_com_ref[1], x_com_ref[2],
 				x_ori_ref.x(), x_ori_ref.y(), x_ori_ref.z(), x_ori_ref.w(),
-				max_z_force[0],max_z_force[1],max_z_force[2],max_z_force[3]);
+				max_z_force[0],max_z_force[1],max_z_force[2],max_z_force[3],
+				mpc_landing_loc_ref.position[0], mpc_landing_loc_ref.position[1], mpc_landing_loc_ref.position[2], mpc_landing_loc_ref.robot_side, use_prediction);
 	}
 
 
