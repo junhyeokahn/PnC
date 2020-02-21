@@ -85,6 +85,13 @@ void DracoFootstep::updateContactLocations(){
   }
 }
 
+Eigen::Vector3d DracoFootstep::getToePosition(){
+  return global_contact_point_list[0];
+}
+Eigen::Vector3d DracoFootstep::getHeelPosition(){
+  return global_contact_point_list[1];
+}
+
 
 void DracoFootstep::printInfo(){
   if ((robot_side == DRACO_LEFT_FOOTSTEP) || (robot_side == DRACO_RIGHT_FOOTSTEP)){

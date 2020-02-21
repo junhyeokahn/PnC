@@ -56,13 +56,26 @@ int WalkingReferenceTrajectoryModule::getState(const double time){
 }
 
 void WalkingReferenceTrajectoryModule::getMPCRefCom(const double time, Eigen::Vector3d & x_com){
+    if (time < t_walk_start_){
+        x_com = x_com_start_;
+    }
+
+    // Set desired CoM position to the be the midfeet position
+    // of the foot landing location and the stance foot location
+
 
 }
 void WalkingReferenceTrajectoryModule::getMPCRefOri(const double time, Eigen::Quaterniond & x_ori){
+    if (time < t_walk_start_){
+        x_ori = x_ori_start_;
+    }
+
+    // Set desired Orientation to the be the midfeet orientation
+    // of the foot landing location and the stance foot location
 
 }
 double WalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
-
+    early_contact_times_[index] = time;
 }
 
 // set that a particular contact was hit early

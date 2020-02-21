@@ -57,6 +57,9 @@ public:
   std::vector<Eigen::Vector3d> local_contact_point_list;
   std::vector<Eigen::Vector3d> global_contact_point_list;
 
+  Eigen::Vector3d getToePosition();
+  Eigen::Vector3d getHeelPosition();
+
 
 private:
   void common_initialization();
