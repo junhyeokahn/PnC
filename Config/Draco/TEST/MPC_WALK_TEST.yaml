@@ -1,0 +1,82 @@
+test_configuration:
+    initial_jpos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+
+    jpos_initialization_time: 2.0
+    jpos_ctrl_time: 2.0
+
+    com_height: 0.7
+    contact_transition_duration: 2.0 # Time to ramp up the reaction force to the current
+    stabilization_duration: 2.0 # Time to stabilize the CoM after ramping up the reaction force
+    com_ctrl_time: 1000000.0
+
+    # Left and right sway
+    sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
+    sway_magnitude: 0.04  # meters
+    sway_period: 2 # seconds
+
+control_configuration:
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 100. , 100 , 100 , 100 , 100 , 100. ]
+        kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
+
+    mpc_ctrl:
+         # Velocity Integration Params
+        max_joint_vel: 2.0 # rad/s - maximum velocity after integration
+        velocity_break_freq: 2.0 # Hz # 1.0 # Higher value decays to 0.0 faster
+
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
+        position_break_freq: 1.0 # Hz # 0.0 # Higher value decays to current jpos faster
+
+        # Task Weights
+        foot_rz_xyz_kp: [1.0, 1.0, 1.0, 1.0]
+        foot_rz_xyz_kd: [0, 0, 0, 0]
+
+        com_kp: [50.0, 50.0, 50.0]
+        com_kd: [2.5, 2.5, 2.5]
+ 
+        body_kp: [50.0, 50.0, 50.0]
+        body_kd: [2.5, 2.5, 2.5]
+ 
+        joint_kp: [1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ]
+        joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
+
+        # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
+        w_contact_weight: 1e-6
+
+        # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
+        ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
+
+        # MPC Parameters
+        # Whether or not to use an approximated centroidal inertia matrix
+        # if true, we use the listed inertia. if false, we compute the centroidal inertia at each time step
+        mpc_use_approx_inertia: false
+        mpc_approx_inertia_input: [4.499536, -0.024537, 0.840501, -0.024537, 3.967693, 0.014913, 0.840501, 0.014913, 1.268436]
+        # Predicion Horizon
+        mpc_horizon: 15 # number of horizon steps 
+        # Prediction Interval
+        mpc_dt: 0.025 # seconds
+
+        # MPC Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+        # th - World Roll, Pitch Yaw
+        # p - World CoM X,Y,Z
+        # w - World Angular veloocity x,y,z
+        # dp - World COM Velocity x,y,z
+        # g - gravitiy (should always be 0.0!)
+        # mpc_cost_vec: [2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+
+        # Robot Params
+        # Regularization Term on the reaction forces
+        # mpc_control_alpha: 1e-6 # Ideally it should be small to properly generate the right reaction forces
+        # mpc_delta_smooth: 1e-12 # Constant term for quadratic smoothing
+        # mpc_smooth_from_prev: false # Whether to use the previous solution to smooth the current solution
+        # mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        # mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        # mpc_cost_vec: [0.25, 0.25, 0.25, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+        # SIM parameters
+        mpc_control_alpha: 1e-12 # Ideally it should be small to properly generate the right reaction forces
+        mpc_delta_smooth: 1e-7 # Constant term for quadratic smoothing
+        mpc_smooth_from_prev: true # Whether to use the previous solution to smooth the current solution
+        mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
+        mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
+        mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]

@@ -196,6 +196,8 @@ void DracoInterface::_ParameterSetting() {
             test_ = new MPCTest(robot_);
         } else if (test_name == "mpc_stand_test") {
             test_ = new MPCStandTest(robot_);
+        } else if (test_name == "mpc_walk_test") {
+            test_ = new MPCWalkTest(robot_);
         }        
         else {
             printf(
