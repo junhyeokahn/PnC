@@ -11,7 +11,9 @@
 #include <PnC/MPC/MPCDesiredTrajectoryManager.hpp>
 #include <PnC/GaitCycle/GaitCycle.hpp>
 
+#include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
+
 
 MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "MPC Stand Ctrl");
@@ -95,6 +97,8 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     reference_trajectory_module_ = new WalkingReferenceTrajectoryModule(contact_index_to_side);
     references_set_once_ = false;
 
+    left_foot_start_ = new DracoFootstep();
+    right_foot_start_ = new DracoFootstep();
 
     // Gait
     no_gait_ = std::make_shared<GaitCycle>();
@@ -183,6 +187,9 @@ void MPCStandCtrl::oneStep(void* _cmd) {
 
     // Setup the contacts
     contact_setup();
+
+    // Setup the Walking Reference Module
+    references_setup();
 
     // update the gait depending on the swing foot
     // To Do
@@ -281,13 +288,43 @@ void MPCStandCtrl::_mpc_setup(){
 }
 
 void MPCStandCtrl::references_setup(){
+
     if (state_machine_time_ >= sway_start_time_){
         if (!references_set_once_){
-            // get current CoM
-            com_current_ = sp_->com_pos;
-            // get current Ori
-            // get current starting left and right footstep configuration
-            // set desired footstep landing locations
+            // Prepare containers
+            Eigen::Vector3d x_com_start;
+            Eigen::Quaterniond x_ori_start;
+            double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
+
+            // Get current CoM
+            x_com_start = sp_->com_pos;
+            // Get current Ori
+            x_ori_start = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
+            // Get current starting left and right footstep configuration
+
+            Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+            Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
+            left_foot_start_->setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
+
+            Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+            Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
+            right_foot_start_->setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
+
+            // Set references initial condition
+            reference_trajectory_module_->setStartingConfiguration(x_com_start,
+                                                                   x_ori_start,
+                                                                   *left_foot_start_,
+                                                                   *right_foot_start_);
+
+            std::cout << "setting references once!" << std::endl;
+            myUtils::pretty_print(x_com_start, std::cout, "x_com_start");
+            myUtils::pretty_print(x_ori_start, std::cout, "x_ori_start");
+            left_foot_start_->printInfo();
+            right_foot_start_->printInfo();
+
+            // Set desired footstep landing locations
+
+
 
 
 

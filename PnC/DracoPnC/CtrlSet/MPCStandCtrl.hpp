@@ -104,6 +104,9 @@ class MPCStandCtrl : public Controller {
 
     // Desired trajectory Managers
     WalkingReferenceTrajectoryModule* reference_trajectory_module_;
+    DracoFootstep* left_foot_start_;
+    DracoFootstep* right_foot_start_;
+
     bool references_set_once_;
     void references_setup();
 
