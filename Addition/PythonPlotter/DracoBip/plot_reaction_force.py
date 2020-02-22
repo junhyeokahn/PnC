@@ -8,8 +8,6 @@ import os
 file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 dim_single_rf = 6
 ## read files
-data_rf_cmd = \
-np.genfromtxt(file_path+'reaction_force.txt', delimiter=None, dtype=(float))
 data_rf_filtered_cmd = \
 np.genfromtxt(file_path+'filtered_rf.txt', delimiter=None, dtype=(float))
 data_rf_sense = \
@@ -36,8 +34,7 @@ plt.get_current_fig_manager().window.wm_geometry("480x600+0+0")
 fig.canvas.set_window_title('reaction_force (right_leg)')
 for i in range(1, dim_single_rf + 1,1):
     ax1 = plt.subplot(dim_single_rf, 1, i)
-    plt.plot(data_x, data_rf_cmd[st_idx:end_idx,i-1], "r-", \
-             data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1 + dim_single_rf], "g-" , \
+    plt.plot(data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1 + dim_single_rf], "r-" , \
              data_x, data_rf_sense[st_idx:end_idx,i-1], "b-")
     # plt.legend(('command', 'pos'), loc='upper left')
     # phase marker #
@@ -54,8 +51,7 @@ plt.get_current_fig_manager().window.wm_geometry("480x600+480+0")
 fig.canvas.set_window_title('reaction_force (left_leg)')
 for i in range(1,dim_single_rf + 1,1):
     ax1 = plt.subplot(dim_single_rf, 1, i)
-    plt.plot(data_x, data_rf_cmd[st_idx:end_idx,i-1 + dim_single_rf], "r-" , \
-             data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1 + dim_single_rf], "g-" , \
+    plt.plot(data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1 + dim_single_rf], "r-" , \
              data_x, data_rf_sense[st_idx:end_idx,i-1 + dim_single_rf], "b-")
     # phase marker #
     for j in phseChange:

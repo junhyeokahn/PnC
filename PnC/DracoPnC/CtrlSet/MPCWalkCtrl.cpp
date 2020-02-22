@@ -331,6 +331,16 @@ void MPCWalkCtrl::references_setup(){
                                       foot_rotate*right_foot_start_->orientation, 
                                       DRACO_RIGHT_FOOTSTEP);
 
+            double double_contact_time_in = 1.0;
+            double contact_transition_time_in = 0.3;
+            double swing_time_in = 0.1;
+            double swing_height_in = 0.05;
+
+            rfootstep_1.setWalkingParams(double_contact_time_in,
+                                         contact_transition_time_in,
+                                         swing_time_in,
+                                         swing_height_in);
+
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
@@ -534,8 +544,8 @@ void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     sp_->qddot_cmd = qddot_res;    
 
     // Store desired reaction force data
-    sp_->reaction_forces = mpc_Fd_des_;
-    sp_->filtered_rf = Fr_res;
+    sp_->filtered_rf = mpc_Fd_des_;
+    sp_->reaction_forces = Fr_res;
 
 }
 
@@ -772,8 +782,19 @@ void MPCWalkCtrl::contact_setup() {
 
     // Smoothly change maximum Fz for IHWBC
     double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, contact_transition_dur_, state_machine_time_ );
+ 
+    // if (state_machine_time_ >= walk_start_time_){
+       // std::cout << "State Machine Time: " << state_machine_time_ << std::endl;
+    // }
+    
     for(int i = 0; i < contact_list_.size(); i++){
-        ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz);
+        if (state_machine_time_ >= walk_start_time_){
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(reference_trajectory_module_->getMaxNormalForce(i, state_machine_time_) );
+            // printf("    Contact:%i, force:%0.3f\n", i, reference_trajectory_module_->getMaxNormalForce(i, state_machine_time_));
+        }else{
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz);            
+        }
+
     }
     
 

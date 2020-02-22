@@ -494,11 +494,13 @@ void CMPC::get_qp_constraints(const Eigen::MatrixXd& CMat,
         gait_cycle_ptr->updateContactStates(0.0, preview_time);
         // gait_cycle_ptr->printCurrentGaitInfo();
 
+        // std::cout << "preview start time" << preview_time << std::endl;
         // Set maximum z force to 0.0 if the contact state is inactive
         for(int j = 0; j < num_contacts; j++){
             // get contact state and deactivate corresponding contact location if necessary            
-            cvec_qp[i * num_rows + 6*j + 4] *= ( static_cast<double>(gait_cycle_ptr->getContactState(j)) * reaction_force_schedule_ptr->getMaxNormalForce(j, preview_time)); 
-            // std::cout << "contact " << j << "state:" << gait_cycle_ptr->getContactState(j) << std::endl;           
+            cvec_qp[i * num_rows + 6*j + 4] = (static_cast<double>(gait_cycle_ptr->getContactState(j))) * reaction_force_schedule_ptr->getMaxNormalForce(j, preview_time); 
+            // printf("    contact:%i, max force:%0.4f\n", j,  reaction_force_schedule_ptr->getMaxNormalForce(j, preview_time));
+            // printf("    contact:%i, max force:%0.4f\n", j,  cvec_qp[i * num_rows + 6*j + 4]);
         }
         // Increment preview window
         preview_time += mpc_dt;
