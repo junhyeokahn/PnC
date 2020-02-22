@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 TEST(ReferenceTest, no_footsteps){
 	std::vector<int> index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
@@ -274,6 +275,17 @@ TEST(ReferenceTest, two_steps_early_contact){
 				max_z_force[0],max_z_force[1],max_z_force[2],max_z_force[3],
 				mpc_landing_loc_ref.position[0], mpc_landing_loc_ref.position[1], mpc_landing_loc_ref.position[2], mpc_landing_loc_ref.robot_side, use_prediction);
 	}
+
+	// Eigen::Quaterniond qyaw( Eigen::AngleAxisd(-M_PI/3.0, Eigen::Vector3d::UnitZ()) );
+	// double theta = -M_PI/4.0;
+	// Eigen::Quaterniond qyaw( cos(theta/2.0), 0.0, 0.0, sin(theta/2.0)  );
+	// Eigen::Quaterniond qpitch( Eigen::AngleAxisd(M_PI/12.0, Eigen::Vector3d::UnitY()) );
+	// Eigen::Quaterniond qroll( Eigen::AngleAxisd(M_PI/4.0, Eigen::Vector3d::UnitX()) );
+	// Eigen::Quaterniond qres = qyaw*qpitch*qroll;
+
+	Eigen::Vector3d euler_zyx = myUtils::QuatToEulerZYX(x_ori_ref);
+	myUtils::pretty_print(x_ori_ref, std::cout, "x_ori_ref");
+	myUtils::pretty_print(euler_zyx, std::cout, "euler_zyx");
 
 
 }

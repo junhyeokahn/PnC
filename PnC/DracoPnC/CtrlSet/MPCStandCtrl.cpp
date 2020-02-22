@@ -11,6 +11,8 @@
 #include <PnC/MPC/MPCDesiredTrajectoryManager.hpp>
 #include <PnC/GaitCycle/GaitCycle.hpp>
 
+#include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
+
 MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "MPC Stand Ctrl");
 
@@ -84,6 +86,15 @@ MPCStandCtrl::MPCStandCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_solved_once_ = false; // Whether the MPC has been solved at least once
 
     simulate_mpc_solved_ = false;
+
+
+    // Footsteps and Reference Trajectory Module
+    // Set which contact points from the contact_list_ corresponds to which footstep
+    std::vector<int> contact_index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
+                                              DRACO_LEFT_FOOTSTEP, DRACO_LEFT_FOOTSTEP};
+    reference_trajectory_module_ = new WalkingReferenceTrajectoryModule(contact_index_to_side);
+    references_set_once_ = false;
+
 
     // Gait
     no_gait_ = std::make_shared<GaitCycle>();
@@ -267,6 +278,23 @@ void MPCStandCtrl::_mpc_setup(){
                         robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation());
 
 
+}
+
+void MPCStandCtrl::references_setup(){
+    if (state_machine_time_ >= sway_start_time_){
+        if (!references_set_once_){
+            // get current CoM
+            com_current_ = sp_->com_pos;
+            // get current Ori
+            // get current starting left and right footstep configuration
+            // set desired footstep landing locations
+
+
+
+
+            references_set_once_ = true;
+        }
+    }    
 }
 
 void MPCStandCtrl::_mpc_Xdes_setup(){

@@ -187,7 +187,12 @@ double QuatToYaw(const Eigen::Quaternion<double> q) {
     return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
 }
 
-// ZYX extrinsic rotations (roll pitch yaw values are based on rotating about the fixed frame.
+// Euler ZYX 
+//     Represents either:
+//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then fixed-frame yaw.
+//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then body-frame roll 
+//
+//     The equation is similar, but the values for fixed and body frame rotations are different.
 // World Orientation is R = Rz*Ry*Rx
 Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw){
     Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitX());
@@ -196,6 +201,35 @@ Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const d
 
     Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
     return q.normalized();
+}
+
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in){
+    // to match equation from:
+    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+    // roll (x-axis rotation)
+    double sinr_cosp = 2 * (quat_in.w() * quat_in.x() + quat_in.y() * quat_in.z());
+    double cosr_cosp = 1 - 2 * (quat_in.x() * quat_in.x() + quat_in.y() * quat_in.y());
+    double roll = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = 2 * (quat_in.w() * quat_in.y() - quat_in.z() * quat_in.x());
+    double pitch;
+    if (std::abs(sinp) >= 1)
+        pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        pitch = std::asin(sinp);
+
+    // yaw rotation (z-axis rotation)
+    double siny_cosp = 2 * (quat_in.w() * quat_in.z() + quat_in.x() * quat_in.y());
+    double cosy_cosp = 1 - 2 * (quat_in.y() * quat_in.y() + quat_in.z() * quat_in.z());
+    double yaw = std::atan2(siny_cosp, cosy_cosp);
+
+    // The following is the Eigen library method. But it flips for a negative yaw..
+    // Eigen::Matrix3d mat = quat_in.toRotationMatrix();
+    // return mat.eulerAngles(2,1,0);
+
+    return Eigen::Vector3d(yaw, pitch, roll);
 }
 
 

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <Utils/IO/IOUtilities.hpp>
 #include <iostream>
 
@@ -65,9 +66,18 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
 
 double QuatToYaw(const Eigen::Quaternion<double> q);
 
-// ZYX extrinsic rotations (roll pitch yaw values are based on sequential rotation about the fixed frame.
+// Euler ZYX 
+//     Represents either:
+//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then fixed-frame yaw.
+//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then body-frame roll 
+//
+//     The equation is similar, but the values for fixed and body frame rotations are different.
 // World Orientation is R = Rz*Ry*Rx
 Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw);
+
+// Quaternion to Euler ZYX 
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in);
+
 
 // ZYX extrinsic rotation rates to world angular velocity
 // angular vel = [wx, wy, wz]

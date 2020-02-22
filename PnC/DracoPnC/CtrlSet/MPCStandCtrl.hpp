@@ -10,6 +10,9 @@ class IHWBC;
 class MPCDesiredTrajectoryManager;
 class GaitCycle;
 
+class WalkingReferenceTrajectoryModule;
+class DracoFootstep;
+
 class MPCStandCtrl : public Controller {
    public:
     MPCStandCtrl(RobotSystem*);
@@ -75,6 +78,9 @@ class MPCStandCtrl : public Controller {
     ContactSpec* lfoot_front_contact_;
     ContactSpec* lfoot_back_contact_;
 
+    // Footstep list
+    std::vector<DracoFootstep> desired_footstep_list_;
+
     // Sway Behavior
     double sway_start_time_;
     double sway_magnitude_;
@@ -97,6 +103,11 @@ class MPCStandCtrl : public Controller {
     bool gait_set_once_;
 
     // Desired trajectory Managers
+    WalkingReferenceTrajectoryModule* reference_trajectory_module_;
+    bool references_set_once_;
+    void references_setup();
+
+
     MPCDesiredTrajectoryManager* mpc_old_trajectory_;
     MPCDesiredTrajectoryManager* mpc_new_trajectory_;
 
