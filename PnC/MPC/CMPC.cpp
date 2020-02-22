@@ -70,6 +70,10 @@ void CMPC::setCustomGaitCycle(std::shared_ptr<GaitCycle> gait_cycle_ptr_in){
     gait_cycle_ptr = gait_cycle_ptr_in;
 }
 
+void CMPC::setCustomReactionForceSchedule(std::shared_ptr<ReactionForceSchedule> reaction_force_schedule_ptr_in){
+    reaction_force_schedule_ptr = reaction_force_schedule_ptr_in;
+}
+
 // Sets the cost vector. for the MPC
 // Vector cost indexing: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,
 // dpx,  dpy,  dpz,  g

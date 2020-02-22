@@ -70,12 +70,8 @@ void MPCWalkTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_ctrl_time", tmp_val);
         ((MPCWalkCtrl*)mpc_ctrl_)->setStanceTime(tmp_val);
 
-        myUtils::readParameter(test_cfg, "sway_start_time", tmp_val);
-        ((MPCWalkCtrl*)mpc_ctrl_)->setSwayStartTime(tmp_val);
-        myUtils::readParameter(test_cfg, "sway_magnitude", tmp_val);
-        ((MPCWalkCtrl*)mpc_ctrl_)->setSwayMagnitude(tmp_val);
-        myUtils::readParameter(test_cfg, "sway_period", tmp_val);
-        ((MPCWalkCtrl*)mpc_ctrl_)->setSwayPeriod(tmp_val);
+        myUtils::readParameter(test_cfg, "walk_start_time", tmp_val);
+        ((MPCWalkCtrl*)mpc_ctrl_)->setWalkStartTime(tmp_val);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

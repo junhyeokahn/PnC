@@ -289,7 +289,7 @@ void MPCWalkCtrl::_mpc_setup(){
 
 void MPCWalkCtrl::references_setup(){
 
-    if (state_machine_time_ >= sway_start_time_){
+    if (state_machine_time_ >= walk_start_time_){
         if (!references_set_once_){
             // Prepare containers
             Eigen::Vector3d x_com_start;
@@ -323,10 +323,25 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
+            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
+            DracoFootstep rfootstep_1; // take a rightfootstep
+            rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
+                                      foot_rotate*right_foot_start_->orientation, 
+                                      DRACO_RIGHT_FOOTSTEP);
 
+            // Clear then add footsteps to the list.
+            desired_footstep_list_.clear();
+            desired_footstep_list_.push_back(rfootstep_1);
 
+            for(int i = 0; i < desired_footstep_list_.size(); i++){
+                printf("Step %i:\n", i);
+                desired_footstep_list_[i].printInfo();
+            }
 
+            // Update the reference trajectory module
+            reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
 
 
             references_set_once_ = true;
@@ -338,13 +353,13 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
     int n = convex_mpc->getStateVecDim(); // This is always size 13.
     mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
 
-    double magnitude = sway_magnitude_;
-    double T = sway_period_;
+    double magnitude = 0.0;
+    double T = 1.0;
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
 
     // Set custom gait cycle
-    // if (state_machine_time_ >= sway_start_time_){
+    // if (state_machine_time_ >= walk_start_time_){
     //     if (!gait_set_once_){
     //         convex_mpc->setCustomGaitCycle(biped_gait_);            
     //         gait_set_once_ = true;
@@ -367,8 +382,8 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
 
         mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
-        if (t_predict >= sway_start_time_){
-            mpc_Xdes_[i*n + 4] = goal_com_pos_[1] + magnitude*sin(omega * (t_predict-sway_start_time_));             
+        if (t_predict >= walk_start_time_){
+            mpc_Xdes_[i*n + 4] = goal_com_pos_[1] + magnitude*sin(omega * (t_predict-walk_start_time_));             
         }
 
         // Wait for contact transition to finish
@@ -385,8 +400,8 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 9] = -omega *magnitude*sin(omega * t_predict); 
 
         mpc_Xdes_[i*n + 10] = 0.0;
-        if (t_predict >= sway_start_time_){
-            mpc_Xdes_[i*n + 10] = omega*magnitude*cos(omega * (t_predict-sway_start_time_));             
+        if (t_predict >= walk_start_time_){
+            mpc_Xdes_[i*n + 10] = omega*magnitude*cos(omega * (t_predict-walk_start_time_));             
         }
 
         // Wait for contact transition to finish
@@ -834,9 +849,7 @@ void MPCWalkCtrl::firstVisit() {
 
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
-    std::cout << "sway_start_time:" << sway_start_time_ << std::endl;
-    std::cout << "sway_magnitude:" << sway_magnitude_ << std::endl;
-    std::cout << "sway_period:" << sway_period_ << std::endl;
+    std::cout << "walk_start_time:" << walk_start_time_ << std::endl;
 
     convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
     convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
@@ -852,6 +865,9 @@ void MPCWalkCtrl::firstVisit() {
     convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
     convex_mpc->setSmoothFromPrevResult(mpc_smooth_from_prev_);
     convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
+
+    // Sets the reaction force schedule
+    convex_mpc->setCustomReactionForceSchedule(reference_trajectory_module_->reaction_force_schedule_ptr);
 
     // Set reference trajectory params
     mpc_old_trajectory_->setHorizon(mpc_horizon_);

@@ -33,14 +33,8 @@ class MPCWalkCtrl : public Controller {
         contact_transition_dur_ = time;
     }
 
-    void setSwayStartTime(double start_time){
-        sway_start_time_ = start_time;
-    }
-    void setSwayMagnitude(double magnitude){
-        sway_magnitude_ = magnitude;
-    }
-    void setSwayPeriod(double period){
-        sway_period_ = period;
+    void setWalkStartTime(double start_time){
+        walk_start_time_ = start_time;
     }
 
     void SetStabilizationDuration(double time){
@@ -82,7 +76,7 @@ class MPCWalkCtrl : public Controller {
     std::vector<DracoFootstep> desired_footstep_list_;
 
     // Sway Behavior
-    double sway_start_time_;
+    double walk_start_time_;
     double sway_magnitude_;
     double sway_period_;
 
