@@ -146,8 +146,8 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
-    w_task_rfoot_ = 100.0;
-    w_task_lfoot_ = 100.0;
+    w_task_rfoot_ = 100;
+    w_task_lfoot_ = 100;
     w_task_com_ = 1e-4;
     w_task_body_ = 1e-4;
     w_task_joint_ = 1e-6;
@@ -357,7 +357,7 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             double double_contact_time_in = 0.05;
-            double contact_transition_time_in = 0.2;
+            double contact_transition_time_in = 0.25;
             double swing_time_in = 0.2;
             double swing_height_in = 0.05;
 
@@ -792,8 +792,8 @@ void MPCWalkCtrl::task_setup() {
         foot_ori_trajectory->getAngularVelocity(s, f_ori_vel);
         foot_ori_trajectory->getAngularAcceleration(s, f_ori_acc);
 
-        printf("s: %0.3f. swing_time: %0.3f, swing_height: %0.3f \n", s, swing_foot_current_->swing_time, swing_foot_current_->swing_height);
-        myUtils::pretty_print(f_pos, std::cout, "  f_pos");
+        // printf("s: %0.3f. swing_time: %0.3f, swing_height: %0.3f \n", s, swing_foot_current_->swing_time, swing_foot_current_->swing_height);
+        // myUtils::pretty_print(f_pos, std::cout, "  f_pos");
         // myUtils::pretty_print(f_vel, std::cout, "  f_vel");
         // myUtils::pretty_print(f_acc, std::cout, "  f_acc");
 
@@ -868,7 +868,7 @@ void MPCWalkCtrl::task_setup() {
     task_list_.push_back(rfoot_back_task);    
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);    
-    // task_list_.push_back(total_joint_task_);
+    task_list_.push_back(total_joint_task_);
     // task_list_.push_back(ang_momentum_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
@@ -881,7 +881,7 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
     // w_task_heirarchy_[6] = w_task_ang_momentum_; // angular momentum
 
-    // w_task_heirarchy_[6] = w_task_joint_; // joint    
+    w_task_heirarchy_[6] = w_task_joint_; // joint    
 
 }
 
