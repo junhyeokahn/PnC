@@ -769,15 +769,19 @@ void MPCWalkCtrl::task_setup() {
         }
       
         // Compute progression variable
+        double s = (state_machine_time_ - swing_start_time_)/swing_foot_current_->swing_time;
+        // swing foot trajectory is split into two. so divide by 2.0 first
 
-        double s = (state_machine_time_ - swing_start_time_)/swing_foot_current_->swing_time ;
-
+        // 0.0 <= s < 1.0 use the first trajectory
+        // 1.0 <= s < 2.0 use the second trajectory
         if (s <= 0.5){
-            std::cout << "first half of trajectory" << std::endl;
             pos_traj_to_use = foot_pos_traj_init_to_mid_;
+            // scale back to 1.0
+            s = 2.0*s;
         }else{
-            std::cout << "second half of trajectory" << std::endl;
             pos_traj_to_use = foot_pos_traj_mid_to_end_;    
+            // scale back to 1.0 after the offset
+            s = 2.0*(s - 0.5);
         }
 
         // Get position, orientation and its derivatives
@@ -803,10 +807,6 @@ void MPCWalkCtrl::task_setup() {
         // Grab the toe and heel position
         toe_pos = swing_foot_current_->getToePosition();
         heel_pos = swing_foot_current_->getHeelPosition();
-
-        myUtils::pretty_print(toe_pos, std::cout, "  toe_pos");
-        myUtils::pretty_print(heel_pos, std::cout, "  heel_pos");
-
     }
 
     // Use Swing foot trajectories if we are in swing
