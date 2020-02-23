@@ -104,6 +104,10 @@ class MPCWalkCtrl : public Controller {
     bool references_set_once_;
     void references_setup();
 
+    //  internal state machines 
+    int ctrl_state_;
+    int prev_ctrl_state_; 
+
 
     MPCDesiredTrajectoryManager* mpc_old_trajectory_;
     MPCDesiredTrajectoryManager* mpc_new_trajectory_;
