@@ -69,7 +69,7 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_horizon_ = 20; // steps
     mpc_dt_ = 0.025; // seconds per step
     mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
-    mpc_max_fz_ = 500.0; // Maximum Reaction force on each contact point
+    mpc_max_fz_ = 1500.0; // Maximum Reaction force on each contact point
     mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
     mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
     mpc_smooth_from_prev_ = false; // Whether to use the previous solution to smooth the current solution
@@ -332,8 +332,8 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             double double_contact_time_in = 0.05;
-            double contact_transition_time_in = 0.3;
-            double swing_time_in = 0.1;
+            double contact_transition_time_in = 0.2;
+            double swing_time_in = 0.2;
             double swing_height_in = 0.05;
 
             rfootstep_1.setWalkingParams(double_contact_time_in,

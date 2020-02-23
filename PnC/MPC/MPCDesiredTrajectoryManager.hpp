@@ -57,19 +57,20 @@ public:
                    const Eigen::VectorXd end_boundary,
                    const double time_start, double const time_end);
 
-    Eigen::VectorXd getVal(const int index, const double time);
+    Eigen::VectorXd getVal(const double time);
 
 
 private:
     int dimension;
-    // A vector of a linear fit for the state within the horizon 
-    std::vector<LinearFit_OneDimension> x_linear;
+    // A vector of a linear fit for the input within the horizon 
+    std::vector<LinearFit_OneDimension> u_linear;
 };
 
 
 class MPCDesiredTrajectoryManager{
 public: 
     MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in);
+    MPCDesiredTrajectoryManager(const int input_size_in, const int state_size_in, const int horizon_in, const double dt_in);
     ~MPCDesiredTrajectoryManager();
 
     // Accepts a concatenated state vector which lists the knot points of the state over the horizon
@@ -87,6 +88,19 @@ public:
                             const Eigen::VectorXd & X_start,
                             const Eigen::VectorXd & X_pred); 
 
+    // U_sequence = [U_0, U_1, ... U_{horizon-1}]
+    // set the input knot points with U_0 the input that should be taken now.
+    void setInputKnotPoints(const double t_start_in,
+                            const Eigen::VectorXd & U_sequence); 
+
+
+    // Simultaenously sets input and state knotpoints
+    void setStateAndInputKnotPoints(const double t_start_in,
+                                    const Eigen::VectorXd & X_start,
+                                    const Eigen::VectorXd & X_pred,
+                                    const Eigen::VectorXd & U_sequence); 
+
+
     // int horizon: number of time steps
     void setHorizon(const int horizon_in);
     // double dt: time interval between knot points. Usually equal to the MPC dt
@@ -98,12 +112,18 @@ public:
     // time_in is clamped between (t_start and t_start + horizon*dt_internal)
     void getState(const double time_in, Eigen::VectorXd & x_out); 
 
+    // time_in is clamped between (t_start and t_start + horizon*dt_internal)
+    void getInput(const double time_in, Eigen::VectorXd & u_out); 
+
     // Returns the input state vector
     Eigen::VectorXd getXStartVector();
-    // Returns the input knot points
+    // Returns the input state knot points
     Eigen::VectorXd getXpredVector();
     // Returns the global start time of the trajectories
     double getStartTime();
+
+    // Returns the input sequence
+    Eigen::VectorXd getUSequence();
 
     // Returns the knot points that are after this time.
     Eigen::VectorXd getTruncatedXpredVector(const double time);
@@ -126,6 +146,7 @@ private:
     double t_start; // global start time of the trajectories
     double dt_internal;
 
+    int input_size;
     int state_size;
     int dim;
     int horizon;
@@ -140,6 +161,10 @@ private:
 
     // vector containing all the polynomial fits from t_start to t_start + horizon*dt
     std::vector< StateTrajectoryWithinHorizon > x_trajectory;
+
+    // vector containing the input knot points
+    Eigen::VectorXd U_sequence_internal; 
+    std::vector< InputTrajectoryWithinHorizon > u_trajectory;
 
 
 };

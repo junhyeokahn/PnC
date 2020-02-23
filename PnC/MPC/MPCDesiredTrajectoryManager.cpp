@@ -84,12 +84,11 @@ Eigen::VectorXd StateTrajectoryWithinHorizon::getAcc(const double time, const in
 InputTrajectoryWithinHorizon::InputTrajectoryWithinHorizon(const int dimension_in){
     dimension = dimension_in;
     for(int i = 0; i < dimension; i++){  
-        x_linear.push_back(LinearFit_OneDimension());
+        u_linear.push_back(LinearFit_OneDimension());
     }
 }
 
 InputTrajectoryWithinHorizon::~InputTrajectoryWithinHorizon(){
-
 }
 
 // init_boundary is the input u at the start time
@@ -97,19 +96,30 @@ InputTrajectoryWithinHorizon::~InputTrajectoryWithinHorizon(){
 void InputTrajectoryWithinHorizon::setParams(const Eigen::VectorXd init_boundary, 
                                              const Eigen::VectorXd end_boundary,
                                              const double time_start, double const time_end){
+
+    for(int i = 0; i < dimension; i++){
+        u_linear[i].setParams(init_boundary[i], end_boundary[i], time_start, time_end);
+    }
+
 }
 
-Eigen::VectorXd InputTrajectoryWithinHorizon::getVal(const int index, const double time){
+Eigen::VectorXd InputTrajectoryWithinHorizon::getVal(const double time){
     Eigen::VectorXd out(dimension); 
     double val;
     for(int i = 0; i < dimension; i++){
-        x_linear[i].getPos(time, val);
+        u_linear[i].getPos(time, val);
         out[i] = val;
     }
 }    
 
 
+MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int input_size_in, const int state_size_in, const int horizon_in, const double dt_in){
+    MPCDesiredTrajectoryManager(state_size_in, horizon_in, dt_in);    
+    input_size = input_size_in;
+}
+
 MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in){
+    input_size = 0;
     state_size = state_size_in;
     dim = floor(state_size/2);
     setHorizon(horizon_in);
@@ -136,11 +146,17 @@ MPCDesiredTrajectoryManager::~MPCDesiredTrajectoryManager(){
 void MPCDesiredTrajectoryManager::setHorizon(const int horizon_in){
     horizon = horizon_in;
     X_pred_internal = Eigen::VectorXd::Zero(horizon*state_size);
-    // Clear the piecewise cubic container
+    U_sequence_internal = Eigen::VectorXd::Zero(horizon*input_size);
+
+    // Clear the trajectory containers
     x_trajectory.clear();
+    u_trajectory.clear();
+
     for(int i = 0; i < horizon; i++){
         x_trajectory.push_back(StateTrajectoryWithinHorizon(dim));       
+        u_trajectory.push_back(InputTrajectoryWithinHorizon(input_size));
     }
+
 }
 
 void MPCDesiredTrajectoryManager::setDt(const double dt_in){
@@ -182,6 +198,49 @@ void MPCDesiredTrajectoryManager::setStateKnotPoints(const double t_start_in,
         x_trajectory[i].setParams(init_boundary, end_boundary, t_horizon_begin, t_horizon_end);
     }
 }
+
+void MPCDesiredTrajectoryManager::setInputKnotPoints(const double t_start_in,
+                                                     const Eigen::VectorXd & U_sequence){
+
+    // Initialize trajectory start time
+    t_start =  t_start_in;
+    // Initialize horizon time window
+    double t_horizon_begin, t_horizon_end;
+
+    // Initialize the boundary conditions
+    Eigen::VectorXd init_boundary(input_size);
+    Eigen::VectorXd end_boundary(input_size);
+
+    // Locally copy U_sequence
+    U_sequence_internal = U_sequence;
+
+    // Set parameters for the linear fit
+    for(int i = 0; i < horizon; i++){
+        t_horizon_begin = t_start + i*dt_internal;
+        t_horizon_end = t_start + (i+1)*dt_internal;
+
+        init_boundary = U_sequence.segment(i*input_size, input_size);
+        if (i == (horizon - 1)){
+            // Zero order hold at the last input
+            end_boundary = U_sequence.segment(i*input_size, input_size);            
+        }else{
+            end_boundary = U_sequence.segment((i+1)*input_size, input_size);            
+        }
+        // Set the boundary conditions on the linear interpolation
+        u_trajectory[i].setParams(init_boundary, end_boundary, t_horizon_begin, t_horizon_end);
+    }    
+
+
+}
+
+void MPCDesiredTrajectoryManager::setStateAndInputKnotPoints(const double t_start_in,
+                                                             const Eigen::VectorXd & X_start,
+                                                             const Eigen::VectorXd & X_pred,
+                                                             const Eigen::VectorXd & U_sequence){
+    setStateKnotPoints(t_start_in, X_start, X_pred);
+    setInputKnotPoints(t_start_in, U_sequence);
+}
+
 
 int MPCDesiredTrajectoryManager::getHorizonIndex(const double time){
     // get index to use for the piecewise cubic polynomial
@@ -233,8 +292,18 @@ void MPCDesiredTrajectoryManager::getState(const double time_in, Eigen::VectorXd
     x_out.segment(dim, dim) = getVel(time_in);
 }
 
+void MPCDesiredTrajectoryManager::getInput(const double time_in, Eigen::VectorXd & u_out){
+    // return the input for the requested time
+    int index = getHorizonIndex(time_in);
+    u_out = u_trajectory[index].getVal(time_in);    
+}
+
 Eigen::VectorXd MPCDesiredTrajectoryManager::getXpredVector(){
     return X_pred_internal;
+}
+
+Eigen::VectorXd MPCDesiredTrajectoryManager::getUSequence(){
+    return U_sequence_internal;
 }
 
 // Returns the input state vector
