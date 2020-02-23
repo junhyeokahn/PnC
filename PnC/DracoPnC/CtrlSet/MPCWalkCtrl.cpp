@@ -755,62 +755,80 @@ void MPCWalkCtrl::task_setup() {
     Eigen::VectorXd foot_vel_d(3); foot_vel_d.setZero();
     Eigen::VectorXd foot_acc_d(3); foot_acc_d.setZero();
 
-
-    // If right leg swing. perform a swing foot trajectory
-    if (ctrl_state_ == DRACO_STATE_RLS){
+    // Compute swing foot trajectories --------------------------------------------------------------
+    Eigen::Vector3d f_pos, f_vel, f_acc;
+    Eigen::Quaterniond f_ori;       
+    Eigen::Vector3d f_ori_vel, f_ori_acc;
+    Eigen::Vector3d toe_pos;
+    Eigen::Vector3d heel_pos;
+    // Check if we are in swing. If so, perform a swing foot trajectory
+    if ((ctrl_state_ == DRACO_STATE_RLS) || ctrl_state_ == DRACO_STATE_LLS){
         // if the previous state was a double support, we have to construct a trajectory.
-        // if (prev_state_ == DRACO_STATE_DS){
-        // compute the trajectory initially
-        //}
-       
-        // we are in swing. get the desired position, orientation, and its derivatives
-        // DracoFootstep swing_current;
-        // s = (state_machine_time - t_start)/swing_time;
+        if (prev_ctrl_state_ == DRACO_STATE_DS){
+            compute_swing_foot_trajectory();            
+        }
+      
+        // Compute progression variable
 
-        // Eigen::Vector3d f_pos, f_vel, f_acc;
-        // Eigen::Quaterniond f_ori;       
-        // Eigen::Vector3d f_ori_vel, f_ori_acc
+        double s = (state_machine_time_ - swing_start_time_)/swing_foot_current_->swing_time ;
 
-        // if (s <= 0.5){
-        //     pos_traj_to_use = trajectory_init_to_mid;
-        // }else{
-        //     pos_traj_to_use = trajectory_mid_to_end;    
-        // }
+        if (s <= 0.5){
+            std::cout << "first half of trajectory" << std::endl;
+            pos_traj_to_use = foot_pos_traj_init_to_mid_;
+        }else{
+            std::cout << "second half of trajectory" << std::endl;
+            pos_traj_to_use = foot_pos_traj_mid_to_end_;    
+        }
 
-        // f_pos = pos_traj_to_use->evaluate(s);
-        // f_vel = pos_traj_to_use->evaluateFirstDerivative(s);
-        // f_acc = pos_traj_to_use->evaluateSecondDerivative(s);
-        // foot_ori_trajectory->evaluate(s, f_ori);
-        // foot_ori_trajectory->getAngularVelocity(s, f_ori_vel);
-        // foot_ori_trajectory->getAngularAcceleration(s, f_ori_acc);
+        // Get position, orientation and its derivatives
+        f_pos = pos_traj_to_use->evaluate(s);
+        f_vel = pos_traj_to_use->evaluateFirstDerivative(s);
+        f_acc = pos_traj_to_use->evaluateSecondDerivative(s);
+        foot_ori_trajectory->evaluate(s, f_ori);
+        foot_ori_trajectory->getAngularVelocity(s, f_ori_vel);
+        foot_ori_trajectory->getAngularAcceleration(s, f_ori_acc);
 
-        // swing_current.setPosOri(f_pos, f_ori);
+        printf("s: %0.3f. swing_time: %0.3f, swing_height: %0.3f \n", s, swing_foot_current_->swing_time, swing_foot_current_->swing_height);
+        myUtils::pretty_print(f_pos, std::cout, "  f_pos");
+        // myUtils::pretty_print(f_vel, std::cout, "  f_vel");
+        // myUtils::pretty_print(f_acc, std::cout, "  f_acc");
 
-        // Eigen::Vector3d toe_pos = swing_current.getToePosition();
-        // Eigen::Vector3d heel_pos = swing_current.getHeelPosition();
+        // myUtils::pretty_print(f_ori, std::cout, "  f_ori");
+        // myUtils::pretty_print(f_ori_vel, std::cout, "  f_ori_vel");
+        // myUtils::pretty_print(f_ori_acc, std::cout, "  f_ori_acc");
 
-        // check which side and update the trajectories accordingly.
+        // Set the current swing foot position and orientation
+        swing_foot_current_->setPosOri(f_pos, f_ori);
+
+        // Grab the toe and heel position
+        toe_pos = swing_foot_current_->getToePosition();
+        heel_pos = swing_foot_current_->getHeelPosition();
+
+        myUtils::pretty_print(toe_pos, std::cout, "  toe_pos");
+        myUtils::pretty_print(heel_pos, std::cout, "  heel_pos");
+
     }
 
+    // Use Swing foot trajectories if we are in swing
+    if (ctrl_state_ == DRACO_STATE_RLS){
+        rfoot_front_task->updateTask(toe_pos, f_vel, f_acc);
+        rfoot_back_task->updateTask(heel_pos, f_vel, f_acc);        
+    }else{
+        foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();   
+        rfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+        foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
+        rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
+    }
 
-
-
-
-    foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();
-    rfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
-    // myUtils::pretty_print(foot_pos_d, std::cout, "rfoot_front_pos");
-
-    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
-    rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
-    // myUtils::pretty_print(foot_pos_d, std::cout, "rfoot_back_pos");
-
-    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
-    lfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
-    // myUtils::pretty_print(foot_pos_d, std::cout, "lfoot_front_pos");
-
-    foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
-    lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
-    // myUtils::pretty_print(foot_pos_d, std::cout, "lfoot_back_pos");
+    if (ctrl_state_ == DRACO_STATE_LLS){
+        lfoot_front_task->updateTask(toe_pos, f_vel, f_acc);
+        lfoot_back_task->updateTask(heel_pos, f_vel, f_acc);
+    }else{
+        foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
+        lfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
+        foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
+        lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
+    }
 
     // =========================================================================
     // Angular Momentum Task
@@ -925,46 +943,6 @@ void MPCWalkCtrl::compute_swing_foot_trajectory(){
                                           swing_init_foot.contact_transition_time,
                                           swing_init_foot.swing_time,
                                           swing_init_foot.swing_height);
-        /*
-        // check which swing foot and initialize
-        DracoFootstep swing_init_foot;
-        DracoFootstep swing_midfoot;
-        DracoFootstep swing_land_foot;
-
-        swing_current = swing_land_foot;
-        
-        // Compute the trajectory curve
-
-        // Compute where the foot will be in the middle of the trajectory
-        swing_midfoot.computeMidfeet(swing_init_foot, swing_land_foot, swing_midfoot);
-
-        // Compute midfeet boundary conditions
-        // Linear velocity at the middle of the swing is the total swing travel over swing time 
-        
-        double swing_height = swing_land_foot.swing_height;
-        double swing_time = swing_land_foot.swing_time;
-
-        Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
-        Eigen::Vector3d mid_swing_position = swing_midfoot.position + swing_midfoot.R_ori*mid_swing_local_foot_pos;
-        Eigen::Vector3d mid_swing_velocity = (swing_land_foot.position - swing_init_foot.position)/swing_time;
-
-        // Construct Position trajectory  
-        HermiteCurveVec trajectory_init_to_mid(swing_init_foot.position, Eigen::Vector3d::Zero(3), 
-                                               mid_swing_position, mid_swing_velocity);
-
-        HermiteCurveVec trajectory_mid_to_end(mid_swing_position, mid_swing_velocity, 
-                                              swing_land_foot.position, Eigen::Vector3d::Zero(3));
-
-        // Construct Quaternion trajectory
-        Eigen::Vector3d ang_vel_start; ang_vel_start.setZero();
-        Eigen::Vector3d ang_vel_end; ang_vel_end.setZero();
-        HermiteQuaternionCurve foot_ori_trajectory(swing_init_foot.orientation, ang_vel_start,
-                                                 swing_land_foot.orientation, ang_vel_end);
-
-        double t_start = state_machine_time_
-        // -- end computation of trajectories
-        */
-
 }
 
 void MPCWalkCtrl::contact_setup() {
