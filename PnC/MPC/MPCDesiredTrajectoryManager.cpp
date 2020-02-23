@@ -80,6 +80,35 @@ Eigen::VectorXd StateTrajectoryWithinHorizon::getAcc(const double time, const in
 }
 
 
+
+InputTrajectoryWithinHorizon::InputTrajectoryWithinHorizon(const int dimension_in){
+    dimension = dimension_in;
+    for(int i = 0; i < dimension; i++){  
+        x_linear.push_back(LinearFit_OneDimension());
+    }
+}
+
+InputTrajectoryWithinHorizon::~InputTrajectoryWithinHorizon(){
+
+}
+
+// init_boundary is the input u at the start time
+// end_boundary is the input u at the end boundary
+void InputTrajectoryWithinHorizon::setParams(const Eigen::VectorXd init_boundary, 
+                                             const Eigen::VectorXd end_boundary,
+                                             const double time_start, double const time_end){
+}
+
+Eigen::VectorXd InputTrajectoryWithinHorizon::getVal(const int index, const double time){
+    Eigen::VectorXd out(dimension); 
+    double val;
+    for(int i = 0; i < dimension; i++){
+        x_linear[i].getPos(time, val);
+        out[i] = val;
+    }
+}    
+
+
 MPCDesiredTrajectoryManager::MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in){
     state_size = state_size_in;
     dim = floor(state_size/2);

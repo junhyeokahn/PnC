@@ -34,7 +34,7 @@ plt.get_current_fig_manager().window.wm_geometry("480x600+0+0")
 fig.canvas.set_window_title('reaction_force (right_leg)')
 for i in range(1, dim_single_rf + 1,1):
     ax1 = plt.subplot(dim_single_rf, 1, i)
-    plt.plot(data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1 + dim_single_rf], "r-" , \
+    plt.plot(data_x, data_rf_filtered_cmd[st_idx:end_idx,i-1], "r-" , \
              data_x, data_rf_sense[st_idx:end_idx,i-1], "b-")
     # plt.legend(('command', 'pos'), loc='upper left')
     # phase marker #

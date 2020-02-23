@@ -45,6 +45,28 @@ private:
     std::vector<LinearFit_OneDimension> x_linear;
 };
 
+class InputTrajectoryWithinHorizon{
+public:
+    // for a given state [x, xdot], the size of dimension_in is equal to the dimension of x.
+    InputTrajectoryWithinHorizon(const int dimension_in);
+    ~InputTrajectoryWithinHorizon();
+
+    // init_boundary is the input u at the start time
+    // end_boundary is the input u at the end boundary
+    void setParams(const Eigen::VectorXd init_boundary, 
+                   const Eigen::VectorXd end_boundary,
+                   const double time_start, double const time_end);
+
+    Eigen::VectorXd getVal(const int index, const double time);
+
+
+private:
+    int dimension;
+    // A vector of a linear fit for the state within the horizon 
+    std::vector<LinearFit_OneDimension> x_linear;
+};
+
+
 class MPCDesiredTrajectoryManager{
 public: 
     MPCDesiredTrajectoryManager(const int state_size_in, const int horizon_in, const double dt_in);

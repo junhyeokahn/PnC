@@ -331,7 +331,7 @@ void MPCWalkCtrl::references_setup(){
                                       foot_rotate*right_foot_start_->orientation, 
                                       DRACO_RIGHT_FOOTSTEP);
 
-            double double_contact_time_in = 1.0;
+            double double_contact_time_in = 0.05;
             double contact_transition_time_in = 0.3;
             double swing_time_in = 0.1;
             double swing_height_in = 0.05;
@@ -786,7 +786,7 @@ void MPCWalkCtrl::contact_setup() {
     // if (state_machine_time_ >= walk_start_time_){
        // std::cout << "State Machine Time: " << state_machine_time_ << std::endl;
     // }
-    
+
     for(int i = 0; i < contact_list_.size(); i++){
         if (state_machine_time_ >= walk_start_time_){
             ((PointContactSpec*)contact_list_[i])->setMaxFz(reference_trajectory_module_->getMaxNormalForce(i, state_machine_time_) );
