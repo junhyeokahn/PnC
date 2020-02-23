@@ -13,6 +13,9 @@ class GaitCycle;
 class WalkingReferenceTrajectoryModule;
 class DracoFootstep;
 
+class HermiteCurveVec;
+class HermiteQuaternionCurve;
+
 class MPCWalkCtrl : public Controller {
    public:
     MPCWalkCtrl(RobotSystem*);
@@ -101,6 +104,17 @@ class MPCWalkCtrl : public Controller {
     DracoFootstep* left_foot_start_;
     DracoFootstep* right_foot_start_;
 
+    std::shared_ptr<HermiteCurveVec> foot_pos_traj_init_to_mid_;
+    std::shared_ptr<HermiteCurveVec> foot_pos_traj_mid_to_end_;
+    std::shared_ptr<HermiteCurveVec> pos_traj_to_use;
+    std::shared_ptr<HermiteQuaternionCurve> foot_ori_trajectory;
+
+    std::shared_ptr<DracoFootstep> swing_foot_current_;
+    double swing_start_time_;
+
+    void compute_swing_foot_trajectory();
+
+
     bool references_set_once_;
     void references_setup();
 
@@ -108,11 +122,11 @@ class MPCWalkCtrl : public Controller {
     int ctrl_state_;
     int prev_ctrl_state_; 
 
-
     MPCDesiredTrajectoryManager* mpc_old_trajectory_;
     MPCDesiredTrajectoryManager* mpc_new_trajectory_;
-
     double homotopy_merge_time_;
+
+
 
 
     // IHWBC

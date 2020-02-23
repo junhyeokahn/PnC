@@ -14,6 +14,9 @@
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
 
+// interpolators
+#include <Utils/Math/hermite_curve_vec.hpp>
+#include <Utils/Math/hermite_quaternion_curve.hpp>
 
 MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "MPC Walk Ctrl");
@@ -117,12 +120,15 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(mpc_contact_dim, mpc_state_dim, mpc_horizon_, mpc_dt_);
     homotopy_merge_time_ = mpc_dt_/2.0; // initialize a merge time
 
+    // Initialize
+    swing_foot_current_.reset(new DracoFootstep());
+    swing_start_time_ = 0.0;
+
     // Integration Parameters
      max_joint_vel_ = 2.0;
     velocity_break_freq_ = 25.0;
     max_jpos_error_ = 0.2;
     position_break_freq_ = 20.0;
-
 
     // wbc
     std::vector<bool> act_list;
@@ -159,6 +165,12 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
 MPCWalkCtrl::~MPCWalkCtrl() {
     delete com_task_;
     delete total_joint_task_;
+
+    delete left_foot_start_;
+    delete right_foot_start_;
+
+    delete mpc_old_trajectory_;
+    delete mpc_new_trajectory_;
 
     delete rfoot_front_contact_;
     delete rfoot_back_contact_;
@@ -750,77 +762,34 @@ void MPCWalkCtrl::task_setup() {
         // if (prev_state_ == DRACO_STATE_DS){
         // compute the trajectory initially
         //}
-
-        /*
-        // check which swing foot and initialize
-        DracoFootstep swing_init_foot;
-        DracoFootstep swing_midfoot;
-        DracoFootstep swing_land_foot;
-
-        swing_current = swing_land_foot;
-        
-        // Compute the trajectory curve
-
-        // Compute where the foot will be in the middle of the trajectory
-        swing_midfoot.computeMidfeet(swing_init_foot, swing_land_foot, swing_midfoot);
-
-        // Compute midfeet boundary conditions
-        // Linear velocity at the middle of the swing is the total swing travel over swing time 
-        
-        double swing_height = swing_land_foot.swing_height;
-        double swing_time = swing_land_foot.swing_time;
-
-        Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
-        Eigen::Vector3d mid_swing_position = swing_midfoot.position + swing_midfoot.R_ori*mid_swing_local_foot_pos;
-        Eigen::Vector3d mid_swing_velocity = (swing_land_foot.position - swing_init_foot.position)/swing_time;
-
-        // Construct Position trajectory  
-        HermiteCurveVec trajectory_init_to_mid(swing_init_foot.position, Eigen::Vector3d::Zero(3), 
-                                               mid_swing_position, mid_swing_velocity);
-
-        HermiteCurveVec trajectory_mid_to_end(mid_swing_position, mid_swing_velocity, 
-                                              swing_land_foot.position, Eigen::Vector3d::Zero(3));
-
-        // Construct Quaternion trajectory
-        Eigen::Vector3d ang_vel_start; ang_vel_start.setZero();
-        Eigen::Vector3d ang_vel_end; ang_vel_end.setZero();
-        HermiteQuaternionCurve foot_ori_trajectory(swing_init_foot.orientation, ang_vel_start,
-                                                 swing_land_foot.orientation, ang_vel_end);
-
-        double t_start = state_machine_time_
-        // -- end computation of trajectories
-        
+       
         // we are in swing. get the desired position, orientation, and its derivatives
-        DracoFootstep swing_current;
-        s = (state_machine_time - t_start)/swing_time;
+        // DracoFootstep swing_current;
+        // s = (state_machine_time - t_start)/swing_time;
 
-        Eigen::Vector3d f_pos, f_vel, f_acc;
-        Eigen::Quaterniond f_ori;       
-        Eigen::Vector3d f_ori_vel, f_ori_acc
+        // Eigen::Vector3d f_pos, f_vel, f_acc;
+        // Eigen::Quaterniond f_ori;       
+        // Eigen::Vector3d f_ori_vel, f_ori_acc
 
-        if (s <= 0.5){
-            pos_traj_to_use = trajectory_init_to_mid;
-        }else{
-            pos_traj_to_use = trajectory_mid_to_end;    
-        }
+        // if (s <= 0.5){
+        //     pos_traj_to_use = trajectory_init_to_mid;
+        // }else{
+        //     pos_traj_to_use = trajectory_mid_to_end;    
+        // }
 
-        f_pos = pos_traj_to_use->evaluate(s);
-        f_vel = pos_traj_to_use->evaluateFirstDerivative(s);
-        f_acc = pos_traj_to_use->evaluateSecondDerivative(s);
-        foot_ori_trajectory->evaluate(s, f_ori);
-        foot_ori_trajectory->getAngularVelocity(s, f_ori_vel);
-        foot_ori_trajectory->getAngularAcceleration(s, f_ori_acc);
+        // f_pos = pos_traj_to_use->evaluate(s);
+        // f_vel = pos_traj_to_use->evaluateFirstDerivative(s);
+        // f_acc = pos_traj_to_use->evaluateSecondDerivative(s);
+        // foot_ori_trajectory->evaluate(s, f_ori);
+        // foot_ori_trajectory->getAngularVelocity(s, f_ori_vel);
+        // foot_ori_trajectory->getAngularAcceleration(s, f_ori_acc);
 
-        swing_land_foot.setPosOri(f_pos, f_ori);
+        // swing_current.setPosOri(f_pos, f_ori);
 
-        Eigen::Vector3d toe_pos = swing_land_foot.getToePosition();
-        Eigen::Vector3d heel_pos = swing_land_foot.getHeelPosition();
+        // Eigen::Vector3d toe_pos = swing_current.getToePosition();
+        // Eigen::Vector3d heel_pos = swing_current.getHeelPosition();
 
         // check which side and update the trajectories accordingly.
-
-        */
-
-
     }
 
 
@@ -895,6 +864,106 @@ void MPCWalkCtrl::task_setup() {
     // w_task_heirarchy_[6] = w_task_ang_momentum_; // angular momentum
 
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
+
+}
+
+void MPCWalkCtrl::compute_swing_foot_trajectory(){
+    DracoFootstep swing_init_foot;
+    DracoFootstep swing_midfoot;
+    DracoFootstep swing_land_foot;
+
+    int footstep_index;
+    // Compute the trajectories if we are actually in swing
+    reference_trajectory_module_->whichFootstepIndexInSwing(state_machine_time_, footstep_index);
+    // Get the swing foot landing position
+    swing_land_foot = desired_footstep_list_[footstep_index];
+    swing_init_foot = swing_land_foot; // get params of the swing land foot.
+
+    // Initialize the swing foot
+    int foot_side;
+    if (swing_land_foot.robot_side == DRACO_RIGHT_FOOTSTEP){
+        foot_side = DracoBodyNode::rFootCenter;
+    }else if (swing_land_foot.robot_side == DRACO_LEFT_FOOTSTEP){
+        foot_side = DracoBodyNode::lFootCenter;
+    }
+    Eigen::Vector3d local_foot_pos = robot_->getBodyNodeCoMIsometry(foot_side).translation();
+    Eigen::Quaterniond local_foot_ori(robot_->getBodyNodeCoMIsometry(foot_side).linear());
+    swing_init_foot.setPosOriSide(local_foot_pos, local_foot_ori, DRACO_RIGHT_FOOTSTEP);               
+
+    // Compute where the foot will be in the middle of the trajectory
+    swing_midfoot.computeMidfeet(swing_init_foot, swing_land_foot, swing_midfoot);
+
+    // Compute midfeet boundary conditions
+    // Linear velocity at the middle of the swing is the total swing travel over swing time 
+    
+    double swing_height = swing_land_foot.swing_height;
+    double swing_time = swing_land_foot.swing_time;
+
+    Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
+    Eigen::Vector3d mid_swing_position = swing_midfoot.position + swing_midfoot.R_ori*mid_swing_local_foot_pos;
+    Eigen::Vector3d mid_swing_velocity = (swing_land_foot.position - swing_init_foot.position)/swing_time;
+
+    // Construct Position trajectory  
+    foot_pos_traj_init_to_mid_.reset(new HermiteCurveVec(swing_init_foot.position, Eigen::Vector3d::Zero(3), 
+                                                           mid_swing_position, mid_swing_velocity));
+
+    foot_pos_traj_mid_to_end_.reset(new HermiteCurveVec(mid_swing_position, mid_swing_velocity, 
+                                                        swing_land_foot.position, Eigen::Vector3d::Zero(3)));
+
+    // Construct Quaternion trajectory
+    Eigen::Vector3d ang_vel_start; ang_vel_start.setZero();
+    Eigen::Vector3d ang_vel_end; ang_vel_end.setZero();
+    foot_ori_trajectory.reset(new HermiteQuaternionCurve(swing_init_foot.orientation, ang_vel_start,
+                                                         swing_land_foot.orientation, ang_vel_end));
+    // set initial swing start time
+    swing_start_time_ = state_machine_time_;
+    // initially set position trajectory to use
+    pos_traj_to_use = foot_pos_traj_init_to_mid_;
+    // initialize the current swing foot location
+    swing_foot_current_->setPosOriSide(swing_init_foot.position, swing_init_foot.orientation, swing_init_foot.robot_side);
+    swing_foot_current_->setWalkingParams(swing_init_foot.double_contact_time,
+                                          swing_init_foot.contact_transition_time,
+                                          swing_init_foot.swing_time,
+                                          swing_init_foot.swing_height);
+        /*
+        // check which swing foot and initialize
+        DracoFootstep swing_init_foot;
+        DracoFootstep swing_midfoot;
+        DracoFootstep swing_land_foot;
+
+        swing_current = swing_land_foot;
+        
+        // Compute the trajectory curve
+
+        // Compute where the foot will be in the middle of the trajectory
+        swing_midfoot.computeMidfeet(swing_init_foot, swing_land_foot, swing_midfoot);
+
+        // Compute midfeet boundary conditions
+        // Linear velocity at the middle of the swing is the total swing travel over swing time 
+        
+        double swing_height = swing_land_foot.swing_height;
+        double swing_time = swing_land_foot.swing_time;
+
+        Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
+        Eigen::Vector3d mid_swing_position = swing_midfoot.position + swing_midfoot.R_ori*mid_swing_local_foot_pos;
+        Eigen::Vector3d mid_swing_velocity = (swing_land_foot.position - swing_init_foot.position)/swing_time;
+
+        // Construct Position trajectory  
+        HermiteCurveVec trajectory_init_to_mid(swing_init_foot.position, Eigen::Vector3d::Zero(3), 
+                                               mid_swing_position, mid_swing_velocity);
+
+        HermiteCurveVec trajectory_mid_to_end(mid_swing_position, mid_swing_velocity, 
+                                              swing_land_foot.position, Eigen::Vector3d::Zero(3));
+
+        // Construct Quaternion trajectory
+        Eigen::Vector3d ang_vel_start; ang_vel_start.setZero();
+        Eigen::Vector3d ang_vel_end; ang_vel_end.setZero();
+        HermiteQuaternionCurve foot_ori_trajectory(swing_init_foot.orientation, ang_vel_start,
+                                                 swing_land_foot.orientation, ang_vel_end);
+
+        double t_start = state_machine_time_
+        // -- end computation of trajectories
+        */
 
 }
 
