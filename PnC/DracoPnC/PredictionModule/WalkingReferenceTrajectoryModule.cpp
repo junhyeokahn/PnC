@@ -111,11 +111,24 @@ void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eig
             landing_foot = footstep_list_[i];
             midfoot.computeMidfeet(stance_foot, landing_foot, midfoot);
             // set com x,y to midfoot
-            x_com_out.head(2) = midfoot.position.head(2);
+            
+            // heuristic which sets the reference CoM to lean towards the stance foot during transition times.
+            if (time <= (t_footstep_start + footstep_list_[i].double_contact_time + 
+                                            footstep_list_[i].contact_transition_time)) {
+                double lean_percentage = 0.5;
+                x_com_out.head(2) =  lean_percentage*stance_foot.position.head(2) + (1.0-lean_percentage)*midfoot.position.head(2);                                
+            }
+            // otherwise land at the midfoot location
+            else{
+                x_com_out.head(2) = midfoot.position.head(2);                
+            }           
+
             // adjust com z height
             x_com_out[2] += (landing_foot.position[2] - stance_foot.position[2]);  
             // set orientation reference to midfoot
             x_ori_out = midfoot.orientation;
+
+
 
             // change the stance foot
             stance_foot = landing_foot;     
