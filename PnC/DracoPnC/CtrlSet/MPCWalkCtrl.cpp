@@ -432,7 +432,11 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         // mpc_Xdes_[i*n + 3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
 
         mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
-        if (t_predict >= walk_start_time_){
+
+        // there's a brief moment where x_com_out is 0.0. which causes the robot to lean on the other foot.
+        // the fix is probably to use a dcm reference trajectory.
+        // if (t_predict >= walk_start_time_){
+        if (state_machine_time_ >= walk_start_time_){
             mpc_Xdes_[i*n + 3] = x_com_out[0];
             mpc_Xdes_[i*n + 4] = x_com_out[1];
         }
@@ -462,6 +466,10 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         if (state_machine_time_ >= walk_start_time_){
              mpc_Xdes_[i*n + 11] = 0.0;
         }
+
+        printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
+                t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 1],
+                mpc_Xdes_[i*n + 3],  mpc_Xdes_[i*n + 4], mpc_Xdes_[i*n + 5]);
 
         // std::cout << "t_pred:" << t_predict << " x_des[5] = " << mpc_Xdes_[i*n + 5] << "xdot_des[11] = " << mpc_Xdes_[i*n + 11] << std::endl;
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
