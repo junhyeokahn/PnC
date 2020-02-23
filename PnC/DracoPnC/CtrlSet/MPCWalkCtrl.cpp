@@ -286,6 +286,27 @@ void MPCWalkCtrl::_mpc_setup(){
         mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
     }
 
+    // If we are in flight use the predicted foot location
+    if (ctrl_state_ == DRACO_STATE_RLS){
+        int footstep_index;
+        // Get the footstep index and assign it as the predicted landing foot location for the MPC
+        if (reference_trajectory_module_->whichFootstepIndexInSwing(state_machine_time_, footstep_index)){
+            mpc_r_feet_.col(0) = desired_footstep_list_[footstep_index].getToePosition();
+            mpc_r_feet_.col(1) = desired_footstep_list_[footstep_index].getHeelPosition();
+        }
+    }
+    if (ctrl_state_ == DRACO_STATE_LLS){
+        int footstep_index;
+        // Get the footstep index and assign it as the predicted landing foot location for the MPC
+        if (reference_trajectory_module_->whichFootstepIndexInSwing(state_machine_time_, footstep_index)){
+            mpc_r_feet_.col(2) = desired_footstep_list_[footstep_index].getToePosition();
+            mpc_r_feet_.col(3) = desired_footstep_list_[footstep_index].getHeelPosition();
+        }        
+    }
+
+    // std::cout << "mpc_r_feet_ = " << std::endl;
+    // std::cout << mpc_r_feet_ << std::endl;
+
     // Update States
     q_current_ = sp_->q;
     qdot_current_ = sp_->qdot;
