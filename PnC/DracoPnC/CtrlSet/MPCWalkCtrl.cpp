@@ -401,15 +401,28 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
     //     }
     // }
 
+    Eigen::Vector3d x_com_out;
+    Eigen::Quaterniond x_ori_out;
+    Eigen::Vector3d euler_yaw_pitch_roll;
+
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
     for(int i = 0; i < mpc_horizon_; i++){
         // Time 
         t_predict = state_machine_time_ + (i+1)*mpc_dt_;
+        reference_trajectory_module_->getMPCRefComAndOri(t_predict, x_com_out, x_ori_out);
 
         mpc_Xdes_[i*n + 0] = 0.0; // Desired Roll
         mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
+
+        if (t_predict >= walk_start_time_){
+            euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(x_ori_out);
+            mpc_Xdes_[i*n + 0] = euler_yaw_pitch_roll[2]; // Desired Roll
+            mpc_Xdes_[i*n + 1] = euler_yaw_pitch_roll[1]; // Desired Pitch
+            mpc_Xdes_[i*n + 2] = euler_yaw_pitch_roll[0]; // Desired Yaw            
+        }
+
 
         // ----------------------------------------------------------------
         // Set CoM Position -----------------------------------------------
@@ -418,36 +431,28 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
 
         mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
         if (t_predict >= walk_start_time_){
-            mpc_Xdes_[i*n + 4] = goal_com_pos_[1] + magnitude*sin(omega * (t_predict-walk_start_time_));             
+            mpc_Xdes_[i*n + 3] = x_com_out[0];
+            mpc_Xdes_[i*n + 4] = x_com_out[1];
         }
 
         // Wait for contact transition to finish
         if (t_predict <= contact_transition_dur_){
             mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
-        }else{
+        }else {
             mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
-            // mpc_Xdes_[i*n + 5] = ini_com_pos_[2] + magnitude*cos(omega * t_predict); 
         }
 
         // ----------------------------------------------------------------
         // Set CoM Velocity -----------------------------------------------
         mpc_Xdes_[i*n + 9] = 0.0;
-        // mpc_Xdes_[i*n + 9] = -omega *magnitude*sin(omega * t_predict); 
-
         mpc_Xdes_[i*n + 10] = 0.0;
-        if (t_predict >= walk_start_time_){
-            mpc_Xdes_[i*n + 10] = omega*magnitude*cos(omega * (t_predict-walk_start_time_));             
-        }
 
         // Wait for contact transition to finish
         if (t_predict <= contact_transition_dur_){
             mpc_Xdes_[i*n + 11] = 0.0;
-        }
-        else{
+        }else {
             mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
-            // mpc_Xdes_[i*n + 11] = -omega *magnitude*sin(omega * t_predict); 
         }
-
 
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
