@@ -203,7 +203,7 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
     // To Do: Create separate state machines for this....
     // Get trajectory state
     ctrl_state_ =  reference_trajectory_module_->getState(state_machine_time_);
-    printf("t:%0.3f, prev_state: %i, cur_state: %i \n", state_machine_time_, prev_ctrl_state_, ctrl_state_);
+    // printf("t:%0.3f, prev_state: %i, cur_state: %i \n", state_machine_time_, prev_ctrl_state_, ctrl_state_);
 
     // Setup the contacts
     contact_setup();
