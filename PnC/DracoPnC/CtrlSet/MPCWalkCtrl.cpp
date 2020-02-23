@@ -830,6 +830,8 @@ void MPCWalkCtrl::task_setup() {
         lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
     }
 
+    // std::cout << "  rFootCenter = " << robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation().transpose() << std::endl;  
+
     // =========================================================================
     // Angular Momentum Task
     // =========================================================================
@@ -869,7 +871,7 @@ void MPCWalkCtrl::task_setup() {
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);    
     task_list_.push_back(total_joint_task_);
-    // task_list_.push_back(ang_momentum_task);
+    task_list_.push_back(ang_momentum_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
@@ -877,11 +879,10 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[1] = w_task_body_; // body ori
     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
     w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
-    w_task_heirarchy_[4] = w_task_lfoot_; // rfoot
+    w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
-    // w_task_heirarchy_[6] = w_task_ang_momentum_; // angular momentum
-
     w_task_heirarchy_[6] = w_task_joint_; // joint    
+    w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
 
 }
 
@@ -1190,6 +1191,8 @@ void MPCWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     com_task_->setGain(com_kp, com_kd);
     total_joint_task_->setGain(kp_jp, kd_jp);
     body_ori_task_->setGain(kp_body_rpy, kd_body_rpy);
+
+    ang_momentum_task->setGain(Eigen::Vector3d::Zero(), kd_body_rpy);
 
     // Set IHWBC dt integration time
     ihwbc_dt_ = DracoAux::ServoRate; //mpc_dt_;  
