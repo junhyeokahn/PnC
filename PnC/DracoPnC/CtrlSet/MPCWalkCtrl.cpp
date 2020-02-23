@@ -251,6 +251,24 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
 
     _PostProcessing_Command();        
 
+    
+    //TODO:
+    // if prev_ctrl_state was swing and now we are in double support, set swing_end to true
+    // swing_end = true;
+
+    // if prev_ctrl_state was double support and now we are in swing, update the global frame location
+    // Change stance leg
+    // if (prev_ctrl_state_ == DRACO_STATE_DS) || (ctrl_state == DRACO_STATE_RLS)  {
+    //     sp_->stance_foot = "lFoot";
+    //     swing_end = false
+    // }
+    // if (prev_ctrl_state_ == DRACO_STATE_DS) || (ctrl_state == DRACO_STATE_LLS)  {
+    //     sp_->stance_foot = "rFoot";
+    //     swing_end = false
+    // }
+    // sp_->num_step_copy = num_step_;
+
+
     // Store  ctrl_state_ as previous.
     prev_ctrl_state_ = ctrl_state_;
 
@@ -487,6 +505,8 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         if (state_machine_time_ >= walk_start_time_){
              mpc_Xdes_[i*n + 11] = 0.0;
         }
+
+        // TODO: if the swing has ended set desired com position to be the current midfoot.
 
         printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
                 t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 1],
@@ -772,6 +792,9 @@ void MPCWalkCtrl::task_setup() {
     // =========================================================================
     // Foot Center Tasks
     // =========================================================================
+
+    //TODO: Fix foot center tasks to conrol, x,y,z, rx, rz
+
     Eigen::VectorXd rfoot_pos_des(7); rfoot_pos_des.setZero();
     Eigen::VectorXd lfoot_pos_des(7); lfoot_pos_des.setZero();
     Eigen::VectorXd foot_vel_des(6); foot_vel_des.setZero();    

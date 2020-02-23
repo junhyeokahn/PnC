@@ -257,6 +257,13 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
                 .tail(3);
     }
 
+    // TODO:
+    // if stance foot changes, add constant offset to curr_config_
+    // offset += new_foot - stance_foot 
+    // minimize difference of base estimation after contact switch.
+    // update qdot using the difference between the curr_config_ now and previous
+
+
     curr_config_[0] = -foot_pos[0];
     curr_config_[1] = -foot_pos[1];
     curr_config_[2] = -foot_pos[2];
