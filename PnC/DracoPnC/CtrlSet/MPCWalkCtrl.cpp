@@ -348,7 +348,7 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
@@ -357,7 +357,7 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             double double_contact_time_in = 0.05;
-            double contact_transition_time_in = 0.25;
+            double contact_transition_time_in = 0.2;
             double swing_time_in = 0.2;
             double swing_height_in = 0.05;
 
@@ -407,6 +407,8 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
 
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
+
+    std::cout << "state time:" << state_machine_time_ << std::endl;
     for(int i = 0; i < mpc_horizon_; i++){
         // Time 
         t_predict = state_machine_time_ + (i+1)*mpc_dt_;
@@ -442,6 +444,9 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
             mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
         }
 
+        if (state_machine_time_ >= walk_start_time_){
+             mpc_Xdes_[i*n + 5] = x_com_out[2];
+        }
         // ----------------------------------------------------------------
         // Set CoM Velocity -----------------------------------------------
         mpc_Xdes_[i*n + 9] = 0.0;
@@ -454,6 +459,11 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
             mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
         }
 
+        if (state_machine_time_ >= walk_start_time_){
+             mpc_Xdes_[i*n + 11] = 0.0;
+        }
+
+        // std::cout << "t_pred:" << t_predict << " x_des[5] = " << mpc_Xdes_[i*n + 5] << "xdot_des[11] = " << mpc_Xdes_[i*n + 11] << std::endl;
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
     }
 
