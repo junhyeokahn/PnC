@@ -111,8 +111,11 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     gait_set_once_ = false;
 
     // Trajectory managers
-    mpc_old_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
-    mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(13, mpc_horizon_, mpc_dt_);
+    int mpc_state_dim = 13;
+    int mpc_contact_dim = 12;
+    mpc_old_trajectory_ = new MPCDesiredTrajectoryManager(mpc_contact_dim, mpc_state_dim, mpc_horizon_, mpc_dt_);
+    mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(mpc_contact_dim, mpc_state_dim, mpc_horizon_, mpc_dt_);
+    homotopy_merge_time_ = mpc_dt_/2.0; // initialize a merge time
 
     // Integration Parameters
      max_joint_vel_ = 2.0;
@@ -449,20 +452,38 @@ void MPCWalkCtrl::_mpc_solve(){
 void MPCWalkCtrl::_updateTrajectories(){
     // Updates the reference trajectories that the IHWBC will follow given a new plan from the MPC
     if (!mpc_solved_once_){
-        mpc_old_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+        // mpc_old_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+        //                                 mpc_x0_,
+        //                                 convex_mpc->getXpredOverHorizon()); 
+        mpc_old_trajectory_->setStateAndInputKnotPoints(mpc_t_start_solve_,
                                         mpc_x0_,
-                                        convex_mpc->getXpredOverHorizon()); 
+                                        convex_mpc->getXpredOverHorizon(),
+                                        convex_mpc->getForcesOverHorizon()); 
+
         // Set that this mpc has been solved at least once
         mpc_solved_once_ = true;
     }else{
         // store the old trajectory
-        mpc_old_trajectory_->setStateKnotPoints(mpc_new_trajectory_->getStartTime(),
-                                                mpc_new_trajectory_->getXStartVector(),
-                                                mpc_new_trajectory_->getXpredVector());         
+        // mpc_old_trajectory_->setStateKnotPoints(mpc_new_trajectory_->getStartTime(),
+        //                                         mpc_new_trajectory_->getXStartVector(),
+        //                                         mpc_new_trajectory_->getXpredVector());         
+
+        mpc_old_trajectory_->setStateAndInputKnotPoints(mpc_new_trajectory_->getStartTime(),
+                                                        mpc_new_trajectory_->getXStartVector(),
+                                                        mpc_new_trajectory_->getXpredVector(),
+                                                        mpc_new_trajectory_->getUSequence());
+
     }
-    mpc_new_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+    // mpc_new_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
+    //                                 mpc_x0_,
+    //                                 convex_mpc->getXpredOverHorizon()); 
+
+    mpc_new_trajectory_->setStateAndInputKnotPoints(mpc_t_start_solve_,
                                     mpc_x0_,
-                                    convex_mpc->getXpredOverHorizon()); 
+                                    convex_mpc->getXpredOverHorizon(),
+                                    convex_mpc->getForcesOverHorizon());
+
+
 }
 
 void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
@@ -495,6 +516,22 @@ void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // Update and solve QP
     ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
+
+    // Update desired reaction forces
+    Eigen::VectorXd mpc_forces_old;
+    Eigen::VectorXd mpc_forces_new;
+    double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
+    mpc_old_trajectory_->getInput(state_machine_time_, mpc_forces_old);
+    mpc_new_trajectory_->getInput(state_machine_time_, mpc_forces_new);
+    // clamp s
+    if (s_merge >= 1){
+        s_merge = 1.0;
+    }else if (s_merge <= 0){
+        s_merge = 0.0;
+    }
+    mpc_Fd_des_ = s_merge*mpc_forces_new + (1 - s_merge)*mpc_forces_old;    
+    // --- finish merge
+
 
     mpc_Fd_des_filtered_ = alpha_fd_*mpc_Fd_des_ + (1.0-alpha_fd_)*mpc_Fd_des_filtered_;
 
@@ -571,8 +608,7 @@ void MPCWalkCtrl::task_setup() {
     // Set desired com and body orientation from predicted state 
     Eigen::VectorXd x_traj_old;
     Eigen::VectorXd x_traj_new;
-    double merge_time = mpc_dt_/2.0;
-    double s_merge = (state_machine_time_ - last_control_time_)/merge_time; ;
+    double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
     mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
     mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
     // clamp s
@@ -895,6 +931,8 @@ void MPCWalkCtrl::firstVisit() {
     mpc_old_trajectory_->setDt(mpc_dt_);
     mpc_new_trajectory_->setHorizon(mpc_horizon_);
     mpc_new_trajectory_->setDt(mpc_dt_);
+    // set merge time of trajectories from mpc
+    homotopy_merge_time_ = mpc_dt_/2.0;
 
     //Penalize forces between the heel and the toe for each leg
     //  toe_heel*||f_{i,toe} - f_{i,heel}|| 

@@ -108,6 +108,9 @@ class MPCWalkCtrl : public Controller {
     MPCDesiredTrajectoryManager* mpc_old_trajectory_;
     MPCDesiredTrajectoryManager* mpc_new_trajectory_;
 
+    double homotopy_merge_time_;
+
+
     // IHWBC
     IHWBC* ihwbc;
     Eigen::VectorXd gamma_old_;
