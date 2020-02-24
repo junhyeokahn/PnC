@@ -72,6 +72,9 @@ public:
 	// cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2, 0.10, 0.0;
 	Eigen::VectorXd cost_vec;  
 
+	bool use_terminal_cost; // if true, will use the custom terminal cost
+	Eigen::VectorXd terminal_cost_vec; 	
+
 	// Returns the state vector size of the MPC per horizon.
 	int getStateVecDim(){return 13;}
 
@@ -113,6 +116,11 @@ public:
 
   	// Vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
 	void setCostVec(const Eigen::VectorXd & cost_vec_in); // Sets the cost vector.
+
+  	// Set Terminal vector cost for the MPC: <<  th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  dpy,  dpz,  g
+	// use_terminal_cost_in : if true, will use the terminal cost specified.
+	void setTerminalCostVec(const bool use_terminal_cost_in, const Eigen::VectorXd & terminal_cost_vec_in); // Sets the cost vector.
+
 	void setControlAlpha(const double control_alpha_in){control_alpha_ = control_alpha_in;}
 	void setDeltaSmooth(const double delta_smooth_in){delta_smooth_ = delta_smooth_in;}
 

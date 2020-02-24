@@ -202,6 +202,8 @@ class MPCWalkCtrl : public Controller {
     Eigen::VectorXd mpc_approx_inertia_input_;
 
     Eigen::VectorXd mpc_cost_vec_;
+    Eigen::VectorXd mpc_cost_vec_walk_;
+    Eigen::VectorXd mpc_terminal_cost_vec_;
     Eigen::VectorXd mpc_x0_;
     Eigen::VectorXd mpc_Xdes_;
     Eigen::MatrixXd mpc_r_feet_;

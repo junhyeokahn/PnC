@@ -32,6 +32,9 @@ CMPC::CMPC() {
     cost_vec << 0.25, 0.25, 10.0, 2.0, 2.0, 50.0, 0.0, 0.0, 0.30, 0.20, 0.2,
         0.10, 0.0;
 
+    use_terminal_cost = false;
+    terminal_cost_vec = cost_vec;
+
     // set preview time to 0.0
     t_preview_start = 0.0; 
     
@@ -91,6 +94,23 @@ void CMPC::setCostVec(const Eigen::VectorXd& cost_vec_in) {
               << std::endl;
     std::cout << "new cost_vec = " << cost_vec.transpose() << std::endl;
 }
+
+void CMPC::setTerminalCostVec(const bool use_terminal_cost_in, const Eigen::VectorXd & terminal_cost_vec_in){
+    use_terminal_cost = use_terminal_cost_in;
+    if (terminal_cost_vec.size() != 13) {
+        printf(
+            "Warning. Terminal vector Cost is not of size 13. Will use old cost "
+            "values:");
+    } else {
+        terminal_cost_vec = terminal_cost_vec_in;
+        terminal_cost_vec[12] = 0.0;  // Always ensure gravity state has 0.0 cost
+    }    
+    std::cout << "th1,  th2,  th3,  px,  py,  pz,   w1,  w2,   w3,   dpx,  "
+                 "dpy,  dpz,  g"
+              << std::endl;
+    std::cout << "new terminal_cost_vec = " << terminal_cost_vec.transpose() << std::endl;
+}
+
 
 // Helper function which returns a 13-vector given the state of the robot.
 // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
@@ -525,6 +545,10 @@ void CMPC::get_qp_costs(const int& n, const int& m,
     Sqp.setZero();
     for (int i = 0; i < horizon; i++) {
         Sqp.block(n * i, n * i, n, n) = S_cost;
+    }
+
+    if (use_terminal_cost){
+         Sqp.block(n * (horizon-1), n * (horizon-1), n, n) = terminal_cost_vec.asDiagonal();       
     }
 
     Kqp = control_alpha * Eigen::MatrixXd::Identity(m * horizon, m * horizon);

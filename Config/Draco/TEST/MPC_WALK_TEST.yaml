@@ -83,3 +83,8 @@ control_configuration:
         mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
         # mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
         mpc_cost_vec: [2.5, 2.5, 2.5, 2.5, 2.5, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 30.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+        # mpc_terminal_cost_vec: [2.5, 2.5, 2.5, 2.5, 2.5, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        mpc_terminal_cost_vec: [2.5, 2.5, 2.5, 50.0, 50.0, 300.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0]        
+
+

@@ -89,6 +89,8 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
 
     mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
     mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
+    mpc_cost_vec_walk_ = mpc_cost_vec_;
+    mpc_terminal_cost_vec_ = mpc_cost_vec_;
 
     mpc_t_start_solve_ = 0.0;
     mpc_solved_once_ = false; // Whether the MPC has been solved at least once
@@ -390,9 +392,9 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(0.15, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
@@ -422,7 +424,7 @@ void MPCWalkCtrl::references_setup(){
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
-            desired_footstep_list_.push_back(lfootstep_1);
+            // desired_footstep_list_.push_back(lfootstep_1);
             
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
@@ -432,7 +434,9 @@ void MPCWalkCtrl::references_setup(){
             // Update the reference trajectory module
             reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
 
-
+            // update MPC costs for walking.
+            convex_mpc->setCostVec(mpc_cost_vec_walk_);
+            convex_mpc->setTerminalCostVec(true, mpc_terminal_cost_vec_);
             references_set_once_ = true;
         }
     }    
@@ -1310,6 +1314,8 @@ void MPCWalkCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
         myUtils::readParameter(node, "mpc_dt", mpc_dt_);
         myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
+        myUtils::readParameter(node, "mpc_cost_vec_walk", mpc_cost_vec_walk_);
+        myUtils::readParameter(node, "mpc_terminal_cost_vec", mpc_terminal_cost_vec_);
         myUtils::readParameter(node, "mpc_control_alpha", mpc_control_alpha_);
         myUtils::readParameter(node, "mpc_delta_smooth", mpc_delta_smooth_);
         myUtils::readParameter(node, "mpc_smooth_from_prev", mpc_smooth_from_prev_);
