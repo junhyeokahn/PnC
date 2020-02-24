@@ -63,6 +63,9 @@ class MPCWalkCtrl : public Controller {
     Task* rfoot_center_rz_xyz_task;
     Task* lfoot_center_rz_xyz_task;
 
+    Task* rfoot_line_task;
+    Task* lfoot_line_task;
+
     Task* rfoot_front_task;
     Task* rfoot_back_task;
     Task* lfoot_front_task;

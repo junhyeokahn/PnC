@@ -39,6 +39,16 @@ bool LineFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
         acc_des[i + 2] = _acc_des[i + 3];
     }
 
+    Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
+    vel_act.head(2) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(2);
+    vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
+
+    // op_cmd
+    for (int i(0); i < dim_task_; ++i) {
+        op_cmd[i] = acc_des[i] + kp_[i] * pos_err[i] +
+                    kd_[i] * (vel_des[i] - vel_act[i]);
+    }
+
     // myUtils::pretty_print(des_ori, std::cout, "ori_des");
     // myUtils::pretty_print(ori_act, std::cout, "ori_act");
     // myUtils::pretty_print(pos_err, std::cout, "pos_err in bodyrpz");
@@ -55,8 +65,8 @@ bool LineFootTask::_UpdateTaskJacobian() {
     Jt_.block(2, 0, 3, robot_->getNumDofs()) =
         Jtmp.block(3, 0, 3, robot_->getNumDofs());
     // isolate virtual joint
-    Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-        Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+    // Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+    //     Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
 
     return true;
 }

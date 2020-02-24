@@ -44,6 +44,9 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     rfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::rFootCenter);
     lfoot_center_rz_xyz_task = new FootRzXYZTask(robot_, DracoBodyNode::lFootCenter);
 
+    rfoot_line_task = new LineFootTask(robot_, DracoBodyNode::rFootCenter);
+    lfoot_line_task = new LineFootTask(robot_, DracoBodyNode::lFootCenter);
+
     rfoot_front_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::rFootFront);
     rfoot_back_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::rFootBack);
     lfoot_front_task = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootFront);
@@ -135,7 +138,6 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     std::vector<bool> act_list;
     act_list.resize(robot_->getNumDofs(), true);
     for (int i(0); i < robot_->getNumVirtualDofs(); ++i) act_list[i] = false;
-
 
     // IHWBC
     last_control_time_ = -0.001;
@@ -388,7 +390,7 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(0.07, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/4.0, Eigen::Vector3d::UnitZ()) );
 
@@ -891,23 +893,58 @@ void MPCWalkCtrl::task_setup() {
 
     // Use Swing foot trajectories if we are in swing
     if (ctrl_state_ == DRACO_STATE_RLS){
+        // Set Point Tasks
         rfoot_front_task->updateTask(toe_pos, f_vel, f_acc);
         rfoot_back_task->updateTask(heel_pos, f_vel, f_acc);        
+
+        // Set positions
+        rfoot_pos_des[0] = f_ori.w(); rfoot_pos_des[1] = f_ori.x();      
+        rfoot_pos_des[2] = f_ori.y(); rfoot_pos_des[3] = f_ori.z();
+        rfoot_pos_des.tail(3) = f_pos;
+        // Set velocities
+        // foot_vel_des.head(3) = f_ori_vel;
+        foot_vel_des.tail(3) = f_vel;
+        // Set Accelerations
+        // foot_acc_des.head(3) = f_ori_acc;
+        foot_acc_des.tail(3) = f_acc;
+        // Set Line Task
+        rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }else{
+        // Set Point Tasks
         foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();   
         rfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
         rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
+        // Set Line Task
+        rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     if (ctrl_state_ == DRACO_STATE_LLS){
+        // Set Point Tasks
         lfoot_front_task->updateTask(toe_pos, f_vel, f_acc);
         lfoot_back_task->updateTask(heel_pos, f_vel, f_acc);
+
+        // Set Postitions
+        lfoot_pos_des[0] = f_ori.w(); lfoot_pos_des[1] = f_ori.x();      
+        lfoot_pos_des[2] = f_ori.y(); lfoot_pos_des[3] = f_ori.z();
+        lfoot_pos_des.tail(3) = f_pos;
+        // Set velocities
+        // foot_vel_des.head(3) = f_ori_vel;
+        foot_vel_des.tail(3) = f_vel;
+        // Set Accelerations
+        // foot_acc_des.head(3) = f_ori_acc;
+        foot_acc_des.tail(3) = f_acc;
+        // Set Line Task
+        rfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+
     }else{
+        // Set Point Tasks
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
         lfoot_front_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
         lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
+        // Set Line Task
+        lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     // std::cout << "  rFootCenter = " << robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation().transpose() << std::endl;  
@@ -945,6 +982,9 @@ void MPCWalkCtrl::task_setup() {
     task_list_.push_back(body_ori_task_);
     // task_list_.push_back(rfoot_center_rz_xyz_task);
     // task_list_.push_back(lfoot_center_rz_xyz_task);    
+    // task_list_.push_back(rfoot_line_task);
+    // task_list_.push_back(lfoot_line_task);    
+
 
     task_list_.push_back(rfoot_front_task);
     task_list_.push_back(rfoot_back_task);    
@@ -963,6 +1003,8 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
     // w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
+
+    w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
 
 }
 
@@ -1267,6 +1309,15 @@ void MPCWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     rfoot_back_task->setGain(kp_point_foot, kd_point_foot);
     lfoot_front_task->setGain(kp_point_foot, kd_point_foot);
     lfoot_back_task->setGain(kp_point_foot, kd_point_foot);
+
+    Eigen::VectorXd kp_line_task = 200.0*Eigen::VectorXd::Ones(5);
+    Eigen::VectorXd kd_line_task = 62.0*Eigen::VectorXd::Ones(5);
+    kp_line_task[4] = 1000;
+    
+    rfoot_line_task->setGain(kp_line_task, kd_line_task);
+    lfoot_line_task->setGain(kp_line_task, kd_line_task);
+
+
 
     com_task_->setGain(com_kp, com_kd);
     total_joint_task_->setGain(kp_jp, kd_jp);
