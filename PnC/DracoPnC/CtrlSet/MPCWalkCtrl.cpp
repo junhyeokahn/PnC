@@ -948,8 +948,8 @@ void MPCWalkCtrl::task_setup() {
     task_list_.push_back(rfoot_back_task);    
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);    
-    task_list_.push_back(total_joint_task_);
-    task_list_.push_back(ang_momentum_task);
+    // task_list_.push_back(total_joint_task_);
+    // task_list_.push_back(ang_momentum_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
@@ -959,8 +959,8 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[3] = w_task_rfoot_; // rfoot
     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot
-    w_task_heirarchy_[6] = w_task_joint_; // joint    
-    w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
+    // w_task_heirarchy_[6] = w_task_joint_; // joint    
+    // w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
 
 }
 
