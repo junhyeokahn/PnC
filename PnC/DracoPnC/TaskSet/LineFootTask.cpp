@@ -64,9 +64,10 @@ bool LineFootTask::_UpdateTaskJacobian() {
     // (x, y, z)
     Jt_.block(2, 0, 3, robot_->getNumDofs()) =
         Jtmp.block(3, 0, 3, robot_->getNumDofs());
+
     // isolate virtual joint
-    // Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-    //     Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+    Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+        Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());       
 
     return true;
 }
@@ -76,6 +77,6 @@ bool LineFootTask::_UpdateTaskJDotQdot() {
         robot_->getBodyNodeJacobianDot(link_idx_) * robot_->getQdot();
     JtDotQdot_ = v_tmp.tail(dim_task_);
 
-    // JtDotQdot_.setZero();
+    JtDotQdot_.setZero();
     return true;
 }
