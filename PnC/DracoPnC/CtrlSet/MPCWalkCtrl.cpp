@@ -123,6 +123,7 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     // Initialize
     swing_foot_current_.reset(new DracoFootstep());
     swing_start_time_ = 0.0;
+    swing_end_ = false;
 
     // Integration Parameters
      max_joint_vel_ = 2.0;
@@ -254,9 +255,10 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
     
     //TODO:
     // if prev_ctrl_state was swing and now we are in double support, set swing_end to true
+    if (((prev_ctrl_state_ == DRACO_STATE_RLS) || (prev_ctrl_state_ == DRACO_STATE_LLS)) && (ctrl_state_ == DRACO_STATE_DS)){
+        swing_end_ = true;
+    }
 
-    // std::cout << "prev_ctrl_state_" << prev_ctrl_state_ << std::endl;
-    // std::cout << "ctrl_state_" << ctrl_state_ << std::endl;
 
     // change stance when we enter the swing phase right leg swing
     if ((prev_ctrl_state_ == DRACO_STATE_DS) && (ctrl_state_ == DRACO_STATE_RLS)){

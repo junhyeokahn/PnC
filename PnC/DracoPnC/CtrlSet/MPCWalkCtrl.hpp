@@ -111,6 +111,7 @@ class MPCWalkCtrl : public Controller {
 
     std::shared_ptr<DracoFootstep> swing_foot_current_;
     double swing_start_time_;
+    bool swing_end_;
 
     void compute_swing_foot_trajectory();
 
