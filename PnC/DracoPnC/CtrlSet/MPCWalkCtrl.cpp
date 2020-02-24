@@ -391,8 +391,8 @@ void MPCWalkCtrl::references_setup(){
 
             // Set desired footstep landing locations
             Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
@@ -1337,9 +1337,10 @@ void MPCWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     lfoot_front_task->setGain(kp_point_foot, kd_point_foot);
     lfoot_back_task->setGain(kp_point_foot, kd_point_foot);
 
-    Eigen::VectorXd kp_line_task = 200.0*Eigen::VectorXd::Ones(5);
-    Eigen::VectorXd kd_line_task = 62.0*Eigen::VectorXd::Ones(5);
-    kp_line_task[4] = 1000;
+    Eigen::VectorXd kp_line_task = kp_foot[0]*Eigen::VectorXd::Ones(5);
+    Eigen::VectorXd kd_line_task = kd_foot[0]*Eigen::VectorXd::Ones(5);
+    kp_line_task[4] = kp_foot[2];
+    kd_line_task[4] = kd_foot[2];
     
     rfoot_line_task->setGain(kp_line_task, kd_line_task);
     lfoot_line_task->setGain(kp_line_task, kd_line_task);
