@@ -390,9 +390,9 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.07, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/4.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/6.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
@@ -902,10 +902,10 @@ void MPCWalkCtrl::task_setup() {
         rfoot_pos_des[2] = f_ori.y(); rfoot_pos_des[3] = f_ori.z();
         rfoot_pos_des.tail(3) = f_pos;
         // Set velocities
-        // foot_vel_des.head(3) = f_ori_vel;
+        foot_vel_des.head(3) = f_ori_vel;
         foot_vel_des.tail(3) = f_vel;
         // Set Accelerations
-        // foot_acc_des.head(3) = f_ori_acc;
+        foot_acc_des.head(3) = f_ori_acc;
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
         rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
@@ -929,13 +929,13 @@ void MPCWalkCtrl::task_setup() {
         lfoot_pos_des[2] = f_ori.y(); lfoot_pos_des[3] = f_ori.z();
         lfoot_pos_des.tail(3) = f_pos;
         // Set velocities
-        // foot_vel_des.head(3) = f_ori_vel;
+        foot_vel_des.head(3) = f_ori_vel;
         foot_vel_des.tail(3) = f_vel;
         // Set Accelerations
-        // foot_acc_des.head(3) = f_ori_acc;
+        foot_acc_des.head(3) = f_ori_acc;
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
-        rfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+        lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
 
     }else{
         // Set Point Tasks
@@ -1004,7 +1004,7 @@ void MPCWalkCtrl::task_setup() {
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
     // w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
 
-    w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
+    // w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
 
 }
 

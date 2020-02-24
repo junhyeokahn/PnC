@@ -40,7 +40,7 @@ bool LineFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     }
 
     Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
-    vel_act.head(2) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(2);
+    vel_act.head(2) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).segment(1,2);
     vel_act.tail(3) = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
 
     // op_cmd
