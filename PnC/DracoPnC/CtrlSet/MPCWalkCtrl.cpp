@@ -254,20 +254,19 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
     
     //TODO:
     // if prev_ctrl_state was swing and now we are in double support, set swing_end to true
-    // swing_end = true;
 
-    // if prev_ctrl_state was double support and now we are in swing, update the global frame location
-    // Change stance leg
-    // if (prev_ctrl_state_ == DRACO_STATE_DS) || (ctrl_state == DRACO_STATE_RLS)  {
-    //     sp_->stance_foot = "lFoot";
-    //     swing_end = false
-    // }
-    // if (prev_ctrl_state_ == DRACO_STATE_DS) || (ctrl_state == DRACO_STATE_LLS)  {
-    //     sp_->stance_foot = "rFoot";
-    //     swing_end = false
-    // }
-    // sp_->num_step_copy = num_step_;
+    // std::cout << "prev_ctrl_state_" << prev_ctrl_state_ << std::endl;
+    // std::cout << "ctrl_state_" << ctrl_state_ << std::endl;
 
+    // change stance when we enter the swing phase right leg swing
+    if ((prev_ctrl_state_ == DRACO_STATE_DS) && (ctrl_state_ == DRACO_STATE_RLS)){
+        std::cout << "stance change to left foot!" << std::endl;
+        sp_->stance_foot = "lFoot";
+    // left leg swing
+    }else if ((prev_ctrl_state_ == DRACO_STATE_DS) && (ctrl_state_ == DRACO_STATE_LLS)){
+         std::cout << "stance change to right foot!" << std::endl;
+        sp_->stance_foot = "rFoot";
+    }
 
     // Store  ctrl_state_ as previous.
     prev_ctrl_state_ = ctrl_state_;
@@ -389,11 +388,17 @@ void MPCWalkCtrl::references_setup(){
             // Set desired footstep landing locations
             Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/4.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
                                       foot_rotate*right_foot_start_->orientation, 
                                       DRACO_RIGHT_FOOTSTEP);
+
+            DracoFootstep lfootstep_1; // take a left footstep
+            lfootstep_1.setPosOriSide(left_foot_start_->position + foot_translate, 
+                                      foot_rotate*left_foot_start_->orientation, 
+                                      DRACO_LEFT_FOOTSTEP);
 
             double double_contact_time_in = 0.05;
             double contact_transition_time_in = 0.2;
@@ -405,10 +410,16 @@ void MPCWalkCtrl::references_setup(){
                                          swing_time_in,
                                          swing_height_in);
 
+            lfootstep_1.setWalkingParams(double_contact_time_in,
+                                         contact_transition_time_in,
+                                         swing_time_in,
+                                         swing_height_in);
+
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
-
+            // desired_footstep_list_.push_back(lfootstep_1);
+            
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
                 desired_footstep_list_[i].printInfo();
@@ -508,9 +519,9 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
 
         // TODO: if the swing has ended set desired com position to be the current midfoot.
 
-        printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
-                t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 1],
-                mpc_Xdes_[i*n + 3],  mpc_Xdes_[i*n + 4], mpc_Xdes_[i*n + 5]);
+        // printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
+        //         t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 1],
+        //         mpc_Xdes_[i*n + 3],  mpc_Xdes_[i*n + 4], mpc_Xdes_[i*n + 5]);
 
         // std::cout << "t_pred:" << t_predict << " x_des[5] = " << mpc_Xdes_[i*n + 5] << "xdot_des[11] = " << mpc_Xdes_[i*n + 11] << std::endl;
         // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;

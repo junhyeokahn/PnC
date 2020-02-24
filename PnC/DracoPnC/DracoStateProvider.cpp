@@ -13,6 +13,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     robot_ = _robot;
     stance_foot = "lFoot";
+    prev_stance_foot = stance_foot;
     curr_time = 0.;
 
     target_yaw = 0.;

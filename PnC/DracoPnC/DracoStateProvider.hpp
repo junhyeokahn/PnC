@@ -11,6 +11,8 @@ class DracoStateProvider {
     ~DracoStateProvider() {}
 
     std::string stance_foot;
+    std::string prev_stance_foot;
+
     double curr_time;
     int rl_count;
     double target_yaw;

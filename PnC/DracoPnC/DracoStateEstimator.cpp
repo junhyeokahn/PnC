@@ -15,6 +15,10 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
     robot_ = robot;
     sp_ = DracoStateProvider::getStateProvider(robot_);
     curr_config_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    
+    prev_config_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    global_linear_offset_.setZero();   
+
     curr_qdot_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
     global_body_euler_zyx_.setZero();
     global_body_quat_ = Eigen::Quaternion<double>::Identity();
@@ -257,24 +261,68 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
                 .tail(3);
     }
 
-    // TODO:
-    // if stance foot changes, add constant offset to curr_config_
-    // offset += new_foot - stance_foot 
-    // minimize difference of base estimation after contact switch.
-    // update qdot using the difference between the curr_config_ now and previous
+    // check if stance foot changes. If so, find the new linear offset
+    if (sp_->stance_foot.compare(sp_->prev_stance_foot) != 0){
+        Eigen::Vector3d new_stance_foot = foot_pos;
+        Eigen::Vector3d old_stance_foot;
+        if (sp_->prev_stance_foot == "rFoot"){
+            old_stance_foot = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
+        }else{
+            old_stance_foot = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
+        }
+        Eigen::Vector3d stance_difference = new_stance_foot - old_stance_foot;        
+
+        // new and old estimates must match, so find the actual offset
+        Eigen::Vector3d old_estimate = global_linear_offset_ - old_stance_foot;
+        Eigen::Vector3d new_estimate = (global_linear_offset_ + stance_difference) - new_stance_foot;
+        Eigen::Vector3d estimate_diff = new_estimate - old_estimate;
+
+        Eigen::Vector3d offset_update = global_linear_offset_ + stance_difference + estimate_diff;
+
+        // myUtils::pretty_print(new_stance_foot, std::cout, "new_stance_foot");
+        // myUtils::pretty_print(old_stance_foot, std::cout, "old_stance_foot");
+        // myUtils::pretty_print(stance_difference, std::cout, "stance_difference");
+        // myUtils::pretty_print(old_estimate, std::cout, "old_estimate");
+        // myUtils::pretty_print(new_estimate, std::cout, "new_estimate");
+        // myUtils::pretty_print(offset_update, std::cout, "offset_update");
+
+        // Update foot positions
+        global_linear_offset_ = offset_update;
+        foot_pos = new_stance_foot;
+
+        // Eigen::Vector3d actual_config = global_linear_offset_ - new_stance_foot;
+        // myUtils::pretty_print(actual_config, std::cout, "actual_config");
+    }
 
 
-    curr_config_[0] = -foot_pos[0];
-    curr_config_[1] = -foot_pos[1];
-    curr_config_[2] = -foot_pos[2];
-    curr_qdot_[0] = -foot_vel[0];
-    curr_qdot_[1] = -foot_vel[1];
-    curr_qdot_[2] = -foot_vel[2];
+    // Perform Base update using kinematics
+    curr_config_[0] = global_linear_offset_[0] - foot_pos[0];
+    curr_config_[1] = global_linear_offset_[1] - foot_pos[1];
+    curr_config_[2] = global_linear_offset_[2] - foot_pos[2];
+
+    // Update qdot using the difference between the curr_config_ now and previous
+    curr_qdot_.head(3) = (curr_config_.head(3) - prev_config_.head(3))/DracoAux::ServoRate;
+
+    // curr_qdot_[0] = -foot_vel[0];
+    // curr_qdot_[1] = -foot_vel[1];
+    // curr_qdot_[2] = -foot_vel[2];
+
+    // Eigen::Vector3d config_xyz = curr_config_.head(3);
+    // Eigen::Vector3d config_dot_xyz = curr_qdot_.head(3);
+    // myUtils::pretty_print(config_xyz, std::cout, "config_xyz");
+    // Eigen::Vector3d config_dot_xyz_estimate = (curr_config_.head(3) - prev_config_.head(3))/DracoAux::ServoRate;
+    // myUtils::pretty_print(config_dot_xyz, std::cout, "config_dot_xyz");
+    // myUtils::pretty_print(config_dot_xyz_estimate, std::cout, "config_dot_xyz_estimate");
+
 
     robot_->updateSystem(curr_config_, curr_qdot_, false);
 
     sp_->q = curr_config_;
     sp_->qdot = curr_qdot_;
+    // update previous stance foot.
+    sp_->prev_stance_foot = sp_->stance_foot;
+    // update previous config:
+    prev_config_ = curr_config_;
 
 }
 

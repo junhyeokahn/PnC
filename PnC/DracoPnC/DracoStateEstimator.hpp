@@ -31,6 +31,9 @@ class DracoStateEstimator {
     RobotSystem* robot_;
 
     Eigen::VectorXd curr_config_;
+    Eigen::Vector3d global_linear_offset_;
+    Eigen::VectorXd prev_config_;
+
     Eigen::VectorXd curr_qdot_;
     Eigen::VectorXd prev_qdot_;
     Eigen::Vector3d global_body_euler_zyx_;
