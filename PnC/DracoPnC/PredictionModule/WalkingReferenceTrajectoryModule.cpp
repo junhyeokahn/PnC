@@ -115,7 +115,7 @@ void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eig
             // heuristic which sets the reference CoM to lean towards the stance foot during transition times.
             if (time <= (t_footstep_start + footstep_list_[i].double_contact_time + 
                                             footstep_list_[i].contact_transition_time)) {
-                double lean_percentage = 0.5;
+                double lean_percentage = 0.0;
                 x_com_out.head(2) =  lean_percentage*stance_foot.position.head(2) + (1.0-lean_percentage)*midfoot.position.head(2);                                
             }
             // otherwise land at the midfoot location

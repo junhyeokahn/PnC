@@ -418,7 +418,7 @@ void MPCWalkCtrl::references_setup(){
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
-            // desired_footstep_list_.push_back(lfootstep_1);
+            desired_footstep_list_.push_back(lfootstep_1);
             
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
