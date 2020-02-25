@@ -392,7 +392,7 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.15, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(0.3, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 
@@ -408,7 +408,7 @@ void MPCWalkCtrl::references_setup(){
 
             double double_contact_time_in = 0.05;
             double contact_transition_time_in = 0.2;
-            double swing_time_in = 0.2;
+            double swing_time_in = 0.3;
             double swing_height_in = 0.05;
 
             rfootstep_1.setWalkingParams(double_contact_time_in,

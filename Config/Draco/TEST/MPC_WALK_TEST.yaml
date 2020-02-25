@@ -54,7 +54,7 @@ control_configuration:
         mpc_use_approx_inertia: false
         mpc_approx_inertia_input: [4.499536, -0.024537, 0.840501, -0.024537, 3.967693, 0.014913, 0.840501, 0.014913, 1.268436]
         # Predicion Horizon
-        mpc_horizon: 15 # number of horizon steps 
+        mpc_horizon: 20 # number of horizon steps 
         # Prediction Interval
         mpc_dt: 0.025 # seconds
 
@@ -87,5 +87,5 @@ control_configuration:
         # mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 0.0]
         mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 10.0, 0.0]
         # mpc_terminal_cost_vec: [2.5, 2.5, 2.5, 50.0, 50.0, 300.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0]        
-        mpc_terminal_cost_vec: [2.5, 2.5, 2.5, 100.0, 100.0, 300.0, 10.0, 10.0, 10.0, 30.0, 30.0, 30.0, 0.0]        
+        mpc_terminal_cost_vec: [25.0, 25.0, 25.0, 100.0, 100.0, 300.0, 10.0, 10.0, 10.0, 30.0, 30.0, 30.0, 0.0]        
 
