@@ -47,6 +47,9 @@ void OSCTest::_ParameterSetting() {
         ((OSCPosCtrl*)osc_pos_ctrl_)->setEndTime(tmp_val);
         myUtils::readParameter(test_cfg, "end_effector_target_pos", tmp_vec);
         ((OSCPosCtrl*)osc_pos_ctrl_)->setTargetPosition(tmp_vec);
+        myUtils::readParameter(test_cfg, "end_effector_target_ori", tmp_vec);
+        ((OSCPosCtrl*)osc_pos_ctrl_)->setTargetOrientation(tmp_vec);
+
 
         //myUtils::readParameter(test_cfg, "ori_duration", tmp_val);
         //((OSCOriCtrl*)osc_ori_ctrl_)->setEndTime(tmp_val);

@@ -36,7 +36,8 @@ ScorpioInterface::ScorpioInterface() : EnvInterface() {
 
     myUtils::color_print(myColor::BoldCyan, border);
 
-    //DataManager* data_manager = DataManager::GetDataManager();
+    DataManager* data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&running_time_,DOUBLE,"time",1);
     //data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", Draco::n_adof);
     //data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", Draco::n_adof);
     //data_manager->RegisterData(&cmd_jtrq_, VECT, "command", Draco::n_adof);
@@ -114,6 +115,7 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     if (!test_initialized) {
         test_->TestInitialization();
         test_initialized = true;
+        DataManager::GetDataManager()->start();
     }
     //if (count_ < waiting_count_) {
         //state_estimator_->Initialization(_sensor_data);

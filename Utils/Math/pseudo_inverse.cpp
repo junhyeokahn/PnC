@@ -56,7 +56,7 @@ namespace myUtils {
         ret = Eigen::MatrixXd::Identity(J.cols(), J.cols()) - J_pinv * J;
         return ret;
     }
-
+    // JM modified threshold
     void weightedInverse(const Eigen::MatrixXd & J,
                          const Eigen::MatrixXd & Winv,
                          Eigen::MatrixXd & Jinv) {
