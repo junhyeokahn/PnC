@@ -14,6 +14,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     // API related parameters
     b_walking = false;
+    b_ready_to_walk = false;
     ft_length = 0.;
     r_ft_width = 0.;
     l_ft_width = 0.;

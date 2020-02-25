@@ -69,6 +69,14 @@ class DracoInterface : public EnvInterface {
     virtual void getCommand(void* _sensor_data, void* _command_data);
     void Walk(double ft_length, double r_ft_width, double l_ft_width,
               double ori_inc, int num_step);
+    void WalkInX(double x, double max_delta_x=0.05);
+    void WalkInY(double y, double max_delta_y=0.03);
+    void Turn(double th, double max_delta_th=0.05);
+    void WalkToRelativePositionAndOrientation(double x, double y, double th,
+                                              double max_delta_x=0.05,
+                                              double max_delta_y=0.03,
+                                              double max_delta_th=0.05);
+    bool IsReadyForNextCommand();
 
     //These would be the new API functionality that we would want for integration into ADE, such that we can build a
     //system to navigate to a relative point on the ADE side of things.

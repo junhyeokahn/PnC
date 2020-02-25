@@ -42,6 +42,7 @@ class DracoStateProvider {
 
     // API related variable
     bool b_walking;
+    bool b_ready_to_walk;
     double ft_length;
     double r_ft_width;
     double l_ft_width;

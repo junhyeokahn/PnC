@@ -106,7 +106,7 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot, Eigen::VectorXd & q_init) {
-    
+
     Eigen::VectorXd conf_init(robot->getNumDofs());
     conf_init.setZero();
 
@@ -177,8 +177,8 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
-            q[0] = 2;
-            q[3] = M_PI;
+            //q[0] = 2.5;
+            //q[3] = M_PI;
             q[2] = 0.9;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);
@@ -219,7 +219,7 @@ void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	    dart::dynamics::ShapeNode* sn = bn->getShapeNode(j);
 	    if(sn->getVisualAspect())
 	    {
-	      dart::dynamics::MeshShape* ms = 
+	      dart::dynamics::MeshShape* ms =
 		  dynamic_cast<dart::dynamics::MeshShape*>(sn->getShape().get());
 	      if(ms)
 		ms->setColorMode(dart::dynamics::MeshShape::SHAPE_COLOR);
@@ -228,12 +228,21 @@ void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	}
 }
 
+void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
+    for (int i = 0; i < robot->getNumJoints(); ++i) {
+        dart::dynamics::Joint* joint = robot->getJoint(i);
+        // std::cout << i << "th" << std::endl;
+        // std::cout << joint->isPositionLimitEnforced() << std::endl;
+        joint->setPositionLimitEnforced(true);
+    }
+}
+
 void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::SkeletonPtr robot){
     dart::dynamics::BodyNode* bd1 = robot->getBodyNode("link1");
     dart::dynamics::BodyNode* bd2 = robot->getBodyNode("link4_end");
    Eigen::Vector3d offset(0.09, 0.1225, -0.034975);
     Eigen::Vector3d joint_pos1 = bd1->getTransform()*offset;
-    dart::constraint::BallJointConstraintPtr cl1 = 
+    dart::constraint::BallJointConstraintPtr cl1 =
         std::make_shared<dart::constraint::BallJointConstraint>(bd1,bd2,joint_pos1);
 
     Eigen::Vector3d pos_b1 = bd1->getTransform().translation();
@@ -242,7 +251,7 @@ void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::Ske
     dart::dynamics::BodyNode* bd3 = robot->getBodyNode("link5");
     dart::dynamics::BodyNode* bd4 = robot->getBodyNode("link8_end");
     Eigen::Vector3d joint_pos2 = bd3->getTransform()*offset;
-    dart::constraint::BallJointConstraintPtr cl2 = 
+    dart::constraint::BallJointConstraintPtr cl2 =
         std::make_shared<dart::constraint::BallJointConstraint>(bd3,bd4,joint_pos2);
 
     world->getConstraintSolver()->addConstraint(cl1);
@@ -267,7 +276,7 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
     passive1->setActuatorType(dart::dynamics::Joint::PASSIVE);
     passive2->setActuatorType(dart::dynamics::Joint::PASSIVE);
     passive3->setActuatorType(dart::dynamics::Joint::PASSIVE);
-    
+
     dart::dynamics::Joint* active1 = robot->getJoint("joint1");
     dart::dynamics::Joint* active2 = robot->getJoint("joint2");
     dart::dynamics::Joint* active3 = robot->getJoint("joint5");
@@ -283,7 +292,7 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
         active2->setActuatorType(dart::dynamics::Joint::SERVO);
         active3->setActuatorType(dart::dynamics::Joint::SERVO);
         active4->setActuatorType(dart::dynamics::Joint::SERVO);
-        active5->setActuatorType(dart::dynamics::Joint::SERVO); 
+        active5->setActuatorType(dart::dynamics::Joint::SERVO);
         active6->setActuatorType(dart::dynamics::Joint::SERVO);
         active7->setActuatorType(dart::dynamics::Joint::SERVO);
 
@@ -294,10 +303,10 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
         active2->setActuatorType(dart::dynamics::Joint::FORCE);
         active3->setActuatorType(dart::dynamics::Joint::FORCE);
         active4->setActuatorType(dart::dynamics::Joint::FORCE);
-        active5->setActuatorType(dart::dynamics::Joint::FORCE); 
+        active5->setActuatorType(dart::dynamics::Joint::FORCE);
         active6->setActuatorType(dart::dynamics::Joint::FORCE);
         active7->setActuatorType(dart::dynamics::Joint::FORCE);
-   
+
         std::cout<<"***** joint types are initialized: Force mode. "<<std::endl;
     }
     std::cout<<"======================================================"<<std::endl;
@@ -348,26 +357,31 @@ int main(int argc, char** argv) {
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
-        // THIS_COM"RobotModel/Robot/Draco/DracoCollision.urdf");
-        //THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
         THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
-    //dart::dynamics::SkeletonPtr hsrrobot = urdfLoader.parseSkeleton(
-         //THIS_COM "RobotModel/Robot/HSR/hsrb.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
     world->addSkeleton(draco);
-    //world->addSkeleton(hsrrobot);
     world->addSkeleton(table);
 
 
     // ==================================
     // Friction & Restitution Coefficient
     // ==================================
+    double friction(10.);
+    double restit(0.0);
+    ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
+    draco->getBodyNode("Torso")->setFrictionCoeff(friction);
+    ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
+    draco->getBodyNode("Torso")->setRestitutionCoeff(restit);
+    draco->getBodyNode("rAnkle")->setFrictionCoeff(friction);
+    draco->getBodyNode("lAnkle")->setFrictionCoeff(friction);
+    draco->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
+    draco->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
 
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
@@ -382,21 +396,17 @@ int main(int argc, char** argv) {
     // ====================
     if (b_display_target_frame) addTargetFrame(world);
 
-    // ====================
-    // Add Collision Object
-    // ====================
-    //_addFootCollisionObject(robot);
-
     // =====================
     // Initial configuration
     // =====================
     _setInitialConfiguration(scorpio, q_init);
     _setInitialConfiguration(draco);
+    _setJointLimitConstraint(draco);
 
     // =====================
     // Robot Mesh Color from URDF
     // =====================
-    _SetMeshColorURDF(scorpio); 
+    _SetMeshColorURDF(scorpio);
 
     // =====================
     // Constraint for Closed-Loop
@@ -406,8 +416,8 @@ int main(int argc, char** argv) {
     // ================
     // Set passive joint
     // ================
-    _SetJointActuatorType(scorpio,actuator_type); 
-   
+    _SetJointActuatorType(scorpio,actuator_type);
+
     // ================
     // Print Model Info
     // ================
@@ -422,8 +432,8 @@ int main(int argc, char** argv) {
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
     // node = new ScorpioWorldNodeReach(world);
-    
-    node->setNumStepsPerCycle(num_steps_per_cycle);
+
+    node->setNumStepsPerCycle(30);
 
     // =====================
     // Create and Set Viewer
@@ -435,7 +445,7 @@ int main(int argc, char** argv) {
         viewer.simulate(false);
         viewer.switchHeadlights(false);
         ::osg::Vec3 p1(1.0, 0.2, 1.0);
-        p1 = p1 * 0.7;
+        p1 = p1 * 0.5;
         viewer.getLightSource(0)->getLight()->setPosition(
             ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
         viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
@@ -449,10 +459,10 @@ int main(int argc, char** argv) {
         }
 
         //viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        viewer.setUpViewInWindow(1440, 0, 700, 500);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
-           ::osg::Vec3(7.14, 7.28, 2.5) *0.5 , ::osg::Vec3(0.0, 0.1, 0.4)*0.5,
-            ::osg::Vec3(0.0, 0.0, 0.8)*0.5);
+            ::osg::Vec3(6.14, 2.28, 3.0) * 1.5, ::osg::Vec3(1.0, 0.2, 0.5),
+            ::osg::Vec3(0.0, 0.0, 1.0));
         viewer.setCameraManipulator(viewer.getCameraManipulator());
         viewer.run();
     } else {

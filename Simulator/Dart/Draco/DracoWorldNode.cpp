@@ -46,6 +46,13 @@ void DracoWorldNode::customPreStep() {
 
     Interface_->getCommand(SensorData_, Command_);
 
+    //std::cout << "------------------------" << std::endl;
+    //std::cout << "t :" << t_ << std::endl;
+    //std::cout << "q :" << std::endl;
+    //std::cout << (SensorData_->q.head(6)) << std::endl;
+    //std::cout << "jtrq :"  << std::endl;
+    //std::cout << (Command_->jtrq.tail(6))  << std::endl;
+
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {
             PlotMPCResult_();

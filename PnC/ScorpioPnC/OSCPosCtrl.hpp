@@ -22,6 +22,7 @@ class OSCPosCtrl : public Controller {
    protected:
     double end_time_;
     int ctrl_count_;
+    std::vector<int> active_joint_idx_;
     Eigen::VectorXd target_pos_;
     Eigen::VectorXd ini_pos_;
     Eigen::VectorXd ini_vel_;

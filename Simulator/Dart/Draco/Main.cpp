@@ -135,6 +135,10 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
             break;
         }
         case 1: {
+            //q[0] = 2.5;
+            //q[3] = M_PI;
+
+
             q[2] = 0.9;
             double alpha(-M_PI / 4.);
             double beta(M_PI / 5.5);

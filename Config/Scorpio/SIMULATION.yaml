@@ -7,10 +7,5 @@ display_joint_frame: false
 display_target_frame: true
 actuator_type: 1 # servo mode 
 #actuator_type: 1 # force mode
-q_init: [180,	-65,	180,	-65,	180]
-#q_init: [ 90,  0,	0,	0,	0]
-
-
-
-
-
+#q_init: [180,	-65,	180,	-65,	180]
+q_init: [ 0,  0,	0,	0,	0]
