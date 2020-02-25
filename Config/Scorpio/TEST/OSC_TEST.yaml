@@ -1,15 +1,7 @@
 test_configuration:
     xyz_duration: 10.
-<<<<<<< HEAD
     end_effector_target_pos: [1., 0.2 , 0.7]
     end_effector_target_ori: [0.5,-0.5,0.5,0.5]
-
-=======
-    end_effector_target_pos: [0. , 0. , 0.]
->>>>>>> c752f51abf2098d03a4b9ee52e3d2d1980c8d9da
-    #end_effector_target_pos: [1. , 0.2 , 0.73]
-    #ori_duration: 10.
-    #head_target_pos: [0.5,0.5,0.5,-0.5]
 
 control_configuration:
     osc_position_ctrl:
@@ -17,8 +9,4 @@ control_configuration:
         end_effector_kd: [15,15,15,15,15,15]
         q_kp: [100 , 100 , 100 , 100 ,  100 , 100 , 100 ]        
         q_kd: [10   , 10   , 10   , 10   ,  10   , 10   , 10]   
-    #osc_orientation_ctrl:
-        #head_kp: [300,300,300]
-        #head_kd: [150,150,150]
-        #q_kp: [100 , 100 , 100 , 100 ,  100 , 100 , 100 , 100 , 100 , 100 , 100 , 100 ,  100 , 100 , 100 , 100 ,100 , 100 , 100 , 100 ,  100 , 100 , 100 , 100 ,100,100,100,100,100,100 ]
-        #q_kd: [10   , 10   , 10   , 10   ,  10   , 10   , 10   , 10   ,  10   , 10   , 10   , 10   ,  10   , 10   , 10   , 10   ,10   , 10   , 10   , 10   ,  10   , 10   , 10   , 10   ,10,10,10,10,10,10]
+

@@ -4,8 +4,7 @@
 #include "PnC/Test.hpp"
 #include "PnC/ScorpioPnC/ScorpioDefinition.hpp"
 
-//class DracoStateProvider;
-//class DracoStateEstimator;
+class ScorpioStateProvider;
 
 class ScorpioSensorData {
    public:
@@ -41,8 +40,7 @@ class ScorpioInterface : public EnvInterface {
    protected:
     void _ParameterSetting();
 
-    //DracoStateEstimator* state_estimator_;
-    //DracoStateProvider* sp_;
+    ScorpioStateProvider* sp_;
 
     //void CropTorque_(ScorpioCommand*);
     bool Initialization_(ScorpioSensorData*, ScorpioCommand*);

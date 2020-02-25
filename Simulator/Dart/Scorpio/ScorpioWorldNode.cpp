@@ -335,21 +335,21 @@ void ScorpioWorldNode::SetParams_(){
     myUtils::readParameter(control_cfg, "kp", scorpio_kp_);
     myUtils::readParameter(control_cfg, "kd", scorpio_kd_);
 
-    myUtils::pretty_print(Amp_, std::cout, "Amp");
-    myUtils::pretty_print(Freq_, std::cout, "Freq");
-    std::cout<<"sim_case: "<<sim_case_ <<std::endl;
+    //myUtils::pretty_print(Amp_, std::cout, "Amp");
+    //myUtils::pretty_print(Freq_, std::cout, "Freq");
+    //std::cout<<"sim_case: "<<sim_case_ <<std::endl;
     
-    if(actuator_type_ == 0)
-        std::cout<<"actuator_type: servo "<<std::endl;
-    else
-        std::cout<<"actuator_type: force "<<std::endl;
+    //if(actuator_type_ == 0)
+        //std::cout<<"actuator_type: servo "<<std::endl;
+    //else
+        //std::cout<<"actuator_type: force "<<std::endl;
 
-    if(control_type_ == 0)
-        std::cout<<"control_type: joint space " <<std::endl;
-    else if(control_type_ == 1)
-        std::cout<<"control_type: operational space " <<std::endl;
-    else
-        std::cout<<"control_type: not defined " <<std::endl;
+    //if(control_type_ == 0)
+        //std::cout<<"control_type: joint space " <<std::endl;
+    //else if(control_type_ == 1)
+        //std::cout<<"control_type: operational space " <<std::endl;
+    //else
+        //std::cout<<"control_type: not defined " <<std::endl;
 
     try {
         YAML::Node simulation_cfg =

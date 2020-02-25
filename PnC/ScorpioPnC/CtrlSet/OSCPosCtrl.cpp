@@ -1,4 +1,4 @@
-#include <PnC/ScorpioPnC/OSCPosCtrl.hpp>
+#include <PnC/ScorpioPnC/CtrlSet/OSCPosCtrl.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>

@@ -1,5 +1,5 @@
-#include <PnC/ScorpioPnC/OSCPosCtrl.hpp>
-#include <PnC/ScorpioPnC/OSCTest.hpp>
+#include <PnC/ScorpioPnC/CtrlSet/OSCPosCtrl.hpp>
+#include <PnC/ScorpioPnC/TestSet/OSCTest.hpp>
 
 OSCTest::OSCTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "OSC Test");
