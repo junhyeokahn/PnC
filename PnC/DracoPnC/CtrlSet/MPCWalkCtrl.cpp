@@ -394,6 +394,8 @@ void MPCWalkCtrl::references_setup(){
             // Set desired footstep landing locations
             Eigen::Vector3d foot_translate(0.3, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
