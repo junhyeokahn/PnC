@@ -71,7 +71,6 @@ void OSCPosCtrl::oneStep(void* _cmd) {
     }
     //myUtils::pretty_print(S, std::cout, "selection matrix");
 
-
     Eigen::MatrixXd J_constraints = Eigen::MatrixXd::Zero(6,Scorpio::n_dof);
 
     //dart::dynamics::SkeletonPtr skel_ptr = robot_-> getSkeleton();

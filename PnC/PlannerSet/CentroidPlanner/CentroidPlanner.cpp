@@ -482,6 +482,14 @@ void CentroidPlanner::_internalOptimize(bool is_first_time) {
                             (1.0 /
                              mDynStateSeq.dynamicsStateSequence[time_id].time));
                 } else {
+                    // TEST
+                    if (axis_id == 2) {
+                        mQuadObjective.addQuaTerm(
+                           mCentParam->wCom[axis_id]/10.0,
+                           LinExpr(mVars[mCom.id(axis_id, time_id)]) -
+                               LinExpr(mComPosGoal[axis_id]));
+                    }
+                    // TEST
                     mQuadObjective.addQuaTerm(
                         mCentParam->wLMomD[axis_id],
                         (LinExpr(mVars[mLMom.id(axis_id, time_id)]) -
