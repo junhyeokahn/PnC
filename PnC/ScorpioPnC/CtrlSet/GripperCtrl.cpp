@@ -58,7 +58,6 @@ void GripperCtrl::_build_constraint_matrix(){
 }
 
 void GripperCtrl::oneStep(void* _cmd) {
-
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     _task_setup();

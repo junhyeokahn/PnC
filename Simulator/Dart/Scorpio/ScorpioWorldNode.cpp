@@ -148,7 +148,40 @@ void ScorpioWorldNode::customPreStep() {
     // =============
     scorpio_sensordata_->q = scorpio_->getPositions();
     scorpio_sensordata_->qdot = scorpio_->getVelocities();
+
+    // ====
+    // APIs
+    // ====
+    static bool b_sc_first_cmd(true);
+    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_sc_first_cmd) {
+        std::cout << "First Command Received" << std::endl;
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-1.0, 0.1, 0.);
+        b_sc_first_cmd = false;
+    }
+
+    static bool is_grasping = false;
+    //static bool b_sc_second_cmd(true);
+    //if (((ScorpioInterface*)scorpio_interface_)->IsReadyToGrasp() && b_sc_second_cmd) {
+        //std::cout << "Second Command Received" << std::endl;
+        //((ScorpioInterface*)scorpio_interface_)->Grasp();
+        //b_sc_second_cmd = false;
+        is_grasping = true;
+    //}
+
     scorpio_interface_->getCommand(scorpio_sensordata_, scorpio_cmd_);
+
+    if (is_grasping) {
+        // set force to box
+    } else {
+        // set force to stay at the same position
+    }
+
+    static bool b_sc_third_cmd(true);
+    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_sc_third_cmd) {
+        std::cout << "Third Command Received" << std::endl;
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-1.0, 0.1, 0.);
+        b_sc_third_cmd = false;
+    }
 
     scorpio_trq_cmd_ = scorpio_cmd_->jtrq;
     SetActiveForce(scorpio_trq_cmd_);
@@ -163,8 +196,10 @@ void ScorpioWorldNode::customPreStep() {
 
     GetContactSwitchData_(draco_sensordata_->rfoot_contact,
                           draco_sensordata_->lfoot_contact);
-    //GetForceTorqueData_();
 
+    // ====
+    // APIs
+    // ====
     static bool b_first_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_first_cmd) {
         ((DracoInterface*)draco_interface_)->WalkInY(-0.9);

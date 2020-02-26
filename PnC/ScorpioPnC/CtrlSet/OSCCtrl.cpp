@@ -8,22 +8,26 @@
 #include <PnC/WBC/BasicTask.hpp>
 #include <PnC/ScorpioPnC/ScorpioStateProvider.hpp>
 #include <PnC/ScorpioPnC/TaskSet/SelectedJointTask.hpp>
+#include <PnC/ScorpioPnC/TaskSet/SuctionGripperTask.hpp>
 
 OSCCtrl::OSCCtrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(2, "OSC POS Ctrl");
     end_time_ = 0;
 
     target_pos_ = Eigen::VectorXd::Zero(3);
+    relative_target_pos_ = Eigen::VectorXd::Zero(3);
     ini_pos_ = Eigen::VectorXd::Zero(3);
     ini_pos_q_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
     q_kp_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
     q_kd_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
     ini_ori_ = Eigen::Quaternion<double> (1,0,0,0);
     target_ori_ = Eigen::Quaternion<double> (1,0,0,0);
+    relative_target_ori_ = Eigen::Quaternion<double> (1,0,0,0);
 
     _build_active_joint_idx();
     ee_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ScorpioBodyNode::end_effector);
-    ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
+    //ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
+    ee_ori_task_ = new SuctionGripperTask(robot_);
     joint_task_ = new SelectedJointTask(robot_, active_joint_idx_);
 
     _build_constraint_matrix();
@@ -65,7 +69,6 @@ void OSCCtrl::_build_constraint_matrix(){
 }
 
 void OSCCtrl::oneStep(void* _cmd) {
-
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     _task_setup();
@@ -84,6 +87,7 @@ void OSCCtrl::_task_setup(){
     Eigen::VectorXd ee_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd ee_acc_des = Eigen::VectorXd::Zero(3);
     for (int i = 0; i < 3; ++i) {
+        target_pos_[i] = ini_pos_[i] + relative_target_pos_[i];
         ee_pos_des[i] = myUtils::smooth_changing(ini_pos_[i], target_pos_[i],
                 end_time_, state_machine_time_);
         ee_vel_des[i] = myUtils::smooth_changing_vel(ini_pos_[i], target_pos_[i],
@@ -99,6 +103,7 @@ void OSCCtrl::_task_setup(){
     double t = myUtils::smooth_changing(0,1,end_time_,state_machine_time_);
     double tdot = myUtils::smooth_changing_vel(0,1,end_time_,state_machine_time_);
 
+    target_ori_ = relative_target_ori_ * ini_ori_ ;
     Eigen::Quaternion<double> quat_ori_error =
         target_ori_ * (ini_ori_.inverse());
     Eigen::VectorXd ang_vel = Eigen::VectorXd::Zero(3);
@@ -135,7 +140,7 @@ void OSCCtrl::_task_setup(){
     // =========================================================================
     task_list_.push_back(ee_pos_task_);
     task_list_.push_back(ee_ori_task_);
-    task_list_.push_back(joint_task_);
+    //task_list_.push_back(joint_task_);
 }
 
 void OSCCtrl::_compute_torque(Eigen::VectorXd & gamma){

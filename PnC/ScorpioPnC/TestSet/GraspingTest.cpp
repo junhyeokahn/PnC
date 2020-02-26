@@ -31,7 +31,7 @@ void GraspingTest::TestInitialization() {
 int GraspingTest::_NextPhase(const int& phase) {
     int nx_phase = phase + 1;
     printf("[GRASPING TEST] next phase: %d\n", nx_phase);
-    if (phase == NUM_GRASPING_PH) {
+    if (nx_phase == NUM_GRASPING_PH) {
         nx_phase = HOLD_PH;
     }
     return nx_phase;
@@ -52,4 +52,8 @@ void GraspingTest::_ParameterSetting() {
             << std::endl;
         exit(0);
     }
+}
+
+void GraspingTest::SetMovingTarget(Eigen::VectorXd pos){
+    ((OSCCtrl*)move_ctrl_)->setRelativeTargetPosition(pos);
 }

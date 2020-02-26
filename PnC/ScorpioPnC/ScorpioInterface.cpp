@@ -102,3 +102,21 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     return false;
 }
 
+void ScorpioInterface::MoveEndEffectorTo(double x, double y, double z) {
+    if (sp_->is_moving) {
+        std::cout << "Wait!" << std::endl;
+    } else {
+        sp_->is_moving = true;
+        Eigen::VectorXd des_pos = Eigen::VectorXd::Zero(3);
+        des_pos << x, y, z;
+        ((GraspingTest*)test_)->SetMovingTarget(des_pos);
+    }
+}
+
+bool ScorpioInterface::IsReadyToMove(){
+    return !(sp_->is_moving);
+}
+
+bool ScorpioInterface::IsReadyToGrasp(){
+    return !(sp_->is_grasping);
+}

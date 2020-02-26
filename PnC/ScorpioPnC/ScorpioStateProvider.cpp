@@ -12,6 +12,7 @@ ScorpioStateProvider* ScorpioStateProvider::getStateProvider(
 ScorpioStateProvider::ScorpioStateProvider(RobotSystem* _robot) {
     myUtils::pretty_constructor(1, "Scorpio State Provider");
 
+    is_grasping = false;
     is_moving = false;
 
     phase_copy = 0;

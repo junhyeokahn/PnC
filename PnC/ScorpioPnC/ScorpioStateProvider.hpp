@@ -26,6 +26,7 @@ class ScorpioStateProvider {
     int phase_copy;
 
     bool is_moving;
+    bool is_grasping;
 
    private:
     ScorpioStateProvider(RobotSystem* _robot);

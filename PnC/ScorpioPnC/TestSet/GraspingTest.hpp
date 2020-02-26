@@ -14,6 +14,8 @@ class GraspingTest : public Test {
 
     virtual void TestInitialization();
 
+    void SetMovingTarget(Eigen::VectorXd pos);
+
    protected:
     void _ParameterSetting();
     virtual int _NextPhase(const int& phase);
@@ -21,4 +23,6 @@ class GraspingTest : public Test {
     Controller* gripper_ctrl_;
     Controller* move_ctrl_;
     YAML::Node cfg_;
+
+
 };

@@ -27,12 +27,10 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
 
     if (b_internal_constraint_) {
         Eigen::MatrixXd JciBar;
-        //_WeightedInverse(Jci_, Ainv_, JciBar);
 
         myUtils::weightedInverse(Jci_,Ainv_, JciBar);
         Nci_ -= JciBar * Jci_;
         SN_c = Sa_*Nci_;
-        //_WeightedInverse(SN_c, Ainv_, SN_c_bar);
         myUtils::weightedInverse(SN_c, Ainv_, SN_c_bar);
     }
 
@@ -43,23 +41,27 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
     task->getTaskJacobian(Jt);
     //task->getTaskJacobianDotQdot(JtDotQdot);
     JtPre = Jt;
-    //_WeightedInverse(JtPre, Ainv_, JtPreBar);
     myUtils::weightedInverse(JtPre, Ainv_, JtPreBar);
     N_pre = Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)
         - JtPreBar * JtPre;
     task->getCommand(xddot);
+    //std::cout << "+++++++++++++++++++++++++++" << std::endl;
+    //myUtils::pretty_print(xddot, std::cout, "first task xddot");
     qddot_des = JtPreBar * xddot;
+    //myUtils::pretty_print(qddot_des, std::cout, "first task qddot");
 
     for (int i = 1; i < task_list.size(); ++i) {
         task = task_list[i];
         task->getTaskJacobian(Jt);
         JtPre = Jt * N_pre;
-        //_WeightedInverse(JtPre, Ainv_, JtPreBar);
         myUtils::weightedInverse(JtPre, Ainv_, JtPreBar);
         N_pre = Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)
             - JtPreBar * JtPre;
         task->getCommand(xddot);
-        qddot_des = JtPreBar * xddot;
+        //if (i ==1) {
+            //myUtils::pretty_print(xddot, std::cout, "first task xddot");
+        //}
+        qddot_des += JtPreBar * xddot;
     }
 
     if (false) {
@@ -72,6 +74,5 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
     }
 
     cmd = SN_c_bar.transpose() * (A_ * qddot_des + Nci_.transpose() * (cori_ + grav_));
-    //cmd = SN_c_bar.transpose() * (Nci_ * (cori_ + grav_));
-    //cmd = SN_c_bar.transpose() * (Nci_.transpose() * (cori_ + grav_));
+    //myUtils::pretty_print(cmd, std::cout, "command");
 }

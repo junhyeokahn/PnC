@@ -33,6 +33,9 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
 // =============================================================================
 // ETC
 // =============================================================================
+
+Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q );
+
 double bind_half_pi(double);
 
 bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
