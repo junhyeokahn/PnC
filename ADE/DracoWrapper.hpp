@@ -15,11 +15,18 @@ public:
 
     //Set up the DracoWrapper to create the PnC instance and pass it down into the sim and ros nodelet to centralize commands
     void Initialize();
-    //Accept a command from ADE to forward to the PnC as long as Initialize has been called
-    void SetWalkCommand(double ft_length, double r_ft_width, double l_ft_width,
+    //Draco Walking Methods
+    void SetWalkRawCommand(double ft_length, double r_ft_width, double l_ft_width,
                         double ori_inc, int num_step);
-    void SetWalkToCommand(int x, int y);
+    void SetWalkXCommand(double x);
+    void SetWalkYCommand(double y);
+    void SetTurnCommand(double th);
+    void SetWalkToRelativeCommand(double x, double y, double th);
     void SetHaltCommand();
+    //Scorio Manipulation Methods
+    void SetMoveEndEffectorCommand(double x, double y, double z, double qw, double qx, double qy, double qz);
+    void SetCloseGripperCommand();
+    void SetOpenGripperCommand();
     //Shutdown the sim and ros nodelet and destruct the PnC instance
     void Shutdown();
 };

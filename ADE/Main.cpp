@@ -10,19 +10,19 @@ void StartControls(DracoWrapper& w) {
         switch (nextInput) {
             case 'w':
                 std::cout << "Walking Forward!\n";
-                w.SetWalkCommand(0.05, 0.33, 0.33, 0., 7);
+                w.SetWalkYCommand(1.0);
                 break;
             case 'a':
                 std::cout << "Walking Left!\n";
-                w.SetWalkCommand(0.05, 0.33, 0.33, 0.1, 5);
+                w.SetWalkXCommand(-1.0);
                 break;
             case 's':
                 std::cout << "Walking Back!\n";
-                w.SetWalkCommand(-0.05, 0.33, 0.33, 0., 5);
+                w.SetWalkYCommand(-1.0);
                 break;
             case 'd':
                 std::cout << "Walking Right!\n";
-                w.SetWalkCommand(0.05, 0.33, 0.33, -0.1, 5);
+                w.SetWalkXCommand(1.0);
                 break;
             case 'c':
                 std::cout << "Exiting!\n";
