@@ -18,7 +18,7 @@ void DCMWalkingReference::setCoMHeight(double z_vrp_in){
 } 
 
 void DCMWalkingReference::setInitialTime(double t_start_in){
-	t_start = t_start_in;
+    t_start = t_start_in;
 }
 
 
@@ -35,10 +35,10 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     rvrp_list.clear();
     dcm_ini_list.clear();
     dcm_eos_list.clear(); 
-	dcm_ini_DS_list.clear();
-	dcm_vel_ini_DS_list.clear();
-	dcm_end_DS_list.clear();
-	dcm_vel_end_DS_list.clear();       
+    dcm_ini_DS_list.clear();
+    dcm_vel_ini_DS_list.clear();
+    dcm_end_DS_list.clear();
+    dcm_vel_end_DS_list.clear();       
   }
 
   // Create an rvrp for the stance leg
@@ -58,7 +58,6 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
   // Add an rvrp to transfer to the stance leg
   rvrp_list.push_back(current_stance_rvrp);
-  dcm_ini_list.push_back(current_stance_rvrp);
 
   int previous_step = initial_footstance.robot_side;
 
@@ -109,11 +108,15 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
   rvrp_list.clear();
   dcm_ini_list.clear();
-  dcm_eos_list.clear();
+  dcm_eos_list.clear(); 
+  dcm_ini_DS_list.clear();
+  dcm_vel_ini_DS_list.clear();
+  dcm_end_DS_list.clear();
+  dcm_vel_end_DS_list.clear();
 
   // Add the initial virtual repellant point. 
   rvrp_list.push_back(initial_rvrp); 
-  dcm_ini_list.push_back(initial_rvrp);   
+
   // Add the remaining virtual repellant points   
   initialize_footsteps_rvrp(input_footstep_list, initial_footstance);
 }
@@ -168,3 +171,128 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_ini_i(const Eigen::Vector3d & r_
 
 
 
+void DCMWalkingReference::computeDCM_states(){
+  // Clear the dcm lists
+  dcm_ini_list.clear();
+  dcm_eos_list.clear();
+  dcm_ini_DS_list.clear(); dcm_vel_ini_DS_list.clear(); 
+  dcm_end_DS_list.clear(); dcm_vel_end_DS_list.clear();  
+  dcm_P.clear();
+
+  // DCM ini and eos list is one size less than the RVRP list
+  dcm_ini_list.reserve(rvrp_list.size() - 1);
+  dcm_eos_list.reserve(rvrp_list.size() - 1);
+
+  // DS DCM list is equal to the size of the rvrp  list
+  dcm_ini_DS_list.reserve(rvrp_list.size()); dcm_vel_ini_DS_list.reserve(rvrp_list.size()); 
+  dcm_end_DS_list.reserve(rvrp_list.size()); dcm_vel_end_DS_list.reserve(rvrp_list.size());  
+
+  // Use backwards recursion to compute the initial and final dcm states
+  double t_step = 0.0;
+  for (int i = rvrp_list.size()-2; i >= 0; i--){
+    // Get the t_step to use for backwards integration
+    t_step = get_t_step(i);
+    // Compute dcm_ini for step i
+    dcm_ini_list[i] = computeDCM_ini_i(rvrp_list[i], t_step, dcm_eos_list[i]);
+
+    // Set dcm_eos for step i-1
+    if (i > 0){
+      dcm_eos_list[i-1] = dcm_ini_list[i];
+    }
+  }
+  // Last element of the DCM end of step list is equal to the last rvrp.
+  dcm_eos_list.back() = rvrp_list.back();
+
+  // Find boundary conditions for the Polynomial interpolator
+  for (int i = 0; rvrp_list.size(); i++){
+   dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*t_ds);
+   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+   dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*t_ds);
+   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+  }
+
+  // Construct the polynomial matrices
+}
+
+
+Eigen::Vector3d DCMWalkingReference::get_DCM_exp(const int & step_index, const double & t){
+  // Get t_step
+  double t_step = get_t_step(step_index);
+  double time = t;
+  // Clamp time value
+  if (t < 0){
+    time = 0;
+  }
+  else if (t > t_step){
+    time = t_step;
+  }
+  return rvrp_list[step_index] + std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
+}
+
+Eigen::Vector3d DCMWalkingReference::get_DCM_vel_exp(const int & step_index, const double & t){
+  // Get t_step
+  double t_step = get_t_step(step_index);
+  double time = t;
+  // Clamp time value
+  if (t < 0){
+    time = 0;
+  }
+  else if (t > t_step){
+    time = t_step;
+  }
+  return (1.0/b)*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
+}
+
+
+Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
+  // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
+  if (step_index == 0){
+    return rvrp_list.front();
+  }
+  return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
+}
+
+Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, const double t_DS_end){
+  // Set Boundary condition. Last element of eoDS is equal to the last element of the rvrp list
+  if (step_index == (rvrp_list.size() - 1)){
+    return rvrp_list.back();
+  }
+  return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
+}
+
+Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
+  // Set Boundary condition. Velocities at the very beginning and end are always 0.0
+  if (step_index == 0){
+    return Eigen::Vector3d::Zero();
+  }
+  return (-1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
+}
+
+Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end){
+  // Set Boundary condition. Velocities at the very beginning and end are always 0.0
+  if (step_index == (rvrp_list.size() - 1)){
+    return Eigen::Vector3d::Zero();
+  }
+  return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
+}
+
+
+Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
+                                                      const Eigen::Vector3d & dcm_ini, const Eigen::Vector3d & dcm_vel_ini,
+                                                      const Eigen::Vector3d & dcm_end, const Eigen::Vector3d & dcm_vel_end){
+
+  Eigen::MatrixXd mat = Eigen::MatrixXd::Zero(4,4);
+
+  // Construct matrix mat
+  mat(0,0) = 2.0/std::pow(Ts, 3);  mat(0,1) = 1.0/std::pow(Ts, 2); mat(0,2) = -2.0/std::pow(Ts, 3); mat(0,3) = 1.0/std::pow(Ts, 2);
+  mat(1,0) = -3.0/std::pow(Ts, 2); mat(1,1) = -2.0/Ts;             mat(1,2) = 3.0/std::pow(Ts, 2);  mat(1,3) = -1.0/Ts;
+                                   mat(2,1) = 1.0;
+
+  Eigen::MatrixXd bound = Eigen::MatrixXd::Zero(4, 3);
+  bound.row(0) = dcm_ini;
+  bound.row(1) = dcm_vel_ini;
+  bound.row(2) = dcm_end;
+  bound.row(3) = dcm_vel_end;
+
+  return mat*bound; 
+}

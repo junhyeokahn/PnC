@@ -28,6 +28,7 @@ public:
   std::vector<Eigen::Vector3d> dcm_vel_ini_DS_list; 
   std::vector<Eigen::Vector3d> dcm_end_DS_list; 
   std::vector<Eigen::Vector3d> dcm_vel_end_DS_list; 
+  std::vector<Eigen::MatrixXd> dcm_P; // polynomial matrices for polynomial interpolation
 
   // DCM walking parameters
   double t_transfer = 0.1; // exponential interpolation transfer time during initial transfer or same step transfer
@@ -92,9 +93,32 @@ private:
   // The computation is stored in the dcm_ini_list and dcm_eos_list. 
   Eigen::Vector3d computeDCM_ini_i(const Eigen::Vector3d & r_vrp_d_i, const double & t_step, const Eigen::Vector3d & dcm_eos_i);
 
+  // Computes the double support DCM boundary conditions for continuous double support trajectories
+  // step_index the boundary condition for the step index
+  // t_DS_{ini, end} the interpolation duration away from a Virtual repelant point. 
+  Eigen::Vector3d computeDCM_iniDS_i(const int & step_index, const double t_DS_ini);
+  Eigen::Vector3d computeDCM_eoDS_i(const int & step_index, const double t_DS_end);
+  Eigen::Vector3d computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini);
+  Eigen::Vector3d computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end);
+
+  // Returns the DCM exponential interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_exp(const int & step_index, const double & t);
+
+  // Returns the DCM velocity exponential interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_vel_exp(const int & step_index, const double & t);
+
   // Get the t_step for step i.
   double get_t_step(const int & step_i);
 
+  // returns matrix P \in R^{4x3}
+  // P = mat_coeff * [dcm_ini^T; \dot{dcm}_ini^T; dcm_end^T; \dot{dcm}_end]
+  // where mat_coeff \in R^{4x4} and ^T denotes a vector transpose transpose.
+  // Ts is the duration in seconds
+  Eigen::MatrixXd polynomialMatrix(const double Ts,
+                                   const Eigen::Vector3d & dcm_ini, const Eigen::Vector3d & dcm_vel_ini,
+                                   const Eigen::Vector3d & dcm_end, const Eigen::Vector3d & dcm_vel_end);
 
 
 };
