@@ -153,7 +153,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
 double DCMWalkingReference::get_t_step(const int & step_i){
   // Use transfer time for double support and overall step time for swing types
-  if ((rvrp_type_list[step_i]) == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE){
+  if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE){
     return t_transfer + t_transfer_ds;
   }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_SWING_VRP_TYPE){
     return t_ss + t_ds; // every swing has a double support transfer
