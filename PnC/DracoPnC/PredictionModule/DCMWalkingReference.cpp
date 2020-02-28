@@ -180,12 +180,12 @@ void DCMWalkingReference::computeDCM_states(){
   dcm_P.clear();
 
   // DCM ini and eos list is one size less than the RVRP list
-  dcm_ini_list.reserve(rvrp_list.size() - 1);
-  dcm_eos_list.reserve(rvrp_list.size() - 1);
+  dcm_ini_list.resize(rvrp_list.size() - 1);
+  dcm_eos_list.resize(rvrp_list.size() - 1);
 
   // DS DCM list is equal to the size of the rvrp  list
-  dcm_ini_DS_list.reserve(rvrp_list.size()); dcm_vel_ini_DS_list.reserve(rvrp_list.size()); 
-  dcm_end_DS_list.reserve(rvrp_list.size()); dcm_vel_end_DS_list.reserve(rvrp_list.size());  
+  dcm_ini_DS_list.resize(rvrp_list.size()); dcm_vel_ini_DS_list.resize(rvrp_list.size()); 
+  dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size());  
 
   // Use backwards recursion to compute the initial and final dcm states
   double t_step = 0.0;
@@ -212,6 +212,11 @@ void DCMWalkingReference::computeDCM_states(){
   }
 
   // Construct the polynomial matrices
+  for (int i = 0; rvrp_list.size(); i++){
+    dcm_P[i] = polynomialMatrix(t_ds, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
+                                      dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
+
+  }
 }
 
 
