@@ -54,6 +54,12 @@ public:
   double swing_time = 0.3; // seconds
   double swing_height = 0.05; // meters
 
+  // DCM walking parameters
+  double t_init = 0.1; // initial transfer time
+  double t_ds = 0.2; // double support transfer time
+  double t_ss = 0.3; // single support time
+  double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
+
   std::vector<Eigen::Vector3d> local_contact_point_list;
   std::vector<Eigen::Vector3d> global_contact_point_list;
 
