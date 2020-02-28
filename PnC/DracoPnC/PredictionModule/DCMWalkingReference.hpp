@@ -29,7 +29,16 @@ public:
   std::vector<Eigen::Vector3d> dcm_end_DS_list; 
   std::vector<Eigen::Vector3d> dcm_vel_end_DS_list; 
 
+  // DCM walking parameters
+  double t_transfer = 0.1; // exponential interpolation transfer time during initial transfer or same step transfer
+  double t_transfer_ds = 0.2; // polynomial transfer time time during initial transfer or same step transfer
+  double t_ss = 0.3; // single support exponential interpolation transfer time
+  double t_ds = 0.2; // double support polynomial transfer time during swing
+  double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
+
   void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
+  void setInitialTime(double t_start_in); // Sets the initial offset time.
+
 
   // DCM trajectory calculation
   // input: input_footstep_list - a list of footsteps to take not including the current stance configuration.
