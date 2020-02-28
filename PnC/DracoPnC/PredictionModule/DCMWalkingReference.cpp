@@ -17,6 +17,11 @@ void DCMWalkingReference::setCoMHeight(double z_vrp_in){
   z_vrp = z_vrp_in;
 } 
 
+void DCMWalkingReference::setInitialTime(double t_start_in){
+	t_start = t_start_in;
+}
+
+
 void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, 
                                                         const DracoFootstep & initial_footstance,
                                                         bool clear_list){
@@ -143,6 +148,15 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
 }
 
+double DCMWalkingReference::get_t_step(const int & step_i){
+  // Use transfer time for double support and overall step time for swing types
+  if ((rvrp_type_list[step_i]) == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE){
+    return t_transfer + t_transfer_ds;
+  }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_SWING_VRP_TYPE){
+    return t_ss + t_ds; // every swing has a double support transfer
+  }
+}
+
 void DCMWalkingReference::get_average_rvrp(const DracoFootstep & footstance_1, const DracoFootstep & footstance_2, Eigen::Vector3d & average_rvrp){
   Eigen::Vector3d desired_rvrp(0, 0, z_vrp); // From foot local frame
   average_rvrp = 0.5*((footstance_1.R_ori*desired_rvrp + footstance_1.position) + (footstance_2.R_ori*desired_rvrp + footstance_2.position));
@@ -151,3 +165,6 @@ void DCMWalkingReference::get_average_rvrp(const DracoFootstep & footstance_1, c
 Eigen::Vector3d DCMWalkingReference::computeDCM_ini_i(const Eigen::Vector3d & r_vrp_d_i, const double & t_step, const Eigen::Vector3d & dcm_eos_i){
   return r_vrp_d_i + std::exp(-t_step/b)*(dcm_eos_i - r_vrp_d_i);
 }
+
+
+
