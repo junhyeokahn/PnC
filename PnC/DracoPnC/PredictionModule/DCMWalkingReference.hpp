@@ -109,6 +109,16 @@ private:
   // time, t, is clamped between 0.0 and t_step.
   Eigen::Vector3d get_DCM_vel_exp(const int & step_index, const double & t);
 
+
+  // Returns the DCM double support polynomial interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_DS_poly(const int & step_index, const double & t);
+
+  // Returns the DCM double support velocity polynomial interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_DS_vel_poly(const int & step_index, const double & t);
+
+
   // Get the t_step for step i.
   double get_t_step(const int & step_i);
 

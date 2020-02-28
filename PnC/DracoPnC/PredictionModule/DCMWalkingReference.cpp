@@ -317,3 +317,50 @@ Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
 
   return mat*bound; 
 }
+
+
+// Returns the DCM double support polynomial interpolation for the requested step_index.
+// time, t, is clamped between 0.0 and t_step.
+Eigen::Vector3d DCMWalkingReference::get_DCM_DS_poly(const int & step_index, const double & t){
+  // Transfer duration for the current step is dictated by the previous step.
+  double Ts = t_ds;
+  if ((step_index > 0) && (rvrp_type_list[step_index-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
+    Ts = t_transfer_ds;
+  }
+
+  double time = t;
+  // Clamp time value
+  if (t < 0){
+    time = 0;
+  }
+  else if (t > Ts){
+    time = Ts;
+  }
+
+  Eigen::MatrixXd t_mat = Eigen::MatrixXd::Zero(1,4);
+  t_mat(0,0) = std::pow(time, 3);  t_mat(0,1) = std::pow(time, 2);  t_mat(0,2) = time; t_mat(0,3) = 1.0; 
+  return t_mat*dcm_P[step_index];
+}
+
+// Returns the DCM double support velocity polynomial interpolation for the requested step_index.
+// time, t, is clamped between 0.0 and t_step.
+Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index, const double & t){
+  // Transfer duration for the current step is dictated by the previous step.
+  double Ts = t_ds;
+  if ((step_index > 0) && (rvrp_type_list[step_index-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
+    Ts = t_transfer_ds;
+  }
+
+  double time = t;
+  // Clamp time value
+  if (t < 0){
+    time = 0;
+  }
+  else if (t > Ts){
+    time = Ts;
+  }
+
+  Eigen::MatrixXd t_mat = Eigen::MatrixXd::Zero(1,4);
+  t_mat(0,0) = 3.0*std::pow(time, 2);  t_mat(0,1) = 2.0*t;  t_mat(0,2) = 1.0; 
+  return t_mat*dcm_P[step_index];
+}
