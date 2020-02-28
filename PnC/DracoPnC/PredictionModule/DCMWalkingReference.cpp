@@ -204,18 +204,34 @@ void DCMWalkingReference::computeDCM_states(){
   dcm_eos_list.back() = rvrp_list.back();
 
   // Find boundary conditions for the Polynomial interpolator
+  double Ts = t_ds; // set transfer duration time
   for (int i = 0; rvrp_list.size(); i++){
-   dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*t_ds);
-   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
-   dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*t_ds);
-   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+    // Transfer duration used is the transfer time from the previous step.
+    if ((i > 0) && (rvrp_type_list[i-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
+      Ts = t_transfer_ds;
+    }else{
+      Ts = t_ds;
+    }
+   // compute boundary conditions
+   dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*Ts);
+   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*Ts);
+   dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*Ts);
+   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*Ts);
   }
 
+
   // Construct the polynomial matrices
+  Ts = t_ds;
   for (int i = 0; rvrp_list.size(); i++){
+    // Transfer duration used is the transfer time from the previous step.
+    if ((i > 0) && (rvrp_type_list[i-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
+      Ts = t_transfer_ds;
+    }else{
+      Ts = t_ds;
+    }
+    // compute polynomial interpolator matrix
     dcm_P[i] = polynomialMatrix(t_ds, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
                                       dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
-
   }
 }
 
