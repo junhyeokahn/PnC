@@ -4,6 +4,11 @@
 #include "PnC/Test.hpp"
 #include "PnC/ScorpioPnC/ScorpioDefinition.hpp"
 
+enum GRIPPER_STATUS {is_closing = 0,
+                     is_holding = 1,
+                    is_opening = 2,
+                    idle = 3 };
+
 class ScorpioStateProvider;
 
 class ScorpioSensorData {
@@ -28,12 +33,14 @@ class ScorpioCommand {
         q = Eigen::VectorXd::Zero(Scorpio::n_adof);
         qdot = Eigen::VectorXd::Zero(Scorpio::n_adof);
         jtrq = Eigen::VectorXd::Zero(Scorpio::n_adof);
+        gripper_cmd = GRIPPER_STATUS::idle;
     }
     virtual ~ScorpioCommand() {}
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
+    GRIPPER_STATUS gripper_cmd;
 };
 
 class ScorpioInterface : public EnvInterface {
@@ -58,7 +65,10 @@ class ScorpioInterface : public EnvInterface {
     virtual ~ScorpioInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
 
-    void MoveEndEffectorTo(double x, double y, double z);
     bool IsReadyToMove();
+    void MoveEndEffectorTo(double x, double y, double z);
     bool IsReadyToGrasp();
+    void Grasp();
+    bool IsReadyToRelease();
+    void Release();
 };

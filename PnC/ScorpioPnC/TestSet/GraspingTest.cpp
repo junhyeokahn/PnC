@@ -1,6 +1,7 @@
 #include <PnC/ScorpioPnC/CtrlSet/OSCCtrl.hpp>
 #include <PnC/ScorpioPnC/CtrlSet/GripperCtrl.hpp>
 #include <PnC/ScorpioPnC/TestSet/GraspingTest.hpp>
+#include <PnC/ScorpioPnC/ScorpioStateProvider.hpp>
 
 GraspingTest::GraspingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "OSC Test");
@@ -16,6 +17,7 @@ GraspingTest::GraspingTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(move_ctrl_);
 
     _ParameterSetting();
+    sp_ = ScorpioStateProvider::getStateProvider(robot_);
 }
 GraspingTest::~GraspingTest() {
     delete move_ctrl_;
@@ -34,6 +36,7 @@ int GraspingTest::_NextPhase(const int& phase) {
     if (nx_phase == NUM_GRASPING_PH) {
         nx_phase = HOLD_PH;
     }
+    sp_->phase_copy = nx_phase;
     return nx_phase;
 }
 

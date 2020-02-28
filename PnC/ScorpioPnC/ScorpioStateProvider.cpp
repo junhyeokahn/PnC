@@ -12,8 +12,14 @@ ScorpioStateProvider* ScorpioStateProvider::getStateProvider(
 ScorpioStateProvider::ScorpioStateProvider(RobotSystem* _robot) {
     myUtils::pretty_constructor(1, "Scorpio State Provider");
 
-    is_grasping = false;
     is_moving = false;
+
+    //Gripper Status boolean variable
+    is_closing = false;
+    is_holding = false;
+    is_opening = false;
+
+    closing_opening_start_time = 0;
 
     phase_copy = 0;
     robot_ = _robot;
@@ -22,6 +28,8 @@ ScorpioStateProvider::ScorpioStateProvider(RobotSystem* _robot) {
     q = Eigen::VectorXd::Zero(Scorpio::n_dof);
     qdot = Eigen::VectorXd::Zero(Scorpio::n_dof);
     jpos_ini = Eigen::VectorXd::Zero(Scorpio::n_dof);
+
+    
 
 }
 

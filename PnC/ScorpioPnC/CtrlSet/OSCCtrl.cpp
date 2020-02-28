@@ -26,8 +26,8 @@ OSCCtrl::OSCCtrl(RobotSystem* _robot) : Controller(_robot) {
 
     _build_active_joint_idx();
     ee_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ScorpioBodyNode::end_effector);
-    //ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
-    ee_ori_task_ = new SuctionGripperTask(robot_);
+    ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
+    //ee_ori_task_ = new SuctionGripperTask(robot_);
     joint_task_ = new SelectedJointTask(robot_, active_joint_idx_);
 
     _build_constraint_matrix();
@@ -151,8 +151,9 @@ void OSCCtrl::_compute_torque(Eigen::VectorXd & gamma){
 
 
 void OSCCtrl::firstVisit() {
+
     state_machine_time_= 0.;
-    ctrl_start_time_ = 0.;
+    ctrl_start_time_ = sp_->curr_time;
     ini_pos_ = robot_->getBodyNodeIsometry("end_effector").translation();
     ini_pos_q_ = robot_->getQ();
     ini_ori_ = Eigen::Quaternion<double> (robot_->getBodyNodeIsometry("end_effector").linear());
@@ -163,6 +164,10 @@ void OSCCtrl::lastVisit() {
 
 bool OSCCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
+        //TEST for box initial pos
+        //std::cout << "end eff lin6ar pos" << std::endl;
+        //std::cout << robot_->getBodyNodeIsometry("end_effector").translation() << std::endl;
+        //exit(0);
         sp_->is_moving = false;
         return true;
     }

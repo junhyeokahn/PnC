@@ -58,6 +58,16 @@ void GripperCtrl::_build_constraint_matrix(){
 }
 
 void GripperCtrl::oneStep(void* _cmd) {
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 4.) && (sp_->is_closing)) {
+       sp_->is_closing = false;
+       sp_->closing_opening_start_time = 0;
+       sp_->is_holding = true;
+    }
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 4.) && (sp_->is_opening)) {
+       sp_->is_opening = false;
+       sp_->closing_opening_start_time = 0;
+    }
+
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     _task_setup();
@@ -66,6 +76,18 @@ void GripperCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 
     ((ScorpioCommand*)_cmd)->jtrq = gamma;
+
+    if (sp_->is_closing) {
+        ((ScorpioCommand*)_cmd)->gripper_cmd = GRIPPER_STATUS::is_closing;
+    }    
+    else if (sp_->is_holding) {
+        ((ScorpioCommand*)_cmd)->gripper_cmd = GRIPPER_STATUS::is_holding;
+    }    
+    else if (sp_->is_opening) {
+        ((ScorpioCommand*)_cmd)->gripper_cmd = GRIPPER_STATUS::is_opening;
+    } else{
+        ((ScorpioCommand*)_cmd)->gripper_cmd = GRIPPER_STATUS::idle;
+    }   
 }
 
 void GripperCtrl::_task_setup(){
@@ -95,7 +117,7 @@ void GripperCtrl::_compute_torque(Eigen::VectorXd & gamma){
 
 void GripperCtrl::firstVisit() {
     state_machine_time_= 0.;
-    ctrl_start_time_ = 0.;
+    ctrl_start_time_ = sp_->curr_time;
     ini_pos_q_ = robot_->getQ();
 }
 

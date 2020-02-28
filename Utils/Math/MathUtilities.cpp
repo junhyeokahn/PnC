@@ -178,7 +178,7 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
 
 Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q ){
     Eigen::Quaternion<double> ret;
-    if (acos(q.w())*2 > M_PI) {
+    if (q.w() < 0) {
         ret.x() = -q.x();
         ret.y() = -q.y();
         ret.z() = -q.z();

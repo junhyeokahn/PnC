@@ -20,13 +20,14 @@ bool SuctionGripperTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                       _pos_des[3]);
     Eigen::Quaternion<double> ori_act(
         robot_->getBodyNodeCoMIsometry(ScorpioBodyNode::end_effector).linear());
-    std::cout << "++++++++++++++++++++++++" << std::endl;
-    myUtils::pretty_print(des_ori, std::cout, "des_ori");
-    myUtils::pretty_print(ori_act, std::cout, "act_ori");
     //TEST
     des_ori = myUtils::bind_qaut_pi(des_ori);
     ori_act = myUtils::bind_qaut_pi(ori_act);
     //TEST
+    //std::cout << "++++++++++++++++++++++++" << std::endl;
+    //myUtils::pretty_print(des_ori, std::cout, "des_ori");
+    //myUtils::pretty_print(ori_act, std::cout, "act_ori");
+    //
     Eigen::Quaternion<double> quat_ori_err;
     quat_ori_err = des_ori * ori_act.inverse();
     Eigen::Vector3d ori_err_so3;

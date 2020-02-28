@@ -33,6 +33,7 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     dart::dynamics::SkeletonPtr draco_;
     //dart::dynamics::SkeletonPtr mSkel_hsr_;
     dart::dynamics::SkeletonPtr mGround_;
+    dart::dynamics::SkeletonPtr mbox_;
 
     dart::dynamics::JointPtr active1_;
     dart::dynamics::JointPtr active2_;
@@ -91,10 +92,13 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     void SetOperationalSpaceControlCmd(int ctrl_case);
     void GetContactSwitchData_(bool&, bool&);
     void PlotMPCResult_();
+
+    void box_maintaining_ctrl();
+    void box_following_ee_ctrl();
+    void fake_grasp();
    public:
     ScorpioWorldNode(const dart::simulation::WorldPtr& world);
     virtual ~ScorpioWorldNode();
 
     void customPreStep() override;
-
 };

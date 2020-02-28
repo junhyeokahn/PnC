@@ -210,6 +210,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
     robot->setPositions(q);
 }
+void _setInitialConfiguration_2(dart::dynamics::SkeletonPtr robot) {
+    Eigen::VectorXd q = robot->getPositions();
+            q[0] = 1.34;
+            q[1] = -0.088;
+            q[2] = 0.465;
+    robot->setPositions(q);
+}
 void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
 	for(size_t i=0; i < robot->getNumBodyNodes(); ++i)
 	{
@@ -362,11 +369,14 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
+    dart::dynamics::SkeletonPtr box = urdfLoader.parseSkeleton(
+         THIS_COM "RobotModel/Environment/Box/box.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
     world->addSkeleton(draco);
     world->addSkeleton(table);
+    world->addSkeleton(box);
 
 
     // ==================================
@@ -402,6 +412,7 @@ int main(int argc, char** argv) {
     _setInitialConfiguration(scorpio, q_init);
     _setInitialConfiguration(draco);
     _setJointLimitConstraint(draco);
+    _setInitialConfiguration_2(box);
 
     // =====================
     // Robot Mesh Color from URDF

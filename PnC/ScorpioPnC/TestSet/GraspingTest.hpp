@@ -2,6 +2,7 @@
 #include <PnC/Test.hpp>
 
 class RobotSystem;
+class ScorpioStateProvider;
 
 enum GRASPING_TEST_PHASE {HOLD_PH = 0,
                           MOVE_PH = 1,
@@ -23,6 +24,6 @@ class GraspingTest : public Test {
     Controller* gripper_ctrl_;
     Controller* move_ctrl_;
     YAML::Node cfg_;
-
+    ScorpioStateProvider* sp_;
 
 };

@@ -42,8 +42,7 @@ ScorpioInterface::~ScorpioInterface() {
     delete test_;
 }
 
-void ScorpioInterface::getCommand(void* _data, void* _command) {
-
+void ScorpioInterface::getCommand(void* _data, void* _command) { 
     ScorpioCommand* cmd = ((ScorpioCommand*)_command);
     ScorpioSensorData* data = ((ScorpioSensorData*)_data);
 
@@ -57,8 +56,7 @@ void ScorpioInterface::getCommand(void* _data, void* _command) {
     ++count_;
     running_time_ = (double)(count_)*ScorpioAux::ServoRate;
     sp_->curr_time = running_time_;
-    sp_->phase_copy = test_->getPhase();
-
+    sp_->phase_copy = test_->getPhase(); 
 }
 
 void ScorpioInterface::_ParameterSetting() {
@@ -102,21 +100,58 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     return false;
 }
 
+bool ScorpioInterface::IsReadyToMove(){
+    if (!(sp_->is_closing) && !(sp_->is_opening) && !(sp_->is_moving)) {
+        return true;
+    } else{
+        return false;
+    }
+}
+
 void ScorpioInterface::MoveEndEffectorTo(double x, double y, double z) {
-    if (sp_->is_moving) {
-        std::cout << "Wait!" << std::endl;
-    } else {
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) || sp_->is_holding) {
         sp_->is_moving = true;
         Eigen::VectorXd des_pos = Eigen::VectorXd::Zero(3);
         des_pos << x, y, z;
         ((GraspingTest*)test_)->SetMovingTarget(des_pos);
+    } else {
+        std::cout << "Wait" << std::endl;
     }
 }
 
-bool ScorpioInterface::IsReadyToMove(){
-    return !(sp_->is_moving);
-}
 
 bool ScorpioInterface::IsReadyToGrasp(){
-    return !(sp_->is_grasping);
+    if (!(sp_->is_moving) && !(sp_->is_closing) && !(sp_->is_holding) && !(sp_->is_opening)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ScorpioInterface::Grasp(){
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH)  {
+       sp_->is_closing = true;
+       sp_->closing_opening_start_time = sp_->curr_time;
+       //if()
+    }else{
+    std::cout << "Wait" << std::endl;
+    }
+}
+
+bool ScorpioInterface::IsReadyToRelease(){
+    if (!(sp_->is_closing) && (sp_->is_holding) && !(sp_->is_opening)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ScorpioInterface::Release(){
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) && (sp_->is_holding)) {
+       sp_->is_opening = true;
+       sp_->is_holding = false;
+       sp_->closing_opening_start_time = sp_->curr_time;
+    }else{
+    std::cout << "Wait" << std::endl;
+    }
 }
