@@ -75,7 +75,9 @@ public:
   void computeDCM_states();
 
   // Compute: DCM, DCM vel, CoM Vel, CoM, given time, t.
-
+  // t is a global time.
+  void get_ref_dcm(const double t, Eigen::Vector3d & dcm_out);
+  void get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_out);
 
 
 private:
@@ -85,6 +87,12 @@ private:
   double b = std::sqrt(z_vrp/gravity); // time constant of DCM dynamics  
 
   double t_start = 0.0; // the starting time for the DCM Walking reference
+
+
+  // Returns the current step index given the input time.
+  int which_step_index(const double t);
+  // returns the starting time of the step_index from t_start.
+  double get_t_start(const int step_index);
 
   // input: r_vrp_d_i - the desired virtual repelant point for the i-th step.
   //        t_step    - the time interval to use for backwards integration
