@@ -101,4 +101,13 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     virtual ~ScorpioWorldNode();
 
     void customPreStep() override;
+
+    Eigen::VectorXd p1_;
+    Eigen::VectorXd p2_;
+    double x_;
+    double y_;
+    double th_;
+    double x2_;
+    Eigen::VectorXd box_kp;
+    Eigen::VectorXd box_kd;
 };

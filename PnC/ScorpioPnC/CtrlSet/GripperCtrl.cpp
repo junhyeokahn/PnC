@@ -58,12 +58,12 @@ void GripperCtrl::_build_constraint_matrix(){
 }
 
 void GripperCtrl::oneStep(void* _cmd) {
-    if ((sp_->curr_time > sp_->closing_opening_start_time + 4.) && (sp_->is_closing)) {
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 3.) && (sp_->is_closing)) {
        sp_->is_closing = false;
        sp_->closing_opening_start_time = 0;
        sp_->is_holding = true;
     }
-    if ((sp_->curr_time > sp_->closing_opening_start_time + 4.) && (sp_->is_opening)) {
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 3.) && (sp_->is_opening)) {
        sp_->is_opening = false;
        sp_->closing_opening_start_time = 0;
     }

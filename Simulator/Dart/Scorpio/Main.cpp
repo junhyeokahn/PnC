@@ -212,9 +212,9 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 }
 void _setInitialConfiguration_2(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q = robot->getPositions();
-            q[0] = 1.34;
-            q[1] = -0.088;
-            q[2] = 0.465;
+    q[0] = 1.3918;
+    q[1] = -0.360352;
+    q[2] = 0.52563;
     robot->setPositions(q);
 }
 void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
@@ -444,7 +444,7 @@ int main(int argc, char** argv) {
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
     // node = new ScorpioWorldNodeReach(world);
 
-    node->setNumStepsPerCycle(30);
+    node->setNumStepsPerCycle(num_steps_per_cycle);
 
     // =====================
     // Create and Set Viewer

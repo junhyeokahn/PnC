@@ -157,7 +157,7 @@ void ScorpioWorldNode::customPreStep() {
     static bool b_move_cmd(true);
     if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
         std::cout << "Moving Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-1.0, 0.1, -0.2);
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p1_[0], p1_[1], p1_[2]);
         b_move_cmd = false;
     }
 
@@ -172,7 +172,7 @@ void ScorpioWorldNode::customPreStep() {
     static bool b_move_while_hold_cmd(true);
     if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_while_hold_cmd) {
         std::cout << "Moving While Holding Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(0, -0.1, 0.2);
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p2_[0], p2_[1], p2_[2]);
         b_move_while_hold_cmd = false;
     }
 
@@ -180,10 +180,10 @@ void ScorpioWorldNode::customPreStep() {
 
     if (scorpio_cmd_->gripper_cmd == GRIPPER_STATUS::is_holding) {
         box_following_ee_ctrl();
-        std::cout << "Holding" << std::endl;
+        //std::cout << "Holding" << std::endl;
     } else {
         box_maintaining_ctrl();
-        std::cout << "Maintaining" << std::endl;
+        //std::cout << "Maintaining" << std::endl;
     }
 
     scorpio_trq_cmd_ = scorpio_cmd_->jtrq;
@@ -205,13 +205,13 @@ void ScorpioWorldNode::customPreStep() {
     // ====
     static bool b_first_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInY(-0.9);
+        ((DracoInterface*)draco_interface_)->WalkInY(x_);
         b_first_cmd = false;
     }
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
+        ((DracoInterface*)draco_interface_)->WalkInX(y_);
         b_second_cmd = false;
     }
 
@@ -223,7 +223,7 @@ void ScorpioWorldNode::customPreStep() {
 
     static bool b_fourth_cmd(true);
     if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(0.61);
+        ((DracoInterface*)draco_interface_)->WalkInX(x2_);
         b_fourth_cmd = false;
     }
 
@@ -372,6 +372,15 @@ void ScorpioWorldNode::SetParams_(){
     myUtils::readParameter(control_cfg, "control_type", control_type_);
     myUtils::readParameter(control_cfg, "kp", scorpio_kp_);
     myUtils::readParameter(control_cfg, "kd", scorpio_kd_);
+
+    myUtils::readParameter(simulation_cfg, "p1", p1_);
+    myUtils::readParameter(simulation_cfg, "p2", p2_);
+    myUtils::readParameter(simulation_cfg, "x", x_);
+    myUtils::readParameter(simulation_cfg, "y", y_);
+    myUtils::readParameter(simulation_cfg, "th", th_);
+    myUtils::readParameter(simulation_cfg, "x2", x2_);
+    myUtils::readParameter(simulation_cfg, "box_kp", box_kp);
+    myUtils::readParameter(simulation_cfg, "box_kd", box_kd);
 
     //myUtils::pretty_print(Amp_, std::cout, "Amp");
     //myUtils::pretty_print(Freq_, std::cout, "Freq");
@@ -532,10 +541,6 @@ void ScorpioWorldNode::PlotMPCResult_() {
 void ScorpioWorldNode::box_maintaining_ctrl(){
     Eigen::VectorXd box_ini_q = mbox_->getPositions();
     Eigen::VectorXd box_ini_qdot = mbox_->getVelocities();
-    Eigen::Vector6d box_kp = Eigen::Vector6d::Zero(6);
-    Eigen::Vector6d box_kd = Eigen::Vector6d::Zero(6);
-    box_kp << 10,10,10,10,10,10;
-    box_kd << 1,1,1,1,1,1;
     Eigen::VectorXd box_qddot_des = Eigen::VectorXd::Zero(6); 
     for (int i = 0; i < 6; ++i) {
         box_qddot_des[i] = box_kp[i] * (box_ini_q[i] - mbox_->getPositions()[i])
@@ -556,7 +561,18 @@ void ScorpioWorldNode::fake_grasp(){
         des_box_pos[i+3] = cur_box_pos[i+3]; 
         //des_box_pos[i+3] = dart::math::matrixToEulerZYX(ee_se3.linear())[i]; 
     }
-    mbox_->setPositions(des_box_pos);
+    des_box_pos[2] -= 0.05;
+
+    Eigen::VectorXd box_qddot_des = Eigen::VectorXd::Zero(6); 
+    for (int i = 0; i < 3; ++i) {
+        box_qddot_des[i] = box_kp[i] * (des_box_pos[i] - mbox_->getPositions()[i])
+            + box_kd[i] * (- mbox_->getVelocities()[i]);
+    }
+    Eigen::VectorXd box_forces = Eigen::VectorXd::Zero(6);
+    box_forces = mbox_->getMassMatrix() * box_qddot_des + mbox_->getCoriolisAndGravityForces();
+    mbox_->setForces(box_forces);
+
+    //mbox_->setPositions(des_box_pos);
 } 
 
 void ScorpioWorldNode::box_following_ee_ctrl(){
@@ -568,5 +584,16 @@ void ScorpioWorldNode::box_following_ee_ctrl(){
         des_box_pos[i] = ee_se3.translation()[i]; 
         des_box_pos[i+3] = dart::math::matrixToEulerZYX(ee_se3.linear())[i]; 
     }
-    mbox_->setPositions(des_box_pos);
+    des_box_pos[2] -= 0.05;
+
+    Eigen::VectorXd box_qddot_des = Eigen::VectorXd::Zero(6); 
+    for (int i = 0; i < 3; ++i) {
+        box_qddot_des[i] = box_kp[i] * (des_box_pos[i] - mbox_->getPositions()[i])
+            + box_kd[i] * (- mbox_->getVelocities()[i]);
+    }
+    Eigen::VectorXd box_forces = Eigen::VectorXd::Zero(6);
+    box_forces = mbox_->getMassMatrix() * box_qddot_des + mbox_->getCoriolisAndGravityForces();
+    mbox_->setForces(box_forces);
+
+    //mbox_->setPositions(des_box_pos);
 }

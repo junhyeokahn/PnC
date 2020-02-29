@@ -49,6 +49,7 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
     //myUtils::pretty_print(xddot, std::cout, "first task xddot");
     qddot_des = JtPreBar * xddot;
     //myUtils::pretty_print(qddot_des, std::cout, "first task qddot");
+    //myUtils::pretty_print(JtPreBar, std::cout, "Jtprebar");
 
     for (int i = 1; i < task_list.size(); ++i) {
         task = task_list[i];
