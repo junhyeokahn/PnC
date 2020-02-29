@@ -38,6 +38,7 @@ public:
 
   void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
   void setInitialTime(double t_start_in); // Sets the initial offset time.
+  double getInitialTime(); // Returns t_start;
 
 
   // DCM trajectory calculation
@@ -63,11 +64,16 @@ public:
   void initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, const DracoFootstep & left_footstance, const DracoFootstep & right_footstance, const Eigen::Vector3d & initial_com);
 
 
-  // Compute: DCM, DCM vel, CoM Vel, CoM, given time, t.
+  // Compute: DCM, DCM vel, CoM, CoM Vel, given time, t.
   // t is a global time.
   void get_ref_dcm(const double t, Eigen::Vector3d & dcm_out);
   void get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_out);
+  void get_ref_com(const double t, Eigen::Vector3d & com_out);
+  void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
 
+
+  // computes the CoM velocity given the current CoM position and DCM velocity state.
+  void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
 
 private:
   // DCM parameters:
@@ -97,8 +103,16 @@ private:
   // returns the polynomial duration for the given step index
   double get_polynomial_duration(const int step_index);
 
+  // Sums up the total trajectory time and stores the result in t_end
   void compute_total_trajectory_time();
   double t_end = 0.0;
+
+  // computes the reference com trajectories by integration
+  void compute_reference_com();
+  double dt_local = 1e-3; // discretization factor used 
+  // containers for the integrated reference CoM position and velocites
+  std::vector<Eigen::Vector3d> ref_com_pos;
+  std::vector<Eigen::Vector3d> ref_com_vel;
 
 
   // input: r_vrp_d_i - the desired virtual repelant point for the i-th step.
@@ -123,7 +137,6 @@ private:
   // Returns the DCM velocity exponential interpolation for the requested step_index.
   // time, t, is clamped between 0.0 and t_step.
   Eigen::Vector3d get_DCM_vel_exp(const int & step_index, const double & t);
-
 
   // Returns the DCM double support polynomial interpolation for the requested step_index.
   // time, t, is clamped between 0.0 and t_step.

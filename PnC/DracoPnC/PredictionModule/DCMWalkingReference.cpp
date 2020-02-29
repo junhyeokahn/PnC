@@ -21,6 +21,10 @@ void DCMWalkingReference::setInitialTime(double t_start_in){
     t_start = t_start_in;
 }
 
+double DCMWalkingReference::getInitialTime(){
+  return t_start;
+}
+
 
 void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, 
                                                         const DracoFootstep & initial_footstance,
@@ -340,6 +344,11 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index,
 
 
 void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out){
+  // Don't process if the list of VRPs is empty
+  if (rvrp_list.size() == 0){
+    return;
+  }
+
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
@@ -354,7 +363,28 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
     local_time = time - get_t_step_start(step_index);
     dcm_out = get_DCM_exp(step_index, local_time);
   }
+}
 
+void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_out){
+  // Don't process if the list of VRPs is empty
+  if (rvrp_list.size() == 0){
+    return;
+  }
+
+  // offset time and clamp. t_start is global start time.
+  double time = clampDOUBLE(t - t_start, 0.0, t_end);
+  
+  // interpolation index to use
+  int step_index = which_step_index_to_use(time);  
+  double local_time;
+  // Use Polynomial interpolation
+  if (time <= get_double_support_t_end(step_index)){
+    local_time = time - get_double_support_t_start(step_index);
+    dcm_out = get_DCM_DS_vel_poly(step_index, local_time);
+  }else{ // Use exponential interpolation
+    local_time = time - get_t_step_start(step_index);
+    dcm_out = get_DCM_vel_exp(step_index, local_time);
+  }  
 }
 
 
@@ -427,7 +457,7 @@ double DCMWalkingReference::get_double_support_t_start(const int step_index){
   // First find initial starting time of the index from t_start
   double t_double_support_start = get_t_step_start(index);
 
-  // Apply double support offset after the first. All steps after the first step.
+  // Apply double support offset after the first step.
   if (step_index > 0){
     t_double_support_start -= (t_ds*alpha_ds);
   }
@@ -440,6 +470,63 @@ double DCMWalkingReference::get_double_support_t_end(const int step_index){
   int index = clampINT(step_index, 0, rvrp_list.size() - 1);
   return get_double_support_t_start(index) + get_polynomial_duration(index);
 }
+
+void DCMWalkingReference::get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out){
+  com_vel_out = (-1.0/b)*(com_pos - dcm);
+}
+
+
+// computes the reference com trajectories by integration
+void DCMWalkingReference::compute_reference_com(){
+  // Do not process if rvrp list is empty
+  if (rvrp_list.size() == 0){
+    return;
+  }
+
+  compute_total_trajectory_time();
+  double t_local = t_start;
+  double t_local_end = t_start + t_end;
+
+  // Compute discretization size
+  int N_local = int(t_end/dt_local);
+
+  // Resize reference vectors
+  ref_com_pos.resize(N_local + 1);
+  ref_com_vel.resize(N_local + 1);
+
+  // Initialize variables
+  Eigen::Vector3d com_pos = rvrp_list[0];
+  Eigen::Vector3d com_vel = Eigen::Vector3d::Zero();
+  Eigen::Vector3d dcm_cur = Eigen::Vector3d::Zero();
+
+  for(int i = 0; i < (N_local + 1); i++){
+    t_local = t_start + i*dt_local;
+    get_ref_dcm(t_local, dcm_cur);
+    get_com_vel(com_pos, dcm_cur, com_vel);
+    com_pos = com_pos + com_vel*dt_local;
+
+    // Set reference CoM position and velocities
+    ref_com_pos[i] = com_pos;
+    ref_com_vel[i] = com_vel;
+  }
+}
+
+void DCMWalkingReference::get_ref_com(const double t, Eigen::Vector3d & com_out){
+  double time = clampDOUBLE(t - t_start, 0.0, t_end);
+  int index = int(time/dt_local);
+  com_out = ref_com_pos[index];
+}
+
+void DCMWalkingReference::get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out){
+  // Eigen::Vector3d com_pos, dcm;
+  // get_ref_com(t, com_pos);
+  // get_ref_dcm(t, dcm);
+  // get_com_vel(com_pos, dcm, com_vel_out);
+  double time = clampDOUBLE(t - t_start, 0.0, t_end);
+  int index = int(time/dt_local);
+  com_vel_out = ref_com_vel[index];
+}
+
 
 
 /*
