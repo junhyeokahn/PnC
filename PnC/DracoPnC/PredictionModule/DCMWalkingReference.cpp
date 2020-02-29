@@ -99,6 +99,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // Update previous_step side 
     previous_step = input_footstep_list[i].robot_side;
   }
+
+  // Compute DCM states
+  computeDCM_states();
 }
 
 void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, const DracoFootstep & initial_footstance, const Eigen::Vector3d & initial_rvrp){
@@ -219,6 +222,16 @@ void DCMWalkingReference::computeDCM_states(){
     dcm_P[i] = polynomialMatrix(Ts, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
                                       dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
   }
+
+  // Compute the total trajectory time.
+  compute_total_trajectory_time();
+}
+
+void DCMWalkingReference::compute_total_trajectory_time(){
+  t_end = 0.0;
+  for (int i = 0; rvrp_list.size(); i++){
+    t_end += get_t_step(i);
+  }
 }
 
 double DCMWalkingReference::get_polynomial_duration(const int step_index){
@@ -231,35 +244,6 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
   }
   return t_ds;
 }
-
-Eigen::Vector3d DCMWalkingReference::get_DCM_exp(const int & step_index, const double & t){
-  // Get t_step
-  double t_step = get_t_step(step_index);
-  double time = t;
-  // Clamp time value
-  if (t < 0){
-    time = 0;
-  }
-  else if (t > t_step){
-    time = t_step;
-  }
-  return rvrp_list[step_index] + std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
-}
-
-Eigen::Vector3d DCMWalkingReference::get_DCM_vel_exp(const int & step_index, const double & t){
-  // Get t_step
-  double t_step = get_t_step(step_index);
-  double time = t;
-  // Clamp time value
-  if (t < 0){
-    time = 0;
-  }
-  else if (t > t_step){
-    time = t_step;
-  }
-  return (1.0/b)*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
-}
-
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
   // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
@@ -314,19 +298,29 @@ Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
   return mat*bound; 
 }
 
+// Returns the DCM exponential for the requested step index
+Eigen::Vector3d DCMWalkingReference::get_DCM_exp(const int & step_index, const double & t){
+  // Get t_step
+  double t_step = get_t_step(step_index);
+  // Clamp time value
+  double time = clampDOUBLE(t, 0.0, t_step);
+  return rvrp_list[step_index] + std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
+}
+
+Eigen::Vector3d DCMWalkingReference::get_DCM_vel_exp(const int & step_index, const double & t){
+  // Get t_step
+  double t_step = get_t_step(step_index);
+  // Clamp time value
+  double time = clampDOUBLE(t, 0.0, t_step);
+  return (1.0/b)*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
+}
+
 
 // Returns the DCM double support polynomial interpolation for the requested step_index.
 // time, t, is clamped between 0.0 and t_step.
 Eigen::Vector3d DCMWalkingReference::get_DCM_DS_poly(const int & step_index, const double & t){
   double Ts = get_polynomial_duration(step_index);
-  double time = t;
-  // Clamp time value
-  if (t < 0){
-    time = 0;
-  }
-  else if (t > Ts){
-    time = Ts;
-  }
+  double time = clampDOUBLE(t, 0.0, Ts);
 
   Eigen::MatrixXd t_mat = Eigen::MatrixXd::Zero(1,4);
   t_mat(0,0) = std::pow(time, 3);  t_mat(0,1) = std::pow(time, 2);  t_mat(0,2) = time; t_mat(0,3) = 1.0; 
@@ -337,15 +331,7 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_poly(const int & step_index, con
 // time, t, is clamped between 0.0 and t_step.
 Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index, const double & t){
   double Ts = get_polynomial_duration(step_index);
-
-  double time = t;
-  // Clamp time value
-  if (t < 0){
-    time = 0;
-  }
-  else if (t > Ts){
-    time = Ts;
-  }
+  double time = clampDOUBLE(t, 0.0, Ts);
 
   Eigen::MatrixXd t_mat = Eigen::MatrixXd::Zero(1,4);
   t_mat(0,0) = 3.0*std::pow(time, 2);  t_mat(0,1) = 2.0*t;  t_mat(0,2) = 1.0; 
@@ -354,23 +340,26 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index,
 
 
 void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out){
-  // offset to starting time. t_start is global start time.
-  double time = t - t_start;
-  // clamp to t_tstart
-  if (time < t_start){ 
-    time = t_start;
-  }  
+  // offset time and clamp. t_start is global start time.
+  double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
-  int step_index = which_step_index(time);
-  double Ts = get_polynomial_duration(step_index);
-  double t_ds_start = get_double_support_t_start(step_index);
-
+  // interpolation index to use
+  int step_index = which_step_index_to_use(time);  
+  double local_time;
+  // Use Polynomial interpolation
+  if (time <= get_double_support_t_end(step_index)){
+    local_time = time - get_double_support_t_start(step_index);
+    dcm_out = get_DCM_DS_poly(step_index, local_time);
+  }else{ // Use exponential interpolation
+    local_time = time - get_t_step_start(step_index);
+    dcm_out = get_DCM_exp(step_index, local_time);
+  }
 
 }
 
 
-// Returns the step index given the input time from t_start.
-int DCMWalkingReference::which_step_index(const double t){
+// Returns the step index to use given the input time from t_start.
+int DCMWalkingReference::which_step_index_to_use(const double t){
   // clamp to 0.0
   if (t <= 0.0){
     return 0;
