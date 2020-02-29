@@ -192,7 +192,8 @@ void DCMWalkingReference::computeDCM_states(){
 
   // DS DCM list is equal to the size of the rvrp  list
   dcm_ini_DS_list.resize(rvrp_list.size()); dcm_vel_ini_DS_list.resize(rvrp_list.size()); 
-  dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size());  
+  dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size());
+  dcm_P.resize(rvrp_list.size()); 
 
   // Use backwards recursion to compute the initial and final dcm states
   double t_step = 0.0;
@@ -211,7 +212,7 @@ void DCMWalkingReference::computeDCM_states(){
   dcm_eos_list.back() = rvrp_list.back();
 
   // Find boundary conditions for the Polynomial interpolator
-  for (int i = 0; rvrp_list.size(); i++){
+  for (int i = 0; i < rvrp_list.size(); i++){
    // compute boundary conditions
    dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*t_ds);
    dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
@@ -221,19 +222,23 @@ void DCMWalkingReference::computeDCM_states(){
 
   // compute polynomial interpolator matrix
   double Ts = t_ds; // set transfer duration time
-  for (int i = 0; rvrp_list.size(); i++){
+  for (int i = 0; i < rvrp_list.size(); i++){
     Ts = get_polynomial_duration(i);
     dcm_P[i] = polynomialMatrix(Ts, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
-                                      dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
+                                    dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
+
   }
 
   // Compute the total trajectory time.
   compute_total_trajectory_time();
+  // Compute the reference com
+  compute_reference_com();
+
 }
 
 void DCMWalkingReference::compute_total_trajectory_time(){
   t_end = 0.0;
-  for (int i = 0; rvrp_list.size(); i++){
+  for (int i = 0; i < rvrp_list.size(); i++){
     t_end += get_t_step(i);
   }
 }
