@@ -32,9 +32,8 @@ public:
 
   // DCM walking parameters
   double t_transfer = 0.1; // exponential interpolation transfer time during initial transfer or same step transfer
-  double t_transfer_ds = 0.2; // polynomial transfer time time during initial transfer or same step transfer
-  double t_ss = 0.3; // single support exponential interpolation transfer time
-  double t_ds = 0.2; // double support polynomial transfer time during swing
+  double t_ds = 0.2; // double support polynomial transfer time
+  double t_ss = 0.3; // single support exponential interpolation  time
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
 
   void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
@@ -88,11 +87,20 @@ private:
 
   double t_start = 0.0; // the starting time for the DCM Walking reference
 
-
-  // Returns the current step index given the input time.
+  // Returns the step index given the input time from t_start.
   int which_step_index(const double t);
-  // returns the starting time of the step_index from t_start.
-  double get_t_start(const int step_index);
+
+  // returns the starting and ending time of the step_index from t_start.
+  double get_t_step_start(const int step_index);
+  double get_t_step_end(const int step_index);
+
+  // returns the double support starting and ending time of the step_index from t_start.
+  double get_double_support_t_start(const int step_index);
+  double get_double_support_t_end(const int step_index);
+
+  // returns the polynomial duration for the given step index
+  double get_polynomial_duration(const int step_index);
+
 
   // input: r_vrp_d_i - the desired virtual repelant point for the i-th step.
   //        t_step    - the time interval to use for backwards integration
@@ -138,6 +146,9 @@ private:
                                    const Eigen::Vector3d & dcm_ini, const Eigen::Vector3d & dcm_vel_ini,
                                    const Eigen::Vector3d & dcm_end, const Eigen::Vector3d & dcm_vel_end);
 
+
+  int clampINT(int input, int low_bound, int upper_bound);
+  double clampDOUBLE(double input, double low_bound, double upper_bound);
 
 };
 

@@ -154,7 +154,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 double DCMWalkingReference::get_t_step(const int & step_i){
   // Use transfer time for double support and overall step time for swing types
   if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE){
-    return t_transfer + t_transfer_ds;
+    return t_transfer + t_ds; 
   }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_SWING_VRP_TYPE){
     return t_ss + t_ds; // every swing has a double support transfer
   }
@@ -204,37 +204,33 @@ void DCMWalkingReference::computeDCM_states(){
   dcm_eos_list.back() = rvrp_list.back();
 
   // Find boundary conditions for the Polynomial interpolator
-  double Ts = t_ds; // set transfer duration time
   for (int i = 0; rvrp_list.size(); i++){
-    // Transfer duration used is the transfer time from the previous step.
-    if ((i > 0) && (rvrp_type_list[i-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
-      Ts = t_transfer_ds;
-    }else{
-      Ts = t_ds;
-    }
    // compute boundary conditions
-   dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*Ts);
-   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*Ts);
-   dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*Ts);
-   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*Ts);
+   dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*t_ds);
+   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+   dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*t_ds);
+   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
   }
 
-
-  // Construct the polynomial matrices
-  Ts = t_ds;
+  // compute polynomial interpolator matrix
+  double Ts = t_ds; // set transfer duration time
   for (int i = 0; rvrp_list.size(); i++){
-    // Transfer duration used is the transfer time from the previous step.
-    if ((i > 0) && (rvrp_type_list[i-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
-      Ts = t_transfer_ds;
-    }else{
-      Ts = t_ds;
-    }
-    // compute polynomial interpolator matrix
-    dcm_P[i] = polynomialMatrix(t_ds, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
+    Ts = get_polynomial_duration(i);
+    dcm_P[i] = polynomialMatrix(Ts, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
                                       dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
   }
 }
 
+double DCMWalkingReference::get_polynomial_duration(const int step_index){
+  // first step has polynomial duration of only ending double support
+  if (step_index == 0){
+    return (1.0-alpha_ds)*t_ds;
+  } // last step only has polynomial duration of the initial double support phase
+  else if (step_index == (rvrp_list.size() - 1)){
+    return alpha_ds*t_ds;
+  }
+  return t_ds;
+}
 
 Eigen::Vector3d DCMWalkingReference::get_DCM_exp(const int & step_index, const double & t){
   // Get t_step
@@ -322,12 +318,7 @@ Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
 // Returns the DCM double support polynomial interpolation for the requested step_index.
 // time, t, is clamped between 0.0 and t_step.
 Eigen::Vector3d DCMWalkingReference::get_DCM_DS_poly(const int & step_index, const double & t){
-  // Transfer duration for the current step is dictated by the previous step.
-  double Ts = t_ds;
-  if ((step_index > 0) && (rvrp_type_list[step_index-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
-    Ts = t_transfer_ds;
-  }
-
+  double Ts = get_polynomial_duration(step_index);
   double time = t;
   // Clamp time value
   if (t < 0){
@@ -345,11 +336,7 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_poly(const int & step_index, con
 // Returns the DCM double support velocity polynomial interpolation for the requested step_index.
 // time, t, is clamped between 0.0 and t_step.
 Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index, const double & t){
-  // Transfer duration for the current step is dictated by the previous step.
-  double Ts = t_ds;
-  if ((step_index > 0) && (rvrp_type_list[step_index-1] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE)){
-    Ts = t_transfer_ds;
-  }
+  double Ts = get_polynomial_duration(step_index);
 
   double time = t;
   // Clamp time value
@@ -365,6 +352,105 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index,
   return t_mat*dcm_P[step_index];
 }
 
+
+void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out){
+  // offset to starting time. t_start is global start time.
+  double time = t - t_start;
+  // clamp to t_tstart
+  if (time < t_start){ 
+    time = t_start;
+  }  
+  
+  int step_index = which_step_index(time);
+  double Ts = get_polynomial_duration(step_index);
+  double t_ds_start = get_double_support_t_start(step_index);
+
+
+}
+
+
+// Returns the step index given the input time from t_start.
+int DCMWalkingReference::which_step_index(const double t){
+  // clamp to 0.0
+  if (t <= 0.0){
+    return 0;
+  }
+
+  double t_ds_step_start = 0.0; // Double support starting time.
+  double t_exp_step_end = 0.0; // step's exponential ending time.
+
+  for (int i = 0; i < rvrp_list.size(); i++){
+    t_ds_step_start = get_double_support_t_start(i);
+    t_exp_step_end = get_t_step_end(i) - (alpha_ds*t_ds);
+    if ((t_ds_step_start <= t) && (t <= t_exp_step_end)){
+      return i;
+    }
+  }
+  // the requested time is beyond so give the last step index
+  return rvrp_list.size() - 1;
+}
+
+
+int DCMWalkingReference::clampINT(int input, int low_bound, int upper_bound){
+  if (input <= low_bound){
+    return low_bound;
+  }else if (input >= upper_bound){
+    return upper_bound;
+  }else{
+    return input;
+  }
+}
+
+double DCMWalkingReference::clampDOUBLE(double input, double low_bound, double upper_bound){
+  if (input <= low_bound){
+    return low_bound;
+  }else if (input >= upper_bound){
+    return upper_bound;
+  }else{
+    return input;
+  }  
+}
+
+// returns the starting time of the step_index from t_start.
+double DCMWalkingReference::get_t_step_start(const int step_index){
+  // clamp step index
+  int index = clampINT(step_index, 0, rvrp_list.size() - 1);
+
+  // Accumulate duration of each step
+  double t_step_start = 0.0;
+  for (int i = 0; i < index; i++){
+    t_step_start += get_t_step(i);
+  }  
+  return t_step_start;
+}
+
+double DCMWalkingReference::get_t_step_end(const int step_index){
+  // clamp step index
+  int index = clampINT(step_index, 0, rvrp_list.size() - 1);
+  return get_t_step_start(index) + get_t_step(index);
+}
+
+// returns the double support starting time of the step_index from t_start.
+double DCMWalkingReference::get_double_support_t_start(const int step_index){
+  // clamp step index
+  int index = clampINT(step_index, 0, rvrp_list.size() - 1);
+
+  // First find initial starting time of the index from t_start
+  double t_double_support_start = get_t_step_start(index);
+
+  // Apply double support offset after the first. All steps after the first step.
+  if (step_index > 0){
+    t_double_support_start -= (t_ds*alpha_ds);
+  }
+  return t_double_support_start;
+}
+
+// returns the double support ending time of the step_index from t_start.
+double DCMWalkingReference::get_double_support_t_end(const int step_index){
+  // clamp step index
+  int index = clampINT(step_index, 0, rvrp_list.size() - 1);
+  return get_double_support_t_start(index) + get_polynomial_duration(index);
+}
 
 
 /*
