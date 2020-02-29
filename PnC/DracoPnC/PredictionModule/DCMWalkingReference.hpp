@@ -2,6 +2,7 @@
 #define DCM_WALKING_PATTERN_GENERATOR_H
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 #include <Eigen/Dense>
 #include <cmath>
 #include <string>
@@ -71,9 +72,12 @@ public:
   void get_ref_com(const double t, Eigen::Vector3d & com_out);
   void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
 
-
   // computes the CoM velocity given the current CoM position and DCM velocity state.
   void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
+
+  // prints the boundary conditions of the DCM
+  void printBoundaryConditions();
+
 
 private:
   // DCM parameters:

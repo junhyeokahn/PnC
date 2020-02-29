@@ -197,6 +197,8 @@ void DCMWalkingReference::computeDCM_states(){
 
   // Use backwards recursion to compute the initial and final dcm states
   double t_step = 0.0;
+  // Last element of the DCM end of step list is equal to the last rvrp.
+  dcm_eos_list.back() = rvrp_list.back();
   for (int i = rvrp_list.size()-2; i >= 0; i--){
     // Get the t_step to use for backwards integration
     t_step = get_t_step(i);
@@ -208,8 +210,6 @@ void DCMWalkingReference::computeDCM_states(){
       dcm_eos_list[i-1] = dcm_ini_list[i];
     }
   }
-  // Last element of the DCM end of step list is equal to the last rvrp.
-  dcm_eos_list.back() = rvrp_list.back();
 
   // Find boundary conditions for the Polynomial interpolator
   for (int i = 0; i < rvrp_list.size(); i++){
@@ -233,8 +233,39 @@ void DCMWalkingReference::computeDCM_states(){
   compute_total_trajectory_time();
   // Compute the reference com
   compute_reference_com();
+}
+
+void DCMWalkingReference::printBoundaryConditions(){
+  Eigen::Vector3d val;
+  for (int i = 0; i < rvrp_list.size(); i++){
+    val = rvrp_list[i];
+    std::cout << "i:" << i << " " << std::endl;
+    myUtils::pretty_print(val, std::cout, "  vrp:");
+    std::cout << "  type:" << rvrp_type_list[i] << std::endl;
+  }
+
+  for (int i = 0; i < dcm_ini_list.size(); i++){
+    val = dcm_ini_list[i];
+    std::cout << "i:" << i << " " << std::endl;
+    myUtils::pretty_print(val, std::cout, "  dcm_ini:");
+    val = dcm_eos_list[i];
+    myUtils::pretty_print(val, std::cout, "  dcm_eos:");
+  }
+
+  for (int i = 0; i < rvrp_list.size(); i++){
+    val = dcm_ini_DS_list[i];
+    std::cout << "i:" << i << " " << std::endl;
+    myUtils::pretty_print(val, std::cout, "  dcm_ini_DS:");
+    val = dcm_end_DS_list[i];
+    myUtils::pretty_print(val, std::cout, "  dcm_end_DS:");
+    val = dcm_vel_ini_DS_list[i];
+    myUtils::pretty_print(val, std::cout, "  dcm_vel_ini_DS:");
+    val = dcm_vel_end_DS_list[i];
+    myUtils::pretty_print(val, std::cout, "  dcm_vel_end_DS:");
+  }  
 
 }
+
 
 void DCMWalkingReference::compute_total_trajectory_time(){
   t_end = 0.0;

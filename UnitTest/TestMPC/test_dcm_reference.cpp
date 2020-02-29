@@ -50,6 +50,8 @@ TEST(DCMReferenceTest, footsteps){
 
 	dcm_reference.initialize_footsteps_rvrp(footstep_list, lf_start, rf_start, x_com_pos_in);
 
+	// print out
+	dcm_reference.printBoundaryConditions();
 
 
 }
