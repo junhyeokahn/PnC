@@ -1,8 +1,8 @@
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReference.hpp>
 
-int const DCMWalkingReference::DCM_SWING_VRP_TYPE = 0;
-int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 1;
-
+int const DCMWalkingReference::DCM_SWING_VRP_TYPE = 1;
+int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 2;
+int const DCMWalkingReference::DCM_END_VRP_TYPE = 3;
 
 DCMWalkingReference::DCMWalkingReference(){
     std::cout << "[DCMWalkingReference] Constructed" << std::endl;
@@ -42,6 +42,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   // clear rvrp list if true
   if (clear_list){
     rvrp_list.clear();    
+    rvrp_type_list.clear();
   }
 
   // Create an rvrp for the stance leg
@@ -53,10 +54,6 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   current_stance_rvrp = initial_footstance.R_ori * current_stance_rvrp + initial_footstance.position;
   left_stance_rvrp = current_stance_rvrp;
   right_stance_rvrp = current_stance_rvrp;
-
-  // Specify that this is the eos for the previous rvrp
-  rvrp_type_list.clear();
-  rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
 
   // Add an rvrp to transfer to the stance leg
   rvrp_list.push_back(current_stance_rvrp);
@@ -101,6 +98,8 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // Update previous_step side 
     previous_step = input_footstep_list[i].robot_side;
   }
+  // Add final RVRP as ending
+  rvrp_type_list.push_back(DCM_END_VRP_TYPE);
 
   // Compute DCM states
   computeDCM_states();
@@ -121,7 +120,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
   // Add the initial virtual repellant point. 
   rvrp_list.push_back(initial_rvrp); 
-
+  // Specify that this is the eos for the previous rvrp
+  rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+  
   // Add the remaining virtual repellant points   
   initialize_footsteps_rvrp(input_footstep_list, initial_footstance);
 }
@@ -162,6 +163,8 @@ double DCMWalkingReference::get_t_step(const int & step_i){
     return t_transfer + t_ds; 
   }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_SWING_VRP_TYPE){
     return t_ss + t_ds; // every swing has a double support transfer
+  }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_END_VRP_TYPE){
+    return t_ds*(1-alpha_ds);
   }
 }
 
@@ -262,14 +265,12 @@ void DCMWalkingReference::printBoundaryConditions(){
     myUtils::pretty_print(val, std::cout, "  dcm_vel_end_DS:");
   }  
 
-  printf("i, t_step_start, t_step_end, t_ds_start, t_ds_end\n");
   for(int i = 0; i < rvrp_list.size(); i++){
     printf("%i, %0.3f, %0.3f, %0.3f, %0.3f\n", i, get_t_step_start(i),
                                                 get_t_step_end(i),
                                                 get_double_support_t_start(i),  
                                                 get_double_support_t_end(i));
   }
-
 
 }
 
@@ -279,6 +280,9 @@ void DCMWalkingReference::compute_total_trajectory_time(){
   for (int i = 0; i < rvrp_list.size(); i++){
     t_end += get_t_step(i);
   }
+  // compute settling time 
+  double t_settle = -b*log(1.0 - percentage_settle);  
+  t_end += t_settle;
 }
 
 double DCMWalkingReference::get_polynomial_duration(const int step_index){
@@ -306,7 +310,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
   // Set Boundary condition. Last element of eoDS is equal to the last element of the rvrp list
   if (step_index == (rvrp_list.size() - 1)){
     return rvrp_list.back();
-    // return get_DCM_exp(step_index, 0.0);
   }
   return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -325,7 +328,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index
   // Set Boundary condition. Velocities at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
     return Eigen::Vector3d::Zero();
-    // return get_DCM_vel_exp(step_index, 0.0);
   } 
   return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -569,6 +571,7 @@ double DCMWalkingReference::get_double_support_t_start(const int step_index){
   if (step_index > 0){
     t_double_support_start -= (t_ds*alpha_ds);
   }
+
   return t_double_support_start;
 }
 

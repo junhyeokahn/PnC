@@ -16,6 +16,9 @@ public:
 
   static int const DCM_SWING_VRP_TYPE;
   static int const DCM_TRANSFER_VRP_TYPE;
+  static int const DCM_END_VRP_TYPE;
+
+
   std::vector<int> rvrp_type_list; // List of type of virtual repelant point
 
   std::vector<DracoFootstep> footstep_list; // Footstep list to generate pattern
@@ -35,6 +38,9 @@ public:
   double t_transfer = 0.3; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
   double t_ds = 0.2; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
+
+  double percentage_settle = 0.999; // percent to converge at the end of the trajectory
+
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
 
   void setRobotMass(double mass);
