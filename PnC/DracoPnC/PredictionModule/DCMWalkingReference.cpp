@@ -44,6 +44,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   if (clear_list){
     rvrp_list.clear();    
     rvrp_type_list.clear();
+    rvrp_index_to_footstep_index.clear();
   }
 
   // Create an rvrp for the stance leg
@@ -93,6 +94,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
     // Specify the right swing VRP type
     input_footstep_list[i].robot_side == DRACO_LEFT_FOOTSTEP ? rvrp_type_list.push_back(DCM_LL_SWING_VRP_TYPE) : rvrp_type_list.push_back(DCM_RL_SWING_VRP_TYPE);
+    // Mark the current RVRP index to correspond to this footstep swing.
+    rvrp_index_to_footstep_index[ rvrp_list.size() - 1 ] = i; 
+
 
     // Add this rvrp to the list and also populate the DCM states
     rvrp_list.push_back(current_rvrp);
@@ -114,6 +118,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
   rvrp_list.clear();
   rvrp_type_list.clear();
+  rvrp_index_to_footstep_index.clear();
   dcm_ini_list.clear();
   dcm_eos_list.clear(); 
   dcm_ini_DS_list.clear();
@@ -486,6 +491,11 @@ void DCMWalkingReference::get_ref_reaction_force(const double t, Eigen::Vector3d
   get_reaction_force(robot_mass, com_pos_ref, r_vrp_ref, f_out);  
 }
 
+int DCMWalkingReference::get_r_vrp_type(const int step_index){
+  // clamp step index
+  int index = clampINT(step_index, 0, rvrp_type_list.size() - 1);
+  return rvrp_type_list[index];
+}
 
 int DCMWalkingReference::which_step_index(const double t){
   // clamp to 0.0
@@ -530,6 +540,19 @@ int DCMWalkingReference::which_step_index_to_use(const double t){
   // the requested time is beyond so give the last step index
   return rvrp_list.size() - 1;
 }
+
+
+// If step index is an rvrp swing type, returns true and populates the value of swing start and end times
+bool DCMWalkingReference::get_t_swing_start_end(const int step_index, double & swing_start_time, double & swing_end_time){
+  if ((rvrp_type_list[step_index] == DCM_LL_SWING_VRP_TYPE) || (rvrp_type_list[step_index] == DCM_RL_SWING_VRP_TYPE)){
+    swing_start_time = get_t_step_start(step_index) + t_ds*(1.0 - alpha_ds);
+    swing_end_time = get_t_step_end(step_index) - (alpha_ds*t_ds);
+    return true;
+  }else{
+    return false;
+  }
+}
+
 
 
 int DCMWalkingReference::clampINT(int input, int low_bound, int upper_bound){

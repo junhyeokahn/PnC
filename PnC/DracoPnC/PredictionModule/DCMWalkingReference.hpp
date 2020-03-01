@@ -7,7 +7,7 @@
 #include <cmath>
 #include <string>
 #include <iostream>
-
+#include <map>
 
 class DCMWalkingReference{
 public:
@@ -27,6 +27,10 @@ public:
   std::vector<Eigen::Vector3d> rvrp_list; // List of virtual repelant points.
   std::vector<Eigen::Vector3d> dcm_ini_list; // List of initial DCM states 
   std::vector<Eigen::Vector3d> dcm_eos_list; // List of end-of-step DCM states
+
+
+  // map containing the rvrp index that have a corresponding footstep swing
+  std::map<int, int> rvrp_index_to_footstep_index;
 
   // Initial and Boundary Conditions for the continuous DS trajectory
   std::vector<Eigen::Vector3d> dcm_ini_DS_list; 
@@ -90,8 +94,10 @@ public:
   void printBoundaryConditions();
 
   // Helper Functions
-  // Returns which step index the current time falls in.
+  // Returns the exponential step index the current time falls in.
   int which_step_index(const double t);
+  // Returns the polynomial step index to use given the input time from t_start.
+  int which_step_index_to_use(const double t);
 
   // returns the starting and ending time of the step_index from t_start.
   double get_t_step_start(const int step_index);
@@ -101,8 +107,14 @@ public:
   double get_double_support_t_start(const int step_index);
   double get_double_support_t_end(const int step_index);
 
+  // if the step_index is a swing type, returns true an populates the swing start time and end
+  bool get_t_swing_start_end(const int step_index, double & swing_start_time, double & swing_end_time);
+
+
   // returns the polynomial duration for the given step index
   double get_polynomial_duration(const int step_index);
+
+  int get_r_vrp_type(const int step_index);
 
 private:
   // DCM parameters:
@@ -118,9 +130,6 @@ private:
 
     // computes all the dcm states. Computation properly populates the dcm_ini_list and dcm_eos_list
   void computeDCM_states();
-
-  // Returns the step index to use given the input time from t_start.
-  int which_step_index_to_use(const double t);
 
   // Sums up the total trajectory time and stores the result in t_end
   void compute_total_trajectory_time();

@@ -3,6 +3,13 @@
 // Initialize by assigning the contact indices to a robot side.
 DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule
 	(const std::vector<int> & index_to_side_in): WalkingReferenceTrajectoryModule(index_to_side_in){
+
+
+    // t_walk_start_ = 0.0;
+    // Initialize object pointers
+    // reaction_force_schedule_ptr.reset(new WalkingReactionForceSchedule(this));
+    // walking_rfs_ptr = std::static_pointer_cast<WalkingReactionForceSchedule>(reaction_force_schedule_ptr);
+    // setContactIndexToSide(index_to_side_in);
     std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
 
 }
@@ -21,43 +28,51 @@ void DCMWalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, c
     // Set DCM reference
 	dcm_reference.setInitialTime(t_walk_start_);
 	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_, right_foot_start_, x_com_start_);
-
 }
 
-// gets the references 
-int DCMWalkingReferenceTrajectoryModule::getState(const double time){
-
-}
 void DCMWalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
-
-}
-
-double DCMWalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
-
-}
-
-// If true, populates the new footstep landing location
-// If false, the MPC should use the current location of the foot
-bool DCMWalkingReferenceTrajectoryModule::getFutureMPCFootstep(double time, DracoFootstep & footstep_landing_location){
-
-}
-
-// set that a particular contact was hit early
-// index: DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
-// time: time of early contact
-void DCMWalkingReferenceTrajectoryModule::setEarlyFootContact(const int index, const double time){
-
-}
-
-// set that a particular foot was hit early. automatically handles the contact updates
-// robot_side DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
-// time: time of early contact
-void DCMWalkingReferenceTrajectoryModule::setEarlyFootSideContact(const int robot_side, const double time){
 
 }
 
 // helper function to identify which footstep is in swing
 // if false. the foot is in not in swing for the time queried
 bool DCMWalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double time, int & footstep_index){
+    // Not in swing if walking has not started yet.
+    double t_query = time - t_walk_start_;
+    if (t_query < 0.0){
+        return false;
+    }
+
+	// Get the exponential interpolator step index
+	int exp_step_index = dcm_reference.which_step_index(t_query);
+
+	// Attempt to get the swing start and end times.
+	double t_swing_start, t_swing_end;
+	if (dcm_reference.get_t_swing_start_end(exp_step_index, t_swing_start, t_swing_end)){	
+		// Ensure that the queried time is within the swing time.
+		if ((t_swing_start <= t_query) && (t_query <= t_swing_end)){
+			// Get the corresponding footstep index
+			if (dcm_reference.rvrp_index_to_footstep_index.count(exp_step_index) > 0){
+				// Set the footstep index
+				footstep_index = dcm_reference.rvrp_index_to_footstep_index[exp_step_index];
+				// Ensure that there are no early contacts
+	            // Go through the contact indices for this side of the foot
+	            for (int j = 0; j < side_to_contact_indices[ footstep_list_[footstep_index].robot_side ].size() ; j++){
+	                // Check if there are early contacts 
+	                if ( (early_contact_times_.count(j) > 0) && (t_query >= early_contact_times_[j]) &&
+	                     (early_contact_times_[j] >= t_swing_start)){               
+	                    return false; // Early contact so this foot is no longer in swing.
+	                }
+	            }
+	            return true;
+			}
+		}
+	}else{
+		// The step index is not a swing VRP type, return false		
+		return false;
+	}
+
+	// t_query was not within the swing start and end times or the rvrp_index_to_footstep_index was empty.
+	return false;
 
 }
