@@ -15,7 +15,12 @@ DCMWalkingReference::~DCMWalkingReference(){
 // Sets the desired CoM Height
 void DCMWalkingReference::setCoMHeight(double z_vrp_in){
   z_vrp = z_vrp_in;
+  b = std::sqrt(z_vrp/gravity); // set time constant of DCM dynamics  
 } 
+
+void DCMWalkingReference::setRobotMass(double mass){
+  robot_mass = mass;
+}
 
 void DCMWalkingReference::setInitialTime(double t_start_in){
     t_start = t_start_in;
@@ -290,15 +295,20 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
 Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
   // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
   if (step_index == 0){
-    return rvrp_list.front();
+    // return rvrp_list.front();
+    return get_DCM_exp(step_index, 0.0);
+  }else if (step_index == (rvrp_list.size() - 1)){
+    return get_DCM_exp(step_index-1, get_t_step(step_index-1) - get_polynomial_duration(step_index) );
   }
+
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, const double t_DS_end){
   // Set Boundary condition. Last element of eoDS is equal to the last element of the rvrp list
   if (step_index == (rvrp_list.size() - 1)){
-    return rvrp_list.back();
+    // return rvrp_list.back();
+    return get_DCM_exp(step_index-1, get_t_step(step_index-1));
   }
   return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -306,16 +316,21 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
   // Set Boundary condition. Velocities at the very beginning are always 0.0
   if (step_index == 0){
-    return Eigen::Vector3d::Zero();
+    // return Eigen::Vector3d::Zero();
+    return get_DCM_vel_exp(step_index, 0.0);
+  }else if (step_index == (rvrp_list.size() - 1)){
+    return get_DCM_vel_exp(step_index-1, get_t_step(step_index-1) - get_polynomial_duration(step_index) );
   }
+
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end){
   // Set Boundary condition. Velocities at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
-    return Eigen::Vector3d::Zero();
-  }
+    // return Eigen::Vector3d::Zero();
+    return get_DCM_vel_exp(step_index-1, get_t_step(step_index-1));
+  } 
   return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
 
@@ -427,7 +442,6 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
   // Continouous Interpolation
-  // interpolation index to use
   int step_index = which_step_index_to_use(time);  
   double local_time;
 
@@ -445,6 +459,21 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
   // int step_index = which_step_index(time);
   // double local_time = time - get_t_step_start(step_index);
   // dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
+}
+
+// Computes the reference virtual repellant point
+void DCMWalkingReference::get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out){
+  Eigen::Vector3d dcm, dcm_vel;
+  get_ref_dcm(t, dcm);
+  get_ref_dcm_vel(t, dcm_vel);
+  r_vrvp_out = dcm - b*dcm_vel;
+}
+
+void DCMWalkingReference::get_ref_reaction_force(const double t, Eigen::Vector3d & f_out){
+  Eigen::Vector3d r_vrp_ref, com_pos_ref;
+  get_ref_r_vrp(t, r_vrp_ref);
+  get_ref_com(t, com_pos_ref);
+  get_reaction_force(robot_mass, com_pos_ref, r_vrp_ref, f_out);  
 }
 
 
@@ -558,6 +587,11 @@ void DCMWalkingReference::get_com_vel(const Eigen::Vector3d & com_pos, const Eig
   com_vel_out = (-1.0/b)*(com_pos - dcm);
 }
 
+void DCMWalkingReference::get_reaction_force(const double mass, const Eigen::Vector3d & com_pos, 
+                                             const Eigen::Vector3d & r_vrp, Eigen::Vector3d fr_out){
+  Eigen::Vector3d r_ecmp_c = (r_vrp - Eigen::Vector3d(0.0, 0.0, z_vrp));
+  fr_out = (mass*gravity/z_vrp)*(com_pos - r_ecmp_c);
+}
 
 // computes the reference com trajectories by integration
 void DCMWalkingReference::compute_reference_com(){

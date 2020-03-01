@@ -54,28 +54,31 @@ TEST(DCMReferenceTest, footsteps){
 	dcm_reference.printBoundaryConditions();
 
 	// set initial global start time
-	double t_start = 0.0;
+	double t_start = 0.15;
 	dcm_reference.setInitialTime(t_start);
 
 	// Get references
-	Eigen::Vector3d dcm_ref, dcm_vel_ref, com_pos_ref, com_vel_ref;
+	Eigen::Vector3d dcm_ref, dcm_vel_ref, com_pos_ref, com_vel_ref, r_vrp_ref;
 	dcm_ref.setZero(), dcm_vel_ref.setZero(), com_pos_ref.setZero(), com_vel_ref.setZero();
 	double t = 0.0;
-	double t_total = 2.6;
-	double dt = 0.005;
+	double t_total = 4.0;
+	double dt = 0.01;
 
 	int N_size = int(t_total/dt);
 
-	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz \n");
+
+	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz, vrp_x, vrp_y, vrp_z\n");
 	for(int i = 0; i < (N_size + 1); i++){
-		t = t_start + i*dt;		
+		t = i*dt;		
 		dcm_reference.get_ref_dcm(t, dcm_ref);
 		dcm_reference.get_ref_dcm_vel(t, dcm_vel_ref);
 		dcm_reference.get_ref_com(t, com_pos_ref);
 		dcm_reference.get_ref_com_vel(t, com_vel_ref);
-		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f \n",
+	  	dcm_reference.get_ref_r_vrp(t, r_vrp_ref);		
+		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f \n",
 			   t, dcm_ref[0], dcm_ref[1], dcm_ref[2], dcm_vel_ref[0], dcm_vel_ref[1], dcm_vel_ref[2],
-			   	  com_pos_ref[0], com_pos_ref[1], com_pos_ref[2], com_vel_ref[0], com_vel_ref[1], com_vel_ref[2]);
+			   	  com_pos_ref[0], com_pos_ref[1], com_pos_ref[2], com_vel_ref[0], com_vel_ref[1], com_vel_ref[2],
+			   	  r_vrp_ref[0], r_vrp_ref[1], r_vrp_ref[2]);
 	}
 
 

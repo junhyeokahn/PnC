@@ -37,6 +37,7 @@ public:
   double t_ss = 0.3; // single support exponential interpolation  time
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
 
+  void setRobotMass(double mass);
   void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
   void setInitialTime(double t_start_in); // Sets the initial offset time.
   double getInitialTime(); // Returns t_start;
@@ -71,9 +72,12 @@ public:
   void get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_vel_out);
   void get_ref_com(const double t, Eigen::Vector3d & com_out);
   void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
+  void get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out);
+  void get_ref_reaction_force(const double t, Eigen::Vector3d & f_out);
 
   // computes the CoM velocity given the current CoM position and DCM velocity state.
   void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
+  void get_reaction_force(const double mass, const Eigen::Vector3d & com_pos, const Eigen::Vector3d & r_vrp, Eigen::Vector3d fr_out);
 
   // prints the boundary conditions of the DCM
   void printBoundaryConditions();
@@ -81,6 +85,7 @@ public:
 
 private:
   // DCM parameters:
+  double robot_mass = 50; // kg
   double gravity = 9.81;
   double z_vrp = 0.75; // desired VRP height / CoM height
   double b = std::sqrt(z_vrp/gravity); // time constant of DCM dynamics  
