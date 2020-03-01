@@ -287,7 +287,8 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
     return (1.0-alpha_ds)*t_ds;
   } // last step only has polynomial duration of the initial double support phase
   else if (step_index == (rvrp_list.size() - 1)){
-    return alpha_ds*t_ds;
+    // return alpha_ds*t_ds;
+    return t_ds;
   }
   return t_ds;
 }
@@ -297,18 +298,15 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, 
   if (step_index == 0){
     // return rvrp_list.front();
     return get_DCM_exp(step_index, 0.0);
-  }else if (step_index == (rvrp_list.size() - 1)){
-    return get_DCM_exp(step_index-1, get_t_step(step_index-1) - get_polynomial_duration(step_index) );
   }
-
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, const double t_DS_end){
   // Set Boundary condition. Last element of eoDS is equal to the last element of the rvrp list
   if (step_index == (rvrp_list.size() - 1)){
-    // return rvrp_list.back();
-    return get_DCM_exp(step_index-1, get_t_step(step_index-1));
+    return rvrp_list.back();
+    // return get_DCM_exp(step_index, 0.0);
   }
   return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -318,8 +316,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_inde
   if (step_index == 0){
     // return Eigen::Vector3d::Zero();
     return get_DCM_vel_exp(step_index, 0.0);
-  }else if (step_index == (rvrp_list.size() - 1)){
-    return get_DCM_vel_exp(step_index-1, get_t_step(step_index-1) - get_polynomial_duration(step_index) );
   }
 
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
@@ -328,8 +324,8 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_inde
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end){
   // Set Boundary condition. Velocities at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
-    // return Eigen::Vector3d::Zero();
-    return get_DCM_vel_exp(step_index-1, get_t_step(step_index-1));
+    return Eigen::Vector3d::Zero();
+    // return get_DCM_vel_exp(step_index, 0.0);
   } 
   return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
