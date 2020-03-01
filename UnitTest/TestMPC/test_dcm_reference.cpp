@@ -54,7 +54,7 @@ TEST(DCMReferenceTest, footsteps){
 	dcm_reference.printBoundaryConditions();
 
 	// set initial global start time
-	double t_start = 0.0;
+	double t_start = 0.25;
 	dcm_reference.setInitialTime(t_start);
 
 	// Get references

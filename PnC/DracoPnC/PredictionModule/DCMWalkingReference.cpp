@@ -122,7 +122,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   rvrp_list.push_back(initial_rvrp); 
   // Specify that this is the eos for the previous rvrp
   rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
-  
+
   // Add the remaining virtual repellant points   
   initialize_footsteps_rvrp(input_footstep_list, initial_footstance);
 }
@@ -289,16 +289,14 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
   // first step has polynomial duration of only ending double support
   if (step_index == 0){
     return (1.0-alpha_ds)*t_ds;
-  } // last step only has polynomial duration of the initial double support phase
+  } 
   else if (step_index == (rvrp_list.size() - 1)){
-    // return alpha_ds*t_ds;
-    return t_ds;
+    return t_ds; //alpha_ds*t_ds; // Not sure why... But the final duration must not be below t_ds.
   }
   return t_ds;
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
-  // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
   if (step_index == 0){
     // return rvrp_list.front();
     return get_DCM_exp(step_index, 0.0);
@@ -315,7 +313,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
-  // Set Boundary condition. Velocities at the very beginning are always 0.0
   if (step_index == 0){
     // return Eigen::Vector3d::Zero();
     return get_DCM_vel_exp(step_index, 0.0);
