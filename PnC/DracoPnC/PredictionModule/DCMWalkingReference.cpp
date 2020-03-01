@@ -266,6 +266,15 @@ void DCMWalkingReference::printBoundaryConditions(){
     myUtils::pretty_print(val, std::cout, "  dcm_vel_end_DS:");
   }  
 
+  printf("i, t_step_start, t_step_end, t_ds_start, t_ds_end\n");
+  for(int i = 0; i < rvrp_list.size(); i++){
+    printf("%i, %0.3f, %0.3f, %0.3f, %0.3f\n", i, get_t_step_start(i),
+                                                get_t_step_end(i),
+                                                get_double_support_t_start(i),  
+                                                get_double_support_t_end(i));
+  }
+
+
 }
 
 
@@ -291,6 +300,9 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, 
   // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
   if (step_index == 0){
     return rvrp_list.front();
+  }  //At the last vrp, dcm_ini equals the last vrp
+  else if (step_index == (rvrp_list.size() - 1)){
+  return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (rvrp_list.back() - rvrp_list[step_index - 1]);
   }
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
@@ -308,7 +320,12 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_inde
   if (step_index == 0){
     return Eigen::Vector3d::Zero();
   }
-  return (-1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
+  //At the last vrp, dcm_ini equals the last vrp
+  else if (step_index == (rvrp_list.size() - 1)){
+    return (1.0/b)*std::exp(-t_DS_ini/b) * (rvrp_list.back() - rvrp_list[step_index - 1]);    
+  }
+
+  return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end){
@@ -420,22 +437,23 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
   // interpolation index to use
-  // int step_index = which_step_index_to_use(time);  
-  // double local_time;
-  // // Use Polynomial interpolation
-  // // std::cout << "step index: " << step_index << std::endl;
-  // if (time <= get_double_support_t_end(step_index)){
-  //   // std::cout << "poly" << std::endl;
-  //   local_time = time - get_double_support_t_start(step_index);
-  //   dcm_out = get_DCM_DS_poly(step_index, local_time);
-  // }else{ // Use exponential interpolation
-  //   // std::cout << "exp" << std::endl;
-  //   local_time = time - get_t_step_start(step_index);
-  //   dcm_out = get_DCM_exp(step_index, local_time);
-  // }
-  int step_index = which_step_index(time);
-  double local_time = time - get_t_step_start(step_index);
-  dcm_out = get_DCM_exp(step_index, local_time);
+  int step_index = which_step_index_to_use(time);  
+  double local_time;
+  // Use Polynomial interpolation
+  // std::cout << "step index: " << step_index << std::endl;
+  if (time <= get_double_support_t_end(step_index)){
+    // std::cout << "poly" << std::endl;
+    local_time = time - get_double_support_t_start(step_index);
+    dcm_out = get_DCM_DS_poly(step_index, local_time);
+  }else{ // Use exponential interpolation
+    // std::cout << "exp" << std::endl;
+    local_time = time - get_t_step_start(step_index);
+    dcm_out = get_DCM_exp(step_index, local_time);
+  }
+
+  // int step_index = which_step_index(time);
+  // double local_time = time - get_t_step_start(step_index);
+  // dcm_out = get_DCM_exp(step_index, local_time);
 
 }
 
@@ -448,31 +466,31 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
-  // // interpolation index to use
-  // int step_index = which_step_index_to_use(time);  
-  // double local_time;
+  // interpolation index to use
+  int step_index = which_step_index_to_use(time);  
+  double local_time;
 
-  // // std::cout << "step_index " << step_index << std::endl;
-  // // Use Polynomial interpolation
-  // if (time <= get_double_support_t_end(step_index)){
-  //   local_time = time - get_double_support_t_start(step_index);
-  //   dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
+  // std::cout << "step_index " << step_index << std::endl;
+  // Use Polynomial interpolation
+  if (time <= get_double_support_t_end(step_index)){
+    local_time = time - get_double_support_t_start(step_index);
+    dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
 
-  //   // std::cout << "poly vel" << std::endl;
-  //   local_time = time - get_t_step_start(step_index);
-  //   // std::cout << "  local_time = " << local_time << std::endl;
-  //   // std::cout << "  poly interpolation:" << dcm_vel_out.transpose() << std::endl;
-  //   // std::cout << "  exp interpolation:" << get_DCM_vel_exp(step_index, local_time).transpose() << std::endl;
+    // std::cout << "poly vel" << std::endl;
+    local_time = time - get_t_step_start(step_index);
+    // std::cout << "  local_time = " << local_time << std::endl;
+    // std::cout << "  poly interpolation:" << dcm_vel_out.transpose() << std::endl;
+    // std::cout << "  exp interpolation:" << get_DCM_vel_exp(step_index, local_time).transpose() << std::endl;
 
-  // }else{ // Use exponential interpolation
-  //   local_time = time - get_t_step_start(step_index);
-  //   dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
-  // }  
+  }else{ // Use exponential interpolation
+    local_time = time - get_t_step_start(step_index);
+    dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
+  }  
 
 
-  int step_index = which_step_index(time);
-  double local_time = time - get_t_step_start(step_index);
-  dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
+  // int step_index = which_step_index(time);
+  // double local_time = time - get_t_step_start(step_index);
+  // dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
 }
 
 
@@ -637,71 +655,3 @@ void DCMWalkingReference::get_ref_com_vel(const double t, Eigen::Vector3d & com_
   int index = int(time/dt_local);
   com_vel_out = ref_com_vel[index];
 }
-
-
-
-/*
-void WalkingPatternGenerator::compute_com_dcm_trajectory(const Eigen::Vector3d & initial_com){
-  Eigen::Vector3d com_pos = initial_com;
-  Eigen::Vector3d dcm_pos; dcm_pos.setZero();
-  int step_index = 0;
-  double t = 0.0;
-  double t_step = get_t_step(step_index);
-  double t_prev = 0.0;
-  double dt = internal_dt;
-
-  // Always try to compute CoM finely. Also, ensure that we follow the desired discretization
-  double dt_local = 1e-3; // Use this discretization for integrating the CoM
-  int N_local = int(get_total_trajectory_time()/dt_local);
-  int j = 0;
-
-  // In case N_size is larger than N_local: 
-  if (N_size > N_local){
-    // Compute using N_size as the discretization. This is rarely the case
-    for(int i = 0; i < N_size; i++){
-      // x_post = dx*dt + x_pre
-      t = dt*i;
-      com_pos = get_com_vel(com_pos, step_index, t-t_prev)*dt + com_pos;
-      dcm_pos = get_desired_DCM(step_index, t-t_prev);
-      // Check if t-t_prev exceeded the current t_step and if we can increment the step index
-      if ( ((t-t_prev) >= t_step) && (step_index < rvrp_type_list.size()-1) ){
-        step_index++;
-        t_prev = t;
-        t_step = get_t_step(step_index);        
-      }
-
-        // std::cout << com_pos.transpose() << std::endl;
-        // Store the CoM position
-        traj_pos_com.set_pos(i, com_pos);
-        traj_dcm_pos.set_pos(i, dcm_pos);  
-    }
-  }else{
-    // Compute with a more fine integration of the CoM. This is usually the case
-    for(int i = 0; i < N_local; i++){
-      if (j < N_size){
-        // x_post = dx*dt + x_pre
-        t = dt_local*i;
-        com_pos = get_com_vel(com_pos, step_index, t-t_prev)*dt_local + com_pos;
-        dcm_pos = get_desired_DCM(step_index, t-t_prev);
-        // Check if t-t_prev exceeded the current t_step and if we can increment the step index
-        if ( ((t-t_prev) >= t_step) && (step_index < rvrp_type_list.size()-1) ){
-          step_index++;
-          t_prev = t;
-          t_step = get_t_step(step_index);        
-        }
-
-        // Store the COM position at the desired discretization
-        if (i % (N_local/N_size) == 0){
-          // std::cout << com_pos.transpose() << std::endl;
-          traj_pos_com.set_pos(j, com_pos);
-          traj_dcm_pos.set_pos(j, dcm_pos);
-          j++;      
-        }
-      }
-      else{
-        break;
-      }
-    }
-  }
-}
-*/

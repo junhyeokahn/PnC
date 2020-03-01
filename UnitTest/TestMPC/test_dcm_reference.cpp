@@ -62,7 +62,7 @@ TEST(DCMReferenceTest, footsteps){
 	dcm_ref.setZero(), dcm_vel_ref.setZero(), com_pos_ref.setZero(), com_vel_ref.setZero();
 	double t = 0.0;
 	double t_total = 2.6;
-	double dt = 0.01;
+	double dt = 0.005;
 
 	int N_size = int(t_total/dt);
 
