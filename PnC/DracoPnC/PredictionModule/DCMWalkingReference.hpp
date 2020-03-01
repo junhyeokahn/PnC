@@ -68,7 +68,7 @@ public:
   // Compute: DCM, DCM vel, CoM, CoM Vel, given time, t.
   // t is a global time.
   void get_ref_dcm(const double t, Eigen::Vector3d & dcm_out);
-  void get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_out);
+  void get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_vel_out);
   void get_ref_com(const double t, Eigen::Vector3d & com_out);
   void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
 

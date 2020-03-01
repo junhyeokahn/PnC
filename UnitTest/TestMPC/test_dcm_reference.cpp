@@ -9,7 +9,7 @@ TEST(DCMReferenceTest, footsteps){
 	// Initialize Necessary States
 	// CoM Height
 	Eigen::Vector3d x_com_pos_in; x_com_pos_in.setZero();
-	x_com_pos_in[2] = 0.7;
+	x_com_pos_in[2] = 0.75;
 	// Body Ori
 	Eigen::Quaterniond x_ori_start_in; x_ori_start_in.setIdentity();
 	// Footstep locations
@@ -52,6 +52,32 @@ TEST(DCMReferenceTest, footsteps){
 
 	// print out
 	dcm_reference.printBoundaryConditions();
+
+	// set initial global start time
+	double t_start = 0.0;
+	dcm_reference.setInitialTime(t_start);
+
+	// Get references
+	Eigen::Vector3d dcm_ref, dcm_vel_ref, com_pos_ref, com_vel_ref;
+	dcm_ref.setZero(), dcm_vel_ref.setZero(), com_pos_ref.setZero(), com_vel_ref.setZero();
+	double t = 0.0;
+	double t_total = 0.4;//2.5;
+	double dt = 0.01;
+
+	int N_size = int(t_total/dt);
+
+	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz \n");
+	for(int i = 0; i < (N_size + 1); i++){
+		t = t_start + i*dt;		
+		dcm_reference.get_ref_dcm(t, dcm_ref);
+		dcm_reference.get_ref_dcm_vel(t, dcm_vel_ref);
+		dcm_reference.get_ref_com(t, com_pos_ref);
+		dcm_reference.get_ref_com_vel(t, com_vel_ref);
+		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f \n",
+			   t, dcm_ref[0], dcm_ref[1], dcm_ref[2], dcm_vel_ref[0], dcm_vel_ref[1], dcm_vel_ref[2],
+			   	  com_pos_ref[0], com_pos_ref[1], com_pos_ref[2], com_vel_ref[0], com_vel_ref[1], com_vel_ref[2]);
+	}
+
 
 
 }
