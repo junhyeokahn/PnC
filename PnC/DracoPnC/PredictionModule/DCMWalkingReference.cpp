@@ -34,15 +34,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   if (input_footstep_list.size() == 0){ 
     return;
   }
-  // clear DCM variables if true
+  // clear rvrp list if true
   if (clear_list){
-    rvrp_list.clear();
-    dcm_ini_list.clear();
-    dcm_eos_list.clear(); 
-    dcm_ini_DS_list.clear();
-    dcm_vel_ini_DS_list.clear();
-    dcm_end_DS_list.clear();
-    dcm_vel_end_DS_list.clear();       
+    rvrp_list.clear();    
   }
 
   // Create an rvrp for the stance leg
@@ -58,7 +52,6 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   // Specify that this is the eos for the previous rvrp
   rvrp_type_list.clear();
   rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
-  dcm_eos_list.push_back(current_stance_rvrp);
 
   // Add an rvrp to transfer to the stance leg
   rvrp_list.push_back(current_stance_rvrp);
@@ -186,11 +179,9 @@ void DCMWalkingReference::computeDCM_states(){
   dcm_end_DS_list.clear(); dcm_vel_end_DS_list.clear();  
   dcm_P.clear();
 
-  // DCM ini and eos list is one size less than the RVRP list
-  dcm_ini_list.resize(rvrp_list.size() - 1);
-  dcm_eos_list.resize(rvrp_list.size() - 1);
-
-  // DS DCM list is equal to the size of the rvrp  list
+  // Resize DCM lists to be equal to the size of the rvrp  list
+  dcm_ini_list.resize(rvrp_list.size());
+  dcm_eos_list.resize(rvrp_list.size());
   dcm_ini_DS_list.resize(rvrp_list.size()); dcm_vel_ini_DS_list.resize(rvrp_list.size()); 
   dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size());
   dcm_P.resize(rvrp_list.size()); 
@@ -199,7 +190,7 @@ void DCMWalkingReference::computeDCM_states(){
   double t_step = 0.0;
   // Last element of the DCM end of step list is equal to the last rvrp.
   dcm_eos_list.back() = rvrp_list.back();
-  for (int i = rvrp_list.size()-2; i >= 0; i--){
+  for (int i = dcm_ini_list.size()-1; i >= 0; i--){
     // Get the t_step to use for backwards integration
     t_step = get_t_step(i);
     // Compute dcm_ini for step i
@@ -220,7 +211,7 @@ void DCMWalkingReference::computeDCM_states(){
    dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
   }
 
-  printBoundaryConditions();
+  // printBoundaryConditions();
 
   // compute polynomial interpolator matrix
   double Ts = t_ds; // set transfer duration time
@@ -277,7 +268,7 @@ void DCMWalkingReference::printBoundaryConditions(){
 
 }
 
-
+// Total trajectory time from t_start
 void DCMWalkingReference::compute_total_trajectory_time(){
   t_end = 0.0;
   for (int i = 0; i < rvrp_list.size(); i++){
@@ -300,9 +291,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, 
   // Set Boundary condition. First element of eoDS is equal to the first element of the rvrp list
   if (step_index == 0){
     return rvrp_list.front();
-  }  //At the last vrp, dcm_ini equals the last vrp
-  else if (step_index == (rvrp_list.size() - 1)){
-  return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (rvrp_list.back() - rvrp_list[step_index - 1]);
   }
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
@@ -316,20 +304,15 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
-  // Set Boundary condition. Velocities at the very beginning and end are always 0.0
+  // Set Boundary condition. Velocities at the very beginning are always 0.0
   if (step_index == 0){
     return Eigen::Vector3d::Zero();
   }
-  //At the last vrp, dcm_ini equals the last vrp
-  else if (step_index == (rvrp_list.size() - 1)){
-    return (1.0/b)*std::exp(-t_DS_ini/b) * (rvrp_list.back() - rvrp_list[step_index - 1]);    
-  }
-
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end){
-  // Set Boundary condition. Velocities at the very beginning and end are always 0.0
+  // Set Boundary condition. Velocities at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
     return Eigen::Vector3d::Zero();
   }
@@ -355,17 +338,6 @@ Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
   bound.row(2) = dcm_end;
   bound.row(3) = dcm_vel_end;
 
-  // std::cout << "Ts = " << Ts << std::endl;
-
-  // std::cout << "mat" << std::endl;
-  // std::cout << mat << std::endl;
-  // std::cout << "bound" << std::endl;
-  // std::cout << bound << std::endl;
-
-  // std::cout << "mat*bound" << std::endl;
-  // std::cout << mat*bound << std::endl;
-
-
   return mat*bound; 
 }
 
@@ -375,13 +347,6 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_exp(const int & step_index, const d
   double t_step = get_t_step(step_index);
   // Clamp time value
   double time = clampDOUBLE(t, 0.0, t_step);
-  // std::cout << "  t = dcm exp " << time << std::endl;
-  // std::cout << "  step_index = " << step_index << std::endl;
-
-  // Clamp the last vrp value
-  if (step_index == rvrp_list.size() - 1){
-    return rvrp_list[step_index];
-  }
 
   return rvrp_list[step_index] + std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
 }
@@ -392,10 +357,6 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_vel_exp(const int & step_index, con
   // Clamp time value
   double time = clampDOUBLE(t, 0.0, t_step);
 
-  // At end of the rvrp, dcm always come to a stop.
-  if (step_index == rvrp_list.size() - 1){
-    return Eigen::Vector3d::Zero();
-  }
   return (1.0/b)*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
 }
 
@@ -436,21 +397,20 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
+  // Continouous Interpolation
   // interpolation index to use
   int step_index = which_step_index_to_use(time);  
   double local_time;
-  // Use Polynomial interpolation
-  // std::cout << "step index: " << step_index << std::endl;
   if (time <= get_double_support_t_end(step_index)){
-    // std::cout << "poly" << std::endl;
+    // Use Polynomial interpolation
     local_time = time - get_double_support_t_start(step_index);
     dcm_out = get_DCM_DS_poly(step_index, local_time);
   }else{ // Use exponential interpolation
-    // std::cout << "exp" << std::endl;
     local_time = time - get_t_step_start(step_index);
     dcm_out = get_DCM_exp(step_index, local_time);
   }
 
+  // Discountinuous
   // int step_index = which_step_index(time);
   // double local_time = time - get_t_step_start(step_index);
   // dcm_out = get_DCM_exp(step_index, local_time);
@@ -466,28 +426,22 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
+  // Continouous Interpolation
   // interpolation index to use
   int step_index = which_step_index_to_use(time);  
   double local_time;
 
-  // std::cout << "step_index " << step_index << std::endl;
-  // Use Polynomial interpolation
   if (time <= get_double_support_t_end(step_index)){
+    // Use Polynomial interpolation
     local_time = time - get_double_support_t_start(step_index);
     dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
-
-    // std::cout << "poly vel" << std::endl;
-    local_time = time - get_t_step_start(step_index);
-    // std::cout << "  local_time = " << local_time << std::endl;
-    // std::cout << "  poly interpolation:" << dcm_vel_out.transpose() << std::endl;
-    // std::cout << "  exp interpolation:" << get_DCM_vel_exp(step_index, local_time).transpose() << std::endl;
-
   }else{ // Use exponential interpolation
     local_time = time - get_t_step_start(step_index);
     dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
   }  
 
 
+  // Discontinuous Interpolation
   // int step_index = which_step_index(time);
   // double local_time = time - get_t_step_start(step_index);
   // dcm_vel_out = get_DCM_vel_exp(step_index, local_time);

@@ -32,7 +32,7 @@ public:
   std::vector<Eigen::MatrixXd> dcm_P; // polynomial matrices for polynomial interpolation
 
   // DCM walking parameters
-  double t_transfer = 0.1; // exponential interpolation transfer time during initial transfer or same step transfer
+  double t_transfer = 0.3; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
   double t_ds = 0.2; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
