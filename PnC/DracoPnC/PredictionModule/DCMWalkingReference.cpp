@@ -404,6 +404,12 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
     return;
   }
 
+  // Reference DCM is the RVRP in the beginning.
+  if (t < t_start){
+    dcm_out = rvrp_list.front();
+    return;
+  }
+
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
@@ -430,6 +436,11 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
 void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_vel_out){
   // Don't process if the list of VRPs is empty
   if (rvrp_list.size() == 0){
+    return;
+  }
+  // Velocities are zero before time starts 
+  if (t < t_start){
+    dcm_vel_out.setZero();
     return;
   }
 
@@ -635,6 +646,12 @@ void DCMWalkingReference::get_ref_com_vel(const double t, Eigen::Vector3d & com_
   // get_ref_com(t, com_pos);
   // get_ref_dcm(t, dcm);
   // get_com_vel(com_pos, dcm, com_vel_out);
+  // Velocities are zero before time starts 
+  if (t < t_start){
+    com_vel_out.setZero();
+    return;
+  }
+
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   int index = int(time/dt_local);
   com_vel_out = ref_com_vel[index];
