@@ -3,6 +3,7 @@
 // Initialize by assigning the contact indices to a robot side.
 DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule
 	(const std::vector<int> & index_to_side_in): WalkingReferenceTrajectoryModule(index_to_side_in){
+    std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
 
 }
 
@@ -11,7 +12,16 @@ DCMWalkingReferenceTrajectoryModule::~DCMWalkingReferenceTrajectoryModule(){
 }
 
 void DCMWalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in){
+    t_walk_start_ = t_walk_start_in;
+    // Clear internal data then copy footsteps
+    footstep_list_.clear();
+    early_contact_times_.clear();
+    footstep_list_ = footstep_list_in;
+
+    // Set DCM reference
+	dcm_reference.setInitialTime(t_walk_start_);
 	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_, right_foot_start_, x_com_start_);
+
 }
 
 // gets the references 
