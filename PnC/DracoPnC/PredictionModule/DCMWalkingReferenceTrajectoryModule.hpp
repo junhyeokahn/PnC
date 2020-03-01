@@ -18,6 +18,7 @@
 // 
 
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReference.hpp>
+#include <PnC/DracoPnC/PredictionModule/DCMWalkingReactionForceSchedule.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
 
 class DCMWalkingReferenceTrajectoryModule : public WalkingReferenceTrajectoryModule {
@@ -25,6 +26,8 @@ public:
 	// Initialize by assigning the contact indices to a robot side.
 	DCMWalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in);
 	virtual ~DCMWalkingReferenceTrajectoryModule();
+
+	friend class DCMWalkingReactionForceSchedule;
 
 	void setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
 
