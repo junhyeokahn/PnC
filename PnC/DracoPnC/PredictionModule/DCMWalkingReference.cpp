@@ -111,6 +111,7 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   }
 
   rvrp_list.clear();
+  rvrp_type_list.clear();
   dcm_ini_list.clear();
   dcm_eos_list.clear(); 
   dcm_ini_DS_list.clear();

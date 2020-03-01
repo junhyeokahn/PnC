@@ -42,47 +42,47 @@ class WalkingReferenceTrajectoryModule{
 public:
 	// Initialize by assigning the contact indices to a robot side.
 	WalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in);
-	~WalkingReferenceTrajectoryModule();
+	virtual ~WalkingReferenceTrajectoryModule();
 
 	friend class WalkingReactionForceSchedule;
 
-	void setStartingConfiguration(const Eigen::Vector3d x_com_start_in,
+	virtual void setStartingConfiguration(const Eigen::Vector3d x_com_start_in,
 								  const Eigen::Quaterniond x_ori_start_in,
 								  const DracoFootstep & left_foot_start_in, 
 								  const DracoFootstep & right_foot_start_in);
 	// function which assigns a contact index to a robot side.
-	void setContactIndexToSide(const std::vector<int> & index_to_side_in);
+	virtual void setContactIndexToSide(const std::vector<int> & index_to_side_in);
 
-	void setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
+	virtual void setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
 
 	std::shared_ptr<ReactionForceSchedule> reaction_force_schedule_ptr;
 	std::shared_ptr<WalkingReactionForceSchedule> walking_rfs_ptr;
 
 	// gets the references 
-	int getState(const double time);
-	void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
-	double getMaxNormalForce(int index, double time);
+	virtual int getState(const double time);
+	virtual void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
+	virtual double getMaxNormalForce(int index, double time);
 
 	// If true, populates the new footstep landing location
 	// If false, the MPC should use the current location of the foot
-	bool getFutureMPCFootstep(double time, DracoFootstep & footstep_landing_location);
+	virtual bool getFutureMPCFootstep(double time, DracoFootstep & footstep_landing_location);
 
 	// set that a particular contact was hit early
 	// index: DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
 	// time: time of early contact
-	void setEarlyFootContact(const int index, const double time);
+	virtual void setEarlyFootContact(const int index, const double time);
 
 	// set that a particular foot was hit early. automatically handles the contact updates
 	// robot_side DRACO_LEFT_FOOTSTEP or DRACO_RIGHT_FOOTSTEP
 	// time: time of early contact
-	void setEarlyFootSideContact(const int robot_side, const double time);
+	virtual void setEarlyFootSideContact(const int robot_side, const double time);
 
 	// helper function to identify which footstep is in swing
 	// if false. the foot is in not in swing for the time queried
-	bool whichFootstepIndexInSwing(const double time, int & footstep_index);
+	virtual bool whichFootstepIndexInSwing(const double time, int & footstep_index);
 
 
-private:
+protected:
 	std::vector<int> index_to_side_;
 	std::map<int, std::vector<int> > side_to_contact_indices;
 

@@ -88,6 +88,20 @@ public:
   // prints the boundary conditions of the DCM
   void printBoundaryConditions();
 
+  // Helper Functions
+  // Returns which step index the current time falls in.
+  int which_step_index(const double t);
+
+  // returns the starting and ending time of the step_index from t_start.
+  double get_t_step_start(const int step_index);
+  double get_t_step_end(const int step_index);
+
+  // returns the double support starting and ending time of the step_index from t_start.
+  double get_double_support_t_start(const int step_index);
+  double get_double_support_t_end(const int step_index);
+
+  // returns the polynomial duration for the given step index
+  double get_polynomial_duration(const int step_index);
 
 private:
   // DCM parameters:
@@ -106,20 +120,6 @@ private:
 
   // Returns the step index to use given the input time from t_start.
   int which_step_index_to_use(const double t);
-
-  // Returns which step index the current time falls in.
-  int which_step_index(const double t);
-
-  // returns the starting and ending time of the step_index from t_start.
-  double get_t_step_start(const int step_index);
-  double get_t_step_end(const int step_index);
-
-  // returns the double support starting and ending time of the step_index from t_start.
-  double get_double_support_t_start(const int step_index);
-  double get_double_support_t_end(const int step_index);
-
-  // returns the polynomial duration for the given step index
-  double get_polynomial_duration(const int step_index);
 
   // Sums up the total trajectory time and stores the result in t_end
   void compute_total_trajectory_time();
