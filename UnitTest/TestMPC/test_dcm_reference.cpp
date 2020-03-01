@@ -61,7 +61,7 @@ TEST(DCMReferenceTest, footsteps){
 	Eigen::Vector3d dcm_ref, dcm_vel_ref, com_pos_ref, com_vel_ref;
 	dcm_ref.setZero(), dcm_vel_ref.setZero(), com_pos_ref.setZero(), com_vel_ref.setZero();
 	double t = 0.0;
-	double t_total = 0.4;//2.5;
+	double t_total = 2.6;
 	double dt = 0.01;
 
 	int N_size = int(t_total/dt);

@@ -96,6 +96,9 @@ private:
   // Returns the step index to use given the input time from t_start.
   int which_step_index_to_use(const double t);
 
+  // Returns which step index the current time falls in.
+  int which_step_index(const double t);
+
   // returns the starting and ending time of the step_index from t_start.
   double get_t_step_start(const int step_index);
   double get_t_step_end(const int step_index);

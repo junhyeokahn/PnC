@@ -420,19 +420,23 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
   // interpolation index to use
-  int step_index = which_step_index_to_use(time);  
-  double local_time;
-  // Use Polynomial interpolation
-  // std::cout << "step index: " << step_index << std::endl;
-  if (time <= get_double_support_t_end(step_index)){
-    // std::cout << "poly" << std::endl;
-    local_time = time - get_double_support_t_start(step_index);
-    dcm_out = get_DCM_DS_poly(step_index, local_time);
-  }else{ // Use exponential interpolation
-    // std::cout << "exp" << std::endl;
-    local_time = time - get_t_step_start(step_index);
-    dcm_out = get_DCM_exp(step_index, local_time);
-  }
+  // int step_index = which_step_index_to_use(time);  
+  // double local_time;
+  // // Use Polynomial interpolation
+  // // std::cout << "step index: " << step_index << std::endl;
+  // if (time <= get_double_support_t_end(step_index)){
+  //   // std::cout << "poly" << std::endl;
+  //   local_time = time - get_double_support_t_start(step_index);
+  //   dcm_out = get_DCM_DS_poly(step_index, local_time);
+  // }else{ // Use exponential interpolation
+  //   // std::cout << "exp" << std::endl;
+  //   local_time = time - get_t_step_start(step_index);
+  //   dcm_out = get_DCM_exp(step_index, local_time);
+  // }
+  int step_index = which_step_index(time);
+  double local_time = time - get_t_step_start(step_index);
+  dcm_out = get_DCM_exp(step_index, local_time);
+
 }
 
 void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_vel_out){
@@ -444,23 +448,54 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
   // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   
-  // interpolation index to use
-  int step_index = which_step_index_to_use(time);  
-  double local_time;
-  // Use Polynomial interpolation
-  if (time <= get_double_support_t_end(step_index)){
-    local_time = time - get_double_support_t_start(step_index);
-    dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
+  // // interpolation index to use
+  // int step_index = which_step_index_to_use(time);  
+  // double local_time;
 
-    std::cout << "poly vel" << std::endl;
-    local_time = time - get_t_step_start(step_index);
-    std::cout << "  poly interpolation:" << dcm_vel_out.transpose() << std::endl;
-    std::cout << "  exp interpolation:" << get_DCM_exp(step_index, local_time).transpose() << std::endl;
+  // // std::cout << "step_index " << step_index << std::endl;
+  // // Use Polynomial interpolation
+  // if (time <= get_double_support_t_end(step_index)){
+  //   local_time = time - get_double_support_t_start(step_index);
+  //   dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
 
-  }else{ // Use exponential interpolation
-    local_time = time - get_t_step_start(step_index);
-    dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
-  }  
+  //   // std::cout << "poly vel" << std::endl;
+  //   local_time = time - get_t_step_start(step_index);
+  //   // std::cout << "  local_time = " << local_time << std::endl;
+  //   // std::cout << "  poly interpolation:" << dcm_vel_out.transpose() << std::endl;
+  //   // std::cout << "  exp interpolation:" << get_DCM_vel_exp(step_index, local_time).transpose() << std::endl;
+
+  // }else{ // Use exponential interpolation
+  //   local_time = time - get_t_step_start(step_index);
+  //   dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
+  // }  
+
+
+  int step_index = which_step_index(time);
+  double local_time = time - get_t_step_start(step_index);
+  dcm_vel_out = get_DCM_vel_exp(step_index, local_time);
+}
+
+
+int DCMWalkingReference::which_step_index(const double t){
+  // clamp to 0.0
+  if (t <= 0.0){
+    return 0;
+  }
+
+  double t_exp_step_start = 0.0; // Double support starting time.
+  double t_exp_step_end = 0.0; // step's exponential ending time.
+
+  for (int i = 0; i < rvrp_list.size(); i++){
+    t_exp_step_start = get_t_step_start(i);
+    t_exp_step_end = get_t_step_end(i);
+    if ((t_exp_step_start <= t) && (t <= t_exp_step_end)){
+      return i;
+    }
+  }
+  // the requested time is beyond so give the last step index
+  return rvrp_list.size() - 1;
+
+
 }
 
 
