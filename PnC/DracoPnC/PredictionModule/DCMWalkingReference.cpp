@@ -245,6 +245,15 @@ void DCMWalkingReference::computeDCM_states(){
   compute_reference_com();
 }
 
+double DCMWalkingReference::get_eoDS_transition_time(){
+  return (1.0-alpha_ds)*t_ds;
+}
+
+double DCMWalkingReference::get_iniDS_transition_time(){
+  return alpha_ds*t_ds;
+}
+
+
 void DCMWalkingReference::printBoundaryConditions(){
   Eigen::Vector3d val;
   for (int i = 0; i < rvrp_list.size(); i++){

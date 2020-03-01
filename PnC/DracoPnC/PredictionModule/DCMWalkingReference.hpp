@@ -110,10 +110,14 @@ public:
   // if the step_index is a swing type, returns true an populates the swing start time and end
   bool get_t_swing_start_end(const int step_index, double & swing_start_time, double & swing_end_time);
 
-
   // returns the polynomial duration for the given step index
   double get_polynomial_duration(const int step_index);
 
+  // Get the initial and end of double support transition times
+  double get_eoDS_transition_time();
+  double get_iniDS_transition_time();  
+
+  // Returns the type of VRP. Clamps the index to valid values.
   int get_r_vrp_type(const int step_index);
 
 private:
