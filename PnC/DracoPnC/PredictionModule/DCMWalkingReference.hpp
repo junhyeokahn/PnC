@@ -14,10 +14,11 @@ public:
   DCMWalkingReference();
   ~DCMWalkingReference(); 
 
-  static int const DCM_SWING_VRP_TYPE;
+  static int const DCM_RL_SWING_VRP_TYPE;
+  static int const DCM_LL_SWING_VRP_TYPE;
+
   static int const DCM_TRANSFER_VRP_TYPE;
   static int const DCM_END_VRP_TYPE;
-
 
   std::vector<int> rvrp_type_list; // List of type of virtual repelant point
 

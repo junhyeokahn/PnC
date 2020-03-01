@@ -1,8 +1,9 @@
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReference.hpp>
 
-int const DCMWalkingReference::DCM_SWING_VRP_TYPE = 1;
-int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 2;
-int const DCMWalkingReference::DCM_END_VRP_TYPE = 3;
+int const DCMWalkingReference::DCM_RL_SWING_VRP_TYPE = 1;
+int const DCMWalkingReference::DCM_LL_SWING_VRP_TYPE = 2;
+int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 3;
+int const DCMWalkingReference::DCM_END_VRP_TYPE = 4;
 
 DCMWalkingReference::DCMWalkingReference(){
     std::cout << "[DCMWalkingReference] Constructed" << std::endl;
@@ -89,8 +90,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
       }
     }
     // -----------------------------------------------------------------
-    // Specify that this is the eos for the previous rvrp
-    rvrp_type_list.push_back(DCM_SWING_VRP_TYPE);
+
+    // Specify the right swing VRP type
+    input_footstep_list[i].robot_side == DRACO_LEFT_FOOTSTEP ? rvrp_type_list.push_back(DCM_LL_SWING_VRP_TYPE) : rvrp_type_list.push_back(DCM_RL_SWING_VRP_TYPE);
 
     // Add this rvrp to the list and also populate the DCM states
     rvrp_list.push_back(current_rvrp);
@@ -162,7 +164,8 @@ double DCMWalkingReference::get_t_step(const int & step_i){
   // Use transfer time for double support and overall step time for swing types
   if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_TRANSFER_VRP_TYPE){
     return t_transfer + t_ds; 
-  }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_SWING_VRP_TYPE){
+  }else if ((rvrp_type_list[step_i] == DCMWalkingReference::DCM_RL_SWING_VRP_TYPE) || 
+            (rvrp_type_list[step_i] == DCMWalkingReference::DCM_LL_SWING_VRP_TYPE)){
     return t_ss + t_ds; // every swing has a double support transfer
   }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_END_VRP_TYPE){
     return t_ds*(1-alpha_ds);
