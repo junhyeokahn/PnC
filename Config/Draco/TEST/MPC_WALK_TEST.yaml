@@ -26,15 +26,11 @@ control_configuration:
         position_break_freq: 1.0 # Hz # 0.0 # Higher value decays to current jpos faster
 
         # Task Weights
-        # foot_rz_xyz_kp: [200.0, 200.0, 1000.0, 1000.0]
-        # foot_rz_xyz_kd: [62, 62, 62, 62]
         foot_rz_xyz_kp: [300.0, 300.0, 300.0, 300.0]
         foot_rz_xyz_kd: [35, 35, 35, 35]
 
         com_kp: [100.0, 100.0, 400.0]
         com_kd: [20.0, 20.0, 40.0]
-        # com_kp: [4000.0, 4000.0, 4000.0]
-        # com_kd: [126.0, 126.0, 126.0]
  
         body_kp: [100.0, 100.0, 400.0]
         body_kd: [20.0, 20.0, 40.0]
@@ -43,7 +39,7 @@ control_configuration:
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 0.0
+        w_contact_weight: 1e-4
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
