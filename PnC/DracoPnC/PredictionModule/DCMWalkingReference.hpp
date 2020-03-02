@@ -2,6 +2,7 @@
 #define DCM_WALKING_PATTERN_GENERATOR_H
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
+#include <Utils/Math/hermite_quaternion_curve.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Eigen/Dense>
 #include <cmath>
@@ -31,6 +32,9 @@ public:
 
   // map containing the rvrp index that have a corresponding footstep swing
   std::map<int, int> rvrp_index_to_footstep_index;
+  // Vector containing hermite quaternion curve objects for the pelvis orientation.
+  // one curve per RVRP.
+  std::vector<HermiteQuaternionCurve> pelvis_ori_quat_curves;
 
   // Initial and Boundary Conditions for the continuous DS trajectory
   std::vector<Eigen::Vector3d> dcm_ini_DS_list; 
@@ -85,6 +89,8 @@ public:
   void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
   void get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out);
   void get_ref_reaction_force(const double t, Eigen::Vector3d & f_out);
+
+  // void get_ref_ori_ang_vel_acc(const double t, Eigen::Quaterniond quat_out Eigen::Vector3d & com_vel_out);
 
   // computes the CoM velocity given the current CoM position and DCM velocity state.
   void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
@@ -146,6 +152,10 @@ private:
   std::vector<Eigen::Vector3d> ref_com_pos;
   std::vector<Eigen::Vector3d> ref_com_vel;
 
+  // computes the reference pelvis orientation.
+  void compute_reference_pelvis_ori();
+  DracoFootstep initial_leftfoot_stance;
+  DracoFootstep initial_rightfoot_stance;
 
   // input: r_vrp_d_i - the desired virtual repelant point for the i-th step.
   //        t_step    - the time interval to use for backwards integration

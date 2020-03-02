@@ -6,6 +6,8 @@ int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 3;
 int const DCMWalkingReference::DCM_END_VRP_TYPE = 4;
 
 DCMWalkingReference::DCMWalkingReference(){
+    initial_leftfoot_stance.setLeftSide();
+    initial_rightfoot_stance.setRightSide();
     std::cout << "[DCMWalkingReference] Constructed" << std::endl;
 } 
 
@@ -691,4 +693,51 @@ void DCMWalkingReference::get_ref_com_vel(const double t, Eigen::Vector3d & com_
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   int index = int(time/dt_local);
   com_vel_out = ref_com_vel[index];
+}
+
+void DCMWalkingReference::compute_reference_pelvis_ori(){
+  pelvis_ori_quat_curves.clear();
+
+  DracoFootstep prev_left_stance = initial_leftfoot_stance;
+  DracoFootstep prev_right_stance = initial_rightfoot_stance;
+  DracoFootstep stance_step;
+  DracoFootstep target_step;
+  DracoFootstep midfeet;
+
+  // Initialize pelvis orientation
+  midfeet.computeMidfeet(prev_left_stance, prev_right_stance, midfeet);
+  Eigen::Quaterniond current_pelvis_ori = midfeet.orientation;
+
+  // Initialize the footstep counter
+  int step_counter = 0;
+
+  for(int i = 0; i < rvrp_type_list.size(); i++){
+    // Swing State
+    if ((rvrp_type_list[i] == DCM_RL_SWING_VRP_TYPE) || (rvrp_type_list[i] == DCM_LL_SWING_VRP_TYPE)){
+      target_step = footstep_list[step_counter];
+      if (target_step.robot_side == DRACO_LEFT_FOOTSTEP){
+        stance_step = prev_right_stance;
+        prev_left_stance = target_step;
+      }else{
+        stance_step = prev_left_stance;
+        prev_right_stance = target_step;
+      }
+      // Find the midfeet 
+      midfeet.computeMidfeet(stance_step, target_step, midfeet);
+      // Create the hermite quaternion curve object
+      pelvis_ori_quat_curves.push_back(HermiteQuaternionCurve(current_pelvis_ori, Eigen::Vector3d::Zero(),
+                                                              midfeet.orientation, Eigen::Vector3d::Zero()));
+      // Update the pelvis orientation
+      current_pelvis_ori = midfeet.orientation;
+      // Increment the step counter
+      step_counter++;
+    }else{
+      // Orientation is constant during transfers
+      midfeet.computeMidfeet(prev_left_stance, prev_right_stance, midfeet);
+      current_pelvis_ori = midfeet.orientation;
+      pelvis_ori_quat_curves.push_back(HermiteQuaternionCurve(current_pelvis_ori, Eigen::Vector3d::Zero(),
+                                                              current_pelvis_ori, Eigen::Vector3d::Zero()));
+    }
+  }
+
 }
