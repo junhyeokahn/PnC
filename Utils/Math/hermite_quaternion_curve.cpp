@@ -64,7 +64,7 @@ void HermiteQuaternionCurve::initialize_data_structures(){
 
   omega_1 = omega_1aa.axis() * omega_1aa.angle(); 
   omega_2 = omega_2aa.axis() * omega_2aa.angle();  
-  omega_3 = omega_1aa.axis() * omega_3aa.angle();
+  omega_3 = omega_3aa.axis() * omega_3aa.angle();
 
   std::cout << "omega_1:" << omega_1.transpose() << std::endl;
   std::cout << "omega_2:" << omega_2.transpose() << std::endl;

@@ -191,4 +191,18 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	}
 
 
+	// Eigen::Quaterniond start( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+	// Eigen::Quaterniond rz( Eigen::AngleAxisd(M_PI/12.0, Eigen::Vector3d::UnitZ()) );
+	// HermiteQuaternionCurve curve(start, Eigen::Vector3d(0.0,0.0,0.0),
+	// 							 rz, Eigen::Vector3d(0,0.0,2));
+	// int N_test = int(1.0/dt);
+	// double s = 0;
+	// printf("s, wx, wy, wz\n");
+	// for(int i = 0; i < (N_test + 1); i++){
+	// 	s = i*dt;
+	// 	curve.getAngularVelocity(s, ang_vel_ref);
+	// 	printf("%0.3f, %0.3f, %0.3f, %0.3f \n", s, ang_vel_ref[0], ang_vel_ref[1], ang_vel_ref[2]);
+	// }
+
+
 }
