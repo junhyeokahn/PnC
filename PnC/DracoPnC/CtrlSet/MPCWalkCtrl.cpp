@@ -13,6 +13,7 @@
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
+#include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
 
 // interpolators
 #include <Utils/Math/hermite_curve_vec.hpp>
@@ -102,7 +103,8 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     // Set which contact points from the contact_list_ corresponds to which footstep
     std::vector<int> contact_index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
                                               DRACO_LEFT_FOOTSTEP, DRACO_LEFT_FOOTSTEP};
-    reference_trajectory_module_ = new WalkingReferenceTrajectoryModule(contact_index_to_side);
+    reference_trajectory_module_ = new DCMWalkingReferenceTrajectoryModule(contact_index_to_side);
+
     references_set_once_ = false;
 
     left_foot_start_ = new DracoFootstep();
@@ -434,11 +436,15 @@ void MPCWalkCtrl::references_setup(){
             }
 
             // Update the reference trajectory module
+            ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
+
+
+
             reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
 
             // update MPC costs for walking.
-            convex_mpc->setCostVec(mpc_cost_vec_walk_);
-            convex_mpc->setTerminalCostVec(true, mpc_terminal_cost_vec_);
+            // convex_mpc->setCostVec(mpc_cost_vec_walk_);
+            // convex_mpc->setTerminalCostVec(true, mpc_terminal_cost_vec_);
             references_set_once_ = true;
         }
     }    
@@ -461,9 +467,13 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
     //     }
     // }
 
-    Eigen::Vector3d x_com_out;
-    Eigen::Quaterniond x_ori_out;
+    Eigen::Vector3d com_pos_ref, com_vel_ref;
+    Eigen::Quaterniond ori_ref;
     Eigen::Vector3d euler_yaw_pitch_roll;
+
+    // Angular velocity and acceleration references
+    Eigen::Vector3d ang_vel_ref, ang_acc_ref;
+    ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
@@ -472,14 +482,20 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
     for(int i = 0; i < mpc_horizon_; i++){
         // Time 
         t_predict = state_machine_time_ + (i+1)*mpc_dt_;
-        reference_trajectory_module_->getMPCRefComAndOri(t_predict, x_com_out, x_ori_out);
+        // reference_trajectory_module_->getMPCRefComAndOri(t_predict, com_pos_ref, ori_ref);
+
+        if (state_machine_time_ >= walk_start_time_){
+            reference_trajectory_module_->getMPCRefComPosandVel(t_predict, com_pos_ref, com_vel_ref);
+            reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(t_predict, ori_ref, ang_vel_ref, ang_acc_ref);            
+        }
+
 
         mpc_Xdes_[i*n + 0] = 0.0; // Desired Roll
         mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
         mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
 
         if (t_predict >= walk_start_time_){
-            euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(x_ori_out);
+            euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
             mpc_Xdes_[i*n + 0] = euler_yaw_pitch_roll[2]; // Desired Roll
             mpc_Xdes_[i*n + 1] = euler_yaw_pitch_roll[1]; // Desired Pitch
             mpc_Xdes_[i*n + 2] = euler_yaw_pitch_roll[0]; // Desired Yaw            
@@ -493,12 +509,12 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
 
         mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
 
-        // there's a brief moment where x_com_out is 0.0. which causes the robot to lean on the other foot.
+        // there's a brief moment where com_pos_ref is 0.0. which causes the robot to lean on the other foot.
         // the fix is probably to use a dcm reference trajectory.
         // if (t_predict >= walk_start_time_){
         if (state_machine_time_ >= walk_start_time_){
-            mpc_Xdes_[i*n + 3] = x_com_out[0];
-            mpc_Xdes_[i*n + 4] = x_com_out[1];
+            mpc_Xdes_[i*n + 3] = com_pos_ref[0];
+            mpc_Xdes_[i*n + 4] = com_pos_ref[1];
         }
 
         // Wait for contact transition to finish
@@ -509,9 +525,17 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         }
 
         if (state_machine_time_ >= walk_start_time_){
-             mpc_Xdes_[i*n + 5] = x_com_out[2];
+             mpc_Xdes_[i*n + 5] = com_pos_ref[2];
         }
         // ----------------------------------------------------------------
+
+        // Set Angular Velocity ref
+        if (state_machine_time_ >= walk_start_time_){
+            mpc_Xdes_[i*n + 6] = ang_vel_ref[0];
+            mpc_Xdes_[i*n + 7] = ang_vel_ref[1];
+            mpc_Xdes_[i*n + 8] = ang_vel_ref[2];            
+        }
+
         // Set CoM Velocity -----------------------------------------------
         mpc_Xdes_[i*n + 9] = 0.0;
         mpc_Xdes_[i*n + 10] = 0.0;
@@ -524,7 +548,9 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         }
 
         if (state_machine_time_ >= walk_start_time_){
-             mpc_Xdes_[i*n + 11] = 0.0;
+             mpc_Xdes_[i*n + 9] = com_vel_ref[0];
+             mpc_Xdes_[i*n + 10] = com_vel_ref[1];
+             mpc_Xdes_[i*n + 11] = com_vel_ref[2];
         }
 
         // TODO: if the swing has ended set desired com position to be the current midfoot.
@@ -760,6 +786,44 @@ void MPCWalkCtrl::task_setup() {
     double des_acc_y = xddot_traj_des[4]; 
     double des_acc_z = xddot_traj_des[5]; 
 
+    Eigen::Vector3d com_pos_ref, com_vel_ref;
+    Eigen::Quaterniond ori_ref;
+    Eigen::Vector3d euler_yaw_pitch_roll;
+
+    // Angular velocity and acceleration references
+    Eigen::Vector3d ang_vel_ref, ang_acc_ref;
+    ang_vel_ref.setZero(); ang_acc_ref.setZero();
+
+    // if (state_machine_time_ >= walk_start_time_){
+    //     reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
+    //     reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
+
+    //     euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
+    //     des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
+    //     des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
+    //     des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
+
+    //     des_pos_x = com_pos_ref[0]; 
+    //     des_pos_y = com_pos_ref[1]; 
+    //     des_pos_z = com_pos_ref[2]; 
+
+    //     des_rx_rate = ang_vel_ref[0]; 
+    //     des_ry_rate = ang_vel_ref[1]; 
+    //     des_rz_rate = ang_vel_ref[2]; 
+
+    //     des_vel_x = com_vel_ref[0]; 
+    //     des_vel_y = com_vel_ref[1]; 
+    //     des_vel_z = com_vel_ref[2]; 
+
+    //     des_rx_acc = ang_acc_ref[0]; 
+    //     des_ry_acc = ang_acc_ref[1]; 
+    //     des_rz_acc = ang_acc_ref[2]; 
+
+    //     des_acc_x = 0.0; 
+    //     des_acc_y = 0.0; 
+    //     des_acc_z = 0.0;
+    // }
+
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
@@ -994,20 +1058,20 @@ void MPCWalkCtrl::task_setup() {
     // task_list_.push_back(lfoot_front_task);
     // task_list_.push_back(lfoot_back_task);
 
-    if (ctrl_state_ == DRACO_STATE_RLS){
+    // if (ctrl_state_ == DRACO_STATE_RLS){
         task_list_.push_back(rfoot_line_task);
-        task_list_.push_back(lfoot_front_task);
-        task_list_.push_back(lfoot_back_task);
-    }else if (ctrl_state_ == DRACO_STATE_LLS){
-        task_list_.push_back(rfoot_front_task);
-        task_list_.push_back(rfoot_back_task);            
+        // task_list_.push_back(lfoot_front_task);
+    //     task_list_.push_back(lfoot_back_task);
+    // }else if (ctrl_state_ == DRACO_STATE_LLS){
+    //     task_list_.push_back(rfoot_front_task);
+    //     task_list_.push_back(rfoot_back_task);            
         task_list_.push_back(lfoot_line_task);            
-    }else{
-        task_list_.push_back(rfoot_front_task);
-        task_list_.push_back(rfoot_back_task);
-        task_list_.push_back(lfoot_front_task);
-        task_list_.push_back(lfoot_back_task);
-    }
+    // }else{
+    //     task_list_.push_back(rfoot_front_task);
+    //     task_list_.push_back(rfoot_back_task);
+    //     task_list_.push_back(lfoot_front_task);
+    //     task_list_.push_back(lfoot_back_task);
+    // }
 
     // task_list_.push_back(total_joint_task_);
     // task_list_.push_back(ang_momentum_task);
@@ -1021,20 +1085,20 @@ void MPCWalkCtrl::task_setup() {
     // w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
     // w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
 
-    if (ctrl_state_ == DRACO_STATE_RLS){
+    // if (ctrl_state_ == DRACO_STATE_RLS){
         w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
         w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
-        w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
-    }else if (ctrl_state_ == DRACO_STATE_LLS){
-        w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-        w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-        w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
-    }else{
-        w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-        w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-        w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
-        w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
-    }
+    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
+    // }else if (ctrl_state_ == DRACO_STATE_LLS){
+    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
+    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
+    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
+    // }else{
+    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
+    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
+    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
+    //     w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
+    // }
 
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
     // w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum

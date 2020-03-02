@@ -10,6 +10,7 @@ class IHWBC;
 class MPCDesiredTrajectoryManager;
 class GaitCycle;
 
+class DCMWalkingReferenceTrajectoryModule;
 class WalkingReferenceTrajectoryModule;
 class DracoFootstep;
 

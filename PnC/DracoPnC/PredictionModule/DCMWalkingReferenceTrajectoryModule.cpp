@@ -34,10 +34,16 @@ void DCMWalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, 
 void DCMWalkingReferenceTrajectoryModule::getMPCRefQuatAngVelAngAcc(const double time, Eigen::Quaterniond & quat_out,
 				 					                                                   Eigen::Vector3d & ang_vel_out,
 				 					                                                   Eigen::Vector3d & ang_acc_out){
+	if (footstep_list_.size() == 0){
+		return;
+	}
 	dcm_reference.get_ref_ori_ang_vel_acc(time, quat_out, ang_vel_out, ang_acc_out);
 }
 
 void DCMWalkingReferenceTrajectoryModule::getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out){
+	if (footstep_list_.size() == 0){
+		return;
+	}
 	dcm_reference.get_ref_com(time, x_com_out);
 	dcm_reference.get_ref_com_vel(time, x_com_vel_out);	
 }
@@ -50,6 +56,10 @@ double DCMWalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double 
 // helper function to identify which footstep is in swing
 // if false. the foot is in not in swing for the time queried
 bool DCMWalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double time, int & footstep_index){
+	if (footstep_list_.size() == 0){
+		return false;
+	}
+
     // Not in swing if walking has not started yet.
     double t_query = time - t_walk_start_;
     if (t_query < 0.0){

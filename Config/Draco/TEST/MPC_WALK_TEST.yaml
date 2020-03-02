@@ -28,11 +28,11 @@ control_configuration:
         # Task Weights
         # foot_rz_xyz_kp: [200.0, 200.0, 1000.0, 1000.0]
         # foot_rz_xyz_kd: [62, 62, 62, 62]
-        foot_rz_xyz_kp: [400.0, 400.0, 1000.0, 1000.0]
-        foot_rz_xyz_kd: [40, 40, 64, 64]
+        foot_rz_xyz_kp: [300.0, 300.0, 300.0, 300.0]
+        foot_rz_xyz_kd: [35, 35, 35, 35]
 
-        com_kp: [2000.0, 2000.0, 2000.0]
-        com_kd: [88.0, 88.0, 88.0]
+        com_kp: [100.0, 100.0, 400.0]
+        com_kd: [20.0, 20.0, 40.0]
         # com_kp: [4000.0, 4000.0, 4000.0]
         # com_kd: [126.0, 126.0, 126.0]
  
@@ -43,7 +43,7 @@ control_configuration:
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 1e-6
+        w_contact_weight: 0.0
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
@@ -82,7 +82,7 @@ control_configuration:
         mpc_toe_heel_smooth: 1e-4 # Parameter for smoothing the forces between the toe and the heel
         mpc_do_toe_heel_smoothing: false # Whether to use toe heel smoothing
         # mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
-        mpc_cost_vec: [2.5, 2.5, 2.5, 2.5, 2.5, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
+        mpc_cost_vec: [2.5, 2.5, 2.5, 10.0, 10.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]
         # mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 30.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
         # mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 0.0]
         mpc_cost_vec_walk: [0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 5.0, 5.0, 1.0, 1.0, 1.0, 10.0, 0.0]
