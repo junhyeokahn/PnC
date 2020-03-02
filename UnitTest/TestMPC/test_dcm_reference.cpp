@@ -189,5 +189,4 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	}
 
 
-
 }

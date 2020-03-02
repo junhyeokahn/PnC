@@ -65,6 +65,10 @@ void HermiteQuaternionCurve::initialize_data_structures(){
   omega_1 = omega_1aa.axis() * omega_1aa.angle(); 
   omega_2 = omega_2aa.axis() * omega_2aa.angle();  
   omega_3 = omega_1aa.axis() * omega_3aa.angle();
+
+  std::cout << "omega_1:" << omega_1.transpose() << std::endl;
+  std::cout << "omega_2:" << omega_2.transpose() << std::endl;
+  std::cout << "omega_3:" << omega_3.transpose() << std::endl;
 }
 
 void HermiteQuaternionCurve::computeBasis(const double & s_in){
@@ -73,7 +77,7 @@ void HermiteQuaternionCurve::computeBasis(const double & s_in){
   b2 = 3*std::pow(s_, 2) - 2*std::pow((s_), 3);
   b3 = std::pow(s_, 3);
 
-  bdot1 = -3*std::pow((1-s_),2);
+  bdot1 = 3*std::pow((1-s_),2);
   bdot2 = 6*s_ - 6*std::pow((s_), 2);
   bdot3 = 3*std::pow((s_), 2);
 
@@ -99,7 +103,23 @@ void HermiteQuaternionCurve::getAngularVelocity(const double & s_in, Eigen::Vect
   // local frame: w(t) = q^-1(t)*qdot(t)
   s_ = this->clamp(s_in);  
   computeBasis(s_);
-  ang_vel_out = omega_1*b1 + omega_2 * b2 + omega_3 * b3;
+
+  qtmp1 = Eigen::AngleAxisd(omega_1aa.angle()*b1, omega_1aa.axis());
+  qtmp2 = Eigen::AngleAxisd(omega_2aa.angle()*b2, omega_2aa.axis());
+  qtmp3 = Eigen::AngleAxisd(omega_3aa.angle()*b3, omega_3aa.axis());
+
+  Eigen::Quaterniond q1dot; q1dot.vec() = omega_1*bdot1; q1dot *= qtmp1;
+  Eigen::Quaterniond q2dot; q2dot.vec() = omega_2*bdot2; q2dot *= qtmp2;
+  Eigen::Quaterniond q3dot; q3dot.vec() = omega_3*bdot3; q3dot *= qtmp3;
+
+  // Computing global frame angular velocity
+  Eigen::Quaterniond quat_dot;
+  Eigen::Quaterniond quat_out = qtmp3*qtmp2*qtmp1*q0; // global frame
+
+  quat_dot.vec() = (q3dot*(qtmp2*qtmp1*q0)).vec() + (q2dot*(qtmp3*qtmp1*q0)).vec() + (q1dot*(qtmp3*qtmp2*q0)).vec();
+  quat_dot.w() = (q3dot*(qtmp2*qtmp1*q0)).w() + (q2dot*(qtmp3*qtmp1*q0)).w() + (q1dot*(qtmp3*qtmp2*q0)).w();
+
+  ang_vel_out = 2.0*(quat_dot*quat_out.conjugate()).vec(); //omega_1*b1 + omega_2 * b2 + omega_3 * b3;
 }
 
 // For world frame
@@ -108,6 +128,7 @@ void HermiteQuaternionCurve::getAngularAcceleration(const double & s_in, Eigen::
   // local frame: a(t) = q^-1(t)*qddot(t) - (q^-1(t)*qdot(t))^2
   s_ = this->clamp(s_in);  
   computeBasis(s_);
+
   ang_acc_out = omega_1*bdot1 + omega_2*bdot2 + omega_3*bdot3;
 }
 

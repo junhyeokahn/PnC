@@ -772,11 +772,13 @@ void DCMWalkingReference::get_ref_ori_ang_vel_acc(const double t, Eigen::Quatern
     // Update trajectory duration and interpolation variable
     traj_duration = t_traj_end - t_traj_start;
     s = (time_query - t_traj_start)/traj_duration;
-    // std::cout << "t:" << time << " s:" << s << std::endl;
   }
 
   // Obtain the reference values
   pelvis_ori_quat_curves[step_index].evaluate(s, quat_out);
   pelvis_ori_quat_curves[step_index].getAngularVelocity(s, ang_vel_out);
   pelvis_ori_quat_curves[step_index].getAngularAcceleration(s, ang_acc_out);
+
+  // std::cout << "t:" << time << " s:" << s << " ang_vel_out = " << ang_vel_out.transpose() << std::endl;
+
 }
