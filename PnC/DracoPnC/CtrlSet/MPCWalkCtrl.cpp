@@ -394,11 +394,11 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.25, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(0.1, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/6.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
@@ -406,7 +406,7 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             DracoFootstep lfootstep_1; // take a left footstep
-            lfootstep_1.setPosOriSide(left_foot_start_->position + foot_translate, 
+            lfootstep_1.setPosOriSide(left_foot_start_->position + foot_translate*2, 
                                       foot_rotate*left_foot_start_->orientation, 
                                       DRACO_LEFT_FOOTSTEP);
 
@@ -428,8 +428,8 @@ void MPCWalkCtrl::references_setup(){
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
-            // desired_footstep_list_.push_back(lfootstep_1);
-            
+            desired_footstep_list_.push_back(lfootstep_1);
+
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
                 desired_footstep_list_[i].printInfo();
@@ -556,7 +556,7 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
         // TODO: if the swing has ended set desired com position to be the current midfoot.
 
         // printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
-        //         t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 1],
+        //         t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 2],
         //         mpc_Xdes_[i*n + 3],  mpc_Xdes_[i*n + 4], mpc_Xdes_[i*n + 5]);
 
         // std::cout << "t_pred:" << t_predict << " x_des[5] = " << mpc_Xdes_[i*n + 5] << "xdot_des[11] = " << mpc_Xdes_[i*n + 11] << std::endl;
@@ -1101,7 +1101,7 @@ void MPCWalkCtrl::task_setup() {
     // }
 
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
-    // w_task_heirarchy_[7] = w_task_ang_momentum_; // angular momentum
+    // w_task_heirarchy_[4] = w_task_ang_momentum_; // angular momentum
 
 }
 

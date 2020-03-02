@@ -45,7 +45,6 @@ public:
 
   // DCM walking parameters
   double t_transfer = 0.1 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
-  // double t_ds = 0.2; // double support polynomial transfer time
   double t_ds = 0.1; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
 
