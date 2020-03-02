@@ -153,8 +153,8 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
-    w_task_rfoot_ = 1e5;
-    w_task_lfoot_ = 1e5;
+    w_task_rfoot_ = 100;// 1e5;
+    w_task_lfoot_ = 100;// 1e5;
     w_task_com_ = 1e-3;
     w_task_body_ = 1e-3;
     w_task_joint_ = 1e-6;
