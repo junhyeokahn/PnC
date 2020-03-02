@@ -153,10 +153,10 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
-    w_task_rfoot_ = 100;
-    w_task_lfoot_ = 100;
-    w_task_com_ = 1e-4;
-    w_task_body_ = 1e-4;
+    w_task_rfoot_ = 1e5;
+    w_task_lfoot_ = 1e5;
+    w_task_com_ = 1e-3;
+    w_task_body_ = 1e-3;
     w_task_joint_ = 1e-6;
 
     w_task_ang_momentum_ = 1e-5;
@@ -398,7 +398,7 @@ void MPCWalkCtrl::references_setup(){
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/5.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/6.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
@@ -1058,6 +1058,9 @@ void MPCWalkCtrl::task_setup() {
     task_list_.push_back(lfoot_front_task);
     task_list_.push_back(lfoot_back_task);
 
+    // task_list_.push_back(rfoot_line_task);
+    // task_list_.push_back(lfoot_line_task);            
+
     // if (ctrl_state_ == DRACO_STATE_RLS){
         // task_list_.push_back(rfoot_line_task);
         // task_list_.push_back(lfoot_front_task);
@@ -1080,10 +1083,28 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[0] = w_task_com_; // COM
     w_task_heirarchy_[1] = w_task_body_; // body ori
 
+
     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
     w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
     w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
+
+    if (ctrl_state_ == DRACO_STATE_RLS){
+        w_task_heirarchy_[2] = 1e-2; // rfoot
+        w_task_heirarchy_[3] = 1e-2; // lfoot
+    }else if (ctrl_state_ == DRACO_STATE_LLS){
+        w_task_heirarchy_[4] = 1e-2; // lfoo
+        w_task_heirarchy_[5] = 1e-2; // lfoo
+    }
+
+    // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
+    // w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
+    // if (ctrl_state_ == DRACO_STATE_RLS){
+    //     w_task_heirarchy_[2] = 1e-4; // rfoot
+    // }else if (ctrl_state_ == DRACO_STATE_LLS){
+    //     w_task_heirarchy_[3] = 1e-4; // lfoot
+    // }
+
 
     // if (ctrl_state_ == DRACO_STATE_RLS){
         // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
