@@ -105,7 +105,7 @@ TEST(DCMTrajectoryModule, trajectory_module){
 
 	// Initialize Footsteps
 	Eigen::Vector3d foot_translate(0.25, 0.0, 0.0);
-	Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+	Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 	myUtils::pretty_print(foot_rotate, std::cout, "quat_foot_rotate");
 
 	// stance foot is the left foot intially. So let us take a right footstep forward.
@@ -117,7 +117,7 @@ TEST(DCMTrajectoryModule, trajectory_module){
 
 	// stance foot is the left foot intially. So let us take a right footstep forward.
 	DracoFootstep right_footstep2;
-	right_footstep2.setPosOriSide(right_footstep1.position + 2.0*foot_translate, right_footstep1.orientation, DRACO_RIGHT_FOOTSTEP);
+	right_footstep2.setPosOriSide(right_footstep1.position + 2.0*foot_translate, rf_start.orientation, DRACO_RIGHT_FOOTSTEP);
 
 	std::cout << "rf step 1" << std::endl;
 	right_footstep1.printInfo();
@@ -148,13 +148,18 @@ TEST(DCMTrajectoryModule, trajectory_module){
 
 	Eigen::VectorXd max_z_force(index_to_side.size());
 
+	// Orientation references
+	Eigen::Quaterniond x_ori_ref; x_ori_ref.setIdentity();
+	Eigen::Vector3d ang_vel_ref, ang_acc_ref;
+	ang_vel_ref.setZero(); ang_acc_ref.setZero();
+
 	double t = 0.0;
 	double t_total = 4.0;
 	double dt = 0.01;
 
 	int N_size = int(t_total/dt);
 	int footstep_index = 0;
-	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz, vrp_x, vrp_y, vrp_z, footstep_index, fz0, fz1, fz2, fz3 \n");
+	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz, vrp_x, vrp_y, vrp_z, footstep_index, fz0, fz1, fz2, fz3, qx, qy, qz, qw, wx, wy, wz, ax, ay, az \n");
 	for(int i = 0; i < (N_size + 1); i++){
 		t = i*dt;		
 
@@ -172,14 +177,15 @@ TEST(DCMTrajectoryModule, trajectory_module){
 		// dcm_walking_reference_module.dcm_reference.get_ref_com(t, com_pos_ref);
 		// dcm_walking_reference_module.dcm_reference.get_ref_com_vel(t, com_vel_ref);
 	  	dcm_walking_reference_module.dcm_reference.get_ref_r_vrp(t, r_vrp_ref);		
-
+		dcm_walking_reference_module.dcm_reference.get_ref_ori_ang_vel_acc(t, x_ori_ref, ang_vel_ref, ang_acc_ref);
 		dcm_walking_reference_module.getMPCRefComPosandVel(t, com_pos_ref, com_vel_ref);
 
-		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f \n",
+		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f \n",
 			   t, dcm_ref[0], dcm_ref[1], dcm_ref[2], dcm_vel_ref[0], dcm_vel_ref[1], dcm_vel_ref[2],
 			   	  com_pos_ref[0], com_pos_ref[1], com_pos_ref[2], com_vel_ref[0], com_vel_ref[1], com_vel_ref[2],
 			   	  r_vrp_ref[0], r_vrp_ref[1], r_vrp_ref[2], footstep_index,
-			   	  max_z_force[0], max_z_force[1], max_z_force[2], max_z_force[3]);
+			   	  max_z_force[0], max_z_force[1], max_z_force[2], max_z_force[3],
+			   	  x_ori_ref.x(), x_ori_ref.y(), x_ori_ref.z(), x_ori_ref.w(), ang_vel_ref[0], ang_vel_ref[1], ang_vel_ref[2], ang_acc_ref[0], ang_acc_ref[1], ang_acc_ref[2]);
 	}
 
 

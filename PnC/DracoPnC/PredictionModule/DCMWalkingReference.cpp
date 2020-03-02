@@ -245,6 +245,8 @@ void DCMWalkingReference::computeDCM_states(){
   compute_total_trajectory_time();
   // Compute the reference com
   compute_reference_com();
+  // Compute the reference ori
+  compute_reference_pelvis_ori();
 }
 
 double DCMWalkingReference::get_eoDS_transition_time(){
@@ -747,6 +749,10 @@ void DCMWalkingReference::get_ref_ori_ang_vel_acc(const double t, Eigen::Quatern
                                                   Eigen::Vector3d & ang_vel_out,
                                                   Eigen::Vector3d & ang_acc_out){
 
+  if (pelvis_ori_quat_curves.size() == 0){
+    return;
+  }
+
    // offset time and clamp. t_start is global start time.
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   int step_index = which_step_index(time);
@@ -755,9 +761,9 @@ void DCMWalkingReference::get_ref_ori_ang_vel_acc(const double t, Eigen::Quatern
   double traj_duration = t_traj_end - t_traj_start;
 
   // Clamp the time query for general VRP types that are still in transfer
-  double time_query = clampDOUBLE(time, t_traj_start, t_traj_end);  ;
+  double time_query = clampDOUBLE(time, t_traj_start, t_traj_end);  
   // Initialize interpolation variable s.
-  double s = (time_query - t_traj_end)/traj_duration;
+  double s = (time_query - t_traj_start)/traj_duration;
 
   // If it is a swing step, update the trjaectory start times and end.
   if (get_t_swing_start_end(step_index, t_traj_start, t_traj_end)){
@@ -765,7 +771,8 @@ void DCMWalkingReference::get_ref_ori_ang_vel_acc(const double t, Eigen::Quatern
     time_query = clampDOUBLE(time, t_traj_start, t_traj_end);  
     // Update trajectory duration and interpolation variable
     traj_duration = t_traj_end - t_traj_start;
-    s = (time_query - t_traj_end)/traj_duration;
+    s = (time_query - t_traj_start)/traj_duration;
+    // std::cout << "t:" << time << " s:" << s << std::endl;
   }
 
   // Obtain the reference values
