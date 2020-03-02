@@ -97,7 +97,7 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     void box_following_ee_ctrl();
     void fake_grasp();
    public:
-    ScorpioWorldNode(const dart::simulation::WorldPtr& world);
+    ScorpioWorldNode(const dart::simulation::WorldPtr& world, EnvInterface* interface_, EnvInterface* arm_interface_);
     virtual ~ScorpioWorldNode();
 
     void customPreStep() override;

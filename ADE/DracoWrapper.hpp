@@ -1,10 +1,12 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 #include <ADE/DracoSim.hpp>
 
 class DracoWrapper {
 private:
     //PnC, sim, and robot members
     DracoInterface* interface_;
+    ScorpioInterface* arm_interface_;
     DracoSim* simulator_;
 
     //Logical Safety
@@ -23,8 +25,8 @@ public:
     void SetTurnCommand(double th);
     void SetWalkToRelativeCommand(double x, double y, double th);
     void SetHaltCommand();
-    //Scorio Manipulation Methods
-    void SetMoveEndEffectorCommand(double x, double y, double z, double qw, double qx, double qy, double qz);
+    //Scorpio Manipulation Methods
+    void SetMoveEndEffectorCommand(double x, double y, double z);
     void SetCloseGripperCommand();
     void SetOpenGripperCommand();
     //Shutdown the sim and ros nodelet and destruct the PnC instance

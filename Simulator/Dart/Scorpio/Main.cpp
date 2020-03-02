@@ -5,6 +5,8 @@
 #include <Configuration.h>
 #include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 
 void displayJointFrames(const dart::simulation::WorldPtr& world,
                         const dart::dynamics::SkeletonPtr& robot) {
@@ -438,7 +440,7 @@ int main(int argc, char** argv) {
     // Wrap a worldnode
     // ================
     osg::ref_ptr<ScorpioWorldNode> node;
-    node = new ScorpioWorldNode(world);
+    node = new ScorpioWorldNode(world, new DracoInterface(), new ScorpioInterface());
 
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
