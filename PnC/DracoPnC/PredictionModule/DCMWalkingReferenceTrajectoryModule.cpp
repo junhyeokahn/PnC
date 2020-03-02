@@ -1,17 +1,14 @@
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
 
 // Initialize by assigning the contact indices to a robot side.
-DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule
-	(const std::vector<int> & index_to_side_in): WalkingReferenceTrajectoryModule(index_to_side_in){
+DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in){
 
-
-    // t_walk_start_ = 0.0;
+    t_walk_start_ = 0.0;
     // Initialize object pointers
-    // reaction_force_schedule_ptr.reset(new WalkingReactionForceSchedule(this));
-    // walking_rfs_ptr = std::static_pointer_cast<WalkingReactionForceSchedule>(reaction_force_schedule_ptr);
-    // setContactIndexToSide(index_to_side_in);
-    std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
+    reaction_force_schedule_ptr.reset(new DCMWalkingReactionForceSchedule(this));
+    setContactIndexToSide(index_to_side_in);
 
+    std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
 }
 
 DCMWalkingReferenceTrajectoryModule::~DCMWalkingReferenceTrajectoryModule(){
@@ -32,6 +29,11 @@ void DCMWalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, c
 
 void DCMWalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
 
+}
+
+// Get the maximum normal force
+double DCMWalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
+	return std::static_pointer_cast<DCMWalkingReactionForceSchedule>(reaction_force_schedule_ptr)->getMaxNormalForce(index,time);
 }
 
 // helper function to identify which footstep is in swing

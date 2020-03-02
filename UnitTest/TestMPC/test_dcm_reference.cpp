@@ -145,13 +145,16 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	// Get references
 	Eigen::Vector3d dcm_ref, dcm_vel_ref, com_pos_ref, com_vel_ref, r_vrp_ref;
 	dcm_ref.setZero(), dcm_vel_ref.setZero(), com_pos_ref.setZero(), com_vel_ref.setZero();
+
+	Eigen::VectorXd max_z_force(index_to_side.size());
+
 	double t = 0.0;
 	double t_total = 4.0;
 	double dt = 0.01;
 
 	int N_size = int(t_total/dt);
 	int footstep_index = 0;
-	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz, vrp_x, vrp_y, vrp_z, footstep_index\n");
+	printf("t, dcm_x, dcm_y, dcm_z, dcm_vx, dcm_vy, dcm_vz, com_x, com_y, com_z, com_vx, com_vy, com_vz, vrp_x, vrp_y, vrp_z, footstep_index, fz0, fz1, fz2, fz3 \n");
 	for(int i = 0; i < (N_size + 1); i++){
 		t = i*dt;		
 
@@ -160,15 +163,20 @@ TEST(DCMTrajectoryModule, trajectory_module){
 			footstep_index += 1;
 		}
 
+		for(int j = 0; j < index_to_side.size(); j++){
+			max_z_force[j] = dcm_walking_reference_module.getMaxNormalForce(j, t);			
+		}
+
 		dcm_walking_reference_module.dcm_reference.get_ref_dcm(t, dcm_ref);
 		dcm_walking_reference_module.dcm_reference.get_ref_dcm_vel(t, dcm_vel_ref);
 		dcm_walking_reference_module.dcm_reference.get_ref_com(t, com_pos_ref);
 		dcm_walking_reference_module.dcm_reference.get_ref_com_vel(t, com_vel_ref);
 	  	dcm_walking_reference_module.dcm_reference.get_ref_r_vrp(t, r_vrp_ref);		
-		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i \n",
+		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f \n",
 			   t, dcm_ref[0], dcm_ref[1], dcm_ref[2], dcm_vel_ref[0], dcm_vel_ref[1], dcm_vel_ref[2],
 			   	  com_pos_ref[0], com_pos_ref[1], com_pos_ref[2], com_vel_ref[0], com_vel_ref[1], com_vel_ref[2],
-			   	  r_vrp_ref[0], r_vrp_ref[1], r_vrp_ref[2], footstep_index);
+			   	  r_vrp_ref[0], r_vrp_ref[1], r_vrp_ref[2], footstep_index,
+			   	  max_z_force[0], max_z_force[1], max_z_force[2], max_z_force[3]);
 	}
 
 

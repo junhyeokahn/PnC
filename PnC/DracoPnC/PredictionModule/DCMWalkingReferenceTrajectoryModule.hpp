@@ -31,6 +31,9 @@ public:
 
 	void setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
 
+	// Get the maximum normal force
+	double getMaxNormalForce(int index, double time);
+
 	// gets the references 
 	void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
 

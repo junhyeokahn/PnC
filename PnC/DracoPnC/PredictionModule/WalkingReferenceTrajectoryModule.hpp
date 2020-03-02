@@ -40,6 +40,7 @@ class WalkingReactionForceSchedule;
 
 class WalkingReferenceTrajectoryModule{
 public:
+	WalkingReferenceTrajectoryModule();
 	// Initialize by assigning the contact indices to a robot side.
 	WalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in);
 	virtual ~WalkingReferenceTrajectoryModule();

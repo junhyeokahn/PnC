@@ -1,5 +1,8 @@
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
 
+WalkingReferenceTrajectoryModule::WalkingReferenceTrajectoryModule(){
+}
+
 WalkingReferenceTrajectoryModule::WalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in){
     t_walk_start_ = 0.0;
 
