@@ -176,6 +176,7 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
             vf = -w_contact_weight*Fd.transpose()*Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);      
         }else{
             // Target Wrench Minimization
+            // TODO: Modify to perform adjoint mapping to CoM frame.
             // w_f * (sum_i=1^n ||w_i*Fd - Sf J_c_i^T Fr_i ||^2_2) + lambda_Fr*||Fr||^2_2
 
             Pf = Eigen::MatrixXd::Zero(dim_contacts_, dim_contacts_);
