@@ -177,7 +177,9 @@ TEST(DCMTrajectoryModule, trajectory_module){
 		// dcm_walking_reference_module.dcm_reference.get_ref_com(t, com_pos_ref);
 		// dcm_walking_reference_module.dcm_reference.get_ref_com_vel(t, com_vel_ref);
 	  	dcm_walking_reference_module.dcm_reference.get_ref_r_vrp(t, r_vrp_ref);		
-		dcm_walking_reference_module.dcm_reference.get_ref_ori_ang_vel_acc(t, x_ori_ref, ang_vel_ref, ang_acc_ref);
+		// dcm_walking_reference_module.dcm_reference.get_ref_ori_ang_vel_acc(t, x_ori_ref, ang_vel_ref, ang_acc_ref);
+
+		dcm_walking_reference_module.getMPCRefQuatAngVelAngAcc(t, x_ori_ref, ang_vel_ref, ang_acc_ref);
 		dcm_walking_reference_module.getMPCRefComPosandVel(t, com_pos_ref, com_vel_ref);
 
 		printf("%0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %i, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f, %0.3f \n",

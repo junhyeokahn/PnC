@@ -87,6 +87,16 @@ void WalkingReferenceTrajectoryModule::getMPCRefComPosandVel(const double time, 
     getMPCRefComAndOri(time, x_com_out, quat);    
 }
 
+void WalkingReferenceTrajectoryModule::getMPCRefQuatAngVelAngAcc(const double time, Eigen::Quaterniond & quat_out,
+                                                                                    Eigen::Vector3d & ang_vel_out,
+                                                                                    Eigen::Vector3d & ang_acc_out){
+    Eigen::Vector3d x_com_out;
+    ang_vel_out.setZero();
+    ang_acc_out.setZero();
+    getMPCRefComAndOri(time, x_com_out, quat_out);
+}
+
+
 void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
     // Set output to initial
     x_com_out = x_com_start_;

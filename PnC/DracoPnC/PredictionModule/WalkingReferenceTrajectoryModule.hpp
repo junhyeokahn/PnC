@@ -63,6 +63,12 @@ public:
 	virtual int getState(const double time);
 	virtual void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
 	virtual void getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out);
+	virtual void getMPCRefQuatAngVelAngAcc(const double time, Eigen::Quaterniond & quat_out,
+	                                                       Eigen::Vector3d & ang_vel_out,
+	                                                       Eigen::Vector3d & ang_acc_out);
+
+
+
 	virtual double getMaxNormalForce(int index, double time);
 
 	// If true, populates the new footstep landing location
