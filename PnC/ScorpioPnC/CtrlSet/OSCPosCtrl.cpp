@@ -1,12 +1,15 @@
-#include <PnC/ScorpioPnC/OSCPosCtrl.hpp>
+#include <PnC/ScorpioPnC/CtrlSet/OSCPosCtrl.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioDefinition.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 OSCPosCtrl::OSCPosCtrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(2, "OSC POS Ctrl");
+    end_time_ = 0;
     ctrl_count_ = 0;
+    task_dim_ = 6;
     active_joint_idx_.resize(Scorpio::n_adof);
     active_joint_idx_[0] = 0;
     active_joint_idx_[1] = 1;
@@ -15,6 +18,35 @@ OSCPosCtrl::OSCPosCtrl(RobotSystem* _robot) : Controller(_robot) {
     active_joint_idx_[4] = 8;
     active_joint_idx_[5] = 9;
     active_joint_idx_[6] = 10;
+    target_pos_ = Eigen::VectorXd::Zero(3);
+    ini_pos_ = Eigen::VectorXd::Zero(3);
+    ini_vel_ = Eigen::VectorXd::Zero(3);
+    ini_pos_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    ini_vel_q = Eigen::VectorXd::Zero(robot_->getNumDofs());
+    q_kp_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    q_kd_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    end_effector_kp_ = Eigen::VectorXd::Zero(task_dim_);
+    end_effector_kd_ = Eigen::VectorXd::Zero(task_dim_);
+    ini_ori_ = Eigen::Quaternion<double> (1,0,0,0);
+    target_ori_ = Eigen::Quaternion<double> (1,0,0,0);
+    ori_err_ = Eigen::VectorXd::Zero(3);
+
+    des_pos_data_ = Eigen::VectorXd::Zero(7);
+    act_pos_data_ = Eigen::VectorXd::Zero(7);
+    des_vel_data_ = Eigen::VectorXd::Zero(6);
+    act_vel_data_ = Eigen::VectorXd::Zero(6);
+
+    ori_err_data_ = Eigen::VectorXd::Zero(3);
+
+
+    //Save Data
+    DataManager* data_manager = DataManager::GetDataManager();     
+    data_manager->RegisterData(&des_pos_data_,VECT,"des_pos",7);
+    data_manager->RegisterData(&act_pos_data_,VECT,"act_pos",7);
+    data_manager->RegisterData(&des_vel_data_,VECT,"des_vel",6);
+    data_manager->RegisterData(&act_vel_data_,VECT,"act_vel",6);
+
+    data_manager->RegisterData(&ori_err_data_,VECT,"ori_error",3);
 }
 
 OSCPosCtrl::~OSCPosCtrl() {}
@@ -39,29 +71,6 @@ void OSCPosCtrl::oneStep(void* _cmd) {
     }
     //myUtils::pretty_print(S, std::cout, "selection matrix");
 
-    Eigen::VectorXd end_effector_pos_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd end_effector_vel_des = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd end_effector_acc_ff = Eigen::VectorXd::Zero(3);
-    Eigen::VectorXd end_effector_acc_des = Eigen::VectorXd::Zero(3);
-
-    Eigen::VectorXd end_effector_pos_act = robot_->getBodyNodeIsometry("end_effector").translation();
-    Eigen::VectorXd end_effector_vel_act = robot_->getBodyNodeSpatialVelocity("end_effector").tail(3); 
-
-    for (int i = 0; i < 3; ++i) {
-            end_effector_pos_des[i] = myUtils::smooth_changing(ini_pos_[i], ini_pos_[i] + target_pos_[i],
-                                                             end_time_, state_machine_time_);
-            end_effector_vel_des[i] = myUtils::smooth_changing_vel(ini_pos_[i], ini_pos_[i] + target_pos_[i],
-                                                                    end_time_, state_machine_time_);
-            end_effector_acc_ff[i] = myUtils::smooth_changing_acc(ini_pos_[i], ini_pos_[i] + target_pos_[i],
-                                                                    end_time_, state_machine_time_);
-            end_effector_acc_des[i] =
-                end_effector_acc_ff[i] + end_effector_kp_[i] * (end_effector_pos_des[i] - end_effector_pos_act[i]) 
-                + end_effector_kd_[i] * (end_effector_vel_des[i] - end_effector_vel_act[i]);
-
-            //end_effector_acc_des[i] =
-                  //end_effector_kp_[i] * (end_effector_pos_des[i] - end_effector_pos_act[i]) 
-                //- end_effector_kd_[i] * (end_effector_vel_act[i]);
-        }
     Eigen::MatrixXd J_constraints = Eigen::MatrixXd::Zero(6,Scorpio::n_dof);
 
     //dart::dynamics::SkeletonPtr skel_ptr = robot_-> getSkeleton();
@@ -130,17 +139,90 @@ void OSCPosCtrl::oneStep(void* _cmd) {
     //std::cout << "SN_c_bar singularValues" << std::endl;
     //std::cout << svd4.singularValues() << std::endl;
     //std::cout << "============================" << std::endl;
- 
-    Eigen::MatrixXd J_end_effector = robot_->getBodyNodeJacobian("end_effector").block(3,0,3,robot_->getNumDofs());
-    Eigen::MatrixXd J_end_effector_bar = Eigen::MatrixXd::Zero(robot_->getNumDofs(),3);
+
+    // Formulating task space desired acceleration
+    Eigen::VectorXd end_effector_pos_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd end_effector_ori_error = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd end_effector_vel_des = Eigen::VectorXd::Zero(task_dim_);
+    Eigen::VectorXd end_effector_acc_ff = Eigen::VectorXd::Zero(task_dim_);
+    Eigen::VectorXd end_effector_acc_des = Eigen::VectorXd::Zero(task_dim_);
+
+    Eigen::VectorXd end_effector_pos_act = robot_->getBodyNodeIsometry("end_effector").translation();
+    Eigen::Quaternion<double> end_effector_ori_act = Eigen::Quaternion<double> (robot_->getBodyNodeIsometry("end_effector").linear());
+    Eigen::Quaternion<double> end_effector_ori_des = Eigen::Quaternion<double> (1,0,0,0);
+
+    Eigen::VectorXd end_effector_vel_act = robot_->getBodyNodeSpatialVelocity("end_effector"); 
+
+    for (int i = 0; i < 3; ++i) {
+            end_effector_pos_des[i] = myUtils::smooth_changing(ini_pos_[i], target_pos_[i],
+                                                             end_time_, state_machine_time_);
+            end_effector_vel_des[3+i] = myUtils::smooth_changing_vel(ini_pos_[i], target_pos_[i],
+                                                                    end_time_, state_machine_time_);
+            end_effector_acc_ff[3+i] = myUtils::smooth_changing_acc(ini_pos_[i], target_pos_[i],
+                                                                    end_time_, state_machine_time_);
+            end_effector_acc_des[3+i] =
+                 end_effector_acc_ff[3+i] +  end_effector_kp_[3+i] * (end_effector_pos_des[i] - end_effector_pos_act[i]) 
+                + end_effector_kd_[3+i] * (end_effector_vel_des[3+i] - end_effector_vel_act[3+i]);
+        }
+    double t = myUtils::smooth_changing(0,1,end_time_,state_machine_time_);
+    end_effector_ori_des = dart::math::expToQuat(ori_err_ * t) * ini_ori_; 
+    end_effector_ori_error = dart::math::quatToExp(end_effector_ori_des * (end_effector_ori_act.inverse())); 
+
+    double tdot = myUtils::smooth_changing_vel(0,1,end_time_,state_machine_time_);
+    end_effector_vel_des.head(3) = ori_err_ * tdot;
+
+    for (int i = 0; i < 3; ++i) {
+       end_effector_acc_des[i] = end_effector_kp_[i] * end_effector_ori_error[i] 
+                                + end_effector_kd_[i] * (end_effector_vel_des[i] - end_effector_vel_act[i]); 
+    }
+
+    //Save Data
+    des_pos_data_[0] = end_effector_ori_des.w();
+    des_pos_data_[1] = end_effector_ori_des.x();
+    des_pos_data_[2] = end_effector_ori_des.y();
+    des_pos_data_[3] = end_effector_ori_des.z();
+
+    act_pos_data_[0] = end_effector_ori_act.w();
+    act_pos_data_[1] = end_effector_ori_act.x();
+    act_pos_data_[2] = end_effector_ori_act.y();
+    act_pos_data_[3] = end_effector_ori_act.z();
+
+    for (int i = 0; i < 3; ++i) {
+        des_pos_data_[i+4] = end_effector_pos_des[i];
+        act_pos_data_[i+4] = end_effector_pos_act[i];
+    }
+
+    des_vel_data_ = end_effector_vel_des;
+    act_vel_data_ = end_effector_vel_act; 
+
+    ori_err_data_ = end_effector_ori_error;
+    //Done saving Data
+
+
+    Eigen::MatrixXd J_end_effector = robot_->getBodyNodeJacobian("end_effector");
+    //J_end_effector = J_end_effector* N_c;
+    Eigen::MatrixXd J_end_effector_bar = Eigen::MatrixXd::Zero(robot_->getNumDofs(),6);
     myUtils::weightedInverse(J_end_effector,robot_->getInvMassMatrix(),J_end_effector_bar);
+
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd(
+     //J_end_effector, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << " J_end_effector" << std::endl; 
+     //std::cout << svd.singularValues() << std::endl;
+     //std::cout << "============================" << std::endl;
+
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
+     //J_end_effector_bar, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << " J_end_effector_bar" << std::endl; 
+     //std::cout << svd1.singularValues() << std::endl;
+     //std::cout << "============================" << std::endl;
+    
     Eigen::MatrixXd N_end_effector = Eigen::MatrixXd::Identity(Scorpio::n_dof,Scorpio::n_dof) - J_end_effector_bar * J_end_effector; 
-    Eigen::MatrixXd J_end_effector_dot = robot_->getBodyNodeJacobianDot("end_effector").block(3,0,3,robot_->getNumDofs());
     Eigen::VectorXd qddot_des_end_effector = Eigen::VectorXd::Zero(robot_->getNumDofs());
 
-    qddot_des_end_effector = J_end_effector_bar * (end_effector_acc_des - J_end_effector_dot*(robot_->getQdot()));
+    qddot_des_end_effector = J_end_effector_bar * (end_effector_acc_des);
 
-   Eigen::MatrixXd J_q = S;      
+   Eigen::MatrixXd J_q = S;
+   //J_q = J_q*N_end_effector;
    Eigen::VectorXd qddot_des_q = Eigen::VectorXd::Zero(Scorpio::n_dof); 
    Eigen::VectorXd joint_des_acc = Eigen::VectorXd::Zero(Scorpio::n_adof);
    Eigen::MatrixXd J_q_N_end_effector = J_q * N_end_effector;
@@ -152,8 +234,22 @@ void OSCPosCtrl::oneStep(void* _cmd) {
                         + q_kd_[i] * (ini_vel_q[active_joint_idx_[i]] - robot_->getQdot()[active_joint_idx_[i]]);
    }
 
-    qddot_des_q = J_q_N_end_effector_bar * (joint_des_acc - J_q * qddot_des_end_effector); 
+    qddot_des_q = J_q_N_end_effector_bar * (joint_des_acc); 
 
+     //Eigen::JacobiSVD<Eigen::MatrixXd> svd3(
+     //J_end_effector, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     //std::cout << " J_q_N_end_effector" << std::endl;
+     //std::cout << svd3.singularValues() << std::endl;
+     //std::cout << "============================" << std::endl;
+ 
+    Eigen::MatrixXd SN_c_J_q = SN_c_bar.transpose()* J_q_N_end_effector_bar;
+
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd4(
+     SN_c_J_q, Eigen::ComputeThinU | Eigen::ComputeThinV);
+     std::cout << "S_N_J_q" << std::endl; 
+     std::cout << svd4.singularValues() << std::endl;
+     std::cout << "============================" << std::endl;
+ 
     gamma = SN_c_bar.transpose() *(robot_->getMassMatrix() * (qddot_des_end_effector + qddot_des_q) + b_c);
 
     ((ScorpioCommand*)_cmd)->jtrq = gamma;
@@ -167,11 +263,19 @@ void OSCPosCtrl::firstVisit() {
     state_machine_time_= 0.;
     ctrl_count_ = 0;
     ini_pos_ = robot_->getBodyNodeIsometry("end_effector").translation();
+    //TEST
+    target_pos_ = ini_pos_;
+    //TEST
     ini_vel_ = robot_->getBodyNodeSpatialVelocity("end_effector").tail(3); 
     //std::cout << "initial end effector pos" << std::endl;
     //std::cout << ini_pos_ << std::endl;
     ini_pos_q = robot_->getQ();
     ini_vel_q = robot_->getQdot();
+    ini_ori_ = Eigen::Quaternion<double> (robot_->getBodyNodeIsometry("end_effector").linear());
+    //ori_err_ = dart::math::quatToExp(target_ori_*(ini_ori_.inverse()));
+    // TEST
+    ori_err_.setZero();
+    // TEST
 }
 void OSCPosCtrl::lastVisit() {
 }

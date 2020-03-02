@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
-#include <PnC/ScorpioPnC/OSCTest.hpp>
-//#include <PnC/DracoPnC/DracoStateEstimator.hpp>
-//#include <PnC/DracoPnC/DracoStateProvider.hpp>
+#include <PnC/ScorpioPnC/TestSet/OSCTest.hpp>
+#include <PnC/ScorpioPnC/TestSet/GraspingTest.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <PnC/ScorpioPnC/ScorpioStateProvider.hpp>
 #include <string>
 
 ScorpioInterface::ScorpioInterface() : EnvInterface() {
@@ -20,10 +20,7 @@ ScorpioInterface::ScorpioInterface() : EnvInterface() {
     robot_ = new RobotSystem(
         4, THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
      //robot_->printRobotInfo();
-    //state_estimator_ = new DracoStateEstimator(robot_);
-    //sp_ = DracoStateProvider::getStateProvider(robot_);
-
-    //sp_->stance_foot = DracoBodyNode::lFootCenter;
+    sp_ = ScorpioStateProvider::getStateProvider(robot_);
 
     count_ = 0;
     //waiting_count_ = 2;
@@ -36,20 +33,16 @@ ScorpioInterface::ScorpioInterface() : EnvInterface() {
 
     myUtils::color_print(myColor::BoldCyan, border);
 
-    //DataManager* data_manager = DataManager::GetDataManager();
-    //data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", Draco::n_adof);
-    //data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", Draco::n_adof);
-    //data_manager->RegisterData(&cmd_jtrq_, VECT, "command", Draco::n_adof);
+    DataManager* data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&running_time_,DOUBLE,"time",1);
 }
 
 ScorpioInterface::~ScorpioInterface() {
     delete robot_;
     delete test_;
-    //delete state_estimator_;
 }
 
-void ScorpioInterface::getCommand(void* _data, void* _command) {
-
+void ScorpioInterface::getCommand(void* _data, void* _command) { 
     ScorpioCommand* cmd = ((ScorpioCommand*)_command);
     ScorpioSensorData* data = ((ScorpioSensorData*)_data);
 
@@ -60,29 +53,11 @@ void ScorpioInterface::getCommand(void* _data, void* _command) {
         //CropTorque_(cmd);
     }
 
-    //cmd_jtrq_ = cmd->jtrq;
-    //cmd_jvel_ = cmd->qdot;
-    //cmd_jpos_ = cmd->q;
-
-    //std::cout << cmd_jtrq_ << std::endl;
-    //std::cout << "========" << std::endl;
-    //std::cout << cmd_jvel_ << std::endl;
-    //std::cout << "========" << std::endl;
-    //std::cout << cmd_jpos_ << std::endl;
-    //std::cout << "========" << std::endl;
-
     ++count_;
     running_time_ = (double)(count_)*ScorpioAux::ServoRate;
-    //sp_->curr_time = running_time_;
-    //sp_->phase_copy = test_->getPhase();
-
+    sp_->curr_time = running_time_;
+    sp_->phase_copy = test_->getPhase(); 
 }
-
-//void ScorpioInterface::CropTorque_(DracoCommand* cmd) {
-    // cmd->jtrq = myUtils::CropVector(cmd->jtrq,
-    // robot_->GetTorqueLowerLimits(), robot_->GetTorqueUpperLimits(), "clip trq
-    // in interface");
-//}
 
 void ScorpioInterface::_ParameterSetting() {
     try {
@@ -92,9 +67,10 @@ void ScorpioInterface::_ParameterSetting() {
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "osc_test") {
             test_ = new OSCTest(robot_);
-        } 
-        //else if (test_name == "walking_test") {
-            //test_ = new WalkingTest(robot_);
+        }
+        else if (test_name == "grasping_test") {
+            test_ = new GraspingTest(robot_);
+        }
         else {
             printf(
                 "[Scorpio Interface] There is no test matching test with "
@@ -114,6 +90,7 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     if (!test_initialized) {
         test_->TestInitialization();
         test_initialized = true;
+        DataManager::GetDataManager()->start();
     }
     //if (count_ < waiting_count_) {
         //state_estimator_->Initialization(_sensor_data);
@@ -123,3 +100,58 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     return false;
 }
 
+bool ScorpioInterface::IsReadyToMove(){
+    if (!(sp_->is_closing) && !(sp_->is_opening) && !(sp_->is_moving)) {
+        return true;
+    } else{
+        return false;
+    }
+}
+
+void ScorpioInterface::MoveEndEffectorTo(double x, double y, double z) {
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) || sp_->is_holding) {
+        sp_->is_moving = true;
+        Eigen::VectorXd des_pos = Eigen::VectorXd::Zero(3);
+        des_pos << x, y, z;
+        ((GraspingTest*)test_)->SetMovingTarget(des_pos);
+    } else {
+        std::cout << "Wait" << std::endl;
+    }
+}
+
+
+bool ScorpioInterface::IsReadyToGrasp(){
+    if (!(sp_->is_moving) && !(sp_->is_closing) && !(sp_->is_holding) && !(sp_->is_opening)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ScorpioInterface::Grasp(){
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH)  {
+       sp_->is_closing = true;
+       sp_->closing_opening_start_time = sp_->curr_time;
+       //if()
+    }else{
+    std::cout << "Wait" << std::endl;
+    }
+}
+
+bool ScorpioInterface::IsReadyToRelease(){
+    if (!(sp_->is_closing) && (sp_->is_holding) && !(sp_->is_opening)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ScorpioInterface::Release(){
+    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) && (sp_->is_holding)) {
+       sp_->is_opening = true;
+       sp_->is_holding = false;
+       sp_->closing_opening_start_time = sp_->curr_time;
+    }else{
+    std::cout << "Wait" << std::endl;
+    }
+}

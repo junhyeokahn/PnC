@@ -176,4 +176,17 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
     return ret;
 }
 
+Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q ){
+    Eigen::Quaternion<double> ret;
+    if (q.w() < 0) {
+        ret.x() = -q.x();
+        ret.y() = -q.y();
+        ret.z() = -q.z();
+        ret.w() = -q.w();
+    } else {
+        ret = q;
+    }
+    return ret;
+}
+
 }  // namespace myUtils

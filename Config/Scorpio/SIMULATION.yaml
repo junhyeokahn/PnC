@@ -3,9 +3,22 @@ servo_rate: 0.001 # !!this should be match with controller servo rate!!
 #show_viewer: false
 show_viewer: true
 num_steps_per_cycle: 30
+#display_joint_frame: true
 display_joint_frame: false
 display_target_frame: true
 actuator_type: 1 # servo mode 
-#actuator_type: 1 # force mode
-#q_init: [180,	-65,	180,	-65,	180]
-q_init: [ 0,  0,	0,	0,	0]
+q_init: [ -90,  0,	-90,	0,	0]
+
+## Manipulator
+p1: [-0.3, -0.4, -0.15]
+p2: [0.4, -0.7, 0.2]
+
+## Draco
+x: -0.9
+y: 2.1
+th: 1.57
+x2: 0.4
+
+## box kp kd
+box_kp: [200,200,200,200,200,200]
+box_kd: [5,5,5,5,5,5]

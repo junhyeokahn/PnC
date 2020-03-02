@@ -4,8 +4,12 @@
 #include "PnC/Test.hpp"
 #include "PnC/ScorpioPnC/ScorpioDefinition.hpp"
 
-//class DracoStateProvider;
-//class DracoStateEstimator;
+enum GRIPPER_STATUS {is_closing = 0,
+                     is_holding = 1,
+                    is_opening = 2,
+                    idle = 3 };
+
+class ScorpioStateProvider;
 
 class ScorpioSensorData {
    public:
@@ -29,20 +33,21 @@ class ScorpioCommand {
         q = Eigen::VectorXd::Zero(Scorpio::n_adof);
         qdot = Eigen::VectorXd::Zero(Scorpio::n_adof);
         jtrq = Eigen::VectorXd::Zero(Scorpio::n_adof);
+        gripper_cmd = GRIPPER_STATUS::idle;
     }
     virtual ~ScorpioCommand() {}
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
+    GRIPPER_STATUS gripper_cmd;
 };
 
 class ScorpioInterface : public EnvInterface {
    protected:
     void _ParameterSetting();
 
-    //DracoStateEstimator* state_estimator_;
-    //DracoStateProvider* sp_;
+    ScorpioStateProvider* sp_;
 
     //void CropTorque_(ScorpioCommand*);
     bool Initialization_(ScorpioSensorData*, ScorpioCommand*);
@@ -59,4 +64,11 @@ class ScorpioInterface : public EnvInterface {
     ScorpioInterface();
     virtual ~ScorpioInterface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
+
+    bool IsReadyToMove();
+    void MoveEndEffectorTo(double x, double y, double z);
+    bool IsReadyToGrasp();
+    void Grasp();
+    bool IsReadyToRelease();
+    void Release();
 };
