@@ -81,6 +81,12 @@ bool WalkingReferenceTrajectoryModule::getFutureMPCFootstep(double time, DracoFo
     }
 }
 
+void WalkingReferenceTrajectoryModule::getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out){
+    x_com_vel_out.setZero();
+    Eigen::Quaterniond quat; quat.setIdentity();
+    getMPCRefComAndOri(time, x_com_out, quat);    
+}
+
 void WalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){
     // Set output to initial
     x_com_out = x_com_start_;

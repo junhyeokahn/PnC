@@ -36,6 +36,7 @@ public:
 
 	// gets the references 
 	void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
+	void getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out);
 
 	// helper function to identify which footstep is in swing
 	// if false. the foot is in not in swing for the time queried

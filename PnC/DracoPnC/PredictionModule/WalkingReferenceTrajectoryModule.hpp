@@ -62,6 +62,7 @@ public:
 	// gets the references 
 	virtual int getState(const double time);
 	virtual void getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out);
+	virtual void getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out);
 	virtual double getMaxNormalForce(int index, double time);
 
 	// If true, populates the new footstep landing location

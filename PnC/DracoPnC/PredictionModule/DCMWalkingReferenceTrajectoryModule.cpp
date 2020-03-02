@@ -31,6 +31,11 @@ void DCMWalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, 
 
 }
 
+void DCMWalkingReferenceTrajectoryModule::getMPCRefComPosandVel(const double time, Eigen::Vector3d & x_com_out, Eigen::Vector3d & x_com_vel_out){
+	dcm_reference.get_ref_com(time, x_com_out);
+	dcm_reference.get_ref_com_vel(time, x_com_vel_out);	
+}
+
 // Get the maximum normal force
 double DCMWalkingReferenceTrajectoryModule::getMaxNormalForce(int index, double time){
 	return std::static_pointer_cast<DCMWalkingReactionForceSchedule>(reaction_force_schedule_ptr)->getMaxNormalForce(index,time);
