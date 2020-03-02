@@ -108,10 +108,10 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // Please remove the if statement
     // If this is not the last step, add a midstep transfer VRP
     if (i != (input_footstep_list.size() - 1)){
-      rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+      rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
       rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
 
-      rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+      rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
       rvrp_list.push_back(current_rvrp);
     }
 
