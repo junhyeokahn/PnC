@@ -54,16 +54,17 @@ bool DCMWalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double
 			// Get the corresponding footstep index
 			if (dcm_reference.rvrp_index_to_footstep_index.count(exp_step_index) > 0){
 				// Set the footstep index
-				footstep_index = dcm_reference.rvrp_index_to_footstep_index[exp_step_index];
+				int tmp_index = dcm_reference.rvrp_index_to_footstep_index[exp_step_index];
 				// Ensure that there are no early contacts
 	            // Go through the contact indices for this side of the foot
-	            for (int j = 0; j < side_to_contact_indices[ footstep_list_[footstep_index].robot_side ].size() ; j++){
+	            for (int j = 0; j < side_to_contact_indices[ footstep_list_[tmp_index].robot_side ].size() ; j++){
 	                // Check if there are early contacts 
 	                if ( (early_contact_times_.count(j) > 0) && (t_query >= early_contact_times_[j]) &&
 	                     (early_contact_times_[j] >= t_swing_start)){               
 	                    return false; // Early contact so this foot is no longer in swing.
 	                }
 	            }
+				footstep_index = tmp_index;
 	            return true;
 			}
 		}

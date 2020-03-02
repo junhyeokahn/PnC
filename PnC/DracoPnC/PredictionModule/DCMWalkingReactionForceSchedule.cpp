@@ -61,17 +61,34 @@ double DCMWalkingReactionForceSchedule::getMaxNormalForce(const int index, const
 			delta_t = t_contact_transition_end - t_contact_transition_start;
 			// Max Z force must be 0.0 or must be increasing due to early contact.
 			if ((t_swing_start <= t_query) && (t_query <= t_swing_end)){
-				// Check for early contact
-				Fz_out = 0.0;
-
+	            // Check for early contact.
+	            if (reference_traj_module->early_contact_times_.count(index) > 0){
+	                t_early = reference_traj_module->early_contact_times_[index];
+	                if ( (t_early >= t_swing_start) && (t_query >= t_early) ) {
+	                    t_o = t_early;
+	                    // Compute transition force
+	                    Fz_out = clampMaxFz((Fz/delta_t)*(time-t_o));
+	                }else{
+						Fz_out = 0.0; // Not within the swing period
+	                }
+	            }else{ // No Early contact
+					Fz_out = 0.0; 
+	            }
 			}
 
 			// Second Contact Transition
 			// Increase Max Z Force
 			if ((t_contact_transition_start <= t_query) && (t_query <= t_contact_transition_end)){
-				// Check for early contact
-             	t_o = t_contact_transition_start;
-
+	            // Check for early contact
+	            // Adjust t_o if there is an early contact for this footstep
+	            if (reference_traj_module->early_contact_times_.count(index) > 0){
+	                t_early = reference_traj_module->early_contact_times_[index];
+	                if ( (t_early >= t_swing_start) && (time >= t_early) ) {
+	                    t_o = t_early;
+	                }
+	            }else{
+	                t_o = t_contact_transition_start;
+	            }
 	            // Compute transition force
 	            Fz_out = clampMaxFz( (Fz/delta_t)*(time-t_o) );
 			}
