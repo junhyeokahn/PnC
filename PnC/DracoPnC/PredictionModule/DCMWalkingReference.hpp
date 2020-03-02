@@ -90,7 +90,10 @@ public:
   void get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out);
   void get_ref_reaction_force(const double t, Eigen::Vector3d & f_out);
 
-  // void get_ref_ori_ang_vel_acc(const double t, Eigen::Quaterniond quat_out Eigen::Vector3d & com_vel_out);
+  // Global reference quat, ang vel and ang acc
+  void get_ref_ori_ang_vel_acc(const double t, Eigen::Quaterniond & quat_out,
+                                               Eigen::Vector3d & ang_vel_out,
+                                               Eigen::Vector3d & ang_acc_out);
 
   // computes the CoM velocity given the current CoM position and DCM velocity state.
   void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
