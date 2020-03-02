@@ -101,35 +101,63 @@ void HermiteQuaternionCurve::evaluate(const double & s_in, Eigen::Quaterniond & 
 void HermiteQuaternionCurve::getAngularVelocity(const double & s_in, Eigen::Vector3d & ang_vel_out){
   // world frame: w(t) = qdot(t)*q^-1(t)
   // local frame: w(t) = q^-1(t)*qdot(t)
+  // s_ = this->clamp(s_in);  
+  // computeBasis(s_);
+
+  // qtmp1 = Eigen::AngleAxisd(omega_1aa.angle()*b1, omega_1aa.axis());
+  // qtmp2 = Eigen::AngleAxisd(omega_2aa.angle()*b2, omega_2aa.axis());
+  // qtmp3 = Eigen::AngleAxisd(omega_3aa.angle()*b3, omega_3aa.axis());
+
+  // Eigen::Quaterniond q1dot; q1dot.vec() = omega_1*bdot1; q1dot *= qtmp1;
+  // Eigen::Quaterniond q2dot; q2dot.vec() = omega_2*bdot2; q2dot *= qtmp2;
+  // Eigen::Quaterniond q3dot; q3dot.vec() = omega_3*bdot3; q3dot *= qtmp3;
+
+  // // Computing global frame angular velocity
+  // Eigen::Quaterniond quat_dot;
+  // Eigen::Quaterniond quat_out = qtmp3*qtmp2*qtmp1*q0; // global frame
+
+  // quat_dot.vec() = (q3dot*(qtmp2*qtmp1*q0)).vec() + (q2dot*(qtmp3*qtmp1*q0)).vec() + (q1dot*(qtmp3*qtmp2*q0)).vec();
+  // quat_dot.w() = (q3dot*(qtmp2*qtmp1*q0)).w() + (q2dot*(qtmp3*qtmp1*q0)).w() + (q1dot*(qtmp3*qtmp2*q0)).w();
+
+  // ang_vel_out = (quat_dot*quat_out.conjugate()).vec(); //omega_1*b1 + omega_2 * b2 + omega_3 * b3;
+
   s_ = this->clamp(s_in);  
   computeBasis(s_);
+  ang_vel_out = omega_1*bdot1 + omega_2 * bdot2 + omega_3 * bdot3;
 
-  qtmp1 = Eigen::AngleAxisd(omega_1aa.angle()*b1, omega_1aa.axis());
-  qtmp2 = Eigen::AngleAxisd(omega_2aa.angle()*b2, omega_2aa.axis());
-  qtmp3 = Eigen::AngleAxisd(omega_3aa.angle()*b3, omega_3aa.axis());
-
-  Eigen::Quaterniond q1dot; q1dot.vec() = omega_1*bdot1; q1dot *= qtmp1;
-  Eigen::Quaterniond q2dot; q2dot.vec() = omega_2*bdot2; q2dot *= qtmp2;
-  Eigen::Quaterniond q3dot; q3dot.vec() = omega_3*bdot3; q3dot *= qtmp3;
-
-  // Computing global frame angular velocity
-  Eigen::Quaterniond quat_dot;
-  Eigen::Quaterniond quat_out = qtmp3*qtmp2*qtmp1*q0; // global frame
-
-  quat_dot.vec() = (q3dot*(qtmp2*qtmp1*q0)).vec() + (q2dot*(qtmp3*qtmp1*q0)).vec() + (q1dot*(qtmp3*qtmp2*q0)).vec();
-  quat_dot.w() = (q3dot*(qtmp2*qtmp1*q0)).w() + (q2dot*(qtmp3*qtmp1*q0)).w() + (q1dot*(qtmp3*qtmp2*q0)).w();
-
-  ang_vel_out = 2.0*(quat_dot*quat_out.conjugate()).vec(); //omega_1*b1 + omega_2 * b2 + omega_3 * b3;
 }
 
 // For world frame
 void HermiteQuaternionCurve::getAngularAcceleration(const double & s_in, Eigen::Vector3d & ang_acc_out){
-  // world frame: a(t) = qddot(t)*q^-1(t) - (qdot(t)*q^-1(t))^2
-  // local frame: a(t) = q^-1(t)*qddot(t) - (q^-1(t)*qdot(t))^2
+  // world frame: a(t) = (qddot(t)*q^-1(t) - (qdot(t)*q^-1(t))^2)
+  // local frame: a(t) = (q^-1(t)*qddot(t) - (q^-1(t)*qdot(t))^2)
+
+
+  // Numerically differentiate since we know the angular velocity
+  // bool forward_diff = true;
+  // if (s_ > 0.5){
+  //   forward_diff = false;
+  // }
+
+  // double ds = 1e-6;
+  // double s_query = s_in;
+  // Eigen::Vector3d ang_vel_1, ang_vel_2;
+  // if (forward_diff){
+  //   s_query = s_in + ds;  
+  //   getAngularVelocity(s_query, ang_vel_2);
+  //   s_query = s_in;       
+  //   getAngularVelocity(s_query, ang_vel_1);
+  // }else {
+  //   s_query = s_in;       
+  //   getAngularVelocity(s_query, ang_vel_2);
+  //   s_query = s_in - ds;  
+  //   getAngularVelocity(s_query, ang_vel_1);
+  // }
+  // ang_acc_out = (ang_vel_2 - ang_vel_1)/ds;
+
   s_ = this->clamp(s_in);  
   computeBasis(s_);
-
-  ang_acc_out = omega_1*bdot1 + omega_2*bdot2 + omega_3*bdot3;
+  ang_acc_out = omega_1*bddot1 + omega_2*bddot2 + omega_3*bddot3;
 }
 
 
