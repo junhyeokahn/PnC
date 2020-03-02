@@ -1,9 +1,10 @@
-#include <PnC/DracoPnC/PredictionModule/DCMWalkingReference.hpp>
+  #include <PnC/DracoPnC/PredictionModule/DCMWalkingReference.hpp>
 
 int const DCMWalkingReference::DCM_RL_SWING_VRP_TYPE = 1;
 int const DCMWalkingReference::DCM_LL_SWING_VRP_TYPE = 2;
 int const DCMWalkingReference::DCM_TRANSFER_VRP_TYPE = 3;
 int const DCMWalkingReference::DCM_END_VRP_TYPE = 4;
+int const DCMWalkingReference::DCM_MIDSTEP_TRANSFER_VRP_TYPE = 5;
 
 DCMWalkingReference::DCMWalkingReference(){
     initial_leftfoot_stance.setLeftSide();
@@ -103,6 +104,18 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // Add this rvrp to the list and also populate the DCM states
     rvrp_list.push_back(current_rvrp);
 
+    // The following is a hack to ensure convergence every midstep.
+    // Please remove the if statement
+    // If this is not the last step, add a midstep transfer VRP
+    if (i != (input_footstep_list.size() - 1)){
+      rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+      rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
+
+      rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+      rvrp_list.push_back(current_rvrp);
+    }
+
+
     // Update previous_step side 
     previous_step = input_footstep_list[i].robot_side;
   }
@@ -176,6 +189,8 @@ double DCMWalkingReference::get_t_step(const int & step_i){
     return t_ss + t_ds; // every swing has a double support transfer
   }else if (rvrp_type_list[step_i] == DCMWalkingReference::DCM_END_VRP_TYPE){
     return t_ds*(1-alpha_ds);
+  }else if (rvrp_type_list[step_i] == DCM_MIDSTEP_TRANSFER_VRP_TYPE){
+    return t_midstep_transfer;
   }
 }
 

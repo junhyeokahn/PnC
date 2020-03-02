@@ -17,7 +17,7 @@ public:
 
   static int const DCM_RL_SWING_VRP_TYPE;
   static int const DCM_LL_SWING_VRP_TYPE;
-
+  static int const DCM_MIDSTEP_TRANSFER_VRP_TYPE;
   static int const DCM_TRANSFER_VRP_TYPE;
   static int const DCM_END_VRP_TYPE;
 
@@ -47,6 +47,7 @@ public:
   double t_transfer = 0.1 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
   double t_ds = 0.1; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
+  double t_midstep_transfer = 0.2;
 
   double percentage_settle = 0.999; // percent to converge at the end of the trajectory
 

@@ -394,19 +394,22 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/6.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
-            rfootstep_1.setPosOriSide(right_foot_start_->position + foot_translate, 
+            rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
                                       foot_rotate*right_foot_start_->orientation, 
                                       DRACO_RIGHT_FOOTSTEP);
 
             DracoFootstep lfootstep_1; // take a left footstep
-            lfootstep_1.setPosOriSide(left_foot_start_->position + foot_translate*2, 
+            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
                                       foot_rotate*left_foot_start_->orientation, 
                                       DRACO_LEFT_FOOTSTEP);
 
@@ -425,10 +428,16 @@ void MPCWalkCtrl::references_setup(){
                                          swing_time_in,
                                          swing_height_in);
 
+            DracoFootstep rfootstep_2; // take a rightfootstep
+            rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate, 
+                                      foot_rotate*rfootstep_1.orientation, 
+                                      DRACO_RIGHT_FOOTSTEP);
+
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
             desired_footstep_list_.push_back(lfootstep_1);
+            // desired_footstep_list_.push_back(rfootstep_2);
 
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
@@ -794,35 +803,35 @@ void MPCWalkCtrl::task_setup() {
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
     ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
-    if (state_machine_time_ >= walk_start_time_){
-        reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
-        reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
+    // if (state_machine_time_ >= walk_start_time_){
+    //     reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
+    //     reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
 
-        euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
-        des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
-        des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
-        des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
+    //     euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
+    //     des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
+    //     des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
+    //     des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
 
-        des_pos_x = com_pos_ref[0]; 
-        des_pos_y = com_pos_ref[1]; 
-        des_pos_z = com_pos_ref[2]; 
+    //     des_pos_x = com_pos_ref[0]; 
+    //     des_pos_y = com_pos_ref[1]; 
+    //     des_pos_z = com_pos_ref[2]; 
 
-        des_rx_rate = ang_vel_ref[0]; 
-        des_ry_rate = ang_vel_ref[1]; 
-        des_rz_rate = ang_vel_ref[2]; 
+    //     des_rx_rate = ang_vel_ref[0]; 
+    //     des_ry_rate = ang_vel_ref[1]; 
+    //     des_rz_rate = ang_vel_ref[2]; 
 
-        des_vel_x = com_vel_ref[0]; 
-        des_vel_y = com_vel_ref[1]; 
-        des_vel_z = com_vel_ref[2]; 
+    //     des_vel_x = com_vel_ref[0]; 
+    //     des_vel_y = com_vel_ref[1]; 
+    //     des_vel_z = com_vel_ref[2]; 
 
-        des_rx_acc = ang_acc_ref[0]; 
-        des_ry_acc = ang_acc_ref[1]; 
-        des_rz_acc = ang_acc_ref[2]; 
+    //     des_rx_acc = ang_acc_ref[0]; 
+    //     des_ry_acc = ang_acc_ref[1]; 
+    //     des_rz_acc = ang_acc_ref[2]; 
 
-        des_acc_x = 0.0; 
-        des_acc_y = 0.0; 
-        des_acc_z = 0.0;
-    }
+    //     des_acc_x = 0.0; 
+    //     des_acc_y = 0.0; 
+    //     des_acc_z = 0.0;
+    // }
 
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
