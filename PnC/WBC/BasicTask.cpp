@@ -117,7 +117,6 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
             pos_err = _pos_des - robot_->getCoMPosition();
             // vel_act
             vel_act = robot_->getCoMVelocity();
-            // myUtils::pretty_print(pos_err, std::cout, "pos_err in COM");
             break;
         }
         default:

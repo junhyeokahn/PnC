@@ -634,7 +634,7 @@ void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
     // Enable Torque Limits
     ihwbc->enableTorqueLimits(true);
-    double tau_lim = 70; //100.0;    
+    double tau_lim = 100.0;    
     Eigen::VectorXd tau_min = -tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
     Eigen::VectorXd tau_max = tau_lim*Eigen::VectorXd::Ones(Draco::n_adof);
     ihwbc->setTorqueLimits(tau_min, tau_max);
@@ -794,35 +794,35 @@ void MPCWalkCtrl::task_setup() {
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
     ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
-    // if (state_machine_time_ >= walk_start_time_){
-    //     reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
-    //     reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
+    if (state_machine_time_ >= walk_start_time_){
+        reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
+        reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
 
-    //     euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
-    //     des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
-    //     des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
-    //     des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
+        euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
+        des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
+        des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
+        des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
 
-    //     des_pos_x = com_pos_ref[0]; 
-    //     des_pos_y = com_pos_ref[1]; 
-    //     des_pos_z = com_pos_ref[2]; 
+        des_pos_x = com_pos_ref[0]; 
+        des_pos_y = com_pos_ref[1]; 
+        des_pos_z = com_pos_ref[2]; 
 
-    //     des_rx_rate = ang_vel_ref[0]; 
-    //     des_ry_rate = ang_vel_ref[1]; 
-    //     des_rz_rate = ang_vel_ref[2]; 
+        des_rx_rate = ang_vel_ref[0]; 
+        des_ry_rate = ang_vel_ref[1]; 
+        des_rz_rate = ang_vel_ref[2]; 
 
-    //     des_vel_x = com_vel_ref[0]; 
-    //     des_vel_y = com_vel_ref[1]; 
-    //     des_vel_z = com_vel_ref[2]; 
+        des_vel_x = com_vel_ref[0]; 
+        des_vel_y = com_vel_ref[1]; 
+        des_vel_z = com_vel_ref[2]; 
 
-    //     des_rx_acc = ang_acc_ref[0]; 
-    //     des_ry_acc = ang_acc_ref[1]; 
-    //     des_rz_acc = ang_acc_ref[2]; 
+        des_rx_acc = ang_acc_ref[0]; 
+        des_ry_acc = ang_acc_ref[1]; 
+        des_rz_acc = ang_acc_ref[2]; 
 
-    //     des_acc_x = 0.0; 
-    //     des_acc_y = 0.0; 
-    //     des_acc_z = 0.0;
-    // }
+        des_acc_x = 0.0; 
+        des_acc_y = 0.0; 
+        des_acc_z = 0.0;
+    }
 
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
