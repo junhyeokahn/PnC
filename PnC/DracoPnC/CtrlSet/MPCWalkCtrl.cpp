@@ -218,25 +218,24 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
     // Setup the Walking Reference Module
     references_setup();
 
-    // update the gait depending on the swing foot
-    // To Do
+    _mpc_Xdes_setup();
 
     // Run the MPC at every MPC tick
-    double policy_delay = mpc_dt_;
-    if ( (!simulate_mpc_solved_) || (last_control_time_ < 0)){
-        // // Setup and solve the MPC 
-        _mpc_setup();
-        _mpc_Xdes_setup();
-        _mpc_solve();
-        simulate_mpc_solved_ = true;
-    }
+   //  double policy_delay = mpc_dt_;
+   //  if ( (!simulate_mpc_solved_) || (last_control_time_ < 0)){
+   //      // // Setup and solve the MPC 
+   //      _mpc_setup();
+   //      _mpc_Xdes_setup();
+   //      _mpc_solve();
+   //      simulate_mpc_solved_ = true;
+   //  }
 
-    // simulate policy delay
-   if (((state_machine_time_ - last_control_time_) > policy_delay) || (last_control_time_ < 0)){
-       _updateTrajectories();
-        last_control_time_ = state_machine_time_;
-        simulate_mpc_solved_ = false;
-   }
+   //  // simulate policy delay
+   // if (((state_machine_time_ - last_control_time_) > policy_delay) || (last_control_time_ < 0)){
+   //     _updateTrajectories();
+   //      last_control_time_ = state_machine_time_;
+   //      simulate_mpc_solved_ = false;
+   // }
 
     // Setup the tasks and compute torque from IHWBC
     task_setup();
@@ -397,11 +396,14 @@ void MPCWalkCtrl::references_setup(){
             // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
@@ -443,8 +445,13 @@ void MPCWalkCtrl::references_setup(){
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
             desired_footstep_list_.push_back(lfootstep_1);
-            desired_footstep_list_.push_back(rfootstep_2);
-            desired_footstep_list_.push_back(lfootstep_2);
+            // desired_footstep_list_.push_back(rfootstep_2);
+            // desired_footstep_list_.push_back(lfootstep_2);
+
+            // desired_footstep_list_.push_back(lfootstep_1);
+            // desired_footstep_list_.push_back(rfootstep_1);
+            // desired_footstep_list_.push_back(lfootstep_2);
+            // desired_footstep_list_.push_back(rfootstep_2);
 
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
@@ -494,7 +501,7 @@ void MPCWalkCtrl::_mpc_Xdes_setup(){
     double t_predict = 0.0;
     // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
 
-    std::cout << "state time:" << state_machine_time_ << std::endl;
+    // std::cout << "state time:" << state_machine_time_ << std::endl;
     for(int i = 0; i < mpc_horizon_; i++){
         // Time 
         t_predict = state_machine_time_ + (i+1)*mpc_dt_;
@@ -683,6 +690,7 @@ void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 
     mpc_Fd_des_filtered_ = alpha_fd_*mpc_Fd_des_ + (1.0-alpha_fd_)*mpc_Fd_des_filtered_;
+    mpc_Fd_des_.setZero();
 
     ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_filtered_, tau_cmd_, qddot_cmd_);
 
@@ -737,70 +745,78 @@ void MPCWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 void MPCWalkCtrl::task_setup() {
     // Disable MPC
-    // double des_roll = mpc_Xdes_[0];
-    // double des_pitch = mpc_Xdes_[1];
-    // double des_yaw = mpc_Xdes_[2];
+    double des_roll = mpc_Xdes_[0];
+    double des_pitch = mpc_Xdes_[1];
+    double des_yaw = mpc_Xdes_[2];
 
-    // double des_pos_x = mpc_Xdes_[3];
-    // double des_pos_y = mpc_Xdes_[4];
-    // double des_pos_z = mpc_Xdes_[5];
+    double des_pos_x = mpc_Xdes_[3];
+    double des_pos_y = mpc_Xdes_[4];
+    double des_pos_z = mpc_Xdes_[5];
 
-    // double des_rx_rate = mpc_Xdes_[6];
-    // double des_ry_rate = mpc_Xdes_[7];
-    // double des_rz_rate = mpc_Xdes_[8];
+    double des_rx_rate = mpc_Xdes_[6];
+    double des_ry_rate = mpc_Xdes_[7];
+    double des_rz_rate = mpc_Xdes_[8];
 
-    // double des_vel_x = mpc_Xdes_[9];
-    // double des_vel_y = mpc_Xdes_[10];
-    // double des_vel_z = mpc_Xdes_[11];
+    double des_vel_x = mpc_Xdes_[9];
+    double des_vel_y = mpc_Xdes_[10];
+    double des_vel_z = mpc_Xdes_[11];
+
+    double des_rx_acc = 0.0; 
+    double des_ry_acc = 0.0; 
+    double des_rz_acc = 0.0; 
+
+    double des_acc_x = 0.0; 
+    double des_acc_y = 0.0; 
+    double des_acc_z = 0.0; 
 
     // Enable MPC:
     // Set desired com and body orientation from predicted state 
-    Eigen::VectorXd x_traj_old;
-    Eigen::VectorXd x_traj_new;
-    double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
-    mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
-    mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
-    // clamp s
-    if (s_merge >= 1){
-        s_merge = 1.0;
-    }else if (s_merge <= 0){
-        s_merge = 0.0;
-    }
-    mpc_x_pred_ = s_merge*x_traj_new + (1 - s_merge)*x_traj_old;
+    // Eigen::VectorXd x_traj_old;
+    // Eigen::VectorXd x_traj_new;
+    // double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
+    // mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
+    // mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
+    // // clamp s
+    // if (s_merge >= 1){
+    //     s_merge = 1.0;
+    // }else if (s_merge <= 0){
+    //     s_merge = 0.0;
+    // }
+    // mpc_x_pred_ = s_merge*x_traj_new + (1 - s_merge)*x_traj_old;
 
-    // Get desired accelerations
-    Eigen::VectorXd xddot_traj_old = mpc_old_trajectory_->getAcc(state_machine_time_);
-    Eigen::VectorXd xddot_traj_new = mpc_new_trajectory_->getAcc(state_machine_time_); 
-    Eigen::VectorXd xddot_traj_des = s_merge*xddot_traj_new + (1 - s_merge)*xddot_traj_old;
+    // // Get desired accelerations
+    // Eigen::VectorXd xddot_traj_old = mpc_old_trajectory_->getAcc(state_machine_time_);
+    // Eigen::VectorXd xddot_traj_new = mpc_new_trajectory_->getAcc(state_machine_time_); 
+    // Eigen::VectorXd xddot_traj_des = s_merge*xddot_traj_new + (1 - s_merge)*xddot_traj_old;
 
 
-    // Update the behavior
-    sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
-    sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
+    // // Update the behavior
+    // sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
+    // sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
 
-    double des_roll = mpc_x_pred_[0]; 
-    double des_pitch = mpc_x_pred_[1]; 
-    double des_yaw = mpc_x_pred_[2]; 
+    // double des_roll = mpc_x_pred_[0]; 
+    // double des_pitch = mpc_x_pred_[1]; 
+    // double des_yaw = mpc_x_pred_[2]; 
 
-    double des_pos_x = mpc_x_pred_[3]; 
-    double des_pos_y = mpc_x_pred_[4]; 
-    double des_pos_z = mpc_x_pred_[5]; 
+    // double des_pos_x = mpc_x_pred_[3]; 
+    // double des_pos_y = mpc_x_pred_[4]; 
+    // double des_pos_z = mpc_x_pred_[5]; 
 
-    double des_rx_rate = mpc_x_pred_[6]; 
-    double des_ry_rate = mpc_x_pred_[7]; 
-    double des_rz_rate = mpc_x_pred_[8]; 
+    // double des_rx_rate = mpc_x_pred_[6]; 
+    // double des_ry_rate = mpc_x_pred_[7]; 
+    // double des_rz_rate = mpc_x_pred_[8]; 
 
-    double des_vel_x = mpc_x_pred_[9]; 
-    double des_vel_y = mpc_x_pred_[10]; 
-    double des_vel_z = mpc_x_pred_[11]; 
+    // double des_vel_x = mpc_x_pred_[9]; 
+    // double des_vel_y = mpc_x_pred_[10]; 
+    // double des_vel_z = mpc_x_pred_[11]; 
 
-    double des_rx_acc = xddot_traj_des[0]; 
-    double des_ry_acc = xddot_traj_des[1]; 
-    double des_rz_acc = xddot_traj_des[2]; 
+    // double des_rx_acc = xddot_traj_des[0]; 
+    // double des_ry_acc = xddot_traj_des[1]; 
+    // double des_rz_acc = xddot_traj_des[2]; 
 
-    double des_acc_x = xddot_traj_des[3]; 
-    double des_acc_y = xddot_traj_des[4]; 
-    double des_acc_z = xddot_traj_des[5]; 
+    // double des_acc_x = xddot_traj_des[3]; 
+    // double des_acc_y = xddot_traj_des[4]; 
+    // double des_acc_z = xddot_traj_des[5]; 
 
     Eigen::Vector3d com_pos_ref, com_vel_ref;
     Eigen::Quaterniond ori_ref;
@@ -810,35 +826,35 @@ void MPCWalkCtrl::task_setup() {
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
     ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
-    // if (state_machine_time_ >= walk_start_time_){
-    //     reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
-    //     reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
+    if (state_machine_time_ >= walk_start_time_){
+        reference_trajectory_module_->getMPCRefComPosandVel(state_machine_time_, com_pos_ref, com_vel_ref);
+        reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(state_machine_time_, ori_ref, ang_vel_ref, ang_acc_ref);            
 
-    //     euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
-    //     des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
-    //     des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
-    //     des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
+        euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
+        des_roll = euler_yaw_pitch_roll[2]; // Desired Roll
+        des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
+        des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
 
-    //     des_pos_x = com_pos_ref[0]; 
-    //     des_pos_y = com_pos_ref[1]; 
-    //     des_pos_z = com_pos_ref[2]; 
+        des_pos_x = com_pos_ref[0]; 
+        des_pos_y = com_pos_ref[1]; 
+        des_pos_z = com_pos_ref[2]; 
 
-    //     des_rx_rate = ang_vel_ref[0]; 
-    //     des_ry_rate = ang_vel_ref[1]; 
-    //     des_rz_rate = ang_vel_ref[2]; 
+        des_rx_rate = ang_vel_ref[0]; 
+        des_ry_rate = ang_vel_ref[1]; 
+        des_rz_rate = ang_vel_ref[2]; 
 
-    //     des_vel_x = com_vel_ref[0]; 
-    //     des_vel_y = com_vel_ref[1]; 
-    //     des_vel_z = com_vel_ref[2]; 
+        des_vel_x = com_vel_ref[0]; 
+        des_vel_y = com_vel_ref[1]; 
+        des_vel_z = com_vel_ref[2]; 
 
-    //     des_rx_acc = ang_acc_ref[0]; 
-    //     des_ry_acc = ang_acc_ref[1]; 
-    //     des_rz_acc = ang_acc_ref[2]; 
+        des_rx_acc = 0.0;//ang_acc_ref[0]; 
+        des_ry_acc = 0.0;//ang_acc_ref[1]; 
+        des_rz_acc = 0.0;//ang_acc_ref[2]; 
 
-    //     des_acc_x = 0.0; 
-    //     des_acc_y = 0.0; 
-    //     des_acc_z = 0.0;
-    // }
+        des_acc_x = 0.0; 
+        des_acc_y = 0.0; 
+        des_acc_z = 0.0;
+    }
 
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
@@ -1069,28 +1085,28 @@ void MPCWalkCtrl::task_setup() {
     // task_list_.push_back(rfoot_center_rz_xyz_task);
     // task_list_.push_back(lfoot_center_rz_xyz_task);    
 
-    task_list_.push_back(rfoot_front_task);
-    task_list_.push_back(rfoot_back_task);
-    task_list_.push_back(lfoot_front_task);
-    task_list_.push_back(lfoot_back_task);
+    // task_list_.push_back(rfoot_front_task);
+    // task_list_.push_back(rfoot_back_task);
+    // task_list_.push_back(lfoot_front_task);
+    // task_list_.push_back(lfoot_back_task);
 
     // task_list_.push_back(rfoot_line_task);
     // task_list_.push_back(lfoot_line_task);            
 
-    // if (ctrl_state_ == DRACO_STATE_RLS){
-    //     task_list_.push_back(rfoot_line_task);
-    //     task_list_.push_back(lfoot_front_task);
-    //     task_list_.push_back(lfoot_back_task);
-    // }else if (ctrl_state_ == DRACO_STATE_LLS){
-    //     task_list_.push_back(lfoot_line_task);            
-    //     task_list_.push_back(rfoot_front_task);
-    //     task_list_.push_back(rfoot_back_task);            
-    // }else{
-    //     task_list_.push_back(rfoot_front_task);
-    //     task_list_.push_back(rfoot_back_task);
-    //     task_list_.push_back(lfoot_front_task);
-    //     task_list_.push_back(lfoot_back_task);
-    // }
+    if (ctrl_state_ == DRACO_STATE_RLS){
+        task_list_.push_back(rfoot_line_task);
+        task_list_.push_back(lfoot_front_task);
+        task_list_.push_back(lfoot_back_task);
+    }else if (ctrl_state_ == DRACO_STATE_LLS){
+        task_list_.push_back(lfoot_line_task);            
+        task_list_.push_back(rfoot_front_task);
+        task_list_.push_back(rfoot_back_task);            
+    }else{
+        task_list_.push_back(rfoot_front_task);
+        task_list_.push_back(rfoot_back_task);
+        task_list_.push_back(lfoot_front_task);
+        task_list_.push_back(lfoot_back_task);
+    }
 
     // task_list_.push_back(total_joint_task_);
     // task_list_.push_back(ang_momentum_task);
@@ -1100,18 +1116,18 @@ void MPCWalkCtrl::task_setup() {
     w_task_heirarchy_[1] = w_task_body_; // body ori
 
 
-    w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-    w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
-    w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
+    // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
+    // w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
+    // w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
+    // w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
 
-    if (ctrl_state_ == DRACO_STATE_RLS){
-        w_task_heirarchy_[2] = 1e-2; // rfoot
-        w_task_heirarchy_[3] = 1e-2; // lfoot
-    }else if (ctrl_state_ == DRACO_STATE_LLS){
-        w_task_heirarchy_[4] = 1e-2; // lfoo
-        w_task_heirarchy_[5] = 1e-2; // lfoo
-    }
+    // if (ctrl_state_ == DRACO_STATE_RLS){
+    //     w_task_heirarchy_[2] = 1e-2; // rfoot
+    //     w_task_heirarchy_[3] = 1e-2; // lfoot
+    // }else if (ctrl_state_ == DRACO_STATE_LLS){
+    //     w_task_heirarchy_[4] = 1e-2; // lfoo
+    //     w_task_heirarchy_[5] = 1e-2; // lfoo
+    // }
 
     // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
     // w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
@@ -1122,20 +1138,20 @@ void MPCWalkCtrl::task_setup() {
     // }
 
 
-    // if (ctrl_state_ == DRACO_STATE_RLS){
-    //     w_task_heirarchy_[2] = 1e-2; // rfoot swing
-    //     w_task_heirarchy_[3] = w_task_lfoot_; // lfoot contact
-    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
-    // }else if (ctrl_state_ == DRACO_STATE_LLS){
-    //     w_task_heirarchy_[2] = 1e-2; // lfoot swing
-    //     w_task_heirarchy_[3] = w_task_rfoot_; // rfoot contact
-    //     w_task_heirarchy_[4] = w_task_rfoot_; // rfoot contact
-    // }else{
-    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot contact
-    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot contact
-    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
-    //     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
-    // }
+    if (ctrl_state_ == DRACO_STATE_RLS){
+        w_task_heirarchy_[2] = 1e-2; // rfoot swing
+        w_task_heirarchy_[3] = w_task_lfoot_; // lfoot contact
+        w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
+    }else if (ctrl_state_ == DRACO_STATE_LLS){
+        w_task_heirarchy_[2] = 1e-2; // lfoot swing
+        w_task_heirarchy_[3] = w_task_rfoot_; // rfoot contact
+        w_task_heirarchy_[4] = w_task_rfoot_; // rfoot contact
+    }else{
+        w_task_heirarchy_[2] = w_task_rfoot_; // rfoot contact
+        w_task_heirarchy_[3] = w_task_rfoot_; // lfoot contact
+        w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
+        w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
+    }
 
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
     // w_task_heirarchy_[4] = w_task_ang_momentum_; // angular momentum

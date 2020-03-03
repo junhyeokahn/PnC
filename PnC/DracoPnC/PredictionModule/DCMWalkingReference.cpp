@@ -100,6 +100,23 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // Mark the current RVRP index to correspond to this footstep swing.
     rvrp_index_to_footstep_index[ rvrp_list.size() - 1 ] = i; 
 
+    // Land in the midfeet every step.
+    // if (i != input_footstep_list.size()){
+    //   rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
+    //   rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);      
+    //   rvrp_list.push_back(current_rvrp);
+    // }else{
+    //     rvrp_list.push_back(current_rvrp);
+    // }
+
+    // // If not the last step, after every 2nd step, add a transfer RVRP
+    // if ((i != input_footstep_list.size() - 1) && ((i+1) % 2 == 0)){
+    //   rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
+    //   rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);      
+    //   rvrp_list.push_back(current_rvrp);
+    // }else{
+    //     rvrp_list.push_back(current_rvrp);
+    // }
 
     // Add this rvrp to the list and also populate the DCM states
     rvrp_list.push_back(current_rvrp);
@@ -107,13 +124,12 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     // The following is a hack to ensure convergence every midstep.
     // Please remove the if statement
     // If this is not the last step, add a midstep transfer VRP
-    if (i != (input_footstep_list.size() - 1)){
-      rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
-      rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
-
-      rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
-      rvrp_list.push_back(current_rvrp);
-    }
+    // if (i != (input_footstep_list.size() - 1)){
+      // rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
+      // rvrp_list.push_back(0.5*(current_rvrp + current_stance_rvrp));
+      // rvrp_type_list.push_back(DCM_MIDSTEP_TRANSFER_VRP_TYPE);
+      // rvrp_list.push_back(current_rvrp);
+    // }
 
 
     // Update previous_step side 

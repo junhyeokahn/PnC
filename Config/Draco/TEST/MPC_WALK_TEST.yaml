@@ -29,23 +29,23 @@ control_configuration:
         foot_rz_xyz_kp: [300.0, 300.0, 300.0, 300.0]
         foot_rz_xyz_kd: [35, 35, 35, 35]
 
-        # com_kp: [100.0, 100.0, 400.0]
-        # com_kd: [20.0, 20.0, 40.0]
+        com_kp: [100.0, 100.0, 200.0]
+        com_kd: [20.0, 20.0, 28.0]
  
-        # body_kp: [100.0, 100.0, 400.0]
-        # body_kd: [20.0, 20.0, 40.0]
+        body_kp: [100.0, 100.0, 100.0]
+        body_kd: [20.0, 20.0, 20.0]
 
-        com_kp: [1000.0, 1000.0, 2000.0]
-        com_kd: [400.0, 200.0, 188.0]
+        # com_kp: [1000.0, 1000.0, 2000.0]
+        # com_kd: [400.0, 200.0, 188.0]
  
-        body_kp: [1000.0, 1000.0, 2000.0]
-        body_kd: [200.0, 200.0, 188.0]
+        # body_kp: [1000.0, 1000.0, 2000.0]
+        # body_kd: [200.0, 200.0, 188.0]
  
         joint_kp: [10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 ]
         joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
 
         # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
-        w_contact_weight: 1e-4
+        w_contact_weight: 1e-8
 
         # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
         ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
