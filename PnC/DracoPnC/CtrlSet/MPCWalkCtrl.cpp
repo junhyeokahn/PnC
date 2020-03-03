@@ -394,11 +394,11 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(-0.1, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-
-            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/12.0, Eigen::Vector3d::UnitZ()) );
@@ -409,7 +409,7 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             DracoFootstep lfootstep_1; // take a left footstep
-            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*2, 
+            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
                                       foot_rotate*left_foot_start_->orientation, 
                                       DRACO_LEFT_FOOTSTEP);
 
@@ -443,8 +443,8 @@ void MPCWalkCtrl::references_setup(){
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
             desired_footstep_list_.push_back(lfootstep_1);
-            // desired_footstep_list_.push_back(rfootstep_2);
-            // desired_footstep_list_.push_back(lfootstep_2);
+            desired_footstep_list_.push_back(rfootstep_2);
+            desired_footstep_list_.push_back(lfootstep_2);
 
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
