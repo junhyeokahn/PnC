@@ -394,7 +394,7 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(-0.1, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
@@ -409,7 +409,7 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_RIGHT_FOOTSTEP);
 
             DracoFootstep lfootstep_1; // take a left footstep
-            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
+            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*2, 
                                       foot_rotate*left_foot_start_->orientation, 
                                       DRACO_LEFT_FOOTSTEP);
 
@@ -433,7 +433,7 @@ void MPCWalkCtrl::references_setup(){
                                       foot_rotate*rfootstep_1.orientation, 
                                       DRACO_RIGHT_FOOTSTEP);
 
-            DracoFootstep lfootstep_2; // take a rightfootstep
+            DracoFootstep lfootstep_2; // take a leftfootstep
             lfootstep_2.setPosOriSide(lfootstep_1.position + foot_translate, 
                                       foot_rotate*lfootstep_1.orientation, 
                                       DRACO_LEFT_FOOTSTEP);
@@ -443,8 +443,8 @@ void MPCWalkCtrl::references_setup(){
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
             desired_footstep_list_.push_back(lfootstep_1);
-            desired_footstep_list_.push_back(rfootstep_2);
-            desired_footstep_list_.push_back(lfootstep_2);
+            // desired_footstep_list_.push_back(rfootstep_2);
+            // desired_footstep_list_.push_back(lfootstep_2);
 
             for(int i = 0; i < desired_footstep_list_.size(); i++){
                 printf("Step %i:\n", i);
@@ -1078,13 +1078,13 @@ void MPCWalkCtrl::task_setup() {
     // task_list_.push_back(lfoot_line_task);            
 
     // if (ctrl_state_ == DRACO_STATE_RLS){
-        // task_list_.push_back(rfoot_line_task);
-        // task_list_.push_back(lfoot_front_task);
+    //     task_list_.push_back(rfoot_line_task);
+    //     task_list_.push_back(lfoot_front_task);
     //     task_list_.push_back(lfoot_back_task);
     // }else if (ctrl_state_ == DRACO_STATE_LLS){
+    //     task_list_.push_back(lfoot_line_task);            
     //     task_list_.push_back(rfoot_front_task);
     //     task_list_.push_back(rfoot_back_task);            
-        // task_list_.push_back(lfoot_line_task);            
     // }else{
     //     task_list_.push_back(rfoot_front_task);
     //     task_list_.push_back(rfoot_back_task);
@@ -1123,18 +1123,18 @@ void MPCWalkCtrl::task_setup() {
 
 
     // if (ctrl_state_ == DRACO_STATE_RLS){
-        // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-        // w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
-    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
+    //     w_task_heirarchy_[2] = 1e-2; // rfoot swing
+    //     w_task_heirarchy_[3] = w_task_lfoot_; // lfoot contact
+    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
     // }else if (ctrl_state_ == DRACO_STATE_LLS){
-    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot
+    //     w_task_heirarchy_[2] = 1e-2; // lfoot swing
+    //     w_task_heirarchy_[3] = w_task_rfoot_; // rfoot contact
+    //     w_task_heirarchy_[4] = w_task_rfoot_; // rfoot contact
     // }else{
-    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
-    //     w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
+    //     w_task_heirarchy_[2] = w_task_rfoot_; // rfoot contact
+    //     w_task_heirarchy_[3] = w_task_rfoot_; // lfoot contact
+    //     w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
+    //     w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
     // }
 
     // w_task_heirarchy_[6] = w_task_joint_; // joint    
