@@ -20,6 +20,9 @@ ScorpioWorldNode::ScorpioWorldNode(const dart::simulation::WorldPtr& _world)
     p_dof_scorpio_ = 4;
     a_dof_scorpio_ = n_dof_scorpio_ - p_dof_scorpio_;
 
+    draco_is_done_=false;
+    scorpio_approach_is_done_ = false;
+
     q_init_ = scorpio_->getPositions();
 
     active_joint_idx_.resize(a_dof_scorpio_);
@@ -144,50 +147,7 @@ void ScorpioWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
 
 
-    // =============
-    // Scorpio
-    // =============
-    scorpio_sensordata_->q = scorpio_->getPositions();
-    scorpio_sensordata_->qdot = scorpio_->getVelocities();
 
-    // ====
-    // APIs
-    // ====
-
-    static bool b_move_cmd(true);
-    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
-        std::cout << "Moving Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p1_[0], p1_[1], p1_[2]);
-        b_move_cmd = false;
-    }
-
-    static bool b_grasp_cmd(true);
-    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToGrasp() && b_grasp_cmd) {
-        std::cout << "Grasping Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->Grasp();
-        fake_grasp();
-        b_grasp_cmd = false;
-    }
-
-    static bool b_move_while_hold_cmd(true);
-    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_while_hold_cmd) {
-        std::cout << "Moving While Holding Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p2_[0], p2_[1], p2_[2]);
-        b_move_while_hold_cmd = false;
-    }
-
-    scorpio_interface_->getCommand(scorpio_sensordata_, scorpio_cmd_);
-
-    if (scorpio_cmd_->gripper_cmd == GRIPPER_STATUS::is_holding) {
-        box_following_ee_ctrl();
-        //std::cout << "Holding" << std::endl;
-    } else {
-        box_maintaining_ctrl();
-        //std::cout << "Maintaining" << std::endl;
-    }
-
-    scorpio_trq_cmd_ = scorpio_cmd_->jtrq;
-    SetActiveForce(scorpio_trq_cmd_);
 
     // =============
     // Draco
@@ -203,38 +163,33 @@ void ScorpioWorldNode::customPreStep() {
     // ====
     // APIs
     // ====
-    static bool b_first_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_first_cmd) {
+    static bool b_draco_first_cmd(true);
+    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_first_cmd) {
         ((DracoInterface*)draco_interface_)->WalkInY(x_);
-        b_first_cmd = false;
+        b_draco_first_cmd = false;
     }
 
-    static bool b_second_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_second_cmd) {
+    static bool b_draco_second_cmd(true);
+    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_second_cmd) {
         ((DracoInterface*)draco_interface_)->WalkInX(y_);
-        b_second_cmd = false;
+        b_draco_second_cmd = false;
     }
 
-    static bool b_third_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_third_cmd) {
+    static bool b_draco_third_cmd(true);
+    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_third_cmd) {
         ((DracoInterface*)draco_interface_)->Turn(M_PI/2.0);
-        b_third_cmd = false;
+        b_draco_third_cmd = false;
     }
 
-    static bool b_fourth_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
+    static bool b_draco_fourth_cmd(true);
+    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_fourth_cmd) {
         ((DracoInterface*)draco_interface_)->WalkInX(x2_);
-        b_fourth_cmd = false;
+        b_draco_fourth_cmd = false;
     }
 
     draco_interface_->getCommand(draco_sensordata_, draco_cmd_);
 
-    //std::cout << "------------------------" << std::endl;
-    //std::cout << "t :" << t_ << std::endl;
-    //std::cout << "q :" << std::endl;
-    //std::cout << (draco_sensordata_->q.head(6)) << std::endl;
-    //std::cout << "jtrq :"  << std::endl;
-    //std::cout << (draco_cmd_->jtrq.tail(6))  << std::endl;
+    //myUtils::pretty_print( ((Eigen::VectorXd)draco_->getBodyNode("IMU")->getWorldTransform().translation()), std::cout, "imu");
 
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)draco_interface_)->IsTrajectoryUpdated()) {
@@ -250,6 +205,65 @@ void ScorpioWorldNode::customPreStep() {
     draco_trq_cmd_.head(6).setZero();
 
     draco_->setForces(draco_trq_cmd_);
+
+
+    // =============
+    // Scorpio
+    // =============
+    scorpio_sensordata_->q = scorpio_->getPositions();
+    scorpio_sensordata_->qdot = scorpio_->getVelocities();
+
+    // ====
+    // APIs
+    // ====
+
+    if (!b_draco_first_cmd && !b_draco_second_cmd && !b_draco_third_cmd && !b_draco_fourth_cmd) {
+        draco_is_done_ = true;
+    } else {
+        // do nothing
+    }
+
+    static bool b_move_cmd(true);
+    if (draco_is_done_ && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
+        std::cout << "Moving Command Received" << std::endl;
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p1_[0], p1_[1], p1_[2]);
+        b_move_cmd = false;
+    }
+
+    static bool b_grasp_cmd(true);
+    if (draco_is_done_ && ((ScorpioInterface*)scorpio_interface_)->IsReadyToGrasp() && b_grasp_cmd) {
+        std::cout << "Grasping Command Received" << std::endl;
+        ((ScorpioInterface*)scorpio_interface_)->Grasp();
+        fake_grasp();
+        b_grasp_cmd = false;
+    }
+
+    static bool b_move_while_hold_cmd(true);
+    if (draco_is_done_ && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_while_hold_cmd) {
+        std::cout << "Moving While Holding Command Received" << std::endl;
+        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(p2_[0], p2_[1], p2_[2]);
+        b_move_while_hold_cmd = false;
+    }
+    
+    if (!b_move_cmd && !b_grasp_cmd && !b_move_while_hold_cmd) {
+        // do nothing
+        scorpio_approach_is_done_ = true;
+    } else {
+    }
+
+    scorpio_interface_->getCommand(scorpio_sensordata_, scorpio_cmd_);
+
+    if (scorpio_cmd_->gripper_cmd == GRIPPER_STATUS::is_holding) {
+        box_following_ee_ctrl();
+        //std::cout << "Holding" << std::endl;
+    } else {
+        box_maintaining_ctrl();
+        //std::cout << "Maintaining" << std::endl;
+    }
+
+    scorpio_trq_cmd_ = scorpio_cmd_->jtrq;
+    SetActiveForce(scorpio_trq_cmd_);
+
 
     count_++;
 }
@@ -573,7 +587,7 @@ void ScorpioWorldNode::fake_grasp(){
     mbox_->setForces(box_forces);
 
     //mbox_->setPositions(des_box_pos);
-} 
+}
 
 void ScorpioWorldNode::box_following_ee_ctrl(){
     Eigen::Isometry3d ee_se3 = Eigen::Isometry3d::Identity(); 

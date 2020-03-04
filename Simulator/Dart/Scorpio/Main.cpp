@@ -404,6 +404,7 @@ int main(int argc, char** argv) {
     // Display Joints Frame
     // ====================
     if (b_display_joint_frame) displayJointFrames(world, scorpio);
+    if (b_display_joint_frame) displayJointFrames(world, draco);
     // ====================
     // Display Target Frame
     // ====================
