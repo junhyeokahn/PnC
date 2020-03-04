@@ -82,6 +82,9 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd a_joint_idx_scorpio_;
     Eigen::VectorXd p_joint_idx_scorpio_;
 
+    bool draco_is_done_;
+    bool scorpio_approach_is_done_;
+
     void GetActiveJointInfo(Eigen::VectorXd & pos_cur, Eigen::VectorXd & vel_cur);
     void SetActivePosition(const Eigen::VectorXd & des_pos);
     void SetActiveForce(const Eigen::VectorXd & des_force);
@@ -110,4 +113,5 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     double x2_;
     Eigen::VectorXd box_kp;
     Eigen::VectorXd box_kd;
+
 };

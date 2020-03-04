@@ -138,8 +138,8 @@ void OSCCtrl::_task_setup(){
     // =========================================================================
     // Stack Task List
     // =========================================================================
-    task_list_.push_back(ee_pos_task_);
     task_list_.push_back(ee_ori_task_);
+    task_list_.push_back(ee_pos_task_);
     //task_list_.push_back(joint_task_);
 }
 
