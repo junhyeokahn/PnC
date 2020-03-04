@@ -11,6 +11,7 @@
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
                                      FootstepSequenceGenerator* fsg)
@@ -658,6 +659,7 @@ void DoubleSupportCtrl::AddContactSequence_(
     Eigen::VectorXd f_pos = f_iso.translation();
     Eigen::Quaternion<double> f_quat =
         Eigen::Quaternion<double>(f_iso.linear());
+    f_quat = myUtils::bind_qaut_pi(f_quat);
     Eigen::VectorXd f_quat_vec = Eigen::VectorXd::Zero(4);
     f_quat_vec << f_quat.w(), f_quat.x(), f_quat.y(), f_quat.z();
 

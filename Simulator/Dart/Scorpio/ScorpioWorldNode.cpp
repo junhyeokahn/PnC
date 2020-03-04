@@ -220,7 +220,7 @@ void ScorpioWorldNode::customPreStep() {
 
     static bool b_draco_sixth_cmd(true);
     if (first_scorpio_done && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_sixth_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(2.5);
+        ((DracoInterface*)draco_interface_)->WalkInX(1.6);
         std::cout << "move in x" << std::endl;
         b_draco_sixth_cmd = false;
     }

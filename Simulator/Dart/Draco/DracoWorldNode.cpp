@@ -62,7 +62,6 @@ void DracoWorldNode::customPreStep() {
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        //((DracoInterface*)Interface_)->Turn(M_PI/2.0);
         ((DracoInterface*)Interface_)->Turn(1.85);
         b_second_cmd = false;
     }
@@ -81,8 +80,7 @@ void DracoWorldNode::customPreStep() {
 
     static bool b_fourth_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
-        //((DracoInterface*)Interface_)->WalkInX(1.8);
-        ((DracoInterface*)Interface_)->WalkInX(0.5);
+        ((DracoInterface*)Interface_)->WalkInX(2.1);
         b_fourth_cmd = false;
     }
 
