@@ -11,19 +11,16 @@
 
 class DracoSim {
 private:
-    //Simulation Helpers
-    osg::ref_ptr<ScorpioWorldNode> world_;
     dart::gui::osg::Viewer viewer;
-
     //Threading
     std::thread thread_;
     std::atomic<bool> exit;
     void StartThread();
 public:
     //Initialize the sim with a new PnC
-    DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface);
+    DracoSim();
     //Start the simulator and visuals in a new thread
-    void StartSim();
+    void StartSim(EnvInterface* interface, EnvInterface* arm_interface);
     //Stop the simulator and join the thread it was running in
     void StopSim();
 };

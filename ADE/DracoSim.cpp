@@ -1,6 +1,14 @@
-#include <PnC/DracoPnC/DracoInterface.hpp>
 #include <ADE/DracoSim.hpp>
 #include <thread>
+#include <dart/dart.hpp>
+#include <dart/gui/osg/osg.hpp>
+#include <dart/utils/urdf/urdf.hpp>
+#include <dart/utils/utils.hpp>
+#include <Configuration.h>
+#include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 
 void displayJointFrames(const dart::simulation::WorldPtr& world,
                         const dart::dynamics::SkeletonPtr& robot) {
@@ -9,11 +17,11 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
         for (std::size_t j = 0; j < bn->getNumChildJoints(); ++j) {
             const dart::dynamics::Joint* joint = bn->getChildJoint(j);
             const Eigen::Isometry3d offset =
-                joint->getTransformFromParentBodyNode();
+                    joint->getTransformFromParentBodyNode();
 
             dart::gui::osg::InteractiveFramePtr frame =
-                std::make_shared<dart::gui::osg::InteractiveFrame>(
-                    bn, joint->getName() + "/frame", offset);
+                    std::make_shared<dart::gui::osg::InteractiveFrame>(
+                            bn, joint->getName() + "/frame", offset);
 
             for (const auto type : {dart::gui::osg::InteractiveTool::ANGULAR,
                                     dart::gui::osg::InteractiveTool::PLANAR})
@@ -27,16 +35,42 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
 
 void addTargetFrame(const dart::simulation::WorldPtr& world) {
     dart::gui::osg::InteractiveFramePtr frame =
-        std::make_shared<dart::gui::osg::InteractiveFrame>(
-            dart::dynamics::Frame::World(), "target_frame");
+            std::make_shared<dart::gui::osg::InteractiveFrame>(
+                    dart::dynamics::Frame::World(), "target_frame");
     for (int i = 0; i < 3; ++i) {
         frame->getTool(dart::gui::osg::InteractiveTool::PLANAR, i)
-            ->setEnabled(false);
+                ->setEnabled(false);
         frame->getTool(dart::gui::osg::InteractiveTool::ANGULAR, i)
-            ->setEnabled(false);
+                ->setEnabled(false);
     }
     world->addSimpleFrame(frame);
 }
+
+class OneStepProgress : public osgGA::GUIEventHandler {
+public:
+    OneStepProgress(ScorpioWorldNode* worldnode) : worldnode_(worldnode) {}
+    // Reachability node
+    //OneStepProgress(ScorpioWorldNodeReach* worldnode) : worldnode_(worldnode) {}
+
+    /** Deprecated, Handle events, return true if handled, false otherwise. */
+    virtual bool handle(const osgGA::GUIEventAdapter& ea,
+                        osgGA::GUIActionAdapter& /*aa*/) {
+        if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
+            if (ea.getKey() == 'f') {
+                int numStepProgress(50);
+                for (int i = 0; i < numStepProgress; ++i) {
+                    worldnode_->customPreStep();
+                    worldnode_->getWorld()->step();
+                    worldnode_->customPostStep();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    ScorpioWorldNode* worldnode_;
+    // ScorpioWorldNodeReach* worldnode_;  // reachability node
+};
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
     // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
@@ -162,7 +196,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
         }
         case 2: {
             YAML::Node simulation_cfg =
-                YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+                    YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
             double hanging_height(0.0);
             myUtils::readParameter(simulation_cfg, "hanging_height",
                                    hanging_height);
@@ -184,25 +218,25 @@ void _setInitialConfiguration_2(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q = robot->getPositions();
     q[0] = 1.3918;
     q[1] = -0.360352;
-    q[2] = 0.52563;
+    q[2] = 1.16563;
     robot->setPositions(q);
 }
 void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
-	for(size_t i=0; i < robot->getNumBodyNodes(); ++i)
-	{
-	  dart::dynamics::BodyNode* bn = robot->getBodyNode(i);
-	  for(size_t j=0; j < bn->getNumShapeNodes(); ++j)
-	  {
-	    dart::dynamics::ShapeNode* sn = bn->getShapeNode(j);
-	    if(sn->getVisualAspect())
-	    {
-	      dart::dynamics::MeshShape* ms =
-		  dynamic_cast<dart::dynamics::MeshShape*>(sn->getShape().get());
-	      if(ms)
-		ms->setColorMode(dart::dynamics::MeshShape::SHAPE_COLOR);
-	    }
-	  }
-	}
+    for(size_t i=0; i < robot->getNumBodyNodes(); ++i)
+    {
+        dart::dynamics::BodyNode* bn = robot->getBodyNode(i);
+        for(size_t j=0; j < bn->getNumShapeNodes(); ++j)
+        {
+            dart::dynamics::ShapeNode* sn = bn->getShapeNode(j);
+            if(sn->getVisualAspect())
+            {
+                dart::dynamics::MeshShape* ms =
+                        dynamic_cast<dart::dynamics::MeshShape*>(sn->getShape().get());
+                if(ms)
+                    ms->setColorMode(dart::dynamics::MeshShape::SHAPE_COLOR);
+            }
+        }
+    }
 }
 
 void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
@@ -217,10 +251,10 @@ void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
 void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::SkeletonPtr robot){
     dart::dynamics::BodyNode* bd1 = robot->getBodyNode("link1");
     dart::dynamics::BodyNode* bd2 = robot->getBodyNode("link4_end");
-   Eigen::Vector3d offset(0.09, 0.1225, -0.034975);
+    Eigen::Vector3d offset(0.09, 0.1225, -0.034975);
     Eigen::Vector3d joint_pos1 = bd1->getTransform()*offset;
     dart::constraint::BallJointConstraintPtr cl1 =
-        std::make_shared<dart::constraint::BallJointConstraint>(bd1,bd2,joint_pos1);
+            std::make_shared<dart::constraint::BallJointConstraint>(bd1,bd2,joint_pos1);
 
     Eigen::Vector3d pos_b1 = bd1->getTransform().translation();
     Eigen::Vector3d pos_b2 = bd2->getTransform().translation();
@@ -229,7 +263,7 @@ void _SetJointConstraint(dart::simulation::WorldPtr & world, dart::dynamics::Ske
     dart::dynamics::BodyNode* bd4 = robot->getBodyNode("link8_end");
     Eigen::Vector3d joint_pos2 = bd3->getTransform()*offset;
     dart::constraint::BallJointConstraintPtr cl2 =
-        std::make_shared<dart::constraint::BallJointConstraint>(bd3,bd4,joint_pos2);
+            std::make_shared<dart::constraint::BallJointConstraint>(bd3,bd4,joint_pos2);
 
     world->getConstraintSolver()->addConstraint(cl1);
     world->getConstraintSolver()->addConstraint(cl2);
@@ -290,7 +324,16 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
 
 }
 
-DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
+int main(int argc, char** argv) {
+
+}
+
+
+DracoSim::DracoSim() {
+    //TODO after debugging sinking problem
+}
+
+void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
     // ========================
     // Parse Yaml for Simulator
     // ========================
@@ -302,11 +345,12 @@ DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
     double servo_rate;
     int actuator_type;
     Eigen::VectorXd q_init(5);
+    Eigen::VectorXd from, to;
     q_init.setZero();
 
     try {
         YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Scorpio/SIMULATION.yaml");
+                YAML::LoadFile(THIS_COM "Config/Scorpio/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "is_record", isRecord);
         myUtils::readParameter(simulation_cfg, "display_joint_frame",
                                b_display_joint_frame);
@@ -318,6 +362,8 @@ DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
         myUtils::readParameter(simulation_cfg, "actuator_type", actuator_type);
         myUtils::readParameter(simulation_cfg, "q_init", q_init);
+        myUtils::readParameter(simulation_cfg, "from", from);
+        myUtils::readParameter(simulation_cfg, "to", to);
         q_init = q_init/180.0*M_PI;
 
     } catch (std::runtime_error& e) {
@@ -332,15 +378,15 @@ DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Ground/ground_terrain.urdf");
+            THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
+            THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
+            THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
-         THIS_COM "RobotModel/Environment/Table/table.urdf");
+            THIS_COM "RobotModel/Environment/Table/table.urdf");
     dart::dynamics::SkeletonPtr box = urdfLoader.parseSkeleton(
-         THIS_COM "RobotModel/Environment/Box/box.urdf");
+            THIS_COM "RobotModel/Environment/Box/box.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
@@ -371,6 +417,7 @@ DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
     // Display Joints Frame
     // ====================
     if (b_display_joint_frame) displayJointFrames(world, scorpio);
+    if (b_display_joint_frame) displayJointFrames(world, draco);
     // ====================
     // Display Target Frame
     // ====================
@@ -407,35 +454,40 @@ DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
     // ================
     // Wrap a worldnode
     // ================
-    world_ = new ScorpioWorldNode(world, interface, arm_interface);
+    osg::ref_ptr<ScorpioWorldNode> node;
+    node = new ScorpioWorldNode(world, interface, arm_interface);
 
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
     // node = new ScorpioWorldNodeReach(world);
 
-    world_->setNumStepsPerCycle(num_steps_per_cycle);
-}
+    node->setNumStepsPerCycle(num_steps_per_cycle);
 
-void DracoSim::StartSim() {
-    exit = false;
-    // =========================================================================
+    // =====================
     // Create and Set Viewer
-    // =========================================================================
-    //dart::gui::osg::Viewer viewer;
-    viewer.addWorldNode(world_);
-    viewer.simulate(true);
+    // =====================
+
+    viewer.addWorldNode(node);
+    viewer.simulate(false);
     viewer.switchHeadlights(false);
     ::osg::Vec3 p1(1.0, 0.2, 1.0);
-    p1 = p1 * 0.7;
+    p1 = p1 * 0.5;
     viewer.getLightSource(0)->getLight()->setPosition(
             ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
+                                     GL_DEPTH_BUFFER_BIT);
+    viewer.addEventHandler(new OneStepProgress(node));
 
-    // viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    viewer.setUpViewInWindow(1440, 0, 500, 500);
+    if (isRecord) {
+        std::cout << "[Video Record Enable]" << std::endl;
+        viewer.record(THIS_COM "/ExperimentVideo");
+    }
+
+    viewer.setUpViewInWindow(0, 0, 2880, 1800);
+    //viewer.setUpViewInWindow(1440, 0, 500, 500);
     viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(5.14, 2.28, 3.0) * 1.5, ::osg::Vec3(0.0, 0.2, 0.5),
+            ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
             ::osg::Vec3(0.0, 0.0, 1.0));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
     thread_ = std::thread(&DracoSim::StartThread, this);
@@ -447,8 +499,6 @@ void DracoSim::StopSim() {
 }
 
 void DracoSim::StartThread() {
-    while(!viewer.done() && !exit.load()) {
-        viewer.frame();
-    }
+    viewer.run();
 }
 
