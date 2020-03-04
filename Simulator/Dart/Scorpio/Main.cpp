@@ -332,6 +332,7 @@ int main(int argc, char** argv) {
     double servo_rate;
     int actuator_type;
     Eigen::VectorXd q_init(5);
+    Eigen::VectorXd from, to;
     q_init.setZero();
 
     try {
@@ -348,6 +349,8 @@ int main(int argc, char** argv) {
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
         myUtils::readParameter(simulation_cfg, "actuator_type", actuator_type);
         myUtils::readParameter(simulation_cfg, "q_init", q_init);
+        myUtils::readParameter(simulation_cfg, "from", from);
+        myUtils::readParameter(simulation_cfg, "to", to);
         q_init = q_init/180.0*M_PI;
 
     } catch (std::runtime_error& e) {
@@ -472,7 +475,7 @@ int main(int argc, char** argv) {
         viewer.setUpViewInWindow(0, 0, 2880, 1800);
         //viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(6.14, 2.28, 3.0) * 1.5, ::osg::Vec3(1.0, 0.2, 0.5),
+            ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
             ::osg::Vec3(0.0, 0.0, 1.0));
         viewer.setCameraManipulator(viewer.getCameraManipulator());
         viewer.run();

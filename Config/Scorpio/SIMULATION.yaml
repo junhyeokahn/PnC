@@ -9,6 +9,10 @@ display_target_frame: true
 actuator_type: 1 # servo mode 
 q_init: [ -90,  0,	-90,	0,	0]
 
+## Camera
+from: [5.21, -5.42, 3.5]
+to: [1.0, 0.2, 0.5]
+
 ## Manipulator
 p1: [-0.3, -0.4, -0.01]
 p2: [0.4, -0.90, 0.06]
