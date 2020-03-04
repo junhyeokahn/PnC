@@ -399,8 +399,8 @@ void MPCWalkCtrl::references_setup(){
             // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
