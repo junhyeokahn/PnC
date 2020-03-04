@@ -137,16 +137,16 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void DoubleSupportCtrl::PlannerUpdate_() {
-    std::cout << "planning" << std::endl;
+    //std::cout << "planning" << std::endl;
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
     ((CentroidPlanner*)planner_)
         ->SaveResult("DS_" + std::to_string(sp_->num_step_copy));
     sp_->planning_moment = sp_->curr_time;
-    std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) << std::endl;
-    std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
-              << std::endl;
+    //std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) << std::endl;
+    //std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
+              //<< std::endl;
     ((CentroidPlanner*)planner_)
         ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
                       frc_world_traj_, trq_local_traj_);

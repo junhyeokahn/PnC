@@ -368,17 +368,23 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
+    dart::dynamics::SkeletonPtr scorpio2 = urdfLoader.parseSkeleton(
+        THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin2.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
+    dart::dynamics::SkeletonPtr table2 = urdfLoader.parseSkeleton(
+         THIS_COM "RobotModel/Environment/Table/table2.urdf");
     dart::dynamics::SkeletonPtr box = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Box/box.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
+    world->addSkeleton(scorpio2);
     world->addSkeleton(draco);
     world->addSkeleton(table);
+    world->addSkeleton(table2);
     world->addSkeleton(box);
 
 
@@ -414,6 +420,7 @@ int main(int argc, char** argv) {
     // Initial configuration
     // =====================
     _setInitialConfiguration(scorpio, q_init);
+    _setInitialConfiguration(scorpio2, q_init);
     _setInitialConfiguration(draco);
     _setJointLimitConstraint(draco);
     _setInitialConfiguration_2(box);
@@ -422,16 +429,19 @@ int main(int argc, char** argv) {
     // Robot Mesh Color from URDF
     // =====================
     _SetMeshColorURDF(scorpio);
+    _SetMeshColorURDF(scorpio2);
 
     // =====================
     // Constraint for Closed-Loop
     // =====================
     _SetJointConstraint(world, scorpio);
+    _SetJointConstraint(world, scorpio2);
 
     // ================
     // Set passive joint
     // ================
     _SetJointActuatorType(scorpio,actuator_type);
+    _SetJointActuatorType(scorpio2,actuator_type);
 
     // ================
     // Print Model Info
@@ -473,8 +483,8 @@ int main(int argc, char** argv) {
             viewer.record(THIS_COM "/ExperimentVideo");
         }
 
-        viewer.setUpViewInWindow(0, 0, 2880, 1800);
-        //viewer.setUpViewInWindow(1440, 0, 500, 500);
+        //viewer.setUpViewInWindow(0, 0, 2880, 1800);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
             ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
             ::osg::Vec3(0.0, 0.0, 1.0));

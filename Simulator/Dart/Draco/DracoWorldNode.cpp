@@ -48,41 +48,43 @@ void DracoWorldNode::customPreStep() {
     // WalkToRelativePositionAndOrientation Method Example
     // =========================================================================
 
-    //static bool b_first_cmd(true);
-    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
-        //((DracoInterface*)Interface_)->WalkInY(-0.9);
-        //b_first_cmd = false;
-    //}
+    static bool b_first_cmd(true);
+    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_first_cmd) {
+        ((DracoInterface*)Interface_)->WalkInY(-0.9);
+        b_first_cmd = false;
+    }
 
-    //static bool b_seventh_cmd(true);
-    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
-        //((DracoInterface*)Interface_)->WalkInX(2.15);
-        //b_seventh_cmd = false;
-    //}
+    static bool b_seventh_cmd(true);
+    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_seventh_cmd) {
+        ((DracoInterface*)Interface_)->WalkInX(2.1);
+        b_seventh_cmd = false;
+    }
 
     static bool b_second_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_second_cmd) {
-        ((DracoInterface*)Interface_)->Turn(M_PI/2.0);
+        //((DracoInterface*)Interface_)->Turn(M_PI/2.0);
+        ((DracoInterface*)Interface_)->Turn(1.85);
         b_second_cmd = false;
     }
 
     static bool b_sixth_cmd(true);
     if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_sixth_cmd) {
-        ((DracoInterface*)Interface_)->WalkInX(0.61);
+        ((DracoInterface*)Interface_)->WalkInX(0.4);
         b_sixth_cmd = false;
     }
 
-    //static bool b_third_cmd(true);
-    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_third_cmd) {
-        //((DracoInterface*)Interface_)->Turn(0.7);
-        //b_third_cmd = false;
-    //}
+    static bool b_third_cmd(true);
+    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_third_cmd) {
+        ((DracoInterface*)Interface_)->WalkInY(-1.0);
+        b_third_cmd = false;
+    }
 
-    //static bool b_fourth_cmd(true);
-    //if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
-        //((DracoInterface*)Interface_)->Turn(-0.7);
-        //b_fourth_cmd = false;
-    //}
+    static bool b_fourth_cmd(true);
+    if (((DracoInterface*)Interface_)->IsReadyForNextCommand() && b_fourth_cmd) {
+        //((DracoInterface*)Interface_)->WalkInX(1.8);
+        ((DracoInterface*)Interface_)->WalkInX(0.5);
+        b_fourth_cmd = false;
+    }
 
     // =========================================================================
     // Walk Method Example
