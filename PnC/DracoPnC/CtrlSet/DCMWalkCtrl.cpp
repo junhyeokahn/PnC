@@ -220,23 +220,6 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
 
     _mpc_Xdes_setup();
 
-    // Run the MPC at every MPC tick
-   //  double policy_delay = mpc_dt_;
-   //  if ( (!simulate_mpc_solved_) || (last_control_time_ < 0)){
-   //      // // Setup and solve the MPC 
-   //      _mpc_setup();
-   //      _mpc_Xdes_setup();
-   //      _mpc_solve();
-   //      simulate_mpc_solved_ = true;
-   //  }
-
-   //  // simulate policy delay
-   // if (((state_machine_time_ - last_control_time_) > policy_delay) || (last_control_time_ < 0)){
-   //     _updateTrajectories();
-   //      last_control_time_ = state_machine_time_;
-   //      simulate_mpc_solved_ = false;
-   // }
-
     // Setup the tasks and compute torque from IHWBC
     task_setup();
     // clock_.start();
@@ -292,77 +275,6 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
 
 }
 
-void DCMWalkCtrl::_mpc_setup(){
-    // // Get the initial robot inertia
-    if (!mpc_use_approx_inertia_){
-        robot_->updateCentroidFrame();
-        Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-        Eigen::MatrixXd I_body = Ig_o.block(0,0,3,3);
-        convex_mpc->setRobotInertia(I_body);
-        // myUtils::pretty_print(I_body, std::cout, "I_world");       
-    }
-
-    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, contact_transition_dur_, state_machine_time_ );
-    convex_mpc->setMaxFz(smooth_max_fz); // (Newtons) maximum vertical reaction force per foot.
-
-    // Update Feet Configuration
-    // Set Foot contact locations w.r.t world
-    mpc_r_feet_ = Eigen::MatrixXd::Zero(3, contact_list_.size()); // Each column is a reaction force in x,y,z 
-    mpc_r_feet_.setZero();
-
-    int link_id = 0;
-    for (int i = 0; i < contact_list_.size(); i++){
-        link_id = ((PointContactSpec*)contact_list_[i])->get_link_idx();
-        mpc_r_feet_.col(i) = robot_->getBodyNodeCoMIsometry( link_id ).translation().transpose();        
-    }
-
-    // If we are in flight use the predicted foot location
-    if (ctrl_state_ == DRACO_STATE_RLS){
-        int footstep_index;
-        // Get the footstep index and assign it as the predicted landing foot location for the MPC
-        if (reference_trajectory_module_->whichFootstepIndexInSwing(state_machine_time_, footstep_index)){
-            mpc_r_feet_.col(0) = desired_footstep_list_[footstep_index].getToePosition();
-            mpc_r_feet_.col(1) = desired_footstep_list_[footstep_index].getHeelPosition();
-        }
-    }
-    if (ctrl_state_ == DRACO_STATE_LLS){
-        int footstep_index;
-        // Get the footstep index and assign it as the predicted landing foot location for the MPC
-        if (reference_trajectory_module_->whichFootstepIndexInSwing(state_machine_time_, footstep_index)){
-            mpc_r_feet_.col(2) = desired_footstep_list_[footstep_index].getToePosition();
-            mpc_r_feet_.col(3) = desired_footstep_list_[footstep_index].getHeelPosition();
-        }        
-    }
-
-    // std::cout << "mpc_r_feet_ = " << std::endl;
-    // std::cout << mpc_r_feet_ << std::endl;
-
-    // Update States
-    q_current_ = sp_->q;
-    qdot_current_ = sp_->qdot;
-
-    com_current_ = sp_->com_pos;
-    com_rate_current_ = sp_->est_com_vel;
-
-    // Starting robot state
-    // Current reduced state of the robot
-    // x = [Theta, p, omega, pdot, g] \in \mathbf{R}^13
-    double init_roll(q_current_[5]), init_pitch(q_current_[4]), init_yaw(q_current_[3]), 
-         init_com_x(com_current_[0]), init_com_y(com_current_[1]), init_com_z(com_current_[2]), 
-         init_roll_rate(qdot_current_[5]), init_pitch_rate(qdot_current_[4]), init_yaw_rate(qdot_current_[3]),
-         init_com_x_rate(com_rate_current_[0]), init_com_y_rate(com_rate_current_[1]), init_com_z_rate(com_rate_current_[2]);
-
-    mpc_x0_ = convex_mpc->getx0(init_roll, init_pitch, init_yaw,
-                           init_com_x, init_com_y, init_com_z,
-                           init_roll_rate, init_pitch_rate, init_yaw_rate,
-                           init_com_x_rate, init_com_y_rate, init_com_z_rate);
-
-    midfeet_pos_ = 0.5*(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation() + 
-                        robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation());
-
-
-}
-
 void DCMWalkCtrl::references_setup(){
 
     if (state_machine_time_ >= walk_start_time_){
@@ -399,11 +311,11 @@ void DCMWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-
-            Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
@@ -601,53 +513,6 @@ void DCMWalkCtrl::_mpc_Xdes_setup(){
 
 }
 
-void DCMWalkCtrl::_mpc_solve(){
-    // Solve the mpc
-    mpc_t_start_solve_ = state_machine_time_;
-    convex_mpc->setPreviewStartTime(mpc_t_start_solve_);
-
-    convex_mpc->solve_mpc(mpc_x0_, mpc_Xdes_, mpc_r_feet_, mpc_x_pred_, mpc_Fd_out_);
-    mpc_Fd_des_ = convex_mpc->getComputedGroundForces();
-
-}
-
-void DCMWalkCtrl::_updateTrajectories(){
-    // Updates the reference trajectories that the IHWBC will follow given a new plan from the MPC
-    if (!mpc_solved_once_){
-        // mpc_old_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
-        //                                 mpc_x0_,
-        //                                 convex_mpc->getXpredOverHorizon()); 
-        mpc_old_trajectory_->setStateAndInputKnotPoints(mpc_t_start_solve_,
-                                        mpc_x0_,
-                                        convex_mpc->getXpredOverHorizon(),
-                                        convex_mpc->getForcesOverHorizon()); 
-
-        // Set that this mpc has been solved at least once
-        mpc_solved_once_ = true;
-    }else{
-        // store the old trajectory
-        // mpc_old_trajectory_->setStateKnotPoints(mpc_new_trajectory_->getStartTime(),
-        //                                         mpc_new_trajectory_->getXStartVector(),
-        //                                         mpc_new_trajectory_->getXpredVector());         
-
-        mpc_old_trajectory_->setStateAndInputKnotPoints(mpc_new_trajectory_->getStartTime(),
-                                                        mpc_new_trajectory_->getXStartVector(),
-                                                        mpc_new_trajectory_->getXpredVector(),
-                                                        mpc_new_trajectory_->getUSequence());
-
-    }
-    // mpc_new_trajectory_->setStateKnotPoints(mpc_t_start_solve_,
-    //                                 mpc_x0_,
-    //                                 convex_mpc->getXpredOverHorizon()); 
-
-    mpc_new_trajectory_->setStateAndInputKnotPoints(mpc_t_start_solve_,
-                                    mpc_x0_,
-                                    convex_mpc->getXpredOverHorizon(),
-                                    convex_mpc->getForcesOverHorizon());
-
-
-}
-
 void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the mpc
     // 1e-2/(robot_->getRobotMass()*9.81);
@@ -679,24 +544,12 @@ void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // Update and solve QP
     ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
 
-    // Update desired reaction forces
-    Eigen::VectorXd mpc_forces_old;
-    Eigen::VectorXd mpc_forces_new;
-    double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
-    mpc_old_trajectory_->getInput(state_machine_time_, mpc_forces_old);
-    mpc_new_trajectory_->getInput(state_machine_time_, mpc_forces_new);
-    // clamp s
-    if (s_merge >= 1){
-        s_merge = 1.0;
-    }else if (s_merge <= 0){
-        s_merge = 0.0;
+    // Desired Reaction Forces
+    int rf_dim = 0;
+    for(int i = 0; i < contact_list_.size(); ++i){
+        rf_dim += contact_list_[i]->getDim();
     }
-    mpc_Fd_des_ = s_merge*mpc_forces_new + (1 - s_merge)*mpc_forces_old;    
-    // --- finish merge
-
-
-    mpc_Fd_des_filtered_ = alpha_fd_*mpc_Fd_des_ + (1.0-alpha_fd_)*mpc_Fd_des_filtered_;
-    mpc_Fd_des_.setZero();
+    mpc_Fd_des_ = Eigen::VectorXd::Zero(rf_dim);
 
     ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_filtered_, tau_cmd_, qddot_cmd_);
 
@@ -774,55 +627,6 @@ void DCMWalkCtrl::task_setup() {
     double des_acc_x = 0.0; 
     double des_acc_y = 0.0; 
     double des_acc_z = 0.0; 
-
-    // Enable MPC:
-    // Set desired com and body orientation from predicted state 
-    // Eigen::VectorXd x_traj_old;
-    // Eigen::VectorXd x_traj_new;
-    // double s_merge = (state_machine_time_ - last_control_time_)/homotopy_merge_time_; ;
-    // mpc_old_trajectory_->getState(state_machine_time_, x_traj_old);
-    // mpc_new_trajectory_->getState(state_machine_time_, x_traj_new);
-    // // clamp s
-    // if (s_merge >= 1){
-    //     s_merge = 1.0;
-    // }else if (s_merge <= 0){
-    //     s_merge = 0.0;
-    // }
-    // mpc_x_pred_ = s_merge*x_traj_new + (1 - s_merge)*x_traj_old;
-
-    // // Get desired accelerations
-    // Eigen::VectorXd xddot_traj_old = mpc_old_trajectory_->getAcc(state_machine_time_);
-    // Eigen::VectorXd xddot_traj_new = mpc_new_trajectory_->getAcc(state_machine_time_); 
-    // Eigen::VectorXd xddot_traj_des = s_merge*xddot_traj_new + (1 - s_merge)*xddot_traj_old;
-
-
-    // // Update the behavior
-    // sp_->mpc_pred_pos = mpc_x_pred_.segment(3,3);
-    // sp_->mpc_pred_vel = mpc_x_pred_.segment(9,3);
-
-    // double des_roll = mpc_x_pred_[0]; 
-    // double des_pitch = mpc_x_pred_[1]; 
-    // double des_yaw = mpc_x_pred_[2]; 
-
-    // double des_pos_x = mpc_x_pred_[3]; 
-    // double des_pos_y = mpc_x_pred_[4]; 
-    // double des_pos_z = mpc_x_pred_[5]; 
-
-    // double des_rx_rate = mpc_x_pred_[6]; 
-    // double des_ry_rate = mpc_x_pred_[7]; 
-    // double des_rz_rate = mpc_x_pred_[8]; 
-
-    // double des_vel_x = mpc_x_pred_[9]; 
-    // double des_vel_y = mpc_x_pred_[10]; 
-    // double des_vel_z = mpc_x_pred_[11]; 
-
-    // double des_rx_acc = xddot_traj_des[0]; 
-    // double des_ry_acc = xddot_traj_des[1]; 
-    // double des_rz_acc = xddot_traj_des[2]; 
-
-    // double des_acc_x = xddot_traj_des[3]; 
-    // double des_acc_y = xddot_traj_des[4]; 
-    // double des_acc_z = xddot_traj_des[5]; 
 
     Eigen::Vector3d com_pos_ref, com_vel_ref;
     Eigen::Quaterniond ori_ref;
@@ -1120,16 +924,6 @@ void DCMWalkCtrl::task_setup() {
 
     task_list_.push_back(com_task_);
     task_list_.push_back(body_ori_task_);
-    // task_list_.push_back(rfoot_center_rz_xyz_task);
-    // task_list_.push_back(lfoot_center_rz_xyz_task);    
-
-    // task_list_.push_back(rfoot_front_task);
-    // task_list_.push_back(rfoot_back_task);
-    // task_list_.push_back(lfoot_front_task);
-    // task_list_.push_back(lfoot_back_task);
-
-    // task_list_.push_back(rfoot_line_task);
-    // task_list_.push_back(lfoot_line_task);            
 
     if (ctrl_state_ == DRACO_STATE_RLS){
         task_list_.push_back(rfoot_line_task);
@@ -1146,35 +940,9 @@ void DCMWalkCtrl::task_setup() {
         task_list_.push_back(lfoot_back_task);
     }
 
-    // task_list_.push_back(total_joint_task_);
-    // task_list_.push_back(ang_momentum_task);
-
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
     w_task_heirarchy_[0] = w_task_com_; // COM
     w_task_heirarchy_[1] = w_task_body_; // body ori
-
-
-    // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    // w_task_heirarchy_[3] = w_task_rfoot_; // lfoot
-    // w_task_heirarchy_[4] = w_task_lfoot_; // lfoo
-    // w_task_heirarchy_[5] = w_task_lfoot_; // lfoo
-
-    // if (ctrl_state_ == DRACO_STATE_RLS){
-    //     w_task_heirarchy_[2] = 1e-2; // rfoot
-    //     w_task_heirarchy_[3] = 1e-2; // lfoot
-    // }else if (ctrl_state_ == DRACO_STATE_LLS){
-    //     w_task_heirarchy_[4] = 1e-2; // lfoo
-    //     w_task_heirarchy_[5] = 1e-2; // lfoo
-    // }
-
-    // w_task_heirarchy_[2] = w_task_rfoot_; // rfoot
-    // w_task_heirarchy_[3] = w_task_lfoot_; // lfoot
-    // if (ctrl_state_ == DRACO_STATE_RLS){
-    //     w_task_heirarchy_[2] = 1e-4; // rfoot
-    // }else if (ctrl_state_ == DRACO_STATE_LLS){
-    //     w_task_heirarchy_[3] = 1e-4; // lfoot
-    // }
-
 
     if (ctrl_state_ == DRACO_STATE_RLS){
         w_task_heirarchy_[2] = 1e-2; // rfoot swing
@@ -1190,9 +958,6 @@ void DCMWalkCtrl::task_setup() {
         w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
         w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
     }
-
-    // w_task_heirarchy_[6] = w_task_joint_; // joint    
-    // w_task_heirarchy_[4] = w_task_ang_momentum_; // angular momentum
 
 }
 

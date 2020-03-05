@@ -40,7 +40,8 @@ for i in range(1,4,1):
     ax1 = plt.subplot(3, 1, i)
     plt.plot(data_x, data_r_vrp_pos[st_idx:end_idx,i-1], "k-")
     plt.plot(data_x, data_r_vrp_pos_des[st_idx:end_idx,i-1], "r-")
-    # plt.plot(data_x, data_dcm_pos[st_idx:end_idx,i-1], "k-")
+    plt.plot(data_x[st_idx:end_idx:20], data_dcm_pos[st_idx:end_idx:20,i-1], "bo-")
+    plt.plot(data_x[st_idx:end_idx:20], data_dcm_pos_des[st_idx:end_idx:20,i-1], "co-")
     plt.grid(True)
     for j in phseChange:
         plt.axvline(x=data_x[j],color='indigo',linestyle='-')
