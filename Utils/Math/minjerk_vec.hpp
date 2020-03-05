@@ -10,13 +10,16 @@ class MinJerkCurveVec{
 public:
 	MinJerkCurveVec();
 	MinJerkCurveVec(const Eigen::VectorXd & start_pos, const Eigen::VectorXd & start_vel, const Eigen::VectorXd & start_acc, 
-			  	    const Eigen::VectorXd & end_pos, const Eigen::VectorXd & end_vel, const Eigen::VectorXd & end_acc);
+			  	    const Eigen::VectorXd & end_pos, const Eigen::VectorXd & end_vel, const Eigen::VectorXd & end_acc,
+			  	    double duration);
 	~MinJerkCurveVec();
-	Eigen::VectorXd evaluate(const double & s_in);
-	Eigen::VectorXd evaluateFirstDerivative(const double & s_in);
-	Eigen::VectorXd evaluateSecondDerivative(const double & s_in);
+	Eigen::VectorXd evaluate(const double & t_in);
+	Eigen::VectorXd evaluateFirstDerivative(const double & t_in);
+	Eigen::VectorXd evaluateSecondDerivative(const double & t_in);
 
 private:
+	double Ts; 
+	
 	Eigen::VectorXd p1;
 	Eigen::VectorXd v1;
 	Eigen::VectorXd a1;
