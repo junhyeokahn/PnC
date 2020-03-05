@@ -9,6 +9,7 @@ enum DCMWalkTestPhase{
     DCMWalkTestPhase_initial_jpos = 0,
     DCMWalkTestPhase_stand_ctrl = 1,
     DCMWalkTestPhase_walk_ctrl = 2,
+    DCMWalkTestPhase_balance_ctrl = 3,
     NUM_DCMWalkTestPhase
 };
 

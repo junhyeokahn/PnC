@@ -620,6 +620,10 @@ int DCMWalkingReference::get_r_vrp_type(const int step_index){
   return rvrp_type_list[index];
 }
 
+double DCMWalkingReference::get_total_trajectory_time(){
+  return t_end;
+}
+
 int DCMWalkingReference::which_step_index(const double t){
   // clamp to 0.0
   if (t <= 0.0){

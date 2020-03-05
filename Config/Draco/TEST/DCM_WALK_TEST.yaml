@@ -9,8 +9,8 @@ test_configuration:
     stabilization_duration: 2.0 # Time to stabilize the CoM after ramping up the reaction force
     com_ctrl_time: 1000000.0
 
-    # Walk Start TIme
-    walk_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
+    # Walk Start Time
+    walk_start_time: 2 # seconds. Must be greater than the sum of contact transition time and stabilization duration
 
 control_configuration:
     joint_position_ctrl:

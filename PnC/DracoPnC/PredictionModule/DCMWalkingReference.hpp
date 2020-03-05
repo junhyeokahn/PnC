@@ -142,6 +142,9 @@ public:
   // Returns the type of VRP. Clamps the index to valid values.
   int get_r_vrp_type(const int step_index);
 
+  // Returns t_end
+  double get_total_trajectory_time();
+
 private:
   // DCM parameters:
   double robot_mass = 50; // kg

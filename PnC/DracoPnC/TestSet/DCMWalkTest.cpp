@@ -21,7 +21,7 @@ DCMWalkTest::DCMWalkTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(jpos_target_ctrl_);
     state_list_.push_back(dcm_stand_ctrl_);
     state_list_.push_back(dcm_ctrl_);
-    // state_list_.push_back(dcm_balance_ctrl_);
+    state_list_.push_back(dcm_balance_ctrl_);
 
 
 
@@ -46,7 +46,7 @@ int DCMWalkTest::_NextPhase(const int & phase) {
     int next_phase = phase + 1;
     printf("next phase: %i\n", next_phase);
     if (next_phase == NUM_DCMWalkTestPhase) {
-        return DCMWalkTestPhase::DCMWalkTestPhase_stand_ctrl;
+        return DCMWalkTestPhase::DCMWalkTestPhase_balance_ctrl;
     }
     else return next_phase;
 }

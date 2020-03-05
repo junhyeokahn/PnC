@@ -325,9 +325,10 @@ void DCMWalkCtrl::references_setup(){
 
             // Update the reference trajectory module
             ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
-
-
             reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
+            end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
+            end_time_ += walk_start_time_;
+
             references_set_once_ = true;
         }
     }    
@@ -342,17 +343,10 @@ void DCMWalkCtrl::_Xdes_setup(){
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
 
-    // Angular velocity and acceleration references
-    Eigen::Vector3d ang_vel_ref, ang_acc_ref;
-    ang_vel_ref.setZero(); ang_acc_ref.setZero();
-
-    double t_predict = 0.0;
-
-    // Time 
-    t_predict = state_machine_time_;
-
     Eigen::Vector3d ypr = myUtils::QuatToEulerZYX(ini_ori_);
 
+    // Set Targets to current 
+    // Set Desired Orientation
     Xdes_[0] = ypr[2]; // Desired Roll
     Xdes_[1] = ypr[1]; // Desired Pitch
     Xdes_[2] = ypr[0]; // Desired Yaw
@@ -360,27 +354,13 @@ void DCMWalkCtrl::_Xdes_setup(){
     // ----------------------------------------------------------------
     // Set CoM Position -----------------------------------------------
     Xdes_[3] = goal_com_pos_[0];
-    // Xdes_[3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
-
     Xdes_[4] = goal_com_pos_[1];
-
-    // Wait for contact transition to finish
-    if (t_predict <= contact_transition_dur_){
-        Xdes_[5] = ini_com_pos_[2];
-    }else {
-        Xdes_[5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
-    }
+    Xdes_[5] = goal_com_pos_[2];    
 
     // Set CoM Velocity -----------------------------------------------
     Xdes_[9] = 0.0;
     Xdes_[10] = 0.0;
-
-    // Wait for contact transition to finish
-    if (t_predict <= contact_transition_dur_){
-        Xdes_[11] = 0.0;
-    }else {
-        Xdes_[11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
-    }
+    Xdes_[11] = 0.0;
 
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = Xdes_[i+3];
@@ -538,12 +518,6 @@ void DCMWalkCtrl::task_setup() {
 
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
-
-    // if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
-    //     sp_->des_jpos = sp_->q.segment(robot_->getNumVirtualDofs(),
-    //                                robot_->getNumActuatedDofs());
-    //     sp_->des_jvel = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());   
-    // }
 
 
     com_acc_des.setZero();
