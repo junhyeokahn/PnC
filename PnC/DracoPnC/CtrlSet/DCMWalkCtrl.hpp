@@ -5,10 +5,9 @@
 class DracoStateProvider;
 class RobotSystem;
 class ContactSpec;
-class CMPC;
+
 class IHWBC;
 class MPCDesiredTrajectoryManager;
-class GaitCycle;
 
 class DCMWalkingReferenceTrajectoryModule;
 class WalkingReferenceTrajectoryModule;
@@ -127,13 +126,6 @@ class DCMWalkCtrl : public Controller {
     int ctrl_state_;
     int prev_ctrl_state_; 
 
-    MPCDesiredTrajectoryManager* mpc_old_trajectory_;
-    MPCDesiredTrajectoryManager* mpc_new_trajectory_;
-    double homotopy_merge_time_;
-
-
-
-
     // IHWBC
     IHWBC* ihwbc;
     Eigen::VectorXd gamma_old_;
@@ -144,6 +136,9 @@ class DCMWalkCtrl : public Controller {
     Eigen::VectorXd ini_com_pos_;
     Eigen::VectorXd ini_com_vel_;
     Eigen::VectorXd goal_com_pos_;
+
+    Eigen::VectorXd Xdes_;
+    void _Xdes_setup();
 
     void task_setup();
     void contact_setup();
@@ -176,43 +171,9 @@ class DCMWalkCtrl : public Controller {
     Eigen::VectorXd q_des_;
 
 
-    // MPC Functions
-    void _mpc_setup();
-    void _mpc_Xdes_setup();
-    void _mpc_solve();
-
-    void _updateTrajectories();
-
-    double mpc_t_start_solve_; // starting time for the mpc to solve
-    bool mpc_solved_once_;
-
-
-    // MPC Variables
-    double mpc_horizon_;
-    double mpc_dt_; 
-    double mpc_mu_;
-    double mpc_max_fz_;
-    double mpc_control_alpha_;
-    double mpc_delta_smooth_;
-    double mpc_toe_heel_smooth_;
-
-    bool mpc_smooth_from_prev_;
-    bool mpc_use_approx_inertia_;
-    bool mpc_do_toe_heel_smoothing_;
-
-    Eigen::VectorXd mpc_approx_inertia_input_;
-
-    Eigen::VectorXd mpc_cost_vec_;
-    Eigen::VectorXd mpc_cost_vec_walk_;
-    Eigen::VectorXd mpc_terminal_cost_vec_;
-    Eigen::VectorXd mpc_x0_;
-    Eigen::VectorXd mpc_Xdes_;
-    Eigen::MatrixXd mpc_r_feet_;
-    Eigen::VectorXd mpc_x_pred_;
-    Eigen::VectorXd mpc_Fd_out_;
-
-    Eigen::VectorXd mpc_Fd_des_;
-    Eigen::VectorXd mpc_Fd_des_filtered_;
+    double max_fz_;
+    Eigen::VectorXd Fd_des_;
+    Eigen::VectorXd Fd_des_filtered_;
     double alpha_fd_;
 
     Eigen::Vector3d com_current_;

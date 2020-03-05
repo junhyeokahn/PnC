@@ -5,11 +5,10 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
-#include <PnC/MPC/CMPC.hpp>
+
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 #include <PnC/MPC/MPCDesiredTrajectoryManager.hpp>
-#include <PnC/GaitCycle/GaitCycle.hpp>
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 #include <PnC/DracoPnC/PredictionModule/WalkingReferenceTrajectoryModule.hpp>
@@ -73,30 +72,10 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
     // Some helpful defaults
     // Convex MPC
     // convex_mpc = new CMPC();
-    mpc_dt_ = 0.025; // seconds per step
-    mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
-    mpc_max_fz_ = 1500.0; // Maximum Reaction force on each contact point
-    mpc_control_alpha_ = 1e-12; // Regularization term on the reaction force
-    mpc_delta_smooth_ = 1e-12; // Smoothing parameter on the reaction force solutions
-    mpc_smooth_from_prev_ = false; // Whether to use the previous solution to smooth the current solution
-
-    mpc_toe_heel_smooth_ = 1e-4; // Smoothing parameter between the toe and the heel
-    mpc_do_toe_heel_smoothing_ = false; // If custom smoothing should be done
-
-    mpc_Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
-    mpc_Fd_des_filtered_ = Eigen::VectorXd::Zero(dim_contact_);
+    max_fz_ = 1500.0; // Maximum Reaction force on each contact point
+    Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
+    Fd_des_filtered_ = Eigen::VectorXd::Zero(dim_contact_);
     alpha_fd_ = 0.9;
-
-    mpc_cost_vec_ = Eigen::VectorXd::Zero(13);
-    mpc_cost_vec_ << 2.5, 2.5, 2.5, 30.0, 10.0, 10.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0;        
-    mpc_cost_vec_walk_ = mpc_cost_vec_;
-    mpc_terminal_cost_vec_ = mpc_cost_vec_;
-
-    mpc_t_start_solve_ = 0.0;
-    mpc_solved_once_ = false; // Whether the MPC has been solved at least once
-
-    simulate_mpc_solved_ = false;
-
 
     // Footsteps and Reference Trajectory Module
     // Set which contact points from the contact_list_ corresponds to which footstep
@@ -108,16 +87,6 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
 
     left_foot_start_ = new DracoFootstep();
     right_foot_start_ = new DracoFootstep();
-
-    // Gait
-    no_gait_ = std::make_shared<GaitCycle>();
-    // Set custom gait cycle
-    gait_swing_time_ = 0.3;
-    gait_transition_time_ = 0.2;
-    gait_biped_walking_offset_ = gait_swing_time_ + gait_transition_time_;
-    gait_total_gait_duration_ = 2.0*gait_swing_time_ + 2.0*gait_transition_time_;
-    biped_gait_ = std::shared_ptr<GaitCycle>(new GaitCycle(gait_swing_time_, gait_total_gait_duration_, {0.0, 0.0, gait_biped_walking_offset_, gait_biped_walking_offset_}));
-    gait_set_once_ = false;
 
     // Initialize
     swing_foot_current_.reset(new DracoFootstep());
@@ -196,10 +165,8 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
-    // To Do: Create separate state machines for this....
     // Get trajectory state
     ctrl_state_ =  reference_trajectory_module_->getState(state_machine_time_);
-    // printf("t:%0.3f, prev_state: %i, cur_state: %i \n", state_machine_time_, prev_ctrl_state_, ctrl_state_);
 
     // Setup the contacts
     contact_setup();
@@ -207,7 +174,7 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
     // Setup the Walking Reference Module
     references_setup();
 
-    _mpc_Xdes_setup();
+    _Xdes_setup();
 
     // Setup the tasks and compute torque from IHWBC
     task_setup();
@@ -255,13 +222,6 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
 
     // Store  ctrl_state_ as previous.
     prev_ctrl_state_ = ctrl_state_;
-
-
-    // myUtils::pretty_print(gamma_old_, std::cout, "gamma_old_");
-    // myUtils::pretty_print(gamma, std::cout, "gamma");
-    // myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_");
-    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");
-
 }
 
 void DCMWalkCtrl::references_setup(){
@@ -375,18 +335,14 @@ void DCMWalkCtrl::references_setup(){
     }    
 }
 
-void DCMWalkCtrl::_mpc_Xdes_setup(){
+void DCMWalkCtrl::_Xdes_setup(){
     int n = 13; 
-    mpc_Xdes_ = Eigen::VectorXd::Zero(n*1); // Create the desired state vector evolution
+    Xdes_ = Eigen::VectorXd::Zero(n*1); // Create the desired state vector evolution
 
     double magnitude = 0.0;
     double T = 1.0;
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
-
-    Eigen::Vector3d com_pos_ref, com_vel_ref;
-    Eigen::Quaterniond ori_ref;
-    Eigen::Vector3d euler_yaw_pitch_roll;
 
     // Angular velocity and acceleration references
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
@@ -396,79 +352,39 @@ void DCMWalkCtrl::_mpc_Xdes_setup(){
 
     // Time 
     t_predict = state_machine_time_;
-    // reference_trajectory_module_->getMPCRefComAndOri(t_predict, com_pos_ref, ori_ref);
 
-    if (state_machine_time_ >= walk_start_time_){
-        reference_trajectory_module_->getMPCRefComPosandVel(t_predict, com_pos_ref, com_vel_ref);
-        reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(t_predict, ori_ref, ang_vel_ref, ang_acc_ref);            
-    }
-
-
-    mpc_Xdes_[0] = 0.0; // Desired Roll
-    mpc_Xdes_[1] = 0.0; // Desired Pitch
-    mpc_Xdes_[2] = 0.0; // Desired Yaw
-
-    if (t_predict >= walk_start_time_){
-        euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
-        mpc_Xdes_[0] = euler_yaw_pitch_roll[2]; // Desired Roll
-        mpc_Xdes_[1] = euler_yaw_pitch_roll[1]; // Desired Pitch
-        mpc_Xdes_[2] = euler_yaw_pitch_roll[0]; // Desired Yaw            
-    }
-
+    Xdes_[0] = 0.0; // Desired Roll
+    Xdes_[1] = 0.0; // Desired Pitch
+    Xdes_[2] = 0.0; // Desired Yaw
 
     // ----------------------------------------------------------------
     // Set CoM Position -----------------------------------------------
-    mpc_Xdes_[3] = goal_com_pos_[0];
-    // mpc_Xdes_[3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
+    Xdes_[3] = goal_com_pos_[0];
+    // Xdes_[3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
 
-    mpc_Xdes_[4] = goal_com_pos_[1];
-
-    if (state_machine_time_ >= walk_start_time_){
-        mpc_Xdes_[3] = com_pos_ref[0];
-        mpc_Xdes_[4] = com_pos_ref[1];
-    }
+    Xdes_[4] = goal_com_pos_[1];
 
     // Wait for contact transition to finish
     if (t_predict <= contact_transition_dur_){
-        mpc_Xdes_[5] = ini_com_pos_[2];
+        Xdes_[5] = ini_com_pos_[2];
     }else {
-        mpc_Xdes_[5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
-    }
-
-    if (state_machine_time_ >= walk_start_time_){
-         mpc_Xdes_[5] = com_pos_ref[2];
-    }
-    // ----------------------------------------------------------------
-
-    // Set Angular Velocity ref
-    if (state_machine_time_ >= walk_start_time_){
-        mpc_Xdes_[6] = ang_vel_ref[0];
-        mpc_Xdes_[7] = ang_vel_ref[1];
-        mpc_Xdes_[8] = ang_vel_ref[2];            
+        Xdes_[5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
     }
 
     // Set CoM Velocity -----------------------------------------------
-    mpc_Xdes_[9] = 0.0;
-    mpc_Xdes_[10] = 0.0;
+    Xdes_[9] = 0.0;
+    Xdes_[10] = 0.0;
 
     // Wait for contact transition to finish
     if (t_predict <= contact_transition_dur_){
-        mpc_Xdes_[11] = 0.0;
+        Xdes_[11] = 0.0;
     }else {
-        mpc_Xdes_[11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
+        Xdes_[11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
     }
-
-    if (state_machine_time_ >= walk_start_time_){
-         mpc_Xdes_[9] = com_vel_ref[0];
-         mpc_Xdes_[10] = com_vel_ref[1];
-         mpc_Xdes_[11] = com_vel_ref[2];
-    }
-
-
 
     for (int i = 0; i < 3; ++i) {
-        sp_->com_pos_des[i] = mpc_Xdes_[i+3];
-        sp_->com_vel_des[i] = mpc_Xdes_[i+9];
+        sp_->com_pos_des[i] = Xdes_[i+3];
+        sp_->com_vel_des[i] = Xdes_[i+9];
     }
 
 }
@@ -505,13 +421,7 @@ void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
 
     // Desired Reaction Forces
-    int rf_dim = 0;
-    for(int i = 0; i < contact_list_.size(); ++i){
-        rf_dim += contact_list_[i]->getDim();
-    }
-    mpc_Fd_des_ = Eigen::VectorXd::Zero(rf_dim);
-
-    ihwbc->solve(task_list_, contact_list_, mpc_Fd_des_filtered_, tau_cmd_, qddot_cmd_);
+    ihwbc->solve(task_list_, contact_list_, Fd_des_filtered_, tau_cmd_, qddot_cmd_);
 
     ihwbc->getQddotResult(qddot_res);
     ihwbc->getFrResult(Fr_res);
@@ -557,28 +467,28 @@ void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     sp_->qddot_cmd = qddot_res;    
 
     // Store desired reaction force data
-    sp_->filtered_rf = mpc_Fd_des_;
+    sp_->filtered_rf = Fd_des_;
     sp_->reaction_forces = Fr_res;
 
 }
 
 void DCMWalkCtrl::task_setup() {
     // Disable MPC
-    double des_roll = mpc_Xdes_[0];
-    double des_pitch = mpc_Xdes_[1];
-    double des_yaw = mpc_Xdes_[2];
+    double des_roll = Xdes_[0];
+    double des_pitch = Xdes_[1];
+    double des_yaw = Xdes_[2];
 
-    double des_pos_x = mpc_Xdes_[3];
-    double des_pos_y = mpc_Xdes_[4];
-    double des_pos_z = mpc_Xdes_[5];
+    double des_pos_x = Xdes_[3];
+    double des_pos_y = Xdes_[4];
+    double des_pos_z = Xdes_[5];
 
-    double des_rx_rate = mpc_Xdes_[6];
-    double des_ry_rate = mpc_Xdes_[7];
-    double des_rz_rate = mpc_Xdes_[8];
+    double des_rx_rate = Xdes_[6];
+    double des_ry_rate = Xdes_[7];
+    double des_rz_rate = Xdes_[8];
 
-    double des_vel_x = mpc_Xdes_[9];
-    double des_vel_y = mpc_Xdes_[10];
-    double des_vel_z = mpc_Xdes_[11];
+    double des_vel_x = Xdes_[9];
+    double des_vel_y = Xdes_[10];
+    double des_vel_z = Xdes_[11];
 
     double des_rx_acc = 0.0; 
     double des_ry_acc = 0.0; 
@@ -993,12 +903,8 @@ void DCMWalkCtrl::contact_setup() {
     contact_list_.push_back(lfoot_back_contact_);
 
     // Smoothly change maximum Fz for IHWBC
-    double smooth_max_fz = myUtils::smooth_changing(0.0, mpc_max_fz_, contact_transition_dur_, state_machine_time_ );
+    double smooth_max_fz = myUtils::smooth_changing(0.0, max_fz_, contact_transition_dur_, state_machine_time_ );
  
-    // if (state_machine_time_ >= walk_start_time_){
-       // std::cout << "State Machine Time: " << state_machine_time_ << std::endl;
-    // }
-
     for(int i = 0; i < contact_list_.size(); i++){
         if (state_machine_time_ >= walk_start_time_){
             ((PointContactSpec*)contact_list_[i])->setMaxFz(reference_trajectory_module_->getMaxNormalForce(i, state_machine_time_) );
@@ -1029,8 +935,6 @@ void DCMWalkCtrl::firstVisit() {
 
     Eigen::Vector3d com_pos = sp_->com_pos; //robot_->getCoMPosition();
     Eigen::Vector3d com_vel = sp_->est_com_vel ;// robot_->getCoMVelocity();
-    //Eigen::VectorXd rankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
-    //Eigen::VectorXd lankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
     Eigen::VectorXd rankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rAnkle).translation();
     Eigen::VectorXd lankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lAnkle).translation();
     for (int i = 0; i < 3; ++i) {
@@ -1145,6 +1049,5 @@ void DCMWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     ang_momentum_task->setGain(Eigen::Vector3d::Zero(), kd_body_rpy);
 
     // Set IHWBC dt integration time
-    ihwbc_dt_ = DracoAux::ServoRate; //mpc_dt_;  
-
+    ihwbc_dt_ = DracoAux::ServoRate; 
 }
