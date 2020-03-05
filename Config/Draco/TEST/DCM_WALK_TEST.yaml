@@ -1,0 +1,45 @@
+test_configuration:
+    initial_jpos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+
+    jpos_initialization_time: 2.0
+    jpos_ctrl_time: 2.0
+
+    com_height: 0.7
+    contact_transition_duration: 2.0 # Time to ramp up the reaction force to the current
+    stabilization_duration: 2.0 # Time to stabilize the CoM after ramping up the reaction force
+    com_ctrl_time: 1000000.0
+
+    # Walk Start TIme
+    walk_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
+
+control_configuration:
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 100. , 100 , 100 , 100 , 100 , 100. ]
+        kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
+
+    dcm_ctrl:
+         # Velocity Integration Params
+        max_joint_vel: 2.0 # rad/s - maximum velocity after integration
+        velocity_break_freq: 2.0 # Hz # 1.0 # Higher value decays to 0.0 faster
+
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
+        position_break_freq: 1.0 # Hz # 0.0 # Higher value decays to current jpos faster
+
+        # Task Weights
+        foot_rz_xyz_kp: [300.0, 300.0, 300.0, 300.0]
+        foot_rz_xyz_kd: [35, 35, 35, 35]
+
+        com_kp: [50.0, 50.0, 200.0]
+        com_kd: [20.0, 20.0, 28.0]
+ 
+        body_kp: [5.0, 5.0, 5.0]
+        body_kd: [20.0, 20.0, 20.0]
+
+        joint_kp: [10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 ]
+        joint_kd: [0  , 0   , 0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ]
+
+        # Weight given to the reaction force tracking relative to tasks when solving the QP for IHWBC
+        w_contact_weight: 1e-8
+
+        # Alpha filter for the desired reaction force from the mpc. Closer to 1.0 will be closer to the current desired reaction force
+        ihwbc_alpha_fd: 1.0 # Value between [0,1]. 
