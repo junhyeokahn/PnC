@@ -3,6 +3,7 @@
 #include <Configuration.h>
 #include <PnC/WBC/BasicTask.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
                      const int& _dim, const int& _link_idx)
@@ -85,6 +86,12 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                               _pos_des[2], _pos_des[3]);
             Eigen::Quaternion<double> ori_act(
                 robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+            // TEST
+            ori_des = myUtils::bind_qaut_pi(ori_des);
+            ori_act = myUtils::bind_qaut_pi(ori_act);
+            // TEST
+
             Eigen::Quaternion<double> quat_ori_err;
             quat_ori_err = ori_des * (ori_act.inverse());
             Eigen::Vector3d ori_err;

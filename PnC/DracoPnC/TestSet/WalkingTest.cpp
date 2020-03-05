@@ -85,20 +85,20 @@ void WalkingTest::TestInitialization() {
 
 int WalkingTest::_NextPhase(const int& phase) {
     int next_phase = phase + 1;
-    myUtils::color_print(myColor::BoldGreen,
-                         "[[Phase " + std::to_string(next_phase) + "]]");
+    //myUtils::color_print(myColor::BoldGreen,
+                         //"[[Phase " + std::to_string(next_phase) + "]]");
 
     if (phase == WKPhase::double_contact_1) {
         ++num_step_;
         sp_->num_residual_step -= 1;
         sp_->stance_foot = DracoBodyNode::lFootCenter;
-        printf("Right Leg Swing\n");
+        //printf("Right Leg Swing\n");
     }
     if (phase == WKPhase::double_contact_2) {
         ++num_step_;
         sp_->num_residual_step -= 1;
         sp_->stance_foot = DracoBodyNode::rFootCenter;
-        printf("Left Leg Swing\n");
+        //printf("Left Leg Swing\n");
     }
     sp_->num_step_copy = num_step_;
 

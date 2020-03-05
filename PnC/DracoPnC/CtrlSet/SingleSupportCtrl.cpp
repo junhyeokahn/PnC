@@ -401,20 +401,20 @@ void SingleSupportCtrl::lastVisit() {}
 
 bool SingleSupportCtrl::endOfPhase() {
     if (state_machine_time_ > ssp_dur_) {
-        printf("(state_machine time, end time) : (%f, %f) \n",
-               state_machine_time_, ssp_dur_);
+        //printf("(state_machine time, end time) : (%f, %f) \n",
+               //state_machine_time_, ssp_dur_);
         return true;
     }
     if (moving_foot_ == DracoBodyNode::rAnkle) {
         if (state_machine_time_ > ssp_dur_ * 0.5 && sp_->b_rfoot_contact) {
-            printf("(state_machine time, end time) : (%f, %f) \n",
-                   state_machine_time_, ssp_dur_);
+            //printf("(state_machine time, end time) : (%f, %f) \n",
+                   //state_machine_time_, ssp_dur_);
             return true;
         }
     } else {
         if (state_machine_time_ > ssp_dur_ * 0.5 && sp_->b_lfoot_contact) {
-            printf("(state_machine time, end time) : (%f, %f) \n",
-                   state_machine_time_, ssp_dur_);
+            //printf("(state_machine time, end time) : (%f, %f) \n",
+                   //state_machine_time_, ssp_dur_);
             return true;
         }
     }
