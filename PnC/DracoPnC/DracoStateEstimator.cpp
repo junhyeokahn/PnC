@@ -191,7 +191,7 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel /sp_->omega; 
 
 
-    double alphaVelocity = computeAlphaGivenBreakFrequency(2.5, DracoAux::ServoRate);   
+    double alphaVelocity = computeAlphaGivenBreakFrequency(100.0, DracoAux::ServoRate);   
     // sp_->dcm_vel = (sp_->dcm - sp_->prev_dcm)/DracoAux::ServoRate;
     sp_->dcm_vel = alphaVelocity*((sp_->dcm - sp_->prev_dcm)/DracoAux::ServoRate) + (1.0 - alphaVelocity)*sp_->dcm_vel;
     sp_->prev_dcm = sp_->dcm;
