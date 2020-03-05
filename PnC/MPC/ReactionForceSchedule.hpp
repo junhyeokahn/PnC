@@ -16,6 +16,10 @@ public:
 
 	double getDefaultMaxNormalForce();
 
+	// returns a value between 0.0 and 1.0
+	// computes getMaxNormalForce(index, time)/default_max_z_force
+	double getTransitionVariable(int index, double time);
+
 	// Default max z force
 	double default_max_z_force_ = 500;
 };
