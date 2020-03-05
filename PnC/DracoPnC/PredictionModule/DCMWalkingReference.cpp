@@ -34,6 +34,10 @@ double DCMWalkingReference::getInitialTime(){
   return t_start;
 }
 
+void DCMWalkingReference::setInitialOri(const Eigen::Quaterniond initial_ori_in){
+  initial_ori = initial_ori_in;
+}
+
 
 void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, 
                                                         const DracoFootstep & initial_footstance,
@@ -260,11 +264,21 @@ void DCMWalkingReference::computeDCM_states(){
   for (int i = 0; i < rvrp_list.size(); i++){
    // compute boundary conditions
    dcm_ini_DS_list[i] = computeDCM_iniDS_i(i, alpha_ds*t_ds);
-   dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
    dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*t_ds);
-   dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
    dcm_acc_ini_DS_list[i] = computeDCMacc_iniDS_i(i, alpha_ds*t_ds);
-   dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+  }
+
+  for (int i = 0; i < rvrp_list.size(); i++){
+    if (i == 0){
+      dcm_end_DS_list[i] = computeDCM_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);
+      dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);
+      dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);          
+    }else{
+      dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+      dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+      dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, (1.0-alpha_ds)*t_ds);          
+    }
+
   }
 
   // printBoundaryConditions();
@@ -352,7 +366,7 @@ void DCMWalkingReference::compute_total_trajectory_time(){
 double DCMWalkingReference::get_polynomial_duration(const int step_index){
   // first step has polynomial duration of only ending double support
   if (step_index == 0){
-    return (1.0-alpha_ds)*t_ds;
+    return t_transfer + (1.0-alpha_ds)*t_ds;
   } 
   else if (step_index == (rvrp_list.size() - 1)){
     return t_ds; //alpha_ds*t_ds; // Not sure why... But the final duration must not be below t_ds.
@@ -362,8 +376,8 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
-    // return rvrp_list.front();
-    return get_DCM_exp(step_index, 0.0);
+    return rvrp_list.front();
+    // return get_DCM_exp(step_index, 0.0);
   }
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
@@ -373,13 +387,16 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
   if (step_index == (rvrp_list.size() - 1)){
     return rvrp_list.back();
   }
+  else if (step_index == 0){
+    return dcm_ini_DS_list[step_index + 1];
+  }
   return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
-    // return Eigen::Vector3d::Zero();
-    return get_DCM_vel_exp(step_index, 0.0);
+    return Eigen::Vector3d::Zero();
+    // return get_DCM_vel_exp(step_index, 0.0);
   }
 
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
@@ -389,7 +406,10 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index
   // Set Boundary condition. Velocities at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
     return Eigen::Vector3d::Zero();
-  } 
+  }
+  else if (step_index == 0){
+    return dcm_vel_ini_DS_list[step_index + 1];
+  }   
   return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
 
@@ -731,7 +751,7 @@ void DCMWalkingReference::get_reaction_force(const double mass, const Eigen::Vec
 //   -the DCM dynamics time constant b,
 //  - the current dcm 
 //  - and the current dcm_vel
-void get_r_vrp(const double b_in, const Eigen::Vector3d & dcm, const Eigen::Vector3d & dcm_vel, Eigen::Vector3d & r_vrp_out){
+void DCMWalkingReference::get_r_vrp(const double b_in, const Eigen::Vector3d & dcm, const Eigen::Vector3d & dcm_vel, Eigen::Vector3d & r_vrp_out){
   r_vrp_out = dcm - b_in*dcm_vel;
 }
 
@@ -805,7 +825,7 @@ void DCMWalkingReference::compute_reference_pelvis_ori(){
 
   // Initialize pelvis orientation
   midfeet.computeMidfeet(prev_left_stance, prev_right_stance, midfeet);
-  Eigen::Quaterniond current_pelvis_ori = midfeet.orientation;
+  Eigen::Quaterniond current_pelvis_ori = initial_ori; //midfeet.orientation;
 
   // Initialize the footstep counter
   int step_counter = 0;

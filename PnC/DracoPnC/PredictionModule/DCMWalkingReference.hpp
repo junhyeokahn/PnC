@@ -60,6 +60,8 @@ public:
   void setRobotMass(double mass);
   void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
   void setInitialTime(double t_start_in); // Sets the initial offset time.
+  void setInitialOri(const Eigen::Quaterniond initial_ori_in);
+
   double getInitialTime(); // Returns t_start;
 
 
@@ -170,6 +172,8 @@ private:
   void compute_reference_pelvis_ori();
   DracoFootstep initial_leftfoot_stance;
   DracoFootstep initial_rightfoot_stance;
+  Eigen::Quaterniond initial_ori;
+
 
   // input: r_vrp_d_i - the desired virtual repelant point for the i-th step.
   //        t_step    - the time interval to use for backwards integration

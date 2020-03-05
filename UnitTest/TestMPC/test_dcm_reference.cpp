@@ -134,7 +134,7 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	footstep_list.push_back(right_footstep2);
 
 
-	double t_walk_start = 0.0;
+	double t_walk_start = 0.25;
  	dcm_walking_reference_module.setStartingConfiguration(x_com_pos_in,
 													  x_ori_start_in,
 								  					  lf_start,
@@ -154,7 +154,7 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
 	double t = 0.0;
-	double t_total = 2.0;
+	double t_total = 4.0;
 	double dt = 0.005;
 
 	int N_size = int(t_total/dt);
