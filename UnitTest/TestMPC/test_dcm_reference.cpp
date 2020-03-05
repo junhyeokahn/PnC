@@ -154,8 +154,8 @@ TEST(DCMTrajectoryModule, trajectory_module){
 	ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
 	double t = 0.0;
-	double t_total = 4.0;
-	double dt = 0.01;
+	double t_total = 2.0;
+	double dt = 0.005;
 
 	int N_size = int(t_total/dt);
 	int footstep_index = 0;
