@@ -7,10 +7,13 @@ private:
     //PnC, sim, and robot members
     DracoInterface* interface_;
     ScorpioInterface* arm_interface_;
+    ScorpioInterface* arm2_interface_;
     DracoSim* simulator_;
 
     //Logical Safety
     bool running_;
+
+    const std::string ARM1_NAME = "1";
 
 public:
     DracoWrapper();
@@ -26,9 +29,9 @@ public:
     void SetWalkToRelativeCommand(double x, double y, double th);
     void SetHaltCommand();
     //Scorpio Manipulation Methods
-    void SetMoveEndEffectorCommand(double x, double y, double z);
-    void SetCloseGripperCommand();
-    void SetOpenGripperCommand();
+    void SetMoveEndEffectorCommand(std::string arm, double x, double y, double z);
+    void SetCloseGripperCommand(std::string arm);
+    void SetOpenGripperCommand(std::string arm);
     //Shutdown the sim and ros nodelet and destruct the PnC instance
     void Shutdown();
 };

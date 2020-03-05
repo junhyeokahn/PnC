@@ -8,6 +8,7 @@
 DracoWrapper::DracoWrapper() : running_(false) {
     //interface_ = new DracoInterface();
     //arm_interface_ = new ScorpioInterface();
+    //arm2_interface_ = new ScorpioInterface();
     simulator_ = new DracoSim();
 }
 
@@ -76,34 +77,55 @@ void DracoWrapper::SetHaltCommand() {
 
 //Scorpio Manipulation Methods
 
-void DracoWrapper::SetMoveEndEffectorCommand(double x, double y, double z){
+void DracoWrapper::SetMoveEndEffectorCommand(std::string arm, double x, double y, double z){
     if (!running_) {
         throw std::bad_function_call();
     }
-    while(!arm_interface_->IsReadyToMove()) {
-        std::this_thread::sleep_for (std::chrono::milliseconds (100));
+    if (arm == ARM1_NAME) {
+        while(!arm_interface_->IsReadyToMove()) {
+            std::this_thread::sleep_for (std::chrono::milliseconds (100));
+        }
+        arm_interface_->MoveEndEffectorTo(x, y, z);
+    } else {
+        while(!arm2_interface_->IsReadyToMove()) {
+            std::this_thread::sleep_for (std::chrono::milliseconds (100));
+        }
+        arm2_interface_->MoveEndEffectorTo(x, y, z);
     }
-    arm_interface_->MoveEndEffectorTo(x, y, z);
 }
 
-void DracoWrapper::SetCloseGripperCommand(){
+void DracoWrapper::SetCloseGripperCommand(std::string arm){
     if (!running_) {
         throw std::bad_function_call();
     }
-    while(!arm_interface_->IsReadyToGrasp()) {
-        std::this_thread::sleep_for (std::chrono::milliseconds (100));
+    if (arm == ARM1_NAME) {
+        while (!arm_interface_->IsReadyToGrasp()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        arm_interface_->Grasp();
+    } else {
+        while (!arm2_interface_->IsReadyToGrasp()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        arm2_interface_->Grasp();
     }
-    arm_interface_->Grasp();
 }
 
-void DracoWrapper::SetOpenGripperCommand(){
+void DracoWrapper::SetOpenGripperCommand(std::string arm){
     if (!running_) {
         throw std::bad_function_call();
     }
-    while(!arm_interface_->IsReadyToRelease()) {
-        std::this_thread::sleep_for (std::chrono::milliseconds (100));
+    if (arm == ARM1_NAME) {
+        while (!arm_interface_->IsReadyToRelease()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        arm_interface_->Release();
+    } else {
+        while (!arm2_interface_->IsReadyToRelease()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        arm2_interface_->Release();
     }
-    arm_interface_->Release();
 }
 
 void DracoWrapper::Shutdown() {
