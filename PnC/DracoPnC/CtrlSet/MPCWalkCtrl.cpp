@@ -1091,6 +1091,33 @@ void MPCWalkCtrl::task_setup() {
     // std::cout << "time:" << state_machine_time_ << std::endl;
     // std::cout << "index 0: transition: " << t_transition << " max force = " << f_max << std::endl;
  
+    // double w_contact_transition = (1-t_transition)*w_task_rfoot_;
+    // double w_swing_transition = t_transition*1e-2;
+
+    // task_list_.push_back(com_task_);
+    // task_list_.push_back(body_ori_task_);
+
+    // task_list_.push_back(rfoot_line_task);
+    // task_list_.push_back(lfoot_line_task); 
+
+    // task_list_.push_back(rfoot_front_task);
+    // task_list_.push_back(rfoot_back_task);            
+    // task_list_.push_back(lfoot_front_task);
+    // task_list_.push_back(lfoot_back_task);
+
+    // w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    // w_task_heirarchy_[0] = w_task_com_; // COM
+    // w_task_heirarchy_[1] = w_task_body_; // body ori
+
+    // w_task_heirarchy_[2] = (1-t_transition)*w_task_rfoot_; // rfoot swing
+    // w_task_heirarchy_[3] = (1-t_transition)*w_task_lfoot_; // lfoot swing
+
+    // w_task_heirarchy_[4] = t_transition*w_task_rfoot_; // rfoot contact
+    // w_task_heirarchy_[5] = t_transition*w_task_rfoot_; // rfoot contact
+    // w_task_heirarchy_[6] = t_transition*w_task_lfoot_; // rfoot contact
+    // w_task_heirarchy_[7] = t_transition*w_task_lfoot_; // rfoot contact
+
+
     task_list_.push_back(com_task_);
     task_list_.push_back(body_ori_task_);
     // task_list_.push_back(rfoot_center_rz_xyz_task);
