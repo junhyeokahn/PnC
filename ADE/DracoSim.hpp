@@ -1,21 +1,12 @@
-#include <PnC/DracoPnC/DracoInterface.hpp>
-#include <PnC/ScorpioPnC/ScorpioInterface.hpp>
-#include <Configuration.h>
-#include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <dart/dart.hpp>
-#include <dart/gui/osg/osg.hpp>
-#include <dart/utils/urdf/urdf.hpp>
-#include <dart/utils/utils.hpp>
-#include <thread>
+#include <PnC/EnvInterface.hpp>
 
 class DracoSim {
 private:
-    dart::gui::osg::Viewer viewer;
+    //dart::gui::osg::Viewer viewer;
     //Threading
-    std::thread thread_;
-    std::atomic<bool> exit;
-    void StartThread();
+    //std::thread thread_;
+    //std::atomic<bool> exit;
+    //void StartThread();
 public:
     //Initialize the sim with a new PnC
     DracoSim();

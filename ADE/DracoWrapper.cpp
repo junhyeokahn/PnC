@@ -6,8 +6,8 @@
 
 
 DracoWrapper::DracoWrapper() : running_(false) {
-    interface_ = new DracoInterface();
-    arm_interface_ = new ScorpioInterface();
+    //interface_ = new DracoInterface();
+    //arm_interface_ = new ScorpioInterface();
     simulator_ = new DracoSim();
 }
 

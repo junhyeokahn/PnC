@@ -23,8 +23,9 @@ target_link_libraries(dracoWrapper
         dracoWrapper_swig)
 
 add_executable(run_draco_wrapper Main.cpp)
-target_link_libraries(run_draco_wrapper ${DART_LIBRARIES}
+target_link_libraries(run_draco_wrapper
         DracoPnC
         myUtils
         worldNode
-        dracoWrapper)
+        dracoWrapper
+        dracoWrapper_swig)

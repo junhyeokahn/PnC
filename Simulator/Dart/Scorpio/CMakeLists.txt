@@ -3,6 +3,7 @@ file(GLOB srcs "*.cpp" "*.hpp")
 add_library(worldNode SHARED ${srcs})
 target_link_libraries(worldNode ${DART_LIBRARIES}
         ScorpioPnC
+        DracoPnC
         myUtils)
 
 add_executable(run_scorpio ${srcs})

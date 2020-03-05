@@ -1,5 +1,4 @@
 #include <ADE/DracoSim.hpp>
-#include <thread>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/urdf/urdf.hpp>
@@ -324,16 +323,13 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
 
 }
 
-int main(int argc, char** argv) {
-
-}
-
 
 DracoSim::DracoSim() {
     //TODO after debugging sinking problem
 }
 
 void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
+    std::cout<<"====================== START SIMULATOR ====================="<<std::endl;
     // ========================
     // Parse Yaml for Simulator
     // ========================
@@ -381,17 +377,23 @@ void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
             THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
             THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
+    dart::dynamics::SkeletonPtr scorpio2 = urdfLoader.parseSkeleton(
+            THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin2.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
             THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
             THIS_COM "RobotModel/Environment/Table/table.urdf");
+    dart::dynamics::SkeletonPtr table2 = urdfLoader.parseSkeleton(
+            THIS_COM "RobotModel/Environment/Table/table2.urdf");
     dart::dynamics::SkeletonPtr box = urdfLoader.parseSkeleton(
             THIS_COM "RobotModel/Environment/Box/box.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
+    world->addSkeleton(scorpio2);
     world->addSkeleton(draco);
     world->addSkeleton(table);
+    world->addSkeleton(table2);
     world->addSkeleton(box);
 
 
@@ -427,6 +429,7 @@ void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
     // Initial configuration
     // =====================
     _setInitialConfiguration(scorpio, q_init);
+    _setInitialConfiguration(scorpio2, q_init);
     _setInitialConfiguration(draco);
     _setJointLimitConstraint(draco);
     _setInitialConfiguration_2(box);
@@ -435,16 +438,19 @@ void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
     // Robot Mesh Color from URDF
     // =====================
     _SetMeshColorURDF(scorpio);
+    _SetMeshColorURDF(scorpio2);
 
     // =====================
     // Constraint for Closed-Loop
     // =====================
     _SetJointConstraint(world, scorpio);
+    _SetJointConstraint(world, scorpio2);
 
     // ================
     // Set passive joint
     // ================
     _SetJointActuatorType(scorpio,actuator_type);
+    _SetJointActuatorType(scorpio2,actuator_type);
 
     // ================
     // Print Model Info
@@ -455,7 +461,7 @@ void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
     // Wrap a worldnode
     // ================
     osg::ref_ptr<ScorpioWorldNode> node;
-    node = new ScorpioWorldNode(world, interface, arm_interface);
+    node = new ScorpioWorldNode(world, new DracoInterface(), new ScorpioInterface());
 
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
@@ -467,38 +473,48 @@ void DracoSim::StartSim(EnvInterface* interface, EnvInterface* arm_interface) {
     // Create and Set Viewer
     // =====================
 
-    viewer.addWorldNode(node);
-    viewer.simulate(false);
-    viewer.switchHeadlights(false);
-    ::osg::Vec3 p1(1.0, 0.2, 1.0);
-    p1 = p1 * 0.5;
-    viewer.getLightSource(0)->getLight()->setPosition(
-            ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
-    viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
-    viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
-                                     GL_DEPTH_BUFFER_BIT);
-    viewer.addEventHandler(new OneStepProgress(node));
+    if (b_show) {
+        dart::gui::osg::Viewer viewer;
+        viewer.addWorldNode(node);
+        viewer.simulate(false);
+        viewer.switchHeadlights(false);
+        ::osg::Vec3 p1(1.0, 0.2, 1.0);
+        p1 = p1 * 0.5;
+        viewer.getLightSource(0)->getLight()->setPosition(
+                ::osg::Vec4(p1[0], p1[1], p1[2], 0.0));
+        viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
+        viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
+                                         GL_DEPTH_BUFFER_BIT);
+        viewer.addEventHandler(new OneStepProgress(node));
 
-    if (isRecord) {
-        std::cout << "[Video Record Enable]" << std::endl;
-        viewer.record(THIS_COM "/ExperimentVideo");
+        if (isRecord) {
+            std::cout << "[Video Record Enable]" << std::endl;
+            viewer.record(THIS_COM "/ExperimentVideo");
+        }
+
+        //viewer.setUpViewInWindow(0, 0, 2880, 1800);
+        viewer.setUpViewInWindow(1440, 0, 500, 500);
+        viewer.getCameraManipulator()->setHomePosition(
+                ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
+                ::osg::Vec3(0.0, 0.0, 1.0));
+        viewer.setCameraManipulator(viewer.getCameraManipulator());
+        viewer.run();
+    } else {
+        while (true) {
+            node->customPreStep();
+            node->getWorld()->step();
+            node->customPostStep();
+        }
     }
-
-    viewer.setUpViewInWindow(0, 0, 2880, 1800);
-    //viewer.setUpViewInWindow(1440, 0, 500, 500);
-    viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
-            ::osg::Vec3(0.0, 0.0, 1.0));
-    viewer.setCameraManipulator(viewer.getCameraManipulator());
-    thread_ = std::thread(&DracoSim::StartThread, this);
+    //thread_ = std::thread(&DracoSim::StartThread, this);
 }
 
 void DracoSim::StopSim() {
-    exit = true;
-    thread_.join();
+    //exit = true;
+    //thread_.join();
 }
 
-void DracoSim::StartThread() {
-    viewer.run();
-}
+//void DracoSim::StartThread() {
+//    //viewer.run();
+//}
 
