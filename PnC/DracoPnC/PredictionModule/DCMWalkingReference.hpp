@@ -53,7 +53,7 @@ public:
   double t_ss = 0.3; // single support exponential interpolation  time
   double t_midstep_transfer = 0.15;
 
-  double percentage_settle = 0.999; // percent to converge at the end of the trajectory
+  double percentage_settle = 0.99;//0.999; // percent to converge at the end of the trajectory
 
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
 
