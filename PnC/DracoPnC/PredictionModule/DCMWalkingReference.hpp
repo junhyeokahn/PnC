@@ -98,7 +98,13 @@ public:
 
   // computes the CoM velocity given the current CoM position and DCM velocity state.
   void get_com_vel(const Eigen::Vector3d & com_pos, const Eigen::Vector3d & dcm, Eigen::Vector3d & com_vel_out);
+  // computes the CoM reaction force / leg reaction force given mass, CoM position and the r_vrp
   void get_reaction_force(const double mass, const Eigen::Vector3d & com_pos, const Eigen::Vector3d & r_vrp, Eigen::Vector3d fr_out);
+  // computes the current r_vrp given 
+  //   -the DCM dynamics time constant b,
+  //  - the current dcm 
+  //  - and the current dcm_vel
+  void get_r_vrp(const double b_in, const Eigen::Vector3d & dcm, const Eigen::Vector3d & dcm_vel, Eigen::Vector3d & r_vrp_out);
 
   // prints the boundary conditions of the DCM
   void printBoundaryConditions();

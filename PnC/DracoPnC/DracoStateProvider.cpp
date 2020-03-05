@@ -59,6 +59,13 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     mpc_pred_vel.setZero();
 
     dcm.setZero();
+    dcm_des.setZero();
+    prev_dcm.setZero();
+    dcm_vel.setZero(); 
+    dcm_vel_des.setZero();   
+    r_vrp.setZero();
+    r_vrp_des.setZero();
+
     omega = 0.7;
 
     DataManager* data_manager = DataManager::GetDataManager();
@@ -103,6 +110,13 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
                                2);
 
     data_manager->RegisterData(&dcm, VECT3, "dcm", 3);
+    data_manager->RegisterData(&dcm_des, VECT3, "dcm_des", 3);
+    data_manager->RegisterData(&dcm_vel, VECT3, "dcm_vel", 3);
+    data_manager->RegisterData(&dcm_vel_des, VECT3, "dcm_vel_des", 3);
+    data_manager->RegisterData(&r_vrp, VECT3, "r_vrp", 3);
+    data_manager->RegisterData(&r_vrp_des, VECT3, "r_vrp_des", 3);
+
+
 }
 
 void DracoStateProvider::saveCurrentData() {

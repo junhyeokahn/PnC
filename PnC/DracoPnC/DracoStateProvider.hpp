@@ -60,6 +60,14 @@ class DracoStateProvider {
     Eigen::Vector3d com_vel_des;
 
     Eigen::Vector3d dcm;
+    Eigen::Vector3d dcm_des;
+    Eigen::Vector3d prev_dcm;
+    Eigen::Vector3d dcm_vel;    
+    Eigen::Vector3d dcm_vel_des;
+    Eigen::Vector3d r_vrp;
+    Eigen::Vector3d r_vrp_des;
+
+
     double omega;
 
     int num_step_copy;

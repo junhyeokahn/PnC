@@ -671,6 +671,16 @@ void DCMWalkingReference::get_reaction_force(const double mass, const Eigen::Vec
   fr_out = (mass*gravity/z_vrp)*(com_pos - r_ecmp_c);
 }
 
+// computes the current r_vrp given 
+//   -the DCM dynamics time constant b,
+//  - the current dcm 
+//  - and the current dcm_vel
+void get_r_vrp(const double b_in, const Eigen::Vector3d & dcm, const Eigen::Vector3d & dcm_vel, Eigen::Vector3d & r_vrp_out){
+  r_vrp_out = dcm - b_in*dcm_vel;
+}
+
+
+
 // computes the reference com trajectories by integration
 void DCMWalkingReference::compute_reference_com(){
   // Do not process if rvrp list is empty

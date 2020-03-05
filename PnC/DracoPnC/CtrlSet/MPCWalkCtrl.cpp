@@ -255,9 +255,15 @@ void MPCWalkCtrl::oneStep(void* _cmd) {
         ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
 
+    // Sotre the desired DCM and r_vrp references
+    if (state_machine_time_ >= walk_start_time_){
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm(state_machine_time_, sp_->dcm_des);    
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm_vel(state_machine_time_, sp_->dcm_vel_des);    
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_r_vrp(state_machine_time_, sp_->r_vrp_des);    
+    }
+
     _PostProcessing_Command();        
 
-    
     //TODO:
     // if prev_ctrl_state was swing and now we are in double support, set swing_end to true
     if (((prev_ctrl_state_ == DRACO_STATE_RLS) || (prev_ctrl_state_ == DRACO_STATE_LLS)) && (ctrl_state_ == DRACO_STATE_DS)){
@@ -393,14 +399,14 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );

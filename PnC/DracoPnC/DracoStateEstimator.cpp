@@ -102,7 +102,8 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->com_pos = robot_->getCoMPosition();
     sp_->com_vel = robot_->getCoMVelocity();
-    sp_->dcm = robot_->getCoMPosition() + robot_->getCoMVelocity() /sp_->omega; 
+    sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel /sp_->omega; 
+    sp_->prev_dcm = sp_->dcm;
 
     ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
@@ -187,7 +188,14 @@ void DracoStateEstimator::update(DracoSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->com_pos = robot_->getCoMPosition();
     sp_->com_vel = robot_->getCoMVelocity();
-    sp_->dcm = robot_->getCoMPosition() + robot_->getCoMVelocity() /sp_->omega; 
+    sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel /sp_->omega; 
+
+
+    double alphaVelocity = computeAlphaGivenBreakFrequency(2.5, DracoAux::ServoRate);   
+    // sp_->dcm_vel = (sp_->dcm - sp_->prev_dcm)/DracoAux::ServoRate;
+    sp_->dcm_vel = alphaVelocity*((sp_->dcm - sp_->prev_dcm)/DracoAux::ServoRate) + (1.0 - alphaVelocity)*sp_->dcm_vel;
+    sp_->prev_dcm = sp_->dcm;
+    sp_->r_vrp = sp_->dcm - (sp_->dcm_vel/sp_->omega);
 
     static bool visit_once(false);
     if ((sp_->phase_copy == 2) && (!visit_once)) {
@@ -301,7 +309,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
     curr_config_[2] = global_linear_offset_[2] - foot_pos[2];
 
     // Update qdot using the difference between the curr_config_ now and previous
-    curr_qdot_.head(3) = (curr_config_.head(3) - prev_config_.head(3))/DracoAux::ServoRate;
+    curr_qdot_.head(3) = (curr_config_.head(3) - prev_config_.head(3))/(DracoAux::ServoRate);
 
     // curr_qdot_[0] = -foot_vel[0];
     // curr_qdot_[1] = -foot_vel[1];
