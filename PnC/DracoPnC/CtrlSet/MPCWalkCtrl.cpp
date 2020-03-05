@@ -153,8 +153,8 @@ MPCWalkCtrl::MPCWalkCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_Fr_ = 1e-16;
 
     // Relative task weighting
-    w_task_rfoot_ = 100;// 1e5;
-    w_task_lfoot_ = 100;// 1e5;
+    w_task_rfoot_ = 200;// 1e5;
+    w_task_lfoot_ = 200;// 1e5;
     w_task_com_ = 1e-3;
     w_task_body_ = 1e-3;
     w_task_joint_ = 1e-6;
@@ -402,14 +402,14 @@ void MPCWalkCtrl::references_setup(){
             // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
