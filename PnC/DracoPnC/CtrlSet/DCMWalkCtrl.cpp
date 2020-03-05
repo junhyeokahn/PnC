@@ -260,8 +260,8 @@ void DCMWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
@@ -269,8 +269,8 @@ void DCMWalkCtrl::references_setup(){
             // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
+            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
 
             DracoFootstep rfootstep_1; // take a rightfootstep
             rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
@@ -527,9 +527,9 @@ void DCMWalkCtrl::task_setup() {
         des_vel_y = com_vel_ref[1]; 
         des_vel_z = com_vel_ref[2]; 
 
-        des_rx_acc = 0.0;//ang_acc_ref[0]; 
-        des_ry_acc = 0.0;//ang_acc_ref[1]; 
-        des_rz_acc = 0.0;//ang_acc_ref[2]; 
+        des_rx_acc = ang_acc_ref[0]; 
+        des_ry_acc = ang_acc_ref[1]; 
+        des_rz_acc = ang_acc_ref[2]; 
 
         des_acc_x = 0.0; 
         des_acc_y = 0.0; 
