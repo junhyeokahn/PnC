@@ -72,8 +72,7 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
 
     // Some helpful defaults
     // Convex MPC
-    convex_mpc = new CMPC();
-    mpc_horizon_ = 20; // steps
+    // convex_mpc = new CMPC();
     mpc_dt_ = 0.025; // seconds per step
     mpc_mu_ = 0.7; // Coefficient of Friction on each contact point
     mpc_max_fz_ = 1500.0; // Maximum Reaction force on each contact point
@@ -119,13 +118,6 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
     gait_total_gait_duration_ = 2.0*gait_swing_time_ + 2.0*gait_transition_time_;
     biped_gait_ = std::shared_ptr<GaitCycle>(new GaitCycle(gait_swing_time_, gait_total_gait_duration_, {0.0, 0.0, gait_biped_walking_offset_, gait_biped_walking_offset_}));
     gait_set_once_ = false;
-
-    // Trajectory managers
-    int mpc_state_dim = 13;
-    int mpc_contact_dim = 12;
-    mpc_old_trajectory_ = new MPCDesiredTrajectoryManager(mpc_contact_dim, mpc_state_dim, mpc_horizon_, mpc_dt_);
-    mpc_new_trajectory_ = new MPCDesiredTrajectoryManager(mpc_contact_dim, mpc_state_dim, mpc_horizon_, mpc_dt_);
-    homotopy_merge_time_ = mpc_dt_/2.0; // initialize a merge time
 
     // Initialize
     swing_foot_current_.reset(new DracoFootstep());
@@ -175,9 +167,6 @@ DCMWalkCtrl::~DCMWalkCtrl() {
 
     delete left_foot_start_;
     delete right_foot_start_;
-
-    delete mpc_old_trajectory_;
-    delete mpc_new_trajectory_;
 
     delete rfoot_front_contact_;
     delete rfoot_back_contact_;
@@ -380,33 +369,20 @@ void DCMWalkCtrl::references_setup(){
             ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
 
 
-
             reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
-
-            // update MPC costs for walking.
-            // convex_mpc->setCostVec(mpc_cost_vec_walk_);
-            // convex_mpc->setTerminalCostVec(true, mpc_terminal_cost_vec_);
             references_set_once_ = true;
         }
     }    
 }
 
 void DCMWalkCtrl::_mpc_Xdes_setup(){
-    int n = convex_mpc->getStateVecDim(); // This is always size 13.
-    mpc_Xdes_ = Eigen::VectorXd::Zero(n*mpc_horizon_); // Create the desired state vector evolution
+    int n = 13; 
+    mpc_Xdes_ = Eigen::VectorXd::Zero(n*1); // Create the desired state vector evolution
 
     double magnitude = 0.0;
     double T = 1.0;
     double freq = 1/T;
     double omega = 2 * M_PI * freq;
-
-    // Set custom gait cycle
-    // if (state_machine_time_ >= walk_start_time_){
-    //     if (!gait_set_once_){
-    //         convex_mpc->setCustomGaitCycle(biped_gait_);            
-    //         gait_set_once_ = true;
-    //     }
-    // }
 
     Eigen::Vector3d com_pos_ref, com_vel_ref;
     Eigen::Quaterniond ori_ref;
@@ -417,94 +393,78 @@ void DCMWalkCtrl::_mpc_Xdes_setup(){
     ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
     double t_predict = 0.0;
-    // std::cout << "MPC X_des for " << mpc_horizon_ << " horizon steps at " << mpc_dt_ << "seconds each interval" << std::endl;  
 
-    // std::cout << "state time:" << state_machine_time_ << std::endl;
-    for(int i = 0; i < mpc_horizon_; i++){
-        // Time 
-        t_predict = state_machine_time_ + (i+1)*mpc_dt_;
-        // reference_trajectory_module_->getMPCRefComAndOri(t_predict, com_pos_ref, ori_ref);
+    // Time 
+    t_predict = state_machine_time_;
+    // reference_trajectory_module_->getMPCRefComAndOri(t_predict, com_pos_ref, ori_ref);
 
-        if (state_machine_time_ >= walk_start_time_){
-            reference_trajectory_module_->getMPCRefComPosandVel(t_predict, com_pos_ref, com_vel_ref);
-            reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(t_predict, ori_ref, ang_vel_ref, ang_acc_ref);            
-        }
-
-
-        mpc_Xdes_[i*n + 0] = 0.0; // Desired Roll
-        mpc_Xdes_[i*n + 1] = 0.0; // Desired Pitch
-        mpc_Xdes_[i*n + 2] = 0.0; // Desired Yaw
-
-        if (t_predict >= walk_start_time_){
-            euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
-            mpc_Xdes_[i*n + 0] = euler_yaw_pitch_roll[2]; // Desired Roll
-            mpc_Xdes_[i*n + 1] = euler_yaw_pitch_roll[1]; // Desired Pitch
-            mpc_Xdes_[i*n + 2] = euler_yaw_pitch_roll[0]; // Desired Yaw            
-        }
-
-
-        // ----------------------------------------------------------------
-        // Set CoM Position -----------------------------------------------
-        mpc_Xdes_[i*n + 3] = goal_com_pos_[0];
-        // mpc_Xdes_[i*n + 3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
-
-        mpc_Xdes_[i*n + 4] = goal_com_pos_[1];
-
-        // there's a brief moment where com_pos_ref is 0.0. which causes the robot to lean on the other foot.
-        // the fix is probably to use a dcm reference trajectory.
-        // if (t_predict >= walk_start_time_){
-        if (state_machine_time_ >= walk_start_time_){
-            mpc_Xdes_[i*n + 3] = com_pos_ref[0];
-            mpc_Xdes_[i*n + 4] = com_pos_ref[1];
-        }
-
-        // Wait for contact transition to finish
-        if (t_predict <= contact_transition_dur_){
-            mpc_Xdes_[i*n + 5] = ini_com_pos_[2];
-        }else {
-            mpc_Xdes_[i*n + 5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
-        }
-
-        if (state_machine_time_ >= walk_start_time_){
-             mpc_Xdes_[i*n + 5] = com_pos_ref[2];
-        }
-        // ----------------------------------------------------------------
-
-        // Set Angular Velocity ref
-        if (state_machine_time_ >= walk_start_time_){
-            mpc_Xdes_[i*n + 6] = ang_vel_ref[0];
-            mpc_Xdes_[i*n + 7] = ang_vel_ref[1];
-            mpc_Xdes_[i*n + 8] = ang_vel_ref[2];            
-        }
-
-        // Set CoM Velocity -----------------------------------------------
-        mpc_Xdes_[i*n + 9] = 0.0;
-        mpc_Xdes_[i*n + 10] = 0.0;
-
-        // Wait for contact transition to finish
-        if (t_predict <= contact_transition_dur_){
-            mpc_Xdes_[i*n + 11] = 0.0;
-        }else {
-            mpc_Xdes_[i*n + 11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
-        }
-
-        if (state_machine_time_ >= walk_start_time_){
-             mpc_Xdes_[i*n + 9] = com_vel_ref[0];
-             mpc_Xdes_[i*n + 10] = com_vel_ref[1];
-             mpc_Xdes_[i*n + 11] = com_vel_ref[2];
-        }
-
-        // TODO: if the swing has ended set desired com position to be the current midfoot.
-
-        // printf("t_pred: %0.3f, r:%0.3f, p:%0.3f, y:%0.3f, x:%0.3f, y:%0.3f, z:%0.3f\n", 
-        //         t_predict, mpc_Xdes_[i*n + 0], mpc_Xdes_[i*n + 1], mpc_Xdes_[i*n + 2],
-        //         mpc_Xdes_[i*n + 3],  mpc_Xdes_[i*n + 4], mpc_Xdes_[i*n + 5]);
-
-        // std::cout << "t_pred:" << t_predict << " x_des[5] = " << mpc_Xdes_[i*n + 5] << "xdot_des[11] = " << mpc_Xdes_[i*n + 11] << std::endl;
-        // std::cout << mpc_Xdes_.segment(i*n, n).transpose() << std::endl;
+    if (state_machine_time_ >= walk_start_time_){
+        reference_trajectory_module_->getMPCRefComPosandVel(t_predict, com_pos_ref, com_vel_ref);
+        reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(t_predict, ori_ref, ang_vel_ref, ang_acc_ref);            
     }
 
-    // std::cout << "mpc_Xdes_.head(n) = " << mpc_Xdes_.head(n).transpose() << std::endl;
+
+    mpc_Xdes_[0] = 0.0; // Desired Roll
+    mpc_Xdes_[1] = 0.0; // Desired Pitch
+    mpc_Xdes_[2] = 0.0; // Desired Yaw
+
+    if (t_predict >= walk_start_time_){
+        euler_yaw_pitch_roll = myUtils::QuatToEulerZYX(ori_ref);
+        mpc_Xdes_[0] = euler_yaw_pitch_roll[2]; // Desired Roll
+        mpc_Xdes_[1] = euler_yaw_pitch_roll[1]; // Desired Pitch
+        mpc_Xdes_[2] = euler_yaw_pitch_roll[0]; // Desired Yaw            
+    }
+
+
+    // ----------------------------------------------------------------
+    // Set CoM Position -----------------------------------------------
+    mpc_Xdes_[3] = goal_com_pos_[0];
+    // mpc_Xdes_[3] = goal_com_pos_[0] + magnitude*cos(omega * t_predict); 
+
+    mpc_Xdes_[4] = goal_com_pos_[1];
+
+    if (state_machine_time_ >= walk_start_time_){
+        mpc_Xdes_[3] = com_pos_ref[0];
+        mpc_Xdes_[4] = com_pos_ref[1];
+    }
+
+    // Wait for contact transition to finish
+    if (t_predict <= contact_transition_dur_){
+        mpc_Xdes_[5] = ini_com_pos_[2];
+    }else {
+        mpc_Xdes_[5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_predict - contact_transition_dur_) ); // Desired com z
+    }
+
+    if (state_machine_time_ >= walk_start_time_){
+         mpc_Xdes_[5] = com_pos_ref[2];
+    }
+    // ----------------------------------------------------------------
+
+    // Set Angular Velocity ref
+    if (state_machine_time_ >= walk_start_time_){
+        mpc_Xdes_[6] = ang_vel_ref[0];
+        mpc_Xdes_[7] = ang_vel_ref[1];
+        mpc_Xdes_[8] = ang_vel_ref[2];            
+    }
+
+    // Set CoM Velocity -----------------------------------------------
+    mpc_Xdes_[9] = 0.0;
+    mpc_Xdes_[10] = 0.0;
+
+    // Wait for contact transition to finish
+    if (t_predict <= contact_transition_dur_){
+        mpc_Xdes_[11] = 0.0;
+    }else {
+        mpc_Xdes_[11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_predict - contact_transition_dur_)); // Desired com z
+    }
+
+    if (state_machine_time_ >= walk_start_time_){
+         mpc_Xdes_[9] = com_vel_ref[0];
+         mpc_Xdes_[10] = com_vel_ref[1];
+         mpc_Xdes_[11] = com_vel_ref[2];
+    }
+
+
 
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = mpc_Xdes_[i+3];
@@ -1083,29 +1043,8 @@ void DCMWalkCtrl::firstVisit() {
 
     // Set CoM X Goal to 0.0
     goal_com_pos_[0] = 0.0;
-
-    //myUtils::pretty_print(ini_com_pos_, std::cout, "ini_com_pos");
-    // exit(0);
     goal_com_pos_[2] = target_com_height_;
 
-
-    // MPC Initial Setup 
-    // System Params
-    double robot_mass = robot_->getRobotMass(); //kg
-    convex_mpc->setRobotMass(robot_mass); // (kilograms) 
-
-    if (mpc_use_approx_inertia_){
-        Eigen::MatrixXd I_body(3,3);
-        I_body << mpc_approx_inertia_input_[0], mpc_approx_inertia_input_[1], mpc_approx_inertia_input_[2],
-                  mpc_approx_inertia_input_[3], mpc_approx_inertia_input_[4], mpc_approx_inertia_input_[5],
-                  mpc_approx_inertia_input_[6], mpc_approx_inertia_input_[7], mpc_approx_inertia_input_[8];         
-        // robot_->updateCentroidFrame();
-        // Eigen::MatrixXd Ig_o = robot_->getCentroidInertia();
-        // I_body = Ig_o.block(0,0,3,3);
-        // convex_mpc->setRobotInertia(I_body);
-        convex_mpc->setRobotInertia(I_body);
-        myUtils::pretty_print(I_body, std::cout, "I_body");
-    }
 
     std::cout << "Integration Params" << std::endl;
     std::cout << "  Max Joint Velocity: " << max_joint_vel_ << std::endl;
@@ -1113,69 +1052,9 @@ void DCMWalkCtrl::firstVisit() {
     std::cout << "  Max Joint Position Error : " << max_jpos_error_ << std::endl;
     std::cout << "  Position Break Freq : " << position_break_freq_ << std::endl;
 
-    std::cout << "MPC Robot Weight:" << robot_mass << std::endl;
-    std::cout << "MPC Use Approx Inertia:" << mpc_use_approx_inertia_ << std::endl;
-    std::cout << "MPC horizon:" << mpc_horizon_ << std::endl;
-    std::cout << "MPC dt:" << mpc_dt_ << std::endl;
-    std::cout << "MPC control alpha:" << mpc_control_alpha_ << std::endl;
-    std::cout << "MPC delta smooth:" << mpc_delta_smooth_ << std::endl;
-    std::cout << "MPC Smooth from prev?:" << mpc_smooth_from_prev_ << std::endl;
-
-    std::cout << "MPC Toe Heel Smoothing:" << mpc_do_toe_heel_smoothing_ << std::endl;
-    std::cout << "MPC Toe Heel Smoothing Value:" << mpc_toe_heel_smooth_ << std::endl;   
-
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
     std::cout << "walk_start_time:" << walk_start_time_ << std::endl;
-
-    convex_mpc->setHorizon(mpc_horizon_); // horizon timesteps 
-    convex_mpc->setDt(mpc_dt_); // (seconds) per horizon
-    convex_mpc->setMu(mpc_mu_); //  friction coefficient
-    // convex_mpc->setMaxFz(mpc_max_fz_); // (Newtons) maximum vertical reaction force per foot.
-    if (mpc_use_approx_inertia_){
-        convex_mpc->rotateBodyInertia(true); // False: Assume we are always providing the world inertia
-                                              // True: We provide body inertia once        
-    }else{
-        convex_mpc->rotateBodyInertia(false); 
-    }
-
-    convex_mpc->setControlAlpha(mpc_control_alpha_); // Regularization term on the reaction force
-    convex_mpc->setSmoothFromPrevResult(mpc_smooth_from_prev_);
-    convex_mpc->setDeltaSmooth(mpc_delta_smooth_); // Smoothing parameter on the reaction force results
-
-    // Sets the reaction force schedule
-    convex_mpc->setCustomReactionForceSchedule(reference_trajectory_module_->reaction_force_schedule_ptr);
-
-    // Set reference trajectory params
-    mpc_old_trajectory_->setHorizon(mpc_horizon_);
-    mpc_old_trajectory_->setDt(mpc_dt_);
-    mpc_new_trajectory_->setHorizon(mpc_horizon_);
-    mpc_new_trajectory_->setDt(mpc_dt_);
-    // set merge time of trajectories from mpc
-    homotopy_merge_time_ = mpc_dt_/2.0;
-
-    //Penalize forces between the heel and the toe for each leg
-    //  toe_heel*||f_{i,toe} - f_{i,heel}|| 
-    Eigen::MatrixXd D_toe_heel(6, 12); D_toe_heel.setZero();
-    D_toe_heel.block(0,0, 3, 3) = Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;
-    D_toe_heel.block(0,3, 3, 3) = -Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;    
-    D_toe_heel.block(3,6, 3, 3) = Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;
-    D_toe_heel.block(3,9, 3, 3) = -Eigen::MatrixXd::Identity(3,3)*mpc_toe_heel_smooth_;    
-    // Create Custom Toe-heel Smoothing Matrix for the horizon:
-    Eigen::MatrixXd Dc1(6*((int) mpc_horizon_), 12*((int) mpc_horizon_));
-    Dc1.setZero();
-    for(int i = 0; i < mpc_horizon_; i++){
-        Dc1.block(i*6, i*12, 6, 12) = D_toe_heel;
-    }
- 
-    // Set the custom smoothing
-    if (mpc_do_toe_heel_smoothing_){
-        convex_mpc->enableCustomSmoothing(true);
-        convex_mpc->setCustomSmoothing(Dc1);       
-    }
-
-    // Set the cost vector
-    convex_mpc->setCostVec(mpc_cost_vec_);
 
 }
 
@@ -1228,22 +1107,6 @@ void DCMWalkCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
         myUtils::readParameter(node, "ihwbc_alpha_fd", alpha_fd_);
        
-        myUtils::readParameter(node, "mpc_use_approx_inertia", mpc_use_approx_inertia_);
-        if (mpc_use_approx_inertia_){
-           myUtils::readParameter(node, "mpc_approx_inertia_input", mpc_approx_inertia_input_);
-        }
-       
-        myUtils::readParameter(node, "mpc_horizon", mpc_horizon_);
-        myUtils::readParameter(node, "mpc_dt", mpc_dt_);
-        myUtils::readParameter(node, "mpc_cost_vec", mpc_cost_vec_);
-        myUtils::readParameter(node, "mpc_cost_vec_walk", mpc_cost_vec_walk_);
-        myUtils::readParameter(node, "mpc_terminal_cost_vec", mpc_terminal_cost_vec_);
-        myUtils::readParameter(node, "mpc_control_alpha", mpc_control_alpha_);
-        myUtils::readParameter(node, "mpc_delta_smooth", mpc_delta_smooth_);
-        myUtils::readParameter(node, "mpc_smooth_from_prev", mpc_smooth_from_prev_);
-
-        myUtils::readParameter(node, "mpc_toe_heel_smooth", mpc_toe_heel_smooth_);
-        myUtils::readParameter(node, "mpc_do_toe_heel_smoothing", mpc_do_toe_heel_smoothing_);
 
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
