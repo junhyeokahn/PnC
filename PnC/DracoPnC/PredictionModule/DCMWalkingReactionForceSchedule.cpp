@@ -67,7 +67,7 @@ double DCMWalkingReactionForceSchedule::getMaxNormalForce(const int index, const
 	                if ( (t_early >= t_swing_start) && (t_query >= t_early) ) {
 	                    t_o = t_early;
 	                    // Compute transition force
-	                    Fz_out = clampMaxFz((Fz/delta_t)*(time-t_o));
+	                    Fz_out = clampMaxFz((Fz/delta_t)*(t_query-t_o));
 	                }else{
 						Fz_out = 0.0; // Not within the swing period
 	                }
@@ -83,14 +83,20 @@ double DCMWalkingReactionForceSchedule::getMaxNormalForce(const int index, const
 	            // Adjust t_o if there is an early contact for this footstep
 	            if (reference_traj_module->early_contact_times_.count(index) > 0){
 	                t_early = reference_traj_module->early_contact_times_[index];
-	                if ( (t_early >= t_swing_start) && (time >= t_early) ) {
+	                if ( (t_early >= t_swing_start) && (t_query >= t_early) ) {
 	                    t_o = t_early;
 	                }
 	            }else{
 	                t_o = t_contact_transition_start;
 	            }
+	   //          std:: cout << "t_query = " << t_query << std::endl;
+				// std::cout << "increasing contact force" << std::endl;
+	   //          std:: cout << "Fz = " << Fz << std::endl;
+	   //          std:: cout << "delta_t = " << delta_t << std::endl;
+	   //          std:: cout << "to = " << t_o << std::endl;
+
 	            // Compute transition force
-	            Fz_out = clampMaxFz( (Fz/delta_t)*(time-t_o) );
+	            Fz_out = clampMaxFz( (Fz/delta_t)*(t_query-t_o) );
 			}
 
 		    // Assumption that only one foot contact at a time enters a transition state.

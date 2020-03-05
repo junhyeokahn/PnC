@@ -1086,6 +1086,11 @@ void MPCWalkCtrl::task_setup() {
     // =========================================================================
     // Task List Update
     // =========================================================================
+
+    double t_transition = reference_trajectory_module_->reaction_force_schedule_ptr->getTransitionVariable(0, state_machine_time_);
+    // std::cout << "time:" << state_machine_time_ << std::endl;
+    // std::cout << "index 0: transition: " << t_transition << " max force = " << f_max << std::endl;
+ 
     task_list_.push_back(com_task_);
     task_list_.push_back(body_ori_task_);
     // task_list_.push_back(rfoot_center_rz_xyz_task);
