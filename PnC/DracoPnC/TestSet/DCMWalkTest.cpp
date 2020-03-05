@@ -13,12 +13,16 @@ DCMWalkTest::DCMWalkTest(RobotSystem* robot) : Test(robot) {
     state_list_.clear();
 
     jpos_target_ctrl_ = new IVDJPosTargetCtrl(robot);
-    dcm_ctrl_ = new DCMWalkCtrl(robot);
     dcm_stand_ctrl_ = new DCMStandCtrl(robot);    
+    dcm_balance_ctrl_ = new DCMBalanceCtrl(robot);
+    dcm_ctrl_ = new DCMWalkCtrl(robot);
+
 
     state_list_.push_back(jpos_target_ctrl_);
+    state_list_.push_back(dcm_stand_ctrl_);
     state_list_.push_back(dcm_ctrl_);
-    // state_list_.push_back(dcm_stand_ctrl_);
+    // state_list_.push_back(dcm_balance_ctrl_);
+
 
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
@@ -35,13 +39,14 @@ void DCMWalkTest::TestInitialization() {
     jpos_target_ctrl_->ctrlInitialization(cfg_["control_configuration"]["joint_position_ctrl"]);
     dcm_ctrl_->ctrlInitialization(cfg_["control_configuration"]["dcm_ctrl"]);
     dcm_stand_ctrl_->ctrlInitialization(cfg_["control_configuration"]["dcm_ctrl"]);
+    dcm_balance_ctrl_->ctrlInitialization(cfg_["control_configuration"]["dcm_ctrl"]);
 }
 
 int DCMWalkTest::_NextPhase(const int & phase) {
     int next_phase = phase + 1;
     printf("next phase: %i\n", next_phase);
     if (next_phase == NUM_DCMWalkTestPhase) {
-        return DCMWalkTestPhase::DCMWalkTestPhase_force_ctrl;
+        return DCMWalkTestPhase::DCMWalkTestPhase_stand_ctrl;
     }
     else return next_phase;
 }
@@ -64,23 +69,28 @@ void DCMWalkTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((DCMWalkCtrl*)dcm_ctrl_)->setCoMHeight(tmp_val);
         ((DCMStandCtrl*)dcm_stand_ctrl_)->setCoMHeight(tmp_val);
+        ((DCMBalanceCtrl*)dcm_balance_ctrl_)->setCoMHeight(tmp_val);
         sp_-> omega = sqrt(9.81/tmp_val);
  
         myUtils::readParameter(test_cfg, "contact_transition_duration", tmp_val);
         ((DCMWalkCtrl*)dcm_ctrl_)->setContactTransitionTime(tmp_val);
         ((DCMStandCtrl*)dcm_stand_ctrl_)->setContactTransitionTime(tmp_val);
+        ((DCMBalanceCtrl*)dcm_balance_ctrl_)->setContactTransitionTime(tmp_val);
 
         myUtils::readParameter(test_cfg, "stabilization_duration", tmp_val);
         ((DCMWalkCtrl*)dcm_ctrl_)->SetStabilizationDuration(tmp_val);
         ((DCMStandCtrl*)dcm_stand_ctrl_)->SetStabilizationDuration(tmp_val);
+        ((DCMBalanceCtrl*)dcm_balance_ctrl_)->SetStabilizationDuration(tmp_val);
 
         myUtils::readParameter(test_cfg, "com_ctrl_time", tmp_val);
         ((DCMWalkCtrl*)dcm_ctrl_)->setStanceTime(tmp_val);
         ((DCMStandCtrl*)dcm_stand_ctrl_)->setStanceTime(tmp_val);
+        ((DCMBalanceCtrl*)dcm_balance_ctrl_)->setStanceTime(tmp_val);
 
         myUtils::readParameter(test_cfg, "walk_start_time", tmp_val);
         ((DCMWalkCtrl*)dcm_ctrl_)->setWalkStartTime(tmp_val);
         ((DCMStandCtrl*)dcm_stand_ctrl_)->setWalkStartTime(tmp_val);
+        ((DCMBalanceCtrl*)dcm_balance_ctrl_)->setWalkStartTime(tmp_val);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

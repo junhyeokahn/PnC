@@ -25,8 +25,6 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
     end_time_ = 1000.;
     ctrl_start_time_ = 0.;
 
-    des_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     des_jacc_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
     Kp_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -190,8 +188,8 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
-        ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
-        ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
+        ((DracoCommand*)_cmd)->q[i] = sp_->des_jpos[i];
+        ((DracoCommand*)_cmd)->qdot[i] = sp_->des_jvel[i];
     }
 
     // Sotre the desired DCM and r_vrp references
@@ -353,9 +351,11 @@ void DCMWalkCtrl::_Xdes_setup(){
     // Time 
     t_predict = state_machine_time_;
 
-    Xdes_[0] = 0.0; // Desired Roll
-    Xdes_[1] = 0.0; // Desired Pitch
-    Xdes_[2] = 0.0; // Desired Yaw
+    Eigen::Vector3d ypr = myUtils::QuatToEulerZYX(ini_ori_);
+
+    Xdes_[0] = ypr[2]; // Desired Roll
+    Xdes_[1] = ypr[1]; // Desired Pitch
+    Xdes_[2] = ypr[0]; // Desired Yaw
 
     // ----------------------------------------------------------------
     // Set CoM Position -----------------------------------------------
@@ -445,22 +445,22 @@ void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     double alphaVelocity = computeAlphaGivenBreakFrequency(velocity_break_freq_, ihwbc_dt_);
     // // Decay desired velocity to 0.0
-    des_jvel_ = (des_jvel_)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
-    des_jvel_ += (qddot_cmd_*ihwbc_dt_);
+    sp_->des_jvel = (sp_->des_jvel)*alphaVelocity + (1.0 - alphaVelocity )*qdot_des_ref;
+    sp_->des_jvel += (qddot_cmd_*ihwbc_dt_);
     // Clamp Joint Velocity Values
-    for(int i = 0; i < des_jvel_.size(); i++){
-        des_jvel_[i] = clamp_value(des_jvel_[i], -max_joint_vel_, max_joint_vel_);
+    for(int i = 0; i < sp_->des_jvel.size(); i++){
+        sp_->des_jvel[i] = clamp_value(sp_->des_jvel[i], -max_joint_vel_, max_joint_vel_);
     }
-    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");    
+    // myUtils::pretty_print(sp_->des_jvel, std::cout, "sp_->des_jvel");    
 
     // // Integrate Joint Positions
     Eigen::VectorXd q_des_ref = q_current_.tail(robot_->getNumActuatedDofs());
     double alphaPosition = computeAlphaGivenBreakFrequency(position_break_freq_, ihwbc_dt_);
-    des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
-    des_jpos_ += (des_jvel_*ihwbc_dt_);
+    sp_->des_jpos = sp_->des_jpos*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
+    sp_->des_jpos += (sp_->des_jvel*ihwbc_dt_);
     // Clamp desired joint position to maximum error
-    for(int i = 0; i < des_jpos_.size(); i++){
-        des_jpos_[i] = clamp_value(des_jpos_[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
+    for(int i = 0; i < sp_->des_jpos.size(); i++){
+        sp_->des_jpos[i] = clamp_value(sp_->des_jpos[i], q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
     }
 
     // Store desired qddot
@@ -539,11 +539,11 @@ void DCMWalkCtrl::task_setup() {
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
-    if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
-        des_jpos_ = sp_->q.segment(robot_->getNumVirtualDofs(),
-                                   robot_->getNumActuatedDofs());
-        des_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());   
-    }
+    // if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
+    //     sp_->des_jpos = sp_->q.segment(robot_->getNumVirtualDofs(),
+    //                                robot_->getNumActuatedDofs());
+    //     sp_->des_jvel = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());   
+    // }
 
 
     com_acc_des.setZero();
@@ -903,7 +903,7 @@ void DCMWalkCtrl::contact_setup() {
     contact_list_.push_back(lfoot_back_contact_);
 
     // Smoothly change maximum Fz for IHWBC
-    double smooth_max_fz = myUtils::smooth_changing(0.0, max_fz_, contact_transition_dur_, state_machine_time_ );
+    double smooth_max_fz = max_fz_;//myUtils::smooth_changing(0.0, max_fz_, contact_transition_dur_, state_machine_time_ );
  
     for(int i = 0; i < contact_list_.size(); i++){
         if (state_machine_time_ >= walk_start_time_){
@@ -919,6 +919,7 @@ void DCMWalkCtrl::contact_setup() {
  }
 
 void DCMWalkCtrl::firstVisit() {
+    std::cout << "[DCM Walk Ctrl] Visit." <<  std::endl;
     // Initialize control state as double support
     ctrl_state_ = DRACO_STATE_DS;
     prev_ctrl_state_ = DRACO_STATE_DS;
@@ -928,8 +929,8 @@ void DCMWalkCtrl::firstVisit() {
     jdot_ini_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
                                   robot_->getNumActuatedDofs());
 
-    des_jpos_ = jpos_ini_;
-    des_jvel_ = jdot_ini_;
+    // sp_->des_jpos = jpos_ini_;
+    // sp_->des_jvel = jdot_ini_;
 
     ctrl_start_time_ = sp_->curr_time;
 
@@ -946,9 +947,13 @@ void DCMWalkCtrl::firstVisit() {
     std::cout << "lankle_pos: " << lankle_pos.transpose() << std::endl;
 
     // Set CoM X Goal to 0.0
-    goal_com_pos_[0] = 0.0;
-    goal_com_pos_[2] = target_com_height_;
+    // goal_com_pos_[0] = 0.0;
+    // goal_com_pos_[2] = target_com_height_;
+    goal_com_pos_ = ini_com_pos_;
 
+    double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
+    ini_ori_ = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
+    goal_ori_ = ini_ori_;
 
     std::cout << "Integration Params" << std::endl;
     std::cout << "  Max Joint Velocity: " << max_joint_vel_ << std::endl;

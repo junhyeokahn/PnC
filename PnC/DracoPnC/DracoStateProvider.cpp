@@ -58,6 +58,9 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     mpc_pred_pos.setZero();
     mpc_pred_vel.setZero();
 
+    des_jpos = Eigen::VectorXd::Zero( robot_->getNumActuatedDofs() );
+    des_jvel = Eigen::VectorXd::Zero( robot_->getNumActuatedDofs() );
+
     dcm.setZero();
     dcm_des.setZero();
     prev_dcm.setZero();

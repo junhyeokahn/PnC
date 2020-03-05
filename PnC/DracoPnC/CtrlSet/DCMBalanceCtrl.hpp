@@ -16,10 +16,10 @@ class DracoFootstep;
 class HermiteCurveVec;
 class HermiteQuaternionCurve;
 
-class DCMWalkCtrl : public Controller {
+class DCMBalanceCtrl : public Controller {
    public:
-    DCMWalkCtrl(RobotSystem*);
-    virtual ~DCMWalkCtrl();
+    DCMBalanceCtrl(RobotSystem*);
+    virtual ~DCMBalanceCtrl();
 
     virtual void oneStep(void* _cmd);
     virtual void firstVisit();

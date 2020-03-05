@@ -59,6 +59,9 @@ class DracoStateProvider {
     Eigen::Vector3d com_pos_des;
     Eigen::Vector3d com_vel_des;
 
+    Eigen::VectorXd des_jpos;
+    Eigen::VectorXd des_jvel;
+
     Eigen::Vector3d dcm;
     Eigen::Vector3d dcm_des;
     Eigen::Vector3d prev_dcm;

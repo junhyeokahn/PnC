@@ -18,8 +18,8 @@
 #include <Utils/Math/hermite_curve_vec.hpp>
 #include <Utils/Math/hermite_quaternion_curve.hpp>
 
-DCMStandCtrl::DCMStandCtrl(RobotSystem* robot) : Controller(robot) {
-    myUtils::pretty_constructor(2, "DCM Stand Ctrl");
+DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
+    myUtils::pretty_constructor(2, "DCM Balance Ctrl");
 
     stab_dur_ = 5.;
     end_time_ = 1000.;
@@ -33,6 +33,9 @@ DCMStandCtrl::DCMStandCtrl(RobotSystem* robot) : Controller(robot) {
     ini_com_pos_ = Eigen::VectorXd::Zero(3);
     ini_com_vel_ = Eigen::VectorXd::Zero(3);
     goal_com_pos_ = Eigen::VectorXd::Zero(3);
+
+    ini_ori_.setIdentity();
+    goal_ori_.setIdentity();
 
     // task
     com_task_ = new BasicTask(robot_, BasicTaskType::COM, 3);
@@ -123,7 +126,7 @@ DCMStandCtrl::DCMStandCtrl(RobotSystem* robot) : Controller(robot) {
     sp_ = DracoStateProvider::getStateProvider(robot_);
 }
 
-DCMStandCtrl::~DCMStandCtrl() {
+DCMBalanceCtrl::~DCMBalanceCtrl() {
     delete com_task_;
     delete total_joint_task_;
     delete body_ori_task_;
@@ -144,7 +147,7 @@ DCMStandCtrl::~DCMStandCtrl() {
     delete lfoot_back_contact_;
 }
 
-double DCMStandCtrl::clamp_value(double in, double min, double max){
+double DCMBalanceCtrl::clamp_value(double in, double min, double max){
     if (in >= max){
         return max;
     }else if (in <= min){
@@ -154,14 +157,14 @@ double DCMStandCtrl::clamp_value(double in, double min, double max){
     }
 }
 
-double DCMStandCtrl::computeAlphaGivenBreakFrequency(double hz, double dt){
+double DCMBalanceCtrl::computeAlphaGivenBreakFrequency(double hz, double dt){
     double omega = 2.0 * M_PI * hz;
     double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt/2.0));
     alpha = clamp_value(alpha, 0.0, 1.0);
     return alpha;
 }
 
-void DCMStandCtrl::oneStep(void* _cmd) {
+void DCMBalanceCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -216,7 +219,7 @@ void DCMStandCtrl::oneStep(void* _cmd) {
     prev_ctrl_state_ = ctrl_state_;
 }
 
-void DCMStandCtrl::_Xdes_setup(){
+void DCMBalanceCtrl::_Xdes_setup(){
     int n = 13; 
     Xdes_ = Eigen::VectorXd::Zero(n*1); // Create the desired state vector evolution
 
@@ -230,33 +233,23 @@ void DCMStandCtrl::_Xdes_setup(){
 
     // Time 
     t_query = state_machine_time_;
+    Eigen::Vector3d ypr = myUtils::QuatToEulerZYX(ini_ori_);
 
-    Xdes_[0] = 0.0; // Desired Roll
-    Xdes_[1] = 0.0; // Desired Pitch
-    Xdes_[2] = 0.0; // Desired Yaw
+    Xdes_[0] = ypr[2]; // Desired Roll
+    Xdes_[1] = ypr[1]; // Desired Pitch
+    Xdes_[2] = ypr[0]; // Desired Yaw
 
     // ----------------------------------------------------------------
     // Set CoM Position -----------------------------------------------
     Xdes_[3] = goal_com_pos_[0];
     Xdes_[4] = goal_com_pos_[1];
+    Xdes_[5] = goal_com_pos_[2];
 
-    // Wait for contact transition to finish
-    if (t_query <= contact_transition_dur_){
-        Xdes_[5] = ini_com_pos_[2];
-    }else {
-        Xdes_[5] = myUtils::smooth_changing(ini_com_pos_[2], target_com_height_, stab_dur_, (t_query - contact_transition_dur_) ); // Desired com z
-    }
 
     // Set CoM Velocity -----------------------------------------------
     Xdes_[9] = 0.0;
     Xdes_[10] = 0.0;
-
-    // Wait for contact transition to finish
-    if (t_query <= contact_transition_dur_){
-        Xdes_[11] = 0.0;
-    }else {
-        Xdes_[11] = myUtils::smooth_changing_vel(ini_com_vel_[2], 0., stab_dur_, (t_query - contact_transition_dur_)); // Desired com z
-    }
+    Xdes_[11] = 0.0;
 
     for (int i = 0; i < 3; ++i) {
         sp_->com_pos_des[i] = Xdes_[i+3];
@@ -265,7 +258,7 @@ void DCMStandCtrl::_Xdes_setup(){
 
 }
 
-void DCMStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
+void DCMBalanceCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
     // When Fd is nonzero, we need to make the contact weight large if we want to trust the output of the mpc
     // 1e-2/(robot_->getRobotMass()*9.81);
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
@@ -348,7 +341,7 @@ void DCMStandCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
 
 }
 
-void DCMStandCtrl::task_setup() {
+void DCMBalanceCtrl::task_setup() {
     // Disable MPC
     double des_roll = Xdes_[0];
     double des_pitch = Xdes_[1];
@@ -374,12 +367,6 @@ void DCMStandCtrl::task_setup() {
     double des_acc_y = 0.0; 
     double des_acc_z = 0.0; 
 
-
-    if (state_machine_time_ < (stab_dur_ + contact_transition_dur_)){
-        sp_->des_jpos = sp_->q.segment(robot_->getNumVirtualDofs(),
-                                   robot_->getNumActuatedDofs());
-        sp_->des_jvel = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());   
-    }
 
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
@@ -547,7 +534,7 @@ void DCMStandCtrl::task_setup() {
 }
 
 
-void DCMStandCtrl::contact_setup() {
+void DCMBalanceCtrl::contact_setup() {
     rfoot_front_contact_->updateContactSpec();
     rfoot_back_contact_->updateContactSpec();
     lfoot_front_contact_->updateContactSpec();
@@ -559,15 +546,15 @@ void DCMStandCtrl::contact_setup() {
     contact_list_.push_back(lfoot_back_contact_);
 
     // Smoothly change maximum Fz for IHWBC
-    double smooth_max_fz = myUtils::smooth_changing(0.0, max_fz_, contact_transition_dur_, state_machine_time_ );
+    double smooth_max_fz = max_fz_; //myUtils::smooth_changing(0.0, max_fz_, contact_transition_dur_, state_machine_time_ );
  
     for(int i = 0; i < contact_list_.size(); i++){
         ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz);            
     }   
  }
 
-void DCMStandCtrl::firstVisit() {
-    std::cout << "[DCMStandCtrl] Visit" << std::endl; 
+void DCMBalanceCtrl::firstVisit() {
+    std::cout << "[DCMBalanceCtrl] Visit" << std::endl; 
     // Initialize control state as double support
     ctrl_state_ = DRACO_STATE_DS;
     prev_ctrl_state_ = DRACO_STATE_DS;
@@ -576,9 +563,6 @@ void DCMStandCtrl::firstVisit() {
                                robot_->getNumActuatedDofs());
     jdot_ini_ = sp_->qdot.segment(robot_->getNumVirtualDofs(),
                                   robot_->getNumActuatedDofs());
-
-    sp_->des_jpos = jpos_ini_;
-    sp_->des_jvel = jdot_ini_;
 
     ctrl_start_time_ = sp_->curr_time;
 
@@ -595,9 +579,14 @@ void DCMStandCtrl::firstVisit() {
     std::cout << "lankle_pos: " << lankle_pos.transpose() << std::endl;
 
     // Set CoM X Goal to 0.0
-    goal_com_pos_[0] = 0.0;
-    goal_com_pos_[2] = target_com_height_;
+    // goal_com_pos_[0] = 0.0;
+    // goal_com_pos_[2] = target_com_height_;
+    goal_com_pos_ = ini_com_pos_;
 
+
+    double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
+    ini_ori_ = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
+    goal_ori_ = ini_ori_;
 
     std::cout << "Integration Params" << std::endl;
     std::cout << "  Max Joint Velocity: " << max_joint_vel_ << std::endl;
@@ -607,20 +596,20 @@ void DCMStandCtrl::firstVisit() {
 
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
-    end_time_ = contact_transition_dur_ + stab_dur_ + 2.0;
+    // end_time_ = contact_transition_dur_ + stab_dur_ + 4.0;
 
 }
 
-void DCMStandCtrl::lastVisit() {}
+void DCMBalanceCtrl::lastVisit() {}
 
-bool DCMStandCtrl::endOfPhase() {
+bool DCMBalanceCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
         return true;
     }
     return false;
 }
 
-void DCMStandCtrl::ctrlInitialization(const YAML::Node& node) {
+void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     jpos_ini_ = sp_->q.segment(robot_->getNumVirtualDofs(),
                                robot_->getNumActuatedDofs());
 
