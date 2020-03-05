@@ -154,8 +154,10 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   dcm_eos_list.clear(); 
   dcm_ini_DS_list.clear();
   dcm_vel_ini_DS_list.clear();
+  dcm_acc_ini_DS_list.clear();
   dcm_end_DS_list.clear();
   dcm_vel_end_DS_list.clear();
+  dcm_acc_end_DS_list.clear();
 
   // Add the initial virtual repellant point. 
   rvrp_list.push_back(initial_rvrp); 
@@ -225,16 +227,18 @@ void DCMWalkingReference::computeDCM_states(){
   // Clear the dcm lists
   dcm_ini_list.clear();
   dcm_eos_list.clear();
-  dcm_ini_DS_list.clear(); dcm_vel_ini_DS_list.clear(); 
-  dcm_end_DS_list.clear(); dcm_vel_end_DS_list.clear();  
+  dcm_ini_DS_list.clear(); dcm_vel_ini_DS_list.clear(); dcm_acc_ini_DS_list.clear();
+  dcm_end_DS_list.clear(); dcm_vel_end_DS_list.clear(); dcm_acc_end_DS_list.clear(); 
   dcm_P.clear();
+  dcm_minjerk.clear();
 
   // Resize DCM lists to be equal to the size of the rvrp  list
   dcm_ini_list.resize(rvrp_list.size());
   dcm_eos_list.resize(rvrp_list.size());
-  dcm_ini_DS_list.resize(rvrp_list.size()); dcm_vel_ini_DS_list.resize(rvrp_list.size()); 
-  dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size());
+  dcm_ini_DS_list.resize(rvrp_list.size()); dcm_vel_ini_DS_list.resize(rvrp_list.size()); dcm_acc_ini_DS_list.resize(rvrp_list.size()); 
+  dcm_end_DS_list.resize(rvrp_list.size()); dcm_vel_end_DS_list.resize(rvrp_list.size()); dcm_acc_end_DS_list.resize(rvrp_list.size());
   dcm_P.resize(rvrp_list.size()); 
+  dcm_minjerk.resize(rvrp_list.size());
 
   // Use backwards recursion to compute the initial and final dcm states
   double t_step = 0.0;
@@ -259,6 +263,8 @@ void DCMWalkingReference::computeDCM_states(){
    dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
    dcm_vel_ini_DS_list[i] = computeDCMvel_iniDS_i(i, alpha_ds*t_ds);
    dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
+   dcm_acc_ini_DS_list[i] = computeDCMacc_iniDS_i(i, alpha_ds*t_ds);
+   dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, (1.0-alpha_ds)*t_ds);
   }
 
   // printBoundaryConditions();
@@ -269,6 +275,11 @@ void DCMWalkingReference::computeDCM_states(){
     Ts = get_polynomial_duration(i);
     dcm_P[i] = polynomialMatrix(Ts, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
                                     dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
+
+    dcm_minjerk[i] =  MinJerkCurveVec(dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i], dcm_acc_ini_DS_list[i], 
+                                      dcm_end_DS_list[i], dcm_vel_end_DS_list[i], dcm_acc_end_DS_list[i],
+                                      Ts);
+
 
   }
 
@@ -383,6 +394,23 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index
 }
 
 
+Eigen::Vector3d DCMWalkingReference::computeDCMacc_iniDS_i(const int & step_index, const double t_DS_ini){
+  if (step_index == 0){
+    // return Eigen::Vector3d::Zero();
+    return get_DCM_acc_exp(step_index, 0.0);
+  }  
+  return (1.0/(std::pow(b,2)))*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
+}
+
+Eigen::Vector3d DCMWalkingReference::computeDCMacc_eoDS_i(const int & step_index, const double t_DS_end){
+  // Set Boundary condition. Accelerations at the very end are always 0.0
+  if (step_index == (rvrp_list.size() - 1)){
+    return Eigen::Vector3d::Zero();
+  } 
+  return (1.0/(std::pow(b,2)))*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
+}
+
+
 Eigen::MatrixXd DCMWalkingReference::polynomialMatrix(const double Ts,
                                                       const Eigen::Vector3d & dcm_ini, const Eigen::Vector3d & dcm_vel_ini,
                                                       const Eigen::Vector3d & dcm_end, const Eigen::Vector3d & dcm_vel_end){
@@ -423,6 +451,15 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_vel_exp(const int & step_index, con
   return (1.0/b)*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);
 }
 
+Eigen::Vector3d DCMWalkingReference::get_DCM_acc_exp(const int & step_index, const double & t){
+  // Get t_step
+  double t_step = get_t_step(step_index);
+  // Clamp time value
+  double time = clampDOUBLE(t, 0.0, t_step);
+
+  return (1.0/(std::pow(b,2)))*std::exp( (time-t_step) / b)*(dcm_eos_list[step_index] - rvrp_list[step_index]);  
+}
+
 
 // Returns the DCM double support polynomial interpolation for the requested step_index.
 // time, t, is clamped between 0.0 and t_step.
@@ -451,6 +488,23 @@ Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_poly(const int & step_index,
 }
 
 
+// Returns the DCM double support min jerk interpolation for the requested step_index.
+// time, t, is clamped between 0.0 and t_step.
+Eigen::Vector3d DCMWalkingReference::get_DCM_DS_minjerk(const int & step_index, const double & t){
+  double Ts = get_polynomial_duration(step_index);
+  double time = clampDOUBLE(t, 0.0, Ts);  
+  return dcm_minjerk[step_index].evaluate(time);
+}
+
+// Returns the DCM double support velocity min jerk interpolation for the requested step_index.
+// time, t, is clamped between 0.0 and t_step.
+Eigen::Vector3d DCMWalkingReference::get_DCM_DS_vel_minjerk(const int & step_index, const double & t){
+  double Ts = get_polynomial_duration(step_index);
+  double time = clampDOUBLE(t, 0.0, Ts);  
+  return dcm_minjerk[step_index].evaluateFirstDerivative(time);
+}
+
+
 void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out){
   // Don't process if the list of VRPs is empty
   if (rvrp_list.size() == 0){
@@ -474,6 +528,7 @@ void DCMWalkingReference::get_ref_dcm(const double t, Eigen::Vector3d & dcm_out)
     // Use Polynomial interpolation
     local_time = time - get_double_support_t_start(step_index);
     dcm_out = get_DCM_DS_poly(step_index, local_time);
+    // dcm_out = get_DCM_DS_minjerk(step_index, local_time);
   }else{ // Use exponential interpolation
     local_time = time - get_t_step_start(step_index);
     dcm_out = get_DCM_exp(step_index, local_time);
@@ -508,6 +563,7 @@ void DCMWalkingReference::get_ref_dcm_vel(const double t, Eigen::Vector3d & dcm_
     // Use Polynomial interpolation
     local_time = time - get_double_support_t_start(step_index);
     dcm_vel_out = get_DCM_DS_vel_poly(step_index, local_time);
+    // dcm_vel_out = get_DCM_DS_vel_minjerk(step_index, local_time);
   }else{ // Use exponential interpolation
     local_time = time - get_t_step_start(step_index);
     dcm_vel_out = get_DCM_vel_exp(step_index, local_time);

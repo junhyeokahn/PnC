@@ -2,6 +2,7 @@
 #define DCM_WALKING_PATTERN_GENERATOR_H
 
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
+#include <Utils/Math/minjerk_vec.hpp>
 #include <Utils/Math/hermite_quaternion_curve.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Eigen/Dense>
@@ -39,9 +40,12 @@ public:
   // Initial and Boundary Conditions for the continuous DS trajectory
   std::vector<Eigen::Vector3d> dcm_ini_DS_list; 
   std::vector<Eigen::Vector3d> dcm_vel_ini_DS_list; 
+  std::vector<Eigen::Vector3d> dcm_acc_ini_DS_list; 
   std::vector<Eigen::Vector3d> dcm_end_DS_list; 
   std::vector<Eigen::Vector3d> dcm_vel_end_DS_list; 
+  std::vector<Eigen::Vector3d> dcm_acc_end_DS_list;  
   std::vector<Eigen::MatrixXd> dcm_P; // polynomial matrices for polynomial interpolation
+  std::vector<MinJerkCurveVec> dcm_minjerk; // minjerk curves for interpolation
 
   // DCM walking parameters
   double t_transfer = 0.1 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
@@ -181,6 +185,8 @@ private:
   Eigen::Vector3d computeDCM_eoDS_i(const int & step_index, const double t_DS_end);
   Eigen::Vector3d computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini);
   Eigen::Vector3d computeDCMvel_eoDS_i(const int & step_index, const double t_DS_end);
+  Eigen::Vector3d computeDCMacc_iniDS_i(const int & step_index, const double t_DS_ini);
+  Eigen::Vector3d computeDCMacc_eoDS_i(const int & step_index, const double t_DS_end);
 
   // Returns the DCM exponential interpolation for the requested step_index.
   // time, t, is clamped between 0.0 and t_step.
@@ -190,6 +196,10 @@ private:
   // time, t, is clamped between 0.0 and t_step.
   Eigen::Vector3d get_DCM_vel_exp(const int & step_index, const double & t);
 
+  // Returns the DCM acceleration exponential interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_acc_exp(const int & step_index, const double & t);
+
   // Returns the DCM double support polynomial interpolation for the requested step_index.
   // time, t, is clamped between 0.0 and t_step.
   Eigen::Vector3d get_DCM_DS_poly(const int & step_index, const double & t);
@@ -197,6 +207,15 @@ private:
   // Returns the DCM double support velocity polynomial interpolation for the requested step_index.
   // time, t, is clamped between 0.0 and t_step.
   Eigen::Vector3d get_DCM_DS_vel_poly(const int & step_index, const double & t);
+
+
+  // Returns the DCM double support min jerk interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_DS_minjerk(const int & step_index, const double & t);
+
+  // Returns the DCM double support velocity min jerk interpolation for the requested step_index.
+  // time, t, is clamped between 0.0 and t_step.
+  Eigen::Vector3d get_DCM_DS_vel_minjerk(const int & step_index, const double & t);
 
 
   // Get the t_step for step i.
