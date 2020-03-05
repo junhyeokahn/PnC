@@ -4,7 +4,8 @@
 # test_name: balancing_test
 # test_name: mpc_test
 # test_name: mpc_stand_test
-test_name: mpc_walk_test
+# test_name: mpc_walk_test
+test_name: dcm_walk_test
 
 #1test_name: rl_walking_test
 #test_name: turning_test

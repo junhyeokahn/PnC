@@ -5,3 +5,4 @@
 #include <PnC/DracoPnC/TestSet/MPCTest.hpp>
 #include <PnC/DracoPnC/TestSet/MPCStandTest.hpp>
 #include <PnC/DracoPnC/TestSet/MPCWalkTest.hpp>
+#include <PnC/DracoPnC/TestSet/DCMWalkTest.hpp>

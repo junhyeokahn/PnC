@@ -10,3 +10,4 @@
 #include <PnC/DracoPnC/CtrlSet/MPCBalanceCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/MPCStandCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/MPCWalkCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/DCMWalkCtrl.hpp>
