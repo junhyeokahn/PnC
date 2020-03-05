@@ -10,7 +10,7 @@ test_configuration:
     com_ctrl_time: 1000000.0
 
     # Walk Start Time
-    walk_start_time: 2 # seconds. Must be greater than the sum of contact transition time and stabilization duration
+    walk_start_time: 0.01 # walk start time as soon as we enter the walk state.
 
 control_configuration:
     joint_position_ctrl:

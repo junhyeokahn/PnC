@@ -23,7 +23,8 @@ DCMWalkTest::DCMWalkTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(dcm_ctrl_);
     state_list_.push_back(dcm_balance_ctrl_);
 
-
+    repeat_counter_ = 0;
+    repeat_times_ = 2;  
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
     _SettingParameter();
@@ -45,6 +46,12 @@ void DCMWalkTest::TestInitialization() {
 int DCMWalkTest::_NextPhase(const int & phase) {
     int next_phase = phase + 1;
     printf("next phase: %i\n", next_phase);
+
+    if ((next_phase == DCMWalkTestPhase_balance_ctrl) && (repeat_counter_ < repeat_times_)) {
+        repeat_counter_++;
+        return DCMWalkTestPhase::DCMWalkTestPhase_walk_ctrl;
+    }
+
     if (next_phase == NUM_DCMWalkTestPhase) {
         return DCMWalkTestPhase::DCMWalkTestPhase_balance_ctrl;
     }

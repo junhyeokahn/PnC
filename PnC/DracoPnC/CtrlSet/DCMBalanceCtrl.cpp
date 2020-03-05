@@ -22,7 +22,7 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     myUtils::pretty_constructor(2, "DCM Balance Ctrl");
 
     stab_dur_ = 5.;
-    end_time_ = 1000.;
+    end_time_ = 1e-10;//1000.;
     ctrl_start_time_ = 0.;
 
     des_jacc_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());

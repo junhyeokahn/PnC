@@ -119,7 +119,6 @@ class DCMWalkCtrl : public Controller {
     void compute_swing_foot_trajectory();
 
 
-    bool references_set_once_;
     void references_setup();
 
     //  internal state machines 

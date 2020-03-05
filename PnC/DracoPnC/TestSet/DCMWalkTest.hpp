@@ -23,6 +23,9 @@ class DCMWalkTest: public Test{
         virtual int _NextPhase(const int & phase);
         void _SettingParameter();
 
+        int repeat_counter_;
+        int repeat_times_;        
+
         Controller* jpos_target_ctrl_;
         Controller* dcm_stand_ctrl_;
         Controller* dcm_balance_ctrl_;

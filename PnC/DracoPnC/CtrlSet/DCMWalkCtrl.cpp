@@ -81,8 +81,6 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
                                               DRACO_LEFT_FOOTSTEP, DRACO_LEFT_FOOTSTEP};
     reference_trajectory_module_ = new DCMWalkingReferenceTrajectoryModule(contact_index_to_side);
 
-    references_set_once_ = false;
-
     left_foot_start_ = new DracoFootstep();
     right_foot_start_ = new DracoFootstep();
 
@@ -169,9 +167,6 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
     // Setup the contacts
     contact_setup();
 
-    // Setup the Walking Reference Module
-    references_setup();
-
     _Xdes_setup();
 
     // Setup the tasks and compute torque from IHWBC
@@ -223,115 +218,103 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
 }
 
 void DCMWalkCtrl::references_setup(){
+    // Prepare containers
+    Eigen::Vector3d x_com_start;
+    Eigen::Quaterniond x_ori_start;
+    double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
 
-    if (state_machine_time_ >= walk_start_time_){
-        if (!references_set_once_){
-            // Prepare containers
-            Eigen::Vector3d x_com_start;
-            Eigen::Quaterniond x_ori_start;
-            double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
+    // Get current CoM
+    x_com_start = sp_->com_pos;
+    // Get current Ori
+    x_ori_start = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
+    // Get current starting left and right footstep configuration
 
-            // Get current CoM
-            x_com_start = sp_->com_pos;
-            // Get current Ori
-            x_ori_start = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
-            // Get current starting left and right footstep configuration
+    Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
+    Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
+    left_foot_start_->setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
 
-            Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
-            Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
-            left_foot_start_->setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
+    Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
+    Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
+    right_foot_start_->setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
 
-            Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
-            Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
-            right_foot_start_->setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
+    // Set references initial condition
+    reference_trajectory_module_->setStartingConfiguration(x_com_start,
+                                                           x_ori_start,
+                                                           *left_foot_start_,
+                                                           *right_foot_start_);
 
-            // Set references initial condition
-            reference_trajectory_module_->setStartingConfiguration(x_com_start,
-                                                                   x_ori_start,
-                                                                   *left_foot_start_,
-                                                                   *right_foot_start_);
+    std::cout << "setting references once!" << std::endl;
+    myUtils::pretty_print(x_com_start, std::cout, "x_com_start");
+    myUtils::pretty_print(x_ori_start, std::cout, "x_ori_start");
+    left_foot_start_->printInfo();
+    right_foot_start_->printInfo();
 
-            std::cout << "setting references once!" << std::endl;
-            myUtils::pretty_print(x_com_start, std::cout, "x_com_start");
-            myUtils::pretty_print(x_ori_start, std::cout, "x_ori_start");
-            left_foot_start_->printInfo();
-            right_foot_start_->printInfo();
+    // Set desired footstep landing locations
+    Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+    Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Set desired footstep landing locations
-            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
-            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
 
-            Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-            Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
+    DracoFootstep rfootstep_1; // take a rightfootstep
+    rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
+                              foot_rotate*right_foot_start_->orientation, 
+                              DRACO_RIGHT_FOOTSTEP);
 
-            DracoFootstep rfootstep_1; // take a rightfootstep
-            rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
-                                      foot_rotate*right_foot_start_->orientation, 
-                                      DRACO_RIGHT_FOOTSTEP);
+    DracoFootstep lfootstep_1; // take a left footstep
+    lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
+                              foot_rotate*left_foot_start_->orientation, 
+                              DRACO_LEFT_FOOTSTEP);
 
-            DracoFootstep lfootstep_1; // take a left footstep
-            lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
-                                      foot_rotate*left_foot_start_->orientation, 
-                                      DRACO_LEFT_FOOTSTEP);
+    double double_contact_time_in = 0.05;
+    double contact_transition_time_in = 0.2;
+    double swing_time_in = 0.3;
+    double swing_height_in = 0.05;
 
-            double double_contact_time_in = 0.05;
-            double contact_transition_time_in = 0.2;
-            double swing_time_in = 0.3;
-            double swing_height_in = 0.05;
+    rfootstep_1.setWalkingParams(double_contact_time_in,
+                                 contact_transition_time_in,
+                                 swing_time_in,
+                                 swing_height_in);
 
-            rfootstep_1.setWalkingParams(double_contact_time_in,
-                                         contact_transition_time_in,
-                                         swing_time_in,
-                                         swing_height_in);
+    lfootstep_1.setWalkingParams(double_contact_time_in,
+                                 contact_transition_time_in,
+                                 swing_time_in,
+                                 swing_height_in);
 
-            lfootstep_1.setWalkingParams(double_contact_time_in,
-                                         contact_transition_time_in,
-                                         swing_time_in,
-                                         swing_height_in);
+    DracoFootstep rfootstep_2; // take a rightfootstep
+    rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate, 
+                              foot_rotate*rfootstep_1.orientation, 
+                              DRACO_RIGHT_FOOTSTEP);
 
-            DracoFootstep rfootstep_2; // take a rightfootstep
-            rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate, 
-                                      foot_rotate*rfootstep_1.orientation, 
-                                      DRACO_RIGHT_FOOTSTEP);
-
-            DracoFootstep lfootstep_2; // take a leftfootstep
-            lfootstep_2.setPosOriSide(lfootstep_1.position + foot_translate, 
-                                      foot_rotate*lfootstep_1.orientation, 
-                                      DRACO_LEFT_FOOTSTEP);
+    DracoFootstep lfootstep_2; // take a leftfootstep
+    lfootstep_2.setPosOriSide(lfootstep_1.position + foot_translate, 
+                              foot_rotate*lfootstep_1.orientation, 
+                              DRACO_LEFT_FOOTSTEP);
 
 
-            // Clear then add footsteps to the list.
-            desired_footstep_list_.clear();
-            desired_footstep_list_.push_back(rfootstep_1);
-            desired_footstep_list_.push_back(lfootstep_1);
-            // desired_footstep_list_.push_back(rfootstep_2);
-            // desired_footstep_list_.push_back(lfootstep_2);
+    // Clear then add footsteps to the list.
+    desired_footstep_list_.clear();
+    desired_footstep_list_.push_back(rfootstep_1);
+    desired_footstep_list_.push_back(lfootstep_1);
 
-            // desired_footstep_list_.push_back(lfootstep_1);
-            // desired_footstep_list_.push_back(rfootstep_1);
-            // desired_footstep_list_.push_back(lfootstep_2);
-            // desired_footstep_list_.push_back(rfootstep_2);
+    for(int i = 0; i < desired_footstep_list_.size(); i++){
+        printf("Step %i:\n", i);
+        desired_footstep_list_[i].printInfo();
+    }
 
-            for(int i = 0; i < desired_footstep_list_.size(); i++){
-                printf("Step %i:\n", i);
-                desired_footstep_list_[i].printInfo();
-            }
+    // Update the reference trajectory module
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
+    reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
+    end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
+    end_time_ += walk_start_time_;
 
-            // Update the reference trajectory module
-            ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
-            reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
-            end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
-            end_time_ += walk_start_time_;
 
-            references_set_once_ = true;
-        }
-    }    
 }
 
 void DCMWalkCtrl::_Xdes_setup(){
@@ -938,6 +921,8 @@ void DCMWalkCtrl::firstVisit() {
     std::cout << "IHWBC reaction force alpha:" << alpha_fd_ << std::endl;
 
     std::cout << "walk_start_time:" << walk_start_time_ << std::endl;
+
+    references_setup();
 
 }
 
