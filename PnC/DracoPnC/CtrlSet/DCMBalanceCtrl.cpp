@@ -578,11 +578,9 @@ void DCMBalanceCtrl::firstVisit() {
     std::cout << "rankle_pos: " << rankle_pos.transpose() << std::endl;
     std::cout << "lankle_pos: " << lankle_pos.transpose() << std::endl;
 
-    // Set CoM X Goal to 0.0
-    // goal_com_pos_[0] = 0.0;
-    // goal_com_pos_[2] = target_com_height_;
-    goal_com_pos_ = ini_com_pos_;
-
+    // Set CoM X Goal to previous com desired
+    goal_com_pos_ = sp_->com_pos_des;
+    goal_com_pos_[2] = target_com_height_;
 
     double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
     ini_ori_ = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);

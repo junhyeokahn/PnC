@@ -226,6 +226,7 @@ void DCMWalkCtrl::references_setup(){
 
     // Get current CoM
     x_com_start = sp_->com_pos;
+    x_com_start[2] = target_com_height_;
     // Get current Ori
     x_ori_start = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
     // Get current starting left and right footstep configuration
@@ -250,16 +251,22 @@ void DCMWalkCtrl::references_setup(){
     left_foot_start_->printInfo();
     right_foot_start_->printInfo();
 
-    double factor = 2.0;
+    double factor = 2.5;
     // Set desired footstep landing locations
-    // Eigen::Vector3d foot_translate(0.11, 0.0, 0.0);
+    // Eigen::Vector3d foot_translate(0.11, 0.0, 0.0); // need to set icp to 5.0 when moving forward
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
     // double swing_time_in = 0.5;
+    // factor = 1.0;
+
+    // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0); // need to set icp to 5.0 when moving forward
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.3;
+    // factor = 1.0;
 
     Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
     Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
     double swing_time_in = 0.5;
-    factor = 2.0;
+    factor = 1.0;
 
     // Eigen::Vector3d foot_translate(0.0, -0.075, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
@@ -290,6 +297,28 @@ void DCMWalkCtrl::references_setup(){
     lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*factor, 
                               foot_rotate*left_foot_start_->orientation, 
                               DRACO_LEFT_FOOTSTEP);
+
+    // Compute landing locations from the current midfoot location
+    // translate from the nominal midfoot configuration.
+    double nominal_midfoot_distance = 0.33;
+    DracoFootstep current_midfoot; current_midfoot.computeMidfeet(*left_foot_start_, *right_foot_start_, current_midfoot);
+    DracoFootstep midfoot_land; 
+    DracoFootstep rfoot_proxy ; 
+    DracoFootstep lfoot_proxy;
+
+    midfoot_land.setPosOriSide(foot_rotate.toRotationMatrix()*current_midfoot.position + foot_translate,
+                           foot_rotate*current_midfoot.orientation,
+                           DRACO_MID_FOOTSTEP);
+
+    rfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0.0),
+                           midfoot_land.orientation,
+                           DRACO_RIGHT_FOOTSTEP);
+    lfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0.0),
+                           midfoot_land.orientation,
+                           DRACO_LEFT_FOOTSTEP);
+    rfootstep_1 = rfoot_proxy;
+    lfootstep_1 = lfoot_proxy;
+
 
 
     double double_contact_time_in = 0.05;
@@ -500,7 +529,7 @@ void DCMWalkCtrl::task_setup() {
 
         des_pos_x = sp_->com_pos[0]; //com_pos_ref[0]; 
         des_pos_y = sp_->com_pos[1]; //com_pos_ref[1]; 
-        des_pos_z = com_pos_ref[2]; 
+        des_pos_z = goal_com_pos_[2]; 
 
         des_rx_rate = ang_vel_ref[0]; 
         des_ry_rate = ang_vel_ref[1]; 
@@ -519,7 +548,7 @@ void DCMWalkCtrl::task_setup() {
         // des_acc_z = 0.0;
 
         double gravity = 9.81;
-        double com_height = com_pos_ref[2]; 
+        double com_height = goal_com_pos_[2]; 
         double omega_o = std::sqrt(gravity/com_height);
 
         // Current ICP 
@@ -535,7 +564,7 @@ void DCMWalkCtrl::task_setup() {
         // icp_acc_error_[0] = clamp_value(icp_acc_error_[0], -icp_sat_error_, icp_sat_error_);
         // icp_acc_error_[1] = clamp_value(icp_acc_error_[1], -icp_sat_error_, icp_sat_error_);
 
-        double kp_ic = 5.0;
+        double kp_ic = 20.0;
         Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);// + ki_ic_*icp_acc_error_;
         // Eigen::VectorXd r_CMP_d = r_ic + kp_ic * (r_icp_error);
 
@@ -955,7 +984,9 @@ void DCMWalkCtrl::firstVisit() {
     // Set CoM X Goal to 0.0
     // goal_com_pos_[0] = 0.0;
     // goal_com_pos_[2] = target_com_height_;
-    goal_com_pos_ = ini_com_pos_;
+    // goal_com_pos_ = ini_com_pos_;
+    goal_com_pos_ = sp_->com_pos_des;
+    goal_com_pos_[2] = target_com_height_;
 
     double init_roll(sp_->q[5]), init_pitch(sp_->q[4]), init_yaw(sp_->q[3]);
     ini_ori_ = myUtils::EulerZYXtoQuat(init_roll, init_pitch, init_yaw);
