@@ -363,7 +363,7 @@ void DCMWalkingReference::compute_total_trajectory_time(){
   }
   // compute settling time 
   double t_settle = -b*log(1.0 - percentage_settle);  
-  t_end += t_settle;
+  t_end += t_additional_settle; //t_settle;
 }
 
 double DCMWalkingReference::get_polynomial_duration(const int step_index){

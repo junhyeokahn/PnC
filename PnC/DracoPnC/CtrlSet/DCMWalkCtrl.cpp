@@ -345,11 +345,6 @@ void DCMWalkCtrl::_Xdes_setup(){
     Xdes_[10] = 0.0;
     Xdes_[11] = 0.0;
 
-    for (int i = 0; i < 3; ++i) {
-        sp_->com_pos_des[i] = Xdes_[i+3];
-        sp_->com_vel_des[i] = Xdes_[i+9];
-    }
-
 }
 
 void DCMWalkCtrl::_compute_torque_ihwbc(Eigen::VectorXd& gamma) {
@@ -498,19 +493,18 @@ void DCMWalkCtrl::task_setup() {
         des_acc_y = 0.0; 
         des_acc_z = 0.0;
     }
-
-
     Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
-
 
     com_acc_des.setZero();
     com_pos_des[0] = des_pos_x;
     com_pos_des[1] = des_pos_y;
     com_pos_des[2] = des_pos_z;
+    sp_->com_pos_des = com_pos_des;
 
     com_vel_des[0] = des_vel_x;
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
+    sp_->com_vel_des = com_vel_des;
 
     com_acc_des[0] = des_acc_x; 
     com_acc_des[1] = des_acc_y; 
