@@ -26,13 +26,31 @@ OSCCtrl::OSCCtrl(RobotSystem* _robot) : Controller(_robot) {
 
     _build_active_joint_idx();
     ee_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ScorpioBodyNode::end_effector);
-    //ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
-    ee_ori_task_ = new SuctionGripperTask(robot_);
+    ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
+    //ee_ori_task_ = new SuctionGripperTask(robot_);
     joint_task_ = new SelectedJointTask(robot_, active_joint_idx_);
 
     _build_constraint_matrix();
     osc_ = new OSC(active_joint_, &Jc_);
     sp_ = ScorpioStateProvider::getStateProvider(_robot);
+
+
+    //Save Data
+    //DataManager* data_manager = DataManager::GetDataManager();     
+    //data_manager->RegisterData(&act_pos_data_,VECT,"act_pos",7);
+    //data_manager->RegisterData(&des_vel_data_,VECT,"des_vel",6);
+    //data_manager->RegisterData(&act_vel_data_,VECT,"act_vel",6);
+
+    //data_manager->RegisterData(&ori_err_data_,VECT,"ori_error",3);   
+
+    //des_pos_data_ = Eigen::VectorXd::Zero(7);
+    //act_pos_data_ = Eigen::VectorXd::Zero(7);
+    //des_vel_data_ = Eigen::VectorXd::Zero(6);
+    //act_vel_data_ = Eigen::VectorXd::Zero(6);
+
+    //ori_err_data_ = Eigen::VectorXd::Zero(3);
+
+
 }
 
 OSCCtrl::~OSCCtrl() {}
@@ -72,6 +90,8 @@ void OSCCtrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     _task_setup();
+
+
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio::n_adof);
     _compute_torque(gamma);
     _PostProcessing_Command();
@@ -95,6 +115,7 @@ void OSCCtrl::_task_setup(){
         ee_acc_des[i] = myUtils::smooth_changing_acc(ini_pos_[i], target_pos_[i],
                 end_time_, state_machine_time_);
     }
+
     ee_pos_task_->updateTask(ee_pos_des, ee_vel_des, ee_acc_des);
 
     // =========================================================================
@@ -103,7 +124,8 @@ void OSCCtrl::_task_setup(){
     double t = myUtils::smooth_changing(0,1,end_time_,state_machine_time_);
     double tdot = myUtils::smooth_changing_vel(0,1,end_time_,state_machine_time_);
 
-    target_ori_ = relative_target_ori_ * ini_ori_ ;
+    target_ori_ =  ini_ori_ ;
+    //target_ori_ = relative_target_ori_ * ini_ori_ ;
     Eigen::Quaternion<double> quat_ori_error =
         target_ori_ * (ini_ori_.inverse());
     Eigen::VectorXd ang_vel = Eigen::VectorXd::Zero(3);
@@ -115,8 +137,11 @@ void OSCCtrl::_task_setup(){
     Eigen::Quaternion<double> curr_quat_des;
     ori_increment = ang_vel * t;
     quat_increment = dart::math::expToQuat(ori_increment);
-    curr_quat_des = quat_increment * ini_ori_;
-    curr_ang_vel_des = ang_vel*tdot;
+    //curr_quat_des = quat_increment * ini_ori_;
+    //curr_ang_vel_des = ang_vel*tdot;
+    
+    curr_quat_des = ini_ori_;
+    curr_ang_vel_des = Eigen::VectorXd::Zero(3);
 
     Eigen::VectorXd quat_des = Eigen::VectorXd::Zero(4);
     quat_des << curr_quat_des.w(), curr_quat_des.x(), curr_quat_des.y(), curr_quat_des.z();
@@ -124,7 +149,7 @@ void OSCCtrl::_task_setup(){
 
     ee_ori_task_->updateTask(quat_des, curr_ang_vel_des, ang_acc_des);
 
-    // =========================================================================
+    //=========================================================================
     // Joint Task
     // =========================================================================
     Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
@@ -138,8 +163,8 @@ void OSCCtrl::_task_setup(){
     // =========================================================================
     // Stack Task List
     // =========================================================================
-    task_list_.push_back(ee_pos_task_);
     task_list_.push_back(ee_ori_task_);
+    task_list_.push_back(ee_pos_task_);
     //task_list_.push_back(joint_task_);
 }
 
@@ -157,6 +182,9 @@ void OSCCtrl::firstVisit() {
     ini_pos_ = robot_->getBodyNodeIsometry("end_effector").translation();
     ini_pos_q_ = robot_->getQ();
     ini_ori_ = Eigen::Quaternion<double> (robot_->getBodyNodeIsometry("end_effector").linear());
+
+    //myUtils::pretty_print(ini_ori_, std::cout, "ini_ori_");
+    //exit(0);
 }
 
 void OSCCtrl::lastVisit() {

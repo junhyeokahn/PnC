@@ -178,7 +178,7 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
 
 Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q ){
     Eigen::Quaternion<double> ret;
-    if (q.w() < 0) {
+    if (q.w() <= 1e-7) {
         ret.x() = -q.x();
         ret.y() = -q.y();
         ret.z() = -q.z();
@@ -187,6 +187,30 @@ Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q ){
         ret = q;
     }
     return ret;
+}
+
+void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori){
+    Eigen::Quaternion<double> ori_diff1;
+    Eigen::Quaternion<double> ori_diff2;
+
+    ori_diff1.w() = des_ori.w() - act_ori.w();
+    ori_diff1.x() = des_ori.x() - act_ori.x();
+    ori_diff1.y() = des_ori.y() - act_ori.y();
+    ori_diff1.z() = des_ori.z() - act_ori.z();
+
+    ori_diff2.w() = des_ori.w() + act_ori.w();
+    ori_diff2.x() = des_ori.x() + act_ori.x();
+    ori_diff2.y() = des_ori.y() + act_ori.y();
+    ori_diff2.z() = des_ori.z() + act_ori.z();
+
+    if(ori_diff1.squaredNorm() > ori_diff2.squaredNorm()){
+        act_ori.w() = -act_ori.w();
+        act_ori.x() = -act_ori.x();
+        act_ori.y() = -act_ori.y();
+        act_ori.z() = -act_ori.z();
+    }
+    else
+        act_ori = act_ori;
 }
 
 }  // namespace myUtils

@@ -150,6 +150,12 @@ void ScorpioWorldNode::customPreStep() {
     scorpio_sensordata_->q = scorpio_->getPositions();
     scorpio_sensordata_->qdot = scorpio_->getVelocities();
 
+    //myUtils::pretty_print(scorpio_sensordata_->q, std::cout, "jpos worldnode");
+
+    //Eigen::MatrixXd ee_rot = Eigen::MatrixXd::Zero(3,3);
+    //ee_rot = scorpio_->getBodyNode("end_effector")->getTransform().linear();
+    //myUtils::pretty_print(ee_rot, std::cout, "worldnode matrix");
+
     // ====
     // APIs
     // ====

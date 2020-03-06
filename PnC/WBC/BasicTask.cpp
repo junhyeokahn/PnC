@@ -3,6 +3,8 @@
 #include <Configuration.h>
 #include <PnC/WBC/BasicTask.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
+
 
 BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
                      const int& _dim, const int& _link_idx)
@@ -85,10 +87,20 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                               _pos_des[2], _pos_des[3]);
             Eigen::Quaternion<double> ori_act(
                 robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+            //Prevent Quaternion Jumping
+            myUtils::avoid_quat_jump(ori_des,ori_act);
+
+            //myUtils::pretty_print(ori_act, std::cout, "ori_act");
+            //myUtils::pretty_print(ori_des, std::cout, "ori_des");
+
             Eigen::Quaternion<double> quat_ori_err;
             quat_ori_err = ori_des * (ori_act.inverse());
             Eigen::Vector3d ori_err;
             ori_err = dart::math::quatToExp(quat_ori_err);
+            //myUtils::pretty_print(ori_err, std::cout, "orr_err");
+
+
             for (int i = 0; i < 3; ++i) {
                 // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
             }
@@ -159,6 +171,7 @@ bool BasicTask::_UpdateTaskJacobian() {
         case BasicTaskType::LINKORI: {
             Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
                       .block(0, 0, dim_task_, robot_->getNumDofs());
+
             break;
         }
         case BasicTaskType::CENTROID: {
