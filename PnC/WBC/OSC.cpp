@@ -49,7 +49,11 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
     //myUtils::pretty_print(xddot, std::cout, "first task xddot");
     qddot_des = JtPreBar * xddot;
     //myUtils::pretty_print(qddot_des, std::cout, "first task qddot");
-    //myUtils::pretty_print(JtPreBar, std::cout, "Jtprebar");
+    //myUtils::pretty_print(JtPreBar, std::cout, "J_ori_bar");
+    //Eigen::JacobiSVD<Eigen::MatrixXd> svd(
+    //JtPreBar, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    //std::cout << "Jt1_bar" << std::endl; 
+    //std::cout << svd.singularValues() << std::endl;
 
     for (int i = 1; i < task_list.size(); ++i) {
         task = task_list[i];
@@ -60,15 +64,22 @@ void OSC::makeTorque(const std::vector<Task*> & task_list,
             - JtPreBar * JtPre;
         task->getCommand(xddot);
         //if (i ==1) {
-            //myUtils::pretty_print(xddot, std::cout, "first task xddot");
+        //myUtils::pretty_print(xddot, std::cout, "first task xddot");
         //}
+
+        //myUtils::pretty_print(JtPreBar, std::cout, "J_pos_bar");
+        //Eigen::JacobiSVD<Eigen::MatrixXd> svd1(
+        //JtPreBar, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        //std::cout << "Jt1_bar" << std::endl; 
+        //std::cout << svd1.singularValues() << std::endl;
+
         qddot_des += JtPreBar * xddot;
     }
 
     if (false) {
         Eigen::MatrixXd SN_c_J_q = SN_c_bar.transpose()*JtPre;
         Eigen::JacobiSVD<Eigen::MatrixXd> svd4(
-                SN_c_J_q, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        SN_c_J_q, Eigen::ComputeThinU | Eigen::ComputeThinV);
         std::cout << "S_N_J_q" << std::endl; 
         std::cout << svd4.singularValues() << std::endl;
         std::cout << "============================" << std::endl;

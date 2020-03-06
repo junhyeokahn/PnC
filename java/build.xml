@@ -34,7 +34,7 @@
 	</target>
 	
 	<target name='draco-cpp' depends='init' description='Build the cpp side of draco.'>
-		<cmake srcdir='${c.src.dir}' buildtype='${cmake.build.type}' bindir='${c.build.dir}' target="dracoWrapper">
+		<cmake srcdir='${c.src.dir}' buildtype='${cmake.build.type}' bindir='${c.build.dir}' target="adeWrapper">
 			<generator buildargs='-j ${j}'/>
 			<variable name='CMAKE_LIBRARY_OUTPUT_DIRECTORY' value='${c.lib.dir}'/>
 			<variable name='SWIG_SRC_BASE_OUTDIR' value='${swig.build.dir}'/>

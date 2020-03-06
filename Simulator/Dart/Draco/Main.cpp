@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<DracoWorldNode> node;
-    node = new DracoWorldNode(world, new DracoInterface());
+    node = new DracoWorldNode(world);
     node->setNumStepsPerCycle(30);
 
     // =========================================================================

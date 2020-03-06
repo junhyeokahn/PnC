@@ -1,7 +1,7 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 #include <Configuration.h>
-#include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
+#include <ADE/ScorpioWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>

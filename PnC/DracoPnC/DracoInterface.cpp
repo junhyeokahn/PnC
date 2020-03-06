@@ -173,7 +173,7 @@ void DracoInterface::WalkInX(double x, double max_delta_x){
     std::cout << "ft_length : " << ft_length << std::endl;
     std::cout << "-------------------------------" << std::endl;
 
-    Walk(ft_length, 0.33, 0.33, 0., n_step_x);
+    Walk(ft_length, 0.30, 0.30, 0., n_step_x);
 }
 
 void DracoInterface::WalkInY(double y, double max_delta_y){
@@ -197,7 +197,7 @@ void DracoInterface::Turn(double th, double max_delta_th){
     std::cout << "n_step_th : " << n_step_th << std::endl;
     std::cout << "ori_inc : " << ori_inc << std::endl;
     std::cout << "-------------------------------" << std::endl;
-    Walk(0., 0.33, 0.33, ori_inc, n_step_th);
+    Walk(0., 0.30, 0.30, ori_inc, n_step_th);
 }
 
 void DracoInterface::WalkToRelativePositionAndOrientation(double x, double y,
