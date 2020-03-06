@@ -164,6 +164,13 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
     // Get trajectory state
     ctrl_state_ =  reference_trajectory_module_->getState(state_machine_time_);
 
+    // Sotre the desired DCM and r_vrp references
+    if (state_machine_time_ >= walk_start_time_){
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm(state_machine_time_, sp_->dcm_des);    
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm_vel(state_machine_time_, sp_->dcm_vel_des);    
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_r_vrp(state_machine_time_, sp_->r_vrp_des);    
+    }
+
     // Setup the contacts
     contact_setup();
 
@@ -178,20 +185,14 @@ void DCMWalkCtrl::oneStep(void* _cmd) {
 
 
     double alphaTau = (1.0 - computeAlphaGivenBreakFrequency(100.0, ihwbc_dt_));   
-    gamma_old_ = gamma*alphaTau + (1.0 - alphaTau)*gamma_old_;
+    // gamma_old_ = gamma*alphaTau + (1.0 - alphaTau)*gamma_old_;
+    gamma_old_ = gamma;
 
     // Send the Commands
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = gamma_old_[i];
         ((DracoCommand*)_cmd)->q[i] = sp_->des_jpos[i];
         ((DracoCommand*)_cmd)->qdot[i] = sp_->des_jvel[i];
-    }
-
-    // Sotre the desired DCM and r_vrp references
-    if (state_machine_time_ >= walk_start_time_){
-        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm(state_machine_time_, sp_->dcm_des);    
-        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_dcm_vel(state_machine_time_, sp_->dcm_vel_des);    
-        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_ref_r_vrp(state_machine_time_, sp_->r_vrp_des);    
     }
 
     _PostProcessing_Command();        
@@ -249,24 +250,36 @@ void DCMWalkCtrl::references_setup(){
     left_foot_start_->printInfo();
     right_foot_start_->printInfo();
 
+    double factor = 2.0;
     // Set desired footstep landing locations
-    Eigen::Vector3d foot_translate(0.11, 0.0, 0.0);
-    Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-    double swing_time_in = 0.5;
-
-    // Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+    // Eigen::Vector3d foot_translate(0.11, 0.0, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
     // double swing_time_in = 0.5;
 
+    Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+    Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    double swing_time_in = 0.5;
+    factor = 2.0;
+
     // Eigen::Vector3d foot_translate(0.0, -0.075, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.4;
+    // factor = 1.0;
 
-    // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+    // Eigen::Vector3d foot_translate(0.0, -0.125, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.4;
+    // factor = 1.0;
 
     // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
     // double swing_time_in = 0.33;
+    // factor = 1.0;
+
+    // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.4;
+    // factor = 1.0;
 
     DracoFootstep rfootstep_1; // take a rightfootstep
     rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
@@ -274,9 +287,10 @@ void DCMWalkCtrl::references_setup(){
                               DRACO_RIGHT_FOOTSTEP);
 
     DracoFootstep lfootstep_1; // take a left footstep
-    lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*2.5, 
+    lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*factor, 
                               foot_rotate*left_foot_start_->orientation, 
                               DRACO_LEFT_FOOTSTEP);
+
 
     double double_contact_time_in = 0.05;
     double contact_transition_time_in = 0.2;
@@ -294,12 +308,12 @@ void DCMWalkCtrl::references_setup(){
                                  swing_height_in);
 
     DracoFootstep rfootstep_2; // take a rightfootstep
-    rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate*2.5, 
+    rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate*factor, 
                               foot_rotate*rfootstep_1.orientation, 
                               DRACO_RIGHT_FOOTSTEP);
 
     DracoFootstep lfootstep_2; // take a leftfootstep
-    lfootstep_2.setPosOriSide(lfootstep_1.position + foot_translate, 
+    lfootstep_2.setPosOriSide(lfootstep_1.position + foot_translate*factor, 
                               foot_rotate*lfootstep_1.orientation, 
                               DRACO_LEFT_FOOTSTEP);
 
@@ -308,6 +322,8 @@ void DCMWalkCtrl::references_setup(){
     desired_footstep_list_.clear();
     desired_footstep_list_.push_back(rfootstep_1);
     desired_footstep_list_.push_back(lfootstep_1);
+    // desired_footstep_list_.push_back(rfootstep_2);
+    // desired_footstep_list_.push_back(lfootstep_2);
 
     for(int i = 0; i < desired_footstep_list_.size(); i++){
         printf("Step %i:\n", i);
@@ -464,11 +480,13 @@ void DCMWalkCtrl::task_setup() {
     double des_acc_z = 0.0; 
 
     Eigen::Vector3d com_pos_ref, com_vel_ref;
+    Eigen::Vector3d dcm_ref, dcm_vel_ref;
     Eigen::Quaterniond ori_ref;
     Eigen::Vector3d euler_yaw_pitch_roll;
 
     // Angular velocity and acceleration references
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
+    Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
     ang_vel_ref.setZero(); ang_acc_ref.setZero();
 
     if (state_machine_time_ >= walk_start_time_){
@@ -480,27 +498,57 @@ void DCMWalkCtrl::task_setup() {
         des_pitch = euler_yaw_pitch_roll[1]; // Desired Pitch
         des_yaw = euler_yaw_pitch_roll[0]; // Desired Yaw            
 
-        des_pos_x = com_pos_ref[0]; 
-        des_pos_y = com_pos_ref[1]; 
+        des_pos_x = sp_->com_pos[0]; //com_pos_ref[0]; 
+        des_pos_y = sp_->com_pos[1]; //com_pos_ref[1]; 
         des_pos_z = com_pos_ref[2]; 
 
         des_rx_rate = ang_vel_ref[0]; 
         des_ry_rate = ang_vel_ref[1]; 
         des_rz_rate = ang_vel_ref[2]; 
 
-        des_vel_x = com_vel_ref[0]; 
-        des_vel_y = com_vel_ref[1]; 
+        des_vel_x = sp_->com_vel[0]; //com_vel_ref[0]; 
+        des_vel_y = sp_->com_vel[1]; //com_vel_ref[1]; 
         des_vel_z = com_vel_ref[2]; 
 
         des_rx_acc = ang_acc_ref[0]; 
         des_ry_acc = ang_acc_ref[1]; 
         des_rz_acc = ang_acc_ref[2]; 
 
-        des_acc_x = 0.0; 
-        des_acc_y = 0.0; 
+        // des_acc_x = 0.0; 
+        // des_acc_y = 0.0; 
+        // des_acc_z = 0.0;
+
+        double gravity = 9.81;
+        double com_height = com_pos_ref[2]; 
+        double omega_o = std::sqrt(gravity/com_height);
+
+        // Current ICP 
+        Eigen::VectorXd r_ic = sp_->dcm.head(2);
+        // Desired ICP
+        Eigen::VectorXd r_id = sp_->dcm_des.head(2);
+        // Desired ICP Velocity
+        Eigen::VectorXd rdot_id = sp_->dcm_vel_des.head(2);
+
+        // Desired CMP
+        Eigen::VectorXd r_icp_error = (r_ic - r_id);
+        // icp_acc_error_ += (r_icp_error*ihwbc_dt_);
+        // icp_acc_error_[0] = clamp_value(icp_acc_error_[0], -icp_sat_error_, icp_sat_error_);
+        // icp_acc_error_[1] = clamp_value(icp_acc_error_[1], -icp_sat_error_, icp_sat_error_);
+
+        double kp_ic = 5.0;
+        Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);// + ki_ic_*icp_acc_error_;
+        // Eigen::VectorXd r_CMP_d = r_ic + kp_ic * (r_icp_error);
+
+        // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
+        // myUtils::pretty_print(icp_acc_error_, std::cout, "icp_acc_error_");
+        // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
+
+        // Desired Linear Momentum / Acceleration task:
+        com_acc_des.head(2) = (gravity/com_height)*( sp_->com_pos.head(2) - r_CMP_d);
+        des_acc_x = com_acc_des[0]; 
+        des_acc_y = com_acc_des[1]; 
         des_acc_z = 0.0;
     }
-    Eigen::Vector3d com_acc_des, com_vel_des, com_pos_des;
 
     com_acc_des.setZero();
     com_pos_des[0] = des_pos_x;
@@ -765,6 +813,7 @@ void DCMWalkCtrl::task_setup() {
         task_list_.push_back(lfoot_front_task);
         task_list_.push_back(lfoot_back_task);
     }
+    // task_list_.push_back(ang_momentum_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
     w_task_heirarchy_[0] = w_task_com_; // COM
@@ -784,6 +833,7 @@ void DCMWalkCtrl::task_setup() {
         w_task_heirarchy_[4] = w_task_lfoot_; // lfoot contact
         w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
     }
+    // w_task_heirarchy_[task_list_.size() - 1] = 1e-2; // angular momentum 
 
 }
 
