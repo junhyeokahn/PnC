@@ -1,5 +1,5 @@
 test_configuration:
-    xyz_duration: 10.
+    xyz_duration: 20.
     end_effector_target_pos: [1., 0.2 , 0.7]
     end_effector_target_ori: [0.5,-0.5,0.5,0.5]
 

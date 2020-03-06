@@ -34,6 +34,8 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
 // ETC
 // =============================================================================
 
+void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori);
+
 Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q );
 
 double bind_half_pi(double);

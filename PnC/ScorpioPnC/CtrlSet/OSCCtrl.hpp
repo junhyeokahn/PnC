@@ -68,4 +68,10 @@ class OSCCtrl : public Controller {
         ScorpioStateProvider* sp_;
 
         double ctrl_start_time_;
+
+
+        Eigen::VectorXd des_pos_data_;
+        //Eigen::VectorXd act_pos_data_;
+        Eigen::VectorXd des_vel_data_;
+        //Eigen::VectorXd act_vel_data_;
 };
