@@ -11,6 +11,7 @@
 #include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot, Planner* planner,
                                      FootstepSequenceGenerator* fsg)
@@ -137,16 +138,16 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 }
 
 void DoubleSupportCtrl::PlannerUpdate_() {
-    std::cout << "planning" << std::endl;
+    //std::cout << "planning" << std::endl;
     sp_->clock.start();
     PlannerInitialization_();
     planner_->DoPlan();
     ((CentroidPlanner*)planner_)
         ->SaveResult("DS_" + std::to_string(sp_->num_step_copy));
     sp_->planning_moment = sp_->curr_time;
-    std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) << std::endl;
-    std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
-              << std::endl;
+    //std::cout << "Saved DS_" + std::to_string(sp_->num_step_copy) << std::endl;
+    //std::cout << "(ds) planning takes : " << sp_->clock.stop() << " (ms)"
+              //<< std::endl;
     ((CentroidPlanner*)planner_)
         ->GetSolution(com_traj_, lmom_traj_, amom_traj_, cop_local_traj_,
                       frc_world_traj_, trq_local_traj_);
@@ -658,6 +659,7 @@ void DoubleSupportCtrl::AddContactSequence_(
     Eigen::VectorXd f_pos = f_iso.translation();
     Eigen::Quaternion<double> f_quat =
         Eigen::Quaternion<double>(f_iso.linear());
+    f_quat = myUtils::bind_qaut_pi(f_quat);
     Eigen::VectorXd f_quat_vec = Eigen::VectorXd::Zero(4);
     f_quat_vec << f_quat.w(), f_quat.x(), f_quat.y(), f_quat.z();
 

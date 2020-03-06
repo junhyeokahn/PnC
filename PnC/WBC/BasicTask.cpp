@@ -5,7 +5,6 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-
 BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
                      const int& _dim, const int& _link_idx)
     : Task(_robot, _dim) {

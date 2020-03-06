@@ -21,6 +21,10 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     ScorpioSensorData* scorpio_sensordata_;
     ScorpioCommand* scorpio_cmd_;
 
+    EnvInterface* scorpio_interface2_;
+    ScorpioSensorData* scorpio_sensordata2_;
+    ScorpioCommand* scorpio_cmd2_;
+
     void SetParams_();
     void GetForceTorqueData_();
 
@@ -30,6 +34,7 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
 
     dart::simulation::WorldPtr world_;
     dart::dynamics::SkeletonPtr scorpio_;
+    dart::dynamics::SkeletonPtr scorpio2_;
     dart::dynamics::SkeletonPtr draco_;
     //dart::dynamics::SkeletonPtr mSkel_hsr_;
     dart::dynamics::SkeletonPtr mGround_;
@@ -42,10 +47,14 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     dart::dynamics::JointPtr active5_;
     dart::dynamics::JointPtr active6_;
     dart::dynamics::JointPtr active7_;
-       
-    Eigen::VectorXd trq_cmd_scorpio_;
-    Eigen::VectorXd trq_lb_scorpio_;
-    Eigen::VectorXd trq_ub_scorpio_;
+
+    dart::dynamics::JointPtr active1__;
+    dart::dynamics::JointPtr active2__;
+    dart::dynamics::JointPtr active3__;
+    dart::dynamics::JointPtr active4__;
+    dart::dynamics::JointPtr active5__;
+    dart::dynamics::JointPtr active6__;
+    dart::dynamics::JointPtr active7__;
 
     Eigen::VectorXd active_joint_idx_;
     Eigen::VectorXd passive_joint_idx_;
@@ -57,6 +66,7 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd scorpio_kp_;
     Eigen::VectorXd scorpio_kd_;
     Eigen::VectorXd scorpio_trq_cmd_;
+    Eigen::VectorXd scorpio_trq_cmd2_;
 
     Eigen::VectorXd draco_kp_;
     Eigen::VectorXd draco_kd_;
@@ -82,14 +92,16 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd a_joint_idx_scorpio_;
     Eigen::VectorXd p_joint_idx_scorpio_;
 
-    void GetActiveJointInfo(Eigen::VectorXd & pos_cur, Eigen::VectorXd & vel_cur);
-    void SetActivePosition(const Eigen::VectorXd & des_pos);
-    void SetActiveForce(const Eigen::VectorXd & des_force);
-    void SetActiveVelocity(const Eigen::VectorXd & des_vel);
-    void UpdateSystem(const Eigen::VectorXd & q_activate);
+    bool draco_first_is_done;
+    bool draco_second_is_done;
+    bool first_scorpio_done;
+    bool second_scorpio_done;
+    double current_box_height_;
+    double draco_top_height_;
 
-    void SetJointSpaceControlCmd(int ctrl_case);
-    void SetOperationalSpaceControlCmd(int ctrl_case);
+    void SetActiveForce(const Eigen::VectorXd & des_force);
+    void SetActiveForce2(const Eigen::VectorXd & des_force);
+
     void GetContactSwitchData_(bool&, bool&);
     void PlotMPCResult_();
 
@@ -110,4 +122,5 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     double x2_;
     Eigen::VectorXd box_kp;
     Eigen::VectorXd box_kd;
+
 };

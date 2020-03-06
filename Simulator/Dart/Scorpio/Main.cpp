@@ -214,7 +214,7 @@ void _setInitialConfiguration_2(dart::dynamics::SkeletonPtr robot) {
     Eigen::VectorXd q = robot->getPositions();
     q[0] = 1.3918;
     q[1] = -0.360352;
-    q[2] = 0.52563;
+    q[2] = 1.16563;
     robot->setPositions(q);
 }
 void _SetMeshColorURDF(dart::dynamics::SkeletonPtr robot){
@@ -332,6 +332,7 @@ int main(int argc, char** argv) {
     double servo_rate;
     int actuator_type;
     Eigen::VectorXd q_init(5);
+    Eigen::VectorXd from, to;
     q_init.setZero();
 
     try {
@@ -348,6 +349,8 @@ int main(int argc, char** argv) {
         myUtils::readParameter(simulation_cfg, "show_viewer", b_show);
         myUtils::readParameter(simulation_cfg, "actuator_type", actuator_type);
         myUtils::readParameter(simulation_cfg, "q_init", q_init);
+        myUtils::readParameter(simulation_cfg, "from", from);
+        myUtils::readParameter(simulation_cfg, "to", to);
         q_init = q_init/180.0*M_PI;
 
     } catch (std::runtime_error& e) {
@@ -365,17 +368,23 @@ int main(int argc, char** argv) {
         THIS_COM "RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr scorpio = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
+    dart::dynamics::SkeletonPtr scorpio2 = urdfLoader.parseSkeleton(
+        THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin2.urdf");
     dart::dynamics::SkeletonPtr draco = urdfLoader.parseSkeleton(
         THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     dart::dynamics::SkeletonPtr table = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Table/table.urdf");
+    dart::dynamics::SkeletonPtr table2 = urdfLoader.parseSkeleton(
+         THIS_COM "RobotModel/Environment/Table/table2.urdf");
     dart::dynamics::SkeletonPtr box = urdfLoader.parseSkeleton(
          THIS_COM "RobotModel/Environment/Box/box.urdf");
 
     world->addSkeleton(ground);
     world->addSkeleton(scorpio);
+    world->addSkeleton(scorpio2);
     world->addSkeleton(draco);
     world->addSkeleton(table);
+    world->addSkeleton(table2);
     world->addSkeleton(box);
 
 
@@ -401,6 +410,7 @@ int main(int argc, char** argv) {
     // Display Joints Frame
     // ====================
     if (b_display_joint_frame) displayJointFrames(world, scorpio);
+    if (b_display_joint_frame) displayJointFrames(world, draco);
     // ====================
     // Display Target Frame
     // ====================
@@ -410,6 +420,7 @@ int main(int argc, char** argv) {
     // Initial configuration
     // =====================
     _setInitialConfiguration(scorpio, q_init);
+    _setInitialConfiguration(scorpio2, q_init);
     _setInitialConfiguration(draco);
     _setJointLimitConstraint(draco);
     _setInitialConfiguration_2(box);
@@ -418,16 +429,19 @@ int main(int argc, char** argv) {
     // Robot Mesh Color from URDF
     // =====================
     _SetMeshColorURDF(scorpio);
+    _SetMeshColorURDF(scorpio2);
 
     // =====================
     // Constraint for Closed-Loop
     // =====================
     _SetJointConstraint(world, scorpio);
+    _SetJointConstraint(world, scorpio2);
 
     // ================
     // Set passive joint
     // ================
     _SetJointActuatorType(scorpio,actuator_type);
+    _SetJointActuatorType(scorpio2,actuator_type);
 
     // ================
     // Print Model Info
@@ -472,7 +486,7 @@ int main(int argc, char** argv) {
         //viewer.setUpViewInWindow(0, 0, 2880, 1800);
         viewer.setUpViewInWindow(1440, 0, 500, 500);
         viewer.getCameraManipulator()->setHomePosition(
-            ::osg::Vec3(6.14, 2.28, 3.0) * 1.5, ::osg::Vec3(1.0, 0.2, 0.5),
+            ::osg::Vec3(from[0], from[1], from[2]), ::osg::Vec3(to[0], to[1], to[2]),
             ::osg::Vec3(0.0, 0.0, 1.0));
         viewer.setCameraManipulator(viewer.getCameraManipulator());
         viewer.run();

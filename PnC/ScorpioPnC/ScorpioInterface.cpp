@@ -128,6 +128,14 @@ bool ScorpioInterface::IsReadyToGrasp(){
     }
 }
 
+bool ScorpioInterface::IsReadyToRelease(){
+    if (!(sp_->is_moving) && !(sp_->is_closing) && !(sp_->is_holding) && !(sp_->is_opening)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void ScorpioInterface::Grasp(){
     if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH)  {
        sp_->is_closing = true;
@@ -138,20 +146,12 @@ void ScorpioInterface::Grasp(){
     }
 }
 
-bool ScorpioInterface::IsReadyToRelease(){
-    if (!(sp_->is_closing) && (sp_->is_holding) && !(sp_->is_opening)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 void ScorpioInterface::Release(){
     if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) && (sp_->is_holding)) {
        sp_->is_opening = true;
        sp_->is_holding = false;
        sp_->closing_opening_start_time = sp_->curr_time;
     }else{
-    std::cout << "Wait" << std::endl;
+        std::cout << "Wait" << std::endl;
     }
 }
