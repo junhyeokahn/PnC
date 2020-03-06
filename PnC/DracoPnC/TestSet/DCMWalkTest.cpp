@@ -24,7 +24,7 @@ DCMWalkTest::DCMWalkTest(RobotSystem* robot) : Test(robot) {
     state_list_.push_back(dcm_balance_ctrl_);
 
     repeat_counter_ = 1;
-    repeat_times_ = 5;  
+    repeat_times_ = 1;  
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
     _SettingParameter();

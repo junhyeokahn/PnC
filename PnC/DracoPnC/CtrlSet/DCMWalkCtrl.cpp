@@ -250,10 +250,15 @@ void DCMWalkCtrl::references_setup(){
     right_foot_start_->printInfo();
 
     // Set desired footstep landing locations
-    Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+    Eigen::Vector3d foot_translate(0.11, 0.0, 0.0);
     Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    double swing_time_in = 0.5;
 
-    // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+    // Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.5;
+
+    // Eigen::Vector3d foot_translate(0.0, -0.075, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
     // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
@@ -261,6 +266,7 @@ void DCMWalkCtrl::references_setup(){
 
     // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.33;
 
     DracoFootstep rfootstep_1; // take a rightfootstep
     rfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(right_foot_start_->position) + foot_translate, 
@@ -268,13 +274,13 @@ void DCMWalkCtrl::references_setup(){
                               DRACO_RIGHT_FOOTSTEP);
 
     DracoFootstep lfootstep_1; // take a left footstep
-    lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate, 
+    lfootstep_1.setPosOriSide(foot_rotate.toRotationMatrix()*(left_foot_start_->position) + foot_translate*2.5, 
                               foot_rotate*left_foot_start_->orientation, 
                               DRACO_LEFT_FOOTSTEP);
 
     double double_contact_time_in = 0.05;
     double contact_transition_time_in = 0.2;
-    double swing_time_in = 0.3;
+
     double swing_height_in = 0.05;
 
     rfootstep_1.setWalkingParams(double_contact_time_in,
@@ -288,7 +294,7 @@ void DCMWalkCtrl::references_setup(){
                                  swing_height_in);
 
     DracoFootstep rfootstep_2; // take a rightfootstep
-    rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate, 
+    rfootstep_2.setPosOriSide(rfootstep_1.position + foot_translate*2.5, 
                               foot_rotate*rfootstep_1.orientation, 
                               DRACO_RIGHT_FOOTSTEP);
 
@@ -310,6 +316,7 @@ void DCMWalkCtrl::references_setup(){
 
     // Update the reference trajectory module
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ss = swing_time_in;
     reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
     end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
     end_time_ += walk_start_time_;
@@ -712,12 +719,10 @@ void DCMWalkCtrl::task_setup() {
     // Task List Update
     // =========================================================================
 
-    double t_transition = reference_trajectory_module_->reaction_force_schedule_ptr->getTransitionVariable(0, state_machine_time_);
-    // std::cout << "time:" << state_machine_time_ << std::endl;
-    // std::cout << "index 0: transition: " << t_transition << " max force = " << f_max << std::endl;
+    // double t_transition = reference_trajectory_module_->reaction_force_schedule_ptr->getTransitionVariable(0, state_machine_time_);
  
-    // double w_contact_transition = (1-t_transition)*w_task_rfoot_;
-    // double w_swing_transition = t_transition*1e-2;
+    // double w_contact_transition = t_transition*w_task_rfoot_;
+    // double w_swing_transition = (1-t_transition)*1e-1;
 
     // task_list_.push_back(com_task_);
     // task_list_.push_back(body_ori_task_);
@@ -734,8 +739,8 @@ void DCMWalkCtrl::task_setup() {
     // w_task_heirarchy_[0] = w_task_com_; // COM
     // w_task_heirarchy_[1] = w_task_body_; // body ori
 
-    // w_task_heirarchy_[2] = (1-t_transition)*w_task_rfoot_; // rfoot swing
-    // w_task_heirarchy_[3] = (1-t_transition)*w_task_lfoot_; // lfoot swing
+    // w_task_heirarchy_[2] = w_swing_transition; // rfoot swing
+    // w_task_heirarchy_[3] = w_swing_transition; // lfoot swing
 
     // w_task_heirarchy_[4] = t_transition*w_task_rfoot_; // rfoot contact
     // w_task_heirarchy_[5] = t_transition*w_task_rfoot_; // rfoot contact
