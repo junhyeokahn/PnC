@@ -229,7 +229,7 @@ void ScorpioWorldNode::customPreStep() {
         draco_second_is_done=true;
     }
     // TEST
-    draco_second_is_done = false;
+    //draco_second_is_done = false;
     // TEST
 
     // ======================================================================
@@ -237,7 +237,7 @@ void ScorpioWorldNode::customPreStep() {
     // ======================================================================
 
     static bool b_move_second_cmd(true);
-    if (draco_second_is_done && ((ScorpioInterface*)scorpio_interface2_)->IsReadyToMove() && b_move_second_cmd) {
+    if (draco_second_is_done && ((ScorpioInterface*)scorpio_interface2_)->IsReadyToMove() && b_move_second_cmd && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand()) {
         std::cout << "Moving Command Received" << std::endl;
         ((ScorpioInterface*)scorpio_interface2_)->MoveEndEffectorTo(p1_[0], p1_[1], p1_[2]);
         b_move_second_cmd = false;
