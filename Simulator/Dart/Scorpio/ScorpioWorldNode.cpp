@@ -7,7 +7,7 @@
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 
 
-ScorpioWorldNode::ScorpioWorldNode(const dart::simulation::WorldPtr& _world)
+ScorpioWorldNode::ScorpioWorldNode(const dart::simulation::WorldPtr& _world, EnvInterface *draco, EnvInterface *arm1, EnvInterface *arm2)
     : dart::gui::osg::WorldNode(_world), count_(0),  t_(0.0), servo_rate_(0.001){
     world_ = _world;
     draco_ = world_->getSkeleton("Draco");
@@ -57,15 +57,15 @@ ScorpioWorldNode::ScorpioWorldNode(const dart::simulation::WorldPtr& _world)
     active6__ = scorpio2_->getJoint("joint10");
     active7__ = scorpio2_->getJoint("joint11");
 
-    scorpio_interface_ = new ScorpioInterface();
+    scorpio_interface_ = arm1;
     scorpio_sensordata_ = new ScorpioSensorData();
     scorpio_cmd_ = new ScorpioCommand();
 
-    scorpio_interface2_ = new ScorpioInterface();
+    scorpio_interface2_ = arm2;
     scorpio_sensordata2_ = new ScorpioSensorData();
     scorpio_cmd2_ = new ScorpioCommand();
 
-    draco_interface_= new DracoInterface();
+    draco_interface_= draco;
     draco_sensordata_= new DracoSensorData(); 
     draco_cmd_ = new DracoCommand();
 
@@ -146,11 +146,11 @@ void ScorpioWorldNode::customPreStep() {
 //        b_draco_first_cmd = false;
 //    }
 //
-    static bool b_draco_second_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_second_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
-        b_draco_second_cmd = false;
-    }
+//    static bool b_draco_second_cmd(true);
+//    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_second_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
+//        b_draco_second_cmd = false;
+//    }
 //
 //    static bool b_draco_third_cmd(true);
 //    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_third_cmd) {
@@ -175,8 +175,8 @@ void ScorpioWorldNode::customPreStep() {
 //    // First Scorpio grasp the box and hand it to Draco
 //    // ================================================
 //
-//    static bool b_move_cmd(true);
-//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
+//   static bool b_move_cmd(true);
+//    if (((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
 //        std::cout << "First Moving Command Received" << std::endl;
 //        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-0.3, -0.4, -0.01);
 //        b_move_cmd = false;

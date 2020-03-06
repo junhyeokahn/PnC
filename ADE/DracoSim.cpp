@@ -316,11 +316,11 @@ void _SetJointActuatorType(dart::dynamics::SkeletonPtr robot, int actuator_type)
 
 }
 
-DracoSim::DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface) {
+DracoSim::DracoSim() {
     //TODO
 }
 
-void DracoSim::StartSim() {
+void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, ScorpioInterface* arm2_i) {
     // ========================
     // Parse Yaml for Simulator
     // ========================
@@ -451,8 +451,8 @@ void DracoSim::StartSim() {
     // ================
     // Wrap a worldnode
     // ================
-    //osg::ref_ptr<ScorpioWorldNode> world_;
-    world_ = new ScorpioWorldNode(world);
+    osg::ref_ptr<ScorpioWorldNode> world_;
+    world_ = new ScorpioWorldNode(world, draco_i, arm_i, arm2_i);
 
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;

@@ -1,7 +1,7 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
 #include <Configuration.h>
-#include <ADE/ScorpioWorldNode.hpp>
+#include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
@@ -12,7 +12,6 @@
 class DracoSim {
 private:
     //Simulation Helpers
-    osg::ref_ptr<ScorpioWorldNode> world_;
     dart::gui::osg::Viewer viewer;
 
     //Threading
@@ -21,9 +20,9 @@ private:
     void StartThread();
 public:
     //Initialize the sim with a new PnC
-    DracoSim(DracoInterface* interface, ScorpioInterface* arm_interface);
+    DracoSim();
     //Start the simulator and visuals in a new thread
-    void StartSim();
+    void StartSim(DracoInterface* draco, ScorpioInterface* arm1, ScorpioInterface* arm2);
     //Stop the simulator and join the thread it was running in
     void StopSim();
 };

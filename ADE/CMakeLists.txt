@@ -3,7 +3,6 @@
 set(srcs
         DracoWrapper.cpp
         DracoSim.cpp
-        ScorpioWorldNode.cpp
         Main.cpp
         )
 
