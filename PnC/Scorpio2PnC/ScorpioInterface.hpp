@@ -2,24 +2,24 @@
 
 #include "PnC/EnvInterface.hpp"
 #include "PnC/Test.hpp"
-#include "PnC/ScorpioPnC/ScorpioDefinition.hpp"
+#include "PnC/Scorpio2PnC/ScorpioDefinition.hpp"
 
-enum GRIPPER_STATUS {is_closing = 0,
-                     is_holding = 1,
-                    is_opening = 2,
-                    idle = 3 };
+enum GRIPPER2_STATUS {is_closing2 = 0,
+                     is_holding2 = 1,
+                    is_opening2 = 2,
+                    idle2 = 3 };
 
-class ScorpioStateProvider;
+class Scorpio2StateProvider;
 
-class ScorpioSensorData {
+class Scorpio2SensorData {
    public:
-    ScorpioSensorData() {
+    Scorpio2SensorData() {
         q = Eigen::VectorXd::Zero(Scorpio::n_dof);
         qdot = Eigen::VectorXd::Zero(Scorpio::n_dof);
         //passive_q = Eigen::VectorXd::Zero(Scorpio::n_vdof);
         //passive_qdot = Eigen::VectorXd::Zero(Scorpio::n_vdof);
     }
-    virtual ~ScorpioSensorData() {}
+    virtual ~Scorpio2SensorData() {}
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
@@ -27,30 +27,30 @@ class ScorpioSensorData {
     //Eigen::VectorXd passive_qdot;
 };
 
-class ScorpioCommand {
+class Scorpio2Command {
    public:
-    ScorpioCommand() {
+    Scorpio2Command() {
         q = Eigen::VectorXd::Zero(Scorpio::n_adof);
         qdot = Eigen::VectorXd::Zero(Scorpio::n_adof);
         jtrq = Eigen::VectorXd::Zero(Scorpio::n_adof);
-        gripper_cmd = GRIPPER_STATUS::idle;
+        gripper_cmd = GRIPPER2_STATUS::idle2;
     }
-    virtual ~ScorpioCommand() {}
+    virtual ~Scorpio2Command() {}
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
     Eigen::VectorXd jtrq;
-    GRIPPER_STATUS gripper_cmd;
+    GRIPPER2_STATUS gripper_cmd;
 };
 
-class ScorpioInterface : public EnvInterface {
+class Scorpio2Interface : public EnvInterface {
    protected:
     void _ParameterSetting();
 
-    ScorpioStateProvider* sp_;
+    Scorpio2StateProvider* sp_;
 
-    //void CropTorque_(ScorpioCommand*);
-    bool Initialization_(ScorpioSensorData*, ScorpioCommand*);
+    //void CropTorque_(Scorpio2Command*);
+    bool Initialization_(Scorpio2SensorData*, Scorpio2Command*);
 
     int count_;
     int waiting_count_;
@@ -61,8 +61,8 @@ class ScorpioInterface : public EnvInterface {
 
 
    public:
-    ScorpioInterface();
-    virtual ~ScorpioInterface();
+    Scorpio2Interface();
+    virtual ~Scorpio2Interface();
     virtual void getCommand(void* _sensor_data, void* _command_data);
 
     bool IsReadyToMove();
