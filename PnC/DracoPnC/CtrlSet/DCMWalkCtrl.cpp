@@ -280,7 +280,7 @@ void DCMWalkCtrl::references_setup(){
 
     // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(-M_PI/8.0, Eigen::Vector3d::UnitZ()) );
-    // double swing_time_in = 0.33;
+    // double swing_time_in = 0.4;
     // factor = 1.0;
 
     // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
@@ -577,18 +577,32 @@ void DCMWalkCtrl::task_setup() {
         des_acc_x = com_acc_des[0]; 
         des_acc_y = com_acc_des[1]; 
         des_acc_z = 0.0;
+
+        sp_->com_pos_des = com_pos_ref;
+        sp_->com_pos_des[2] = goal_com_pos_[2];
+
+        sp_->com_vel_des = com_vel_ref;
+        sp_->com_vel_des[2] = 0.0;
+
+    }else{
+        sp_->com_pos_des[0] = des_pos_x;
+        sp_->com_pos_des[1] = des_pos_y;
+        sp_->com_pos_des[2] = des_pos_z;
+        sp_->com_vel_des[0] = des_vel_x;
+        sp_->com_vel_des[1] = des_vel_y;
+        sp_->com_vel_des[2] = des_vel_z;
+
     }
 
     com_acc_des.setZero();
     com_pos_des[0] = des_pos_x;
     com_pos_des[1] = des_pos_y;
     com_pos_des[2] = des_pos_z;
-    sp_->com_pos_des = com_pos_des;
 
     com_vel_des[0] = des_vel_x;
     com_vel_des[1] = des_vel_y;
     com_vel_des[2] = des_vel_z;
-    sp_->com_vel_des = com_vel_des;
+
 
     com_acc_des[0] = des_acc_x; 
     com_acc_des[1] = des_acc_y; 
@@ -843,6 +857,7 @@ void DCMWalkCtrl::task_setup() {
         task_list_.push_back(lfoot_back_task);
     }
     // task_list_.push_back(ang_momentum_task);
+    // task_list_.push_back(total_joint_task_);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
     w_task_heirarchy_[0] = w_task_com_; // COM
@@ -863,6 +878,7 @@ void DCMWalkCtrl::task_setup() {
         w_task_heirarchy_[5] = w_task_lfoot_; // lfoot contact
     }
     // w_task_heirarchy_[task_list_.size() - 1] = 1e-2; // angular momentum 
+    // w_task_heirarchy_[task_list_.size() - 1] = w_task_joint_; // joint task
 
 }
 
