@@ -1,5 +1,5 @@
-is_record: true
-#is_record: false
+#is_record: true
+is_record: false
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
 #show_viewer: false
 show_viewer: true
