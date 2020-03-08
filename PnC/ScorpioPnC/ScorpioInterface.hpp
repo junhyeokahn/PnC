@@ -71,4 +71,5 @@ class ScorpioInterface : public EnvInterface {
     void Grasp();
     bool IsReadyToRelease();
     void Release();
+    void PrintPhase();
 };

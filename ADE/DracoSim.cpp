@@ -320,7 +320,7 @@ DracoSim::DracoSim() {
     //TODO
 }
 
-void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, ScorpioInterface* arm2_i) {
+void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, Scorpio2Interface* arm2_i) {
     // ========================
     // Parse Yaml for Simulator
     // ========================
@@ -451,20 +451,20 @@ void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, Scorpi
     // ================
     // Wrap a worldnode
     // ================
-    osg::ref_ptr<ScorpioWorldNode> world_;
-    world_ = new ScorpioWorldNode(world, draco_i, arm_i, arm2_i);
+    osg::ref_ptr<ScorpioWorldNode> node;
+    node = new ScorpioWorldNode(world, draco_i, arm_i, arm2_i);
 
     // Reachability node
     // osg::ref_ptr<ScorpioWorldNodeReach> node;
     // node = new ScorpioWorldNodeReach(world);
 
-    world_->setNumStepsPerCycle(num_steps_per_cycle);
+    node->setNumStepsPerCycle(num_steps_per_cycle);
     exit = false;
     // =========================================================================
     // Create and Set Viewer
-    // =========================================================================
+    // =====================
     //dart::gui::osg::Viewer viewer;
-    viewer.addWorldNode(world_);
+    viewer.addWorldNode(node);
     viewer.simulate(false);
     viewer.switchHeadlights(false);
     ::osg::Vec3 p1(1.0, 0.2, 1.0);
@@ -474,7 +474,7 @@ void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, Scorpi
     viewer.getCamera()->setClearColor(osg::Vec4(0.93f, 0.95f, 1.0f, 0.95f));
     viewer.getCamera()->setClearMask(GL_COLOR_BUFFER_BIT |
                                      GL_DEPTH_BUFFER_BIT);
-    viewer.addEventHandler(new OneStepProgress(world_));
+    viewer.addEventHandler(new OneStepProgress(node));
 
     if (isRecord) {
         std::cout << "[Video Record Enable]" << std::endl;

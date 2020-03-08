@@ -10,6 +10,7 @@ set(srcs
 include_directories(.)
 include_directories(../PnC/DracoPnC)
 include_directories(../PnC/ScorpioPnC)
+include_directories(../PnC/Scorpio2PnC)
 include_directories(../Simulator/Dart/Scorpio)
 include_directories(../Utils/General)
 include_directories(../Utils/IO)
@@ -21,6 +22,7 @@ ADD_LIBRARY(dracoWrapper SHARED ${srcs})
 target_link_libraries(dracoWrapper
         DracoPnC
         ScorpioPnC
+        Scorpio2PnC
         worldNode
         myUtils
         dracoWrapper_swig)
@@ -29,6 +31,7 @@ add_executable(run_draco_wrapper ${srcs})
 target_link_libraries(run_draco_wrapper ${DART_LIBRARIES}
         DracoPnC
         ScorpioPnC
+        Scorpio2PnC
         worldNode
         myUtils
         dracoWrapper)

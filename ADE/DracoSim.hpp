@@ -1,5 +1,6 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
+#include <PnC/Scorpio2PnC/ScorpioInterface.hpp>
 #include <Configuration.h>
 #include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -22,7 +23,7 @@ public:
     //Initialize the sim with a new PnC
     DracoSim();
     //Start the simulator and visuals in a new thread
-    void StartSim(DracoInterface* draco, ScorpioInterface* arm1, ScorpioInterface* arm2);
+    void StartSim(DracoInterface* draco, ScorpioInterface* arm1, Scorpio2Interface* arm2);
     //Stop the simulator and join the thread it was running in
     void StopSim();
 };

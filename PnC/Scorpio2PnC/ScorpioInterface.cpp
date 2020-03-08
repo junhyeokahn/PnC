@@ -1,33 +1,33 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/ScorpioPnC/ScorpioInterface.hpp>
-#include <PnC/ScorpioPnC/TestSet/OSCTest.hpp>
-#include <PnC/ScorpioPnC/TestSet/GraspingTest.hpp>
+#include <PnC/Scorpio2PnC/ScorpioInterface.hpp>
+#include <PnC/Scorpio2PnC/TestSet/OSCTest.hpp>
+#include <PnC/Scorpio2PnC/TestSet/GraspingTest.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
-#include <PnC/ScorpioPnC/ScorpioStateProvider.hpp>
+#include <PnC/Scorpio2PnC/ScorpioStateProvider.hpp>
 #include <string>
 
-ScorpioInterface::ScorpioInterface() : EnvInterface() {
+Scorpio2Interface::Scorpio2Interface() : EnvInterface() {
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
         border += "=";
     }
     myUtils::color_print(myColor::BoldCyan, border);
-    myUtils::pretty_constructor(0, "Scorpio Interface");
+    myUtils::pretty_constructor(0, "Scorpio2 Interface");
 
     robot_ = new RobotSystem(
         4, THIS_COM "RobotModel/Robot/Scorpio/Scorpio_Kin.urdf");
      //robot_->printRobotInfo();
-    sp_ = ScorpioStateProvider::getStateProvider(robot_);
+    sp_ = Scorpio2StateProvider::getStateProvider(robot_);
 
     count_ = 0;
     //waiting_count_ = 2;
     test_initialized = false;
-    cmd_jpos_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    cmd_jvel_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    cmd_jtrq_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    cmd_jpos_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    cmd_jvel_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    cmd_jtrq_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
 
     _ParameterSetting();
 
@@ -37,14 +37,14 @@ ScorpioInterface::ScorpioInterface() : EnvInterface() {
     data_manager->RegisterData(&running_time_,DOUBLE,"time",1);
 }
 
-ScorpioInterface::~ScorpioInterface() {
+Scorpio2Interface::~Scorpio2Interface() {
     delete robot_;
     delete test_;
 }
 
-void ScorpioInterface::getCommand(void* _data, void* _command) { 
-    ScorpioCommand* cmd = ((ScorpioCommand*)_command);
-    ScorpioSensorData* data = ((ScorpioSensorData*)_data);
+void Scorpio2Interface::getCommand(void* _data, void* _command) { 
+    Scorpio2Command* cmd = ((Scorpio2Command*)_command);
+    Scorpio2SensorData* data = ((Scorpio2SensorData*)_data);
 
     if (!Initialization_(data, cmd)) {
         //state_estimator_->Update(data);
@@ -54,12 +54,12 @@ void ScorpioInterface::getCommand(void* _data, void* _command) {
     }
 
     ++count_;
-    running_time_ = (double)(count_)*ScorpioAux::ServoRate;
+    running_time_ = (double)(count_)*Scorpio2Aux::ServoRate;
     sp_->curr_time = running_time_;
     sp_->phase_copy = test_->getPhase(); 
 }
 
-void ScorpioInterface::_ParameterSetting() {
+void Scorpio2Interface::_ParameterSetting() {
     try {
         YAML::Node cfg =
             YAML::LoadFile(THIS_COM "Config/Scorpio/INTERFACE.yaml");
@@ -69,11 +69,11 @@ void ScorpioInterface::_ParameterSetting() {
             test_ = new OSCTest(robot_);
         }
         else if (test_name == "grasping_test") {
-            test_ = new GraspingTest(robot_);
+            test_ = new Grasping2Test(robot_);
         }
         else {
             printf(
-                "[Scorpio Interface] There is no test matching test with "
+                "[Scorpio2 Interface] There is no test matching test with "
                 "the name\n");
             exit(0);
         }
@@ -85,8 +85,8 @@ void ScorpioInterface::_ParameterSetting() {
     }
 }
 
-bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
-                                        ScorpioCommand* _command) {
+bool Scorpio2Interface::Initialization_(Scorpio2SensorData* _sensor_data,
+                                        Scorpio2Command* _command) {
     if (!test_initialized) {
         test_->TestInitialization();
         test_initialized = true;
@@ -100,7 +100,7 @@ bool ScorpioInterface::Initialization_(ScorpioSensorData* _sensor_data,
     return false;
 }
 
-bool ScorpioInterface::IsReadyToMove(){
+bool Scorpio2Interface::IsReadyToMove(){
     if (!(sp_->is_closing) && !(sp_->is_opening) && !(sp_->is_moving)) {
         return true;
     } else{
@@ -108,21 +108,21 @@ bool ScorpioInterface::IsReadyToMove(){
     }
 }
 
-void ScorpioInterface::MoveEndEffectorTo(double x, double y, double z) {
+void Scorpio2Interface::MoveEndEffectorTo(double x, double y, double z) {
     std::cout << "-------------------------------" << std::endl;
-    std::cout << "Scorpio1 Move to : " << x << ", " << y << ", " << z << std::endl;
-    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) || sp_->is_holding) {
+    std::cout << "Scorpio2 2 Move to : " << x << ", " << y << ", " << z << std::endl;
+    if (sp_->phase_copy == GRASPING2_TEST_PHASE::HOLD2_PH && !(sp_->is_opening) && !(sp_->is_closing) || sp_->is_holding) {
         sp_->is_moving = true;
         Eigen::VectorXd des_pos = Eigen::VectorXd::Zero(3);
         des_pos << x, y, z;
-        ((GraspingTest*)test_)->SetMovingTarget(des_pos);
+        ((Grasping2Test*)test_)->SetMovingTarget(des_pos);
     } else {
         std::cout << "Wait" << std::endl;
     }
 }
 
 
-bool ScorpioInterface::IsReadyToGrasp(){
+bool Scorpio2Interface::IsReadyToGrasp(){
     if (!(sp_->is_moving) && !(sp_->is_closing) && !(sp_->is_holding) && !(sp_->is_opening)) {
         return true;
     } else {
@@ -130,7 +130,7 @@ bool ScorpioInterface::IsReadyToGrasp(){
     }
 }
 
-bool ScorpioInterface::IsReadyToRelease(){
+bool Scorpio2Interface::IsReadyToRelease(){
     if (!(sp_->is_moving) && !(sp_->is_closing) && !(sp_->is_holding) && !(sp_->is_opening)) {
         return true;
     } else {
@@ -138,8 +138,8 @@ bool ScorpioInterface::IsReadyToRelease(){
     }
 }
 
-void ScorpioInterface::Grasp(){
-    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH)  {
+void Scorpio2Interface::Grasp(){
+    if (sp_->phase_copy == GRASPING2_TEST_PHASE::HOLD2_PH)  {
        sp_->is_closing = true;
        sp_->closing_opening_start_time = sp_->curr_time;
        //if()
@@ -148,8 +148,8 @@ void ScorpioInterface::Grasp(){
     }
 }
 
-void ScorpioInterface::Release(){
-    if (sp_->phase_copy == GRASPING_TEST_PHASE::HOLD_PH && !(sp_->is_opening) && !(sp_->is_closing) && (sp_->is_holding)) {
+void Scorpio2Interface::Release(){
+    if (sp_->phase_copy == GRASPING2_TEST_PHASE::HOLD2_PH && !(sp_->is_opening) && !(sp_->is_closing) && (sp_->is_holding)) {
        sp_->is_opening = true;
        sp_->is_holding = false;
        sp_->closing_opening_start_time = sp_->curr_time;
@@ -158,6 +158,6 @@ void ScorpioInterface::Release(){
     }
 }
 
-void ScorpioInterface::PrintPhase(){
-    std::cout << "Scorpio Phase is: " << sp_->phase_copy << std::endl;
+void Scorpio2Interface::PrintPhase(){
+    std::cout << "Scorpio2 Phase is: " << sp_->phase_copy << std::endl;
 }

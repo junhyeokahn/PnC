@@ -11,8 +11,22 @@
 class EnvInterface;
 class ScorpioSensorData;
 class ScorpioCommand;
+class Scorpio2SensorData;
+class Scorpio2Command;
 class DracoSensorData;
 class DracoCommand;
+
+/*! \enum 
+ *
+ *  Detailed description
+ */
+enum BoxPH {
+    table=0,
+    scorpio=1,
+    draco=2,
+    scorpio2=3,
+    table2=4
+};
 
 class ScorpioWorldNode : public dart::gui::osg::WorldNode {
    private:
@@ -22,8 +36,8 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     ScorpioCommand* scorpio_cmd_;
 
     EnvInterface* scorpio_interface2_;
-    ScorpioSensorData* scorpio_sensordata2_;
-    ScorpioCommand* scorpio_cmd2_;
+    Scorpio2SensorData* scorpio_sensordata2_;
+    Scorpio2Command* scorpio_cmd2_;
 
     void SetParams_();
     void GetForceTorqueData_();
@@ -102,12 +116,11 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     void SetActiveForce(const Eigen::VectorXd & des_force);
     void SetActiveForce2(const Eigen::VectorXd & des_force);
 
+    void print_position();
+
     void GetContactSwitchData_(bool&, bool&);
     void PlotMPCResult_();
 
-    void box_maintaining_ctrl();
-    void box_following_ee_ctrl();
-    void fake_grasp();
    public:
     ScorpioWorldNode(const dart::simulation::WorldPtr& world, EnvInterface *draco, EnvInterface *arm1, EnvInterface *arm2);
     virtual ~ScorpioWorldNode();
@@ -123,4 +136,14 @@ class ScorpioWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd box_kp;
     Eigen::VectorXd box_kd;
 
+    Eigen::VectorXd des_box_pos;
+    Eigen::VectorXd des_box_pos_6d;
+
+    Eigen::VectorXd box_ini_pos;
+    Eigen::VectorXd box_fin_pos;
+
+    Eigen::VectorXd first_scorpio_ini_pos;
+    Eigen::VectorXd second_scorpio_ini_pos;
+
+    BoxPH box_ph;
 };

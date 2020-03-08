@@ -1,0 +1,145 @@
+#include <PnC/WBC/OSC.hpp>
+#include <PnC/Scorpio2PnC/CtrlSet/GripperCtrl.hpp>
+#include <PnC/Scorpio2PnC/ScorpioInterface.hpp>
+#include <PnC/Scorpio2PnC/ScorpioDefinition.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
+#include <Utils/IO/DataManager.hpp>
+#include <PnC/WBC/BasicTask.hpp>
+#include <PnC/Scorpio2PnC/ScorpioStateProvider.hpp>
+#include <PnC/Scorpio2PnC/TaskSet/SelectedJointTask.hpp>
+
+Gripper2Ctrl::Gripper2Ctrl(RobotSystem* _robot) : Controller(_robot) {
+    myUtils::pretty_constructor(2, "Scorpio2 Gripper Ctrl");
+
+    q_kp_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    q_kd_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    ini_pos_q_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
+
+    _build_active_joint_idx();
+    joint_task_ = new SelectedJointTask2(robot_, active_joint_idx_);
+
+    _build_constraint_matrix();
+    osc_ = new OSC(active_joint_, &Jc_);
+    sp_ = Scorpio2StateProvider::getStateProvider(_robot);
+}
+
+Gripper2Ctrl::~Gripper2Ctrl() {}
+
+void Gripper2Ctrl::_build_active_joint_idx(){
+    active_joint_idx_.resize(Scorpio2::n_adof);
+    active_joint_idx_[0] = 0;
+    active_joint_idx_[1] = 1;
+    active_joint_idx_[2] = 4;
+    active_joint_idx_[3] = 5;
+    active_joint_idx_[4] = 8;
+    active_joint_idx_[5] = 9;
+    active_joint_idx_[6] = 10;
+
+    active_joint_.resize(Scorpio2::n_dof, true);
+    active_joint_[2] = false;
+    active_joint_[3] = false;
+    active_joint_[6] = false;
+    active_joint_[7] = false;
+}
+
+void Gripper2Ctrl::_build_constraint_matrix(){
+    Jc_ = Eigen::MatrixXd::Zero(6, Scorpio2::n_dof);
+    Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Scorpio2::n_dof);
+    Eigen::MatrixXd J_body_1 = robot_->getBodyNodeJacobian("link2").block(3,0,3,robot_->getNumDofs()); 
+    Eigen::MatrixXd J_constriant_1 = robot_->getBodyNodeJacobian("link4_end").block(3,0,3,robot_->getNumDofs());
+    Eigen::MatrixXd J_constriant_diff_1 = J_constriant_1 - J_body_1;
+    Jc_.block(0,0,3,robot_->getNumDofs()) =  J_constriant_diff_1;
+
+    Eigen::MatrixXd J_body_2 = robot_->getBodyNodeJacobian("link6").block(3,0,3,robot_->getNumDofs()); 
+    Eigen::MatrixXd J_constriant_2 = robot_->getBodyNodeJacobian("link8_end").block(3,0,3,robot_->getNumDofs());
+    Eigen::MatrixXd J_constriant_diff_2 = J_constriant_2 - J_body_2;
+    Jc_.block(3,0,3,robot_->getNumDofs()) =  J_constriant_diff_2;
+}
+
+void Gripper2Ctrl::oneStep(void* _cmd) {
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 3.) && (sp_->is_closing)) {
+       sp_->is_closing = false;
+       sp_->closing_opening_start_time = 0;
+       sp_->is_holding = true;
+    }
+    if ((sp_->curr_time > sp_->closing_opening_start_time + 3.) && (sp_->is_opening)) {
+       sp_->is_opening = false;
+       sp_->closing_opening_start_time = 0;
+    }
+
+    _PreProcessing_Command();
+    state_machine_time_ = sp_->curr_time - ctrl_start_time_;
+    _task_setup();
+    Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    _compute_torque(gamma);
+    _PostProcessing_Command();
+
+    ((Scorpio2Command*)_cmd)->jtrq = gamma;
+
+    if (sp_->is_closing) {
+        ((Scorpio2Command*)_cmd)->gripper_cmd = GRIPPER2_STATUS::is_closing2;
+    }    
+    else if (sp_->is_holding) {
+        ((Scorpio2Command*)_cmd)->gripper_cmd = GRIPPER2_STATUS::is_holding2;
+    }    
+    else if (sp_->is_opening) {
+        ((Scorpio2Command*)_cmd)->gripper_cmd = GRIPPER2_STATUS::is_opening2;
+    } else{
+        ((Scorpio2Command*)_cmd)->gripper_cmd = GRIPPER2_STATUS::idle2;
+    }   
+}
+
+void Gripper2Ctrl::_task_setup(){
+    // =========================================================================
+    // Joint Task
+    // =========================================================================
+    Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    for (int i = 0; i < Scorpio2::n_adof; ++i) {
+        jpos_des[i] = ini_pos_q_[active_joint_idx_[i]];
+    }
+    Eigen::VectorXd jvel_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    Eigen::VectorXd jacc_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
+
+    // =========================================================================
+    // Stack Task List
+    // =========================================================================
+    task_list_.push_back(joint_task_);
+}
+
+void Gripper2Ctrl::_compute_torque(Eigen::VectorXd & gamma){
+    _build_constraint_matrix();
+    osc_->updateSetting(A_, Ainv_, coriolis_, grav_, &Jc_);
+    osc_->makeTorque(task_list_, contact_list_, gamma);
+}
+
+
+void Gripper2Ctrl::firstVisit() {
+    state_machine_time_= 0.;
+    ctrl_start_time_ = sp_->curr_time;
+    ini_pos_q_ = robot_->getQ();
+}
+
+void Gripper2Ctrl::lastVisit() {
+}
+
+bool Gripper2Ctrl::endOfPhase() {
+    if (sp_->is_moving) {
+        return true;
+    }
+    return false;
+}
+
+void Gripper2Ctrl::ctrlInitialization(const YAML::Node& node) {
+    try {
+        myUtils::readParameter(node, "q_kp", q_kp_);
+        myUtils::readParameter(node, "q_kd", q_kd_);
+        joint_task_->setGain(q_kp_, q_kd_);
+    } catch (std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+            << __FILE__ << "]" << std::endl
+            << std::endl;
+        exit(0);
+    }
+}

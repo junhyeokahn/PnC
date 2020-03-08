@@ -1,5 +1,6 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/ScorpioPnC/ScorpioInterface.hpp>
+#include <PnC/Scorpio2PnC/ScorpioInterface.hpp>
 #include <ADE/DracoSim.hpp>
 
 class DracoWrapper {
@@ -7,7 +8,7 @@ private:
     //PnC, sim, and robot members
     DracoInterface* interface_;
     ScorpioInterface* arm_interface_;
-    ScorpioInterface* arm2_interface_;
+    Scorpio2Interface* arm2_interface_;
     DracoSim* simulator_;
 
     const std::string ARM1_NAME = "one";
