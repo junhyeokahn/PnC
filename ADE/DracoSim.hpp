@@ -20,6 +20,7 @@ private:
     std::atomic<bool> exit;
     void StartThread();
 public:
+    osg::ref_ptr<ScorpioWorldNode> node;
     //Initialize the sim with a new PnC
     DracoSim();
     //Start the simulator and visuals in a new thread

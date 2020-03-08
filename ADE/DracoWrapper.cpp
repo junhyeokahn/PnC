@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/DracoInterface.hpp>
+#include <Simulator/Dart/Scorpio/ScorpioWorldNode.hpp>
 #include <ADE/DracoWrapper.hpp>
 #include <thread>
 #include <chrono>
@@ -100,36 +101,52 @@ void DracoWrapper::SetMoveEndEffectorCommand(char *arm, double x, double y, doub
 }
 
 void DracoWrapper::SetCloseGripperCommand(char *arm){
+    myUtils::color_print(myColor::BoldRed,
+                         "[[About to grasp]]");
     if (!running_) {
         throw std::bad_function_call();
     }
     if (ARM1_NAME.compare(arm) == 0) {
-        arm_interface_->Grasp();
+        myUtils::color_print(myColor::BoldRed,
+                             "[[GRASPING]]");
         while (!arm_interface_->IsReadyToGrasp()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        arm_interface_->Grasp();
+        simulator_->node->box_ph = BoxPH::scorpio;
     } else {
-        arm2_interface_->Grasp();
+        myUtils::color_print(myColor::BoldRed,
+                             "[[GRASPING(2)]]");
         while (!arm2_interface_->IsReadyToGrasp()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        arm2_interface_->Grasp();
+        simulator_->node->box_ph = BoxPH::scorpio2;
     }
 }
 
 void DracoWrapper::SetOpenGripperCommand(char *arm){
+    myUtils::color_print(myColor::BoldRed,
+                         "[[About to release]]");
     if (!running_) {
         throw std::bad_function_call();
     }
     if (ARM1_NAME.compare(arm) == 0) {
-        arm_interface_->Release();
-        while (!arm_interface_->IsReadyToRelease()) {
+        myUtils::color_print(myColor::BoldRed,
+                             "[[RELEASING]]");
+        while (!arm_interface_->IsReadyToMove()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        //arm_interface_->Release();
+        simulator_->node->box_ph = BoxPH::draco;
     } else {
-        arm2_interface_->Release();
-        while (!arm2_interface_->IsReadyToRelease()) {
+        myUtils::color_print(myColor::BoldRed,
+                             "[[RELEASING(2)]]");
+        while (!arm2_interface_->IsReadyToMove()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        //arm2_interface_->Release();
+        simulator_->node->box_ph = BoxPH::table2;
     }
 }
 

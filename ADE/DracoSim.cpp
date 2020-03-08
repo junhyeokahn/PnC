@@ -451,7 +451,7 @@ void DracoSim::StartSim(DracoInterface* draco_i, ScorpioInterface* arm_i, Scorpi
     // ================
     // Wrap a worldnode
     // ================
-    osg::ref_ptr<ScorpioWorldNode> node;
+    //osg::ref_ptr<ScorpioWorldNode> node;
     node = new ScorpioWorldNode(world, draco_i, arm_i, arm2_i);
 
     // Reachability node
