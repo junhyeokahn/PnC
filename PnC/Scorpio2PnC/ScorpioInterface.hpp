@@ -14,10 +14,10 @@ class Scorpio2StateProvider;
 class Scorpio2SensorData {
    public:
     Scorpio2SensorData() {
-        q = Eigen::VectorXd::Zero(Scorpio::n_dof);
-        qdot = Eigen::VectorXd::Zero(Scorpio::n_dof);
-        //passive_q = Eigen::VectorXd::Zero(Scorpio::n_vdof);
-        //passive_qdot = Eigen::VectorXd::Zero(Scorpio::n_vdof);
+        q = Eigen::VectorXd::Zero(Scorpio2::n_dof);
+        qdot = Eigen::VectorXd::Zero(Scorpio2::n_dof);
+        //passive_q = Eigen::VectorXd::Zero(Scorpio2::n_vdof);
+        //passive_qdot = Eigen::VectorXd::Zero(Scorpio2::n_vdof);
     }
     virtual ~Scorpio2SensorData() {}
 
@@ -30,9 +30,9 @@ class Scorpio2SensorData {
 class Scorpio2Command {
    public:
     Scorpio2Command() {
-        q = Eigen::VectorXd::Zero(Scorpio::n_adof);
-        qdot = Eigen::VectorXd::Zero(Scorpio::n_adof);
-        jtrq = Eigen::VectorXd::Zero(Scorpio::n_adof);
+        q = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+        qdot = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+        jtrq = Eigen::VectorXd::Zero(Scorpio2::n_adof);
         gripper_cmd = GRIPPER2_STATUS::idle2;
     }
     virtual ~Scorpio2Command() {}

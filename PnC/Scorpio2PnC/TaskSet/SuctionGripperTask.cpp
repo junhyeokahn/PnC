@@ -22,7 +22,7 @@ bool SuctionGripperTask2::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     Eigen::Quaternion<double> des_ori(_pos_des[0], _pos_des[1], _pos_des[2],
                                       _pos_des[3]);
     Eigen::Quaternion<double> ori_act(
-        robot_->getBodyNodeCoMIsometry(ScorpioBodyNode::end_effector).linear());
+        robot_->getBodyNodeCoMIsometry(Scorpio2BodyNode::end_effector).linear());
     //TEST
     des_ori = myUtils::bind_qaut_pi(des_ori);
     ori_act = myUtils::bind_qaut_pi(ori_act);
@@ -59,7 +59,7 @@ bool SuctionGripperTask2::_UpdateCommand(const Eigen::VectorXd& _pos_des,
         acc_des[i] = loc_acc[i];
     }
 
-    Eigen::VectorXd vel_act = robot_->getBodyNodeSpatialVelocity(ScorpioBodyNode::end_effector).head(3);
+    Eigen::VectorXd vel_act = robot_->getBodyNodeSpatialVelocity(Scorpio2BodyNode::end_effector).head(3);
     Eigen::VectorXd loc_vel_act =  R_tr * vel_act;
     for (int i = 0; i < dim_task_; ++i) {
         op_cmd[i] =  acc_des[i+1]
@@ -93,7 +93,7 @@ bool SuctionGripperTask2::_UpdateCommand(const Eigen::VectorXd& _pos_des,
 }
 
 bool SuctionGripperTask2::_UpdateTaskJacobian() {
-    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(ScorpioBodyNode::end_effector);
+    Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(Scorpio2BodyNode::end_effector);
     Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6, 6);
     R.block(0, 0, 3, 3) = robot_->getBodyNodeCoMIsometry("end_effector").linear().transpose();
     R.block(3, 3, 3, 3) = robot_->getBodyNodeCoMIsometry("end_effector").linear().transpose();

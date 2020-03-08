@@ -12,8 +12,8 @@
 Gripper2Ctrl::Gripper2Ctrl(RobotSystem* _robot) : Controller(_robot) {
     myUtils::pretty_constructor(2, "Scorpio2 Gripper Ctrl");
 
-    q_kp_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    q_kd_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    q_kp_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    q_kd_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     ini_pos_q_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
 
     _build_active_joint_idx();
@@ -27,7 +27,7 @@ Gripper2Ctrl::Gripper2Ctrl(RobotSystem* _robot) : Controller(_robot) {
 Gripper2Ctrl::~Gripper2Ctrl() {}
 
 void Gripper2Ctrl::_build_active_joint_idx(){
-    active_joint_idx_.resize(Scorpio::n_adof);
+    active_joint_idx_.resize(Scorpio2::n_adof);
     active_joint_idx_[0] = 0;
     active_joint_idx_[1] = 1;
     active_joint_idx_[2] = 4;
@@ -36,7 +36,7 @@ void Gripper2Ctrl::_build_active_joint_idx(){
     active_joint_idx_[5] = 9;
     active_joint_idx_[6] = 10;
 
-    active_joint_.resize(Scorpio::n_dof, true);
+    active_joint_.resize(Scorpio2::n_dof, true);
     active_joint_[2] = false;
     active_joint_[3] = false;
     active_joint_[6] = false;
@@ -44,8 +44,8 @@ void Gripper2Ctrl::_build_active_joint_idx(){
 }
 
 void Gripper2Ctrl::_build_constraint_matrix(){
-    Jc_ = Eigen::MatrixXd::Zero(6, Scorpio::n_dof);
-    Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Scorpio::n_dof);
+    Jc_ = Eigen::MatrixXd::Zero(6, Scorpio2::n_dof);
+    Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Scorpio2::n_dof);
     Eigen::MatrixXd J_body_1 = robot_->getBodyNodeJacobian("link2").block(3,0,3,robot_->getNumDofs()); 
     Eigen::MatrixXd J_constriant_1 = robot_->getBodyNodeJacobian("link4_end").block(3,0,3,robot_->getNumDofs());
     Eigen::MatrixXd J_constriant_diff_1 = J_constriant_1 - J_body_1;
@@ -71,7 +71,7 @@ void Gripper2Ctrl::oneStep(void* _cmd) {
     _PreProcessing_Command();
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
     _task_setup();
-    Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     _compute_torque(gamma);
     _PostProcessing_Command();
 
@@ -94,12 +94,12 @@ void Gripper2Ctrl::_task_setup(){
     // =========================================================================
     // Joint Task
     // =========================================================================
-    Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    for (int i = 0; i < Scorpio::n_adof; ++i) {
+    Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    for (int i = 0; i < Scorpio2::n_adof; ++i) {
         jpos_des[i] = ini_pos_q_[active_joint_idx_[i]];
     }
-    Eigen::VectorXd jvel_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    Eigen::VectorXd jacc_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    Eigen::VectorXd jvel_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    Eigen::VectorXd jacc_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
 
     // =========================================================================

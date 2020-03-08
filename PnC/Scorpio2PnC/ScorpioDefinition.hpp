@@ -1,12 +1,12 @@
 #pragma once
-namespace Scorpio {
+namespace Scorpio2 {
 constexpr int n_bodynode = 20;                                                                                                                                                                            
 constexpr int n_dof = 11;                                                                                                                                                                            
 constexpr int n_vdof = 4;                                                                             
 constexpr int n_adof = 7;
 }
 
-namespace ScorpioBodyNode{
+namespace Scorpio2BodyNode{
     constexpr int tower = 0;                                                                              
     constexpr int scorpio_mount = 1;                                                                      
     constexpr int scorpio_ground = 2;                                                                     
@@ -30,7 +30,7 @@ namespace ScorpioBodyNode{
 }
 
 
-namespace ScorpioDoF{
+namespace Scorpio2DoF{
     constexpr int joint1 = 0;                                                                             
     constexpr int joint2 = 1;                                                                             
     constexpr int joint3 = 2;                                                                             
@@ -44,6 +44,6 @@ namespace ScorpioDoF{
     constexpr int joint11 = 10;  
 }
 
-namespace ScorpioAux{
+namespace Scorpio2Aux{
 constexpr double ServoRate = 1.0 / 1000.0;
 }

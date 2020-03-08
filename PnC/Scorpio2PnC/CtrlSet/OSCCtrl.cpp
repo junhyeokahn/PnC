@@ -18,15 +18,15 @@ OSC2Ctrl::OSC2Ctrl(RobotSystem* _robot) : Controller(_robot) {
     relative_target_pos_ = Eigen::VectorXd::Zero(3);
     ini_pos_ = Eigen::VectorXd::Zero(3);
     ini_pos_q_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
-    q_kp_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    q_kd_ = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    q_kp_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    q_kd_ = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     ini_ori_ = Eigen::Quaternion<double> (1,0,0,0);
     target_ori_ = Eigen::Quaternion<double> (1,0,0,0);
     relative_target_ori_ = Eigen::Quaternion<double> (1,0,0,0);
 
     _build_active_joint_idx();
-    ee_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ScorpioBodyNode::end_effector);
-    ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ScorpioBodyNode::end_effector);
+    ee_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, Scorpio2BodyNode::end_effector);
+    ee_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, Scorpio2BodyNode::end_effector);
     //ee_ori_task_ = new SuctionGripperTask2(robot_);
     joint_task_ = new SelectedJointTask2(robot_, active_joint_idx_);
 
@@ -56,7 +56,7 @@ OSC2Ctrl::OSC2Ctrl(RobotSystem* _robot) : Controller(_robot) {
 OSC2Ctrl::~OSC2Ctrl() {}
 
 void OSC2Ctrl::_build_active_joint_idx(){
-    active_joint_idx_.resize(Scorpio::n_adof);
+    active_joint_idx_.resize(Scorpio2::n_adof);
     active_joint_idx_[0] = 0;
     active_joint_idx_[1] = 1;
     active_joint_idx_[2] = 4;
@@ -65,7 +65,7 @@ void OSC2Ctrl::_build_active_joint_idx(){
     active_joint_idx_[5] = 9;
     active_joint_idx_[6] = 10;
 
-    active_joint_.resize(Scorpio::n_dof, true);
+    active_joint_.resize(Scorpio2::n_dof, true);
     active_joint_[2] = false;
     active_joint_[3] = false;
     active_joint_[6] = false;
@@ -73,8 +73,8 @@ void OSC2Ctrl::_build_active_joint_idx(){
 }
 
 void OSC2Ctrl::_build_constraint_matrix(){
-    Jc_ = Eigen::MatrixXd::Zero(6, Scorpio::n_dof);
-    Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Scorpio::n_dof);
+    Jc_ = Eigen::MatrixXd::Zero(6, Scorpio2::n_dof);
+    Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Scorpio2::n_dof);
     Eigen::MatrixXd J_body_1 = robot_->getBodyNodeJacobian("link2").block(3,0,3,robot_->getNumDofs()); 
     Eigen::MatrixXd J_constriant_1 = robot_->getBodyNodeJacobian("link4_end").block(3,0,3,robot_->getNumDofs());
     Eigen::MatrixXd J_constriant_diff_1 = J_constriant_1 - J_body_1;
@@ -92,7 +92,7 @@ void OSC2Ctrl::oneStep(void* _cmd) {
     _task_setup();
 
 
-    Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     _compute_torque(gamma);
     _PostProcessing_Command();
 
@@ -152,12 +152,12 @@ void OSC2Ctrl::_task_setup(){
     //=========================================================================
     // Joint Task
     // =========================================================================
-    Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    for (int i = 0; i < Scorpio::n_adof; ++i) {
+    Eigen::VectorXd jpos_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    for (int i = 0; i < Scorpio2::n_adof; ++i) {
         jpos_des[i] = ini_pos_q_[active_joint_idx_[i]];
     }
-    Eigen::VectorXd jvel_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
-    Eigen::VectorXd jacc_des = Eigen::VectorXd::Zero(Scorpio::n_adof);
+    Eigen::VectorXd jvel_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
+    Eigen::VectorXd jacc_des = Eigen::VectorXd::Zero(Scorpio2::n_adof);
     joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
 
     // =========================================================================

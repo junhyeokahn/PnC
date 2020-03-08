@@ -25,9 +25,9 @@ Scorpio2StateProvider::Scorpio2StateProvider(RobotSystem* _robot) {
     robot_ = _robot;
     curr_time = 0.;
 
-    q = Eigen::VectorXd::Zero(Scorpio::n_dof);
-    qdot = Eigen::VectorXd::Zero(Scorpio::n_dof);
-    jpos_ini = Eigen::VectorXd::Zero(Scorpio::n_dof);
+    q = Eigen::VectorXd::Zero(Scorpio2::n_dof);
+    qdot = Eigen::VectorXd::Zero(Scorpio2::n_dof);
+    jpos_ini = Eigen::VectorXd::Zero(Scorpio2::n_dof);
 
     
 
