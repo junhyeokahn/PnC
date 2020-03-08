@@ -145,154 +145,154 @@ void ScorpioWorldNode::customPreStep() {
     GetContactSwitchData_(draco_sensordata_->rfoot_contact,
                           draco_sensordata_->lfoot_contact);
 
-    // =====================================
-    // Draco is Walking to the first scorpio
-    // =====================================
-
-    static bool b_draco_first_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_first_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInY(-0.9);
-        b_draco_first_cmd = false;
-    }
-
-    static bool b_draco_second_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_second_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
-        b_draco_second_cmd = false;
-    }
-
-    static bool b_draco_third_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_third_cmd) {
-        //((DracoInterface*)draco_interface_)->Turn(M_PI/2.0);
-        ((DracoInterface*)draco_interface_)->Turn(1.85);
-        b_draco_third_cmd = false;
-    }
-
-    static bool b_draco_fourth_cmd(true);
-    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_fourth_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(0.4);
-        b_draco_fourth_cmd = false;
-    }
-
-    if (!b_draco_first_cmd && !b_draco_second_cmd && !b_draco_third_cmd && !b_draco_fourth_cmd) {
-        draco_first_is_done = true;
-    }
-    //draco_first_is_done = true;
-
-
-    // ================================================
-    // First Scorpio grasp the box and hand it to Draco
-    // ================================================
-
-    static bool b_move_cmd(true);
-    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
-        //std::cout << "First Moving Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-0.3, -0.4, -0.01);
-        b_move_cmd = false;
-    }
-
-    static bool b_grasp_cmd(true);
-    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToGrasp() && b_grasp_cmd) {
-        //std::cout << "First Grasping Command Received" << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->Grasp();
-        b_grasp_cmd = false;
-    }
-
-    static bool b_move_while_hold_cmd(true);
-    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_while_hold_cmd) {
-        box_ph = BoxPH::scorpio;
-        //std::cout << "First Moving While Holding Command Received" << std::endl;
-        //print_position();
-        Eigen::VectorXd rel_pos =  draco_->getBodyNode("IMU")->getTransform().translation() - scorpio_->getBodyNode("end_effector")->getTransform().translation() ;
-        //std::cout << "rel pos : " << rel_pos << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], 0.06);
-        b_move_while_hold_cmd = false;
-    }
-
-    static bool b_release_cmd(true);
-    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_release_cmd) {
-        std::cout << "First Release Command Received" << std::endl;
-        b_release_cmd = false;
-    }
-
-    static bool b_move_back_to_home(true);
-    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_back_to_home) {
-        box_ph = BoxPH::draco;
-        Eigen::VectorXd rel_pos =  first_scorpio_ini_pos - scorpio_->getBodyNode("end_effector")->getTransform().translation() ;
-        //std::cout << "rel pos : " << rel_pos << std::endl;
-        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]);
-        b_move_back_to_home = false;
-    }
-
-    if (!b_move_cmd && !b_grasp_cmd && !b_move_while_hold_cmd &&!b_release_cmd && !b_move_back_to_home) {
-        first_scorpio_done = true;
-    }
-
-    // ==============================================
-    // Draco Walks to the second Scorpio with the box
-    // ==============================================
-    static bool b_draco_fifth_cmd(true);
-    if (first_scorpio_done && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_fifth_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInY(-1.0);
-        b_draco_fifth_cmd = false;
-    }
-
-    static bool b_draco_sixth_cmd(true);
-    if (first_scorpio_done && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_sixth_cmd) {
-        ((DracoInterface*)draco_interface_)->WalkInX(1.6);
-        b_draco_sixth_cmd = false;
-    }
-
-    if (!b_draco_fifth_cmd && !b_draco_sixth_cmd && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand()) {
-        draco_second_is_done=true;
-    }
-
-    // ======================================================================
-    // Second Scorpio Pick up the box on top of Draco and put it on the table
-    // ======================================================================
-
-    static bool b_move_second_cmd(true);
-    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_second_cmd && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand()) {
-        Eigen::VectorXd rel_pos =  mbox_->getBodyNode("baseLink")->getTransform().translation() - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
-        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]+0.05);
-        b_move_second_cmd = false;
-    }
-
-    static bool b_grasp_second_cmd(true);
-    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToGrasp() && b_grasp_second_cmd) {
-        ((Scorpio2Interface*)scorpio_interface2_)->Grasp();
-        b_grasp_second_cmd = false;
-    }
-
-    static bool b_move_while_grasp_second_cmd(true);
-    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_while_grasp_second_cmd) {
-        box_ph = BoxPH::scorpio2;
-        Eigen::VectorXd rel_pos =  second_scorpio_ini_pos - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
-        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0]-0.2, rel_pos[1]-0.1, rel_pos[2]+0.05);
-        b_move_while_grasp_second_cmd = false;
-    }
-
-
-    static bool b_release_second_cmd(true);
-    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_release_second_cmd) {
-        b_release_second_cmd = false;
-    }
-
-    static bool b_move_to_home_second(true);
-    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_to_home_second) {
-        box_ph = BoxPH::table2;
-        box_fin_pos = mbox_->getBodyNode("baseLink")->getTransform().translation();
-        box_fin_pos[2] = box_ini_pos[2];
-        Eigen::VectorXd rel_pos =  second_scorpio_ini_pos - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
-        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]);
-        b_move_to_home_second = false;
-    }
-
-    if (!b_move_second_cmd && !b_grasp_second_cmd && !b_move_while_grasp_second_cmd) {
-        second_scorpio_done = true;
-    } else {
-        // do nothing
-    }
+//    // =====================================
+//    // Draco is Walking to the first scorpio
+//    // =====================================
+//
+//    static bool b_draco_first_cmd(true);
+//    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_first_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInY(-0.9);
+//        b_draco_first_cmd = false;
+//    }
+//
+//    static bool b_draco_second_cmd(true);
+//    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_second_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInX(2.1);
+//        b_draco_second_cmd = false;
+//    }
+//
+//    static bool b_draco_third_cmd(true);
+//    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_third_cmd) {
+//        //((DracoInterface*)draco_interface_)->Turn(M_PI/2.0);
+//        ((DracoInterface*)draco_interface_)->Turn(1.85);
+//        b_draco_third_cmd = false;
+//    }
+//
+//    static bool b_draco_fourth_cmd(true);
+//    if (((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_fourth_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInX(0.4);
+//        b_draco_fourth_cmd = false;
+//    }
+//
+//    if (!b_draco_first_cmd && !b_draco_second_cmd && !b_draco_third_cmd && !b_draco_fourth_cmd) {
+//        draco_first_is_done = true;
+//    }
+//    //draco_first_is_done = true;
+//
+//
+//    // ================================================
+//    // First Scorpio grasp the box and hand it to Draco
+//    // ================================================
+//
+//    static bool b_move_cmd(true);
+//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_cmd) {
+//        //std::cout << "First Moving Command Received" << std::endl;
+//        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(-0.3, -0.4, -0.01);
+//        b_move_cmd = false;
+//    }
+//
+//    static bool b_grasp_cmd(true);
+//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToGrasp() && b_grasp_cmd) {
+//        //std::cout << "First Grasping Command Received" << std::endl;
+//        ((ScorpioInterface*)scorpio_interface_)->Grasp();
+//        b_grasp_cmd = false;
+//    }
+//
+//    static bool b_move_while_hold_cmd(true);
+//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_while_hold_cmd) {
+//        box_ph = BoxPH::scorpio;
+//        //std::cout << "First Moving While Holding Command Received" << std::endl;
+//        //print_position();
+//        Eigen::VectorXd rel_pos =  draco_->getBodyNode("IMU")->getTransform().translation() - scorpio_->getBodyNode("end_effector")->getTransform().translation() ;
+//        //std::cout << "rel pos : " << rel_pos << std::endl;
+//        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], 0.06);
+//        b_move_while_hold_cmd = false;
+//    }
+//
+//    static bool b_release_cmd(true);
+//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_release_cmd) {
+//        std::cout << "First Release Command Received" << std::endl;
+//        b_release_cmd = false;
+//    }
+//
+//    static bool b_move_back_to_home(true);
+//    if (draco_first_is_done && ((ScorpioInterface*)scorpio_interface_)->IsReadyToMove() && b_move_back_to_home) {
+//        box_ph = BoxPH::draco;
+//        Eigen::VectorXd rel_pos =  first_scorpio_ini_pos - scorpio_->getBodyNode("end_effector")->getTransform().translation() ;
+//        //std::cout << "rel pos : " << rel_pos << std::endl;
+//        ((ScorpioInterface*)scorpio_interface_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]);
+//        b_move_back_to_home = false;
+//    }
+//
+//    if (!b_move_cmd && !b_grasp_cmd && !b_move_while_hold_cmd &&!b_release_cmd && !b_move_back_to_home) {
+//        first_scorpio_done = true;
+//    }
+//
+//    // ==============================================
+//    // Draco Walks to the second Scorpio with the box
+//    // ==============================================
+//    static bool b_draco_fifth_cmd(true);
+//    if (first_scorpio_done && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_fifth_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInY(-1.0);
+//        b_draco_fifth_cmd = false;
+//    }
+//
+//    static bool b_draco_sixth_cmd(true);
+//    if (first_scorpio_done && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand() && b_draco_sixth_cmd) {
+//        ((DracoInterface*)draco_interface_)->WalkInX(1.6);
+//        b_draco_sixth_cmd = false;
+//    }
+//
+//    if (!b_draco_fifth_cmd && !b_draco_sixth_cmd && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand()) {
+//        draco_second_is_done=true;
+//    }
+//
+//    // ======================================================================
+//    // Second Scorpio Pick up the box on top of Draco and put it on the table
+//    // ======================================================================
+//
+//    static bool b_move_second_cmd(true);
+//    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_second_cmd && ((DracoInterface*)draco_interface_)->IsReadyForNextCommand()) {
+//        Eigen::VectorXd rel_pos =  mbox_->getBodyNode("baseLink")->getTransform().translation() - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
+//        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]+0.05);
+//        b_move_second_cmd = false;
+//    }
+//
+//    static bool b_grasp_second_cmd(true);
+//    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToGrasp() && b_grasp_second_cmd) {
+//        ((Scorpio2Interface*)scorpio_interface2_)->Grasp();
+//        b_grasp_second_cmd = false;
+//    }
+//
+//    static bool b_move_while_grasp_second_cmd(true);
+//    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_while_grasp_second_cmd) {
+//        box_ph = BoxPH::scorpio2;
+//        Eigen::VectorXd rel_pos =  second_scorpio_ini_pos - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
+//        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0]-0.2, rel_pos[1]-0.1, rel_pos[2]+0.05);
+//        b_move_while_grasp_second_cmd = false;
+//    }
+//
+//
+//    static bool b_release_second_cmd(true);
+//    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_release_second_cmd) {
+//        b_release_second_cmd = false;
+//    }
+//
+//    static bool b_move_to_home_second(true);
+//    if (draco_second_is_done && ((Scorpio2Interface*)scorpio_interface2_)->IsReadyToMove() && b_move_to_home_second) {
+//        box_ph = BoxPH::table2;
+//        box_fin_pos = mbox_->getBodyNode("baseLink")->getTransform().translation();
+//        box_fin_pos[2] = box_ini_pos[2];
+//        Eigen::VectorXd rel_pos =  second_scorpio_ini_pos - scorpio2_->getBodyNode("end_effector")->getTransform().translation() ;
+//        ((Scorpio2Interface*)scorpio_interface2_)->MoveEndEffectorTo(rel_pos[0], rel_pos[1], rel_pos[2]);
+//        b_move_to_home_second = false;
+//    }
+//
+//    if (!b_move_second_cmd && !b_grasp_second_cmd && !b_move_while_grasp_second_cmd) {
+//        second_scorpio_done = true;
+//    } else {
+//        // do nothing
+//    }
 
     scorpio_interface_->getCommand(scorpio_sensordata_, scorpio_cmd_);
     scorpio_trq_cmd_ = scorpio_cmd_->jtrq;
