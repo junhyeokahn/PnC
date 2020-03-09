@@ -324,6 +324,8 @@ void ScorpioWorldNode::customPreStep() {
         des_box_pos = scorpio2_->getBodyNode("end_effector")->getTransform().translation();
         des_box_pos[2] -= 0.05;
     } else if (box_ph == BoxPH::table2) {
+        box_fin_pos = mbox_->getBodyNode("baseLink")->getTransform().translation();
+        box_fin_pos[2] = box_ini_pos[2];
         des_box_pos = box_fin_pos;
     }
     for (int i = 0; i < 3; ++i) {
