@@ -399,13 +399,19 @@ void MPCWalkCtrl::references_setup(){
             right_foot_start_->printInfo();
 
             // Set desired footstep landing locations
-            // Eigen::Vector3d foot_translate(0.05, 0.0, 0.0);
+            // Eigen::Vector3d foot_translate(0.06, 0.0, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
             Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
-            // Eigen::Vector3d foot_translate(0.0, -0.1, 0.0);
+            // Eigen::Vector3d foot_translate(-0.09, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            // Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+            // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+
+            // Eigen::Vector3d foot_translate(0.0, -0.09, 0.0);
             // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
             // Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
@@ -447,13 +453,49 @@ void MPCWalkCtrl::references_setup(){
                                       DRACO_LEFT_FOOTSTEP);
 
 
+            DracoFootstep rfootstep_3; // take a rightfootstep
+            rfootstep_3.setPosOriSide(rfootstep_2.position + foot_translate, 
+                                      foot_rotate*rfootstep_2.orientation, 
+                                      DRACO_RIGHT_FOOTSTEP);
+
+            DracoFootstep lfootstep_3; // take a leftfootstep
+            lfootstep_3.setPosOriSide(lfootstep_2.position + foot_translate, 
+                                      foot_rotate*lfootstep_2.orientation, 
+                                      DRACO_LEFT_FOOTSTEP);
+
+            DracoFootstep rfootstep_4; // take a rightfootstep
+            rfootstep_4.setPosOriSide(rfootstep_3.position + foot_translate, 
+                                      foot_rotate*rfootstep_3.orientation, 
+                                      DRACO_RIGHT_FOOTSTEP);
+
+            DracoFootstep lfootstep_4; // take a leftfootstep
+            lfootstep_4.setPosOriSide(lfootstep_3.position + foot_translate, 
+                                      foot_rotate*lfootstep_3.orientation, 
+                                      DRACO_LEFT_FOOTSTEP);
+
+            DracoFootstep rfootstep_5; // take a rightfootstep
+            rfootstep_5.setPosOriSide(rfootstep_4.position + foot_translate, 
+                                      foot_rotate*rfootstep_4.orientation, 
+                                      DRACO_RIGHT_FOOTSTEP);
+
+            DracoFootstep lfootstep_5; // take a leftfootstep
+            lfootstep_5.setPosOriSide(lfootstep_4.position + foot_translate, 
+                                      foot_rotate*lfootstep_4.orientation, 
+                                      DRACO_LEFT_FOOTSTEP);
+
+
             // Clear then add footsteps to the list.
             desired_footstep_list_.clear();
             desired_footstep_list_.push_back(rfootstep_1);
             desired_footstep_list_.push_back(lfootstep_1);
-            // desired_footstep_list_.push_back(rfootstep_2);
-            // desired_footstep_list_.push_back(lfootstep_2);
-
+            desired_footstep_list_.push_back(rfootstep_2);
+            desired_footstep_list_.push_back(lfootstep_2);
+            desired_footstep_list_.push_back(rfootstep_3);
+            desired_footstep_list_.push_back(lfootstep_3);
+            desired_footstep_list_.push_back(rfootstep_4);
+            desired_footstep_list_.push_back(lfootstep_4);
+            desired_footstep_list_.push_back(rfootstep_5);
+            desired_footstep_list_.push_back(lfootstep_5);
             // desired_footstep_list_.push_back(lfootstep_1);
             // desired_footstep_list_.push_back(rfootstep_1);
             // desired_footstep_list_.push_back(lfootstep_2);
