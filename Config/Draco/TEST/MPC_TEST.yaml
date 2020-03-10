@@ -12,8 +12,8 @@ test_configuration:
 
     # Left and right sway
     sway_start_time: 6 # seconds. Must be greater than the sum of contact transition time and stabilization duration
-    sway_magnitude: 0.0  # meters
-    sway_period: 2 # seconds
+    sway_magnitude: 0.13  # meters
+    sway_period: 4 # seconds
 
 control_configuration:
     joint_position_ctrl:

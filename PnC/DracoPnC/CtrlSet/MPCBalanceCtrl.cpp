@@ -161,7 +161,7 @@ void MPCBalanceCtrl::oneStep(void* _cmd) {
         // // Setup and solve the MPC 
         _mpc_setup();
         _mpc_Xdes_setup();
-        // _mpc_solve();
+        _mpc_solve();
     }
     // Setup the tasks and compute torque from IHWBC
     task_setup();
