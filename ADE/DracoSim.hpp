@@ -13,13 +13,14 @@
 class DracoSim {
 private:
     //Simulation Helpers
-    dart::gui::osg::Viewer viewer;
+    //dart::gui::osg::Viewer viewer;
 
     //Threading
     std::thread thread_;
     std::atomic<bool> exit;
     void StartThread();
 public:
+    dart::gui::osg::Viewer viewer;
     osg::ref_ptr<ScorpioWorldNode> node;
     //Initialize the sim with a new PnC
     DracoSim();

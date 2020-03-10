@@ -12,6 +12,7 @@ private:
     DracoSim* simulator_;
 
     const std::string ARM1_NAME = "one";
+    const int SLEEP_MILLIS = 50;
 
     //Logical Safety
     bool running_;
