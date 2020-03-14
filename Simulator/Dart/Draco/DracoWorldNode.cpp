@@ -5,9 +5,8 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
-DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
-                               osgShadow::MinimalShadowMap* msm)
-    : dart::gui::osg::WorldNode(_world, msm),
+DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world)
+    : dart::gui::osg::WorldNode(_world),
       count_(0),
       t_(0.0),
       servo_rate_(0.001) {
@@ -52,6 +51,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     q_sim_ = Eigen::VectorXd::Zero(16);
     data_manager->RegisterData(&q_sim_, VECT, "q_sim", 16);
 }
+
 
 DracoWorldNode::~DracoWorldNode() {
     delete mInterface;

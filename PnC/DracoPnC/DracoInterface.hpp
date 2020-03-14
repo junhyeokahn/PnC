@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "PnC/EnvInterface.hpp"
 
 class DracoStateEstimator;

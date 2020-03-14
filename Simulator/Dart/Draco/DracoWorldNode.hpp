@@ -44,8 +44,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     double servo_rate_;
 
    public:
-    DracoWorldNode(const dart::simulation::WorldPtr& world,
-                   osgShadow::MinimalShadowMap*);
+    DracoWorldNode(const dart::simulation::WorldPtr& world);
 
     virtual ~DracoWorldNode();
 

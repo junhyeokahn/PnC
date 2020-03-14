@@ -1,6 +1,7 @@
 #ifndef ALM_HERMITE_CURVE_VEC_H
 #define ALM_HERMITE_CURVE_VEC_H
 
+#include <vector>
 #include <Eigen/Dense>
 #include <Utils/Math/hermite_curve.hpp>
 

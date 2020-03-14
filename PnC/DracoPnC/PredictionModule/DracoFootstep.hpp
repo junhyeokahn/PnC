@@ -1,6 +1,7 @@
 #ifndef DRACO_FOOTSTEP_OBJECT_H
 #define DRACO_FOOTSTEP_OBJECT_H
 
+#include <vector>
 #include <Eigen/Dense>
 #include <iostream>
 #include <string>

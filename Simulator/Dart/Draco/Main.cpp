@@ -230,28 +230,18 @@ int main(int argc, char** argv) {
     // =========================================================================
     //_printRobotModel(robot);
 
-    osg::ref_ptr<osgShadow::MinimalShadowMap> msm =
-        new osgShadow::LightSpacePerspectiveShadowMapDB;
-
     float minLightMargin = 10.f;
     float maxFarPlane = 0;
     unsigned int texSize = 1024;
     unsigned int baseTexUnit = 0;
     unsigned int shadowTexUnit = 1;
 
-    msm->setMinLightMargin(minLightMargin);
-    msm->setMaxFarPlane(maxFarPlane);
-    msm->setTextureSize(::osg::Vec2s(texSize, texSize));
-    msm->setShadowTextureCoordIndex(shadowTexUnit);
-    msm->setShadowTextureUnit(shadowTexUnit);
-    msm->setBaseTextureCoordIndex(baseTexUnit);
-    msm->setBaseTextureUnit(baseTexUnit);
 
     // =========================================================================
     // Wrap a worldnode
     // =========================================================================
     osg::ref_ptr<DracoWorldNode> node;
-    node = new DracoWorldNode(world, msm);
+    node = new DracoWorldNode(world);
     node->setNumStepsPerCycle(num_steps_per_cycle);
 
     // =========================================================================
@@ -261,7 +251,6 @@ int main(int argc, char** argv) {
     viewer.addWorldNode(node);
     viewer.simulate(false);
     viewer.switchHeadlights(false);
-    msm->setLight(viewer.getLightSource(0)->getLight());
     ::osg::Vec3 p1(1.0, 0.2, 1.0);
     p1 = p1 * 0.7;
     viewer.getLightSource(0)->getLight()->setPosition(
