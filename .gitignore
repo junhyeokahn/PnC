@@ -44,3 +44,4 @@ octave-workspace
 *.m~
 RLData
 *.json
+tags.lock
