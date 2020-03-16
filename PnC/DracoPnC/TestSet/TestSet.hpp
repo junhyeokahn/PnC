@@ -6,3 +6,4 @@
 #include <PnC/DracoPnC/TestSet/MPCStandTest.hpp>
 #include <PnC/DracoPnC/TestSet/MPCWalkTest.hpp>
 #include <PnC/DracoPnC/TestSet/DCMWalkTest.hpp>
+#include <PnC/DracoPnC/TestSet/DCMPhaseWalkingTest.hpp>

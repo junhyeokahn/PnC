@@ -1,0 +1,33 @@
+test_configuration:
+    initial_jpos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+
+    jpos_initialization_time: 2.0
+    jpos_ctrl_time: 2.0
+
+    stand_up_time: 2.0
+    com_height: 0.7
+
+    double_support_time:
+    transition_time:
+    swing_time:
+
+control_configuration:
+    joint_position_ctrl:
+        kp: [100 , 100 , 100 , 100 , 100. , 100 , 100 , 100 , 100 , 100. ]
+        kd: [2   , 2   , 2   , 2   , 2.   , 2   , 2   , 2   , 2   , 2.  ]
+
+    stand_ctrl:
+
+    ds_ctrl:
+
+    right_swing_ctrl:
+
+    left_swing_ctrl:
+
+    right_swing_start_ctrl:
+
+    right_swing_end_ctrl:
+
+    left_swing_start_ctrl:
+
+    left_swing_end_ctrl:

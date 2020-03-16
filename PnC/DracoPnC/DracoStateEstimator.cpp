@@ -278,7 +278,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
         }else{
             old_stance_foot = robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
         }
-        Eigen::Vector3d stance_difference = new_stance_foot - old_stance_foot;        
+        Eigen::Vector3d stance_difference = new_stance_foot - old_stance_foot;
 
         // new and old estimates must match, so find the actual offset
         Eigen::Vector3d old_estimate = global_linear_offset_ - old_stance_foot;

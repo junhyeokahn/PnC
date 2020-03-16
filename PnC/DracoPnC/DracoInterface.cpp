@@ -200,7 +200,9 @@ void DracoInterface::_ParameterSetting() {
             test_ = new MPCWalkTest(robot_);
         } else if (test_name == "dcm_walk_test") {
             test_ = new DCMWalkTest(robot_);
-        }        
+        } else if (test_name == "dcm_phase_walking_test") {
+            test_ = new DCMPhaseWalkingTest(robot_);
+        }
         else {
             printf(
                 "[Draco Interface] There is no matching test with the "
