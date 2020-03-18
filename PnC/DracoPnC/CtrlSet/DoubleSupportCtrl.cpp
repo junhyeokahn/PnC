@@ -356,6 +356,12 @@ void DoubleSupportCtrl::_references_setup() {
         dcm_reference.setCoMHeight(target_com_height_);
 
     reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
+
+    // TODO : Debug this sequencer works well for all the cases
+    for(int i = 0; i < desired_footstep_list_.size(); i++){
+        printf("Step %i:\n", i);
+        desired_footstep_list_[i].printInfo();
+    }
 }
 
 void DoubleSupportCtrl::_walking_contact_setup() {
@@ -391,13 +397,15 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
+
+    // TODO : Query with curr_time?
+    // TODO : What about Acc?
+    Eigen::Vector3d p, v;
+    reference_trajectory_module_->getMPCRefComPosandVel(sp_->curr_time, p, v);
     for (int i = 0; i < 3; ++i) {
-        com_pos_des[i] = myUtils::smooth_changing(ini_com_pos[i],
-                target_com_pos_[i], double_support_dur_, state_machine_time_);
-        com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos[i],
-                target_com_pos_[i], double_support_dur_, state_machine_time_);
-        com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos[i],
-                target_com_pos_[i], double_support_dur_, state_machine_time_);
+        com_pos_des[i] = p[i];
+        com_vel_des[i] = v[i];
+        com_acc_des[i] = 0.;
         sp_->com_pos_des[i] = com_pos_des[i];
         sp_->com_vel_des[i] = com_vel_des[i];
     }
@@ -405,9 +413,20 @@ void DoubleSupportCtrl::_walking_task_setup() {
 
     // BodyOri Task
     Eigen::VectorXd bodyori_pos_des = Eigen::VectorXd::Zero(4);
-    bodyori_pos_des << 1, 0, 0, 0;
     Eigen::VectorXd bodyori_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd bodyori_acc_des = Eigen::VectorXd::Zero(3);
+
+    Eigen::Quaterniond ori_ref;
+    Eigen::Vector3d ang_vel_ref, ang_acc_ref;
+    reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(sp_->curr_time,
+            ori_ref, ang_vel_ref, ang_acc_ref);
+    bodyori_pos_des << ori_ref.w(), ori_ref.x(), ori_ref.y(), ori_ref.z();
+    for (int i = 0; i < 3; ++i) {
+        bodyori_vel_des[i] << ang_vel_ref[i];
+        //bodyori_acc_des[i] << ang_acc_ref[i];
+        //TODO : Using Zero?
+        bodyori_acc_des[i] << 0.;
+    }
     bodyori_task_->updateTask(
             bodyori_pos_des, bodyori_vel_des, bodyori_acc_des);
 
@@ -427,7 +446,6 @@ void DoubleSupportCtrl::_walking_task_setup() {
     lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
 
     // Task Weights
-    // TODO : Should I use myUtils::smooth_changing?
     task_weight_heirarchy_[0] = com_task_weight_;
     task_weight_heirarchy_[1] = bodyori_task_weight_;
     task_weight_heirarchy_[2] = rfoot_task_weight_;
@@ -445,7 +463,79 @@ void DoubleSupportCtrl::_walking_task_setup() {
 }
 
 void DoubleSupportCtrl::_balancing_task_setup(){
-    // TODO : Work on this later for stopping
+    // CoM Task
+    double stab_time(4.);
+    Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
+    if (state_machine_time_ < stab_time) {
+        for (int i = 0; i < 3; ++i) {
+            com_pos_des[i] = myUtils::smooth_changing(ini_com_pos[i],
+                    goal_com_pos_[i], stab_time, state_machine_time_);
+            com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos[i],
+                    goal_com_pos_[i], stab_time, state_machine_time_);
+            com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos[i],
+                    goal_com_pos_[i], stab_time, state_machine_time_);
+            sp_->com_pos_des[i] = com_pos_des[i];
+            sp_->com_vel_des[i] = com_vel_des[i];
+        }
+    } else {
+        for (int i = 0; i < 3; ++i) {
+            com_pos_des[i] = goal_com_pos_[i];
+            com_vel_des[i] = 0.;
+            com_acc_des[i] = 0.;
+            sp_->com_pos_des[i] = com_pos_des[i];
+            sp_->com_vel_des[i] = com_vel_des[i];
+        }
+    }
+    com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
+
+    // BodyOri Task
+    Eigen::Isometry3d rf_iso =
+        robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter);
+    Eigen::Isometry3d lf_iso =
+        robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter);
+    Eigen::Quaternion<double> rf_q = Eigen::Quaternion<double>(rf_iso.linear());
+    Eigen::Quaternion<double> lf_q = Eigen::Quaternion<double>(lf_iso.linear());
+    Eigen::Quaternion<double> des_q = rf_q.slerp(0.5, lf_q);
+    Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
+    des_quat_vec << des_q.w(), des_q.x(), des_q.y(), des_q.z();
+
+    Eigen::VectorXd des_so3 = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd ori_acc_des = Eigen::VectorXd::Zero(3);
+
+    bodyori_task_->updateTask(des_quat_vec, des_so3, ori_acc_des);
+
+    // Foot Task
+    Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd rfoot_front_pos =
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();
+    Eigen::VectorXd rfoot_back_pos =
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
+    Eigen::VectorXd lfoot_front_pos =
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
+    Eigen::VectorXd lfoot_back_pos =
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
+    rfoot_front_task_->updateTask(rfoot_front_pos, zero_vec, zero_vec);
+    rfoot_back_task_->updateTask(rfoot_back_pos, zero_vec, zero_vec);
+    lfoot_front_task_->updateTask(lfoot_front_pos, zero_vec, zero_vec);
+    lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
+
+    // Task Weights
+    task_weight_heirarchy_[0] = com_task_weight_;
+    task_weight_heirarchy_[1] = bodyori_task_weight_;
+    task_weight_heirarchy_[2] = rfoot_task_weight_;
+    task_weight_heirarchy_[3] = rfoot_task_weight_;
+    task_weight_heirarchy_[4] = lfoot_task_weight_;
+    task_weight_heirarchy_[5] = lfoot_task_weight_;
+
+    // Update Task List
+    task_list_.push_back(com_task_);
+    task_list_.push_back(bodyori_task_);
+    task_list_.push_back(rfoot_front_task_);
+    task_list_.push_back(rfoot_back_task_);
+    task_list_.push_back(lfoot_front_task_);
+    task_list_.push_back(lfoot_back_task_);
 }
 
 void DoubleSupportCtrl::_compute_torque_ihwbc() {
