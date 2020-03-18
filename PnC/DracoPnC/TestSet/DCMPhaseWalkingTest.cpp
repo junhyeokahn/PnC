@@ -11,7 +11,7 @@ DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
             THIS_COM"Config/Draco/TEST/DCM_PHASE_WALKING_TEST.yaml");
 
     num_step_ = 0;
-    phase_ = DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_initial_jpos;
+    phase_ = static_cast<int>(DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_initial_jpos);
 
     // Trajectory Module
     std::vector<int> contact_index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
@@ -24,25 +24,18 @@ DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
 
     ds_ctrl_ = new DoubleSupportCtrl(robot, reference_trajectory_module_);
 
-    right_swing_ctrl_ = new SingleSupportCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_ctrl);
+    right_swing_ctrl_ = new SingleSupportCtrl(robot, reference_trajectory_module_)
     left_swing_ctrl_ = new SingleSupportCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl);
+            reference_trajectory_module_);
 
     right_swing_start_ctrl_ = new TransitionCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_start_ctrl);
+            reference_trajectory_module_);
     right_swing_end_ctrl_ = new TransitionCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_end_ctrl);
+            reference_trajectory_module_);
     left_swing_start_ctrl_ = new TransitionCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_start_ctrl);
+            reference_trajectory_module_);
     left_swing_end_ctrl_ = new TransitionCtrl(robot,
-            reference_trajectory_module_,
-            DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_end_ctrl);
+            reference_trajectory_module_);
 
     state_list_.clear();
     state_list_.push_back(jpos_target_ctrl_);
@@ -92,19 +85,21 @@ void DCMPhaseWalkingTest::TestInitialization() {
 int DCMPhaseWalkingTest::_NextPhase(const int & phase) {
     int next_phase = phase + 1;
 
-    if (phase == DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_1) {
+    if (phase == static_cast<int>(DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_1)) {
         ++num_step_;
         sp_->stance_foot = "lFoot";
+        sp_->num_residual_steps -= 1;
     }
 
-    if (phase == DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_2) {
+    if (phase == static_cast<int>(DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_2)) {
         ++num_step_;
         sp_->stance_foot = "rFoot";
+        sp_->num_residual_steps -= 1;
     }
     sp_->num_step_copy = num_step_;
 
-    if (next_phase == NUM_DCMPhaseWalkingTestPhase) {
-        return DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_1;
+    if (next_phase == static_cast<int>(NUM_DCMPhaseWalkingTestPhase)) {
+        return static_cast<int>(DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_double_support_ctrl_1);
     } else {
         return next_phase;
     }
@@ -116,26 +111,38 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         Eigen::VectorXd tmp_vec;
         double tmp_val;
 
-        // IVDJPosTargetCtrl
+        // Initial Joint Position
         myUtils::readParameter(test_cfg, "initial_jpos", tmp_vec);
         ((IVDJPosTargetCtrl*)jpos_target_ctrl_)->setTargetPosition(tmp_vec);
+
+        // Joint Position Control Duration
         myUtils::readParameter(test_cfg, "jpos_initialization_time", tmp_val);
         ((IVDJPosTargetCtrl*)jpos_target_ctrl_)->setMovingTime(tmp_val);
         myUtils::readParameter(test_cfg, "jpos_ctrl_time", tmp_val);
         ((IVDJPosTargetCtrl*)jpos_target_ctrl_)->setTotalCtrlTime(tmp_val);
 
-        // StandUpCtrl
+        // Target CoM Height
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((StandUpCtrl*)stand_up_ctrl_)->setCoMHeight(tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setCoMHeight(tmp_val);
+        // TODO : Can I set this in advance?
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.setCoMHeight(target_com_height_);
         sp_->omega = sqrt(9.81/tmp_val);
+
+        // Stand Up Control Duration
         myUtils::readParameter(test_cfg, "stand_up_ctrl_time", tmp_val);
         ((StandUpCtrl*)stand_up_ctrl_)->setTotalCtrlTime(tmp_val);
 
-        // DoubleSupportCtrl
+        // Double Support Control Duration
         myUtils::readParameter(test_cfg, "double_support_ctrl_time", tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setTotalCtrlTime(tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setDoubleSupportDuration(tmp_val);
+        myUtils::readParameter(test_cfg, "initial_double_support_ctrl_time", tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setInitialDoubleSupportDuration(tmp_val);
+        myUtils::readParameter(test_cfg, "final_double_support_ctrl_time", tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setFinalDoubleSupportDuration(tmp_val);
 
-        // TransitionCtrl
+        // Transition Control Duration
         myUtils::readParameter(test_cfg, "contact_transition_duration", tmp_val);
         ((TransitionCtrl*)right_swing_start_ctrl_)->setTotalCtrlTime(tmp_val);
         ((TransitionCtrl*)right_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
@@ -143,12 +150,13 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         ((TransitionCtrl*)left_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
         ((DoubleSupportCtrl*)ds_ctrl_)->setTransitionTime(tmp_val);
 
-        // SingleSupportCtrl
+        // Single Support Control Duration
         myUtils::readParameter(test_cfg, "single_support_ctrl_time", tmp_val);
         ((SingleSupportCtrl*)right_swing_ctrl_)->setTotalCtrlTime(tmp_val);
         ((SingleSupportCtrl*)left_swing_ctrl_)->setTotalCtrlTime(tmp_val);
         ((DoubleSupportCtrl*)ds_ctrl_)->setSwingTime(tmp_val);
 
+        // Swing Height
         myUtils::readParameter(test_cfg, "swing_foot_height", tmp_val);
         ((SingleSupportCtrl*)right_swing_ctrl_)->setSwingFootHeight(tmp_val);
         ((SingleSupportCtrl*)left_swing_ctrl_)->setSwingFootHeight(tmp_val);

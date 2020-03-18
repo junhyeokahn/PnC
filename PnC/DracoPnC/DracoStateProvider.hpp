@@ -14,6 +14,9 @@ class DracoStateProvider {
     std::string prev_stance_foot;
 
     bool b_walking;
+    int num_total_steps;
+    int num_residual_steps;
+
     double curr_time;
 
     Eigen::VectorXd q;

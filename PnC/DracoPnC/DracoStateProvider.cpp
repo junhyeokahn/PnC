@@ -16,7 +16,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     prev_stance_foot = stance_foot;
     curr_time = 0.;
 
-    b_walking = false;
+    b_walking = true;
+    // TODO : Set this with API
+    num_residual_steps = 5;
+    num_total_steps = 5;
 
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
