@@ -8,12 +8,6 @@ class ContactSpec;
 class IHWBC;
 class Task;
 
-class WalkingReferenceTrajectoryModule;
-class DracoFootstep;
-
-class HermiteCurveVec;
-class HermiteQuaternionCurve;
-
 class StandUpCtrl : public Controller {
     public:
         StandUpCtrl(RobotSystem*);

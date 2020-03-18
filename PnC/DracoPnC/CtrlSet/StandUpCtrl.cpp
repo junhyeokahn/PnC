@@ -67,7 +67,12 @@ void StandUpCtrl::firstVisit() {
     std::cout << "First Visit of StandUpCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
     ini_com_pos_ = robot_->getCoMPosition();
-    target_com_pos_ = ini_com_pos_;
+
+    Eigen::VectorXd rankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::rAnkle).translation();
+    Eigen::VectorXd lankle_pos = robot_->getBodyNodeIsometry(DracoBodyNode::lAnkle).translation();
+    for (int i = 0; i < 2; ++i) {
+        target_com_pos_[i] = (rankle_pos[i] + lankle_pos[i]) / 2.;
+    }
     target_com_pos_[2] = target_com_height_;
 }
 

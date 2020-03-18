@@ -22,20 +22,26 @@ DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
     jpos_target_ctrl_ = new IVDJPosTargetCtrl(robot);
     stand_up_ctrl_ = new StandUpCtrl(robot);
 
-    ds_ctrl_ = new DoubleSupportCtrl(robot);
+    ds_ctrl_ = new DoubleSupportCtrl(robot, reference_trajectory_module_);
 
     right_swing_ctrl_ = new SingleSupportCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_ctrl);
     left_swing_ctrl_ = new SingleSupportCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl);
 
     right_swing_start_ctrl_ = new TransitionCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_start_ctrl);
     right_swing_end_ctrl_ = new TransitionCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_end_ctrl);
     left_swing_start_ctrl_ = new TransitionCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_start_ctrl);
     left_swing_end_ctrl_ = new TransitionCtrl(robot,
+            reference_trajectory_module_,
             DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_end_ctrl);
 
     state_list_.clear();
@@ -59,6 +65,7 @@ DCMPhaseWalkingTest::~DCMPhaseWalkingTest() {
     for(int i(0); i<state_list_.size(); ++i){
         delete state_list_[i];
     }
+    delete reference_trajectory_module_;
 }
 
 void DCMPhaseWalkingTest::TestInitialization() {
@@ -134,14 +141,18 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         ((TransitionCtrl*)right_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
         ((TransitionCtrl*)left_swing_start_ctrl_)->setTotalCtrlTime(tmp_val);
         ((TransitionCtrl*)left_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setTransitionTime(tmp_val);
 
         // SingleSupportCtrl
         myUtils::readParameter(test_cfg, "single_support_ctrl_time", tmp_val);
         ((SingleSupportCtrl*)right_swing_ctrl_)->setTotalCtrlTime(tmp_val);
         ((SingleSupportCtrl*)left_swing_ctrl_)->setTotalCtrlTime(tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setSwingTime(tmp_val);
+
         myUtils::readParameter(test_cfg, "swing_foot_height", tmp_val);
         ((SingleSupportCtrl*)right_swing_ctrl_)->setSwingFootHeight(tmp_val);
         ((SingleSupportCtrl*)left_swing_ctrl_)->setSwingFootHeight(tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setSwingHeight(tmp_val);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;
