@@ -13,13 +13,8 @@ class DracoStateProvider {
     std::string stance_foot;
     std::string prev_stance_foot;
 
+    bool b_walking;
     double curr_time;
-    int rl_count;
-    double target_yaw;
-    Eigen::Vector3d adjusted_foot;
-    Eigen::Vector3d guided_foot;
-    Eigen::Vector2d walking_velocity;
-    Eigen::Quaternion<double> des_quat;
 
     Eigen::VectorXd q;
     Eigen::VectorXd qdot;
@@ -69,7 +64,6 @@ class DracoStateProvider {
     Eigen::Vector3d dcm_vel_des;
     Eigen::Vector3d r_vrp;
     Eigen::Vector3d r_vrp_des;
-
 
     double omega;
 

@@ -13,3 +13,8 @@
 #include <PnC/DracoPnC/CtrlSet/DCMStandCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/DCMBalanceCtrl.hpp>
 #include <PnC/DracoPnC/CtrlSet/DCMWalkCtrl.hpp>
+
+#include <PnC/DracoPnC/CtrlSet/StandUpCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/DoubleSupportCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/SingleSupportCtrl.hpp>
+#include <PnC/DracoPnC/CtrlSet/TransitionCtrl.hpp>

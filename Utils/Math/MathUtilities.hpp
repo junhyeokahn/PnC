@@ -34,11 +34,15 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
 // =============================================================================
 // ETC
 // =============================================================================
+
+double computeAlphaGivenBreakFrequency(double hz, double dt);
+
 double bind_half_pi(double);
 
 bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
              const double threshold = 0.00001);
 double CropValue(double value, double min, double max, std::string source);
+double CropValue(double value, double min, double max);
 
 Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
                            Eigen::VectorXd max, std::string source);

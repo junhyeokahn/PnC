@@ -16,12 +16,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     prev_stance_foot = stance_foot;
     curr_time = 0.;
 
-    target_yaw = 0.;
-    rl_count = 0;
-    adjusted_foot.setZero();
-    guided_foot.setZero();
-    walking_velocity.setZero();
-    des_quat = Eigen::Quaternion<double>(1, 0, 0, 0);
+    b_walking = false;
 
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());

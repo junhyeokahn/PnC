@@ -42,6 +42,13 @@ Eigen::MatrixXd deleteRow(const Eigen::MatrixXd& a_, int row_) {
     return ret;
 }
 
+double computeAlphaGivenBreakFrequency(double hz, double dt){
+    double omega = 2.0 * M_PI * hz;
+    double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt/2.0));
+    alpha = CropValue(alpha, 0.0, 1.0);
+    return alpha;
+}
+
 double bind_half_pi(double ang) {
     if (ang > M_PI / 2) {
         return ang - M_PI;
@@ -91,6 +98,17 @@ double CropValue(double value, double min, double max, std::string source) {
     }
     if (value < min) {
         printf("%s: %f is cropped to %f.\n", source.c_str(), value, min);
+        value = min;
+    }
+    return value;
+}
+
+double CropValue(double value, double min, double max) {
+    assert(min < max);
+    if (value > max) {
+        value = max;
+    }
+    if (value < min) {
         value = min;
     }
     return value;

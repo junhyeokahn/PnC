@@ -4,10 +4,11 @@
 
 class RobotSystem;
 class DracoStateProvider;
+class WalkingReferenceTrajectoryModule;
 
 enum DCMPhaseWalkingTestPhase{
     DCMPhaseWalkingTestPhase_initial_jpos = 0,
-    DCMPhaseWalkingTestPhase_stand_ctrl = 1,
+    DCMPhaseWalkingTestPhase_stand_up_ctrl = 1,
     DCMPhaseWalkingTestPhase_double_support_ctrl_1 = 2,
     DCMPhaseWalkingTestPhase_right_swing_start_ctrl = 3,
     DCMPhaseWalkingTestPhase_right_swing_ctrl = 4,
@@ -30,7 +31,7 @@ class DCMPhaseWalkingTest: public Test{
         void _SettingParameter();
 
         Controller* jpos_target_ctrl_;
-        Controller* stand_ctrl_;
+        Controller* stand_up_ctrl_;
 
         Controller* ds_ctrl_;
 
@@ -41,6 +42,8 @@ class DCMPhaseWalkingTest: public Test{
         Controller* right_swing_end_ctrl_;
         Controller* left_swing_start_ctrl_;
         Controller* left_swing_end_ctrl_;
+
+        WalkingReferenceTrajectoryModule* reference_trajectory_module_;
 
         YAML::Node cfg_;
         DracoStateProvider* sp_;
