@@ -680,8 +680,8 @@ void DCMWalkCtrl::task_setup() {
     lfoot_pos_des[3] = lfoot_ori_act.z();
     lfoot_pos_des.tail(3) = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
 
-    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
-    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+    // rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    // lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
 
     Eigen::VectorXd foot_pos_d(3); foot_pos_d.setZero();
     Eigen::VectorXd foot_vel_d(3); foot_vel_d.setZero();
@@ -759,6 +759,7 @@ void DCMWalkCtrl::task_setup() {
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
         rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+        rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }else{
         // Set Point Tasks
         foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();   
@@ -766,7 +767,10 @@ void DCMWalkCtrl::task_setup() {
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
         rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
         // Set Line Task
+        foot_vel_des.setZero(); 
+        foot_acc_des.setZero();
         rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+        rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     if (ctrl_state_ == DRACO_STATE_LLS){
@@ -786,7 +790,7 @@ void DCMWalkCtrl::task_setup() {
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
         lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
-
+        lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     }else{
         // Set Point Tasks
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
@@ -794,7 +798,10 @@ void DCMWalkCtrl::task_setup() {
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
         lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
         // Set Line Task
+        foot_vel_des.setZero(); 
+        foot_acc_des.setZero();
         lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+        lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     // std::cout << "  rFootCenter = " << robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation().transpose() << std::endl;  
@@ -863,10 +870,12 @@ void DCMWalkCtrl::task_setup() {
 
     if (ctrl_state_ == DRACO_STATE_RLS){
         task_list_.push_back(rfoot_line_task);
+        // task_list_.push_back(rfoot_center_rz_xyz_task);
         task_list_.push_back(lfoot_front_task);
         task_list_.push_back(lfoot_back_task);
     }else if (ctrl_state_ == DRACO_STATE_LLS){
         task_list_.push_back(lfoot_line_task);            
+        // task_list_.push_back(lfoot_center_rz_xyz_task);
         task_list_.push_back(rfoot_front_task);
         task_list_.push_back(rfoot_back_task);            
     }else{
@@ -1121,6 +1130,8 @@ void DCMWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     rfoot_line_task->setGain(kp_line_task, kd_line_task);
     lfoot_line_task->setGain(kp_line_task, kd_line_task);
 
+    rfoot_center_rz_xyz_task->setGain(kp_line_task, kd_line_task);
+    lfoot_center_rz_xyz_task->setGain(kp_line_task, kd_line_task);
 
 
     com_task_->setGain(com_kp, com_kd);
