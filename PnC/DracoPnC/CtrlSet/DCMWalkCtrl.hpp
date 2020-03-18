@@ -81,6 +81,8 @@ class DCMWalkCtrl : public Controller {
     // Footstep list
     std::vector<DracoFootstep> desired_footstep_list_;
 
+    double kp_icp_;
+
     // Sway Behavior
     double walk_start_time_;
     double sway_magnitude_;

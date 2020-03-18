@@ -65,8 +65,8 @@ bool FootRzXYZTask::_UpdateTaskJacobian() {
     Jt_.block(1, 0, 3, robot_->getNumDofs()) =
         Jtmp.block(3, 0, 3, robot_->getNumDofs());
     // isolate virtual joint
-    // Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-    //     Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+    Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+        Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
 
     return true;
 }
@@ -76,6 +76,6 @@ bool FootRzXYZTask::_UpdateTaskJDotQdot() {
         robot_->getBodyNodeJacobianDot(link_idx_) * robot_->getQdot();
     JtDotQdot_.segment(0, 1) = v_tmp.segment(2, 1);
     JtDotQdot_.tail(3) = v_tmp.tail(3);
-    // JtDotQdot_.setZero();
+    JtDotQdot_.setZero();
     return true;
 }
