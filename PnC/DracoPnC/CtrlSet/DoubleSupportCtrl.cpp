@@ -19,8 +19,6 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot,
     tau_cmd_ = Eigen::VectorXd::Zero(Draco::n_adof);
     tau_cmd_old_ = Eigen::VectorXd::Zero(Draco::n_adof);
     qddot_cmd_ = Eigen::VectorXd::Zero(Draco::n_adof);
-    qdot_des_ = Eigen::VectorXd::Zero(Draco::n_adof);
-    q_des_ = Eigen::VectorXd::Zero(Draco::n_adof);
 
     // Tasks
     com_task_ = new BasicTask(robot_, BasicTaskType::COM, 3);
@@ -116,7 +114,6 @@ bool DoubleSupportCtrl::endOfPhase() {
 
 void DoubleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
     // Maximum Reaction Force
-    // TODO : Is this right number?
     myUtils::readParameter(node, "max_fz", max_fz_);
 
     // Task Weights
@@ -161,7 +158,6 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
     state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
     if (b_do_plan_) {
-        // TODO: Should this be first?
         _references_setup();
         b_do_plan_ = false;
     }
@@ -169,21 +165,19 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
         _walking_contact_setup();
         _walking_task_setup();
     } else {
-        // TODO : Work on this later for stopping motion
         _balancing_contact_setup();
         _balancing_task_setup();
     }
     _compute_torque_ihwbc();
 
-    // TODO: Is this right?
     double alphaTau = (1.0 - myUtils::computeAlphaGivenBreakFrequency(
                 100.0, DracoAux::ServoRate));
     tau_cmd_old_ = tau_cmd_*alphaTau + (1.0 - alphaTau)*tau_cmd_old_;
 
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         ((DracoCommand*)_cmd)->jtrq[i] = tau_cmd_old_[i];
-        ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
-        ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
+        ((DracoCommand*)_cmd)->q[i] = sp_->des_jpos[i];
+        ((DracoCommand*)_cmd)->qdot[i] = sp_->des_jvel[i];
     }
 
     _PostProcessing_Command();
@@ -206,9 +200,6 @@ void DoubleSupportCtrl::_references_setup() {
     Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
     rfoot_start->setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
 
-    // TODO : Can x_com_start be the middle of the feet?
-    // TODO : How do you incorporate smooth initiating in dcm planning? (since we are doing backward calculation)
-    // TODO : Is this planner accepting local com and yielding local com?
     reference_trajectory_module_->setStartingConfiguration(x_com_start,
             x_ori_start, *lfoot_start, *rfoot_start);
 
@@ -227,7 +218,6 @@ void DoubleSupportCtrl::_references_setup() {
         first_foot_translate = 2*foot_translate;
     }
 
-    // TODO : Using different types of walking
     std::vector<DracoFootstep> footstep_list;
     if (sp_->phase_copy == 2) {
         // Stance: Left
@@ -240,6 +230,8 @@ void DoubleSupportCtrl::_references_setup() {
                     DRACO_RIGHT_FOOTSTEP);
             rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
                     swing_time_, swing_height_);
+            // TODO: change temporal parameter here
+
             footstep_list.push_back(rfoot_last);
         } else if (sp_->num_residual_steps == 1) {
             // Add First Right Step
@@ -351,10 +343,6 @@ void DoubleSupportCtrl::_references_setup() {
         }
     }
 
-    // TODO : Could I remove this since I am setting this at DCMPhaseWalkingTest.cpp?
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
-        dcm_reference.setCoMHeight(target_com_height_);
-
     reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
 
     // TODO : Debug this sequencer works well for all the cases
@@ -376,7 +364,9 @@ void DoubleSupportCtrl::_walking_contact_setup() {
     contact_list_.push_back(lfoot_back_contact_);
 
     for(int i = 0; i < contact_list_.size(); i++){
-        ((PointContactSpec*)contact_list_[i])->setMaxFz(reference_trajectory_module_->getMaxNormalForce(i, state_machine_time_));
+        // TODO : Is this setting 500(N) for all points?
+        ((PointContactSpec*)contact_list_[i])->setMaxFz(
+            reference_trajectory_module_->getMaxNormalForce(i, sp_->curr_time));
     }
 }
 
@@ -398,17 +388,35 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
-    // TODO : Query with curr_time?
-    // TODO : What about Acc?
-    Eigen::Vector3d p, v;
-    reference_trajectory_module_->getMPCRefComPosandVel(sp_->curr_time, p, v);
-    for (int i = 0; i < 3; ++i) {
-        com_pos_des[i] = p[i];
-        com_vel_des[i] = v[i];
-        com_acc_des[i] = 0.;
-        sp_->com_pos_des[i] = com_pos_des[i];
-        sp_->com_vel_des[i] = com_vel_des[i];
+    Eigen::Vector3d com_pos_ref, com_vel_ref, com_pos, com_vel;
+    reference_trajectory_module_->getMPCRefComPosandVel(
+            sp_->curr_time, com_pos_ref, com_vel_ref);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+        dcm_reference.get_ref_dcm(sp_->curr_time, sp_->dcm_des);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+        dcm_reference.get_ref_dcm_vel(sp_->curr_time, sp_->dcm_vel_des);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+        dcm_reference.get_ref_r_vrp(sp_->curr_time, sp_->r_vrp_des);
+
+    com_pos = robot_->getCoMPosition();
+    com_vel = robot_->getCoMVelocity();
+
+    for (int i = 0; i < 2; ++i) {
+        com_pos_des[i] = com_pos[i];
+        com_vel_des[i] = com_vel[i];
     }
+    Eigen::VectorXd r_ic = sp_->dcm.head(2);
+    Eigen::VectorXd r_id = sp_->dcm_des.head(2);
+    Eigen::VectorXd rdot_id = sp_->dcm_vel_des.head(2);
+    Eigen::VectorXd r_icp_error = (r_ic - r_id);
+    double kp_ic(20.);
+    Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);
+    com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
+
+    com_pos_des[2] = target_com_height_;
+    com_vel_des[2] = com_vel_ref[2]; // TODO : Not 0?
+    com_acc_des[2] = 0.;
+
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // BodyOri Task
@@ -423,9 +431,8 @@ void DoubleSupportCtrl::_walking_task_setup() {
     bodyori_pos_des << ori_ref.w(), ori_ref.x(), ori_ref.y(), ori_ref.z();
     for (int i = 0; i < 3; ++i) {
         bodyori_vel_des[i] << ang_vel_ref[i];
-        //bodyori_acc_des[i] << ang_acc_ref[i];
-        //TODO : Using Zero?
-        bodyori_acc_des[i] << 0.;
+        bodyori_acc_des[i] << ang_acc_ref[i];
+        //bodyori_acc_des[i] << 0.;
     }
     bodyori_task_->updateTask(
             bodyori_pos_des, bodyori_vel_des, bodyori_acc_des);
@@ -558,7 +565,6 @@ void DoubleSupportCtrl::_compute_torque_ihwbc() {
     ihwbc->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
 
     // Solve
-    // TODO: What would be reaction force desired?
     ihwbc->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
             tau_cmd_, qddot_cmd_);
     ihwbc->getQddotResult(sp_->qddot_cmd);
@@ -568,22 +574,20 @@ void DoubleSupportCtrl::_compute_torque_ihwbc() {
     Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(Draco::n_adof);
     double alphaVelocity = myUtils::computeAlphaGivenBreakFrequency(
             velocity_break_freq_, DracoAux::ServoRate);
-    // TODO: What would be des_jvel_ set initially?
-    des_jvel_ = des_jvel_*alphaVelocity + (1. - alphaVelocity)*qdot_des_ref;
-    des_jvel_ += (qddot_cmd_ * DracoAux::ServoRate);
-    for (int i = 0; i < des_jvel_.size(); ++i) {
-        des_jvel[i] = myUtils::CropValue(des_jvel_[i], -max_jvel, max_jvel);
+    sp_->des_jvel = sp_->des_jvel*alphaVelocity + (1. - alphaVelocity)*qdot_des_ref;
+    sp_->des_jvel += (qddot_cmd_ * DracoAux::ServoRate);
+    for (int i = 0; i < sp_->des_jvel.size(); ++i) {
+        des_jvel[i] = myUtils::CropValue(sp_->des_jvel[i], -max_jvel, max_jvel);
     }
 
     // Integrate Joint Positions
     Eigen::VectorXd q_des_ref = sp_->q.tail(Draco::n_adof);
     double alphaPosition = myUtils::computeAlphaGivenBreakFrequency(
             position_break_freq_, DracoAux::ServoRate);
-    // TODO: What would be des_jvel_ set initially?
-    des_jpos_ = des_jpos_*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
-    des_jpos_ += (des_jvel_*DracoAux::ServoRate);
-    for (int i = 0; i < des_jpos_.size(); ++i) {
-        des_jpos_[i] = myUtils::CropValue(des_jpos_[i],
+    sp_->des_jpos = sp_->des_jpos*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
+    sp_->des_jpos += (des_jvel_*DracoAux::ServoRate);
+    for (int i = 0; i < sp_->des_jpos.size(); ++i) {
+        sp_->des_jpos[i] = myUtils::CropValue(sp_->des_jpos[i],
                 q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);
     }
 }

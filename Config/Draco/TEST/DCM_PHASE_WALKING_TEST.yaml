@@ -46,8 +46,30 @@ control_configuration:
         max_jvel: 2.0 # rad/s - maximum velocity after integration
         max_jpos_error: 0.2 # radians - maximum joint position error after integration 
 
-
     ds_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
+        max_fz: 500.
+
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
 
     right_swing_ctrl:
 

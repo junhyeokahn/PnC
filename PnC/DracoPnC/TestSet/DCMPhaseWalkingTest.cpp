@@ -125,7 +125,6 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((StandUpCtrl*)stand_up_ctrl_)->setCoMHeight(tmp_val);
         ((DoubleSupportCtrl*)ds_ctrl_)->setCoMHeight(tmp_val);
-        // TODO : Can I set this in advance?
         ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
             dcm_reference.setCoMHeight(target_com_height_);
         sp_->omega = sqrt(9.81/tmp_val);

@@ -11,10 +11,13 @@ class Task;
 class WalkingReferenceTrajectoryModule;
 class DracoFootstep;
 
-class DoubleSupportCtrl : public Controller {
+class HermiteCurveVec;
+class HermiteQuaternionCurve;
+
+class SingleSupportCtrl : public Controller {
     public:
-        DoubleSupportCtrl(RobotSystem*, WalkingReferenceTrajectoryModule*);
-        virtual ~DoubleSupportCtrl();
+        SingleSupportCtrl(RobotSystem*, WalkingReferenceTrajectoryModule*);
+        virtual ~SingleSupportCtrl();
 
         virtual void oneStep(void* _cmd);
         virtual void firstVisit();
@@ -22,40 +25,20 @@ class DoubleSupportCtrl : public Controller {
         virtual bool endOfPhase();
         virtual void ctrlInitialization(const YAML::Node& node);
 
-        void setDoubleSupportDuration(double val) {double_support_dur_ = val;}
-
-        void setInitialDoubleSupportDuration(double val) {
-            initial_double_support_dur_ = val;
-        }
-
-        void setFinalDoubleSupportDuration(double val) {
-            final_double_support_dur_ = val;
-        }
-
-        void setTransitionTime(double val) {trans_time_ = val;}
-
-        void setSwingTime(double val) {swing_time_ = val;}
-
-        void setSwingHeight(double val) {swing_height_ = val;}
+        void setTotalCtrlTime(double val) {end_time_ = val;}
 
         void setCoMHeight(double val) {target_com_height_ = val;}
 
     protected:
         WalkingReferenceTrajectoryModule* walking_reference_trajectory_module_;
 
-        double double_support_dur_;
-        double initial_double_support_dur_;
-        double final_double_support_dur_;
-        double trans_time_;
-        double swing_time_;
-        double swing_height_;
-        double target_com_height_;
+        double end_time_;
         int dim_contact_;
-        bool b_do_plan_;
 
         Eigen::Vector3d ini_com_pos_;
         Eigen::Vector3d ini_com_vel_;
         Eigen::Vector3d goal_com_pos_;
+        double target_com_height_;
 
         Eigen::VectorXd tau_cmd_;
         Eigen::VectorXd tau_cmd_old_;
@@ -68,6 +51,8 @@ class DoubleSupportCtrl : public Controller {
         Task* rfoot_back_task_;
         Task* lfoot_front_task_;
         Task* lfoot_back_task_;
+        Task* rfoot_line_task_;
+        Task* lfoot_line_task_;
 
         // Contacts
         ContactSpec* rfoot_front_contact_;
@@ -91,10 +76,14 @@ class DoubleSupportCtrl : public Controller {
         double max_jvel_;
         double max_jpos_error_;
 
+        // Foot Trajectory
+        std::shared_ptr<HermiteCurveVec> foot_pos_traj_init_to_mid_;
+        std::shared_ptr<HermiteCurveVec> foot_pos_traj_mid_to_end_;
+        std::shared_ptr<HermiteCurveVec> pos_traj_to_use;
+        std::shared_ptr<HermiteQuaternionCurve> foot_ori_trajectory;
+
         void _compute_torque_ihwbc();
-        void _walking_task_setup();
-        void _balancing_task_setup();
-        void _walking_contact_setup();
-        void _balancing_contact_setup();
-        void _references_setup();
+        void _task_setup();
+        void _contact_setup();
+        void _compute_swing_foot_trajectory();
 };
