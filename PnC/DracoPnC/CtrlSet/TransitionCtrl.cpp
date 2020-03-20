@@ -153,12 +153,44 @@ void TrainsitionCtrl::_contact_setup() {
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
 
-    for(int i = 0; i < contact_list_.size(); i++){
-        // TODO : Is this reducing 500 -> 0 and 0 -> 500?
-        // TODO : I think I need to smooth changing max fz
-        ((PointContactSpec*)contact_list_[i])->setMaxFz(
-            reference_trajectory_module_->getMaxNormalForce(i, sp_->curr_time));
+    double smooth_max_fz;
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_start_ctrl)) {
+        smooth_max_fz = myUtils::smooth_changing(max_fz_, 0., end_time_,
+                state_machine_time_); // reducing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(max_fz_); // left foot
+        }
+    } else if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_right_swing_end_ctrl)) {
+        smooth_max_fz = myUtils::smooth_changing(0, max_fz_, end_time_,
+                state_machine_time_); // increasing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(smooth_max_fz); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(max_fz_); // left foot
+        }
+    } else if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_start_ctrl)) {
+        smooth_max_fz = myUtils::smooth_changing(max_fz_, 0, end_time_,
+                state_machine_time_); // reducing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(max_fz_); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(smooth_max_fz); // left foot
+        }
+    } else if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_end_ctrl)) {
+        smooth_max_fz = myUtils::smooth_changing(0, max_fz_, end_time_,
+                state_machine_time_); // increasing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(max_fz_); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(smooth_max_fz); // left foot
+        }
+    } else {
+        std::cout << "Something Wrong" << std::endl;
+        exit(0);
     }
+
 }
 
 void TrainsitionCtrl::_task_setup() {
@@ -193,7 +225,8 @@ void TrainsitionCtrl::_task_setup() {
     com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
 
     com_pos_des[2] = target_com_height_;
-    com_vel_des[2] = com_vel_ref[2]; // TODO : Not 0?
+    //com_vel_des[2] = com_vel_ref[2];
+    com_vel_des[2] = 0.;
     com_acc_des[2] = 0.;
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
@@ -231,14 +264,6 @@ void TrainsitionCtrl::_task_setup() {
     lfoot_front_task_->updateTask(lfoot_front_pos, zero_vec, zero_vec);
     lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
 
-    // Task Weights
-    task_weight_heirarchy_[0] = com_task_weight_;
-    task_weight_heirarchy_[1] = bodyori_task_weight_;
-    task_weight_heirarchy_[2] = rfoot_task_weight_;
-    task_weight_heirarchy_[3] = rfoot_task_weight_;
-    task_weight_heirarchy_[4] = lfoot_task_weight_;
-    task_weight_heirarchy_[5] = lfoot_task_weight_;
-
     // Update Task List
     task_list_.push_back(com_task_);
     task_list_.push_back(bodyori_task_);
@@ -246,6 +271,15 @@ void TrainsitionCtrl::_task_setup() {
     task_list_.push_back(rfoot_back_task_);
     task_list_.push_back(lfoot_front_task_);
     task_list_.push_back(lfoot_back_task_);
+
+    // Task Weights
+    task_weight_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    task_weight_heirarchy_[0] = com_task_weight_;
+    task_weight_heirarchy_[1] = bodyori_task_weight_;
+    task_weight_heirarchy_[2] = rfoot_task_weight_;
+    task_weight_heirarchy_[3] = rfoot_task_weight_;
+    task_weight_heirarchy_[4] = lfoot_task_weight_;
+    task_weight_heirarchy_[5] = lfoot_task_weight_;
 }
 
 void TrainsitionCtrl::_compute_torque_ihwbc() {

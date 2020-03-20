@@ -29,6 +29,7 @@ class TransitionCtrl : public Controller {
     protected:
         WalkingReferenceTrajectoryModule* walking_reference_trajectory_module_;
 
+        double max_fz_;
         double end_time_;
         int dim_contact_;
 

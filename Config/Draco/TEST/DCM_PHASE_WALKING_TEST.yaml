@@ -7,13 +7,17 @@ test_configuration:
     com_height: 0.7
     stand_up_ctrl_time: 2.0
 
-    initial_double_support_ctrl_time: 0.05
+    # Temporal parameters
+    # t_ss = 2*transition_ctrl_time + single_support_ctrl_time
+    # t_ds = double_support_ctrl_time
+    # t_transfer = initial_double_support_ctrl_time - (1+alpha)*double_support_ctrl_time (Only for the first step)
+    #            = (1-alpha_ds)*double_support_ctrl_time (For the reset of steps)
+    initial_double_support_ctrl_time: 0.175
     double_support_ctrl_time: 0.05
-    final_double_support_ctrl_time: 0.05
+    transition_ctrl_time: 0.03
+    single_support_ctrl_time: 0.44
+    alpha_ratio: 0.5
 
-    transition_ctrl_time: 0.2
-
-    single_support_ctrl_time: 0.3
     swing_foot_height: 0.05
 
 control_configuration:
@@ -64,6 +68,59 @@ control_configuration:
         lfoot_task_kp_gain: [500., 500., 500.]
         lfoot_task_kd_gain: [35., 35., 35.]
 
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
+
+    right_swing_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
+        rfoot_line_task_kp_gain: [500., 500., 500., 500., 500.]
+        rfoot_line_task_kd_gain: [35., 35., 35., 35., 35.]
+        lfoot_line_task_kp_gain: [500., 500., 500., 500., 500.]
+        lfoot_line_task_kd_gain: [35., 35., 35., 35., 35.]
+
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
+
+    left_swing_ctrl:
+
+    right_swing_start_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
         max_fz: 500.
 
         velocity_break_freq: 2.0
@@ -71,14 +128,77 @@ control_configuration:
         max_jvel: 2.0 # rad/s - maximum velocity after integration
         max_jpos_error: 0.2 # radians - maximum joint position error after integration 
 
-    right_swing_ctrl:
-
-    left_swing_ctrl:
-
-    right_swing_start_ctrl:
-
     right_swing_end_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
+        max_fz: 500.
+
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
 
     left_swing_start_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
+        max_fz: 500.
+
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 
 
     left_swing_end_ctrl:
+        com_task_weight: 1e-3
+        bodyori_task_weight: 1e-3
+        rfoot_task_weight: 200.
+        lfoot_task_weight: 200.
+        rf_tracking_weight: 1e-8
+        qddot_reg_weight: 1e-8
+        rf_reg_weight: 1e-16
+
+        com_task_kp_gain: [200., 200., 200.]
+        com_task_kd_gain: [20., 20., 28.]
+        bodyori_task_kp_gain: [5. 5. 5.]
+        bodyori_task_kd_gain: [20. 20. 20.]
+        rfoot_task_kp_gain: [500., 500., 500.]
+        rfoot_task_kd_gain: [35., 35., 35.]
+        lfoot_task_kp_gain: [500., 500., 500.]
+        lfoot_task_kd_gain: [35., 35., 35.]
+
+        max_fz: 500.
+
+        velocity_break_freq: 2.0
+        position_break_freq: 1.0
+        max_jvel: 2.0 # rad/s - maximum velocity after integration
+        max_jpos_error: 0.2 # radians - maximum joint position error after integration 

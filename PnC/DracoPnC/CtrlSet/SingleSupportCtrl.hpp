@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
+#include <Utils/Math/BSplineBasic.h>
 
 class DracoStateProvider;
 class RobotSystem;
@@ -29,9 +30,12 @@ class SingleSupportCtrl : public Controller {
 
         void setCoMHeight(double val) {target_com_height_ = val;}
 
+        void setSwingFootHeight(double val) {swing_height_ = val;}
+
     protected:
         WalkingReferenceTrajectoryModule* walking_reference_trajectory_module_;
 
+        double max_fz_;
         double end_time_;
         int dim_contact_;
 
@@ -39,6 +43,7 @@ class SingleSupportCtrl : public Controller {
         Eigen::Vector3d ini_com_vel_;
         Eigen::Vector3d goal_com_pos_;
         double target_com_height_;
+        double swing_height_;
 
         Eigen::VectorXd tau_cmd_;
         Eigen::VectorXd tau_cmd_old_;
@@ -79,11 +84,12 @@ class SingleSupportCtrl : public Controller {
         // Foot Trajectory
         std::shared_ptr<HermiteCurveVec> foot_pos_traj_init_to_mid_;
         std::shared_ptr<HermiteCurveVec> foot_pos_traj_mid_to_end_;
-        std::shared_ptr<HermiteCurveVec> pos_traj_to_use;
-        std::shared_ptr<HermiteQuaternionCurve> foot_ori_trajectory;
+        BS_Basic<3, 3, 1, 2, 2> foot_pos_spline_traj_;
+        std::shared_ptr<HermiteQuaternionCurve> foot_ori_trajectory_;
 
         void _compute_torque_ihwbc();
         void _task_setup();
         void _contact_setup();
-        void _compute_swing_foot_trajectory();
+        void _compute_swing_foot_trajectory_spline();
+        void _compute_swing_foot_trajectory_hermite();
 };

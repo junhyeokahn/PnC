@@ -125,8 +125,12 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((StandUpCtrl*)stand_up_ctrl_)->setCoMHeight(tmp_val);
         ((DoubleSupportCtrl*)ds_ctrl_)->setCoMHeight(tmp_val);
+        ((TransitionCtrl*)right_swing_start_ctrl_)->setCoMHeight(tmp_val);
+        ((TransitionCtrl*)right_swing_end_ctrl_)->setCoMHeight(tmp_val);
+        ((TransitionCtrl*)left_swing_start_ctrl_)->setCoMHeight(tmp_val);
+        ((TransitionCtrl*)left_swing_end_ctrl_)->setCoMHeight(tmp_val);
         ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
-            dcm_reference.setCoMHeight(target_com_height_);
+            dcm_reference.setCoMHeight(tmp_val);
         sp_->omega = sqrt(9.81/tmp_val);
 
         // Stand Up Control Duration
@@ -134,32 +138,57 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         ((StandUpCtrl*)stand_up_ctrl_)->setTotalCtrlTime(tmp_val);
 
         // Double Support Control Duration
-        myUtils::readParameter(test_cfg, "double_support_ctrl_time", tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setDoubleSupportDuration(tmp_val);
-        myUtils::readParameter(test_cfg, "initial_double_support_ctrl_time", tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setInitialDoubleSupportDuration(tmp_val);
-        myUtils::readParameter(test_cfg, "final_double_support_ctrl_time", tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setFinalDoubleSupportDuration(tmp_val);
+        double double_support_ctrl_time, initial_double_support_ctrl_time;
+        myUtils::readParameter(test_cfg, "double_support_ctrl_time",
+                double_support_ctrl_time);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setDoubleSupportDuration(
+            double_support_ctrl_time);
+        myUtils::readParameter(test_cfg, "initial_double_support_ctrl_time",
+                initial_double_support_ctrl_time);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setInitialDoubleSupportDuration(
+            initial_double_support_ctrl_time);
+
+        // alpha_ds
+        myUtils::readParameter(test_cfg, "alpha_ratio", tmp_val);
+        ((DoubleSupportCtrl*)ds_ctrl_)->setAlphaRatio(tmp_val);
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.alpha_ds = tmp_val;
 
         // Transition Control Duration
-        myUtils::readParameter(test_cfg, "contact_transition_duration", tmp_val);
-        ((TransitionCtrl*)right_swing_start_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((TransitionCtrl*)right_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((TransitionCtrl*)left_swing_start_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((TransitionCtrl*)left_swing_end_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setTransitionTime(tmp_val);
+        double transition_ctrl_time;
+        myUtils::readParameter(test_cfg, "transition_ctrl_time",
+                transition_ctrl_time);
+        ((TransitionCtrl*)right_swing_start_ctrl_)->setTotalCtrlTime(
+            transition_ctrl_time);
+        ((TransitionCtrl*)right_swing_end_ctrl_)->setTotalCtrlTime(
+            transition_ctrl_time);
+        ((TransitionCtrl*)left_swing_start_ctrl_)->setTotalCtrlTime(
+            transition_ctrl_time);
+        ((TransitionCtrl*)left_swing_end_ctrl_)->setTotalCtrlTime(
+            transition_ctrl_time);
 
         // Single Support Control Duration
-        myUtils::readParameter(test_cfg, "single_support_ctrl_time", tmp_val);
-        ((SingleSupportCtrl*)right_swing_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((SingleSupportCtrl*)left_swing_ctrl_)->setTotalCtrlTime(tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setSwingTime(tmp_val);
+        double single_support_ctrl_time;
+        myUtils::readParameter(test_cfg, "single_support_ctrl_time", 
+                single_support_ctrl_time);
+        ((SingleSupportCtrl*)right_swing_ctrl_)->setTotalCtrlTime(
+            single_support_ctrl_time);
+        ((SingleSupportCtrl*)left_swing_ctrl_)->setTotalCtrlTime(
+            single_support_ctrl_time);
 
         // Swing Height
         myUtils::readParameter(test_cfg, "swing_foot_height", tmp_val);
         ((SingleSupportCtrl*)right_swing_ctrl_)->setSwingFootHeight(tmp_val);
         ((SingleSupportCtrl*)left_swing_ctrl_)->setSwingFootHeight(tmp_val);
-        ((DoubleSupportCtrl*)ds_ctrl_)->setSwingHeight(tmp_val);
+
+        // Temporal Parameters
+        // Note that t_transfer will be set in DoubleSupportCtrl.cpp since it is
+        // varying.
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.t_ds = double_support_ctrl_time;
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.t_ss = single_support_ctrl_time +
+            2*transition_ctrl_time;
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter ["<< e.what() << "] at file: [" << __FILE__ << "]" << std::endl << std::endl;

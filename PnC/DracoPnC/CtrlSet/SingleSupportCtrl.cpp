@@ -30,8 +30,8 @@ SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot,
     rfoot_back_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::rFootBack);
     lfoot_front_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootFront);
     lfoot_back_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, DracoBodyNode::lFootBack);
-    rfoot_line_task = new LineFootTask(robot_, DracoBodyNode::rFootCenter);
-    lfoot_line_task = new LineFootTask(robot_, DracoBodyNode::lFootCenter);
+    rfoot_line_task_ = new LineFootTask(robot_, DracoBodyNode::rFootCenter);
+    lfoot_line_task_ = new LineFootTask(robot_, DracoBodyNode::lFootCenter);
 
     // Contacts
     rfoot_front_contact_ = new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
@@ -75,7 +75,12 @@ SingleSupportCtrl::~SingleSupportCtrl() {
 void SingleSupportCtrl::firstVisit() {
     std::cout << "First Visit of SingleSupportCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
-    _compute_swing_foot_trajectory();
+    //_compute_swing_foot_trajectory_spline();
+    _compute_swing_foot_trajectory_hermite();
+
+    if (sp_->num_residual_step == -1) {
+        sp_->b_walking = false;
+    }
 }
 
 void SingleSupportCtrl::lastVisit() {
@@ -86,12 +91,14 @@ bool SingleSupportCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
         return true;
     }
-    if (sp_->phase_copy ==
-            static_cast<int>(DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
         if ((state_machine_time_ > 0.5*end_time_ && sp_->b_lfoot_contact)) {
             return true;
         }
     } else {
+        // left stance, right swing
         if ((state_machine_time_ > 0.5*end_time_ && sp_->b_rfoot_contact)) {
             return true;
         }
@@ -100,11 +107,88 @@ bool SingleSupportCtrl::endOfPhase() {
     return false;
 }
 
-void SingleSupportCtrl::_compute_swing_foot_trajectory(){
+void SingleSupportCtrl::_compute_swing_foot_trajectory_spline(){
+    double ini[9];
+    double fin[9];
+    double** middle_pt = new double*[1];
+    middle_pt[i] = new double[3];
+    Eigen::VectorXd ini_pos;
+    Eigen::VectorXd fin_pos = sp_->swing_foot_target_pos;
+    Eigen::Quaternion<double> ini_quat;
+    Eigen::Quaternion<double> fin_quat = sp_->swing_foot_target_quat;
+
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+    ini_pos = robot_->getBodyNodeIsometry(
+            DracoBodyNode::lFootCenter).translation();
+    ini_quat = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).linear());
+
+    } else {
+        // left stance, right swing
+    ini_pos = robot_->getBodyNodeIsometry(
+            DracoBodyNode::rFootCenter).translation();
+    ini_quat = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).linear());
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        ini[i] = ini_pos[i];
+        ini[i+3] = 0.;
+        ini[i+6] = 0.;
+        fin[i] = fin_pos[i];
+        // TODO : Should find proper number for this in Experiment
+        fin[i+3] = 0.;
+        fin[i+6] = 0.;
+    }
+    for (int i = 0; i < 2; ++i) {
+        middle_pt[0][i] = (ini_pos[i] + fin_pos[i])/2.0;
+    }
+    middle_pt[0][2] = swing_height_;
+    foot_pos_spline_traj_.SetParam(ini, fin, middle_pt, end_time_);
+
+    delete[] * middle_pt;
+    delete[] middel_pt;
+
+    foot_ori_trajectory_.reset(new HermiteQuaternionCurve(ini_quat,
+                Eigen::Vector3d::Zero(3), fin_quat, Eigen::Vector3d::Zero(3)));
+}
+
+void SingleSupportCtrl::_compute_swing_foot_trajectory_hermite(){
+    Eigen::VectorXd ini_pos;
+    Eigen::VectorXd fin_pos = sp_->swing_foot_target_pos;
+    Eigen::Quaternion<double> ini_quat;
+    Eigen::Quaternion<double> fin_quat = sp_->swing_foot_target_quat;
+
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+    ini_pos = robot_->getBodyNodeIsometry(
+            DracoBodyNode::lFootCenter).translation();
+    ini_quat = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).linear());
+
+    } else {
+        // left stance, right swing
+    ini_pos = robot_->getBodyNodeIsometry(
+            DracoBodyNode::rFootCenter).translation();
+    ini_quat = Eigen::Quaternion<double>(
+            robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).linear());
+    }
+
+    Eigen::VectorXd mid_pos= (ini_pos + fin_pos) / 2.0;
+    Eigen::VectorXd mid_vel = (fin_pos - ini_pos) / end_time_;
+    mid_pos[2] = swing_height_;
+    foot_pos_traj_init_to_mid_.reset(new HermiteCurveVec(ini_pos,
+                Eigen::Vector3d::Zero(3), mid_pos, mid_vel));
+    foot_pos_traj_mid_to_end_.reset(new HermiteCurveVec(mid_pos, mid_vel,
+                fin_pos, Eigen::Vector3d::Zero(3)));
+    foot_ori_trajectory_.reset(new HermiteQuaternionCurve(ini_quat,
+                Eigen::Vector3d::Zero(3), fin_quat, Eigen::Vector3d::Zero(3)));
 }
 
 void SingleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
-    // Maximum Reaction Force
     myUtils::readParameter(node, "max_fz", max_fz_);
 
     // Task Weights
@@ -136,6 +220,14 @@ void SingleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "lfoot_task_kd_gain", kd);
     lfoot_front_task_->setGain(kp, kd);
     lfoot_back_task_->setGain(kp, kd);
+
+    myUtils::readParameter(node, "lfoot_line_task_kp_gain", kp);
+    myUtils::readParameter(node, "lfoot_line_task_kd_gain", kd);
+    lfoot_line_task_->setGain(kp, kd);
+
+    myUtils::readParameter(node, "rfoot_line_task_kp_gain", kp);
+    myUtils::readParameter(node, "rfoot_line_task_kd_gain", kd);
+    rfoot_line_task_->setGain(kp, kd);
 
     // Safety Parameters on Admittance Control
     myUtils::readParameter(node, "velocity_break_freq", velocity_break_freq_);
@@ -176,10 +268,19 @@ void SingleSupportCtrl::_contact_setup() {
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
 
-    for(int i = 0; i < contact_list_.size(); i++){
-        // TODO : Is this reducing 500 -> 0 and 0 -> 500?
-        ((PointContactSpec*)contact_list_[i])->setMaxFz(
-            reference_trajectory_module_->getMaxNormalForce(i, sp_->curr_time));
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(max_fz_); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(0.); // left foot
+        }
+    } else {
+        // left stance, right swing
+        for (int i = 0; i < 2; ++i) {
+            ((PointContactSpec*)contact_list_[i])->setMaxFz(0.); // right foot
+            ((PointContactSpec*)contact_list_[i+2])->setMaxFz(max_fz_); // left foot
+        }
     }
 }
 
@@ -238,7 +339,7 @@ void SingleSupportCtrl::_task_setup() {
     bodyori_task_->updateTask(
             bodyori_pos_des, bodyori_vel_des, bodyori_acc_des);
 
-    // Foot Task
+    // Point Foot Task
     Eigen::VectorXd zero_vec = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd rfoot_front_pos =
         robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();
@@ -253,21 +354,86 @@ void SingleSupportCtrl::_task_setup() {
     lfoot_front_task_->updateTask(lfoot_front_pos, zero_vec, zero_vec);
     lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
 
-    // Task Weights
-    task_weight_heirarchy_[0] = com_task_weight_;
-    task_weight_heirarchy_[1] = bodyori_task_weight_;
-    task_weight_heirarchy_[2] = rfoot_task_weight_;
-    task_weight_heirarchy_[3] = rfoot_task_weight_;
-    task_weight_heirarchy_[4] = lfoot_task_weight_;
-    task_weight_heirarchy_[5] = lfoot_task_weight_;
+    // Line Foot Task
+    Eigen::Vector3d swing_foot_pos_des, swing_foot_vel_des, swing_foot_acc_des;
+    Eigen::Quaternion<double> swing_foot_quat_des;
+    Eigen::Vector3d swing_foot_ang_vel_des, swing_foot_ang_acc_des;
+
+    double s(state_machine_time_ / end_time_);
+    foot_ori_trajectory_->evaluate(s, swing_foot_quat_des);
+    foot_ori_trajectory_->getAngularVelocity(s, swing_foot_ang_vel_des);
+    foot_ori_trajectory_->getAngularAcceleration(s, swing_foot_ang_acc_des);
+    if (state_machine_time_ < 0.5 * end_time_) {
+        s = 2 * state_machine_time_ / end_time
+        swing_foot_pos_des = foot_pos_traj_init_to_mid_->evaluate(s);
+        swing_foot_vel_des = foot_pos_traj_init_to_mid_->evaluateFirstDerivative(s);
+        swing_foot_acc_des = foot_pos_traj_init_to_mid_->evaluateSecondDerivative(s);
+    } else {
+        foot_pos_traj_mid_to_end_;
+        s = 2 * (state_machine_time_ / end_time - 0.5)
+        swing_foot_pos_des = foot_pos_traj_mid_to_end_->evaluate(s);
+        swing_foot_vel_des = foot_pos_traj_mid_to_end_->evaluateFirstDerivative(s);
+        swing_foot_acc_des = foot_pos_traj_mid_to_end_->evaluateSecondDerivative(s);
+    }
+
+    Eigen::VectorXd swing_foot_pos_task_des(7);
+    Eigen::VectorXd swing_foot_vel_task_des(6);
+    Eigen::VectorXd swing_foot_acc_task_des(6);
+    swing_foot_pos_task_des << swing_foot_quat_des.w(), swing_foot_quat_des.x(),
+                            swing_foot_quat_des.y(), swing_foot_quat_des.z(),
+                            swing_foot_pos_des[0], swing_foot_pos_des[1],
+                            swing_foot_pos_des[2];
+    for (int i = 0; i < 3; ++i) {
+        swing_foot_vel_task_des[i] = swing_foot_ang_vel_des[i];
+        swing_foot_vel_task_des[i+3] = swing_foot_vel_des[i];
+        swing_foot_acc_task_des[i] = swing_foot_ang_acc_des[i];
+        swing_foot_acc_task_des[i+3] = swing_foot_acc_des[i];
+    }
+
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+        lfoot_line_task_->updateTask(swing_foot_pos_task_des,
+                swing_foot_vel_task_des,, swing_foot_acc_task_des);
+    } else {
+        // left stance, right swing
+        rfoot_line_task_->updateTask(swing_foot_pos_task_des,
+                swing_foot_vel_task_des,, swing_foot_acc_task_des);
+    }
 
     // Update Task List
     task_list_.push_back(com_task_);
     task_list_.push_back(bodyori_task_);
-    task_list_.push_back(rfoot_front_task_);
-    task_list_.push_back(rfoot_back_task_);
-    task_list_.push_back(lfoot_front_task_);
-    task_list_.push_back(lfoot_back_task_);
+
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+        task_list_.push_back(lfoot_line_task_);
+        task_list_.push_back(rfoot_front_task_);
+        task_list_.push_back(rfoot_back_task_);
+    } else {
+        // left stance, right swing
+        task_list_.push_back(rfoot_line_task_);
+        task_list_.push_back(lfoot_front_task_);
+        task_list_.push_back(lfoot_back_task_);
+    }
+
+    // Task Weights
+    task_weight_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    task_weight_heirarchy_[0] = com_task_weight_;
+    task_weight_heirarchy_[1] = bodyori_task_weight_;
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+        // right stance, left swing
+        task_weight_heirarchy_[2] = 1e-2; //left swing
+        task_weight_heirarchy_[3] = rfoot_task_weight_;
+        task_weight_heirarchy_[4] = rfoot_task_weight_;
+    } else {
+        // left stance, right swing
+        task_weight_heirarchy_[2] = 1e-2; //right swing
+        task_weight_heirarchy_[3] = lfoot_task_weight_;
+        task_weight_heirarchy_[4] = lfoot_task_weight_;
+    }
 }
 
 void SingleSupportCtrl::_compute_torque_ihwbc() {

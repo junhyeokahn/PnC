@@ -211,14 +211,6 @@ void StandUpCtrl::_task_setup() {
     lfoot_front_task_->updateTask(lfoot_front_pos, zero_vec, zero_vec);
     lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
 
-    // Task Weights
-    task_weight_heirarchy_[0] = com_task_weight_;
-    task_weight_heirarchy_[1] = bodyori_task_weight_;
-    task_weight_heirarchy_[2] = rfoot_task_weight_;
-    task_weight_heirarchy_[3] = rfoot_task_weight_;
-    task_weight_heirarchy_[4] = lfoot_task_weight_;
-    task_weight_heirarchy_[5] = lfoot_task_weight_;
-
     // Update Task List
     task_list_.push_back(com_task_);
     task_list_.push_back(bodyori_task_);
@@ -226,6 +218,15 @@ void StandUpCtrl::_task_setup() {
     task_list_.push_back(rfoot_back_task_);
     task_list_.push_back(lfoot_front_task_);
     task_list_.push_back(lfoot_back_task_);
+
+    // Task Weights
+    task_weight_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    task_weight_heirarchy_[0] = com_task_weight_;
+    task_weight_heirarchy_[1] = bodyori_task_weight_;
+    task_weight_heirarchy_[2] = rfoot_task_weight_;
+    task_weight_heirarchy_[3] = rfoot_task_weight_;
+    task_weight_heirarchy_[4] = lfoot_task_weight_;
+    task_weight_heirarchy_[5] = lfoot_task_weight_;
 }
 
 void StandUpCtrl::_compute_torque_ihwbc() {

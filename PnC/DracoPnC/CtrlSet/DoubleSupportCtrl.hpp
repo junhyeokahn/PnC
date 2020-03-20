@@ -28,27 +28,17 @@ class DoubleSupportCtrl : public Controller {
             initial_double_support_dur_ = val;
         }
 
-        void setFinalDoubleSupportDuration(double val) {
-            final_double_support_dur_ = val;
-        }
-
-        void setTransitionTime(double val) {trans_time_ = val;}
-
-        void setSwingTime(double val) {swing_time_ = val;}
-
-        void setSwingHeight(double val) {swing_height_ = val;}
-
         void setCoMHeight(double val) {target_com_height_ = val;}
+
+        void setAlphaRatio(double val) {alpha_ds_ = val;}
 
     protected:
         WalkingReferenceTrajectoryModule* walking_reference_trajectory_module_;
 
+        double alpha_ds_;
+        double max_fz_;
         double double_support_dur_;
         double initial_double_support_dur_;
-        double final_double_support_dur_;
-        double trans_time_;
-        double swing_time_;
-        double swing_height_;
         double target_com_height_;
         int dim_contact_;
         bool b_do_plan_;

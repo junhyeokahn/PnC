@@ -113,7 +113,6 @@ bool DoubleSupportCtrl::endOfPhase() {
 }
 
 void DoubleSupportCtrl::ctrlInitialization(const YAML::Node& node) {
-    // Maximum Reaction Force
     myUtils::readParameter(node, "max_fz", max_fz_);
 
     // Task Weights
@@ -211,37 +210,46 @@ void DoubleSupportCtrl::_references_setup() {
     double first_ds_dur;
     Eigen::Vector3d first_foot_translate;
     if (sp_->num_residual_steps == sp_->num_total_stpes) {
-        first_ds_dur = initial_double_support_dur_;
+        //first_ds_dur = initial_double_support_dur_;
         first_foot_translate = foot_translate;
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.t_transfer =
+            initial_double_support_dur_ - (1+alpha_ds_)*double_support_dur_;
     } else {
-        first_ds_dur = double_support_dur_;
+        //first_ds_dur = double_support_dur_;
         first_foot_translate = 2*foot_translate;
+        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+            dcm_reference.t_transfer = (1-alpha_ds_)*double_support_dur_;
     }
 
     std::vector<DracoFootstep> footstep_list;
+    Eigen::Vector3d swing_foot_target_pos;
+    Eigen::Quaternion<double> swing_foot_target_quat;
     if (sp_->phase_copy == 2) {
         // Stance: Left
         if (sp_->num_residual_steps == 0) {
             // Add Last Right Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                foot_translate;
+            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
             DracoFootstep rfoot_last;
-            rfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(rfoot_start->position) +
-                    foot_translate, foot_rotate*rfoot_start->orientation,
-                    DRACO_RIGHT_FOOTSTEP);
-            rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
-            // TODO: change temporal parameter here
-
+            rfoot_last.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
+            //rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(rfoot_last);
         } else if (sp_->num_residual_steps == 1) {
             // Add First Right Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                first_foot_translate;
+            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
             DracoFootstep rfoot_first;
-            rfoot_first.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(rfoot_start->position) +
-                    first_foot_translate, foot_rotate*rfoot_start->orientation,
-                    DRACO_RIGHT_FOOTSTEP);
-            rfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
-                    swing_height_);
+            rfoot_first.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
+            //rfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
+                    //swing_height_);
             footstep_list.push_back(rfoot_first);
             // Add Last Left Step
             DracoFootstep lfoot_last;
@@ -249,18 +257,20 @@ void DoubleSupportCtrl::_references_setup() {
                 foot_rotate.toRotationMatrix()*(lfoot_start->position) +
                 foot_translate, foot_rotate*lfoot_start->orientation,
                 DRACO_LEFT_FOOTSTEP);
-            lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(lfoot_last);
         } else {
             // Add First Right Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                first_foot_translate;
+            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
             DracoFootstep rfoot_first;
-            rfoot_first.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(rfoot_start->position) +
-                    first_foot_translate, foot_rotate*rfoot_start->orientation,
-                    DRACO_RIGHT_FOOTSTEP);
-            rfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
-                    swing_height_);
+            rfoot_first.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
+            //rfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
+                    //swing_height_);
             footstep_list.push_back(rfoot_first);
             // Add Second Left Step
             DracoFootstep lfoot_second;
@@ -268,8 +278,8 @@ void DoubleSupportCtrl::_references_setup() {
                 foot_rotate.toRotationMatrix()*(lfoot_start->position) +
                 2*foot_translate, foot_rotate*lfoot_start->orientation,
                 DRACO_LEFT_FOOTSTEP);
-            lfoot_second.setWalkingParams(double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //lfoot_second.setWalkingParams(double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(lfoot_second);
             // Add Last Right Step
             DracoFootstep rfoot_last;
@@ -277,31 +287,35 @@ void DoubleSupportCtrl::_references_setup() {
                     foot_rotate.toRotationMatrix()*(rfoot_first->position) +
                     foot_translate, foot_rotate*rfoot_first->orientation,
                     DRACO_RIGHT_FOOTSTEP);
-            rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(rfoot_last);
         }
     } else {
         // Stance: Right
         if (sp_->num_residual_steps == 0) {
             // Add Last Left Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                foot_translate;
+            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
             DracoFootstep lfoot_last;
-            lfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(lfoot_start->position) +
-                    foot_translate, foot_rotate*lfoot_start->orientation,
-                    DRACO_LEFT_FOOTSTEP);
-            lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            lfoot_last.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
+            //lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(lfoot_last);
         } else if (sp_->num_residual_steps == 1) {
             // Add First Left Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                first_foot_translate;
+            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
             DracoFootstep lfoot_first;
-            lfoot_first.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(lfoot_start->position) +
-                    first_foot_translate, foot_rotate*lfoot_start->orientation,
-                    DRACO_LEFT_FOOTSTEP);
-            lfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
-                    swing_height_);
+            lfoot_first.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
+            //lfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
+                    //swing_height_);
             footstep_list.push_back(lfoot_first);
             // Add Last Right Step
             DracoFootstep rfoot_last;
@@ -309,18 +323,20 @@ void DoubleSupportCtrl::_references_setup() {
                 foot_rotate.toRotationMatrix()*(rfoot_start->position) +
                 foot_translate, foot_rotate*rfoot_start->orientation,
                 DRACO_RIGHT_FOOTSTEP);
-            rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //rfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(rfoot_last);
         } else {
             // Add First Left Step
+            swing_foot_target_pos =
+                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                first_foot_translate;
+            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
             DracoFootstep lfoot_first;
-            lfoot_first.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(lfoot_start->position) +
-                    first_foot_translate, foot_rotate*lfoot_start->orientation,
-                    DRACO_LEFT_FOOTSTEP);
-            lfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
-                    swing_height_);
+            lfoot_first.setPosOriSide(swing_foot_target_pos,
+                    swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
+            //lfoot_first.setWalkingParams(first_ds_dur, trans_time_, swing_time_,
+                    //swing_height_);
             footstep_list.push_back(lfoot_first);
             // Add Second Right Step
             DracoFootstep rfoot_second;
@@ -328,8 +344,8 @@ void DoubleSupportCtrl::_references_setup() {
                 foot_rotate.toRotationMatrix()*(rfoot_start->position) +
                 2*foot_translate, foot_rotate*rfoot_start->orientation,
                 DRACO_RIGHTT_FOOTSTEP);
-            rfoot_second.setWalkingParams(double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //rfoot_second.setWalkingParams(double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(rfoot_second);
             // Add Last Left Step
             DracoFootstep lfoot_last;
@@ -337,15 +353,18 @@ void DoubleSupportCtrl::_references_setup() {
                     foot_rotate.toRotationMatrix()*(lfoot_first->position) +
                     foot_translate, foot_rotate*lfoot_first->orientation,
                     DRACO_LEFT_FOOTSTEP);
-            lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
-                    swing_time_, swing_height_);
+            //lfoot_last.setWalkingParams(final_double_support_dur_, trans_time_,
+                    //swing_time_, swing_height_);
             footstep_list.push_back(lfoot_last);
         }
     }
+    for (int i = 0; i < 3; ++i) {
+        sp_->swing_foot_target_pos[i] = swing_foot_target_pos[i];
+    }
+    sp_->swing_foot_target_quat = swing_foot_target_quat;
 
     reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
 
-    // TODO : Debug this sequencer works well for all the cases
     for(int i = 0; i < desired_footstep_list_.size(); i++){
         printf("Step %i:\n", i);
         desired_footstep_list_[i].printInfo();
@@ -364,9 +383,7 @@ void DoubleSupportCtrl::_walking_contact_setup() {
     contact_list_.push_back(lfoot_back_contact_);
 
     for(int i = 0; i < contact_list_.size(); i++){
-        // TODO : Is this setting 500(N) for all points?
-        ((PointContactSpec*)contact_list_[i])->setMaxFz(
-            reference_trajectory_module_->getMaxNormalForce(i, sp_->curr_time));
+        ((PointContactSpec*)contact_list_[i])->setMaxFz(max_fz_);
     }
 }
 
@@ -380,6 +397,10 @@ void DoubleSupportCtrl::_balancing_contact_setup() {
     contact_list_.push_back(rfoot_back_contact_);
     contact_list_.push_back(lfoot_front_contact_);
     contact_list_.push_back(lfoot_back_contact_);
+
+    for(int i = 0; i < contact_list_.size(); i++){
+        ((PointContactSpec*)contact_list_[i])->setMaxFz(max_fz_);
+    }
 }
 
 void DoubleSupportCtrl::_walking_task_setup() {
@@ -414,7 +435,8 @@ void DoubleSupportCtrl::_walking_task_setup() {
     com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
 
     com_pos_des[2] = target_com_height_;
-    com_vel_des[2] = com_vel_ref[2]; // TODO : Not 0?
+    //com_vel_des[2] = com_vel_ref[2];
+    com_vel_des[2] = 0.;
     com_acc_des[2] = 0.;
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
@@ -528,14 +550,6 @@ void DoubleSupportCtrl::_balancing_task_setup(){
     lfoot_front_task_->updateTask(lfoot_front_pos, zero_vec, zero_vec);
     lfoot_back_task_->updateTask(lfoot_back_pos, zero_vec, zero_vec);
 
-    // Task Weights
-    task_weight_heirarchy_[0] = com_task_weight_;
-    task_weight_heirarchy_[1] = bodyori_task_weight_;
-    task_weight_heirarchy_[2] = rfoot_task_weight_;
-    task_weight_heirarchy_[3] = rfoot_task_weight_;
-    task_weight_heirarchy_[4] = lfoot_task_weight_;
-    task_weight_heirarchy_[5] = lfoot_task_weight_;
-
     // Update Task List
     task_list_.push_back(com_task_);
     task_list_.push_back(bodyori_task_);
@@ -543,6 +557,15 @@ void DoubleSupportCtrl::_balancing_task_setup(){
     task_list_.push_back(rfoot_back_task_);
     task_list_.push_back(lfoot_front_task_);
     task_list_.push_back(lfoot_back_task_);
+
+    // Task Weights
+    task_weight_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    task_weight_heirarchy_[0] = com_task_weight_;
+    task_weight_heirarchy_[1] = bodyori_task_weight_;
+    task_weight_heirarchy_[2] = rfoot_task_weight_;
+    task_weight_heirarchy_[3] = rfoot_task_weight_;
+    task_weight_heirarchy_[4] = lfoot_task_weight_;
+    task_weight_heirarchy_[5] = lfoot_task_weight_;
 }
 
 void DoubleSupportCtrl::_compute_torque_ihwbc() {
