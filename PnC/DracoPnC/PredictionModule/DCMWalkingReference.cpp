@@ -163,6 +163,9 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
   dcm_vel_end_DS_list.clear();
   dcm_acc_end_DS_list.clear();
 
+  // Set initial DCM boundary condition
+  ini_dcm_pos = initial_rvrp;
+
   // Add the initial virtual repellant point. 
   rvrp_list.push_back(initial_rvrp); 
   // Specify that this is the eos for the previous rvrp
@@ -179,6 +182,10 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
 
   Eigen::Vector3d initial_rvrp; 
   get_average_rvrp(left_footstance, right_footstance, initial_rvrp);
+
+  // Set initial DCM velocity boundary condition
+  ini_dcm_vel.setZero();
+
   // Set the stance leg
   if (input_footstep_list[0].robot_side == DRACO_LEFT_FOOTSTEP){
     initialize_footsteps_rvrp(input_footstep_list, right_footstance, initial_rvrp);
@@ -193,11 +200,34 @@ void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFoots
     return;
   }
 
+  // Set initial DCM velocity boundary condition
+  ini_dcm_vel.setZero();
+
   // Set the stance leg
   if (input_footstep_list[0].robot_side == DRACO_LEFT_FOOTSTEP){
     initialize_footsteps_rvrp(input_footstep_list, right_footstance, initial_com);
   }else{
     initialize_footsteps_rvrp(input_footstep_list, left_footstance, initial_com);
+  }
+
+}
+
+void DCMWalkingReference::initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, 
+                               const DracoFootstep & left_footstance, const DracoFootstep & right_footstance, 
+                               const Eigen::Vector3d & initial_dcm, const Eigen::Vector3d & initial_dcm_vel){
+
+  if (input_footstep_list.size() == 0){ 
+    return;
+  }
+
+  // Set initial DCM velocity boundary condition
+  ini_dcm_vel = initial_dcm_vel;
+
+  // Set the stance leg
+  if (input_footstep_list[0].robot_side == DRACO_LEFT_FOOTSTEP){
+    initialize_footsteps_rvrp(input_footstep_list, right_footstance, initial_dcm);
+  }else{
+    initialize_footsteps_rvrp(input_footstep_list, left_footstance, initial_dcm);
   }
 
 }
@@ -370,8 +400,7 @@ double DCMWalkingReference::get_polynomial_duration(const int step_index){
 
 Eigen::Vector3d DCMWalkingReference::computeDCM_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
-    return rvrp_list.front();
-    // return get_DCM_exp(step_index, 0.0);
+    return ini_dcm_pos;
   }
   return rvrp_list[step_index - 1] + std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
@@ -389,7 +418,7 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
 
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
-    return Eigen::Vector3d::Zero();
+    return ini_dcm_vel;
   }
 
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
