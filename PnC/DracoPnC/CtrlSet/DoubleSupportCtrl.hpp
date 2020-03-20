@@ -42,6 +42,7 @@ class DoubleSupportCtrl : public Controller {
         double target_com_height_;
         int dim_contact_;
         bool b_do_plan_;
+        double ctrl_start_time_;
 
         Eigen::Vector3d ini_com_pos_;
         Eigen::Vector3d ini_com_vel_;
@@ -87,4 +88,6 @@ class DoubleSupportCtrl : public Controller {
         void _walking_contact_setup();
         void _balancing_contact_setup();
         void _references_setup();
+
+        DracoStateProvider* sp_;
 };

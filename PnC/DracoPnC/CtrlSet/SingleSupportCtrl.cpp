@@ -9,9 +9,9 @@
 #include <PnC/MPC/CMPC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
-
 #include <Utils/Math/hermite_curve_vec.hpp>
 #include <Utils/Math/hermite_quaternion_curve.hpp>
+#include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
 
 SingleSupportCtrl::SingleSupportCtrl(RobotSystem* robot,
         WalkingReferenceTrajectoryModule* walking_module) : Controller(robot) {
@@ -78,7 +78,7 @@ void SingleSupportCtrl::firstVisit() {
     //_compute_swing_foot_trajectory_spline();
     _compute_swing_foot_trajectory_hermite();
 
-    if (sp_->num_residual_step == -1) {
+    if (sp_->num_residual_steps == -1) {
         sp_->b_walking = false;
     }
 }
@@ -111,7 +111,7 @@ void SingleSupportCtrl::_compute_swing_foot_trajectory_spline(){
     double ini[9];
     double fin[9];
     double** middle_pt = new double*[1];
-    middle_pt[i] = new double[3];
+    middle_pt[0] = new double[3];
     Eigen::VectorXd ini_pos;
     Eigen::VectorXd fin_pos = sp_->swing_foot_target_pos;
     Eigen::Quaternion<double> ini_quat;
@@ -149,7 +149,7 @@ void SingleSupportCtrl::_compute_swing_foot_trajectory_spline(){
     foot_pos_spline_traj_.SetParam(ini, fin, middle_pt, end_time_);
 
     delete[] * middle_pt;
-    delete[] middel_pt;
+    delete[] middle_pt;
 
     foot_ori_trajectory_.reset(new HermiteQuaternionCurve(ini_quat,
                 Eigen::Vector3d::Zero(3), fin_quat, Eigen::Vector3d::Zero(3)));
@@ -291,13 +291,13 @@ void SingleSupportCtrl::_task_setup() {
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
     Eigen::Vector3d com_pos_ref, com_vel_ref, com_pos, com_vel;
-    reference_trajectory_module_->getMPCRefComPosandVel(
+    walking_reference_trajectory_module_->getMPCRefComPosandVel(
             sp_->curr_time, com_pos_ref, com_vel_ref);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_dcm(sp_->curr_time, sp_->dcm_des);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_dcm_vel(sp_->curr_time, sp_->dcm_vel_des);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_r_vrp(sp_->curr_time, sp_->r_vrp_des);
 
     com_pos = robot_->getCoMPosition();
@@ -312,6 +312,7 @@ void SingleSupportCtrl::_task_setup() {
     Eigen::VectorXd rdot_id = sp_->dcm_vel_des.head(2);
     Eigen::VectorXd r_icp_error = (r_ic - r_id);
     double kp_ic(20.);
+    double omega_o = std::sqrt(9.81/target_com_height_);
     Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);
     com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
 
@@ -328,13 +329,13 @@ void SingleSupportCtrl::_task_setup() {
 
     Eigen::Quaterniond ori_ref;
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
-    reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(sp_->curr_time,
+    walking_reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(sp_->curr_time,
             ori_ref, ang_vel_ref, ang_acc_ref);
     bodyori_pos_des << ori_ref.w(), ori_ref.x(), ori_ref.y(), ori_ref.z();
     for (int i = 0; i < 3; ++i) {
-        bodyori_vel_des[i] << ang_vel_ref[i];
-        bodyori_acc_des[i] << ang_acc_ref[i];
-        //bodyori_acc_des[i] << 0.;
+        bodyori_vel_des[i] = ang_vel_ref[i];
+        bodyori_acc_des[i] = ang_acc_ref[i];
+        //bodyori_acc_des[i] = 0.;
     }
     bodyori_task_->updateTask(
             bodyori_pos_des, bodyori_vel_des, bodyori_acc_des);
@@ -364,13 +365,13 @@ void SingleSupportCtrl::_task_setup() {
     foot_ori_trajectory_->getAngularVelocity(s, swing_foot_ang_vel_des);
     foot_ori_trajectory_->getAngularAcceleration(s, swing_foot_ang_acc_des);
     if (state_machine_time_ < 0.5 * end_time_) {
-        s = 2 * state_machine_time_ / end_time
+        s = 2 * state_machine_time_ / end_time_;
         swing_foot_pos_des = foot_pos_traj_init_to_mid_->evaluate(s);
         swing_foot_vel_des = foot_pos_traj_init_to_mid_->evaluateFirstDerivative(s);
         swing_foot_acc_des = foot_pos_traj_init_to_mid_->evaluateSecondDerivative(s);
     } else {
         foot_pos_traj_mid_to_end_;
-        s = 2 * (state_machine_time_ / end_time - 0.5)
+        s = 2 * (state_machine_time_ / end_time_ - 0.5);
         swing_foot_pos_des = foot_pos_traj_mid_to_end_->evaluate(s);
         swing_foot_vel_des = foot_pos_traj_mid_to_end_->evaluateFirstDerivative(s);
         swing_foot_acc_des = foot_pos_traj_mid_to_end_->evaluateSecondDerivative(s);
@@ -394,11 +395,11 @@ void SingleSupportCtrl::_task_setup() {
                 DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
         // right stance, left swing
         lfoot_line_task_->updateTask(swing_foot_pos_task_des,
-                swing_foot_vel_task_des,, swing_foot_acc_task_des);
+                swing_foot_vel_task_des, swing_foot_acc_task_des);
     } else {
         // left stance, right swing
         rfoot_line_task_->updateTask(swing_foot_pos_task_des,
-                swing_foot_vel_task_des,, swing_foot_acc_task_des);
+                swing_foot_vel_task_des, swing_foot_acc_task_des);
     }
 
     // Update Task List
@@ -440,26 +441,26 @@ void SingleSupportCtrl::_compute_torque_ihwbc() {
     // Update Setting
     Eigen::MatrixXd A_rotor = A_;
     for (int i = 0; i < Draco::n_adof; ++i) {
-        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->robot_inertia[i];
+        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->rotor_inertia[i];
     }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
-    ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
+    ihwbc_->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
 
     // Enable Torque Limits
-    ihwbc->enableTorqueLimits(true);
-    ihwbc->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
+    ihwbc_->enableTorqueLimits(true);
+    ihwbc_->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
             100*Eigen::VectorXd::Ones(Draco::n_adof));
 
     // Set QP Weights
-    ihwbc->setQPWeights(task_weight_heirarchy_,
+    ihwbc_->setQPWeights(task_weight_heirarchy_,
             rf_tracking_weight_/robot_->getRobotMass()*9.81);
-    ihwbc->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
+    ihwbc_->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
 
     // Solve
-    ihwbc->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
+    ihwbc_->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
             tau_cmd_, qddot_cmd_);
-    ihwbc->getQddotResult(sp_->qddot_cmd);
-    ihwbc->getFrResult(sp_->reaction_forces);
+    ihwbc_->getQddotResult(sp_->qddot_cmd);
+    ihwbc_->getFrResult(sp_->reaction_forces);
 
     // Integrate Joint Velocities
     Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(Draco::n_adof);
@@ -468,7 +469,7 @@ void SingleSupportCtrl::_compute_torque_ihwbc() {
     sp_->des_jvel = sp_->des_jvel*alphaVelocity + (1. - alphaVelocity)*qdot_des_ref;
     sp_->des_jvel += (qddot_cmd_ * DracoAux::ServoRate);
     for (int i = 0; i < sp_->des_jvel.size(); ++i) {
-        des_jvel[i] = myUtils::CropValue(sp_->des_jvel[i], -max_jvel, max_jvel);
+        sp_->des_jvel[i] = myUtils::CropValue(sp_->des_jvel[i], -max_jvel_, max_jvel_);
     }
 
     // Integrate Joint Positions

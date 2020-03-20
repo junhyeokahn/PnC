@@ -37,6 +37,7 @@ class TransitionCtrl : public Controller {
         Eigen::Vector3d ini_com_vel_;
         Eigen::Vector3d goal_com_pos_;
         double target_com_height_;
+        double ctrl_start_time_;
 
         Eigen::VectorXd tau_cmd_;
         Eigen::VectorXd tau_cmd_old_;
@@ -75,4 +76,6 @@ class TransitionCtrl : public Controller {
         void _compute_torque_ihwbc();
         void _task_setup();
         void _contact_setup();
+
+        DracoStateProvider* sp_;
 };

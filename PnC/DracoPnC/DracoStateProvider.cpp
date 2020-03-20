@@ -93,7 +93,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     data_manager->RegisterData(&lfoot_center_so3, VECT3, "lfoot_so3", 3);
     data_manager->RegisterData(&rfoot_center_quat, QUATERNION, "rfoot_quat", 4);
     data_manager->RegisterData(&lfoot_center_quat, QUATERNION, "lfoot_quat", 4);
-    data_manager->RegisterData(&des_quat, QUATERNION, "des_quat", 4);
 
     data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3);
     data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3);

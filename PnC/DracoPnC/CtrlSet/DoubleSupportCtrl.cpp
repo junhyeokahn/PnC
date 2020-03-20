@@ -9,6 +9,9 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
+#include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
+#include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
+
 DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot,
         WalkingReferenceTrajectoryModule* walking_module) : Controller(robot) {
     myUtils::pretty_constructor(2, "Double Support Ctrl");
@@ -190,17 +193,19 @@ void DoubleSupportCtrl::_references_setup() {
     Eigen::Quaternion<double> x_ori_start = myUtils::EulerZYXtoQuat(sp_->q[5],
             sp_->q[4], sp_->q[3]);
 
-    DracoFootstep rfoot_start, lfoot_start;
+    DracoFootstep rfoot_start;
+    DracoFootstep lfoot_start;
     Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
     Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
-    lfoot_start->setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
+    lfoot_start.setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
 
     Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
     Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
-    rfoot_start->setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
+    rfoot_start.setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
 
-    reference_trajectory_module_->setStartingConfiguration(x_com_start,
-            x_ori_start, *lfoot_start, *rfoot_start);
+    // TODO : Change this with initialize
+    walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
+            x_ori_start, lfoot_start, rfoot_start);
 
     // Footstep Sequences
     // TODO : Set this value from API later.
@@ -209,16 +214,16 @@ void DoubleSupportCtrl::_references_setup() {
 
     double first_ds_dur;
     Eigen::Vector3d first_foot_translate;
-    if (sp_->num_residual_steps == sp_->num_total_stpes) {
+    if (sp_->num_residual_steps == sp_->num_total_steps) {
         //first_ds_dur = initial_double_support_dur_;
         first_foot_translate = foot_translate;
-        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
             dcm_reference.t_transfer =
             initial_double_support_dur_ - (2-alpha_ds_)*double_support_dur_;
     } else {
         //first_ds_dur = double_support_dur_;
         first_foot_translate = 2*foot_translate;
-        ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
             dcm_reference.t_transfer = (alpha_ds_-1)*double_support_dur_;
     }
 
@@ -230,9 +235,9 @@ void DoubleSupportCtrl::_references_setup() {
         if (sp_->num_residual_steps == 0) {
             // Add Last Right Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
                 foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
             DracoFootstep rfoot_last;
             rfoot_last.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
@@ -240,9 +245,9 @@ void DoubleSupportCtrl::_references_setup() {
         } else if (sp_->num_residual_steps == 1) {
             // Add First Right Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
                 first_foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
             DracoFootstep rfoot_first;
             rfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
@@ -250,16 +255,16 @@ void DoubleSupportCtrl::_references_setup() {
             // Add Last Left Step
             DracoFootstep lfoot_last;
             lfoot_last.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
-                foot_translate, foot_rotate*lfoot_start->orientation,
+                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
+                foot_translate, foot_rotate*lfoot_start.orientation,
                 DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_last);
         } else {
             // Add First Right Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
                 first_foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
             DracoFootstep rfoot_first;
             rfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
@@ -267,15 +272,15 @@ void DoubleSupportCtrl::_references_setup() {
             // Add Second Left Step
             DracoFootstep lfoot_second;
             lfoot_second.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
-                2*foot_translate, foot_rotate*lfoot_start->orientation,
+                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
+                2*foot_translate, foot_rotate*lfoot_start.orientation,
                 DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_second);
             // Add Last Right Step
             DracoFootstep rfoot_last;
             rfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(rfoot_first->position) +
-                    foot_translate, foot_rotate*rfoot_first->orientation,
+                    foot_rotate.toRotationMatrix()*(rfoot_first.position) +
+                    foot_translate, foot_rotate*rfoot_first.orientation,
                     DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_last);
         }
@@ -284,9 +289,9 @@ void DoubleSupportCtrl::_references_setup() {
         if (sp_->num_residual_steps == 0) {
             // Add Last Left Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
                 foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
             DracoFootstep lfoot_last;
             lfoot_last.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
@@ -294,9 +299,9 @@ void DoubleSupportCtrl::_references_setup() {
         } else if (sp_->num_residual_steps == 1) {
             // Add First Left Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
                 first_foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
             DracoFootstep lfoot_first;
             lfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
@@ -304,16 +309,16 @@ void DoubleSupportCtrl::_references_setup() {
             // Add Last Right Step
             DracoFootstep rfoot_last;
             rfoot_last.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
-                foot_translate, foot_rotate*rfoot_start->orientation,
+                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
+                foot_translate, foot_rotate*rfoot_start.orientation,
                 DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_last);
         } else {
             // Add First Left Step
             swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start->position) +
+                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
                 first_foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start->orientation;
+            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
             DracoFootstep lfoot_first;
             lfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
@@ -321,15 +326,15 @@ void DoubleSupportCtrl::_references_setup() {
             // Add Second Right Step
             DracoFootstep rfoot_second;
             rfoot_second.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(rfoot_start->position) +
-                2*foot_translate, foot_rotate*rfoot_start->orientation,
-                DRACO_RIGHTT_FOOTSTEP);
+                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
+                2*foot_translate, foot_rotate*rfoot_start.orientation,
+                DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_second);
             // Add Last Left Step
             DracoFootstep lfoot_last;
             lfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(lfoot_first->position) +
-                    foot_translate, foot_rotate*lfoot_first->orientation,
+                    foot_rotate.toRotationMatrix()*(lfoot_first.position) +
+                    foot_translate, foot_rotate*lfoot_first.orientation,
                     DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_last);
         }
@@ -339,11 +344,11 @@ void DoubleSupportCtrl::_references_setup() {
     }
     sp_->swing_foot_target_quat = swing_foot_target_quat;
 
-    reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
+    walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
 
-    for(int i = 0; i < desired_footstep_list_.size(); i++){
+    for(int i = 0; i < footstep_list.size(); i++){
         printf("Step %i:\n", i);
-        desired_footstep_list_[i].printInfo();
+        footstep_list[i].printInfo();
     }
 }
 
@@ -386,13 +391,13 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
     Eigen::Vector3d com_pos_ref, com_vel_ref, com_pos, com_vel;
-    reference_trajectory_module_->getMPCRefComPosandVel(
+    walking_reference_trajectory_module_->getMPCRefComPosandVel(
             sp_->curr_time, com_pos_ref, com_vel_ref);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_dcm(sp_->curr_time, sp_->dcm_des);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_dcm_vel(sp_->curr_time, sp_->dcm_vel_des);
-    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
         dcm_reference.get_ref_r_vrp(sp_->curr_time, sp_->r_vrp_des);
 
     com_pos = robot_->getCoMPosition();
@@ -407,6 +412,7 @@ void DoubleSupportCtrl::_walking_task_setup() {
     Eigen::VectorXd rdot_id = sp_->dcm_vel_des.head(2);
     Eigen::VectorXd r_icp_error = (r_ic - r_id);
     double kp_ic(20.);
+    double omega_o = std::sqrt(9.81/target_com_height_);
     Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);
     com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
 
@@ -424,13 +430,13 @@ void DoubleSupportCtrl::_walking_task_setup() {
 
     Eigen::Quaterniond ori_ref;
     Eigen::Vector3d ang_vel_ref, ang_acc_ref;
-    reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(sp_->curr_time,
+    walking_reference_trajectory_module_->getMPCRefQuatAngVelAngAcc(sp_->curr_time,
             ori_ref, ang_vel_ref, ang_acc_ref);
     bodyori_pos_des << ori_ref.w(), ori_ref.x(), ori_ref.y(), ori_ref.z();
     for (int i = 0; i < 3; ++i) {
-        bodyori_vel_des[i] << ang_vel_ref[i];
-        bodyori_acc_des[i] << ang_acc_ref[i];
-        //bodyori_acc_des[i] << 0.;
+        bodyori_vel_des[i] = ang_vel_ref[i];
+        bodyori_acc_des[i] = ang_acc_ref[i];
+        //bodyori_acc_des[i] = 0.;
     }
     bodyori_task_->updateTask(
             bodyori_pos_des, bodyori_vel_des, bodyori_acc_des);
@@ -475,11 +481,11 @@ void DoubleSupportCtrl::_balancing_task_setup(){
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
     if (state_machine_time_ < stab_time) {
         for (int i = 0; i < 3; ++i) {
-            com_pos_des[i] = myUtils::smooth_changing(ini_com_pos[i],
+            com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i],
                     goal_com_pos_[i], stab_time, state_machine_time_);
-            com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos[i],
+            com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos_[i],
                     goal_com_pos_[i], stab_time, state_machine_time_);
-            com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos[i],
+            com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos_[i],
                     goal_com_pos_[i], stab_time, state_machine_time_);
             sp_->com_pos_des[i] = com_pos_des[i];
             sp_->com_vel_des[i] = com_vel_des[i];
@@ -548,26 +554,26 @@ void DoubleSupportCtrl::_compute_torque_ihwbc() {
     // Update Setting
     Eigen::MatrixXd A_rotor = A_;
     for (int i = 0; i < Draco::n_adof; ++i) {
-        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->robot_inertia[i];
+        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->rotor_inertia[i];
     }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
-    ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
+    ihwbc_->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
 
     // Enable Torque Limits
-    ihwbc->enableTorqueLimits(true);
-    ihwbc->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
+    ihwbc_->enableTorqueLimits(true);
+    ihwbc_->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
             100*Eigen::VectorXd::Ones(Draco::n_adof));
 
     // Set QP Weights
-    ihwbc->setQPWeights(task_weight_heirarchy_,
+    ihwbc_->setQPWeights(task_weight_heirarchy_,
             rf_tracking_weight_/robot_->getRobotMass()*9.81);
-    ihwbc->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
+    ihwbc_->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
 
     // Solve
-    ihwbc->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
+    ihwbc_->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
             tau_cmd_, qddot_cmd_);
-    ihwbc->getQddotResult(sp_->qddot_cmd);
-    ihwbc->getFrResult(sp_->reaction_forces);
+    ihwbc_->getQddotResult(sp_->qddot_cmd);
+    ihwbc_->getFrResult(sp_->reaction_forces);
 
     // Integrate Joint Velocities
     Eigen::VectorXd qdot_des_ref = Eigen::VectorXd::Zero(Draco::n_adof);
@@ -576,7 +582,7 @@ void DoubleSupportCtrl::_compute_torque_ihwbc() {
     sp_->des_jvel = sp_->des_jvel*alphaVelocity + (1. - alphaVelocity)*qdot_des_ref;
     sp_->des_jvel += (qddot_cmd_ * DracoAux::ServoRate);
     for (int i = 0; i < sp_->des_jvel.size(); ++i) {
-        des_jvel[i] = myUtils::CropValue(sp_->des_jvel[i], -max_jvel, max_jvel);
+        sp_->des_jvel[i] = myUtils::CropValue(sp_->des_jvel[i], -max_jvel_, max_jvel_);
     }
 
     // Integrate Joint Positions
@@ -584,7 +590,7 @@ void DoubleSupportCtrl::_compute_torque_ihwbc() {
     double alphaPosition = myUtils::computeAlphaGivenBreakFrequency(
             position_break_freq_, DracoAux::ServoRate);
     sp_->des_jpos = sp_->des_jpos*alphaPosition + (1.0 - alphaPosition)*q_des_ref;
-    sp_->des_jpos += (des_jvel_*DracoAux::ServoRate);
+    sp_->des_jpos += (sp_->des_jvel*DracoAux::ServoRate);
     for (int i = 0; i < sp_->des_jpos.size(); ++i) {
         sp_->des_jpos[i] = myUtils::CropValue(sp_->des_jpos[i],
                 q_des_ref[i]-max_jpos_error_, q_des_ref[i]+max_jpos_error_);

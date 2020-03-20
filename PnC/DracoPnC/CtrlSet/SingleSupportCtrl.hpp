@@ -44,6 +44,7 @@ class SingleSupportCtrl : public Controller {
         Eigen::Vector3d goal_com_pos_;
         double target_com_height_;
         double swing_height_;
+        double ctrl_start_time_;
 
         Eigen::VectorXd tau_cmd_;
         Eigen::VectorXd tau_cmd_old_;
@@ -92,4 +93,6 @@ class SingleSupportCtrl : public Controller {
         void _contact_setup();
         void _compute_swing_foot_trajectory_spline();
         void _compute_swing_foot_trajectory_hermite();
+
+        DracoStateProvider* sp_;
 };

@@ -18,7 +18,7 @@ class DracoStateProvider {
     int num_residual_steps;
 
     Eigen::VectorXd swing_foot_target_pos;
-    Eigen::Quaternion<double> swing_foot_target_quat;_
+    Eigen::Quaternion<double> swing_foot_target_quat;
 
     double curr_time;
 

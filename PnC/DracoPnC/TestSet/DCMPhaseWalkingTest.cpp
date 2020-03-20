@@ -24,7 +24,7 @@ DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
 
     ds_ctrl_ = new DoubleSupportCtrl(robot, reference_trajectory_module_);
 
-    right_swing_ctrl_ = new SingleSupportCtrl(robot, reference_trajectory_module_)
+    right_swing_ctrl_ = new SingleSupportCtrl(robot, reference_trajectory_module_);
     left_swing_ctrl_ = new SingleSupportCtrl(robot,
             reference_trajectory_module_);
 

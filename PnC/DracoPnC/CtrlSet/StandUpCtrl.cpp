@@ -177,11 +177,11 @@ void StandUpCtrl::_task_setup() {
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
     for (int i = 0; i < 3; ++i) {
-        com_pos_des[i] = myUtils::smooth_changing(ini_com_pos[i],
+        com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i],
                 target_com_pos_[i], end_time_, state_machine_time_);
-        com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos[i],
+        com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos_[i],
                 target_com_pos_[i], end_time_, state_machine_time_);
-        com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos[i],
+        com_acc_des[i] = myUtils::smooth_changing_acc(ini_com_pos_[i],
                 target_com_pos_[i], end_time_, state_machine_time_);
         sp_->com_pos_des[i] = com_pos_des[i];
         sp_->com_vel_des[i] = com_vel_des[i];
@@ -233,24 +233,24 @@ void StandUpCtrl::_compute_torque_ihwbc() {
     // Update Setting
     Eigen::MatrixXd A_rotor = A_;
     for (int i = 0; i < Draco::n_adof; ++i) {
-        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->robot_inertia[i];
+        A_rotor(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->rotor_inertia[i];
     }
     Eigen::MatrixXd A_rotor_inv = A_rotor.inverse();
-    ihwbc->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
+    ihwbc_->updateSetting(A_rotor, A_rotor_inv, coriolis_, grav_);
 
     // Enable Torque Limits
-    ihwbc->enableTorqueLimits(true);
-    ihwbc->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
+    ihwbc_->enableTorqueLimits(true);
+    ihwbc_->setTorqueLimits(-100*Eigen::VectorXd::Ones(Draco::n_adof),
             100*Eigen::VectorXd::Ones(Draco::n_adof));
 
     // Set QP Weights
-    ihwbc->setQPWeights(task_weight_heirarchy_,
+    ihwbc_->setQPWeights(task_weight_heirarchy_,
             rf_tracking_weight_/robot_->getRobotMass()*9.81);
-    ihwbc->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
+    ihwbc_->setRegularizationTerms(qddot_reg_weight_, rf_reg_weight_);
 
     // Solve
-    ihwbc->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
+    ihwbc_->solve(task_list_, contact_list_, Eigen::VectorXd::Zero(dim_contact_),
             tau_cmd_, qddot_cmd_);
-    ihwbc->getQddotResult(sp_->qddot_cmd);
-    ihwbc->getFrResult(sp_->reaction_forces);
+    ihwbc_->getQddotResult(sp_->qddot_cmd);
+    ihwbc_->getFrResult(sp_->reaction_forces);
 }

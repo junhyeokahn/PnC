@@ -35,6 +35,7 @@ class StandUpCtrl : public Controller {
         int dim_contact_;
         Eigen::Vector3d ini_com_pos_;
         Eigen::Vector3d target_com_pos_;
+        double ctrl_start_time_;
 
         Eigen::VectorXd tau_cmd_;
         Eigen::VectorXd tau_cmd_old_;
@@ -75,4 +76,6 @@ class StandUpCtrl : public Controller {
         void _compute_torque_ihwbc();
         void _task_setup();
         void _contact_setup();
+
+        DracoStateProvider* sp_;
 };
