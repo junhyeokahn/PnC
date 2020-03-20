@@ -26,13 +26,15 @@ control_configuration:
         position_break_freq: 1.0 # Hz # 0.0 # Higher value decays to current jpos faster
 
         # Task Weights
+        kp_icp: 20 #DCM gain
+
         foot_rz_xyz_kp: [300.0, 300.0, 300.0, 300.0]
         foot_rz_xyz_kd: [35, 35, 35, 35]
 
         com_kp: [50.0, 50.0, 200.0]
         com_kd: [20.0, 20.0, 28.0]
  
-        body_kp: [5.0, 5.0, 50.0]
+        body_kp: [50.0, 50.0, 50.0]
         body_kd: [20.0, 20.0, 20.0]
 
         joint_kp: [10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 ]

@@ -30,6 +30,9 @@ public:
   std::vector<Eigen::Vector3d> dcm_ini_list; // List of initial DCM states 
   std::vector<Eigen::Vector3d> dcm_eos_list; // List of end-of-step DCM states
 
+  // Initial DCM states
+  Eigen::Vector3d ini_dcm_pos;
+  Eigen::Vector3d ini_dcm_vel;
 
   // map containing the rvrp index that have a corresponding footstep swing
   std::map<int, int> rvrp_index_to_footstep_index;
@@ -48,12 +51,11 @@ public:
   std::vector<MinJerkCurveVec> dcm_minjerk; // minjerk curves for interpolation
 
   // DCM walking parameters
-  double t_transfer = 0.1 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
-  double t_ds = 0.05; //0.1; // double support polynomial transfer time
+  double t_transfer = 0.1; //0.125 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
+  double t_ds = 0.05; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
   double t_midstep_transfer = 0.15;
 
-  double t_additional_settle = 1.25; // Additional settle time. 
   double percentage_settle = 0.99;//0.999; // percent to converge at the end of the trajectory
 
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
@@ -87,6 +89,15 @@ public:
   //        right_footstance       - a footstep object describing the right stance feet
   //        initial_com            - the initial location of the com 
   void initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, const DracoFootstep & left_footstance, const DracoFootstep & right_footstance, const Eigen::Vector3d & initial_com);
+
+  // input: input_footstep_list - a list of footsteps to take not including the current stance configuration.
+  //        left_footstance        - a footstep object describing the left stance feet
+  //        right_footstance       - a footstep object describing the right stance feet
+  //        initial_dcm            - the initial starting position of the dcm
+  //        initial_dcm_vel        - the initial starting velocity of the dcm
+  void initialize_footsteps_rvrp(const std::vector<DracoFootstep> & input_footstep_list, 
+                                 const DracoFootstep & left_footstance, const DracoFootstep & right_footstance, 
+                                 const Eigen::Vector3d & initial_dcm, const Eigen::Vector3d & initial_dcm_vel);
 
 
   // Compute: DCM, DCM vel, CoM, CoM Vel, given time, t.

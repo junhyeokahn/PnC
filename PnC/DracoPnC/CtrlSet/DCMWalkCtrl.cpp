@@ -80,6 +80,8 @@ DCMWalkCtrl::DCMWalkCtrl(RobotSystem* robot) : Controller(robot) {
     std::vector<int> contact_index_to_side = {DRACO_RIGHT_FOOTSTEP, DRACO_RIGHT_FOOTSTEP,
                                               DRACO_LEFT_FOOTSTEP, DRACO_LEFT_FOOTSTEP};
     reference_trajectory_module_ = new DCMWalkingReferenceTrajectoryModule(contact_index_to_side);
+    // DCM gain
+    kp_icp_ = 20;
 
     left_foot_start_ = new DracoFootstep();
     right_foot_start_ = new DracoFootstep();
@@ -268,6 +270,11 @@ void DCMWalkCtrl::references_setup(){
     double swing_time_in = 0.5;
     factor = 1.0;
 
+    // Eigen::Vector3d foot_translate(-0.075, 0.0, 0.0);
+    // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
+    // double swing_time_in = 0.3;
+    // factor = 1.0;
+
     // Eigen::Vector3d foot_translate(0.0, -0.075, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
     // double swing_time_in = 0.4;
@@ -300,24 +307,24 @@ void DCMWalkCtrl::references_setup(){
 
     // Compute landing locations from the current midfoot location
     // translate from the nominal midfoot configuration.
-    double nominal_midfoot_distance = 0.33;
-    DracoFootstep current_midfoot; current_midfoot.computeMidfeet(*left_foot_start_, *right_foot_start_, current_midfoot);
-    DracoFootstep midfoot_land; 
-    DracoFootstep rfoot_proxy ; 
-    DracoFootstep lfoot_proxy;
+    // double nominal_midfoot_distance = 0.33;
+    // DracoFootstep current_midfoot; current_midfoot.computeMidfeet(*left_foot_start_, *right_foot_start_, current_midfoot);
+    // DracoFootstep midfoot_land; 
+    // DracoFootstep rfoot_proxy ; 
+    // DracoFootstep lfoot_proxy;
 
-    midfoot_land.setPosOriSide(foot_rotate.toRotationMatrix()*current_midfoot.position + foot_translate,
-                           foot_rotate*current_midfoot.orientation,
-                           DRACO_MID_FOOTSTEP);
+    // midfoot_land.setPosOriSide(foot_rotate.toRotationMatrix()*current_midfoot.position + foot_translate,
+    //                        foot_rotate*current_midfoot.orientation,
+    //                        DRACO_MID_FOOTSTEP);
 
-    rfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0.0),
-                           midfoot_land.orientation,
-                           DRACO_RIGHT_FOOTSTEP);
-    lfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0.0),
-                           midfoot_land.orientation,
-                           DRACO_LEFT_FOOTSTEP);
-    rfootstep_1 = rfoot_proxy;
-    lfootstep_1 = lfoot_proxy;
+    // rfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0.0),
+    //                        midfoot_land.orientation,
+    //                        DRACO_RIGHT_FOOTSTEP);
+    // lfoot_proxy.setPosOriSide(midfoot_land.position + midfoot_land.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0.0),
+    //                        midfoot_land.orientation,
+    //                        DRACO_LEFT_FOOTSTEP);
+    // rfootstep_1 = rfoot_proxy;
+    // lfootstep_1 = lfoot_proxy;
 
 
 
@@ -346,13 +353,25 @@ void DCMWalkCtrl::references_setup(){
                               foot_rotate*lfootstep_1.orientation, 
                               DRACO_LEFT_FOOTSTEP);
 
+    DracoFootstep rfootstep_3; // take a rightfootstep
+    rfootstep_3.setPosOriSide(rfootstep_2.position + foot_translate*factor, 
+                              foot_rotate*rfootstep_2.orientation, 
+                              DRACO_RIGHT_FOOTSTEP);
+
+    DracoFootstep lfootstep_3; // take a leftfootstep
+    lfootstep_3.setPosOriSide(lfootstep_2.position + foot_translate*factor, 
+                              foot_rotate*lfootstep_2.orientation, 
+                              DRACO_LEFT_FOOTSTEP);
+
 
     // Clear then add footsteps to the list.
     desired_footstep_list_.clear();
     desired_footstep_list_.push_back(rfootstep_1);
     desired_footstep_list_.push_back(lfootstep_1);
-    // desired_footstep_list_.push_back(rfootstep_2);
-    // desired_footstep_list_.push_back(lfootstep_2);
+    desired_footstep_list_.push_back(rfootstep_2);
+    desired_footstep_list_.push_back(lfootstep_2);
+    desired_footstep_list_.push_back(rfootstep_3);
+    desired_footstep_list_.push_back(lfootstep_3);
 
     for(int i = 0; i < desired_footstep_list_.size(); i++){
         printf("Step %i:\n", i);
@@ -361,7 +380,10 @@ void DCMWalkCtrl::references_setup(){
 
     // Update the reference trajectory module
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_transfer = 0.1;
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ds = 0.05;
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ss = swing_time_in;
+
     reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
     end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
     end_time_ += walk_start_time_;
@@ -564,9 +586,9 @@ void DCMWalkCtrl::task_setup() {
         // icp_acc_error_[0] = clamp_value(icp_acc_error_[0], -icp_sat_error_, icp_sat_error_);
         // icp_acc_error_[1] = clamp_value(icp_acc_error_[1], -icp_sat_error_, icp_sat_error_);
 
-        double kp_ic = 20.0;
-        Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);// + ki_ic_*icp_acc_error_;
-        // Eigen::VectorXd r_CMP_d = r_ic + kp_ic * (r_icp_error);
+        double kp_icp = kp_icp_;
+        Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_icp * (r_icp_error);// + ki_ic_*icp_acc_error_;
+        // Eigen::VectorXd r_CMP_d = r_ic + kp_icp * (r_icp_error);
 
         // myUtils::pretty_print(r_icp_error, std::cout, "r_icp_error");
         // myUtils::pretty_print(icp_acc_error_, std::cout, "icp_acc_error_");
@@ -661,8 +683,8 @@ void DCMWalkCtrl::task_setup() {
     lfoot_pos_des[3] = lfoot_ori_act.z();
     lfoot_pos_des.tail(3) = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
 
-    rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
-    lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+    // rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+    // lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
 
     Eigen::VectorXd foot_pos_d(3); foot_pos_d.setZero();
     Eigen::VectorXd foot_vel_d(3); foot_vel_d.setZero();
@@ -740,6 +762,7 @@ void DCMWalkCtrl::task_setup() {
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
         rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+        rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }else{
         // Set Point Tasks
         foot_pos_d =  robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootFront).translation();   
@@ -747,7 +770,10 @@ void DCMWalkCtrl::task_setup() {
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootBack).translation();
         rfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
         // Set Line Task
+        foot_vel_des.setZero(); 
+        foot_acc_des.setZero();
         rfoot_line_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
+        rfoot_center_rz_xyz_task->updateTask(rfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     if (ctrl_state_ == DRACO_STATE_LLS){
@@ -767,7 +793,7 @@ void DCMWalkCtrl::task_setup() {
         foot_acc_des.tail(3) = f_acc;
         // Set Line Task
         lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
-
+        lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     }else{
         // Set Point Tasks
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootFront).translation();
@@ -775,7 +801,10 @@ void DCMWalkCtrl::task_setup() {
         foot_pos_d = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootBack).translation();
         lfoot_back_task->updateTask(foot_pos_d, foot_vel_d, foot_acc_d);        
         // Set Line Task
+        foot_vel_des.setZero(); 
+        foot_acc_des.setZero();
         lfoot_line_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
+        lfoot_center_rz_xyz_task->updateTask(lfoot_pos_des, foot_vel_des, foot_acc_des);
     }
 
     // std::cout << "  rFootCenter = " << robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation().transpose() << std::endl;  
@@ -844,10 +873,12 @@ void DCMWalkCtrl::task_setup() {
 
     if (ctrl_state_ == DRACO_STATE_RLS){
         task_list_.push_back(rfoot_line_task);
+        // task_list_.push_back(rfoot_center_rz_xyz_task);
         task_list_.push_back(lfoot_front_task);
         task_list_.push_back(lfoot_back_task);
     }else if (ctrl_state_ == DRACO_STATE_LLS){
         task_list_.push_back(lfoot_line_task);            
+        // task_list_.push_back(lfoot_center_rz_xyz_task);
         task_list_.push_back(rfoot_front_task);
         task_list_.push_back(rfoot_back_task);            
     }else{
@@ -1056,6 +1087,8 @@ void DCMWalkCtrl::ctrlInitialization(const YAML::Node& node) {
         myUtils::readParameter(node, "position_break_freq", position_break_freq_);
 
         // Task Gains
+        myUtils::readParameter(node, "kp_icp", kp_icp_);
+
         myUtils::readParameter(node, "foot_rz_xyz_kp", kp_foot);
         myUtils::readParameter(node, "foot_rz_xyz_kd", kd_foot);
 
@@ -1100,6 +1133,8 @@ void DCMWalkCtrl::ctrlInitialization(const YAML::Node& node) {
     rfoot_line_task->setGain(kp_line_task, kd_line_task);
     lfoot_line_task->setGain(kp_line_task, kd_line_task);
 
+    rfoot_center_rz_xyz_task->setGain(kp_line_task, kd_line_task);
+    lfoot_center_rz_xyz_task->setGain(kp_line_task, kd_line_task);
 
 
     com_task_->setGain(com_kp, com_kd);

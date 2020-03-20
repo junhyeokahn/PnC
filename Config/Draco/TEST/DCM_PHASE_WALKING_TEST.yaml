@@ -10,8 +10,8 @@ test_configuration:
     # Temporal parameters
     # t_ss = 2*transition_ctrl_time + single_support_ctrl_time
     # t_ds = double_support_ctrl_time
-    # t_transfer = initial_double_support_ctrl_time - (1+alpha)*double_support_ctrl_time (Only for the first step)
-    #            = (1-alpha_ds)*double_support_ctrl_time (For the reset of steps)
+    # t_transfer = initial_double_support_ctrl_time - (2-alpha)*double_support_ctrl_time (Only for the first step)
+    #            = (alpha_ds-1)*double_support_ctrl_time (For the reset of steps)
     initial_double_support_ctrl_time: 0.175
     double_support_ctrl_time: 0.05
     transition_ctrl_time: 0.03

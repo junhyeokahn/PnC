@@ -106,7 +106,7 @@ double DCMWalkingReactionForceSchedule::getMaxNormalForce(const int index, const
 		        return default_max_z_force_;
 		    }
 		    // Otherwise return the computed transition force
-		   return Fz_out;
+		   return clampMaxFz(Fz_out);
 		}
 
 	}else{
@@ -121,7 +121,10 @@ double DCMWalkingReactionForceSchedule::getMaxNormalForce(const int index, const
 double DCMWalkingReactionForceSchedule::clampMaxFz(double Fz_in){
     if (Fz_in >= default_max_z_force_){
         return default_max_z_force_;
-    }else{
+    }else if (Fz_in < 0){
+    	return 0;
+    }
+    else{
         return Fz_in;
     }
 }

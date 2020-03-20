@@ -31,6 +31,13 @@ public:
 
 	void setFootsteps(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in);
 
+	void initialize(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in,
+											const Eigen::Vector3d  dcm_pos_start_in,
+											const Eigen::Vector3d  dcm_vel_start_in,	
+										    const Eigen::Quaterniond & ori_start_in,
+										    const DracoFootstep & left_foot_start_in,
+										    const DracoFootstep & right_foot_start_in);
+
 	// Get the maximum normal force
 	double getMaxNormalForce(int index, double time);
 
