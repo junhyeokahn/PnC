@@ -380,7 +380,10 @@ void DCMWalkCtrl::references_setup(){
 
     // Update the reference trajectory module
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_transfer = 0.1;
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ds = 0.05;
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ss = swing_time_in;
+
     reference_trajectory_module_->setFootsteps(walk_start_time_, desired_footstep_list_);
     end_time_ = ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
     end_time_ += walk_start_time_;

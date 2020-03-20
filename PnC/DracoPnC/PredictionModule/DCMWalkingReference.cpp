@@ -271,18 +271,10 @@ void DCMWalkingReference::computeDCM_states(){
    dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, (1.0-alpha_ds)*t_ds);          
   }
 
-  for (int i = 0; i < rvrp_list.size(); i++){
-    if (i == 0){
-      dcm_end_DS_list[i] = computeDCM_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);
-      dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);
-      dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, t_transfer + (1.0-alpha_ds)*t_ds);          
-    }else{
-      dcm_end_DS_list[i] = computeDCM_eoDS_i(i, (1.0-alpha_ds)*t_ds);
-      dcm_vel_end_DS_list[i] = computeDCMvel_eoDS_i(i, (1.0-alpha_ds)*t_ds);
-      dcm_acc_end_DS_list[i] = computeDCMacc_eoDS_i(i, (1.0-alpha_ds)*t_ds);          
-    }
-
-  }
+  // Recompute first DS polynomial boundary conditions again
+  dcm_end_DS_list[0] = computeDCM_eoDS_i(0, t_transfer + alpha_ds*t_ds);
+  dcm_vel_end_DS_list[0] = computeDCMvel_eoDS_i(0, t_transfer + alpha_ds*t_ds);
+  dcm_acc_end_DS_list[0] = computeDCMacc_eoDS_i(0, t_transfer + alpha_ds*t_ds);          
 
   // printBoundaryConditions();
 
@@ -367,9 +359,8 @@ void DCMWalkingReference::compute_total_trajectory_time(){
 }
 
 double DCMWalkingReference::get_polynomial_duration(const int step_index){
-  // first step has polynomial duration of only ending double support
   if (step_index == 0){
-    return t_transfer + (1.0-alpha_ds)*t_ds;  
+    return t_transfer + t_ds + (1-alpha_ds)*t_ds;  
   } 
   else if (step_index == (rvrp_list.size() - 1)){
     return t_ds; //alpha_ds*t_ds; // Not sure why... But the final duration must not be below t_ds.
@@ -391,7 +382,7 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
     return rvrp_list.back();
   }
   else if (step_index == 0){
-    return dcm_ini_DS_list[step_index + 1];
+    return dcm_end_DS_list[step_index + 1];
   }
   return rvrp_list[step_index] + std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -399,7 +390,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCM_eoDS_i(const int & step_index, c
 Eigen::Vector3d DCMWalkingReference::computeDCMvel_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
     return Eigen::Vector3d::Zero();
-    // return get_DCM_vel_exp(step_index, 0.0);
   }
 
   return (1.0/b)*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
@@ -411,7 +401,7 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index
     return Eigen::Vector3d::Zero();
   }
   else if (step_index == 0){
-    return dcm_vel_ini_DS_list[step_index + 1];
+    return dcm_vel_end_DS_list[step_index + 1];
   }   
   return (1.0/b)*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -420,7 +410,6 @@ Eigen::Vector3d DCMWalkingReference::computeDCMvel_eoDS_i(const int & step_index
 Eigen::Vector3d DCMWalkingReference::computeDCMacc_iniDS_i(const int & step_index, const double t_DS_ini){
   if (step_index == 0){
     return Eigen::Vector3d::Zero();
-    // return get_DCM_acc_exp(step_index, 0.0);
   }  
   return (1.0/(std::pow(b,2)))*std::exp(-t_DS_ini/b) * (dcm_ini_list[step_index] - rvrp_list[step_index - 1]);
 }
@@ -429,8 +418,9 @@ Eigen::Vector3d DCMWalkingReference::computeDCMacc_eoDS_i(const int & step_index
   // Set Boundary condition. Accelerations at the very end are always 0.0
   if (step_index == (rvrp_list.size() - 1)){
     return Eigen::Vector3d::Zero();
-  } else if (step_index == 0){
-    return dcm_acc_ini_DS_list[step_index + 1];
+  } 
+  else if (step_index == 0){
+    return dcm_acc_end_DS_list[step_index + 1];
   }   
   return (1.0/(std::pow(b,2)))*std::exp(t_DS_end/b) * (dcm_ini_list[step_index] - rvrp_list[step_index]);
 }
@@ -662,6 +652,11 @@ int DCMWalkingReference::which_step_index_to_use(const double t){
   for (int i = 0; i < rvrp_list.size(); i++){
     t_ds_step_start = get_double_support_t_start(i);
     t_exp_step_end = get_t_step_end(i) - (alpha_ds*t_ds);
+
+    if (i == 0){
+        t_exp_step_end = get_double_support_t_end(i+1);
+    }
+
     if ((t_ds_step_start <= t) && (t <= t_exp_step_end)){
       return i;
     }

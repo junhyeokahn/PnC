@@ -48,12 +48,11 @@ public:
   std::vector<MinJerkCurveVec> dcm_minjerk; // minjerk curves for interpolation
 
   // DCM walking parameters
-  double t_transfer = 0.1 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
-  double t_ds = 0.05; //0.1; // double support polynomial transfer time
+  double t_transfer = 0.1; //0.125 ; //0.1; // exponential interpolation transfer time during initial transfer or same step transfer
+  double t_ds = 0.05; // double support polynomial transfer time
   double t_ss = 0.3; // single support exponential interpolation  time
   double t_midstep_transfer = 0.15;
 
-  double t_additional_settle = 1.25; // Additional settle time. 
   double percentage_settle = 0.99;//0.999; // percent to converge at the end of the trajectory
 
   double alpha_ds = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
