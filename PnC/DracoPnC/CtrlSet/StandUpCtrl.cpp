@@ -64,7 +64,6 @@ StandUpCtrl::~StandUpCtrl() {
 }
 
 void StandUpCtrl::firstVisit() {
-    std::cout << "First Visit of StandUpCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
     ini_com_pos_ = robot_->getCoMPosition();
 
@@ -78,7 +77,6 @@ void StandUpCtrl::firstVisit() {
 }
 
 void StandUpCtrl::lastVisit() {
-    std::cout << "Last Visit of StandUpCtrl" << std::endl;
     sp_->des_jpos = sp_->q.tail(Draco::n_adof);
     sp_->des_jvel = Eigen::VectorXd::Zero(Draco::n_adof);
 }

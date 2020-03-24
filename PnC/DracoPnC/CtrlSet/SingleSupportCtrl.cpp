@@ -73,7 +73,6 @@ SingleSupportCtrl::~SingleSupportCtrl() {
 }
 
 void SingleSupportCtrl::firstVisit() {
-    std::cout << "First Visit of SingleSupportCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
     //_compute_swing_foot_trajectory_spline();
     _compute_swing_foot_trajectory_hermite();
@@ -84,7 +83,6 @@ void SingleSupportCtrl::firstVisit() {
 }
 
 void SingleSupportCtrl::lastVisit() {
-    std::cout << "Last Visit of SingleSupportCtrl" << std::endl;
 }
 
 bool SingleSupportCtrl::endOfPhase() {

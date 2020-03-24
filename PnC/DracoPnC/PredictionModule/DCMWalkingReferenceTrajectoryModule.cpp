@@ -25,7 +25,8 @@ void DCMWalkingReferenceTrajectoryModule::setFootsteps(double t_walk_start_in, c
     // Set DCM reference
 	dcm_reference.setInitialTime(t_walk_start_);
 	dcm_reference.setInitialOri(x_ori_start_);
-	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_, right_foot_start_, x_com_start_);
+	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_,
+            right_foot_start_, x_com_start_);
 }
 
 void DCMWalkingReferenceTrajectoryModule::initialize(double t_walk_start_in, const std::vector<DracoFootstep> & footstep_list_in,
@@ -47,7 +48,8 @@ void DCMWalkingReferenceTrajectoryModule::initialize(double t_walk_start_in, con
     // Set DCM reference
 	dcm_reference.setInitialTime(t_walk_start_);
 	dcm_reference.setInitialOri(x_ori_start_);
-	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_, right_foot_start_, dcm_pos_start_in, dcm_vel_start_in);
+	dcm_reference.initialize_footsteps_rvrp(footstep_list_, left_foot_start_,
+            right_foot_start_, dcm_pos_start_in, dcm_vel_start_in);
 }
 
 void DCMWalkingReferenceTrajectoryModule::getMPCRefComAndOri(const double time, Eigen::Vector3d & x_com_out, Eigen::Quaterniond & x_ori_out){

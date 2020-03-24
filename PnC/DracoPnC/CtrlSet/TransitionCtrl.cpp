@@ -67,12 +67,10 @@ TransitionCtrl::~TransitionCtrl() {
 }
 
 void TransitionCtrl::firstVisit() {
-    std::cout << "First Visit of TransitionCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
 }
 
 void TransitionCtrl::lastVisit() {
-    std::cout << "Last Visit of TransitionCtrl" << std::endl;
 }
 
 bool TransitionCtrl::endOfPhase() {

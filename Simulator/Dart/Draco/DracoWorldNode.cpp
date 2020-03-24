@@ -217,7 +217,7 @@ void DracoWorldNode::_hold_rot() {
     mTorqueCommand[3] = kp * (-q[3]) + kd * (-v[3]);
     mTorqueCommand[4] = kp * (-q[4]) + kd * (-v[4]);
     mTorqueCommand[5] = kp * (-q[5]) + kd * (-v[5]);
-}   
+}
 
 void DracoWorldNode::_hold_xy() {
     static double des_x = (mSkel->getPositions())[0];

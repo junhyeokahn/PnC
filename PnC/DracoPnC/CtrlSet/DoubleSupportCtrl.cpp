@@ -69,7 +69,6 @@ DoubleSupportCtrl::~DoubleSupportCtrl() {
 }
 
 void DoubleSupportCtrl::firstVisit() {
-    std::cout << "First Visit of DoubleSupportCtrl" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
 
     ini_com_pos_ = robot_->getCoMPosition();
@@ -92,7 +91,6 @@ void DoubleSupportCtrl::firstVisit() {
 }
 
 void DoubleSupportCtrl::lastVisit() {
-    std::cout << "Last Visit of DoubleSupportCtrl" << std::endl;
 }
 
 bool DoubleSupportCtrl::endOfPhase() {
@@ -188,7 +186,7 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
 
 void DoubleSupportCtrl::_references_setup() {
 
-    // Set references initial condition
+    // References initial condition
     Eigen::Vector3d x_com_start = robot_->getCoMPosition();
     Eigen::Quaternion<double> x_ori_start = myUtils::EulerZYXtoQuat(sp_->q[5],
             sp_->q[4], sp_->q[3]);
@@ -203,13 +201,11 @@ void DoubleSupportCtrl::_references_setup() {
     Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
     rfoot_start.setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
 
-    // TODO : Change this with initialize
-    walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
-            x_ori_start, lfoot_start, rfoot_start);
 
     // Footstep Sequences
     // TODO : Set this value from API later.
-    Eigen::Vector3d foot_translate(0.01, 0.0, 0.0);
+    //Eigen::Vector3d foot_translate(0.01, 0.0, 0.0);
+    Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
     Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
     double first_ds_dur;
@@ -344,8 +340,20 @@ void DoubleSupportCtrl::_references_setup() {
     }
     sp_->swing_foot_target_quat = swing_foot_target_quat;
 
+    if (sp_->num_residual_steps == sp_->num_total_steps) {
+    walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
+            x_ori_start, lfoot_start, rfoot_start);
     walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
+    } else {
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
+            sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
+            lfoot_start, rfoot_start);
+    }
+    //walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
+            //x_ori_start, lfoot_start, rfoot_start);
+    //walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
 
+    myUtils::color_print(myColor::Red, "[FootStep Infos]");
     for(int i = 0; i < footstep_list.size(); i++){
         printf("Step %i:\n", i);
         footstep_list[i].printInfo();
