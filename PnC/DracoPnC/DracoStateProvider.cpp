@@ -21,6 +21,9 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
     num_residual_steps = 5;
     num_total_steps = 5;
 
+    swing_foot_target_pos = Eigen::VectorXd::Zero(3);
+    swing_foot_target_quat = Eigen::Quaternion<double>::Identity();
+
     q = Eigen::VectorXd::Zero(robot_->getNumDofs());
     qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
     rotor_inertia = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
