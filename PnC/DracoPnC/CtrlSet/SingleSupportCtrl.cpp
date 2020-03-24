@@ -91,18 +91,19 @@ bool SingleSupportCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
         return true;
     }
-    if (sp_->phase_copy == static_cast<int>(
-                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
-        // right stance, left swing
-        if ((state_machine_time_ > 0.5*end_time_ && sp_->b_lfoot_contact)) {
-            return true;
-        }
-    } else {
-        // left stance, right swing
-        if ((state_machine_time_ > 0.5*end_time_ && sp_->b_rfoot_contact)) {
-            return true;
-        }
-    }
+    // TODO : Incorporating contact sensor
+    //if (sp_->phase_copy == static_cast<int>(
+                //DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+         //right stance, left swing
+        //if ((state_machine_time_ > 0.5*end_time_ && sp_->b_lfoot_contact)) {
+            //return true;
+        //}
+    //} else {
+         //left stance, right swing
+        //if ((state_machine_time_ > 0.5*end_time_ && sp_->b_rfoot_contact)) {
+            //return true;
+        //}
+    //}
 
     return false;
 }
@@ -176,6 +177,9 @@ void SingleSupportCtrl::_compute_swing_foot_trajectory_hermite(){
     ini_quat = Eigen::Quaternion<double>(
             robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).linear());
     }
+
+    //myUtils::pretty_print(ini_pos, std::cout, "foot ini pos");
+    //myUtils::pretty_print(fin_pos, std::cout, "foot fin pos");
 
     Eigen::VectorXd mid_pos= (ini_pos + fin_pos) / 2.0;
     Eigen::VectorXd mid_vel = (fin_pos - ini_pos) / end_time_;
@@ -401,6 +405,8 @@ void SingleSupportCtrl::_task_setup() {
         rfoot_line_task_->updateTask(swing_foot_pos_task_des,
                 swing_foot_vel_task_des, swing_foot_acc_task_des);
     }
+
+    //myUtils::pretty_print(swing_foot_pos_task_des, std::cout, "foot_task_pos");
 
     // Update Task List
     task_list_.push_back(com_task_);
