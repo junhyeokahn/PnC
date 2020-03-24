@@ -15,7 +15,8 @@ plot_guided_foot: false
 camera_manipulator: false
 print_computation_time: false
 # release_time: 0.50
-release_time: 6.20
+#release_time: 6.20
+release_time: 4.0
 # release_time: 100   
 
 ### Toggle for RL ###
