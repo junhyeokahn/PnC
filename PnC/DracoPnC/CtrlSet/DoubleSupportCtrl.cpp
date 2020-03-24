@@ -340,18 +340,23 @@ void DoubleSupportCtrl::_references_setup() {
     }
     sp_->swing_foot_target_quat = swing_foot_target_quat;
 
-    if (sp_->num_residual_steps == sp_->num_total_steps) {
-    walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
-            x_ori_start, lfoot_start, rfoot_start);
-    walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
-    } else {
-        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
-            sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
-            lfoot_start, rfoot_start);
-    }
+    //if (sp_->num_residual_steps == sp_->num_total_steps) {
     //walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
             //x_ori_start, lfoot_start, rfoot_start);
     //walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
+    //} else {
+        //((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
+            //sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
+            //lfoot_start, rfoot_start);
+    //}
+
+    //walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
+            //x_ori_start, lfoot_start, rfoot_start);
+    //walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
+
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
+        sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
+        lfoot_start, rfoot_start);
 
     myUtils::color_print(myColor::Red, "[FootStep Infos]");
     for(int i = 0; i < footstep_list.size(); i++){
