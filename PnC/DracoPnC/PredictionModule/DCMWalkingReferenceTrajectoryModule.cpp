@@ -8,7 +8,7 @@ DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule(const s
     reaction_force_schedule_ptr.reset(new DCMWalkingReactionForceSchedule(this));
     setContactIndexToSide(index_to_side_in);
 
-    std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
+    //std::cout << "[DCMWalkingReferenceTrajectoryModule] Constructed" << std::endl;
 }
 
 DCMWalkingReferenceTrajectoryModule::~DCMWalkingReferenceTrajectoryModule(){

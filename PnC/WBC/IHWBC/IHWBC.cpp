@@ -8,7 +8,7 @@ IHWBC::IHWBC(const std::vector<bool> & act_list):
     b_updatesetting_(false), 
     b_torque_limits_(false),
     target_wrench_minimization(false) {
-    myUtils::pretty_constructor(1, "IHWBC");
+    myUtils::pretty_constructor(3, "IHWBC");
     // Set Number of degrees of freedom
     num_qdot_ = act_list.size();
     

@@ -9,7 +9,7 @@ int const DCMWalkingReference::DCM_MIDSTEP_TRANSFER_VRP_TYPE = 5;
 DCMWalkingReference::DCMWalkingReference(){
     initial_leftfoot_stance.setLeftSide();
     initial_rightfoot_stance.setRightSide();
-    std::cout << "[DCMWalkingReference] Constructed" << std::endl;
+    //std::cout << "[DCMWalkingReference] Constructed" << std::endl;
 } 
 
 DCMWalkingReference::~DCMWalkingReference(){

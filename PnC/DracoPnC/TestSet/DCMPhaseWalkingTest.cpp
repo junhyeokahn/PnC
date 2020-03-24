@@ -65,7 +65,7 @@ void DCMPhaseWalkingTest::TestInitialization() {
     jpos_target_ctrl_->ctrlInitialization(
             cfg_["control_configuration"]["joint_position_ctrl"]);
     stand_up_ctrl_->ctrlInitialization(
-            cfg_["control_configuration"]["stand_ctrl"]);
+            cfg_["control_configuration"]["stand_up_ctrl"]);
     ds_ctrl_->ctrlInitialization(
             cfg_["control_configuration"]["ds_ctrl"]);
     right_swing_ctrl_->ctrlInitialization(
