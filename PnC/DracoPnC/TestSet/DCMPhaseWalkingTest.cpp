@@ -125,6 +125,8 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         myUtils::readParameter(test_cfg, "com_height", tmp_val);
         ((StandUpCtrl*)stand_up_ctrl_)->setCoMHeight(tmp_val);
         ((DoubleSupportCtrl*)ds_ctrl_)->setCoMHeight(tmp_val);
+        ((SingleSupportCtrl*)right_swing_ctrl_)->setCoMHeight(tmp_val);
+        ((SingleSupportCtrl*)left_swing_ctrl_)->setCoMHeight(tmp_val);
         ((TransitionCtrl*)right_swing_start_ctrl_)->setCoMHeight(tmp_val);
         ((TransitionCtrl*)right_swing_end_ctrl_)->setCoMHeight(tmp_val);
         ((TransitionCtrl*)left_swing_start_ctrl_)->setCoMHeight(tmp_val);

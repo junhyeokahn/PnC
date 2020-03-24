@@ -92,18 +92,18 @@ bool SingleSupportCtrl::endOfPhase() {
         return true;
     }
     // TODO : Incorporating contact sensor
-    //if (sp_->phase_copy == static_cast<int>(
-                //DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
+    if (sp_->phase_copy == static_cast<int>(
+                DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
          //right stance, left swing
-        //if ((state_machine_time_ > 0.5*end_time_ && sp_->b_lfoot_contact)) {
-            //return true;
-        //}
-    //} else {
+        if ((state_machine_time_ > 0.5*end_time_ && sp_->b_lfoot_contact)) {
+            return true;
+        }
+    } else {
          //left stance, right swing
-        //if ((state_machine_time_ > 0.5*end_time_ && sp_->b_rfoot_contact)) {
-            //return true;
-        //}
-    //}
+        if ((state_machine_time_ > 0.5*end_time_ && sp_->b_rfoot_contact)) {
+            return true;
+        }
+    }
 
     return false;
 }
@@ -321,7 +321,7 @@ void SingleSupportCtrl::_task_setup() {
     com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
 
     com_pos_des[2] = target_com_height_;
-    com_vel_des[2] = com_vel_ref[2]; // TODO : Not 0?
+    com_vel_des[2] = com_vel_ref[2];
     com_acc_des[2] = 0.;
 
     com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);

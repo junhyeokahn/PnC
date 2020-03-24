@@ -28,7 +28,9 @@ class SingleSupportCtrl : public Controller {
 
         void setTotalCtrlTime(double val) {end_time_ = val;}
 
-        void setCoMHeight(double val) {target_com_height_ = val;}
+        void setCoMHeight(double val) {
+            target_com_height_ = val;
+        }
 
         void setSwingFootHeight(double val) {swing_height_ = val;}
 
