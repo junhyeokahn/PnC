@@ -67,6 +67,7 @@ TransitionCtrl::~TransitionCtrl() {
 }
 
 void TransitionCtrl::firstVisit() {
+    std::cout << "[[Transition Phase]]" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
 }
 

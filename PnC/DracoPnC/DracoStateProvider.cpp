@@ -18,8 +18,8 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
     b_walking = true;
     // TODO : Set this with API
-    num_residual_steps = 5;
-    num_total_steps = 5;
+    num_residual_steps = 1;
+    num_total_steps = 1;
 
     swing_foot_target_pos = Eigen::VectorXd::Zero(3);
     swing_foot_target_quat = Eigen::Quaternion<double>::Identity();

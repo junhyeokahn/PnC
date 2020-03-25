@@ -73,6 +73,7 @@ SingleSupportCtrl::~SingleSupportCtrl() {
 }
 
 void SingleSupportCtrl::firstVisit() {
+    std::cout << "[[Single Support Phase]]" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
     //_compute_swing_foot_trajectory_spline();
     _compute_swing_foot_trajectory_hermite();

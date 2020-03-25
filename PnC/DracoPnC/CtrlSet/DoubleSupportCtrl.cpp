@@ -70,6 +70,7 @@ DoubleSupportCtrl::~DoubleSupportCtrl() {
 }
 
 void DoubleSupportCtrl::firstVisit() {
+    std::cout << "[[Double Support Phase]]" << std::endl;
     ctrl_start_time_ = sp_->curr_time;
 
     ini_com_pos_ = robot_->getCoMPosition();
@@ -212,8 +213,8 @@ void DoubleSupportCtrl::_references_setup() {
     // TODO : Set this value from API later.
     //Eigen::Vector3d foot_translate(0.01, 0.0, 0.0);
     //Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
-    Eigen::Vector3d foot_translate(-0.045, 0.0, 0.0);
-    //Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
+    //Eigen::Vector3d foot_translate(-0.045, 0.0, 0.0);
+    Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
     Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
     double first_ds_dur;
