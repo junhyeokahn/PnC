@@ -2,6 +2,7 @@
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 LineFootTask::LineFootTask(RobotSystem* robot, int _link_idx) : Task(robot, 5) {
     myUtils::pretty_constructor(3, "Line Foot Task");
@@ -20,6 +21,9 @@ bool LineFootTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                                       _pos_des[3]);
     Eigen::Quaternion<double> ori_act(
         robot_->getBodyNodeIsometry(link_idx_).linear());
+
+    myUtils::avoid_quat_jump(des_ori, ori_act);
+
     Eigen::Quaternion<double> quat_ori_err = des_ori * ori_act.inverse();
     Eigen::Vector3d ori_err_so3 = dart::math::quatToExp(quat_ori_err);
 

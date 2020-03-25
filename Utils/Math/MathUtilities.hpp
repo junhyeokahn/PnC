@@ -88,4 +88,5 @@ Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in);
 Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
                                       const double roll_rate, const double pitch_rate, const double yaw_rate);
 
+void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori);
 }  // namespace myUtils
