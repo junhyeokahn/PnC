@@ -115,8 +115,8 @@ def main(args):
             zs=com_pos_ref[:, 2], linewidth=comref_linewidth,
             color=comref_linecolor)
     com_motion.plot(xs=dcm_pos_ref[:, 0], ys=dcm_pos_ref[:, 1],
-            zs=dcm_pos_ref[:, 2], linewidth=dcmref_linewidth, linestyle=line_styles["0"],
-            color=dcmref_linecolor)
+            zs=dcm_pos_ref[:, 2], linewidth=dcmref_linewidth,
+            linestyle=line_styles[0], color=dcmref_linecolor)
 
     # plot foot
     plot_foot(com_motion, np.squeeze(curr_rfoot_contact_pos),
@@ -138,6 +138,9 @@ def main(args):
     # ==========================================================================
     # Plot Trajectory
     # ==========================================================================
+
+    # fig1 = plt.figure()
+
 
     plt.show()
 if __name__ == "__main__":
