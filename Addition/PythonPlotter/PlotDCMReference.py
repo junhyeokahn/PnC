@@ -102,9 +102,9 @@ def main(args):
     axis_label_size = 14
     axis_tick_color = '#434440'
     axis_label_color = '#373834'
-    comref_linewidth = 3
+    comref_linewidth = 2
     comref_linecolor = 'darkorange'
-    dcmref_linewidth = 2
+    dcmref_linewidth = 4
     dcmref_linecolor = 'cornflowerblue'
 
     fig1 = plt.figure()
@@ -114,6 +114,9 @@ def main(args):
     com_motion.plot(xs=com_pos_ref[:, 0], ys=com_pos_ref[:, 1],
             zs=com_pos_ref[:, 2], linewidth=comref_linewidth,
             color=comref_linecolor)
+    com_motion.plot(xs=dcm_pos_ref[:, 0], ys=dcm_pos_ref[:, 1],
+            zs=dcm_pos_ref[:, 2], linewidth=dcmref_linewidth, linestyle="--",
+            color=dcmref_linecolor)
 
     # plot foot
     plot_foot(com_motion, np.squeeze(curr_rfoot_contact_pos),
