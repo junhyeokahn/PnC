@@ -90,6 +90,7 @@ public:
 	virtual bool whichFootstepIndexInSwing(const double time, int & footstep_index);
 
 
+
 protected:
 	std::vector<int> index_to_side_;
 	std::map<int, std::vector<int> > side_to_contact_indices;

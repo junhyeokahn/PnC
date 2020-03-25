@@ -48,6 +48,7 @@ public:
                                                       Eigen::Vector3d & ang_vel_out,
                                                       Eigen::Vector3d & ang_acc_out);
 
+    void saveSolution(const std::string & file_name);
 	// helper function to identify which footstep is in swing
 	// if false. the foot is in not in swing for the time queried
 	bool whichFootstepIndexInSwing(const double time, int & footstep_index);

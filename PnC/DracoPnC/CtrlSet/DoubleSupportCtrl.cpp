@@ -18,6 +18,7 @@ DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot,
 
     walking_reference_trajectory_module_ = walking_module;
     b_do_plan_ = true;
+    b_save_planning_result_ = true;
 
     tau_cmd_ = Eigen::VectorXd::Zero(Draco::n_adof);
     tau_cmd_old_ = Eigen::VectorXd::Zero(Draco::n_adof);
@@ -160,6 +161,11 @@ void DoubleSupportCtrl::oneStep(void* _cmd) {
     if (b_do_plan_) {
         _references_setup();
         b_do_plan_ = false;
+        if (b_save_planning_result_) {
+            ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->saveSolution(
+                "DS_"+std::to_string(sp_->num_step_copy));
+            std::cout << "Save to DS_"+std::to_string(sp_->num_step_copy)+".yaml" << std::endl;
+        }
     }
     if (sp_->b_walking) {
         _walking_contact_setup();
@@ -205,7 +211,9 @@ void DoubleSupportCtrl::_references_setup() {
     // Footstep Sequences
     // TODO : Set this value from API later.
     //Eigen::Vector3d foot_translate(0.01, 0.0, 0.0);
-    Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+    //Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
+    Eigen::Vector3d foot_translate(-0.045, 0.0, 0.0);
+    //Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
     Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
 
     double first_ds_dur;

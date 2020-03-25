@@ -42,6 +42,7 @@ class DoubleSupportCtrl : public Controller {
         double target_com_height_;
         int dim_contact_;
         bool b_do_plan_;
+        bool b_save_planning_result_;
         double ctrl_start_time_;
 
         Eigen::Vector3d ini_com_pos_;

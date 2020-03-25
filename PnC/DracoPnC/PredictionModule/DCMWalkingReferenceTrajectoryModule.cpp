@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
 // Initialize by assigning the contact indices to a robot side.
 DCMWalkingReferenceTrajectoryModule::DCMWalkingReferenceTrajectoryModule(const std::vector<int> & index_to_side_in){
@@ -124,4 +125,103 @@ bool DCMWalkingReferenceTrajectoryModule::whichFootstepIndexInSwing(const double
 	// t_query was not within the swing start and end times or the rvrp_index_to_footstep_index was empty.
 	return false;
 
+}
+
+void DCMWalkingReferenceTrajectoryModule::saveSolution(const std::string & file_name) {
+    try {
+        double t_start = dcm_reference.getInitialTime();
+        double t_end = t_start + dcm_reference.get_total_trajectory_time();
+        double t_step(0.01);
+        int n_eval = std::floor((t_end - t_start) / t_step);
+
+        YAML::Node cfg;
+
+        // =====================================================================
+        // Temporal Parameters
+        // =====================================================================
+
+        cfg["temporal_parameters"]["initial_time"] = t_start;
+        cfg["temporal_parameters"]["final_time"] = t_end;
+        cfg["temporal_parameters"]["time_step"] = t_step;
+        cfg["temporal_parameters"]["t_ds"] = dcm_reference.t_ds;
+        cfg["temporal_parameters"]["t_ss"] = dcm_reference.t_ss;
+        cfg["temporal_parameters"]["t_transfer"] = dcm_reference.t_transfer;
+
+        // =====================================================================
+        // Contact Information
+        // =====================================================================
+        int n_rf(0); int n_lf(0);
+        for (int i = 0; i < footstep_list_.size(); ++i) {
+            if (footstep_list_[i].robot_side == DRACO_LEFT_FOOTSTEP) {n_lf += 1;}
+            else {n_rf += 1;}
+        }
+        Eigen::MatrixXd rfoot_pos = Eigen::MatrixXd::Zero(n_rf, 3);
+        Eigen::MatrixXd rfoot_quat = Eigen::MatrixXd::Zero(n_rf, 4);
+        Eigen::MatrixXd lfoot_pos = Eigen::MatrixXd::Zero(n_lf, 3);
+        Eigen::MatrixXd lfoot_quat = Eigen::MatrixXd::Zero(n_lf, 4);
+        int rf_id(0); int lf_id(0);
+        for (int i = 0; i < footstep_list_.size(); ++i) {
+            if (footstep_list_[i].robot_side == DRACO_RIGHT_FOOTSTEP) {
+                for (int j = 0; j < 3; ++j) {rfoot_pos(rf_id, j) = footstep_list_[i].position(j);}
+                rfoot_quat(rf_id, 0) = footstep_list_[i].orientation.w();
+                rfoot_quat(rf_id, 1) = footstep_list_[i].orientation.x();
+                rfoot_quat(rf_id, 2) = footstep_list_[i].orientation.y();
+                rfoot_quat(rf_id, 3) = footstep_list_[i].orientation.z();
+                rf_id += 1;
+            } else {
+                for (int j = 0; j < 3; ++j) {lfoot_pos(lf_id, j) = footstep_list_[i].position(j);}
+                lfoot_quat(lf_id, 0) = footstep_list_[i].orientation.w();
+                lfoot_quat(lf_id, 1) = footstep_list_[i].orientation.x();
+                lfoot_quat(lf_id, 2) = footstep_list_[i].orientation.y();
+                lfoot_quat(lf_id, 3) = footstep_list_[i].orientation.z();
+                lf_id += 1;
+            }
+        }
+
+        cfg["contact"]["right_foot"]["pos"] = rfoot_pos;
+        cfg["contact"]["right_foot"]["ori"] = rfoot_quat;
+        cfg["contact"]["left_foot"]["pos"] = rfoot_pos;
+        cfg["contact"]["left_foot"]["ori"] = rfoot_quat;
+
+        // =====================================================================
+        // Reference Trajectory
+        // =====================================================================
+        Eigen::MatrixXd dcm_pos_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+        Eigen::MatrixXd dcm_vel_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+        Eigen::MatrixXd com_pos_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+        Eigen::MatrixXd com_vel_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+        Eigen::MatrixXd vrp_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+
+        double t(t_start);
+        Eigen::Vector3d v3;
+        for (int i = 0; i < n_eval; ++i) {
+            dcm_reference.get_ref_dcm(t, v3);
+            for (int j = 0; j < 3; ++j) {dcm_pos_ref(i, j) = v3(j);}
+            dcm_reference.get_ref_dcm_vel(t, v3);
+            for (int j = 0; j < 3; ++j) {dcm_vel_ref(i, j) = v3(j);}
+            dcm_reference.get_ref_dcm_vel(t, v3);
+            for (int j = 0; j < 3; ++j) {dcm_vel_ref(i, j) = v3(j);}
+            dcm_reference.get_ref_com(t, v3);
+            for (int j = 0; j < 3; ++j) {com_pos_ref(i, j) = v3(j);}
+            dcm_reference.get_ref_com_vel(t, v3);
+            for (int j = 0; j < 3; ++j) {com_vel_ref(i, j) = v3(j);}
+            dcm_reference.get_ref_r_vrp(t, v3);
+            for (int j = 0; j < 3; ++j) {vrp_ref(i, j) = v3(j);}
+            t += t_step;
+        }
+
+        cfg["reference"]["dcm_pos"] = dcm_pos_ref;
+        cfg["reference"]["dcm_vel"] = dcm_vel_ref;
+        cfg["reference"]["com"] = com_pos_ref;
+        cfg["reference"]["com_vel"] = com_vel_ref;
+        cfg["reference"]["vrp"] = vrp_ref;
+
+        std::string full_path = THIS_COM + std::string("ExperimentData/") +
+            file_name + std::string(".yaml");
+        std::ofstream file_out(full_path);
+        file_out << cfg;
+
+    }catch(YAML::ParserException& e) {
+        std::cout << e.what() << std::endl;
+    }
 }
