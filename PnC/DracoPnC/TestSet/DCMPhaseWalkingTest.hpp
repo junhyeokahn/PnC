@@ -5,6 +5,7 @@
 class RobotSystem;
 class DracoStateProvider;
 class WalkingReferenceTrajectoryModule;
+class FootstepSequenceGenerator;
 
 enum DCMPhaseWalkingTestPhase{
     DCMPhaseWalkingTestPhase_initial_jpos = 0,
@@ -44,6 +45,7 @@ class DCMPhaseWalkingTest: public Test{
         Controller* left_swing_end_ctrl_;
 
         WalkingReferenceTrajectoryModule* reference_trajectory_module_;
+        FootstepSequenceGenerator* foot_sequence_generator_;
 
         YAML::Node cfg_;
         DracoStateProvider* sp_;

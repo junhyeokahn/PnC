@@ -7,6 +7,11 @@ test_configuration:
     com_height: 0.7
     stand_up_ctrl_time: 2.0
 
+    # Walking Parameters
+    footstep_length: 0.02
+    footstep_width: 0.35
+    footstep_orientation: 0.
+
     # Temporal parameters
     # t_ss = 2*transition_ctrl_time + single_support_ctrl_time
     # t_ds = double_support_ctrl_time

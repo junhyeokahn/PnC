@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
+#include <PnC/PlannerSet/ContactSequenceGenerator/FootstepSequenceGenerator.hpp>
 
 class DracoStateProvider;
 class RobotSystem;
@@ -13,7 +14,8 @@ class DracoFootstep;
 
 class DoubleSupportCtrl : public Controller {
     public:
-        DoubleSupportCtrl(RobotSystem*, WalkingReferenceTrajectoryModule*);
+        DoubleSupportCtrl(RobotSystem*, WalkingReferenceTrajectoryModule*,
+                FootstepSequenceGenerator*);
         virtual ~DoubleSupportCtrl();
 
         virtual void oneStep(void* _cmd);
@@ -91,4 +93,5 @@ class DoubleSupportCtrl : public Controller {
         void _references_setup();
 
         DracoStateProvider* sp_;
+        FootstepSequenceGenerator* foot_sequence_generator_;
 };

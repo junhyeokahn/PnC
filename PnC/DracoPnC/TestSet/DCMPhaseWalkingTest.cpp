@@ -3,6 +3,7 @@
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
+#include <PnC/PlannerSet/ContactSequenceGenerator/FootstepSequenceGenerator.hpp>
 #include <PnC/DracoPnC/PredictionModule/DracoFootstep.hpp>
 
 DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
@@ -22,7 +23,9 @@ DCMPhaseWalkingTest::DCMPhaseWalkingTest(RobotSystem* robot) : Test(robot) {
     jpos_target_ctrl_ = new IVDJPosTargetCtrl(robot);
     stand_up_ctrl_ = new StandUpCtrl(robot);
 
-    ds_ctrl_ = new DoubleSupportCtrl(robot, reference_trajectory_module_);
+    foot_sequence_generator_ = new FootstepSequenceGenerator();
+    ds_ctrl_ = new DoubleSupportCtrl(robot, reference_trajectory_module_,
+            foot_sequence_generator_);
 
     right_swing_ctrl_ = new SingleSupportCtrl(robot, reference_trajectory_module_);
     left_swing_ctrl_ = new SingleSupportCtrl(robot,
@@ -59,6 +62,7 @@ DCMPhaseWalkingTest::~DCMPhaseWalkingTest() {
         delete state_list_[i];
     }
     delete reference_trajectory_module_;
+    delete foot_sequence_generator_;
 }
 
 void DCMPhaseWalkingTest::TestInitialization() {
@@ -134,6 +138,22 @@ void DCMPhaseWalkingTest::_SettingParameter() {
         ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->
             dcm_reference.setCoMHeight(tmp_val);
         sp_->omega = sqrt(9.81/tmp_val);
+
+        // Footstep Sequence
+        myUtils::readParameter(test_cfg, "footstep_length", tmp_val);
+        foot_sequence_generator_->SetFootStepLength(tmp_val);
+
+        myUtils::readParameter(test_cfg, "footstep_width", tmp_val);
+        foot_sequence_generator_->SetRightFootStepWidth(tmp_val);
+        foot_sequence_generator_->SetLeftFootStepWidth(tmp_val);
+
+        myUtils::readParameter(test_cfg, "footstep_orientation", tmp_val);
+        Eigen::Quaternion<double> quat_temp =
+            Eigen::Quaternion<double>(cos(tmp_val/2.0), 0., 0., sin(tmp_val/2.0));
+        tmp_vec = Eigen::VectorXd::Zero(4);
+        tmp_vec << quat_temp.w(), quat_temp.x(), quat_temp.y(), quat_temp.z();
+        foot_sequence_generator_->SetFootStepOrientation(tmp_vec);
+
 
         // Stand Up Control Duration
         myUtils::readParameter(test_cfg, "stand_up_ctrl_time", tmp_val);

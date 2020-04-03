@@ -90,7 +90,6 @@ bool SingleSupportCtrl::endOfPhase() {
     if (state_machine_time_ > end_time_) {
         return true;
     }
-    // TODO : Incorporating contact sensor
     if (sp_->phase_copy == static_cast<int>(
                 DCMPhaseWalkingTestPhase::DCMPhaseWalkingTestPhase_left_swing_ctrl)) {
          //right stance, left swing

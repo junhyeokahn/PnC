@@ -1,5 +1,6 @@
 file(GLOB_RECURSE sources "*.cpp")
 file(GLOB centroid_planner_headers "CentroidPlanner/*.hpp")
+file(GLOB contact_sequence_headers "ContactSequenceGenerator/*.hpp")
 file(GLOB pipm_foot_planner_headers "PIPM_FootPlacementPlanner/*.hpp")
 
 if(NOT USE_DRAKE)
@@ -11,7 +12,8 @@ endif()
 
 add_library(myPlanner SHARED ${sources}
                              ${centroid_planner_headers}
-                             ${pipm_foot_planner_headers})
+                             ${pipm_foot_planner_headers}
+                             ${contact_sequence_headers})
 
 if(USE_DRAKE)
   target_link_libraries(myPlanner drake::drake)
@@ -26,3 +28,5 @@ install(FILES ${centroid_planner_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/PlannerSet/CentroidPlanner")
 install(FILES ${pipm_foot_planner_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/PlannerSet/PIPM_FootPlacementPlanner")
+install(FILES ${contact_sequence_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/PlannerSet/ContactSequenceGenerator")

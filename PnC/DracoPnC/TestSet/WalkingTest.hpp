@@ -45,5 +45,6 @@ class WalkingTest : public Test {
     Controller* left_swing_ctrl_;
     Controller* left_swing_end_trans_ctrl_;
 
+
     YAML::Node cfg_;
 };

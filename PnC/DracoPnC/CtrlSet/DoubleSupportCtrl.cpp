@@ -13,9 +13,11 @@
 #include <PnC/DracoPnC/PredictionModule/DCMWalkingReferenceTrajectoryModule.hpp>
 
 DoubleSupportCtrl::DoubleSupportCtrl(RobotSystem* robot,
-        WalkingReferenceTrajectoryModule* walking_module) : Controller(robot) {
+        WalkingReferenceTrajectoryModule* walking_module,
+        FootstepSequenceGenerator* foot_sequence_generator): Controller(robot) {
     myUtils::pretty_constructor(2, "Double Support Ctrl");
 
+    foot_sequence_generator_ = foot_sequence_generator;
     walking_reference_trajectory_module_ = walking_module;
     b_do_plan_ = true;
     b_save_planning_result_ = true;
@@ -200,35 +202,22 @@ void DoubleSupportCtrl::_references_setup() {
 
     DracoFootstep rfoot_start;
     DracoFootstep lfoot_start;
-    Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).translation();
-    Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter).linear());
-    lfoot_start.setPosOriSide(lfoot_pos, lfoot_ori, DRACO_LEFT_FOOTSTEP);
 
-    Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
-    Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).linear());
-    rfoot_start.setPosOriSide(rfoot_pos, rfoot_ori, DRACO_RIGHT_FOOTSTEP);
+    Eigen::Isometry3d lf_ct_iso = robot_->getBodyNodeCoMIsometry(DracoBodyNode::lFootCenter);
+    lfoot_start.setPosOriSide(lf_ct_iso.translation(),
+            Eigen::Quaternion<double>(lf_ct_iso.linear()),
+            DRACO_LEFT_FOOTSTEP);
 
+    Eigen::Isometry3d rf_ct_iso = robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter);
+    rfoot_start.setPosOriSide(rf_ct_iso.translation(),
+            Eigen::Quaternion<double>(rf_ct_iso.linear()),
+            DRACO_RIGHT_FOOTSTEP);
 
-    // Footstep Sequences
-    // TODO : Set this value from API later.
-    Eigen::Vector3d foot_translate(0.028, 0.0, 0.0);
-    //Eigen::Vector3d foot_translate(-0.125, 0.0, 0.0);
-    //Eigen::Vector3d foot_translate(-0.02, 0.0, 0.0);
-    //Eigen::Vector3d foot_translate(0.0, 0.0, 0.0);
-    //Eigen::Vector3d foot_translate(0.0, -0.04, 0.0);
-    Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-
-    double first_ds_dur;
-    Eigen::Vector3d first_foot_translate;
     if (sp_->num_residual_steps == sp_->num_total_steps) {
-        //first_ds_dur = initial_double_support_dur_;
-        first_foot_translate = foot_translate;
         ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
             dcm_reference.t_transfer =
             initial_double_support_dur_ - (2-alpha_ds_)*double_support_dur_;
     } else {
-        //first_ds_dur = double_support_dur_;
-        first_foot_translate = 2*foot_translate;
         ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
             dcm_reference.t_transfer = (alpha_ds_-1)*double_support_dur_;
     }
@@ -236,111 +225,110 @@ void DoubleSupportCtrl::_references_setup() {
     std::vector<DracoFootstep> footstep_list;
     Eigen::Vector3d swing_foot_target_pos;
     Eigen::Quaternion<double> swing_foot_target_quat;
+    CentroidModel::EEfID dummy;
     if (sp_->phase_copy == 2) {
         // Stance: Left
+        foot_sequence_generator_->Update(CentroidModel::EEfID::leftFoot,
+                rf_ct_iso, lf_ct_iso);
         if (sp_->num_residual_steps == 0) {
             // Add Last Right Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
-                foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
+            foot_sequence_generator_->GetFinalFootStep(dummy, rf_ct_iso);
+            swing_foot_target_pos = rf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(rf_ct_iso.linear());
             DracoFootstep rfoot_last;
             rfoot_last.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_last);
         } else if (sp_->num_residual_steps == 1) {
             // Add First Right Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
-                first_foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
+            foot_sequence_generator_->GetNextFootStep(dummy, rf_ct_iso);
             DracoFootstep rfoot_first;
+            swing_foot_target_pos = rf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(rf_ct_iso.linear());
             rfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_first);
             // Add Last Left Step
+            foot_sequence_generator_->GetFinalFootStep(dummy, lf_ct_iso);
             DracoFootstep lfoot_last;
-            lfoot_last.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
-                foot_translate, foot_rotate*lfoot_start.orientation,
-                DRACO_LEFT_FOOTSTEP);
+            lfoot_last.setPosOriSide(lf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(lf_ct_iso.linear()),
+                    DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_last);
         } else {
             // Add First Right Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
-                first_foot_translate;
-            swing_foot_target_quat = foot_rotate*rfoot_start.orientation;
+            foot_sequence_generator_->GetNextFootStep(dummy, rf_ct_iso);
             DracoFootstep rfoot_first;
+            swing_foot_target_pos = rf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(rf_ct_iso.linear());
             rfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_first);
             // Add Second Left Step
+            foot_sequence_generator_->GetNextFootStep(dummy, lf_ct_iso);
             DracoFootstep lfoot_second;
-            lfoot_second.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
-                2*foot_translate, foot_rotate*lfoot_start.orientation,
-                DRACO_LEFT_FOOTSTEP);
+            lfoot_second.setPosOriSide(lf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(lf_ct_iso.linear()),
+                    DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_second);
             // Add Last Right Step
+            foot_sequence_generator_->GetFinalFootStep(dummy, rf_ct_iso);
             DracoFootstep rfoot_last;
-            rfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(rfoot_first.position) +
-                    foot_translate, foot_rotate*rfoot_first.orientation,
+            rfoot_last.setPosOriSide(rf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(rf_ct_iso.linear()),
                     DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_last);
         }
     } else {
         // Stance: Right
+        foot_sequence_generator_->Update(CentroidModel::EEfID::rightFoot,
+                rf_ct_iso, lf_ct_iso);
         if (sp_->num_residual_steps == 0) {
             // Add Last Left Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
-                foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
+            foot_sequence_generator_->GetFinalFootStep(dummy, lf_ct_iso);
+            swing_foot_target_pos = lf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(lf_ct_iso.linear());
             DracoFootstep lfoot_last;
             lfoot_last.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_last);
         } else if (sp_->num_residual_steps == 1) {
             // Add First Left Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
-                first_foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
+            foot_sequence_generator_->GetNextFootStep(dummy, lf_ct_iso);
+            swing_foot_target_pos = lf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(lf_ct_iso.linear());
             DracoFootstep lfoot_first;
             lfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_first);
             // Add Last Right Step
+            foot_sequence_generator_->GetFinalFootStep(dummy, rf_ct_iso);
             DracoFootstep rfoot_last;
-            rfoot_last.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
-                foot_translate, foot_rotate*rfoot_start.orientation,
-                DRACO_RIGHT_FOOTSTEP);
+            rfoot_last.setPosOriSide(rf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(rf_ct_iso.linear()),
+                    DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_last);
         } else {
             // Add First Left Step
-            swing_foot_target_pos =
-                foot_rotate.toRotationMatrix()*(lfoot_start.position) +
-                first_foot_translate;
-            swing_foot_target_quat = foot_rotate*lfoot_start.orientation;
+            foot_sequence_generator_->GetNextFootStep(dummy, lf_ct_iso);
+            swing_foot_target_pos = lf_ct_iso.translation();
+            swing_foot_target_quat = Eigen::Quaternion<double>(lf_ct_iso.linear());
             DracoFootstep lfoot_first;
             lfoot_first.setPosOriSide(swing_foot_target_pos,
                     swing_foot_target_quat, DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_first);
             // Add Second Right Step
+            foot_sequence_generator_->GetNextFootStep(dummy, rf_ct_iso);
             DracoFootstep rfoot_second;
-            rfoot_second.setPosOriSide(
-                foot_rotate.toRotationMatrix()*(rfoot_start.position) +
-                2*foot_translate, foot_rotate*rfoot_start.orientation,
-                DRACO_RIGHT_FOOTSTEP);
+            rfoot_second.setPosOriSide(rf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(rf_ct_iso.linear()),
+                    DRACO_RIGHT_FOOTSTEP);
             footstep_list.push_back(rfoot_second);
             // Add Last Left Step
+            foot_sequence_generator_->GetFinalFootStep(dummy, lf_ct_iso);
             DracoFootstep lfoot_last;
-            lfoot_last.setPosOriSide(
-                    foot_rotate.toRotationMatrix()*(lfoot_first.position) +
-                    foot_translate, foot_rotate*lfoot_first.orientation,
+            lfoot_last.setPosOriSide(lf_ct_iso.translation(),
+                    Eigen::Quaternion<double>(lf_ct_iso.linear()),
                     DRACO_LEFT_FOOTSTEP);
             footstep_list.push_back(lfoot_last);
         }
@@ -349,20 +337,6 @@ void DoubleSupportCtrl::_references_setup() {
         sp_->swing_foot_target_pos[i] = swing_foot_target_pos[i];
     }
     sp_->swing_foot_target_quat = swing_foot_target_quat;
-
-    //if (sp_->num_residual_steps == sp_->num_total_steps) {
-    //walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
-            //x_ori_start, lfoot_start, rfoot_start);
-    //walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
-    //} else {
-        //((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
-            //sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
-            //lfoot_start, rfoot_start);
-    //}
-
-    //walking_reference_trajectory_module_->setStartingConfiguration(x_com_start,
-            //x_ori_start, lfoot_start, rfoot_start);
-    //walking_reference_trajectory_module_->setFootsteps(sp_->curr_time, footstep_list);
 
     ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
         sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
