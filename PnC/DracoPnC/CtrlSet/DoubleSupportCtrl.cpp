@@ -477,8 +477,47 @@ void DoubleSupportCtrl::_balancing_task_setup(){
     Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
-    if (state_machine_time_ < stab_time) {
-        for (int i = 0; i < 3; ++i) {
+
+    double ref_end_time =
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->dcm_reference.getInitialTime() +
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->dcm_reference.get_total_trajectory_time();
+    Eigen::Vector3d com_pos_ref, com_vel_ref, com_pos, com_vel;
+    if (sp_->curr_time < ref_end_time && sp_->num_step_copy > 1) {
+        walking_reference_trajectory_module_->getMPCRefComPosandVel(
+                sp_->curr_time, com_pos_ref, com_vel_ref);
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
+            dcm_reference.get_ref_dcm(sp_->curr_time, sp_->dcm_des);
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
+            dcm_reference.get_ref_dcm_vel(sp_->curr_time, sp_->dcm_vel_des);
+        ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->
+            dcm_reference.get_ref_r_vrp(sp_->curr_time, sp_->r_vrp_des);
+
+        com_pos = robot_->getCoMPosition();
+        com_vel = robot_->getCoMVelocity();
+
+        for (int i = 0; i < 2; ++i) {
+            com_pos_des[i] = com_pos[i];
+            com_vel_des[i] = com_vel[i];
+        }
+        Eigen::VectorXd r_ic = sp_->dcm.head(2);
+        Eigen::VectorXd r_id = sp_->dcm_des.head(2);
+        Eigen::VectorXd rdot_id = sp_->dcm_vel_des.head(2);
+        Eigen::VectorXd r_icp_error = (r_ic - r_id);
+        double kp_ic(20.);
+        double omega_o = std::sqrt(9.81/target_com_height_);
+        Eigen::VectorXd r_CMP_d = r_ic - rdot_id/omega_o + kp_ic * (r_icp_error);
+        com_acc_des.head(2) = (9.81/target_com_height_) * (com_pos.head(2) - r_CMP_d);
+
+        com_pos_des[2] = target_com_height_;
+        //com_vel_des[2] = com_vel_ref[2];
+        com_vel_des[2] = 0.;
+        com_acc_des[2] = 0.;
+
+        com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
+
+        ini_com_pos_ = robot_->getCoMPosition();
+    } else if (sp_->curr_time < ref_end_time + stab_time) {
+         for (int i = 0; i < 3; ++i) {
             com_pos_des[i] = myUtils::smooth_changing(ini_com_pos_[i],
                     goal_com_pos_[i], stab_time, state_machine_time_);
             com_vel_des[i] = myUtils::smooth_changing_vel(ini_com_pos_[i],
@@ -488,16 +527,17 @@ void DoubleSupportCtrl::_balancing_task_setup(){
             sp_->com_pos_des[i] = com_pos_des[i];
             sp_->com_vel_des[i] = com_vel_des[i];
         }
+        com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
     } else {
-        for (int i = 0; i < 3; ++i) {
+         for (int i = 0; i < 3; ++i) {
             com_pos_des[i] = goal_com_pos_[i];
             com_vel_des[i] = 0.;
             com_acc_des[i] = 0.;
             sp_->com_pos_des[i] = com_pos_des[i];
             sp_->com_vel_des[i] = com_vel_des[i];
         }
+        com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
     }
-    com_task_->updateTask(com_pos_des, com_vel_des, com_acc_des);
 
     // BodyOri Task
     Eigen::Isometry3d rf_iso =
