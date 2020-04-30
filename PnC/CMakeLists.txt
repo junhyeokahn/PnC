@@ -1,5 +1,6 @@
 add_subdirectory(GaitCycle)
 add_subdirectory(DracoPnC)
+add_subdirectory(ValkyriePnC)
 add_subdirectory(WBC)
 add_subdirectory(MPC)
 add_subdirectory(PlannerSet)
