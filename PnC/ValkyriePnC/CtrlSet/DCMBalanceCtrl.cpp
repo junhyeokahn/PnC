@@ -31,8 +31,8 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     // TASK
     com_task_ =
         new CoMxyzRxRyRzTask(robot);
-    torso_ori_task_ =
-        new BasicTask(robot,BasicTaskType::LINKORI, 3, ValkyrieBodyNode::torso);
+    pelvis_ori_task_ =
+        new BasicTask(robot,BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
@@ -46,6 +46,9 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     for (int i(0); i < Valkyrie::n_vdof; ++i) act_list[i] = false;
 
     ihwbc_ = new IHWBC(act_list);
+
+    lambda_qddot_ = 1e-8;
+    lambda_Fr_ = 1e-16;
 
     kin_wbc_ = new KinWBC(act_list);
     wblc_ = new WBLC(act_list);
@@ -74,7 +77,7 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 DCMBalanceCtrl::~DCMBalanceCtrl() {
     delete total_joint_task_;
     delete com_task_;
-    delete torso_ori_task_;
+    delete pelvis_ori_task_;
     delete wblc_;
     delete wblc_data_;
     delete rfoot_contact_;
@@ -111,6 +114,30 @@ void DCMBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     // myUtils::pretty_print(des_jacc_cmd, std::cout, "balance");
     // exit(0);
     wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
+
+    // Set QP weights
+    double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
+    ihwbc_->setQPWeights(w_task_heirarchy_, local_w_contact_weight);
+    ihwbc_->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
+
+    // QP dec variable results
+    Eigen::VectorXd qddot_res;
+    Eigen::VectorXd Fr_res;
+    Eigen::VectorXd Fd_des = Eigen::VectorXd::Zero(dim_contact_);
+
+    // Update QP and solve
+    ihwbc_->updateSetting(A_, Ainv_, coriolis_, grav_);
+    ihwbc_->solve(task_list_, contact_list_, Fd_des, tau_cmd_, qddot_cmd_);
+
+    ihwbc_->getQddotResult(qddot_res);
+    ihwbc_->getFrResult(Fr_res);
+
+    // myUtils::pretty_print(Fr_res, std::cout, "Fr_des");
+    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+
+
+    gamma = tau_cmd_;
+
 }
 
 void DCMBalanceCtrl::_task_setup() {
@@ -128,14 +155,14 @@ void DCMBalanceCtrl::_task_setup() {
     com_task_->updateTask(des_com_pos_,des_com_vel_,des_com_acc_);
 
     // =========================================================================
-    // Torso Ori Task
+    // Pelvis Ori Task
     // =========================================================================
     Eigen::VectorXd des_torso_quat = Eigen::VectorXd::Zero(4);
     des_torso_quat << ini_torso_quat.w(),ini_torso_quat.x(), ini_torso_quat.y(),
                         ini_torso_quat.z();
     Eigen::VectorXd des_torso_so3 = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd des_ang_acc = Eigen::VectorXd::Zero(3);
-    torso_ori_task_ -> updateTask(des_torso_quat,des_torso_so3,des_ang_acc);
+    pelvis_ori_task_ -> updateTask(des_torso_quat,des_torso_so3,des_ang_acc);
     // =========================================================================
     // Joint Pos Task
     // =========================================================================
@@ -150,7 +177,7 @@ void DCMBalanceCtrl::_task_setup() {
     // Task List Update
     // =========================================================================
     task_list_.push_back(com_task_);
-    task_list_.push_back(torso_ori_task_);
+    task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(total_joint_task_);
 
     // =========================================================================
@@ -192,6 +219,33 @@ void DCMBalanceCtrl::_task_setup() {
     lfoot_center_pos_task->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
     lfoot_center_ori_task->updateTask(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
 
+    task_list_.clear();
+
+    task_list_.push_back(com_task_);
+    task_list_.push_back(pelvis_ori_task_);
+    task_list_.push_back(total_joint_task_);
+
+    task_list_.push_back(rfoot_center_pos_task);
+    task_list_.push_back(rfoot_center_ori_task);
+    task_list_.push_back(lfoot_center_pos_task);
+    task_list_.push_back(lfoot_center_ori_task);
+
+    w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    // w_task_heirarchy_[0] = w_task_com_;
+    // w_task_heirarchy_[1] = w_task_pelvis_;
+    // w_task_heirarchy_[2] = w_task_rfoot_;
+    // w_task_heirarchy_[3] = w_task_rfoot_;
+    // w_task_heirarchy_[4] = w_task_lfoot_;
+    // w_task_heirarchy_[5] = w_task_lfoot_;
+
+    w_task_heirarchy_[0] = w_task_com_;
+    w_task_heirarchy_[1] = w_task_pelvis_;
+    w_task_heirarchy_[2] = w_task_joint_;
+    w_task_heirarchy_[3] = w_task_rfoot_;
+    w_task_heirarchy_[4] = w_task_rfoot_;
+    w_task_heirarchy_[5] = w_task_lfoot_;
+    w_task_heirarchy_[6] = w_task_lfoot_;
+
 }
 
 void DCMBalanceCtrl::_contact_setup() {
@@ -200,6 +254,11 @@ void DCMBalanceCtrl::_contact_setup() {
 
     contact_list_.push_back(rfoot_contact_);
     contact_list_.push_back(lfoot_contact_);
+
+    for(int i = 0; i < contact_list_.size(); i++){
+        ((SurfaceContactSpec*)contact_list_[i])->setMaxFz(1500);            
+    }   
+
 }
 
 void DCMBalanceCtrl::firstVisit() {
@@ -229,6 +288,7 @@ void DCMBalanceCtrl::lastVisit() {}
 
 bool DCMBalanceCtrl::endOfPhase() {
      if (state_machine_time_ > end_time_) {
+     std::cout << "end of DCM balance ctrl" << std::endl;
      return true;
     }
     return false;
@@ -245,6 +305,46 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
                   << std::endl;
         exit(0);
     }
+
+    // COM
+    Eigen::VectorXd kp_com = 1000*Eigen::VectorXd::Ones(6); 
+    Eigen::VectorXd kd_com = 100.0*Eigen::VectorXd::Ones(6);
+    kp_com.head(3) = Eigen::VectorXd::Zero(3);
+    kd_com.head(3) = Eigen::VectorXd::Zero(3);
+
+    // Torso
+    Eigen::VectorXd kp_torso = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_torso = 10.0*Eigen::VectorXd::Ones(3);
+    // Total Joint
+    Eigen::VectorXd kp_joint = 100.0*Eigen::VectorXd::Ones(Valkyrie::n_adof); 
+    Eigen::VectorXd kd_joint = 10.0*Eigen::VectorXd::Ones(Valkyrie::n_adof);
+    // Foot
+    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_foot = 10.0*Eigen::VectorXd::Ones(3);
+
+    // Set Task Gains
+    com_task_->setGain(kp_com, kd_com);
+    pelvis_ori_task_->setGain(kp_torso, kd_torso);
+    total_joint_task_->setGain(kp_joint, kd_joint);
+    rfoot_center_pos_task->setGain(kp_foot, kd_foot);
+    rfoot_center_ori_task->setGain(kp_foot, kd_foot);
+    lfoot_center_pos_task->setGain(kp_foot, kd_foot);
+    lfoot_center_ori_task->setGain(kp_foot, kd_foot);
+
+    // Set Hierarchy
+    w_task_com_ = 5.0;
+    w_task_pelvis_ = 5.0;
+    w_task_joint_ = 1e-1;
+
+    w_task_upper_body_ = 5.0;
+
+    w_task_rfoot_ = 100.0;
+    w_task_lfoot_ = 100.0;
+
+    // Set Contact Weight
+    w_contact_weight_ = 0.0;
+
+
 }
 
 void DCMBalanceCtrl::_SetBspline(const Eigen::VectorXd st_pos,
@@ -273,7 +373,7 @@ void DCMBalanceCtrl::_SetBspline(const Eigen::VectorXd st_pos,
     }
     // TEST
     //fin[5] = amplitude_[] * omega_;
-    com_traj_.SetParam(init, fin, middle_pt, end_time_);
+    com_traj_.SetParam(init, fin, middle_pt, end_time_/2.0);
 
     delete[] * middle_pt;
     delete[] middle_pt;

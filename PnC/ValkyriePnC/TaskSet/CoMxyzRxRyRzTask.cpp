@@ -39,6 +39,15 @@ bool CoMxyzRxRyRzTask::_UpdateCommand(const Eigen::VectorXd & _pos_des,
         acc_des[i+3] = _acc_des[i+3];
     }
 
+    // com_vel_act
+    Eigen::Vector3d com_vel_act = robot_->getCoMVelocity();
+
+    // op_cmd
+    for (int i(0); i < 3; ++i) {
+        op_cmd[i+3] = acc_des[i+3] + kp_[i+3] * pos_err[i+3] +
+                    kd_[i+3] * (vel_des[i+3] - com_vel_act[i]);
+    }
+
     //myUtils::pretty_print(des_ori, std::cout, "ori_des");
     //myUtils::pretty_print(ori_act, std::cout, "ori_act");
     //myUtils::pretty_print(pos_err, std::cout, "pos_err in com_lin_body_ori_task");

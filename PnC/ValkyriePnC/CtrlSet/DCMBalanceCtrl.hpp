@@ -41,7 +41,27 @@ class DCMBalanceCtrl : public Controller {
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
 
+    // IHWBC
     IHWBC* ihwbc_;
+    double ihwbc_dt_;
+    Eigen::VectorXd tau_cmd_;
+    Eigen::VectorXd qddot_cmd_;
+
+    Eigen::VectorXd w_task_heirarchy_;
+    double w_task_com_;
+    double w_task_torso_;
+    double w_task_joint_;
+
+    double w_task_upper_body_;
+    double w_task_pelvis_;
+
+    double w_task_rfoot_;
+    double w_task_lfoot_;
+
+    double w_contact_weight_;
+    double lambda_qddot_;
+    double lambda_Fr_;
+
 
     KinWBC* kin_wbc_;
     WBLC* wblc_;
