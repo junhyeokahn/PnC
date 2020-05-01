@@ -5,8 +5,6 @@
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
-#include <PnC/WBC/WBLC/KinWBC.hpp>
-#include <PnC/WBC/WBLC/WBLC.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
@@ -33,8 +31,6 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
         new CoMxyzRxRyRzTask(robot);
     pelvis_ori_task_ =
         new BasicTask(robot,BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
-    total_joint_task_ =
-        new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
     // Set Upper Body Joint Tasks
     upper_body_joint_indices_.clear();
@@ -49,6 +45,7 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     rfoot_center_ori_task = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::rightCOP_Frame);
     lfoot_center_ori_task = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::leftCOP_Frame);
 
+    // Initialize IHWBC
     std::vector<bool> act_list;
     act_list.resize(Valkyrie::n_dof, true);
     for (int i(0); i < Valkyrie::n_vdof; ++i) act_list[i] = false;
@@ -58,36 +55,30 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     lambda_qddot_ = 1e-8;
     lambda_Fr_ = 1e-16;
 
-    kin_wbc_ = new KinWBC(act_list);
-    wblc_ = new WBLC(act_list);
-    wblc_data_ = new WBLC_ExtraData();
+    // Initialize Foot Contacts
     rfoot_contact_ = new SurfaceContactSpec(
         robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.7);
     lfoot_contact_ = new SurfaceContactSpec(
         robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.7);
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
-    wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Valkyrie::n_dof, 100.0);
-    wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, 0.1);
-    wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, 1000.0);
-    wblc_data_->W_rf_[rfoot_contact_->getFzIndex()] = 0.01;
-    wblc_data_->W_rf_[rfoot_contact_->getDim() + lfoot_contact_->getFzIndex()] =
-        0.01;
-
     // torque limit default setting
-    wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Valkyrie::n_adof, -2500.);
-    wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Valkyrie::n_adof, 2500.);
+    // wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Valkyrie::n_adof, -2500.);
+    // wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Valkyrie::n_adof, 2500.);
 
     sp_ = ValkyrieStateProvider::getStateProvider(robot);
 
 }
 
 DCMBalanceCtrl::~DCMBalanceCtrl() {
-    delete total_joint_task_;
     delete com_task_;
     delete pelvis_ori_task_;
-    delete wblc_;
-    delete wblc_data_;
+    delete upper_body_task_;
+    delete rfoot_center_pos_task;
+    delete lfoot_center_pos_task;
+    delete rfoot_center_ori_task;
+    delete lfoot_center_ori_task;
+    delete ihwbc_;
     delete rfoot_contact_;
     delete lfoot_contact_;
 }
@@ -99,7 +90,7 @@ void DCMBalanceCtrl::oneStep(void* _cmd) {
     Eigen::VectorXd gamma = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     _contact_setup();
     _task_setup();
-    _compute_torque_wblc(gamma);
+    _compute_torque_wbc(gamma);
 
     for (int i(0); i < Valkyrie::n_adof; ++i) {
         ((ValkyrieCommand*)_cmd)->jtrq[i] = gamma[i];
@@ -110,19 +101,7 @@ void DCMBalanceCtrl::oneStep(void* _cmd) {
     _PostProcessing_Command();
 }
 
-void DCMBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
-    // WBLC
-    wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
-    Eigen::VectorXd des_jacc_cmd =
-        des_jacc_ +
-        Kp_.cwiseProduct(des_jpos_ -
-                         sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof)) +
-        Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Valkyrie::n_adof));
-
-    // myUtils::pretty_print(des_jacc_cmd, std::cout, "balance");
-    // exit(0);
-    wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, gamma, wblc_data_);
-
+void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     // Set QP weights
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
     ihwbc_->setQPWeights(w_task_heirarchy_, local_w_contact_weight);
@@ -136,13 +115,9 @@ void DCMBalanceCtrl::_compute_torque_wblc(Eigen::VectorXd& gamma) {
     // Update QP and solve
     ihwbc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     ihwbc_->solve(task_list_, contact_list_, Fd_des, tau_cmd_, qddot_cmd_);
-
-    ihwbc_->getQddotResult(qddot_res);
-    ihwbc_->getFrResult(Fr_res);
-
-    // myUtils::pretty_print(Fr_res, std::cout, "Fr_des");
-    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
-
+    // ihwbc_->getQddotResult(qddot_res);
+ 
+    // TODO: Integration Step here
 
     gamma = tau_cmd_;
 
@@ -152,8 +127,8 @@ void DCMBalanceCtrl::_task_setup() {
     // =========================================================================
     // CoMxyzRxRyRzTask
     // =========================================================================
-        //ori_traj
-        //xyz_traj
+    //ori_traj
+    //xyz_traj
     _GetBsplineTrajectory();
     // for com plotting
     for (int i = 0; i < 3; ++i) {
@@ -179,24 +154,10 @@ void DCMBalanceCtrl::_task_setup() {
     jvel_des.setZero();
     Eigen::VectorXd jacc_des(Valkyrie::n_adof);
     jacc_des.setZero();
-    total_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
 
     upper_body_task_->updateTask(jpos_des.tail(upper_body_joint_indices_.size()),
                                  jvel_des.tail(upper_body_joint_indices_.size()),
                                  jacc_des.tail(upper_body_joint_indices_.size()));
-
-    // =========================================================================
-    // Task List Update
-    // =========================================================================
-    task_list_.push_back(com_task_);
-    task_list_.push_back(pelvis_ori_task_);
-    task_list_.push_back(total_joint_task_);
-
-    // =========================================================================
-    // Solve Inv Kinematics
-    // =========================================================================
-    kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
-                                des_jvel_, des_jacc_);
 
     // =========================================================================
     // Set Foot Motion Tasks
@@ -231,6 +192,7 @@ void DCMBalanceCtrl::_task_setup() {
     lfoot_center_pos_task->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
     lfoot_center_ori_task->updateTask(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
 
+    // Set Tasks
     task_list_.clear();
 
     task_list_.push_back(com_task_);
@@ -336,7 +298,6 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     // Set Task Gains
     com_task_->setGain(kp_com, kd_com);
     pelvis_ori_task_->setGain(kp_pelvis, kd_pelvis);
-    total_joint_task_->setGain(kp_joint, kd_joint);
     upper_body_task_->setGain(kp_upper_body_joint, kd_upper_body_joint);
 
     rfoot_center_pos_task->setGain(kp_foot, kd_foot);

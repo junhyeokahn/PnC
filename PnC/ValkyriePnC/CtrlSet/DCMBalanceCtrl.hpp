@@ -6,9 +6,6 @@
 class ValkyrieStateProvider;
 class RobotSystem;
 class IHWBC;
-class WBLC;
-class WBLC_ExtraData;
-class KinWBC;
 class ContactSpec;
 
 class DCMBalanceCtrl : public Controller {
@@ -27,11 +24,9 @@ class DCMBalanceCtrl : public Controller {
 
    protected:
     Task* com_task_;
-    Task* torso_ori_task_;
-    Task* total_joint_task_;
+    Task* pelvis_ori_task_;
 
     Task* upper_body_task_;
-    Task* pelvis_ori_task_;
     std::vector<int> upper_body_joint_indices_;
 
     Task* rfoot_center_pos_task;
@@ -63,14 +58,9 @@ class DCMBalanceCtrl : public Controller {
     double lambda_qddot_;
     double lambda_Fr_;
 
-
-    KinWBC* kin_wbc_;
-    WBLC* wblc_;
-    WBLC_ExtraData* wblc_data_;
-
     void _task_setup();
     void _contact_setup();
-    void _compute_torque_wblc(Eigen::VectorXd& gamma);
+    void _compute_torque_wbc(Eigen::VectorXd& gamma);
     void _SetBspline(const Eigen::VectorXd st_pos,
                      const Eigen::VectorXd des_pos); 
     void _GetBsplineTrajectory();
