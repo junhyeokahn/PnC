@@ -30,8 +30,9 @@ class DCMBalanceCtrl : public Controller {
     Task* torso_ori_task_;
     Task* total_joint_task_;
 
-    Task* upper_body_task;
+    Task* upper_body_task_;
     Task* pelvis_ori_task_;
+    std::vector<int> upper_body_joint_indices_;
 
     Task* rfoot_center_pos_task;
     Task* lfoot_center_pos_task;

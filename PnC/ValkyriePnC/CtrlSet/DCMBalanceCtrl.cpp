@@ -36,6 +36,14 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     total_joint_task_ =
         new BasicTask(robot, BasicTaskType::JOINT, Valkyrie::n_adof);
 
+    // Set Upper Body Joint Tasks
+    upper_body_joint_indices_.clear();
+    for(int i = ValkyrieDoF::torsoYaw; i < (ValkyrieDoF::rightForearmYaw + 1); i++){
+        upper_body_joint_indices_.push_back(i);
+    }
+    upper_body_task_ = new SelectedJointTasks(robot, upper_body_joint_indices_);
+
+    // Set Foot Motion Tasks
     rfoot_center_pos_task = new BasicTask(robot, BasicTaskType::LINKXYZ, 3, ValkyrieBodyNode::rightCOP_Frame);
     lfoot_center_pos_task = new BasicTask(robot, BasicTaskType::LINKXYZ, 3, ValkyrieBodyNode::leftCOP_Frame);
     rfoot_center_ori_task = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::rightCOP_Frame);
@@ -173,6 +181,10 @@ void DCMBalanceCtrl::_task_setup() {
     jacc_des.setZero();
     total_joint_task_->updateTask(jpos_des, jvel_des, jacc_des);
 
+    upper_body_task_->updateTask(jpos_des.tail(upper_body_joint_indices_.size()),
+                                 jvel_des.tail(upper_body_joint_indices_.size()),
+                                 jacc_des.tail(upper_body_joint_indices_.size()));
+
     // =========================================================================
     // Task List Update
     // =========================================================================
@@ -223,7 +235,7 @@ void DCMBalanceCtrl::_task_setup() {
 
     task_list_.push_back(com_task_);
     task_list_.push_back(pelvis_ori_task_);
-    task_list_.push_back(total_joint_task_);
+    task_list_.push_back(upper_body_task_);
 
     task_list_.push_back(rfoot_center_pos_task);
     task_list_.push_back(rfoot_center_ori_task);
@@ -231,16 +243,10 @@ void DCMBalanceCtrl::_task_setup() {
     task_list_.push_back(lfoot_center_ori_task);
 
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
-    // w_task_heirarchy_[0] = w_task_com_;
-    // w_task_heirarchy_[1] = w_task_pelvis_;
-    // w_task_heirarchy_[2] = w_task_rfoot_;
-    // w_task_heirarchy_[3] = w_task_rfoot_;
-    // w_task_heirarchy_[4] = w_task_lfoot_;
-    // w_task_heirarchy_[5] = w_task_lfoot_;
 
     w_task_heirarchy_[0] = w_task_com_;
     w_task_heirarchy_[1] = w_task_pelvis_;
-    w_task_heirarchy_[2] = w_task_joint_;
+    w_task_heirarchy_[2] = w_task_upper_body_; 
     w_task_heirarchy_[3] = w_task_rfoot_;
     w_task_heirarchy_[4] = w_task_rfoot_;
     w_task_heirarchy_[5] = w_task_lfoot_;
@@ -312,20 +318,27 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     kp_com.head(3) = Eigen::VectorXd::Zero(3);
     kd_com.head(3) = Eigen::VectorXd::Zero(3);
 
-    // Torso
-    Eigen::VectorXd kp_torso = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_torso = 10.0*Eigen::VectorXd::Ones(3);
+    // Pelvis
+    Eigen::VectorXd kp_pelvis = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_pelvis = 10.0*Eigen::VectorXd::Ones(3);
     // Total Joint
     Eigen::VectorXd kp_joint = 100.0*Eigen::VectorXd::Ones(Valkyrie::n_adof); 
     Eigen::VectorXd kd_joint = 10.0*Eigen::VectorXd::Ones(Valkyrie::n_adof);
+
+    // Upper Body Joint
+    Eigen::VectorXd kp_upper_body_joint = 100.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
+    Eigen::VectorXd kd_upper_body_joint = 10.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
+
     // Foot
     Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(3); 
     Eigen::VectorXd kd_foot = 10.0*Eigen::VectorXd::Ones(3);
 
     // Set Task Gains
     com_task_->setGain(kp_com, kd_com);
-    pelvis_ori_task_->setGain(kp_torso, kd_torso);
+    pelvis_ori_task_->setGain(kp_pelvis, kd_pelvis);
     total_joint_task_->setGain(kp_joint, kd_joint);
+    upper_body_task_->setGain(kp_upper_body_joint, kd_upper_body_joint);
+
     rfoot_center_pos_task->setGain(kp_foot, kd_foot);
     rfoot_center_ori_task->setGain(kp_foot, kd_foot);
     lfoot_center_pos_task->setGain(kp_foot, kd_foot);
@@ -336,14 +349,13 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     w_task_pelvis_ = 5.0;
     w_task_joint_ = 1e-1;
 
-    w_task_upper_body_ = 5.0;
+    w_task_upper_body_ = 2.0;
 
     w_task_rfoot_ = 100.0;
     w_task_lfoot_ = 100.0;
 
     // Set Contact Weight
     w_contact_weight_ = 0.0;
-
 
 }
 
