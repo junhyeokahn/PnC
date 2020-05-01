@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/ValkyriePnC/TestSet/BalanceTest.hpp>
+#include <PnC/ValkyriePnC/TestSet/DCMBalanceTest.hpp>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateEstimator.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
@@ -83,6 +84,9 @@ void ValkyrieInterface::_ParameterSetting() {
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "balance_test") {
             test_ = new BalanceTest(robot_);
+        } 
+        else if (test_name == "dcm_balance_test") {
+            test_ = new DCMBalanceTest(robot_);
         } else {
             printf(
                 "[Valkyrie Interface] There is no test matching test with "
