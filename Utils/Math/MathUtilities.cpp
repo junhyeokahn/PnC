@@ -195,6 +195,8 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
 }
 
 // From Modern Robotics 
+// Lynch, Kevin M., and Frank C. Park. Modern Robotics. Cambridge University Press, 2017.
+// CPP Implementation: https://github.com/Le0nX/ModernRoboticsCpp
 /* Function: Returns the skew symmetric matrix representation of an angular velocity vector
  * Input: Eigen::Vector3d 3x1 angular velocity vector
  * Returns: Eigen::MatrixXd 3x3 skew symmetric matrix
@@ -208,9 +210,12 @@ Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg) {
 }
 
 // From Modern Robotics 
+// Lynch, Kevin M., and Frank C. Park. Modern Robotics. Cambridge University Press, 2017.
+// CPP Implementation:  https://github.com/Le0nX/ModernRoboticsCpp
 /* Function: Provides the adjoint representation of a transformation matrix
              Used to change the frame of reference for spatial velocity vectors
- * Inputs: 3x3 Rotation Matrix, 3x1 translation vector
+ * Inputs: Eigen::MatrixXd 3x3 Rotation matrix, Eigen::Vector3d, 3x1 translation vector
+ * Returns: Eigen::MatrixXd 6x6 Adjoint matrix for transforming twists representation to a different frame
 */ 
 Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p) {
     Eigen::MatrixXd ad_ret = Eigen::MatrixXd::Zero(6, 6);

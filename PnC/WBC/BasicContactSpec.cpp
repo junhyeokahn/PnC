@@ -135,8 +135,8 @@ bool SurfaceContactSpec::_UpdateUf() {
     // With the geometric Jacobian used by dart (world frame representation of body twists and wrenches),
     // The wrenches are defined to be at link frame center (p = 0) with moment axes parallel to the world frame.
     Eigen::MatrixXd Adj_foot(6, 6); Adj_foot.setZero();
-    Eigen::VectorXd pos_foot_vec  = Eigen::Vector3d::Zero();
-    Adj_foot = myUtils::Adjoint(Rot_foot_mtx, pos_foot_vec);
+    Eigen::VectorXd pos_vec  = Eigen::Vector3d::Zero();
+    Adj_foot = myUtils::Adjoint(Rot_foot_mtx, pos_vec);
     Uf_ = U * Adj_foot.transpose();
 
     return true;
