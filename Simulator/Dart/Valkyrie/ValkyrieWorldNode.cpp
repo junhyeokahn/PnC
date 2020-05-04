@@ -178,21 +178,23 @@ void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
     Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
     Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
 
-    // local Z-Force Threshold
+    // Local Z-Force Threshold
     double force_threshold = 10; // 10 Newtons ~ 1kg. If sensor detects this force, then we are in contact
 
-    if (fabs(rf_wrench[5] >= force_threshold)) {
+    if (fabs(rf_wrench[5]) >= force_threshold) {
         rfoot_contact = true;
     } else {
         rfoot_contact = false;
     }
 
-    if (fabs(lf_wrench[5] >= force_threshold)) {
+    if (fabs(lf_wrench[5]) >= force_threshold) {
         lfoot_contact = true;
     } else {
         lfoot_contact = false;
     }
 
+    // std::cout << "rwrench = " << fabs(rf_wrench[5]) << std::endl;
+    // std::cout << "lwrench = " << fabs(lf_wrench[5]) << std::endl;
     // std::cout << "Rfoot contact = " << rfoot_contact << std::endl;
     // std::cout << "Lfoot contact = " << lfoot_contact << std::endl;
 
