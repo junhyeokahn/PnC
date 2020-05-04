@@ -38,9 +38,12 @@ void ValkyrieWorldNode::customPreStep() {
     sensor_data_->qdot = robot_->getVelocities().tail(n_dof_ - 6);
     sensor_data_->virtual_qdot = robot_->getVelocities().head(6);
 
+    // Compute local frame wrenches on the sensor  
+    GetForceTorqueData_();
+    // Use force thresholding to detect contacts
     GetContactSwitchData_(sensor_data_->rfoot_contact,
                           sensor_data_->lfoot_contact);
-    GetForceTorqueData_();
+
 
     // Walking Interface Example
     // static bool b_first_cmd(true);
@@ -171,28 +174,28 @@ void ValkyrieWorldNode::PlotMPCResult_() {
 
 void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
                                               bool& lfoot_contact) {
-    Eigen::VectorXd rf = robot_->getBodyNode("rightCOP_Frame")
-                             ->getWorldTransform()
-                             .translation();
-    Eigen::VectorXd lf =
-        robot_->getBodyNode("leftCOP_Frame")->getWorldTransform().translation();
+    // Get Sensor Wrench Data
+    Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
+    Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
 
-    // myUtils::pretty_print(rf, std::cout, "right_sole");
-    // myUtils::pretty_print(lf, std::cout, "left_sole");
+    // local Z-Force Threshold
+    double force_threshold = 10; // 10 Newtons ~ 1kg. If sensor detects this force, then we are in contact
 
-    if (fabs(rf[2] < 0.005)) {
+    if (fabs(rf_wrench[5] >= force_threshold)) {
         rfoot_contact = true;
-        // printf("right contact\n");
     } else {
         rfoot_contact = false;
     }
 
-    if (fabs(lf[2] < 0.005)) {
+    if (fabs(lf_wrench[5] >= force_threshold)) {
         lfoot_contact = true;
-        // printf("left contact\n");
     } else {
         lfoot_contact = false;
     }
+
+    // std::cout << "Rfoot contact = " << rfoot_contact << std::endl;
+    // std::cout << "Lfoot contact = " << lfoot_contact << std::endl;
+
 }
 
 void ValkyrieWorldNode::SetParams_() {
@@ -286,8 +289,8 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
     }
 
     // myUtils::pretty_print(lf_contact_force_sum, std::cout, "lf_contact_force_sum");
-    myUtils::pretty_print(rf_wrench, std::cout, "sensor true local rf_wrench");
-    myUtils::pretty_print(lf_wrench, std::cout, "sensor true local lf_wrench ");
+    // myUtils::pretty_print(rf_wrench, std::cout, "sensor true local rf_wrench");
+    // myUtils::pretty_print(lf_wrench, std::cout, "sensor true local lf_wrench ");
 
     sensor_data_->lf_wrench = lf_wrench;
     sensor_data_->rf_wrench = rf_wrench;

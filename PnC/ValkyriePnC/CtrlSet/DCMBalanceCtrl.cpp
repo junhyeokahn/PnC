@@ -133,8 +133,8 @@ void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     Rot_foot.block(3, 3, 3, 3) = R_l_cop.transpose();
     Eigen::VectorXd W_l_local = Rot_foot*Fr_res.tail(6);
 
-    myUtils::pretty_print(W_r_local, std::cout, "W_r_local_desired");
-    myUtils::pretty_print(W_l_local, std::cout, "W_l_local_desired");
+    // myUtils::pretty_print(W_r_local, std::cout, "W_r_local_desired");
+    // myUtils::pretty_print(W_l_local, std::cout, "W_l_local_desired");
 
     // TODO: Integration Step here
 
