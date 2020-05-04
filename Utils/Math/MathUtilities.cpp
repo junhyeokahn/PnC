@@ -194,6 +194,32 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
     return ret;
 }
 
+// From Modern Robotics 
+/* Function: Returns the skew symmetric matrix representation of an angular velocity vector
+ * Input: Eigen::Vector3d 3x1 angular velocity vector
+ * Returns: Eigen::MatrixXd 3x3 skew symmetric matrix
+ */
+Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg) {
+    Eigen::Matrix3d m_ret;
+    m_ret <<   0,    -omg(2), omg(1),
+             omg(2),    0,   -omg(0),
+            -omg(1),  omg(0),    0;
+    return m_ret;
+}
+
+// From Modern Robotics 
+/* Function: Provides the adjoint representation of a transformation matrix
+             Used to change the frame of reference for spatial velocity vectors
+ * Inputs: 3x3 Rotation Matrix, 3x1 translation vector
+*/ 
+Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p) {
+    Eigen::MatrixXd ad_ret = Eigen::MatrixXd::Zero(6, 6);
+    Eigen::MatrixXd zeroes = Eigen::MatrixXd::Zero(3, 3);
+    ad_ret << R, zeroes,
+        VecToso3(p) * R, R;
+    return ad_ret;
+}
+
 double QuatToYaw(const Eigen::Quaternion<double> q) {
     // to match equation from:
     // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles

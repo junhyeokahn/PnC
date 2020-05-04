@@ -6,6 +6,7 @@
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 //! Contact Frame's z-axis should correspond normal vector to the ground
 

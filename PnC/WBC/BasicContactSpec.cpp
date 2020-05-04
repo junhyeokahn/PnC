@@ -127,6 +127,25 @@ bool SurfaceContactSpec::_UpdateUf() {
     Rot_foot.block(0, 0, 3, 3) = Rot_foot_mtx.transpose();
     Rot_foot.block(3, 3, 3, 3) = Rot_foot_mtx.transpose();
     Uf_ = U * Rot_foot;
+
+    // Attempting adjoint mapping below. Does not appear to work.
+    // Perhaps it's because our wrenches are body frame wrenches that are rotated to be represented in the real world.
+    // Thus, the transformations between wrenches are [R 0; R 0] instead of the usual adjoint operator [R 0; [p]R, R]
+
+    // Eigen::VectorXd pos_foot_vec =
+    //     robot_->getBodyNodeIsometry(link_idx_).translation();
+    // Eigen::MatrixXd Adj_foot(6, 6); Adj_foot.setZero();
+    // Adj_foot = myUtils::Adjoint(Rot_foot_mtx, pos_foot_vec);
+
+    // std::cout << "link_idx = " << link_idx_ << std::endl;
+    // myUtils::pretty_print(Rot_foot, std::cout, "Rot_foot");
+    // myUtils::pretty_print(pos_foot_vec, std::cout, "pos_foot_vec");
+    // myUtils::pretty_print(Adj_foot, std::cout, "Adj_foot");    
+
+    // Uf_ = U * Rot_foot.transpose(); 
+    // Uf_ = U * Adj_foot.transpose();
+    // Uf_ = U * Adj_foot;
+
     return true;
 }
 

@@ -68,6 +68,9 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
                                   const Eigen::VectorXd& alpha,
                                   const Eigen::VectorXd& alphad, double dt);
 
+Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg);
+Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p);
+
 double QuatToYaw(const Eigen::Quaternion<double> q);
 
 // Euler ZYX 
