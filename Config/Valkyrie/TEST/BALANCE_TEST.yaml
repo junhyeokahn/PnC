@@ -1,6 +1,6 @@
 test_configuration:
     #target_com: [0, 0, 0.82]
-    target_pos_duration: 1.
+    target_pos_duration: 5.
     com_pos_deviation: [0, 0, 0.05]
 
     #swing_duration: 30.

@@ -118,23 +118,23 @@ void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     ihwbc_->getQddotResult(qddot_res);
 
     // Test Wrench Frame values
-    // ihwbc_->getFrResult(Fr_res);
+    ihwbc_->getFrResult(Fr_res);
     // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
-    // Eigen::MatrixXd R_r_cop = robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame).linear();
-    // Eigen::MatrixXd R_l_cop = robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame).linear();
-    // // Compute local frame wrench values
-    // Eigen::MatrixXd Rot_foot(6, 6);
-    // Rot_foot.setZero();
-    // Rot_foot.block(0, 0, 3, 3) = R_r_cop.transpose();
-    // Rot_foot.block(3, 3, 3, 3) = R_r_cop.transpose();
-    // Eigen::VectorXd W_r_local = Rot_foot*Fr_res.head(6); 
+    Eigen::MatrixXd R_r_cop = robot_->getBodyNodeIsometry(ValkyrieBodyNode::rightCOP_Frame).linear();
+    Eigen::MatrixXd R_l_cop = robot_->getBodyNodeIsometry(ValkyrieBodyNode::leftCOP_Frame).linear();
+    // Compute local frame wrench values
+    Eigen::MatrixXd Rot_foot(6, 6);
+    Rot_foot.setZero();
+    Rot_foot.block(0, 0, 3, 3) = R_r_cop.transpose();
+    Rot_foot.block(3, 3, 3, 3) = R_r_cop.transpose();
+    Eigen::VectorXd W_r_local = Rot_foot*Fr_res.head(6); 
 
-    // Rot_foot.block(0, 0, 3, 3) = R_l_cop.transpose();
-    // Rot_foot.block(3, 3, 3, 3) = R_l_cop.transpose();
-    // Eigen::VectorXd W_l_local = Rot_foot*Fr_res.tail(6);
+    Rot_foot.block(0, 0, 3, 3) = R_l_cop.transpose();
+    Rot_foot.block(3, 3, 3, 3) = R_l_cop.transpose();
+    Eigen::VectorXd W_l_local = Rot_foot*Fr_res.tail(6);
 
-    // myUtils::pretty_print(W_r_local, std::cout, "W_r_local");
-    // myUtils::pretty_print(W_l_local, std::cout, "W_l_local");
+    myUtils::pretty_print(W_r_local, std::cout, "W_r_local_desired");
+    myUtils::pretty_print(W_l_local, std::cout, "W_l_local_desired");
 
     // TODO: Integration Step here
 

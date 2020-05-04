@@ -218,19 +218,30 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
     Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
 
-    dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftFoot");
-    dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightFoot");
+    dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftCOP_Frame");
+    dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightCOP_Frame");
     const dart::collision::CollisionResult& _result =
         world_->getLastCollisionResult();
 
+    Eigen::VectorXd lf_contact_force_sum = Eigen::VectorXd::Zero(3);
     for (const auto& contact : _result.getContacts()) {
         for (const auto& shapeNode :
              lfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+
+            // Ensure that we view the force as external.
+            double sgn = 1.0;
+            if (shapeNode == contact.collisionObject1->getShapeFrame()){
+                sgn = 1.0;
+            }
+            if (shapeNode == contact.collisionObject2->getShapeFrame()){
+                sgn = -1.0;
+            }
+            // Perform Adjoint Map to local frame wrench
             if (shapeNode == contact.collisionObject1->getShapeFrame() ||
                 shapeNode == contact.collisionObject2->getShapeFrame()) {
-                double normal(contact.normal(2));
                 Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-                w_c.tail(3) = contact.force * normal;
+                w_c.tail(3) = (contact.force*sgn);
+                lf_contact_force_sum += (contact.force*sgn);
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
@@ -240,18 +251,25 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
                 Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
                 w_a = AdT_ca.transpose() * w_c;
-                // myUtils::pretty_print(w_a, std::cout, "left");
                 lf_wrench += w_a;
             }
         }
-
         for (const auto& shapeNode :
              rfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+            // Conditional Check to ensure that we view the force as external.
+            double sgn = 1.0;
+            if (shapeNode == contact.collisionObject1->getShapeFrame()){
+                sgn = 1.0;
+            }
+            if (shapeNode == contact.collisionObject2->getShapeFrame()){
+                sgn = -1.0;
+            }
+            // Perform Adjoint Map to local frame wrench
             if (shapeNode == contact.collisionObject1->getShapeFrame() ||
                 shapeNode == contact.collisionObject2->getShapeFrame()) {
                 double normal(contact.normal(2));
                 Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-                w_c.tail(3) = contact.force * normal;
+                w_c.tail(3) = (contact.force*sgn);
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
@@ -266,6 +284,10 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
             }
         }
     }
+
+    // myUtils::pretty_print(lf_contact_force_sum, std::cout, "lf_contact_force_sum");
+    myUtils::pretty_print(rf_wrench, std::cout, "sensor true local rf_wrench");
+    myUtils::pretty_print(lf_wrench, std::cout, "sensor true local lf_wrench ");
 
     sensor_data_->lf_wrench = lf_wrench;
     sensor_data_->rf_wrench = rf_wrench;
