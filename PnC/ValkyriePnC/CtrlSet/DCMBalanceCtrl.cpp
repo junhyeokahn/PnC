@@ -27,11 +27,9 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
     ini_pelvis_quat_ = Eigen::Quaternion<double> (1,0,0,0);
     // TASK
-    com_task_ =
-        //new CoMxyzRxRyRzTask(robot);
-        new CoMxyz(robot);
-    pelvis_ori_task_ =
-        new BasicTask(robot,BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
+    com_task_ = new CoMxyz(robot);
+    ang_momentum_task_ = new AngularMomentumTask(robot, ValkyrieAux::servo_rate);
+    pelvis_ori_task_ = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
 
     // Set Upper Body Joint Tasks
     upper_body_joint_indices_.clear();
@@ -73,6 +71,7 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
 
 DCMBalanceCtrl::~DCMBalanceCtrl() {
     delete com_task_;
+    delete ang_momentum_task_;
     delete pelvis_ori_task_;
     delete upper_body_task_;
     delete rfoot_center_pos_task;
@@ -180,6 +179,14 @@ void DCMBalanceCtrl::_task_setup() {
                                  jacc_des.tail(upper_body_joint_indices_.size()));
 
     // =========================================================================
+    // Set Angular Momentum Tasks
+    // =========================================================================
+    Eigen::VectorXd zero3 = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd des_ang_momentum = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd des_ang_momentum_rate = Eigen::VectorXd::Zero(3);
+    ang_momentum_task_->updateTask(zero3, des_ang_momentum, des_ang_momentum_rate);
+
+    // =========================================================================
     // Set Foot Motion Tasks
     // =========================================================================
     Eigen::VectorXd foot_pos_des(3); foot_pos_des.setZero();
@@ -224,6 +231,8 @@ void DCMBalanceCtrl::_task_setup() {
     task_list_.push_back(lfoot_center_pos_task);
     task_list_.push_back(lfoot_center_ori_task);
 
+    task_list_.push_back(ang_momentum_task_);
+
     w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
     w_task_heirarchy_[0] = w_task_com_;
@@ -233,6 +242,7 @@ void DCMBalanceCtrl::_task_setup() {
     w_task_heirarchy_[4] = w_task_rfoot_;
     w_task_heirarchy_[5] = w_task_lfoot_;
     w_task_heirarchy_[6] = w_task_lfoot_;
+    w_task_heirarchy_[7] = w_task_ang_mom_;
 
 }
 
@@ -288,8 +298,12 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 
     // COM
-    Eigen::VectorXd kp_com = 1000*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_com = 100.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kp_com = 100*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_com = 10.0*Eigen::VectorXd::Ones(3);
+
+    // Ang Momentum
+    Eigen::VectorXd kp_ang_mom = Eigen::VectorXd::Zero(3); 
+    Eigen::VectorXd kd_ang_mom = 100.0*Eigen::VectorXd::Ones(3);
 
     // Pelvis
     Eigen::VectorXd kp_pelvis = 100*Eigen::VectorXd::Ones(3); 
@@ -308,6 +322,7 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
 
     // Set Task Gains
     com_task_->setGain(kp_com, kd_com);
+    ang_momentum_task_->setGain(kp_ang_mom, kd_ang_mom);
     pelvis_ori_task_->setGain(kp_pelvis, kd_pelvis);
     upper_body_task_->setGain(kp_upper_body_joint, kd_upper_body_joint);
 
@@ -319,12 +334,13 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     // Set Hierarchy
     w_task_com_ = 5.0;
     w_task_pelvis_ = 5.0;
-    w_task_joint_ = 1e-1;
+
+    w_task_ang_mom_ = 3.0;
 
     w_task_upper_body_ = 2.0;
 
-    w_task_rfoot_ = 100.0;
-    w_task_lfoot_ = 100.0;
+    w_task_rfoot_ = 20.0;
+    w_task_lfoot_ = 20.0;
 
     // Set Contact Weight
     w_contact_weight_ = 0.0;

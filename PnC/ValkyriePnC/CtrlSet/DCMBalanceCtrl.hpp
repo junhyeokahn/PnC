@@ -25,6 +25,8 @@ class DCMBalanceCtrl : public Controller {
    protected:
     Task* com_task_;
     Task* pelvis_ori_task_;
+    Task* ang_momentum_task_;
+
 
     Task* upper_body_task_;
     std::vector<int> upper_body_joint_indices_;
@@ -45,8 +47,7 @@ class DCMBalanceCtrl : public Controller {
 
     Eigen::VectorXd w_task_heirarchy_;
     double w_task_com_;
-    double w_task_torso_;
-    double w_task_joint_;
+    double w_task_ang_mom_;
 
     double w_task_upper_body_;
     double w_task_pelvis_;
