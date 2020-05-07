@@ -28,7 +28,8 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     ini_torso_quat = Eigen::Quaternion<double> (1,0,0,0);
     // TASK
     com_task_ =
-        new CoMxyzRxRyRzTask(robot);
+        //new CoMxyzRxRyRzTask(robot);
+        new CoMxyz(robot);
     pelvis_ori_task_ =
         new BasicTask(robot,BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
 
@@ -154,7 +155,7 @@ void DCMBalanceCtrl::_task_setup() {
         (sp_->com_pos_des)[i] = des_com_pos_[i+4];
         (sp_->com_vel_des)[i] = des_com_vel_[i+3];
     }
-    com_task_->updateTask(des_com_pos_,des_com_vel_,des_com_acc_);
+    com_task_->updateTask(des_com_pos_.tail(3),des_com_vel_.tail(3),des_com_acc_.tail(3));
 
     // =========================================================================
     // Pelvis Ori Task
@@ -294,10 +295,8 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 
     // COM
-    Eigen::VectorXd kp_com = 1000*Eigen::VectorXd::Ones(6); 
-    Eigen::VectorXd kd_com = 100.0*Eigen::VectorXd::Ones(6);
-    kp_com.head(3) = Eigen::VectorXd::Zero(3);
-    kd_com.head(3) = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd kp_com = 1000*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_com = 100.0*Eigen::VectorXd::Ones(3);
 
     // Pelvis
     Eigen::VectorXd kp_pelvis = 100*Eigen::VectorXd::Ones(3); 
