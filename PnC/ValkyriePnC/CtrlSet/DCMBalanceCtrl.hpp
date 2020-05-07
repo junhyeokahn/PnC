@@ -86,5 +86,5 @@ class DCMBalanceCtrl : public Controller {
 
     BS_Basic<3,3,1,2,2> com_traj_;
 
-    Eigen::Quaternion<double> ini_torso_quat;
+    Eigen::Quaternion<double> ini_pelvis_quat_;
 };

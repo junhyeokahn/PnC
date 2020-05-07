@@ -18,14 +18,14 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     Kp_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
     Kd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
 
-    ini_com_pos_ = Eigen::VectorXd::Zero(7);
-    des_com_pos_ = Eigen::VectorXd::Zero(7);
-    des_com_vel_ = Eigen::VectorXd::Zero(6);
-    des_com_acc_ = Eigen::VectorXd::Zero(6);
+    ini_com_pos_ = Eigen::VectorXd::Zero(3);
+    des_com_pos_ = Eigen::VectorXd::Zero(3);
+    des_com_vel_ = Eigen::VectorXd::Zero(3);
+    des_com_acc_ = Eigen::VectorXd::Zero(3);
 
     com_pos_dev_ = Eigen::VectorXd::Zero(3);
 
-    ini_torso_quat = Eigen::Quaternion<double> (1,0,0,0);
+    ini_pelvis_quat_ = Eigen::Quaternion<double> (1,0,0,0);
     // TASK
     com_task_ =
         //new CoMxyzRxRyRzTask(robot);
@@ -152,20 +152,20 @@ void DCMBalanceCtrl::_task_setup() {
     _GetBsplineTrajectory();
     // for com plotting
     for (int i = 0; i < 3; ++i) {
-        (sp_->com_pos_des)[i] = des_com_pos_[i+4];
-        (sp_->com_vel_des)[i] = des_com_vel_[i+3];
+        (sp_->com_pos_des)[i] = des_com_pos_[i];
+        (sp_->com_vel_des)[i] = des_com_vel_[i];
     }
     com_task_->updateTask(des_com_pos_.tail(3),des_com_vel_.tail(3),des_com_acc_.tail(3));
 
     // =========================================================================
     // Pelvis Ori Task
     // =========================================================================
-    Eigen::VectorXd des_torso_quat = Eigen::VectorXd::Zero(4);
-    des_torso_quat << ini_torso_quat.w(),ini_torso_quat.x(), ini_torso_quat.y(),
-                        ini_torso_quat.z();
-    Eigen::VectorXd des_torso_so3 = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd des_pelvis_quat = Eigen::VectorXd::Zero(4);
+    des_pelvis_quat << ini_pelvis_quat_.w(),ini_pelvis_quat_.x(), ini_pelvis_quat_.y(),
+                        ini_pelvis_quat_.z();
+    Eigen::VectorXd des_pelvis_ang_vel = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd des_ang_acc = Eigen::VectorXd::Zero(3);
-    pelvis_ori_task_ -> updateTask(des_torso_quat,des_torso_so3,des_ang_acc);
+    pelvis_ori_task_ -> updateTask(des_pelvis_quat,des_pelvis_ang_vel,des_ang_acc);
     // =========================================================================
     // Joint Pos Task
     // =========================================================================
@@ -254,14 +254,7 @@ void DCMBalanceCtrl::firstVisit() {
     ctrl_start_time_ = sp_->curr_time;
 
     // ini_com_pos setting
-    Eigen::Quaternion<double> com_pos_ori_ini(robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
-    ini_com_pos_ <<  com_pos_ori_ini.w(), com_pos_ori_ini.x(),
-                    com_pos_ori_ini.y(), com_pos_ori_ini.z();
-
-    Eigen::Vector3d com_pos_xyz_ini = robot_ ->getCoMPosition();
-    for (int i(0); i < 3; ++i) {
-        ini_com_pos_[i+4] = com_pos_xyz_ini[i]; 
-    }
+    ini_com_pos_ = robot_ ->getCoMPosition();
     
     des_com_pos_ = ini_com_pos_;
     des_com_pos_.tail(3) = ini_com_pos_.tail(3) + com_pos_dev_;
@@ -269,7 +262,7 @@ void DCMBalanceCtrl::firstVisit() {
     _SetBspline(ini_com_pos_.tail(3),des_com_pos_.tail(3));
     //myUtils::pretty_print(ini_com_pos_, std::cout, "ini");
     
-    ini_torso_quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(ValkyrieBodyNode::torso).linear());
+    ini_pelvis_quat_ = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
 }
 
 void DCMBalanceCtrl::lastVisit() {}
@@ -380,8 +373,8 @@ void DCMBalanceCtrl::_GetBsplineTrajectory(){
     com_traj_.getCurveDerPoint(state_machine_time_, 2, acc);
 
     for (int i(0); i < 3; ++i) {
-        des_com_pos_[i+4] = pos[i];
-        des_com_vel_[i+3] = vel[i];
-        des_com_acc_[i+3] = acc[i];
+        des_com_pos_[i] = pos[i];
+        des_com_vel_[i] = vel[i];
+        des_com_acc_[i] = acc[i];
     }
 }
