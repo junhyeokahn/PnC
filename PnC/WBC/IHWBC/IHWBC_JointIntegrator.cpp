@@ -1,0 +1,133 @@
+#include <PnC/WBC/IHWBC/IHWBC_JointIntegrator.hpp>
+
+
+IHWBC_JointIntegrator::IHWBC_JointIntegrator(const int num_joints_in, const double dt_in){
+    myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
+    n_joints_ = num_joints_in;
+    setDt(dt_in);
+    setDefaultSaturation();
+    setVelocityFrequencyCutOff(default_vel_freq_cutoff_);
+    setPositionFrequencyCutOff(default_pos_freq_cutoff_);
+}
+
+IHWBC_JointIntegrator::IHWBC_JointIntegrator(const int num_joints_in, 
+                                             const double vel_cutoff_in,
+                                             const double pos_cutoff_in,
+                                             const double dt_in){
+    myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
+    n_joints_ = num_joints_in;
+    setDt(dt_in);
+    setDefaultSaturation();
+    setVelocityFrequencyCutOff(vel_cutoff_in);
+    setPositionFrequencyCutOff(pos_cutoff_in);
+}
+
+void IHWBC_JointIntegrator::integrate(const Eigen::VectorXd acc_in, const Eigen::VectorXd & vel_in, const Eigen::VectorXd & pos_in, 
+                                      Eigen::VectorXd & vel_out, Eigen::VectorXd & pos_out){
+    // Use IHMC's integration scheme
+    // Velocity Integration
+    // Decay desired velocity to 0.0
+    vel_ = (1.0 - alpha_vel_)*vel_;
+    // Integrate Joint Acceleration
+    vel_ += (acc_in*dt_);
+    // Clamp and Store Value
+    vel_out = clampVec(vel_, vel_min_, vel_max_);
+    vel_ = vel_out;
+
+    // Position Integration
+    // Decay desired position to current position
+    pos_ = (1.0 - alpha_pos_)*pos_ + alpha_pos_*pos_in;
+    // Integrate Joint Position
+    pos_ += (vel_*dt_);
+    // Clamp to maximum position error
+    pos_ = clampVec(pos_, pos_in - pos_max_error_, pos_in + pos_max_error_);
+    // Clamp to joint position limits
+    pos_out = clampVec(pos_, pos_min_, pos_max_);
+    // Store value
+    pos_ = pos_out;
+}
+
+double IHWBC_JointIntegrator::getAlphaFromFrequency(const double hz, const double dt){
+    double omega = 2.0 * M_PI * hz;
+    // double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt_/2.0));
+    // double alpha = (omega*dt/2.0) / (1.0 + (omega*dt_/2.0));
+    double alpha = (omega*dt) / (1.0 + (omega*dt_));
+    alpha = clampValue(alpha, 0.0, 1.0);
+    return alpha;
+}
+
+void IHWBC_JointIntegrator::setDt(const double dt_in){
+    dt_ = dt_in;
+}
+void IHWBC_JointIntegrator::setVelocityFrequencyCutOff(const double vel_cutoff_in){
+    vel_freq_cutoff_ = vel_cutoff_in;
+    alpha_vel_ = getAlphaFromFrequency(vel_freq_cutoff_, dt_);
+}
+void IHWBC_JointIntegrator::setPositionFrequencyCutOff(const double pos_cutoff_in){
+    pos_freq_cutoff_ = pos_cutoff_in;
+    alpha_pos_ = getAlphaFromFrequency(pos_freq_cutoff_, dt_);
+}
+void IHWBC_JointIntegrator::setVelocityBounds(const Eigen::VectorXd vel_min_in, const Eigen::VectorXd vel_max_in){
+    vel_min_ = vel_min_in;
+    vel_max_ = vel_max_in;
+}
+void IHWBC_JointIntegrator::setPositionBounds(const Eigen::VectorXd pos_min_in, const Eigen::VectorXd pos_max_in){
+    pos_min_ = pos_min_in;
+    pos_max_ = pos_max_in;
+}
+
+        // Sets the maximum position deviation from current position for all joints
+void IHWBC_JointIntegrator::setMaxPositionError(const double pos_max_error_in){
+    setMaxPositionErrorVector(default_pos_max_error_*Eigen::VectorXd::Ones(n_joints_));
+}
+        // Use custom maximum position deviation from current position for each joint
+void IHWBC_JointIntegrator::setMaxPositionErrorVector(const Eigen::VectorXd pos_max_error_in){
+    pos_max_error_ = pos_max_error_in;
+}
+
+void IHWBC_JointIntegrator::setDefaultSaturation(){
+    setVelocityBounds(-default_vel_min_max_*Eigen::VectorXd::Ones(n_joints_),
+                       default_vel_min_max_*Eigen::VectorXd::Ones(n_joints_));
+    setPositionBounds(-default_pos_min_max_*Eigen::VectorXd::Ones(n_joints_),
+                       default_pos_min_max_*Eigen::VectorXd::Ones(n_joints_));
+    setMaxPositionError(default_pos_max_error_);
+}
+
+double IHWBC_JointIntegrator::clampValue(double in, double min, double max){
+    if (in >= max){
+        return max;
+    }else if (in <= min){
+        return min;
+    }else{
+        return in;
+    }
+}
+
+Eigen::VectorXd IHWBC_JointIntegrator::clampVec(Eigen::VectorXd vec_in, 
+                                                Eigen::VectorXd vec_min,
+                                                Eigen::VectorXd vec_max){
+    Eigen::VectorXd vec_out = vec_in;
+    for(int i = 0; i < vec_in.size(); i++){
+        vec_out[i] = clampValue(vec_in[i], vec_min[i], vec_max[i]);
+    }
+    return vec_out;
+}
+
+void IHWBC_JointIntegrator::printIntegrationParams(){
+    std::cout << "Integration Params:" << std::endl;
+    printf("  dt: %0.6f s\n", dt_);
+    printf("  velocity cutoff freq: %0.3f Hz \n", vel_freq_cutoff_);
+    printf("  velocity cutoff alpha: %0.6f \n", alpha_vel_);
+    printf("  (1.0 - velocity cutoff alpha): %0.6f \n", (1.0-alpha_vel_));
+
+    printf("  position cutoff freq: %0.3f \n", pos_freq_cutoff_);
+    printf("  position cutoff alpha: %0.6f \n", alpha_pos_);
+    printf("  (1.0 - position cutoff alpha): %0.6f \n", (1.0-alpha_pos_));
+
+    myUtils::pretty_print(vel_min_, std::cout, "velocity_min");   
+    myUtils::pretty_print(vel_max_, std::cout, "velocity_max");
+    myUtils::pretty_print(pos_min_, std::cout, "position_min");
+    myUtils::pretty_print(pos_max_, std::cout, "position_max");
+    myUtils::pretty_print(pos_max_error_, std::cout, "position max error");
+
+}
