@@ -135,4 +135,7 @@ void IHWBC_JointIntegrator::printIntegrationParams(){
     myUtils::pretty_print(pos_max_, std::cout, "position_max");
     myUtils::pretty_print(pos_max_error_, std::cout, "position max error");
 
+    myUtils::pretty_print(pos_, std::cout, "position current");
+    myUtils::pretty_print(vel_, std::cout, "velocity current");
+
 }

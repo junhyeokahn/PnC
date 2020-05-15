@@ -68,7 +68,7 @@ private:
     double default_pos_freq_cutoff_ = 1.0; // Hz
 
     void setDefaultSaturation();
-    double default_vel_min_max_ = 10; // +/- radians/s
+    double default_vel_min_max_ = 2; // +/- radians/s
     double default_pos_min_max_ = 2*M_PI; //  +/- radians
     double default_pos_max_error_ = 0.2; // radians maximum position deviation from actual
 

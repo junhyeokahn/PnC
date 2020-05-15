@@ -6,6 +6,7 @@
 class ValkyrieStateProvider;
 class RobotSystem;
 class IHWBC;
+class IHWBC_JointIntegrator;
 class ContactSpec;
 
 class DCMBalanceCtrl : public Controller {
@@ -38,6 +39,9 @@ class DCMBalanceCtrl : public Controller {
 
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
+
+    // IHWBC Joint Integrator
+    IHWBC_JointIntegrator* ihwbc_joint_integrator_;
 
     // IHWBC
     IHWBC* ihwbc_;

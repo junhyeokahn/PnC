@@ -4,5 +4,6 @@ show_joint_frame: false
 plot_mpc_result: false
 
 control_configuration:
-  kp: 0 #300
-  kd: 0 #2
+  kp: 4
+  kd: 4
+

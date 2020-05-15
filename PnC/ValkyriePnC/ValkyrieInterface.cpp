@@ -71,9 +71,8 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
 }
 
 void ValkyrieInterface::CropTorque_(ValkyrieCommand* cmd) {
-    // cmd->jtrq = myUtils::CropVector(cmd->jtrq,
-    // robot_->GetTorqueLowerLimits(), robot_->GetTorqueUpperLimits(), "clip trq
-    // in interface");
+    cmd->jtrq = myUtils::CropVector(cmd->jtrq,
+    robot_->GetTorqueLowerLimits(), robot_->GetTorqueUpperLimits(), "clip trq in interface");
 }
 
 void ValkyrieInterface::_ParameterSetting() {

@@ -5,6 +5,7 @@
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
+#include <PnC/WBC/IHWBC/IHWBC_JointIntegrator.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
@@ -43,6 +44,9 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     lfoot_center_pos_task = new BasicTask(robot, BasicTaskType::LINKXYZ, 3, ValkyrieBodyNode::leftCOP_Frame);
     rfoot_center_ori_task = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::rightCOP_Frame);
     lfoot_center_ori_task = new BasicTask(robot, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::leftCOP_Frame);
+
+    // Joint Integrator
+    ihwbc_joint_integrator_ = new IHWBC_JointIntegrator(Valkyrie::n_adof, ValkyrieAux::servo_rate);
 
     // Initialize IHWBC
     std::vector<bool> act_list;
@@ -116,6 +120,19 @@ void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     ihwbc_->updateSetting(A_, Ainv_, coriolis_, grav_);
     ihwbc_->solve(task_list_, contact_list_, Fd_des, tau_cmd_, qddot_cmd_);
     ihwbc_->getQddotResult(qddot_res);
+
+    // Integrate Joint Velocities and Positions
+    des_jacc_= qddot_res.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    ihwbc_joint_integrator_->integrate(des_jacc_, sp_->qdot.segment(Valkyrie::n_vdof, Valkyrie::n_adof),
+                                                  sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof),
+                                                  des_jvel_,
+                                                  des_jpos_);
+
+    // Eigen::VectorXd jpos_cur = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    // Eigen::VectorXd jvel_cur = sp_->qdot.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    // myUtils::pretty_print(des_jacc_, std::cout, "des_jacc_");
+    // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_");
+    // myUtils::pretty_print(jvel_cur, std::cout, "jvel_cur");
 
     // Test Wrench Frame values
     ihwbc_->getFrResult(Fr_res);
@@ -263,6 +280,9 @@ void DCMBalanceCtrl::firstVisit() {
     jpos_ini_ = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ctrl_start_time_ = sp_->curr_time;
 
+    ihwbc_joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Valkyrie::n_adof), jpos_ini_);
+    // ihwbc_joint_integrator_->printIntegrationParams();
+
     // ini_com_pos setting
     ini_com_pos_ = robot_ ->getCoMPosition();
     
@@ -298,27 +318,27 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     }
 
     // COM
-    Eigen::VectorXd kp_com = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_com = 10.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kp_com = 50*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_com = 5.0*Eigen::VectorXd::Ones(3);
 
     // Ang Momentum
     Eigen::VectorXd kp_ang_mom = Eigen::VectorXd::Zero(3); 
-    Eigen::VectorXd kd_ang_mom = 100.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kd_ang_mom = 50.0*Eigen::VectorXd::Ones(3); //100.0*Eigen::VectorXd::Ones(3);
 
     // Pelvis
-    Eigen::VectorXd kp_pelvis = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_pelvis = 10.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kp_pelvis = 50*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_pelvis = 5.0*Eigen::VectorXd::Ones(3);
     // Total Joint
-    Eigen::VectorXd kp_joint = 100.0*Eigen::VectorXd::Ones(Valkyrie::n_adof); 
-    Eigen::VectorXd kd_joint = 10.0*Eigen::VectorXd::Ones(Valkyrie::n_adof);
+    Eigen::VectorXd kp_joint = 50.0*Eigen::VectorXd::Ones(Valkyrie::n_adof); 
+    Eigen::VectorXd kd_joint = 5.0*Eigen::VectorXd::Ones(Valkyrie::n_adof);
 
     // Upper Body Joint
-    Eigen::VectorXd kp_upper_body_joint = 100.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
-    Eigen::VectorXd kd_upper_body_joint = 10.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
+    Eigen::VectorXd kp_upper_body_joint = 50.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
+    Eigen::VectorXd kd_upper_body_joint = 5.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
 
     // Foot
-    Eigen::VectorXd kp_foot = 100*Eigen::VectorXd::Ones(3); 
-    Eigen::VectorXd kd_foot = 10.0*Eigen::VectorXd::Ones(3);
+    Eigen::VectorXd kp_foot = 50*Eigen::VectorXd::Ones(3); 
+    Eigen::VectorXd kd_foot = 5.0*Eigen::VectorXd::Ones(3);
 
     // Set Task Gains
     com_task_->setGain(kp_com, kd_com);
