@@ -15,6 +15,11 @@ public:
                           const double pos_cutoff_in,
                           const double dt_in);
 
+    // Initialize internal starting velocity and position states
+    void initializeStates(const Eigen::VectorXd init_vel,
+                          const Eigen::VectorXd init_pos);
+
+    // Main Integration function
     // Function: performs a leaky integration on the velocity and position.
     // Inputs: the current joint acceleration, velocity and position.
     // Outputs: the integrated velocity and position values.
@@ -23,14 +28,15 @@ public:
 
     // Setters
     void setDt(const double dt_in);
+    // Set cutoff to 0.0 to perform traditional integration
     void setVelocityFrequencyCutOff(const double vel_cutoff_in);
     void setPositionFrequencyCutOff(const double pos_cutoff_in);
+    // Set Joint velocity and position hardware limits
     void setVelocityBounds(const Eigen::VectorXd vel_min_in, const Eigen::VectorXd vel_max_in);
     void setPositionBounds(const Eigen::VectorXd pos_min_in, const Eigen::VectorXd pos_max_in);
-
-    // Sets the maximum position deviation from current position for all joints
+    // Set, for all joints, the maximum position deviation from current position
     void setMaxPositionError(const double pos_max_error_in);
-    // Use custom maximum position deviation from current position for each joint
+    // Set, for each joint, the maximum position deviation from current position
     void setMaxPositionErrorVector(const Eigen::VectorXd pos_max_error_in);
 
     // Debug
@@ -70,11 +76,11 @@ private:
     // Ouptuts alpha \in [0,1] from a set frequency and dt
     double getAlphaFromFrequency(const double hz, const double dt);
     // Clamps a value to be within min and max bounds
-    double clampValue(double in, double min, double max);
+    double clampValue(const double in, const double min, const double max);
     // Clamps a vector value to be within min and max bounds. 
-    Eigen::VectorXd clampVec(Eigen::VectorXd vec_in, 
-                             Eigen::VectorXd vec_min,
-                             Eigen::VectorXd vec_max);
+    Eigen::VectorXd clampVec(const Eigen::VectorXd vec_in, 
+                             const Eigen::VectorXd vec_min,
+                             const Eigen::VectorXd vec_max);
 
 };
 

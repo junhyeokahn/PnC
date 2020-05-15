@@ -4,6 +4,7 @@
 IHWBC_JointIntegrator::IHWBC_JointIntegrator(const int num_joints_in, const double dt_in){
     myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
     n_joints_ = num_joints_in;
+    initializeStates(Eigen::VectorXd::Zero(n_joints_), Eigen::VectorXd::Zero(n_joints_));
     setDt(dt_in);
     setDefaultSaturation();
     setVelocityFrequencyCutOff(default_vel_freq_cutoff_);
@@ -16,6 +17,7 @@ IHWBC_JointIntegrator::IHWBC_JointIntegrator(const int num_joints_in,
                                              const double dt_in){
     myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
     n_joints_ = num_joints_in;
+    initializeStates(Eigen::VectorXd::Zero(n_joints_), Eigen::VectorXd::Zero(n_joints_));
     setDt(dt_in);
     setDefaultSaturation();
     setVelocityFrequencyCutOff(vel_cutoff_in);
@@ -49,11 +51,14 @@ void IHWBC_JointIntegrator::integrate(const Eigen::VectorXd acc_in, const Eigen:
 
 double IHWBC_JointIntegrator::getAlphaFromFrequency(const double hz, const double dt){
     double omega = 2.0 * M_PI * hz;
-    // double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt_/2.0));
-    // double alpha = (omega*dt/2.0) / (1.0 + (omega*dt_/2.0));
     double alpha = (omega*dt) / (1.0 + (omega*dt_));
     alpha = clampValue(alpha, 0.0, 1.0);
     return alpha;
+}
+
+void IHWBC_JointIntegrator::initializeStates(const Eigen::VectorXd init_vel, const Eigen::VectorXd init_pos){
+    vel_ = init_vel;
+    pos_ = init_pos;
 }
 
 void IHWBC_JointIntegrator::setDt(const double dt_in){
@@ -93,7 +98,7 @@ void IHWBC_JointIntegrator::setDefaultSaturation(){
     setMaxPositionError(default_pos_max_error_);
 }
 
-double IHWBC_JointIntegrator::clampValue(double in, double min, double max){
+double IHWBC_JointIntegrator::clampValue(const double in, const double min, const double max){
     if (in >= max){
         return max;
     }else if (in <= min){
@@ -103,9 +108,9 @@ double IHWBC_JointIntegrator::clampValue(double in, double min, double max){
     }
 }
 
-Eigen::VectorXd IHWBC_JointIntegrator::clampVec(Eigen::VectorXd vec_in, 
-                                                Eigen::VectorXd vec_min,
-                                                Eigen::VectorXd vec_max){
+Eigen::VectorXd IHWBC_JointIntegrator::clampVec(const Eigen::VectorXd vec_in, 
+                                                const Eigen::VectorXd vec_min,
+                                                const Eigen::VectorXd vec_max){
     Eigen::VectorXd vec_out = vec_in;
     for(int i = 0; i < vec_in.size(); i++){
         vec_out[i] = clampValue(vec_in[i], vec_min[i], vec_max[i]);

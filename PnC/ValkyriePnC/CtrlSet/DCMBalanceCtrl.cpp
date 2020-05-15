@@ -52,7 +52,7 @@ DCMBalanceCtrl::DCMBalanceCtrl(RobotSystem* robot) : Controller(robot) {
     ihwbc_ = new IHWBC(act_list);
 
     lambda_qddot_ = 1e-8;
-    lambda_Fr_ = 1e-16;
+    lambda_Fr_ = 1e-8;
 
     // Initialize Foot Contacts
     rfoot_contact_ = new SurfaceContactSpec(
@@ -343,7 +343,7 @@ void DCMBalanceCtrl::ctrlInitialization(const YAML::Node& node) {
     w_task_lfoot_ = 20.0;
 
     // Set Contact Weight
-    w_contact_weight_ = 0.0;
+    w_contact_weight_ = 1e-3;
 
 }
 
