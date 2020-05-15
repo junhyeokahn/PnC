@@ -111,6 +111,12 @@ void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     ihwbc_->setQPWeights(w_task_heirarchy_, local_w_contact_weight);
     ihwbc_->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
 
+    // Enable Torque Limits
+    ihwbc_->enableTorqueLimits(true); 
+    Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    ihwbc_->setTorqueLimits(tau_min, tau_max);
+
     // QP dec variable results
     Eigen::VectorXd qddot_res;
     Eigen::VectorXd Fr_res;

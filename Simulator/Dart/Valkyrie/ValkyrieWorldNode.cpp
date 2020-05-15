@@ -102,6 +102,12 @@ void ValkyrieWorldNode::customPreStep() {
         trq_cmd_[i + 6] += kp_ * (command_->q[i] - sensor_data_->q[i]) +
                            kd_ * (command_->qdot[i] - sensor_data_->qdot[i]);
     }
+
+    // Crop Torque to be within the limits
+    trq_cmd_.tail(n_dof_ - 6) = myUtils::CropVector(trq_cmd_.tail(n_dof_ - 6),
+    trq_lb_.segment(Valkyrie::n_vdof, Valkyrie::n_adof), 
+    trq_ub_.segment(Valkyrie::n_vdof, Valkyrie::n_adof), "clip trq in sim");
+
     trq_cmd_.head(6).setZero();
 
     robot_->setForces(trq_cmd_);
