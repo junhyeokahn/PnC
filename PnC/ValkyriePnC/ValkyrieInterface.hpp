@@ -63,6 +63,9 @@ class ValkyrieInterface : public EnvInterface {
 
     double prev_planning_moment_;
 
+    std::string test_name_;
+    bool use_control_architecture_interface_;
+
    public:
     ValkyrieInterface();
     virtual ~ValkyrieInterface();

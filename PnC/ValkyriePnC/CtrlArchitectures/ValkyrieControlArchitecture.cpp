@@ -1,0 +1,84 @@
+#include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
+#include <PnC/ValkyriePnC/ContactSet/ContactSet.hpp>
+#include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
+#include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
+#include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
+#include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
+#include <Utils/IO/DataManager.hpp>
+
+ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : ControlArchitecture(robot) {
+    b_first_visit_ = true;
+
+    myUtils::pretty_constructor(1, "Valkyrie Control Architecture");
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/BALANCE_TEST.yaml");
+
+    sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+    phase_ = VALKYRIE_STATES::BALANCE;
+
+    state_list_.clear();
+
+    balance_ctrl_ = new DCMBalanceCtrl(robot);
+    swing_ctrl_ = new SwingCtrl(robot);
+
+    _SettingParameter();
+
+    state_list_.push_back(balance_ctrl_);
+    state_list_.push_back(swing_ctrl_);
+}
+
+ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
+    delete balance_ctrl_; 
+    delete swing_ctrl_; 
+}
+
+void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
+    balance_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["balance_ctrl"]);
+    swing_ctrl_->ctrlInitialization(
+        cfg_["control_configuration"]["swing_ctrl"]);
+}
+
+
+void ValkyrieControlArchitecture::getCommand(void* _command) {
+    if (b_first_visit_) {
+        state_list_[phase_]->firstVisit();
+        b_first_visit_ = false;
+    }
+    state_list_[phase_]->oneStep(_command);
+    if (state_list_[phase_]->endOfPhase()) {
+        state_list_[phase_]->lastVisit();
+        phase_ = _NextPhase(phase_);
+        b_first_visit_ = true;
+    }
+};
+
+
+int ValkyrieControlArchitecture::_NextPhase(const int& phase) {
+    int next_phase = phase + 1;
+    return next_phase;
+}
+
+void ValkyrieControlArchitecture::_SettingParameter() {
+    try {
+        double temp;
+        Eigen::VectorXd temp_vec;
+
+        YAML::Node test_cfg = cfg_["test_configuration"];
+        myUtils::readParameter(test_cfg,"target_pos_duration",temp);
+       ((DCMBalanceCtrl*)balance_ctrl_)->setDuration(temp);
+        myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
+       ((DCMBalanceCtrl*)balance_ctrl_)->setComDeviation(temp_vec);
+        myUtils::readParameter(test_cfg,"amplitude",temp_vec);
+       ((SwingCtrl*)swing_ctrl_)->setAmplitude(temp_vec);
+        myUtils::readParameter(test_cfg,"frequency",temp_vec);
+       ((SwingCtrl*)swing_ctrl_)->setFrequency(temp_vec);
+        myUtils::readParameter(test_cfg,"phase",temp_vec);
+       ((SwingCtrl*)swing_ctrl_)->setPhase(temp_vec);
+
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
+}

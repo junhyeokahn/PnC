@@ -3,6 +3,7 @@
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/ValkyriePnC/TestSet/BalanceTest.hpp>
 #include <PnC/ValkyriePnC/TestSet/DCMBalanceTest.hpp>
+#include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateEstimator.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
@@ -11,6 +12,7 @@
 #include <string>
 
 ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
+    use_control_architecture_interface_ = false;
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
         border += "=";
@@ -56,7 +58,11 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
 
     if (!Initialization_(data, cmd)) {
         state_estimator_->Update(data);
-        test_->getCommand(cmd);
+        if(use_control_architecture_interface_){
+            control_architecture_->getCommand(cmd);            
+        }else{
+            test_->getCommand(cmd);
+        }
         CropTorque_(cmd);
     }
 
@@ -67,7 +73,12 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
     ++count_;
     running_time_ = (double)(count_)*ValkyrieAux::servo_rate;
     sp_->curr_time = running_time_;
-    sp_->phase_copy = test_->getPhase();
+    
+    if(use_control_architecture_interface_){
+        sp_->phase_copy = control_architecture_->getPhase();
+    }else{
+        sp_->phase_copy = test_->getPhase();
+    }
 }
 
 void ValkyrieInterface::CropTorque_(ValkyrieCommand* cmd) {
@@ -80,14 +91,19 @@ void ValkyrieInterface::_ParameterSetting() {
     try {
         YAML::Node cfg =
             YAML::LoadFile(THIS_COM "Config/Valkyrie/INTERFACE.yaml");
-        std::string test_name =
+        test_name_ =
             myUtils::readParameter<std::string>(cfg, "test_name");
-        if (test_name == "balance_test") {
+        if (test_name_ == "balance_test") {
             test_ = new BalanceTest(robot_);
         } 
-        else if (test_name == "dcm_balance_test") {
+        else if (test_name_ == "dcm_balance_test") {
             test_ = new DCMBalanceTest(robot_);
-        } else {
+        }
+        else if (test_name_ == "valkyrie_control_architecture_test") {
+            control_architecture_ = new ValkyrieControlArchitecture(robot_);
+            use_control_architecture_interface_ = true;
+        }
+         else {
             printf(
                 "[Valkyrie Interface] There is no test matching test with "
                 "the name\n");
@@ -105,7 +121,11 @@ bool ValkyrieInterface::Initialization_(ValkyrieSensorData* _sensor_data,
                                         ValkyrieCommand* _command) {
     static bool test_initialized(false);
     if (!test_initialized) {
-        test_->TestInitialization();
+        if(use_control_architecture_interface_){
+            control_architecture_->ControlArchitectureInitialization();
+        }else{
+            test_->TestInitialization();
+        }
         test_initialized = true;
     }
     if (count_ < waiting_count_) {

@@ -1,2 +1,3 @@
 # test_name: balance_test
-test_name: dcm_balance_test
+#test_name: dcm_balance_test
+test_name: valkyrie_control_architecture_test

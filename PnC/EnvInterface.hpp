@@ -4,11 +4,13 @@
 #include <memory>
 
 class Test;
+class ControlArchitecture;
 class RobotSystem;
 
 class EnvInterface {
    protected:
     Test* test_;
+    ControlArchitecture* control_architecture_;
     RobotSystem* robot_;
     int count_;
     double running_time_;

@@ -19,7 +19,7 @@ class Test {
     virtual ~Test(){};
 
     virtual void TestInitialization() = 0;
-    void getCommand(void* _command) {
+    virtual void getCommand(void* _command) {
         AdditionalUpdate_();
         if (b_first_visit_) {
             state_list_[phase_]->firstVisit();
