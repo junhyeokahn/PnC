@@ -39,6 +39,10 @@ class Task {
     void setHierarchy(const double& _w_hierarchy) {
         w_hierarchy_ = _w_hierarchy;
     }
+    // Get hierarchy weight
+    double getHierarchyWeight() {
+        return w_hierarchy_;
+    }
 
     bool updateTask(const Eigen::VectorXd& pos_des,
                     const Eigen::VectorXd& vel_des,

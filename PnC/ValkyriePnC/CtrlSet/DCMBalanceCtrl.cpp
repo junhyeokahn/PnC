@@ -256,16 +256,20 @@ void DCMBalanceCtrl::_task_setup() {
 
     task_list_.push_back(ang_momentum_task_);
 
-    w_task_hierarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    // Set hierarchy weights
+    com_task_->setHierarchy(w_task_com_);
+    pelvis_ori_task_->setHierarchy(w_task_pelvis_);
+    upper_body_task_->setHierarchy(w_task_upper_body_);
+    rfoot_center_pos_task->setHierarchy(w_task_rfoot_);
+    rfoot_center_ori_task->setHierarchy(w_task_rfoot_);
+    lfoot_center_pos_task->setHierarchy(w_task_lfoot_);
+    lfoot_center_ori_task->setHierarchy(w_task_lfoot_);
 
-    w_task_hierarchy_[0] = w_task_com_;
-    w_task_hierarchy_[1] = w_task_pelvis_;
-    w_task_hierarchy_[2] = w_task_upper_body_; 
-    w_task_hierarchy_[3] = w_task_rfoot_;
-    w_task_hierarchy_[4] = w_task_rfoot_;
-    w_task_hierarchy_[5] = w_task_lfoot_;
-    w_task_hierarchy_[6] = w_task_lfoot_;
-    w_task_hierarchy_[7] = w_task_ang_mom_;
+
+    w_task_hierarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    for(int i = 0; i < task_list_.size(); i++){
+        w_task_hierarchy_[i] = task_list_[i]->getHierarchyWeight();        
+    }
 
 }
 
