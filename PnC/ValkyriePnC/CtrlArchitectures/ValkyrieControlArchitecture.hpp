@@ -7,7 +7,6 @@ class ValkyrieStateProvider;
 // 
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
-    constexpr int SWING = 1;
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
@@ -26,9 +25,6 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
 
     // Temporary
     bool b_first_visit_;
-    std::vector<Controller*> state_list_;
-
     Controller* balance_ctrl_;
-    Controller* swing_ctrl_;
 
 };
