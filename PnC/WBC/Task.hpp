@@ -10,6 +10,8 @@ class Task {
         robot_ = _robot;
         b_set_task_ = false;
         dim_task_ = _dim;
+
+        w_hierarchy_ = 1.0;
         kp_ = Eigen::VectorXd::Zero(_dim);
         kd_ = Eigen::VectorXd::Zero(_dim);
         JtDotQdot_ = Eigen::VectorXd::Zero(_dim);
@@ -31,6 +33,11 @@ class Task {
     void setGain(const Eigen::VectorXd& _kp, const Eigen::VectorXd& _kd) {
         kp_ = _kp;
         kd_ = _kd;
+    }
+
+    // Set hierarchy weight for IHWBC
+    void setHierarchy(const double& _w_hierarchy) {
+        w_hierarchy_ = _w_hierarchy;
     }
 
     bool updateTask(const Eigen::VectorXd& pos_des,
@@ -64,6 +71,8 @@ class Task {
     RobotSystem* robot_;
     bool b_set_task_;
     int dim_task_;
+
+    double w_hierarchy_;
     Eigen::VectorXd kp_;
     Eigen::VectorXd kd_;
 
