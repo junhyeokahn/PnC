@@ -75,7 +75,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
     sp_->curr_time = running_time_;
     
     if(use_control_architecture_interface_){
-        sp_->phase_copy = control_architecture_->getPhase();
+        sp_->phase_copy = control_architecture_->getState();
     }else{
         sp_->phase_copy = test_->getPhase();
     }

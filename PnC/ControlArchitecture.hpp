@@ -13,7 +13,7 @@ class RobotSystem;
 class ControlArchitecture {
    public:
     ControlArchitecture(RobotSystem* _robot) {
-        DataManager::GetDataManager()->RegisterData(&phase_, INT, "phase");
+        DataManager::GetDataManager()->RegisterData(&state_, INT, "phase");
         robot_ = _robot;
     };
     virtual ~ControlArchitecture(){};
@@ -21,10 +21,10 @@ class ControlArchitecture {
     virtual void ControlArchitectureInitialization() = 0;
     virtual void getCommand(void* _command) {};
 
-    int getPhase() { return phase_; }
+    int getState() { return state_; }
 
    protected:
-    int phase_;
+    int state_;
 
     RobotSystem* robot_;
 };

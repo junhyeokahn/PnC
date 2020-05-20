@@ -18,7 +18,6 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
 
    protected:
     ValkyrieStateProvider* sp_;
-    virtual int _NextPhase(const int& phase);
     void _SettingParameter();
 
     YAML::Node cfg_;

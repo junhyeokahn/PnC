@@ -13,7 +13,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : C
     cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/BALANCE_TEST.yaml");
 
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
-    phase_ = VALKYRIE_STATES::BALANCE;
+    state_ = VALKYRIE_STATES::BALANCE;
 
     balance_ctrl_ = new DCMBalanceCtrl(robot);
 
@@ -37,12 +37,6 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
     }
     balance_ctrl_->oneStep(_command);
 };
-
-
-int ValkyrieControlArchitecture::_NextPhase(const int& phase) {
-    int next_phase = phase + 1;
-    return next_phase;
-}
 
 void ValkyrieControlArchitecture::_SettingParameter() {
     try {
