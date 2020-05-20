@@ -29,7 +29,7 @@ public:
     // Returns the reaction forces computed by the QP
     void getFrResult(Eigen::VectorXd & Fr_out);
 
-    // w_task_heirarchy_in:
+    // w_task_hierarchy_in:
     //  - sets relative weight between task priority
     //  - must have dimension equal to the number of tasks.
     // w_rf_contacts_in (for target wrench minimization only)
@@ -41,8 +41,8 @@ public:
     //
     // w_contact_weight_in  
     //  - sets the relative weight of the contact forces and the task hierarchies
-    void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
-    void setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in);
+    void setQPWeights(const Eigen::VectorXd & w_task_hierarchy_in, const Eigen::VectorXd & w_rf_contacts_in, const double & w_contact_weight_in);
+    void setQPWeights(const Eigen::VectorXd & w_task_hierarchy_in, const double & w_contact_weight_in);
     void setRegularizationTerms(const double lambda_qddot_in, const double lambda_Fr_in); 
 
     void setTorqueLimits(const Eigen::VectorXd & tau_min_in, const Eigen::VectorXd & tau_max_in);
@@ -54,7 +54,7 @@ public:
     bool target_wrench_minimization;
 
     // Weight of task hierarchies
-    Eigen::VectorXd w_task_heirarchy;
+    Eigen::VectorXd w_task_hierarchy;
     // Weights of contact reaction forces
     Eigen::VectorXd w_rf_contacts;
     double w_contact_weight;

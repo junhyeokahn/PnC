@@ -65,17 +65,17 @@ void IHWBC::getFrResult(Eigen::VectorXd & Fr_out){
     Fr_out = Fr_result_;
 }
 
-void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, 
+void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_hierarchy_in, 
                          const Eigen::VectorXd & w_rf_contacts_in, 
                          const double & w_contact_weight_in){
-    w_task_heirarchy = w_task_heirarchy_in;
+    w_task_hierarchy = w_task_hierarchy_in;
     w_rf_contacts = w_rf_contacts_in;
     w_contact_weight = w_contact_weight_in;
     b_weights_set_ = true;
 }
 
-void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_heirarchy_in, const double & w_contact_weight_in){
-    w_task_heirarchy = w_task_heirarchy_in;
+void IHWBC::setQPWeights(const Eigen::VectorXd & w_task_hierarchy_in, const double & w_contact_weight_in){
+    w_task_hierarchy = w_task_hierarchy_in;
     w_contact_weight = w_contact_weight_in; 
     b_weights_set_ = true;
 }
@@ -116,11 +116,11 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
 
     if(!b_weights_set_){
         printf("[Warning] Weights for IHBWC has not been set. Setting 1.0 to all weights \n");
-        w_task_heirarchy = Eigen::VectorXd::Zero(task_list.size());
+        w_task_hierarchy = Eigen::VectorXd::Zero(task_list.size());
         w_rf_contacts = Eigen::VectorXd::Zero(contact_list.size());
 
         for(int i = 0; i < task_list.size(); i++){
-            w_task_heirarchy[i] = 1.0;
+            w_task_hierarchy[i] = 1.0;
         }
         for(int i = 0; i < contact_list.size(); i++){
             w_rf_contacts[i] = 1.0/contact_list.size();
@@ -154,8 +154,8 @@ void IHWBC::solve(const std::vector<Task*> & task_list,
         // std::cout << "      JtDotQdot: " << JtDotQdot.transpose() << std::endl;
 
         // Add to Costs
-        Pt += (w_task_heirarchy[i]*(Jt.transpose()*Jt));
-        vt += (w_task_heirarchy[i]*((JtDotQdot-xddot).transpose()*Jt));
+        Pt += (w_task_hierarchy[i]*(Jt.transpose()*Jt));
+        vt += (w_task_hierarchy[i]*((JtDotQdot-xddot).transpose()*Jt));
     }
     // Pt += (lambda_qddot*Eigen::MatrixXd::Identity(num_qdot_, num_qdot_)); 
     Pt += lambda_qddot*A_;
