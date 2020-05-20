@@ -49,7 +49,7 @@ class DCMBalanceCtrl : public Controller {
     Eigen::VectorXd tau_cmd_;
     Eigen::VectorXd qddot_cmd_;
 
-    Eigen::VectorXd w_task_heirarchy_;
+    Eigen::VectorXd w_task_hierarchy_;
     double w_task_com_;
     double w_task_ang_mom_;
 

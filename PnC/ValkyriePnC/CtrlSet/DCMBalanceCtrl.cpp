@@ -108,7 +108,7 @@ void DCMBalanceCtrl::oneStep(void* _cmd) {
 void DCMBalanceCtrl::_compute_torque_wbc(Eigen::VectorXd& gamma) {
     // Set QP weights
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
-    ihwbc_->setQPWeights(w_task_heirarchy_, local_w_contact_weight);
+    ihwbc_->setQPWeights(w_task_hierarchy_, local_w_contact_weight);
     ihwbc_->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
 
     // Enable Torque Limits
@@ -256,16 +256,16 @@ void DCMBalanceCtrl::_task_setup() {
 
     task_list_.push_back(ang_momentum_task_);
 
-    w_task_heirarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    w_task_hierarchy_ = Eigen::VectorXd::Zero(task_list_.size());
 
-    w_task_heirarchy_[0] = w_task_com_;
-    w_task_heirarchy_[1] = w_task_pelvis_;
-    w_task_heirarchy_[2] = w_task_upper_body_; 
-    w_task_heirarchy_[3] = w_task_rfoot_;
-    w_task_heirarchy_[4] = w_task_rfoot_;
-    w_task_heirarchy_[5] = w_task_lfoot_;
-    w_task_heirarchy_[6] = w_task_lfoot_;
-    w_task_heirarchy_[7] = w_task_ang_mom_;
+    w_task_hierarchy_[0] = w_task_com_;
+    w_task_hierarchy_[1] = w_task_pelvis_;
+    w_task_hierarchy_[2] = w_task_upper_body_; 
+    w_task_hierarchy_[3] = w_task_rfoot_;
+    w_task_hierarchy_[4] = w_task_rfoot_;
+    w_task_hierarchy_[5] = w_task_lfoot_;
+    w_task_hierarchy_[6] = w_task_lfoot_;
+    w_task_hierarchy_[7] = w_task_ang_mom_;
 
 }
 
