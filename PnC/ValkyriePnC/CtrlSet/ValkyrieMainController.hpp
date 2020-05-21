@@ -1,28 +1,25 @@
 #pragma once
 
 #include <PnC/Controller.hpp>
-#include <PnC/ControlArchitecture.hpp>
 
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
 #include <PnC/WBC/IHWBC/IHWBC_JointIntegrator.hpp>
 
-#include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 
-// Forward Declare Inter-dependent Classes
-class ValkyrieControlArchitecture;
+#include <PnC/ValkyriePnC/TaskAndForceContainers/ValkyrieTaskAndForceContainer.hpp>
 
 class ValkyrieMainController : public Controller {
   public:
-    ValkyrieMainController(ControlArchitecture* _ctrl_arch, RobotSystem* _robot);
+    ValkyrieMainController(ValkyrieTaskAndForceContainer* _taf_container, RobotSystem* _robot);
     virtual ~ValkyrieMainController();
 
     void getCommand(void* _cmd);
     virtual void ctrlInitialization(const YAML::Node& node);
 
   protected:
-    ValkyrieControlArchitecture* val_ctrl_arch_;
+    ValkyrieTaskAndForceContainer* taf_container_;
     ValkyrieStateProvider* sp_;
 
     // -------------------------------------------------------

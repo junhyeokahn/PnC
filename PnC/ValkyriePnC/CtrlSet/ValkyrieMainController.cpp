@@ -1,9 +1,10 @@
 #include <PnC/ValkyriePnC/CtrlSet/ValkyrieMainController.hpp>
 
-ValkyrieMainController::ValkyrieMainController(ControlArchitecture* _ctrl_arch, RobotSystem* _robot) : Controller(_robot){
+ValkyrieMainController::ValkyrieMainController(ValkyrieTaskAndForceContainer* _taf_container, RobotSystem* _robot) : Controller(_robot){
     myUtils::pretty_constructor(2, "Valkyrie Main Controller");
-    // Initialize Pointer to the control architecture
-    val_ctrl_arch_ = (ValkyrieControlArchitecture*) _ctrl_arch;
+
+    // Initialize Pointer to the Task and Force Container
+    taf_container_ = _taf_container;
 
     // Initialize State Provider
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);

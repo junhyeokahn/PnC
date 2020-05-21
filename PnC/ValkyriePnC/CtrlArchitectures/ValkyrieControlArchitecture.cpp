@@ -10,7 +10,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
 
     // Initialize Main Controller
     taf_container_ = new ValkyrieTaskAndForceContainer(robot_);
-    main_controller_ = new ValkyrieMainController(this, robot_);
+    main_controller_ = new ValkyrieMainController(taf_container_, robot_);
 
     // Add all states to the state machine
     // state_machines_[VALKYRIE_STATES::BALANCE] = new StateMachine(VALKYRIE_STATES::BALANCE, this, robot_);

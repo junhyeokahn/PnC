@@ -19,8 +19,6 @@ namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
 };  
 
-// Forward Declare Inter-dependent Classes
-class ValkyrieMainController;
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
   public:
@@ -41,15 +39,10 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     // -----------------------
 
   void _InitializeParameters();
-  void _InitializeTasks();
-  void _InitializeContacts();
-
-  void _DeleteTasks();
-  void _DeleteContacts();
 
   public:
-    // Controller Object
-    ValkyrieMainController* main_controller_;
     // Task and Force Containers
     ValkyrieTaskAndForceContainer* taf_container_;
+    // Controller Object
+    ValkyrieMainController* main_controller_;
 };

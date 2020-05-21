@@ -1,3 +1,5 @@
+#pragma once
+
 #include <PnC/TaskAndForceContainer.hpp>
 
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
