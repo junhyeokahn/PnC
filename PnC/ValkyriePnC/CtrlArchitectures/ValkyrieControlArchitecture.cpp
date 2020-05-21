@@ -1,6 +1,6 @@
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 
-ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : ControlArchitecture(robot) {
+ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : ControlArchitecture(_robot) {
     b_first_visit_ = true;
 
     myUtils::pretty_constructor(1, "Valkyrie Control Architecture");
@@ -8,8 +8,12 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : C
 
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
+    // Initialize Main Controller
+    taf_container_ = new ValkyrieTaskAndForceContainer(robot_);
+    main_controller_ = new ValkyrieMainController(this, robot_);
+
     // Add all states to the state machine
-    // state_machines[VALKYRIE_STATES::BALANCE] = new StateMachine(VALKYRIE_STATES::BALANCE, this, robot_);
+    // state_machines_[VALKYRIE_STATES::BALANCE] = new StateMachine(VALKYRIE_STATES::BALANCE, this, robot_);
     // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
 
@@ -19,9 +23,8 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : C
 
 ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
     delete balance_ctrl_; 
-    _DeleteController();
-    _DeleteTasks();
-    _DeleteContacts();
+    delete main_controller_;
+    delete taf_container_;
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
@@ -61,68 +64,4 @@ void ValkyrieControlArchitecture::_SettingParameter() {
 void ValkyrieControlArchitecture::_InitializeParameters(){
 }
 
-void ValkyrieControlArchitecture::_InitializeController(){
-    // Initialize IHWBC
-    std::vector<bool> act_list;
-    act_list.resize(Valkyrie::n_dof, true);
-    for (int i(0); i < Valkyrie::n_vdof; ++i) act_list[i] = false;
-    ihwbc_ = new IHWBC(act_list);
 
-    // Initialize Joint Integrator
-    ihwbc_dt_ = ValkyrieAux::servo_rate;
-    ihwbc_joint_integrator_ = new IHWBC_JointIntegrator(Valkyrie::n_adof, ihwbc_dt_);
-
-    // Initialize desired pos, vel, acc containers
-    des_jpos_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-    des_jvel_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-    des_jacc_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-}
-
-void ValkyrieControlArchitecture::_InitializeTasks(){
-    // CoM and Pelvis Tasks
-    com_task_ = new CoMxyz(robot_);
-    ang_momentum_task_ = new AngularMomentumTask(robot_, ValkyrieAux::servo_rate);
-    pelvis_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::pelvis);
-
-    // Set Upper Body Joint Tasks
-    upper_body_joint_indices_.clear();
-    for(int i = ValkyrieDoF::torsoYaw; i < (ValkyrieDoF::rightForearmYaw + 1); i++){
-        upper_body_joint_indices_.push_back(i);
-    }
-    upper_body_task_ = new SelectedJointTasks(robot_, upper_body_joint_indices_);
-
-    // Set Foot Motion Tasks
-    rfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ValkyrieBodyNode::rightCOP_Frame);
-    lfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3, ValkyrieBodyNode::leftCOP_Frame);
-    rfoot_center_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::rightCOP_Frame);
-    lfoot_center_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3, ValkyrieBodyNode::leftCOP_Frame);
-}
-
-void ValkyrieControlArchitecture::_InitializeContacts(){
-    rfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.7);
-    lfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.7);
-    dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim(); 
-    rfoot_max_z_ = 1500;
-    lfoot_max_z_ = 1500;
-}
-
-void ValkyrieControlArchitecture::_DeleteController(){
-    delete ihwbc_;
-    delete ihwbc_joint_integrator_;
-}
-void ValkyrieControlArchitecture::_DeleteTasks(){
-    delete com_task_;
-    delete ang_momentum_task_;
-    delete pelvis_ori_task_;
-    delete upper_body_task_;
-    delete rfoot_center_pos_task_;
-    delete lfoot_center_pos_task_;
-    delete rfoot_center_ori_task_;
-    delete lfoot_center_ori_task_;
-}
-void ValkyrieControlArchitecture::_DeleteContacts(){
-    delete rfoot_contact_;
-    delete lfoot_contact_;
-}

@@ -30,7 +30,7 @@ protected:
       Jinv = Ainv_ * J.transpose() * Jtmp_inv;
   }
 
-  void _PreProcessing_Command(){
+  virtual void _PreProcessing_Command(){
       A_ = robot_->getMassMatrix();
       Ainv_ = robot_->getInvMassMatrix();
       grav_ = robot_->getGravity();
@@ -40,7 +40,7 @@ protected:
       contact_list_.clear();
   }
 
-  void _PostProcessing_Command(){
+  virtual void _PostProcessing_Command(){
       for(int i(0); i<task_list_.size(); ++i){ task_list_[i]->unsetTask(); }
       for(int i(0); i<contact_list_.size(); ++i){ contact_list_[i]->unsetContact(); }
   }

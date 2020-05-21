@@ -10,7 +10,9 @@
 
 typedef int StateIdentifier;
 
+// Forward Declare Other Classes
 class ControlArchitecture;
+
 class StateMachine{
 public:
   StateMachine(const StateIdentifier state_identifier_in, ControlArchitecture* _ctrl_arch, RobotSystem* _robot) {
@@ -34,24 +36,9 @@ public:
   }
 
 protected:
-  void _PreProcessing_Command(){
-      A_ = robot_->getMassMatrix();
-      Ainv_ = robot_->getInvMassMatrix();
-      grav_ = robot_->getGravity();
-      coriolis_ = robot_->getCoriolis();
-  }
-
-  void _PostProcessing_Command(){
-  }
-
   StateIdentifier state_identity_; // Unique integer of this state
   RobotSystem* robot_; // Pointer to the robot
   ControlArchitecture* ctrl_arch_; // Pointer to Control Architecture
-
-  Eigen::MatrixXd A_;
-  Eigen::MatrixXd Ainv_;
-  Eigen::VectorXd grav_;
-  Eigen::VectorXd coriolis_;
 
   double state_machine_time_;
 };

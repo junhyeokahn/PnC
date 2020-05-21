@@ -28,7 +28,7 @@ class ControlArchitecture {
    protected:
     int state_;
 
-    std::map<StateIdentifier, StateMachine*> state_machines;
+    std::map<StateIdentifier, StateMachine*> state_machines_;
 
     RobotSystem* robot_;
 };
