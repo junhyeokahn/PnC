@@ -34,6 +34,11 @@ void ValkyrieMainController::getCommand(void* _cmd){
 }
 
 void ValkyrieMainController::ctrlInitialization(const YAML::Node& node){    
+    // Defaults
+    ihwbc_dt_ = ValkyrieAux::servo_rate;
+    lambda_qddot_ = 1e-8;  // Generalized Coord Acceleration 
+    lambda_Fr_ = 1e-8;     // Reaction Force Regularization
+    w_contact_weight_ = 1e-3;  // Contact Weight
 }
 
 // Parent Functions not used

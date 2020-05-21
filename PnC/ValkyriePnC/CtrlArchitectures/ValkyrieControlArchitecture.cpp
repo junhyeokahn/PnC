@@ -18,7 +18,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     state_ = VALKYRIE_STATES::BALANCE;
 
     balance_ctrl_ = new DCMBalanceCtrl(robot_);
-    _SettingParameter();
+    _InitializeParameters();
 }
 
 ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
@@ -41,7 +41,7 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
     balance_ctrl_->oneStep(_command);
 };
 
-void ValkyrieControlArchitecture::_SettingParameter() {
+void ValkyrieControlArchitecture::_InitializeParameters() {
     try {
         double temp;
         Eigen::VectorXd temp_vec;
@@ -61,7 +61,5 @@ void ValkyrieControlArchitecture::_SettingParameter() {
     }
 }
 
-void ValkyrieControlArchitecture::_InitializeParameters(){
-}
 
 
