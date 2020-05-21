@@ -1,10 +1,4 @@
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
-#include <PnC/ValkyriePnC/ContactSet/ContactSet.hpp>
-#include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
-#include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
-#include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
-#include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
-#include <Utils/IO/DataManager.hpp>
 
 ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : ControlArchitecture(robot) {
     b_first_visit_ = true;

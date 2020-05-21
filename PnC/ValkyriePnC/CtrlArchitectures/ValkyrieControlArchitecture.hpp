@@ -2,9 +2,16 @@
 
 #include <PnC/ControlArchitecture.hpp>
 
-class ValkyrieStateProvider;
+#include <PnC/WBC/Task.hpp>
+#include <PnC/WBC/ContactSpec.hpp>
 
-// 
+#include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
+#include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
+
+#include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
+#include <PnC/ValkyriePnC/ContactSet/ContactSet.hpp>
+#include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
+
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
 };  
