@@ -1,9 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <map>
 
 #include <Configuration.h>
 #include <PnC/Controller.hpp>
+#include <PnC/StateMachine.hpp>
+
 #include <PnC/RobotSystem/RobotSystem.hpp>
 
 #include <Utils/IO/DataManager.hpp>
@@ -24,6 +26,8 @@ class ControlArchitecture {
 
    protected:
     int state_;
+
+    std::map<StateIdentifier, StateMachine*> state_machines;
 
     RobotSystem* robot_;
 };

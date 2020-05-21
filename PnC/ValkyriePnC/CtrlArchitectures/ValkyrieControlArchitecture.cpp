@@ -7,10 +7,13 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* robot) : C
     cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/BALANCE_TEST.yaml");
 
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+
+    // Add all states to the state machine
+    // state_machines[VALKYRIE_STATES::BALANCE] = new StateMachine(VALKYRIE_STATES::BALANCE, robot_);
+    // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
 
-    balance_ctrl_ = new DCMBalanceCtrl(robot);
-
+    balance_ctrl_ = new DCMBalanceCtrl(robot_);
     _SettingParameter();
 }
 
