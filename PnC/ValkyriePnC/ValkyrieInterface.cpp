@@ -50,6 +50,7 @@ ValkyrieInterface::~ValkyrieInterface() {
     delete robot_;
     delete state_estimator_;
     delete test_;
+    delete control_architecture_;
 }
 
 void ValkyrieInterface::getCommand(void* _data, void* _command) {

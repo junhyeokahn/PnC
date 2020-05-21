@@ -19,13 +19,13 @@ namespace VALKYRIE_STATES {
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
-   public:
+  public:
     ValkyrieControlArchitecture(RobotSystem*);
     virtual ~ValkyrieControlArchitecture();
     virtual void ControlArchitectureInitialization();
     virtual void getCommand(void* _command);
 
-   protected:
+  protected:
     ValkyrieStateProvider* sp_;
     void _SettingParameter();
 
@@ -35,8 +35,17 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     bool b_first_visit_;
     Controller* balance_ctrl_;
     // -----------------------
-   
-    public:
+
+  void _InitializeParameters();
+  void _InitializeController();
+  void _InitializeTasks();
+  void _InitializeContacts();
+
+  void _DeleteController();
+  void _DeleteTasks();
+  void _DeleteContacts();
+
+  public:
     // -------------------------------------------------------
     // Controller Objects
     // -------------------------------------------------------
@@ -57,16 +66,17 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     Task* upper_body_task_;
     std::vector<int> upper_body_joint_indices_; // list of upperbody joint names
 
-    Task* rfoot_center_pos_task;
-    Task* lfoot_center_pos_task;
-    Task* rfoot_center_ori_task;
-    Task* lfoot_center_ori_task;
+    Task* rfoot_center_pos_task_;
+    Task* lfoot_center_pos_task_;
+    Task* rfoot_center_ori_task_;
+    Task* lfoot_center_ori_task_;
 
     // -------------------------------------------------------
     // Contact Member variables
     // -------------------------------------------------------    
     ContactSpec* rfoot_contact_;
     ContactSpec* lfoot_contact_;
+    int dim_contact_;
     double lfoot_max_z_;
     double rfoot_max_z_;
 

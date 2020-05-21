@@ -11,6 +11,7 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
+class StateMachine;
 class ControlArchitecture {
    public:
     ControlArchitecture(RobotSystem* _robot) {
