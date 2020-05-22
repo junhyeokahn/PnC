@@ -37,6 +37,30 @@ void DoubleSupportStand::firstVisit(){
 
   ini_pelvis_quat_ = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
 
+  // =========================================================================
+  // Pelvis Ori Task: Maintain Starting Orientation
+  // =========================================================================
+  Eigen::VectorXd des_pelvis_quat = Eigen::VectorXd::Zero(4);
+  des_pelvis_quat << ini_pelvis_quat_.w(),ini_pelvis_quat_.x(), ini_pelvis_quat_.y(),
+                      ini_pelvis_quat_.z();
+  taf_container_->pelvis_ori_task_->updateDesired(des_pelvis_quat, Eigen::VectorXd::Zero(3),Eigen::VectorXd::Zero(3));
+
+  // =========================================================================
+  // Set Angular Momentum Tasks
+  // =========================================================================
+  Eigen::VectorXd zero3 = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd des_ang_momentum = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd des_ang_momentum_rate = Eigen::VectorXd::Zero(3);
+  taf_container_->ang_momentum_task_->updateDesired(zero3, des_ang_momentum, des_ang_momentum_rate);
+
+  // =========================================================================
+  // Joint Pos Task
+  // =========================================================================
+  Eigen::VectorXd jpos_des = sp_->jpos_ini;
+  taf_container_->upper_body_task_->updateDesired(jpos_des.tail(taf_container_->upper_body_joint_indices_.size()),
+                                                  Eigen::VectorXd::Zero(Valkyrie::n_adof),
+                                                  Eigen::VectorXd::Zero(Valkyrie::n_adof));
+
 }
 
 void DoubleSupportStand::_taskUpdate(){
@@ -48,31 +72,7 @@ void DoubleSupportStand::_taskUpdate(){
       (sp_->com_pos_des)[i] = des_com_pos_[i];
       (sp_->com_vel_des)[i] = des_com_vel_[i];
   }
-  taf_container_->com_task_->updateTask(des_com_pos_, des_com_vel_, des_com_acc_);
-
-  // =========================================================================
-  // Pelvis Ori Task: Maintain Starting Orientation
-  // =========================================================================
-  Eigen::VectorXd des_pelvis_quat = Eigen::VectorXd::Zero(4);
-  des_pelvis_quat << ini_pelvis_quat_.w(),ini_pelvis_quat_.x(), ini_pelvis_quat_.y(),
-                      ini_pelvis_quat_.z();
-  taf_container_->pelvis_ori_task_->updateTask(des_pelvis_quat, Eigen::VectorXd::Zero(3),Eigen::VectorXd::Zero(3));
-
-  // =========================================================================
-  // Set Angular Momentum Tasks
-  // =========================================================================
-  Eigen::VectorXd zero3 = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd des_ang_momentum = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd des_ang_momentum_rate = Eigen::VectorXd::Zero(3);
-  taf_container_->ang_momentum_task_->updateTask(zero3, des_ang_momentum, des_ang_momentum_rate);
-
-  // =========================================================================
-  // Joint Pos Task
-  // =========================================================================
-  Eigen::VectorXd jpos_des = sp_->jpos_ini;
-  taf_container_->upper_body_task_->updateTask(jpos_des.tail(taf_container_->upper_body_joint_indices_.size()),
-                                               Eigen::VectorXd::Zero(Valkyrie::n_adof),
-                                               Eigen::VectorXd::Zero(Valkyrie::n_adof));
+  taf_container_->com_task_->updateDesired(des_com_pos_, des_com_vel_, des_com_acc_);
 
   // =========================================================================
   // Set Foot Motion Tasks
@@ -93,8 +93,8 @@ void DoubleSupportStand::_taskUpdate(){
   foot_ori_des[2] = rfoot_ori_act.y();
   foot_ori_des[3] = rfoot_ori_act.z();
 
-  taf_container_->rfoot_center_pos_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
-  taf_container_->rfoot_center_ori_task_->updateTask(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
+  taf_container_->rfoot_center_pos_task_->updateDesired(foot_pos_des, foot_vel_des, foot_acc_des);
+  taf_container_->rfoot_center_ori_task_->updateDesired(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
 
   // Set Left Foot Task
   foot_pos_des = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).translation();
@@ -104,8 +104,8 @@ void DoubleSupportStand::_taskUpdate(){
   foot_ori_des[2] = lfoot_ori_act.y();
   foot_ori_des[3] = lfoot_ori_act.z();
 
-  taf_container_->lfoot_center_pos_task_->updateTask(foot_pos_des, foot_vel_des, foot_acc_des);
-  taf_container_->lfoot_center_ori_task_->updateTask(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
+  taf_container_->lfoot_center_pos_task_->updateDesired(foot_pos_des, foot_vel_des, foot_acc_des);
+  taf_container_->lfoot_center_ori_task_->updateDesired(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
 }
 
 void DoubleSupportStand::oneStep(){  

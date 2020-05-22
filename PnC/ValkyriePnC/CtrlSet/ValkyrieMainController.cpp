@@ -57,13 +57,13 @@ void ValkyrieMainController::_PreProcessing_Command(){
     Fd_des_ = taf_container_->Fd_des_;
 
     // Update Task Jacobians and commands
-    for(int i = 0; i < taf_container_->task_list_.size(); i++){
-        taf_container_->task_list_[i]->updateJacobians();
-        taf_container_->task_list_[i]->computeCommands();
+    for(int i = 0; i < task_list_.size(); i++){
+        task_list_[i]->updateJacobians();
+        task_list_[i]->computeCommands();
     }
     // Update Contact Spec
-    for(int i = 0; i < taf_container_->contact_list_.size(); i++){
-        taf_container_->contact_list_[i]->updateContactSpec();
+    for(int i = 0; i < contact_list_.size(); i++){
+        contact_list_[i]->updateContactSpec();
     }   
 }
 
@@ -87,12 +87,6 @@ void ValkyrieMainController::getCommand(void* _cmd){
     double local_w_contact_weight = w_contact_weight_/(robot_->getRobotMass()*9.81);
     ihwbc_->setQPWeights(w_task_hierarchy_, local_w_contact_weight);
     ihwbc_->setRegularizationTerms(lambda_qddot_, lambda_Fr_);
-
-    // Enable Torque Limits
-    ihwbc_->enableTorqueLimits(true); 
-    Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
-    Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
-    ihwbc_->setTorqueLimits(tau_min, tau_max);
 
     // QP dec variable results
     Eigen::VectorXd qddot_res;
@@ -127,9 +121,16 @@ void ValkyrieMainController::ctrlInitialization(const YAML::Node& node){
     lambda_qddot_ = 1e-8;  // Generalized Coord Acceleration 
     lambda_Fr_ = 1e-8;     // Reaction Force Regularization
     w_contact_weight_ = 1e-3;  // Contact Weight
+
+    // Enable Torque Limits
+    ihwbc_->enableTorqueLimits(true); 
+    Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    ihwbc_->setTorqueLimits(tau_min, tau_max);
 }
 
 void ValkyrieMainController::firstVisit(){
+    // Initialize joint integrator
     Eigen::VectorXd jpos_ini = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ihwbc_joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Valkyrie::n_adof), jpos_ini);
 }
