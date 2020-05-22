@@ -35,6 +35,38 @@ ValkyrieMainController::~ValkyrieMainController(){
     delete ihwbc_joint_integrator_;
 }
 
+void ValkyrieMainController::_PreProcessing_Command(){
+    // Update Dynamic Terms
+    A_ = robot_->getMassMatrix();
+    Ainv_ = robot_->getInvMassMatrix();
+    grav_ = robot_->getGravity();
+    coriolis_ = robot_->getCoriolis();
+
+    // Clear out local pointers
+    task_list_.clear();
+    contact_list_.clear();
+
+    // Grab Variables from the container.
+    // Update task and contact list pointers from container object
+    for (int i = 0; i < taf_container_->task_list_.size(); i++){
+        task_list_.push_back(taf_container_->task_list_[i]);
+    }
+    for (int i = 0; i < taf_container_->contact_list_.size(); i++){
+        contact_list_.push_back(taf_container_->contact_list_[i]);
+    }
+    Fd_des_ = taf_container_->Fd_des_;
+
+    // Update Task Jacobians and commands
+    for(int i = 0; i < taf_container_->task_list_.size(); i++){
+        taf_container_->task_list_[i]->updateJacobians();
+        taf_container_->task_list_[i]->computeCommands();
+    }
+    // Update Contact Spec
+    for(int i = 0; i < taf_container_->contact_list_.size(); i++){
+        taf_container_->contact_list_[i]->updateContactSpec();
+    }   
+}
+
 void ValkyrieMainController::getCommand(void* _cmd){   
     // Perform First time visit Initialization
     if (b_first_visit_){
@@ -42,18 +74,13 @@ void ValkyrieMainController::getCommand(void* _cmd){
         b_first_visit_ = false;
     }
 
-    // Update Dynamic Terms
+    // Update Dynamic Terms, Task Jacobians, and Contact Jacobians
     _PreProcessing_Command();
 
-    // Update Contact Spec
-    for(int i = 0; i < taf_container_->contact_list_.size(); i++){
-        taf_container_->contact_list_[i]->updateContactSpec();
-    }
-
     // Update Task Hierarchy
-    Eigen::VectorXd w_task_hierarchy_ = Eigen::VectorXd::Zero(taf_container_->task_list_.size());
-    for(int i = 0; i < taf_container_->task_list_.size(); i++){
-        w_task_hierarchy_[i] = taf_container_->task_list_[i]->getHierarchyWeight();        
+    Eigen::VectorXd w_task_hierarchy_ = Eigen::VectorXd::Zero(task_list_.size());
+    for(int i = 0; i < task_list_.size(); i++){
+        w_task_hierarchy_[i] = task_list_[i]->getHierarchyWeight();        
     }
 
     // Set QP weights   
@@ -73,7 +100,7 @@ void ValkyrieMainController::getCommand(void* _cmd){
 
     // Update QP and solve
     ihwbc_->updateSetting(A_, Ainv_, coriolis_, grav_);
-    ihwbc_->solve(taf_container_->task_list_, taf_container_->contact_list_, taf_container_->Fd_des_, tau_cmd_, qddot_cmd_);
+    ihwbc_->solve(task_list_, contact_list_, Fd_des_, tau_cmd_, qddot_cmd_);
 
     // Get Results
     ihwbc_->getQddotResult(qddot_res);

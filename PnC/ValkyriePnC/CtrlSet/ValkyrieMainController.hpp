@@ -27,10 +27,13 @@ class ValkyrieMainController : public Controller {
     void firstVisit();
     bool b_first_visit_;
 
+    // Redefine PreProcessing Command
+    void _PreProcessing_Command();
     // -------------------------------------------------------
     // Controller Objects
     // -------------------------------------------------------
     IHWBC* ihwbc_;
+    Eigen::VectorXd Fd_des_;
     Eigen::VectorXd tau_cmd_;
     Eigen::VectorXd qddot_cmd_;
 

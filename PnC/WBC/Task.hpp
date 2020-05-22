@@ -22,6 +22,11 @@ class Task {
         pos_err = Eigen::VectorXd::Zero(_dim);
         vel_des = Eigen::VectorXd::Zero(_dim);
         acc_des = Eigen::VectorXd::Zero(_dim);
+
+        pos_des_ = Eigen::VectorXd::Zero(_dim);
+        vel_des_ = Eigen::VectorXd::Zero(_dim);
+        acc_des_ = Eigen::VectorXd::Zero(_dim);
+
     }
     virtual ~Task() {}
 
@@ -44,12 +49,29 @@ class Task {
         return w_hierarchy_;
     }
 
+    void updateJacobians(){
+        _UpdateTaskJacobian();
+        _UpdateTaskJDotQdot();        
+    }
+
+    void updateDesired(const Eigen::VectorXd& pos_des,
+                       const Eigen::VectorXd& vel_des,
+                       const Eigen::VectorXd& acc_des){
+        pos_des_ = pos_des;
+        vel_des_ = vel_des;
+        acc_des_ = acc_des;
+    }
+
+    void computeCommands(){
+        _UpdateCommand(pos_des_, vel_des_, acc_des_);       
+    }
+
     bool updateTask(const Eigen::VectorXd& pos_des,
                     const Eigen::VectorXd& vel_des,
                     const Eigen::VectorXd& acc_des) {
-        _UpdateTaskJacobian();
-        _UpdateTaskJDotQdot();
-        _UpdateCommand(pos_des, vel_des, acc_des);
+        updateJacobians();
+        updateDesired(pos_des, vel_des, acc_des);
+        computeCommands();
         b_set_task_ = true;
         return true;
     }
@@ -64,6 +86,11 @@ class Task {
     Eigen::VectorXd pos_err;
     Eigen::VectorXd vel_des;
     Eigen::VectorXd acc_des;
+
+    // Store for reuse old command
+    Eigen::VectorXd pos_des_;
+    Eigen::VectorXd vel_des_;
+    Eigen::VectorXd acc_des_;
 
    protected:
     virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,
