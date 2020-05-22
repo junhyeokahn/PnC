@@ -246,6 +246,7 @@ void DCMBalanceCtrl::_task_setup() {
     task_list_.clear();
 
     task_list_.push_back(com_task_);
+    task_list_.push_back(ang_momentum_task_);
     task_list_.push_back(pelvis_ori_task_);
     task_list_.push_back(upper_body_task_);
 
@@ -254,12 +255,13 @@ void DCMBalanceCtrl::_task_setup() {
     task_list_.push_back(lfoot_center_pos_task);
     task_list_.push_back(lfoot_center_ori_task);
 
-    task_list_.push_back(ang_momentum_task_);
 
     // Set hierarchy weights
     com_task_->setHierarchy(w_task_com_);
+    ang_momentum_task_->setHierarchy(w_task_ang_mom_);
     pelvis_ori_task_->setHierarchy(w_task_pelvis_);
     upper_body_task_->setHierarchy(w_task_upper_body_);
+
     rfoot_center_pos_task->setHierarchy(w_task_rfoot_);
     rfoot_center_ori_task->setHierarchy(w_task_rfoot_);
     lfoot_center_pos_task->setHierarchy(w_task_lfoot_);

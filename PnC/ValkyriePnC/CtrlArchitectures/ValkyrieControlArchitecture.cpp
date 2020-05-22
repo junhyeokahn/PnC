@@ -47,8 +47,12 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
         b_first_visit_ = false;
     }
     state_machines_[state_]->oneStep();
+    main_controller_->getCommand(_command);
+
+    // balance_ctrl_->oneStep(_command);
+    // taf_container_->task_list_ = balance_ctrl_->task_list_;
+    // taf_container_->contact_list_ = balance_ctrl_->contact_list_;
     // main_controller_->getCommand(_command);
-    balance_ctrl_->oneStep(_command);
 };
 
 void ValkyrieControlArchitecture::_InitializeParameters() {

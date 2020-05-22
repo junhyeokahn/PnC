@@ -119,6 +119,7 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
 
     // Set Task Hierarchies
     com_task_->setHierarchy(w_task_com_);
+    ang_momentum_task_->setHierarchy(w_task_ang_mom_);
     pelvis_ori_task_->setHierarchy(w_task_pelvis_);
     upper_body_task_->setHierarchy(w_task_upper_body_);
     rfoot_center_pos_task_->setHierarchy(w_task_rfoot_);

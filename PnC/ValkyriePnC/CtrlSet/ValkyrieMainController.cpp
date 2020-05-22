@@ -45,6 +45,11 @@ void ValkyrieMainController::getCommand(void* _cmd){
     // Update Dynamic Terms
     _PreProcessing_Command();
 
+    // Update Contact Spec
+    for(int i = 0; i < taf_container_->contact_list_.size(); i++){
+        taf_container_->contact_list_[i]->updateContactSpec();
+    }
+
     // Update Task Hierarchy
     Eigen::VectorXd w_task_hierarchy_ = Eigen::VectorXd::Zero(taf_container_->task_list_.size());
     for(int i = 0; i < taf_container_->task_list_.size(); i++){
@@ -71,10 +76,8 @@ void ValkyrieMainController::getCommand(void* _cmd){
     ihwbc_->solve(taf_container_->task_list_, taf_container_->contact_list_, taf_container_->Fd_des_, tau_cmd_, qddot_cmd_);
 
     // Get Results
-    // ihwbc_->getQddotResult(qddot_res);
-    // ihwbc_->getFrResult(Fr_res);
-
-    myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+    ihwbc_->getQddotResult(qddot_res);
+    ihwbc_->getFrResult(Fr_res);
 
     // Integrate Joint Velocities and Positions
     des_jacc_= qddot_cmd_;
@@ -88,6 +91,7 @@ void ValkyrieMainController::getCommand(void* _cmd){
         ((ValkyrieCommand*)_cmd)->q[i] = des_jpos_[i];
         ((ValkyrieCommand*)_cmd)->qdot[i] = des_jvel_[i];
     }
+
 }
 
 void ValkyrieMainController::ctrlInitialization(const YAML::Node& node){    
