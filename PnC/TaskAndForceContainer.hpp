@@ -16,7 +16,7 @@ public:
   	robot_ = _robot;
   }
   virtual ~TaskAndForceContainer(){}
-  virtual void ParamInitialization(const YAML::Node& node) = 0;
+  virtual void paramInitialization(const YAML::Node& node) = 0;
 
   RobotSystem* robot_;
   std::vector<Task*> task_list_;

@@ -12,7 +12,7 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
   public:
   	ValkyrieTaskAndForceContainer(RobotSystem* _robot);
   	~ValkyrieTaskAndForceContainer();	
-    void ParamInitialization(const YAML::Node& node);
+    void paramInitialization(const YAML::Node& node);
 
   protected:
     void _InitializeTasks();
@@ -43,12 +43,11 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
       int dim_contact_;
       double lfoot_max_z_;
       double rfoot_max_z_;
-
       Eigen::VectorXd Fd_des_;
+
       // -------------------------------------------------------
       // Parameters
       // -------------------------------------------------------
-
       // Task Hierarchy Weights
       Eigen::VectorXd w_task_hierarchy_;
       double w_task_com_;

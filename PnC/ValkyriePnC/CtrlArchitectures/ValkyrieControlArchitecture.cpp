@@ -28,6 +28,9 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
+    taf_container_->paramInitialization(cfg_["control_configuration"]);
+    main_controller_->ctrlInitialization(cfg_["control_configuration"]);
+
     balance_ctrl_->ctrlInitialization(
         cfg_["control_configuration"]["balance_ctrl"]);
 }

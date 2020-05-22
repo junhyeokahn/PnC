@@ -7,6 +7,7 @@
 
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
+#include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 
 #include <PnC/ValkyriePnC/TaskAndForceContainers/ValkyrieTaskAndForceContainer.hpp>
 
@@ -21,6 +22,10 @@ class ValkyrieMainController : public Controller {
   protected:
     ValkyrieTaskAndForceContainer* taf_container_;
     ValkyrieStateProvider* sp_;
+
+    //  Processing Step for first visit
+    void firstVisit();
+    bool b_first_visit_;
 
     // -------------------------------------------------------
     // Controller Objects
@@ -43,10 +48,9 @@ class ValkyrieMainController : public Controller {
     double lambda_qddot_; // Joint acceleration variable normalization
     double lambda_Fr_; //  Reaction Force normalization
 
-
-  // Parent Functions not used
-  virtual void oneStep(void* _cmd);
-  virtual void firstVisit();
-  virtual void lastVisit();
-  virtual bool endOfPhase();
+    // Parent Functions not used
+    void oneStep(void* _cmd);
+    void lastVisit();
+    bool endOfPhase();
+    void _PostProcessing_Command();
 };

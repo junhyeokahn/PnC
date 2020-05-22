@@ -28,7 +28,7 @@ public:
   virtual void firstVisit() = 0;
   virtual void lastVisit() = 0;
   virtual bool endOfState() = 0;
-  virtual void Initialization(const YAML::Node& node) = 0;
+  virtual void initialization(const YAML::Node& node) = 0;
   virtual StateIdentifier getNextState() = 0;
 
   StateIdentifier getStateIdentity(){

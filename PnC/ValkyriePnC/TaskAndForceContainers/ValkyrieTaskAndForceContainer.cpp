@@ -79,7 +79,7 @@ void ValkyrieTaskAndForceContainer::_DeleteContacts(){
 }
 
 // Set Parameters
-void ValkyrieTaskAndForceContainer::ParamInitialization(const YAML::Node& node){
+void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     // Use defaults
     // Task Gains
     // COM
