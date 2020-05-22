@@ -43,8 +43,11 @@ void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
 void ValkyrieControlArchitecture::getCommand(void* _command) {
     if (b_first_visit_) {
         balance_ctrl_->firstVisit();
+        state_machines_[state_]->firstVisit();
         b_first_visit_ = false;
     }
+    state_machines_[state_]->oneStep();
+    // main_controller_->getCommand(_command);
     balance_ctrl_->oneStep(_command);
 };
 
@@ -56,9 +59,12 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
         YAML::Node test_cfg = cfg_["test_configuration"];
         myUtils::readParameter(test_cfg,"target_pos_duration",temp);
        ((DCMBalanceCtrl*)balance_ctrl_)->setDuration(temp);
+       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setDuration(temp);
+
         myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
        ((DCMBalanceCtrl*)balance_ctrl_)->setComDeviation(temp_vec);
-        myUtils::readParameter(test_cfg,"amplitude",temp_vec);
+       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setComDeviation(temp_vec);
+
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["

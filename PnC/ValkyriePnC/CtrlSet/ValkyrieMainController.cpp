@@ -74,6 +74,8 @@ void ValkyrieMainController::getCommand(void* _cmd){
     // ihwbc_->getQddotResult(qddot_res);
     // ihwbc_->getFrResult(Fr_res);
 
+    myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+
     // Integrate Joint Velocities and Positions
     des_jacc_= qddot_cmd_;
     ihwbc_joint_integrator_->integrate(des_jacc_, sp_->qdot.segment(Valkyrie::n_vdof, Valkyrie::n_adof),
