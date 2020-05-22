@@ -3,15 +3,15 @@
 #include <map>
 
 #include <Configuration.h>
-#include <PnC/Controller.hpp>
 #include <PnC/StateMachine.hpp>
+#include <PnC/Controller.hpp>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
 
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
-class StateMachine;
+// Generic Control Architecture Object
 class ControlArchitecture {
    public:
     ControlArchitecture(RobotSystem* _robot) {
@@ -29,6 +29,5 @@ class ControlArchitecture {
     int state_;
 
     std::map<StateIdentifier, StateMachine*> state_machines_;
-
     RobotSystem* robot_;
 };

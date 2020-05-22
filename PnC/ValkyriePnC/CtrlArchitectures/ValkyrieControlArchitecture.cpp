@@ -13,7 +13,8 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     main_controller_ = new ValkyrieMainController(taf_container_, robot_);
 
     // Add all states to the state machine
-    // state_machines_[VALKYRIE_STATES::BALANCE] = new StateMachine(VALKYRIE_STATES::BALANCE, this, robot_);
+    state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
+
     // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
 
@@ -25,6 +26,9 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete balance_ctrl_; 
     delete main_controller_;
     delete taf_container_;
+
+    // Delete the state machines
+    delete state_machines_[VALKYRIE_STATES::BALANCE];
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {

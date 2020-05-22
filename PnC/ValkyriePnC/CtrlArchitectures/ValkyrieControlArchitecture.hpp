@@ -1,19 +1,18 @@
 #pragma once
-
 #include <PnC/ControlArchitecture.hpp>
 
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 
+#include <PnC/ValkyriePnC/StateMachines/StateMachineSet.hpp>
+#include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
+
 #include <PnC/ValkyriePnC/CtrlSet/ValkyrieMainController.hpp>
 #include <PnC/ValkyriePnC/TaskAndForceContainers/ValkyrieTaskAndForceContainer.hpp>
-
-#include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
 
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
 };  
-
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
   public:

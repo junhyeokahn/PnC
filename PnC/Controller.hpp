@@ -15,6 +15,8 @@ public:
   }
   virtual ~Controller(){}
 
+  virtual void getCommand(void* command){}
+  
   virtual void oneStep(void* command) = 0;
   virtual void firstVisit() = 0;
   virtual void lastVisit() = 0;
