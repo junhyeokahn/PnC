@@ -26,11 +26,7 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     YAML::Node cfg_;
 
     void _InitializeParameters();
-
-    // Temporary -------------
-    bool b_first_visit_;
-    Controller* balance_ctrl_;
-    // -----------------------
+    bool b_state_first_visit_;
 
   public:
     // Task and Force Containers

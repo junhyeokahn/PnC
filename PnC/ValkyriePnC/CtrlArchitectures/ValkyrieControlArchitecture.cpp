@@ -1,7 +1,7 @@
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 
 ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : ControlArchitecture(_robot) {
-    b_first_visit_ = true;
+    b_state_first_visit_ = true;
 
     myUtils::pretty_constructor(1, "Valkyrie Control Architecture");
     cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/BALANCE_TEST.yaml");
@@ -18,12 +18,10 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
 
-    balance_ctrl_ = new DCMBalanceCtrl(robot_);
     _InitializeParameters();
 }
 
 ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
-    delete balance_ctrl_; 
     delete main_controller_;
     delete taf_container_;
 
@@ -34,25 +32,25 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
     taf_container_->paramInitialization(cfg_["control_configuration"]);
     main_controller_->ctrlInitialization(cfg_["control_configuration"]);
-
-    balance_ctrl_->ctrlInitialization(
-        cfg_["control_configuration"]["balance_ctrl"]);
 }
 
 
 void ValkyrieControlArchitecture::getCommand(void* _command) {
-    if (b_first_visit_) {
-        balance_ctrl_->firstVisit();
+    // Initialize State
+    if (b_state_first_visit_) {
         state_machines_[state_]->firstVisit();
-        b_first_visit_ = false;
+        b_state_first_visit_ = false;
     }
+    // Get Commands
     state_machines_[state_]->oneStep();
     main_controller_->getCommand(_command);
 
-    // balance_ctrl_->oneStep(_command);
-    // taf_container_->task_list_ = balance_ctrl_->task_list_;
-    // taf_container_->contact_list_ = balance_ctrl_->contact_list_;
-    // main_controller_->getCommand(_command);
+    // Check for State Transitions
+    if (state_machines_[state_]->endOfState()) {
+        state_machines_[state_]->lastVisit();
+        state_ = state_machines_[state_]->getNextState();
+        b_state_first_visit_ = true;
+    }
 };
 
 void ValkyrieControlArchitecture::_InitializeParameters() {
@@ -62,11 +60,9 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
 
         YAML::Node test_cfg = cfg_["test_configuration"];
         myUtils::readParameter(test_cfg,"target_pos_duration",temp);
-       ((DCMBalanceCtrl*)balance_ctrl_)->setDuration(temp);
        ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setDuration(temp);
 
         myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
-       ((DCMBalanceCtrl*)balance_ctrl_)->setComDeviation(temp_vec);
        ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setComDeviation(temp_vec);
 
 
