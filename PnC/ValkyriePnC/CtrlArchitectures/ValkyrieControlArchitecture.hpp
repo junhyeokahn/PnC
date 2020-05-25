@@ -10,6 +10,9 @@
 #include <PnC/ValkyriePnC/CtrlSet/ValkyrieMainController.hpp>
 #include <PnC/ValkyriePnC/TaskAndForceContainers/ValkyrieTaskAndForceContainer.hpp>
 
+// Add planner
+#include <PnC/PlannerSet/DCMPlanner/DCMPlanner.hpp>
+
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
 };  
@@ -33,4 +36,6 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     ValkyrieTaskAndForceContainer* taf_container_;
     // Controller Object
     ValkyrieMainController* main_controller_;
+    // Add Planner
+    DCMPlanner* dcm_planner_;
 };

@@ -21,6 +21,8 @@ ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr& _world)
     sensor_data_ = new ValkyrieSensorData();
     command_ = new ValkyrieCommand();
 
+    resetButtonFlags();
+
     SetParams_();
 }
 
@@ -89,6 +91,14 @@ void ValkyrieWorldNode::customPreStep() {
     //     b_seventh_cmd = false;
     // }
 
+    // Check for user button presses
+    if (b_button_p){
+        std::cout << "Flag true: button p pressed" << std::endl;
+    }
+    if (b_button_r){
+        std::cout << "Flag true: button r pressed" << std::endl;        
+    }
+
     interface_->getCommand(sensor_data_, command_);
 
     if (b_plot_mpc_result_) {
@@ -113,6 +123,9 @@ void ValkyrieWorldNode::customPreStep() {
     robot_->setForces(trq_cmd_);
 
     count_++;
+
+    // reset flags
+    resetButtonFlags();
 }
 
 void ValkyrieWorldNode::PlotMPCResult_() {

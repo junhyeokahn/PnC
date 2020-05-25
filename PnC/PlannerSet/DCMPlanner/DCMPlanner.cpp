@@ -1,4 +1,4 @@
-  #include <PnC/PlannerSet/DCMPlanner/DCMPlanner.hpp>
+#include <PnC/PlannerSet/DCMPlanner/DCMPlanner.hpp>
 
 int const DCMPlanner::DCM_RL_SWING_VRP_TYPE = 1;
 int const DCMPlanner::DCM_LL_SWING_VRP_TYPE = 2;

@@ -42,4 +42,18 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
     virtual ~ValkyrieWorldNode();
 
     void customPreStep() override;
+
+    bool b_button_p;
+    bool b_button_r;
+    void enableButtonPFlag(){
+        b_button_p = true;
+    }
+    void enableButtonRFlag(){
+        b_button_r = true;
+    }
+    void resetButtonFlags(){
+        b_button_p = false;
+        b_button_r = false;
+    }
+
 };

@@ -11,10 +11,12 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     // Initialize Main Controller
     taf_container_ = new ValkyrieTaskAndForceContainer(robot_);
     main_controller_ = new ValkyrieMainController(taf_container_, robot_);
+    // Initialize Planner
+    dcm_planner_ = new DCMPlanner();
 
+    // Initialize states
     // Add all states to the state machine
     state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
-
     // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
 
@@ -24,7 +26,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
 ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
     delete main_controller_;
     delete taf_container_;
-
+    delete dcm_planner_;
     // Delete the state machines
     delete state_machines_[VALKYRIE_STATES::BALANCE];
 }

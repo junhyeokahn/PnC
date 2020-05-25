@@ -37,6 +37,16 @@ class OneStepProgress : public osgGA::GUIEventHandler {
     virtual bool handle(const osgGA::GUIEventAdapter& ea,
                         osgGA::GUIActionAdapter& /*aa*/) {
         if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
+
+            // custom buttons
+            // World Node Buttons
+            if (ea.getKey() == 'p'){
+                worldnode_->enableButtonPFlag();
+            }
+            if (ea.getKey() == 'r'){
+                worldnode_->enableButtonRFlag();
+            }
+
             if (ea.getKey() == 'f') {
                 int numStepProgress(50);
                 for (int i = 0; i < numStepProgress; ++i) {
@@ -46,6 +56,9 @@ class OneStepProgress : public osgGA::GUIEventHandler {
                 }
                 return true;
             }
+
+
+
         }
         return false;
     }
