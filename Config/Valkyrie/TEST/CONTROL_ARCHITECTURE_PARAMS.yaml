@@ -2,12 +2,22 @@ test_configuration:
     target_pos_duration: 2.
     com_pos_deviation: [0, 0, 0.05]
 
+dcm_planner_parameters:
+    # t_init_transfer = t_transfer + t_ds + (1-alpha)*t_ds
+    # t_transfer = t_init_transfer - ((2-alpha)*t_ds)
+    t_transfer: 0.1 # exponential interpolation transfer time during initial transfer or same step transfer
+    t_ds: 0.05 #  support polynomial transfer time
+    t_ss: 0.3 # single support exponential interpolation  time
+    percentage_settle: 0.99 # percent to converge at the end of the trajectory
+    alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
+
 controller_parameters: 
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
     # Regularization terms
     lambda_qddot: 1e-8 
     lambda_Fr: 1e-8
+    # Enable limits
     enable_torque_limits: true
 
     # Integration_parameters
@@ -36,9 +46,9 @@ task_parameters:
     # Pelvis
     kp_pelvis: [50, 50, 50]
     kd_pelvis: [5, 5, 5]
-    # Upper Body Joints
-    kp_upper_body_joint: 50.0 # gains for all the upper-body joints
-    kd_upper_body_joint: 5.0 # gains for all the upper-body joints
+    # Upper Body Joints (gains for all the upper-body joints)
+    kp_upper_body_joint: 50.0 
+    kd_upper_body_joint: 5.0 
     # Foot Linear and orientation gains
     kp_foot: [50, 50, 50]
     kd_foot: [5, 5, 5]

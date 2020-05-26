@@ -4,7 +4,6 @@ int const DCMPlanner::DCM_RL_SWING_VRP_TYPE = 1;
 int const DCMPlanner::DCM_LL_SWING_VRP_TYPE = 2;
 int const DCMPlanner::DCM_TRANSFER_VRP_TYPE = 3;
 int const DCMPlanner::DCM_END_VRP_TYPE = 4;
-int const DCMPlanner::DCM_MIDSTEP_TRANSFER_VRP_TYPE = 5;
 
 DCMPlanner::DCMPlanner(){
     initial_leftfoot_stance.setLeftSide();
@@ -15,6 +14,25 @@ DCMPlanner::DCMPlanner(){
 DCMPlanner::~DCMPlanner(){
 
 }
+
+
+void DCMPlanner::paramInitialization(const YAML::Node& node){    
+   // Load Custom Params ----------------------------------
+    try {
+        // Load DCM Parameters
+        myUtils::readParameter(node,"t_transfer", t_transfer);
+        myUtils::readParameter(node,"t_ds", t_ds);
+        myUtils::readParameter(node,"t_ss", t_ss);
+        myUtils::readParameter(node,"percentage_settle", percentage_settle);
+        myUtils::readParameter(node,"alpha_ds", alpha_ds);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
+}
+
 
 // Sets the desired CoM Height
 void DCMPlanner::setCoMHeight(double z_vrp_in){
@@ -212,8 +230,6 @@ double DCMPlanner::get_t_step(const int & step_i){
     return t_ss + t_ds; // every swing has a double support transfer
   }else if (rvrp_type_list[step_i] == DCMPlanner::DCM_END_VRP_TYPE){
     return t_ds*(1-alpha_ds);
-  }else if (rvrp_type_list[step_i] == DCM_MIDSTEP_TRANSFER_VRP_TYPE){
-    return t_midstep_transfer;
   }
 }
 

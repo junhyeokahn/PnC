@@ -34,8 +34,9 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
     taf_container_->paramInitialization(cfg_["task_parameters"]);
     main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+    dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
+    // _InitializeDCMPlannerParameters();
 }
-
 
 void ValkyrieControlArchitecture::getCommand(void* _command) {
     // Initialize State
@@ -63,10 +64,8 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
         YAML::Node test_cfg = cfg_["test_configuration"];
         myUtils::readParameter(test_cfg,"target_pos_duration",temp);
        ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setDuration(temp);
-
         myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
        ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setComDeviation(temp_vec);
-
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -75,6 +74,3 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
         exit(0);
     }
 }
-
-
-
