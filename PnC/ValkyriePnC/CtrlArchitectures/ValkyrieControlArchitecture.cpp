@@ -14,11 +14,11 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     // Initialize Planner
     dcm_planner_ = new DCMPlanner();
 
-    // Initialize states
-    // Add all states to the state machine
+    // Initialize states: add all states to the state machine map
     state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
     // Set Starting State
     state_ = VALKYRIE_STATES::BALANCE;
+    prev_state_ = state_;
 
     _InitializeParameters();
 }
@@ -35,7 +35,6 @@ void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
     taf_container_->paramInitialization(cfg_["task_parameters"]);
     main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
     dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
-    // _InitializeDCMPlannerParameters();
 }
 
 void ValkyrieControlArchitecture::getCommand(void* _command) {
@@ -51,6 +50,7 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
     // Check for State Transitions
     if (state_machines_[state_]->endOfState()) {
         state_machines_[state_]->lastVisit();
+        prev_state_ = state_;
         state_ = state_machines_[state_]->getNextState();
         b_state_first_visit_ = true;
     }

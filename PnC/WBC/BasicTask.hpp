@@ -12,6 +12,10 @@ class BasicTask : public Task {
               const int& _dim, const int& _link_idx = 0);
     virtual ~BasicTask(){};
 
+    int getLinkID(){
+        return link_idx_;
+    }
+
    private:
     /* Update op_cmd, pos_err, vel_des, acc_des
      *

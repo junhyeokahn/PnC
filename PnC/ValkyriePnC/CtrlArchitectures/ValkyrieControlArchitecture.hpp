@@ -13,6 +13,10 @@
 // Add planner
 #include <PnC/PlannerSet/DCMPlanner/DCMPlanner.hpp>
 
+// Add footstep list container
+#include <vector>
+#include <PnC/PlannerSet/DCMPlanner/Footstep.hpp>
+
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
 };  
@@ -38,4 +42,9 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     ValkyrieMainController* main_controller_;
     // Add Planner
     DCMPlanner* dcm_planner_;
+
+    // Footstep list container
+    std::vector<Footstep> footstep_list_;
+
+
 };
