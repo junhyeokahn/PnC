@@ -14,6 +14,12 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     // Initialize Planner
     dcm_planner_ = new DCMPlanner();
 
+    // Initialize Trajectory managers
+    rfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->rfoot_center_pos_task_, 
+                                                             taf_container_->rfoot_center_ori_task_, robot_);
+    lfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->lfoot_center_pos_task_, 
+                                                             taf_container_->lfoot_center_ori_task_, robot_);
+
     // Initialize states: add all states to the state machine map
     state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
     // Set Starting State
@@ -27,6 +33,10 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete main_controller_;
     delete taf_container_;
     delete dcm_planner_;
+
+    // Delete the trajectory managers
+    delete rfoot_trajectory_manager_;
+
     // Delete the state machines
     delete state_machines_[VALKYRIE_STATES::BALANCE];
 }

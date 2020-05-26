@@ -6,6 +6,7 @@
 
 #include <PnC/ValkyriePnC/StateMachines/StateMachineSet.hpp>
 #include <PnC/ValkyriePnC/CtrlSet/CtrlSet.hpp>
+#include <PnC/ValkyriePnC/TrajectoryManagers/TrajectoryManagerSet.hpp>
 
 #include <PnC/ValkyriePnC/CtrlSet/ValkyrieMainController.hpp>
 #include <PnC/ValkyriePnC/TaskAndForceContainers/ValkyrieTaskAndForceContainer.hpp>
@@ -42,6 +43,10 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     ValkyrieMainController* main_controller_;
     // Add Planner
     DCMPlanner* dcm_planner_;
+
+    // Trajectory Managers
+    FootSE3TrajectoryManager* rfoot_trajectory_manager_; 
+    FootSE3TrajectoryManager* lfoot_trajectory_manager_; 
 
     // Footstep list container
     std::vector<Footstep> footstep_list_;

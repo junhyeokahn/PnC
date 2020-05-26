@@ -77,35 +77,8 @@ void DoubleSupportStand::_taskUpdate(){
   // =========================================================================
   // Set Foot Motion Tasks
   // =========================================================================
-  Eigen::VectorXd foot_pos_des(3); foot_pos_des.setZero();
-  Eigen::VectorXd foot_vel_des(3); foot_vel_des.setZero();    
-  Eigen::VectorXd foot_acc_des(3); foot_acc_des.setZero();    
-
-  Eigen::VectorXd foot_ori_des(4); foot_ori_des.setZero();
-  Eigen::VectorXd foot_ang_vel_des(3); foot_ang_vel_des.setZero();    
-  Eigen::VectorXd foot_ang_acc_des(3); foot_ang_acc_des.setZero();
-
-  // Set Right Foot Task
-  foot_pos_des = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).translation();
-  Eigen::Quaternion<double> rfoot_ori_act(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).linear());
-  foot_ori_des[0] = rfoot_ori_act.w();
-  foot_ori_des[1] = rfoot_ori_act.x();
-  foot_ori_des[2] = rfoot_ori_act.y();
-  foot_ori_des[3] = rfoot_ori_act.z();
-
-  taf_container_->rfoot_center_pos_task_->updateDesired(foot_pos_des, foot_vel_des, foot_acc_des);
-  taf_container_->rfoot_center_ori_task_->updateDesired(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
-
-  // Set Left Foot Task
-  foot_pos_des = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).translation();
-  Eigen::Quaternion<double> lfoot_ori_act(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).linear());
-  foot_ori_des[0] = lfoot_ori_act.w();
-  foot_ori_des[1] = lfoot_ori_act.x();
-  foot_ori_des[2] = lfoot_ori_act.y();
-  foot_ori_des[3] = lfoot_ori_act.z();
-
-  taf_container_->lfoot_center_pos_task_->updateDesired(foot_pos_des, foot_vel_des, foot_acc_des);
-  taf_container_->lfoot_center_ori_task_->updateDesired(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
+  val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
+  val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
 }
 
 void DoubleSupportStand::oneStep(){  
