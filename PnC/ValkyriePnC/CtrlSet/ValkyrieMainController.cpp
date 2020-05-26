@@ -115,24 +115,64 @@ void ValkyrieMainController::getCommand(void* _cmd){
 
 }
 
-void ValkyrieMainController::ctrlInitialization(const YAML::Node& node){    
-    // Defaults
-    ihwbc_dt_ = ValkyrieAux::servo_rate;
-    lambda_qddot_ = 1e-8;  // Generalized Coord Acceleration 
-    lambda_Fr_ = 1e-8;     // Reaction Force Regularization
-    w_contact_weight_ = 1e-3;  // Contact Weight
-
-    // Enable Torque Limits
-    ihwbc_->enableTorqueLimits(true); 
-    Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
-    Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
-    ihwbc_->setTorqueLimits(tau_min, tau_max);
-}
-
 void ValkyrieMainController::firstVisit(){
     // Initialize joint integrator
     Eigen::VectorXd jpos_ini = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     ihwbc_joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Valkyrie::n_adof), jpos_ini);
+}
+
+void ValkyrieMainController::ctrlInitialization(const YAML::Node& node){    
+    // IHWBC Defaults
+    ihwbc_dt_ = ValkyrieAux::servo_rate;
+    w_contact_weight_ = 1e-3;  // Contact Weight
+    lambda_qddot_ = 1e-8;  // Generalized Coord Acceleration 
+    lambda_Fr_ = 1e-8;     // Reaction Force Regularization
+    b_enable_torque_limits_ = true; // Enable IHWBC torque limits
+
+    // Joint Integrator Defaults
+    vel_freq_cutoff_ = 2.0; // Hz
+    pos_freq_cutoff_ = 1.0; // Hz
+    max_pos_error_ = 0.2; // Radians    
+
+   // Load Custom Parmams ----------------------------------
+    try {
+        // Load IHWBC Parameters
+        myUtils::readParameter(node, "w_contact_weight", w_contact_weight_);
+        myUtils::readParameter(node, "lambda_qddot", lambda_qddot_);
+        myUtils::readParameter(node, "lambda_Fr", lambda_Fr_);
+        myUtils::readParameter(node, "enable_torque_limits", b_enable_torque_limits_);
+
+        // Load Integration Parameters
+        myUtils::readParameter(node, "velocity_freq_cutoff", vel_freq_cutoff_);
+        myUtils::readParameter(node, "position_freq_cutoff", pos_freq_cutoff_);
+        myUtils::readParameter(node, "max_position_error", max_pos_error_);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
+    // ----------------------------------
+
+    // Set IHWBC Parameters 
+    // Enable Torque Limits
+    ihwbc_->enableTorqueLimits(b_enable_torque_limits_); 
+    Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof);
+    ihwbc_->setTorqueLimits(tau_min, tau_max);
+
+    // Set Joint Integrator Parameters
+    // Use cutoff = 0.0 to perform traditional integration
+    ihwbc_joint_integrator_->setVelocityFrequencyCutOff(vel_freq_cutoff_);
+    ihwbc_joint_integrator_->setPositionFrequencyCutOff(pos_freq_cutoff_);
+    // Set Maximum Current Position Deviation
+    ihwbc_joint_integrator_->setMaxPositionError(max_pos_error_);
+    // Set Joint velocity and position hardware limits
+    ihwbc_joint_integrator_->setVelocityBounds(robot_->getVelocityLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof), 
+                                               robot_->getVelocityUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof));
+    ihwbc_joint_integrator_->setPositionBounds(robot_->getPositionLowerLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof), 
+                                               robot_->getPositionUpperLimits().segment(Valkyrie::n_vdof, Valkyrie::n_adof));
+
 }
 
 // Parent Functions not used

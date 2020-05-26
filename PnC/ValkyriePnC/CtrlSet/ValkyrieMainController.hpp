@@ -50,6 +50,12 @@ class ValkyrieMainController : public Controller {
     double w_contact_weight_; // contact weights hierarchy (relative to task weights)
     double lambda_qddot_; // Joint acceleration variable normalization
     double lambda_Fr_; //  Reaction Force normalization
+    bool b_enable_torque_limits_; // Enable IHWBC torque limits
+
+    // Joint Integrator parameters
+    double vel_freq_cutoff_; // Hz
+    double pos_freq_cutoff_; // Hz
+    double max_pos_error_; // radians. After position integrator, deviation from current position
 
     // Parent Functions not used
     void oneStep(void* _cmd);

@@ -3,7 +3,8 @@ is_record: false
 show_joint_frame: false
 plot_mpc_result: false
 
+# Low-level Joint PD gains
 control_configuration:
-  kp: 4
+  kp: 4 
   kd: 4
 

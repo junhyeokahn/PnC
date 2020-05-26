@@ -6,8 +6,9 @@ controller_parameters:
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
     # Regularization terms
-    lambda_qddot: 1e-8; 
+    lambda_qddot: 1e-8 
     lambda_Fr: 1e-8
+    enable_torque_limits: true
 
     # Integration_parameters
     velocity_freq_cutoff: 2.0 #Hz

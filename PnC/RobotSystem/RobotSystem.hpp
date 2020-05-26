@@ -51,6 +51,21 @@ class RobotSystem {
     int getJointIdx(const std::string& jointName_);
     int getDofIdx(const std::string& dofName_);
 
+    // Position Limits
+    Eigen::VectorXd getPositionLowerLimits() {
+        return skel_ptr_->getPositionLowerLimits();
+    }
+    Eigen::VectorXd getPositionUpperLimits() {
+        return skel_ptr_->getPositionUpperLimits();
+    }
+    // Velocity Limits
+    Eigen::VectorXd getVelocityLowerLimits() {
+        return skel_ptr_->getVelocityLowerLimits();
+    }
+    Eigen::VectorXd getVelocityUpperLimits() {
+        return skel_ptr_->getVelocityUpperLimits();
+    }
+    // Force Torque Limits
     Eigen::VectorXd GetTorqueLowerLimits() {
         return skel_ptr_->getForceLowerLimits();
     }

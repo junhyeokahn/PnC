@@ -81,11 +81,11 @@ void IHWBC_JointIntegrator::setPositionBounds(const Eigen::VectorXd pos_min_in, 
     pos_max_ = pos_max_in;
 }
 
-        // Sets the maximum position deviation from current position for all joints
+// Sets the maximum position deviation from current position for all joints
 void IHWBC_JointIntegrator::setMaxPositionError(const double pos_max_error_in){
     setMaxPositionErrorVector(default_pos_max_error_*Eigen::VectorXd::Ones(n_joints_));
 }
-        // Use custom maximum position deviation from current position for each joint
+// Use custom maximum position deviation from current position for each joint
 void IHWBC_JointIntegrator::setMaxPositionErrorVector(const Eigen::VectorXd pos_max_error_in){
     pos_max_error_ = pos_max_error_in;
 }
