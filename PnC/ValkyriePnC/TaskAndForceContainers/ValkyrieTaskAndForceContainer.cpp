@@ -80,7 +80,7 @@ void ValkyrieTaskAndForceContainer::_DeleteContacts(){
 
 // Set Parameters
 void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
-    // Use defaults
+    // Defaults
     // Task Gains
     // COM
     kp_com_ = 50*Eigen::VectorXd::Ones(3); 
@@ -106,6 +106,44 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     w_task_upper_body_ = 2.0;
     w_task_rfoot_ = 20.0;
     w_task_lfoot_ = 20.0;
+
+    // Try Loading Custom Parmams ----------------------------------
+    try {
+        double temp_double;
+        Eigen::VectorXd temp_vec;
+
+        // Load Maximum normal force
+        myUtils::readParameter(node, "max_z_force", rfoot_max_z_);
+        myUtils::readParameter(node, "max_z_force", lfoot_max_z_); 
+
+        // Load Task Gains
+        myUtils::readParameter(node, "kp_com", kp_com_);
+        myUtils::readParameter(node, "kd_com", kd_com_);                               
+        myUtils::readParameter(node, "kd_ang_mom", kp_ang_mom_);         
+        myUtils::readParameter(node, "kp_pelvis", kp_pelvis_);
+        myUtils::readParameter(node, "kd_pelvis", kd_pelvis_);
+        myUtils::readParameter(node, "kp_upper_body_joint", temp_double);        
+        kp_upper_body_joint_ = temp_double*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
+        myUtils::readParameter(node, "kd_upper_body_joint", temp_double);        
+        kd_upper_body_joint_ = temp_double*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
+        myUtils::readParameter(node, "kp_foot", kp_foot_);
+        myUtils::readParameter(node, "kd_foot", kd_foot_);
+
+         // Load Task Hierarchies
+        myUtils::readParameter(node, "w_task_com", w_task_com_);        
+        myUtils::readParameter(node, "w_task_ang_mom", w_task_ang_mom_);        
+        myUtils::readParameter(node, "w_task_pelvis", w_task_pelvis_);        
+        myUtils::readParameter(node, "w_task_upper_body", w_task_upper_body_); 
+        myUtils::readParameter(node, "w_task_rfoot", w_task_rfoot_);        
+        myUtils::readParameter(node, "w_task_lfoot", w_task_lfoot_);               
+
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
+    //  Loading Custom Parmams ----------------------------------
 
     // Set Task Gains
     com_task_->setGain(kp_com_, kd_com_);

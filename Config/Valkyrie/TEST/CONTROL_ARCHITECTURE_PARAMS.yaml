@@ -1,0 +1,43 @@
+test_configuration:
+    target_pos_duration: 2.
+    com_pos_deviation: [0, 0, 0.05]
+
+controller_parameters: 
+    # Contact weight relative to tasks
+    w_contact_weight: 1e-3
+    # Regularization terms
+    lambda_qddot: 1e-8; 
+    lambda_Fr: 1e-8
+
+    # Integration_parameters
+    velocity_freq_cutoff: 2.0 #Hz
+    position_freq_cutoff: 1.0 #Hz
+    max_position_error: 0.2 # radians
+
+task_parameters:
+    # Maximum normal force
+    max_z_force: 1500
+
+    # Task hierarchy weights
+    w_task_com: 5.0
+    w_task_ang_mom: 3.0
+    w_task_pelvis: 5.0
+    w_task_upper_body: 2.0
+    w_task_rfoot: 20.0
+    w_task_lfoot: 20.0
+
+    # Task Gains
+    # COM
+    kp_com: [50, 50, 50] 
+    kd_com: [5, 5, 5] 
+    # Ang Momentum
+    kd_ang_mom: [50, 50, 50]
+    # Pelvis
+    kp_pelvis: [50, 50, 50]
+    kd_pelvis: [5, 5, 5]
+    # Upper Body Joints
+    kp_upper_body_joint: 50.0 # gains for all the upper-body joints
+    kd_upper_body_joint: 5.0 # gains for all the upper-body joints
+    # Foot Linear and orientation gains
+    kp_foot: [50, 50, 50]
+    kd_foot: [5, 5, 5]

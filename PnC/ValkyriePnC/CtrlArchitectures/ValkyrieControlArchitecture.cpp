@@ -4,7 +4,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     b_state_first_visit_ = true;
 
     myUtils::pretty_constructor(1, "Valkyrie Control Architecture");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/BALANCE_TEST.yaml");
+    cfg_ = YAML::LoadFile(THIS_COM "Config/Valkyrie/TEST/CONTROL_ARCHITECTURE_PARAMS.yaml");
 
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
@@ -32,8 +32,8 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
-    taf_container_->paramInitialization(cfg_["control_configuration"]);
-    main_controller_->ctrlInitialization(cfg_["control_configuration"]);
+    taf_container_->paramInitialization(cfg_["task_parameters"]);
+    main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
 }
 
 
