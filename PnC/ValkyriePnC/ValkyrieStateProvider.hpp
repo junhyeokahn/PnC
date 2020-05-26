@@ -58,6 +58,11 @@ class ValkyrieStateProvider {
     Eigen::VectorXd com_vel_des;
     Eigen::VectorXd mom_des;
 
+    Eigen::VectorXd dcm;
+    Eigen::VectorXd prev_dcm;    
+    Eigen::VectorXd dcm_vel;    
+    double dcm_omega;
+
     Eigen::VectorXd rf_pos;
     Eigen::VectorXd rf_vel;
     Eigen::VectorXd lf_pos;

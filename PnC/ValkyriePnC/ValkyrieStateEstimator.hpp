@@ -25,4 +25,5 @@ class ValkyrieStateEstimator {
     void _JointUpdate(ValkyrieSensorData* data);
     void _ConfigurationAndModelUpdate();
     void _FootContactUpdate(ValkyrieSensorData* data);
+    void _UpdateDCM();
 };

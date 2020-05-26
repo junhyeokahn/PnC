@@ -21,6 +21,7 @@ void ValkyrieStateEstimator::Initialization(ValkyrieSensorData* data) {
     _ConfigurationAndModelUpdate();
     sp_->jpos_ini = curr_config_.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
     _FootContactUpdate(data);
+    _UpdateDCM();
     sp_->saveCurrentData();
 }
 
@@ -28,6 +29,7 @@ void ValkyrieStateEstimator::Update(ValkyrieSensorData* data) {
     _JointUpdate(data);
     _ConfigurationAndModelUpdate();
     _FootContactUpdate(data);
+    _UpdateDCM();
     sp_->saveCurrentData();
 }
 
@@ -63,4 +65,17 @@ void ValkyrieStateEstimator::_FootContactUpdate(ValkyrieSensorData* data) {
         sp_->b_lfoot_contact = 1;
     else
         sp_->b_lfoot_contact = 0;
+}
+
+void ValkyrieStateEstimator::_UpdateDCM(){
+    sp_->com_pos = robot_->getCoMPosition();
+    sp_->com_vel = robot_->getCoMVelocity();
+    sp_->dcm_omega = sqrt(9.81/sp_->com_pos[2]);
+
+    sp_->prev_dcm = sp_->dcm;
+    sp_->dcm = robot_->getCoMPosition() + sp_->com_vel /sp_->dcm_omega; 
+
+    double alpha_vel = 0.1;
+    sp_->dcm_vel = alpha_vel*((sp_->dcm - sp_->prev_dcm)/ValkyrieAux::servo_rate) +
+                   (1.0 - alpha_vel)*sp_->dcm_vel;
 }

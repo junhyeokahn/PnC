@@ -42,6 +42,11 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
     com_vel = Eigen::VectorXd::Zero(3);
     mom = Eigen::VectorXd::Zero(6);
 
+    dcm = Eigen::VectorXd::Zero(3);
+    prev_dcm = Eigen::VectorXd::Zero(3);
+    dcm_vel = Eigen::VectorXd::Zero(3);    
+    dcm_omega = 1.0;
+
     com_pos_des = Eigen::VectorXd::Zero(3);
     com_vel_des = Eigen::VectorXd::Zero(3);
     mom_des = Eigen::VectorXd::Zero(6);
