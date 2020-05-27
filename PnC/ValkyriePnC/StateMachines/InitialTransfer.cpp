@@ -3,7 +3,7 @@
 
 InitialTransfer::InitialTransfer(const StateIdentifier state_identifier_in, ValkyrieControlArchitecture* _ctrl_arch, RobotSystem* _robot) : 
                StateMachine(state_identifier_in, _robot) {
-  myUtils::pretty_constructor(2, "SM: Double Support Stand");
+  myUtils::pretty_constructor(2, "SM: Initial Transfer");
 
   // Set Pointer to Control Architecture
   val_ctrl_arch_ = ((ValkyrieControlArchitecture*) _ctrl_arch);
@@ -18,8 +18,11 @@ InitialTransfer::~InitialTransfer(){
 
 
 void InitialTransfer::firstVisit(){
+  std::cout << "Initial Transfer First Visit" << std::endl;
+
   ctrl_start_time_ = sp_->curr_time;
   double t_walk_start = ctrl_start_time_;
+
 
   // Initialize DCM planner
   val_ctrl_arch_->dcm_planner_->setInitialTime(t_walk_start);

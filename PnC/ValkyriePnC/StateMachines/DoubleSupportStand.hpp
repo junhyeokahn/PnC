@@ -27,6 +27,10 @@ class DoubleSupportStand : public StateMachine{
     void setDuration(double time){end_time_ = time;}
     void setComDeviation(const Eigen::VectorXd& dev){com_pos_dev_ = dev;}
 
+    void switchStateButtonTrigger(){
+      state_switch_button_trigger_ = true;
+    }
+
   protected:
     ValkyrieStateProvider* sp_;
     ValkyrieControlArchitecture* val_ctrl_arch_;
@@ -50,5 +54,7 @@ class DoubleSupportStand : public StateMachine{
     void _SetBspline(const Eigen::VectorXd st_pos,
                      const Eigen::VectorXd des_pos);
     void _GetBsplineTrajectory();
+
+    bool state_switch_button_trigger_;
 
 };

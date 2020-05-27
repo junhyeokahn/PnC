@@ -20,6 +20,7 @@
 
 namespace VALKYRIE_STATES {
     constexpr int BALANCE = 0;
+    constexpr int INITIAL_TRANSFER = 1;
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
