@@ -26,7 +26,7 @@ void FootSE3TrajectoryManager::useCurrent(){
   Eigen::VectorXd foot_ang_vel_des(3); foot_ang_vel_des.setZero();    
   Eigen::VectorXd foot_ang_acc_des(3); foot_ang_acc_des.setZero();
 
-  // Set Right Foot Task
+  // Set Foot Task
   foot_pos_des = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
   Eigen::Quaternion<double> rfoot_ori_act(robot_->getBodyNodeCoMIsometry(link_idx_).linear());
   foot_ori_des[0] = rfoot_ori_act.w();

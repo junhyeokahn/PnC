@@ -78,14 +78,6 @@ void DoubleSupportStand::_taskUpdate(){
   // =========================================================================
   val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-
-  Eigen::VectorXd foot_ori_cur(4); foot_ori_cur.setZero();
-  Eigen::Quaternion<double> rfoot_ori_act(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).linear());
-  foot_ori_cur[0] = rfoot_ori_act.w();
-  foot_ori_cur[1] = rfoot_ori_act.x();
-  foot_ori_cur[2] = rfoot_ori_act.y();
-  foot_ori_cur[3] = rfoot_ori_act.z();
-  myUtils::pretty_print(foot_ori_cur, std::cout, "rfoot_ori_cur");
 }
 
 void DoubleSupportStand::oneStep(){  
