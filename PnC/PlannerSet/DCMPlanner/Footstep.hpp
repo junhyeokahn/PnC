@@ -6,9 +6,9 @@
 #include <iostream>
 #include <string>
 
-#define LEFT_FOOTSTEP 0
-#define RIGHT_FOOTSTEP 1
-#define MID_FOOTSTEP 2
+#define LEFT_ROBOT_SIDE 0
+#define RIGHT_ROBOT_SIDE 1
+#define MIDFOOT_TYPE 2
 
 // Data container for a footstep
 

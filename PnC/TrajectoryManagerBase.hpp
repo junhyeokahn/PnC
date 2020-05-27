@@ -20,8 +20,6 @@ public:
   virtual void paramInitialization(const YAML::Node& node) = 0;
 
   RobotSystem* robot_;
-  Task* task_;
-  ContactSpec* contact_;
 
   double traj_start_time_;
   double traj_end_time_;  
