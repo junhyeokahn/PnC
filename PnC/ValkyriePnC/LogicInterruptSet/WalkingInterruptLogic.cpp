@@ -13,33 +13,33 @@ WalkingInterruptLogic::~WalkingInterruptLogic(){
 // Process Interrupts here
 void WalkingInterruptLogic::processInterrupts(){
   if (b_interrupt_button_p){
-    std::cout << "[Walking Interrupt Logic] button p pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button P pressed" << std::endl;
     std::cout << "current state = " << val_ctrl_arch_->getState() << std::endl;
   }
   if (b_interrupt_button_r){
-    std::cout << "[Walking Interrupt Logic] button r pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button R pressed" << std::endl;
     if (val_ctrl_arch_->getState() == VALKYRIE_STATES::BALANCE){
       static_cast<DoubleSupportBalance*>(val_ctrl_arch_->state_machines_[VALKYRIE_STATES::BALANCE])->switchStateButtonTrigger();
     }
 
   }
   if (b_interrupt_button_w){
-    std::cout << "[Walking Interrupt Logic] button w pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button W pressed" << std::endl;
   }
   if (b_interrupt_button_a){
-    std::cout << "[Walking Interrupt Logic] button a pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button A pressed" << std::endl;
   }
   if (b_interrupt_button_s){
-    std::cout << "[Walking Interrupt Logic] button s pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button S pressed" << std::endl;
   }
   if (b_interrupt_button_d){
-    std::cout << "[Walking Interrupt Logic] button d pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button D pressed" << std::endl;
   }
   if (b_interrupt_button_q){
-    std::cout << "[Walking Interrupt Logic] button q pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button Q pressed" << std::endl;
   }
   if (b_interrupt_button_e){
-    std::cout << "[Walking Interrupt Logic] button e pressed" << std::endl;
+    std::cout << "[Walking Interrupt Logic] button E pressed" << std::endl;
   }
 
   resetFlags();

@@ -107,9 +107,6 @@ StateIdentifier DoubleSupportStand::getNextState(){
 }
 
 
-void DoubleSupportStand::initialization(const YAML::Node& node){
-}
-
 void DoubleSupportStand::_SetBspline(const Eigen::VectorXd st_pos,
                           const Eigen::VectorXd des_pos) {
   // Trajectory Setup
@@ -156,4 +153,23 @@ void DoubleSupportStand::_GetBsplineTrajectory(){
     des_com_vel_[i] = vel[i];
     des_com_acc_[i] = acc[i];
   }
+}
+
+
+void DoubleSupportStand::initialization(const YAML::Node& node){
+    try {
+        double temp;
+        Eigen::VectorXd temp_vec;
+
+        myUtils::readParameter(node,"target_pos_duration",temp);
+        myUtils::readParameter(node,"com_pos_deviation",temp_vec);
+
+        setDuration(temp);
+        setComDeviation(temp_vec);
+    } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
 }

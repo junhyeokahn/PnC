@@ -50,9 +50,6 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
-    taf_container_->paramInitialization(cfg_["task_parameters"]);
-    main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
-    dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
 }
 
 void ValkyrieControlArchitecture::getCommand(void* _command) {
@@ -75,20 +72,11 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
 };
 
 void ValkyrieControlArchitecture::_InitializeParameters() {
-    try {
-        double temp;
-        Eigen::VectorXd temp_vec;
+    taf_container_->paramInitialization(cfg_["task_parameters"]);
+    main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+    dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
-        YAML::Node test_cfg = cfg_["test_configuration"];
-        myUtils::readParameter(test_cfg,"target_pos_duration",temp);
-       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::STAND])->setDuration(temp);
-        myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
-       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::STAND])->setComDeviation(temp_vec);
+    // States Initialization:
+    state_machines_[VALKYRIE_STATES::STAND]->initialization(cfg_["state_stand_params"]);
 
-    } catch(std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                  << __FILE__ << "]" << std::endl
-                  << std::endl;
-        exit(0);
-    }
 }
