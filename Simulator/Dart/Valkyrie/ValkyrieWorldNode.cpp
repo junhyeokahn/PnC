@@ -93,10 +93,10 @@ void ValkyrieWorldNode::customPreStep() {
 
     // Check for user button presses
     if (b_button_p){
-        std::cout << "Flag true: button p pressed" << std::endl;
+        interface_->interrupt_->b_interrupt_button_p = true;       
     }
     if (b_button_r){
-        std::cout << "Flag true: button r pressed" << std::endl;        
+        interface_->interrupt_->b_interrupt_button_r = true;
     }
 
     interface_->getCommand(sensor_data_, command_);

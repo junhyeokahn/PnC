@@ -19,9 +19,21 @@ InitialTransfer::~InitialTransfer(){
 
 void InitialTransfer::firstVisit(){
   ctrl_start_time_ = sp_->curr_time;
+  double t_walk_start = ctrl_start_time_;
+
+  // Initialize DCM planner
+  val_ctrl_arch_->dcm_planner_->setInitialTime(t_walk_start);
+  // val_ctrl_arch_->dcm_planner_->setInitialOri(x_ori_start_);
+  // val_ctrl_arch_->dcm_planner_->initialize_footsteps_rvrp(footstep_list_, left_foot_start_,
+                                                          // right_foot_start_, dcm_pos_start_in, dcm_vel_start_in);
 }
 
 void InitialTransfer::_taskUpdate(){
+  // =========================================================================
+  // Set Foot Motion Tasks
+  // =========================================================================
+  val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
+  val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
 }
 
 void InitialTransfer::oneStep(){  

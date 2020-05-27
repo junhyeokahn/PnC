@@ -4,6 +4,7 @@
 #include <PnC/ValkyriePnC/TestSet/BalanceTest.hpp>
 #include <PnC/ValkyriePnC/TestSet/DCMBalanceTest.hpp>
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
+#include <PnC/ValkyriePnC/LogicInterruptSet/WalkingInterruptLogic.hpp>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateEstimator.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
@@ -25,6 +26,9 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
     // robot_->printRobotInfo();
     state_estimator_ = new ValkyrieStateEstimator(robot_);
     sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+
+    // Initialize empty interrupt class
+    interrupt_ = new InterruptLogic();
 
     sp_->stance_foot = ValkyrieBodyNode::leftCOP_Frame;
 
@@ -50,7 +54,10 @@ ValkyrieInterface::~ValkyrieInterface() {
     delete robot_;
     delete state_estimator_;
     delete test_;
-    delete control_architecture_;
+    delete interrupt_;
+    if (use_control_architecture_interface_){
+        delete control_architecture_;
+    }
 }
 
 void ValkyrieInterface::getCommand(void* _data, void* _command) {
@@ -60,6 +67,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
     if (!Initialization_(data, cmd)) {
         state_estimator_->Update(data);
         if(use_control_architecture_interface_){
+            interrupt_->processInterrupts();
             control_architecture_->getCommand(cmd);            
         }else{
             test_->getCommand(cmd);
@@ -102,6 +110,9 @@ void ValkyrieInterface::_ParameterSetting() {
         }
         else if (test_name_ == "valkyrie_control_architecture_test") {
             control_architecture_ = new ValkyrieControlArchitecture(robot_);
+            // Replace default interrupt logic with new one
+            delete interrupt_;
+            interrupt_ = new WalkingInterruptLogic(static_cast<ValkyrieControlArchitecture*> (control_architecture_));
             use_control_architecture_interface_ = true;
         }
          else {

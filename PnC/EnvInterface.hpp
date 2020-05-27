@@ -2,6 +2,7 @@
 
 #include <Eigen/Dense>
 #include <memory>
+#include <PnC/InterruptLogic.hpp>
 
 class Test;
 class ControlArchitecture;
@@ -16,6 +17,8 @@ class EnvInterface {
     double running_time_;
 
    public:
+    InterruptLogic* interrupt_;
+
     EnvInterface() {
         count_ = 0;
         running_time_ = 0.;
