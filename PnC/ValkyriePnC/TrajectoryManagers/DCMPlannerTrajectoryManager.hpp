@@ -12,9 +12,14 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   	~DCMPlannerTrajectoryManager();	
     void paramInitialization(const YAML::Node& node);
 
+    void initialize(double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
+                    const int transfer_type_in, 
+                    const Eigen::Quaterniond & ori_start_in,
+                    const Eigen::Vector3d & dcm_pos_start_in, 
+                    const Eigen::Vector3d & dcm_vel_start_in);
+
     // Updates the feet pose of the starting stance 
     void updateStartingStance();
-
     void incrementStepIndex();
     void resetStepIndex();
 
@@ -43,11 +48,19 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
     					  std::vector<Footstep> & footstep_list);
 
    DCMPlanner* dcm_planner_;
+   std::vector<Footstep> footstep_list_copy_;
    std::vector<Footstep> footstep_preview_list_;
    int current_footstep_index_; // keeps track of which footstep to take.
 
+   // Initialization
+   double t_walk_start_;
+   Eigen::Quaterniond ori_start_;
    Footstep right_foot_start_;
    Footstep left_foot_start_;
+
+
+   Footstep right_foot_stance_;
+   Footstep left_foot_stance_;
 
    double t_initial_transfer_;    // the initial transfer time
    double t_double_support_;	  // the time during double support

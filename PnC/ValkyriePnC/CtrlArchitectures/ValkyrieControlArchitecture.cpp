@@ -13,6 +13,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     main_controller_ = new ValkyrieMainController(taf_container_, robot_);
     // Initialize Planner
     dcm_planner_ = new DCMPlanner();
+    dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
 
     // Initialize Trajectory managers
     rfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->rfoot_center_pos_task_, 
@@ -36,7 +37,9 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete dcm_planner_;
 
     // Delete the trajectory managers
+    delete dcm_trajectory_manger_;
     delete rfoot_trajectory_manager_;
+    delete lfoot_trajectory_manager_;
 
     // Delete the state machines
     delete state_machines_[VALKYRIE_STATES::BALANCE];

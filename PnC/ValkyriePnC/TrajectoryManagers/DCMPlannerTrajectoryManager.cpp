@@ -1,14 +1,11 @@
 #include <PnC/ValkyriePnC/TrajectoryManagers/DCMPlannerTrajectoryManager.hpp>
 
 DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot) : TrajectoryManagerBase(_robot){
+    myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
 	dcm_planner_ = _dcm_planner;
 }
 
 DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager(){
-}
-
-void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node){
-
 }
 
 void DCMPlannerTrajectoryManager::incrementStepIndex(){
@@ -18,16 +15,15 @@ void DCMPlannerTrajectoryManager::resetStepIndex(){
    current_footstep_index_ = 0;
 }
 
-
 // Updates the feet pose of the starting stance 
 void DCMPlannerTrajectoryManager::updateStartingStance(){
     Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).translation();
     Eigen::Quaterniond lfoot_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).linear());
-    left_foot_start_.setPosOriSide(lfoot_pos, lfoot_ori, LEFT_ROBOT_SIDE);
+    left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, LEFT_ROBOT_SIDE);
 
     Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).translation();
     Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).linear());
-    right_foot_start_.setPosOriSide(rfoot_pos, rfoot_ori, RIGHT_ROBOT_SIDE);
+    right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, RIGHT_ROBOT_SIDE);
 }
 
 // Updates the local footstep list (ie: footstep preview) for trajectory generation:
@@ -40,14 +36,34 @@ void DCMPlannerTrajectoryManager::updatePreview(const int max_footsteps_to_previ
 			break;
 		}
 	}
+}
 
-	// Identify stance leg from footstep.
-	// int stance_side = LEFT_ROBOT_SIDE;
-	// int stance_body_id = ValkyrieBodyNode::leftCOP_Frame;
-	// if (footstep_list[0].robot_side == LEFT_ROBOT_SIDE){
-	// 	stance_side = RIGHT_ROBOT_SIDE;
-	// 	stance_body_id = ValkyrieBodyNode::rightCOP_Frame;
-	// }
+void DCMPlannerTrajectoryManager::initialize(double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
+											 const int transfer_type_in, 
+									    	 const Eigen::Quaterniond & ori_start_in,
+											 const Eigen::Vector3d & dcm_pos_start_in, 
+											 const Eigen::Vector3d & dcm_vel_start_in){
+
+    t_walk_start_ = t_walk_start_in;
+    // Clear internal data then copy footsteps
+    footstep_list_copy_.clear();
+    footstep_list_copy_ = footstep_list_in;
+
+    // Reset index
+    resetStepIndex();
+    updateStartingStance();
+    left_foot_start_ = left_foot_stance_;
+    right_foot_start_ = right_foot_stance_;
+    updatePreview(4, footstep_list_copy_);
+
+    // Set DCM reference
+	dcm_planner_->setInitialTime(t_walk_start_);
+	dcm_planner_->setInitialOri(ori_start_in);
+	dcm_planner_->initialize_footsteps_rvrp(footstep_preview_list_, left_foot_start_, right_foot_start_, 
+											dcm_pos_start_in, dcm_vel_start_in);
+	// Set transfer time
+	// if initial transfer use initial transfer time.
+	// if midstep transfer use final transfer time.
 }
 
 // Footstep sequence primitives -----------------------------------------------------------
@@ -59,10 +75,10 @@ void DCMPlannerTrajectoryManager::populateStepInPlace(const int num_steps, const
 	for(int i = 0; i < num_steps; i++){
 		// Add in place step and switch sides
 		if (robot_side == LEFT_ROBOT_SIDE){
-			footstep_list.push_back(left_foot_start_);
+			footstep_list.push_back(left_foot_stance_);
 			robot_side = RIGHT_ROBOT_SIDE;
 		}else{
-			footstep_list.push_back(right_foot_start_);
+			footstep_list.push_back(right_foot_stance_);
 			robot_side = LEFT_ROBOT_SIDE;			
 		}
 	}
@@ -88,4 +104,9 @@ void DCMPlannerTrajectoryManager::populateTurnLeft(const double turn_angle,
 void DCMPlannerTrajectoryManager::populateTurnRight(const double turn_angle,
 								  				    const double nominal_step_width_distance,
 													std::vector<Footstep> & footstep_list){	
+}
+
+
+void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node){
+
 }

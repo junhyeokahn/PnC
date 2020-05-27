@@ -48,6 +48,7 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     // Trajectory Managers
     FootSE3TrajectoryManager* rfoot_trajectory_manager_; 
     FootSE3TrajectoryManager* lfoot_trajectory_manager_; 
+    DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
 
     // Footstep list container
     std::vector<Footstep> footstep_list_;
