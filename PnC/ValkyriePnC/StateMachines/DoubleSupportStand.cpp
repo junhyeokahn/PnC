@@ -95,15 +95,15 @@ void DoubleSupportStand::lastVisit(){
 }
 
 bool DoubleSupportStand::endOfState(){  
-  if ((state_machine_time_ > end_time_) && state_switch_button_trigger_){
-    std::cout << "[DoubleSupportStand] Switch State Triggered" << std::endl;
+  if (state_machine_time_ > end_time_){
+    std::cout << "[DoubleSupportStand] State End" << std::endl;
     return true;
   }
   return false;
 } 
 
 StateIdentifier DoubleSupportStand::getNextState(){
-  return VALKYRIE_STATES::INITIAL_TRANSFER;
+  return VALKYRIE_STATES::BALANCE;
 }
 
 

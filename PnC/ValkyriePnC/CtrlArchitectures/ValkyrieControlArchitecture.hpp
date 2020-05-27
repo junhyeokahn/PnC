@@ -19,8 +19,9 @@
 #include <PnC/PlannerSet/DCMPlanner/Footstep.hpp>
 
 namespace VALKYRIE_STATES {
-    constexpr int BALANCE = 0;
-    constexpr int INITIAL_TRANSFER = 1;
+    constexpr int STAND = 0;
+    constexpr int BALANCE = 1;
+    constexpr int INITIAL_TRANSFER = 2;
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {

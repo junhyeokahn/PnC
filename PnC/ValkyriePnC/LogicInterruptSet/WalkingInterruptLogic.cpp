@@ -19,7 +19,7 @@ void WalkingInterruptLogic::processInterrupts(){
   if (b_interrupt_button_r){
     std::cout << "[Walking Interrupt Logic] button r pressed" << std::endl;
     if (val_ctrl_arch_->getState() == VALKYRIE_STATES::BALANCE){
-      static_cast<DoubleSupportStand*>(val_ctrl_arch_->state_machines_[VALKYRIE_STATES::BALANCE])->switchStateButtonTrigger();
+      static_cast<DoubleSupportBalance*>(val_ctrl_arch_->state_machines_[VALKYRIE_STATES::BALANCE])->switchStateButtonTrigger();
     }
 
   }

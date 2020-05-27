@@ -22,10 +22,11 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
                                                              taf_container_->lfoot_center_ori_task_, robot_);
 
     // Initialize states: add all states to the state machine map
-    state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
+    state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
+    state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportBalance(VALKYRIE_STATES::BALANCE, this, robot_);
     state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER] = new InitialTransfer(VALKYRIE_STATES::INITIAL_TRANSFER, this, robot_);    
     // Set Starting State
-    state_ = VALKYRIE_STATES::BALANCE;
+    state_ = VALKYRIE_STATES::STAND;
     prev_state_ = state_;
 
     _InitializeParameters();
@@ -42,7 +43,10 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete lfoot_trajectory_manager_;
 
     // Delete the state machines
+    delete state_machines_[VALKYRIE_STATES::STAND];
     delete state_machines_[VALKYRIE_STATES::BALANCE];
+    delete state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER];
+
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
@@ -77,9 +81,9 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
 
         YAML::Node test_cfg = cfg_["test_configuration"];
         myUtils::readParameter(test_cfg,"target_pos_duration",temp);
-       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setDuration(temp);
+       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::STAND])->setDuration(temp);
         myUtils::readParameter(test_cfg,"com_pos_deviation",temp_vec);
-       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::BALANCE])->setComDeviation(temp_vec);
+       ((DoubleSupportStand*) state_machines_[VALKYRIE_STATES::STAND])->setComDeviation(temp_vec);
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
