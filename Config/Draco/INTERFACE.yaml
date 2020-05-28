@@ -5,7 +5,7 @@
 # test_name: mpc_test
 # test_name: mpc_stand_test
 # test_name: mpc_walk_test
-#test_name: dcm_walk_test
+# test_name: dcm_walk_test
 test_name: dcm_phase_walking_test
 
 jpos_min: [-0.6 , -0.4 , -1.15 , -0.2  , 0.64 , -0.6 , -0.4 , -1.15 , -0.2  , 0.64]

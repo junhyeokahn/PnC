@@ -338,6 +338,10 @@ void DoubleSupportCtrl::_references_setup() {
     }
     sp_->swing_foot_target_quat = swing_foot_target_quat;
 
+    // Set Robot Mass
+    ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->dcm_reference.setRobotMass(robot_->getRobotMass());
+    std::cout << "Robot Mass (kg): " << robot_->getRobotMass() << std::endl;
+
     ((DCMWalkingReferenceTrajectoryModule*)walking_reference_trajectory_module_)->initialize(
         sp_->curr_time, footstep_list, sp_->dcm, sp_->dcm_vel, x_ori_start,
         lfoot_start, rfoot_start);

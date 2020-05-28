@@ -8,7 +8,7 @@ test_configuration:
     stand_up_ctrl_time: 2.0
 
     # Walking Parameters
-    footstep_length: 0.02
+    footstep_length: 0.05 #0.02
     footstep_width: 0.35
     footstep_orientation: 0.
 

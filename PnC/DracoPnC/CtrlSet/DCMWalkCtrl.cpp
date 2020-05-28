@@ -277,7 +277,7 @@ void DCMWalkCtrl::references_setup(){
 
     // Eigen::Vector3d foot_translate(0.0, -0.075, 0.0);
     // Eigen::Quaterniond foot_rotate( Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ()) );
-    // double swing_time_in = 0.4;
+    // double swing_time_in = 0.3;
     // factor = 1.0;
 
     // Eigen::Vector3d foot_translate(0.0, -0.125, 0.0);
@@ -379,6 +379,7 @@ void DCMWalkCtrl::references_setup(){
     }
 
     // Update the reference trajectory module
+    ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setRobotMass(robot_->getRobotMass());
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.setCoMHeight(target_com_height_);
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_transfer = 0.1;
     ((DCMWalkingReferenceTrajectoryModule*)reference_trajectory_module_)->dcm_reference.t_ds = 0.05;
