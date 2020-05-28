@@ -156,6 +156,12 @@ public:
   // Returns t_end
   double get_total_trajectory_time();
 
+  // Returns t_settle;
+  double get_settle_time(){
+    double t_settle = -b*log(1.0 - percentage_settle);
+    return t_settle;
+  }
+
 private:
   // DCM parameters:
   double robot_mass = 50; // kg

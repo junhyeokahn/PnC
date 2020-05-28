@@ -17,6 +17,9 @@ DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planne
   convertTemporalParamsToDCMParams();
 }
 
+DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager(){
+}
+
 void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams(){
   // Fixed transforms
   t_ds_ = t_contact_transition_; // double support polynomial transfer time
@@ -27,7 +30,23 @@ void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams(){
 }
 
 
-DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager(){
+double DCMPlannerTrajectoryManager::getInitialContactTransferTime(){
+  double t_initial_transfer_time = t_additional_init_transfer_ + t_ds_ + (1-alpha_ds_)*t_ds_; // the total initial transfer time before the foot swinng
+  return t_initial_transfer_time;
+}
+
+double DCMPlannerTrajectoryManager::getMidStepContactTransferTime(){
+  double t_midstep_transfer = t_ds_; // midstep transfer time before contact transition
+  return t_midstep_transfer;
+}
+
+double DCMPlannerTrajectoryManager::getFinalContactTransferTime(){
+  double t_final_transfer = t_ds_ + dcm_planner_->get_settle_time(); // total time after landing the last step.
+  return t_final_transfer;
+}
+
+double DCMPlannerTrajectoryManager::getSwingTime(){
+  return t_ss_;
 }
 
 void DCMPlannerTrajectoryManager::incrementStepIndex(){
@@ -164,5 +183,6 @@ void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node){
   dcm_planner_->percentage_settle = percentage_settle_;
   dcm_planner_->alpha_ds = alpha_ds_;
 }
+
 
 
