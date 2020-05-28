@@ -12,6 +12,9 @@ dcm_planner_parameters:
     percentage_settle: 0.99 # percent to converge at the end of the trajectory
     alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
 
+foot_trajectory_parameters:
+    swing_height: 0.05 # cm off the ground
+
 controller_parameters: 
     # Contact weight relative to tasks
     w_contact_weight: 1e-3

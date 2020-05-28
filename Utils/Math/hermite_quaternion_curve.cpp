@@ -8,8 +8,15 @@ Kim, Myoung-Jun, Myung-Soo Kim, and Sung Yong Shin.
 
 // Note that we implement the global frame case not the local frame!
 
+HermiteQuaternionCurve::HermiteQuaternionCurve(){}
+
 HermiteQuaternionCurve::HermiteQuaternionCurve(const Eigen::Quaterniond & quat_start, const Eigen::Vector3d & angular_velocity_start,
                                                const Eigen::Quaterniond & quat_end, const Eigen::Vector3d & angular_velocity_end){
+  initialize(quat_start, angular_velocity_start, quat_end, angular_velocity_end);
+}
+
+void HermiteQuaternionCurve::initialize(const Eigen::Quaterniond & quat_start, const Eigen::Vector3d & angular_velocity_start,
+                                        const Eigen::Quaterniond & quat_end, const Eigen::Vector3d & angular_velocity_end){
   qa = quat_start;
   omega_a = angular_velocity_start;
 
@@ -17,8 +24,7 @@ HermiteQuaternionCurve::HermiteQuaternionCurve(const Eigen::Quaterniond & quat_s
   omega_b = angular_velocity_end;
 
   s_ = 0.0;
-  initialize_data_structures();
-  // std::cout << "[Hermite Quaternion Curve] Initialized" << std::endl;
+  initialize_data_structures(); 
 }
 
 HermiteQuaternionCurve::~HermiteQuaternionCurve(){}

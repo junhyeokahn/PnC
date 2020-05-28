@@ -5,7 +5,14 @@ HermiteCurveVec::HermiteCurveVec(){}
 
 HermiteCurveVec::HermiteCurveVec(const Eigen::VectorXd & start_pos, const Eigen::VectorXd & start_vel, 
 			   const Eigen::VectorXd & end_pos, const Eigen::VectorXd & end_vel):  p1(start_pos), v1(start_vel), p2(end_pos), v2(end_vel){
-	// Create N hermite curves with the specified boundary conditions
+	initialize(start_pos, start_vel, end_pos, end_vel);
+}
+
+
+void HermiteCurveVec::initialize(const Eigen::VectorXd & start_pos, const Eigen::VectorXd & start_vel, 
+			   			  								 const Eigen::VectorXd & end_pos, const Eigen::VectorXd & end_vel){
+	// Clear and 	create N hermite curves with the specified boundary conditions
+	curves.clear();
 	for(int i = 0; i < start_pos.size(); i++){
 		curves.push_back(HermiteCurve(start_pos[i], start_vel[i], end_pos[i], end_vel[i]));
 	}
