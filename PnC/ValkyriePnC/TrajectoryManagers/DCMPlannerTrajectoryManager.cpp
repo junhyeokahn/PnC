@@ -104,6 +104,7 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in, const
   updatePreview(4, footstep_list_copy_);
 
     // Set DCM reference
+  dcm_planner_->setRobotMass(robot_->getRobotMass());
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
   dcm_planner_->initialize_footsteps_rvrp(footstep_preview_list_, left_foot_start_, right_foot_start_, 

@@ -7,6 +7,7 @@ MaxNormalForceTrajectoryManager::MaxNormalForceTrajectoryManager(ContactSpec* _c
     starting_max_normal_force_z_ = 0.0; // Default
     current_max_normal_force_z_ = 0.0; // Default
     local_max_normal_force_z_ = 0.0;
+    nominal_ramp_duration_ = 1.0; //seconds
 }
 
 MaxNormalForceTrajectoryManager::~MaxNormalForceTrajectoryManager(){    
@@ -29,25 +30,29 @@ void MaxNormalForceTrajectoryManager::initializeRampToZero(const double start_ti
     // Initialize start times and starting max value
     ramp_start_time_ = start_time;
     starting_max_normal_force_z_ = current_max_normal_force_z_;
+    nominal_ramp_duration_ = nominal_ramp_duration;
     // Initialize ramp speed
-    ramp_down_speed_ = -nominal_max_normal_force_z_ / nominal_ramp_duration;
+    ramp_down_speed_ = -nominal_max_normal_force_z_ / nominal_ramp_duration_;
 }
 
 void MaxNormalForceTrajectoryManager::initializeRampToMax(const double start_time, const double nominal_ramp_duration){
     // Initialize start times and starting max value
     ramp_start_time_ = start_time;
     starting_max_normal_force_z_ = current_max_normal_force_z_;
+    nominal_ramp_duration_ = nominal_ramp_duration;
     // Initialize ramp speed
-    ramp_up_speed_ = nominal_max_normal_force_z_ / nominal_ramp_duration;       
+    ramp_up_speed_ = nominal_max_normal_force_z_ / nominal_ramp_duration_;       
 }
 
 void MaxNormalForceTrajectoryManager::computeRampToZero(const double current_time){
-    local_max_normal_force_z_ = ramp_down_speed_*(current_time - ramp_start_time_) + starting_max_normal_force_z_;
+    double t_current = myUtils::CropValue(current_time, ramp_start_time_, nominal_ramp_duration_);
+    local_max_normal_force_z_ = ramp_down_speed_*(t_current - ramp_start_time_) + starting_max_normal_force_z_;
     current_max_normal_force_z_ = myUtils::CropValue(local_max_normal_force_z_, 0.0, nominal_max_normal_force_z_);
 }
 
 void MaxNormalForceTrajectoryManager::computeRampToMax(const double current_time){
-    local_max_normal_force_z_ = ramp_up_speed_*(current_time - ramp_start_time_) + starting_max_normal_force_z_;
+    double t_current = myUtils::CropValue(current_time, ramp_start_time_, nominal_ramp_duration_);
+    local_max_normal_force_z_ = ramp_up_speed_*(t_current - ramp_start_time_) + starting_max_normal_force_z_;
     current_max_normal_force_z_ = myUtils::CropValue(local_max_normal_force_z_, 0.0, nominal_max_normal_force_z_);    
 }
 
