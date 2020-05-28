@@ -19,11 +19,9 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
                                                              taf_container_->rfoot_center_ori_task_, robot_);
     lfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->lfoot_center_pos_task_, 
                                                              taf_container_->lfoot_center_ori_task_, robot_);
-
-    lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->lfoot_contact_, robot_);
     rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->rfoot_contact_, robot_);
+    lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->lfoot_contact_, robot_);
     dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
-
 
     // Initialize states: add all states to the state machine map
     state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
@@ -37,20 +35,21 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
 }
 
 ValkyrieControlArchitecture::~ValkyrieControlArchitecture() { 
-    delete main_controller_;
     delete taf_container_;
+    delete main_controller_;
     delete dcm_planner_;
 
     // Delete the trajectory managers
-    delete dcm_trajectory_manger_;
     delete rfoot_trajectory_manager_;
     delete lfoot_trajectory_manager_;
+    delete rfoot_max_normal_force_manager_;
+    delete lfoot_max_normal_force_manager_;
+    delete dcm_trajectory_manger_;
 
     // Delete the state machines
     delete state_machines_[VALKYRIE_STATES::STAND];
     delete state_machines_[VALKYRIE_STATES::BALANCE];
     delete state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER];
-
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
@@ -81,6 +80,8 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
     dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
     // Trajectory Managers initialization
+    rfoot_trajectory_manager_->paramInitialization(cfg_["foot_trajectory_parameters"]);
+    lfoot_trajectory_manager_->paramInitialization(cfg_["foot_trajectory_parameters"]);
     lfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
     rfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
 

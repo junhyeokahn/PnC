@@ -18,6 +18,8 @@ FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task* _foot_pos_task, Task* _
   foot_ori_des_ = Eigen::VectorXd::Zero(4);
   foot_ang_vel_des_.setZero();
   foot_ang_acc_des_.setZero();
+
+  swing_height_ = 0.04; // 4cm default
 }
 
 
@@ -25,6 +27,15 @@ FootSE3TrajectoryManager::~FootSE3TrajectoryManager(){
 }
 
 void FootSE3TrajectoryManager::paramInitialization(const YAML::Node& node){	
+    try {
+        myUtils::readParameter(node,"swing_height", swing_height_);
+
+     } catch(std::runtime_error& e) {
+        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+                  << __FILE__ << "]" << std::endl
+                  << std::endl;
+        exit(0);
+    }
 }
 
 void FootSE3TrajectoryManager::useCurrent(){
