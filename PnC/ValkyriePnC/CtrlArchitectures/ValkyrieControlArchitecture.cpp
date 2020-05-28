@@ -24,7 +24,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
 
     // Initialize states: add all states to the state machine map
-    state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);
+    state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::STAND, this, robot_);
     state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportBalance(VALKYRIE_STATES::BALANCE, this, robot_);
     state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER] = new InitialTransfer(VALKYRIE_STATES::INITIAL_TRANSFER, this, robot_);    
     // Set Starting State

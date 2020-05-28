@@ -23,18 +23,36 @@ void InitialTransfer::firstVisit(){
   ctrl_start_time_ = sp_->curr_time;
   double t_walk_start = ctrl_start_time_;
 
+  // if previous state is from swing,
+  //  incrementStepIndex()
+
+  //  if there are no more steps remaining,
+  //    set end_time_ to settling time.
+  //    set final transition flag.
+  //  else
+  //    normal contact transition
+
+  // else if previous state is from balance or ending transition
+  //       if ending transition is from the opposite foot, use initial transfer time
+  //       if ending transition is from the same foot, use contact transition time
+  //       initialize the dcm planner
+  //       set valid flag.
+
   // Initialize DCM planner
   double t_transfer = 0.1;
   Eigen::Quaterniond pelvis_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
   val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start, val_ctrl_arch_->footstep_list_,
-                                                             t_transfer,
-                                                             pelvis_ori,
-                                                             sp_->dcm, 
-                                                             sp_->dcm_vel);
+                                                     t_transfer,
+                                                     pelvis_ori,
+                                                     sp_->dcm, 
+                                                     sp_->dcm_vel);
 
 }
 
 void InitialTransfer::_taskUpdate(){
+  // Get DCM tasks from trajectory manager
+
+
   // =========================================================================
   // Set Foot Motion Tasks
   // =========================================================================
@@ -51,10 +69,18 @@ void InitialTransfer::lastVisit(){
 }
 
 bool InitialTransfer::endOfState(){  
+  // if time exceeds transition time, switch state
   return false;
 } 
 
 StateIdentifier InitialTransfer::getNextState(){
+  // if no more steps remaining, transition to balance. 
+  // otherwise, check next step.
+  // if next step is for the opposite foot, transition to left leg start
+  // if next step is for the same foot, transition to right leg start
+
+  // if pause trajectory is hit, transition to balance 
+
 }
 
 
