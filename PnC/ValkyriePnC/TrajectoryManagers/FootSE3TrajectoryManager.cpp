@@ -8,6 +8,17 @@ FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task* _foot_pos_task, Task* _
 
 	// Assume that both tasks use the same link id.
 	link_idx_ = static_cast<BasicTask*>(foot_pos_task_)->getLinkID();
+
+  // Initialize member variables
+  foot_pos_des_ = Eigen::VectorXd::Zero(3); 
+  foot_vel_des_ = Eigen::VectorXd::Zero(3);
+  foot_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  foot_quat_des_.setIdentity();
+  foot_ori_des_ = Eigen::VectorXd::Zero(4);
+  foot_ang_vel_des_ = Eigen::VectorXd::Zero(3);
+  foot_ang_acc_des_ = Eigen::VectorXd::Zero(3);
+
 }
 
 
@@ -18,22 +29,32 @@ void FootSE3TrajectoryManager::paramInitialization(const YAML::Node& node){
 }
 
 void FootSE3TrajectoryManager::useCurrent(){
-  Eigen::VectorXd foot_pos_des(3); foot_pos_des.setZero();
-  Eigen::VectorXd foot_vel_des(3); foot_vel_des.setZero();    
-  Eigen::VectorXd foot_acc_des(3); foot_acc_des.setZero();    
+  // Update desired to use current foot pose
+  foot_pos_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+  foot_quat_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).linear();
+  convertQuatDesToOriDes();
+  updateDesired();
+}
 
-  Eigen::VectorXd foot_ori_des(4); foot_ori_des.setZero();
-  Eigen::VectorXd foot_ang_vel_des(3); foot_ang_vel_des.setZero();    
-  Eigen::VectorXd foot_ang_acc_des(3); foot_ang_acc_des.setZero();
+void FootSE3TrajectoryManager::convertQuatDesToOriDes(){
+  foot_ori_des_[0] = foot_quat_des_.w();
+  foot_ori_des_[1] = foot_quat_des_.x();
+  foot_ori_des_[2] = foot_quat_des_.y();
+  foot_ori_des_[3] = foot_quat_des_.z();
+}
 
-  // Set Foot Task
-  foot_pos_des = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-  Eigen::Quaternion<double> rfoot_ori_act(robot_->getBodyNodeCoMIsometry(link_idx_).linear());
-  foot_ori_des[0] = rfoot_ori_act.w();
-  foot_ori_des[1] = rfoot_ori_act.x();
-  foot_ori_des[2] = rfoot_ori_act.y();
-  foot_ori_des[3] = rfoot_ori_act.z();
+void FootSE3TrajectoryManager::updateDesired(){
+  foot_pos_task_->updateDesired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
+  foot_ori_task_->updateDesired(foot_ori_des_, foot_ang_vel_des_, foot_ang_acc_des_);
+}
 
-  foot_pos_task_->updateDesired(foot_pos_des, foot_vel_des, foot_acc_des);
-  foot_ori_task_->updateDesired(foot_ori_des, foot_ang_vel_des, foot_ang_acc_des);
+// Initialize the swing foot trajectory 
+void FootSE3TrajectoryManager::initializeSwingFootTrajectory(const double _start_time, const double _swing_duration, const Footstep & _landing_foot){
+  swing_start_time_ = _start_time;
+  swing_duration_ = _swing_duration;  
+}
+
+// Computes the swing foot
+void FootSE3TrajectoryManager::computeSwingFoot(const double current_time){
+
 }
