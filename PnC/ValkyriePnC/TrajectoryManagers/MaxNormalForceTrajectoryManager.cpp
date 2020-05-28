@@ -51,6 +51,16 @@ void MaxNormalForceTrajectoryManager::computeRampToMax(const double current_time
     current_max_normal_force_z_ = myUtils::CropValue(local_max_normal_force_z_, 0.0, nominal_max_normal_force_z_);    
 }
 
+
+void MaxNormalForceTrajectoryManager::updateRampToZeroDesired(const double current_time){
+    computeRampToZero(current_time);
+    updateMaxNormalForce();
+}
+void MaxNormalForceTrajectoryManager::updateRampToMaxDesired(const double current_time){
+    computeRampToMax(current_time);
+    updateMaxNormalForce();
+}
+
 void MaxNormalForceTrajectoryManager::updateMaxNormalForce(){
     ((SurfaceContactSpec*)contact_)->setMaxFz(current_max_normal_force_z_);    
 }

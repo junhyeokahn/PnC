@@ -35,6 +35,11 @@ class MaxNormalForceTrajectoryManager : public TrajectoryManagerBase {
     void computeRampToMax(const double current_time);
 
     double current_max_normal_force_z_;  // current normal force value to update contact spec
+
+    // computes the new normal force and updates the maximum force normal force
+    void updateRampToZeroDesired(const double current_time);
+    void updateRampToMaxDesired(const double current_time);
+
     // Update the maximum normal force 
     void updateMaxNormalForce();
 

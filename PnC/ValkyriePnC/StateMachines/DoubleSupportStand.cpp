@@ -96,13 +96,10 @@ void DoubleSupportStand::_taskUpdate(){
 void DoubleSupportStand::oneStep(){  
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
-  // Compute new maximum reaction forces
-  val_ctrl_arch_->lfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
-  val_ctrl_arch_->rfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
+  // Compute and update new maximum reaction forces
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
 
-  // Update reaction forces
-  val_ctrl_arch_->lfoot_max_normal_force_manager_->updateMaxNormalForce();
-  val_ctrl_arch_->rfoot_max_normal_force_manager_->updateMaxNormalForce();
   _taskUpdate();
 }
 

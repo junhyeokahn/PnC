@@ -26,14 +26,14 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
     int link_idx_;
 
 
-    Eigen::VectorXd foot_pos_des_;
-    Eigen::VectorXd foot_vel_des_;
-    Eigen::VectorXd foot_acc_des_;
+    Eigen::Vector3d foot_pos_des_;
+    Eigen::Vector3d foot_vel_des_;
+    Eigen::Vector3d foot_acc_des_;
 
     Eigen::Quaterniond foot_quat_des_;
     Eigen::VectorXd foot_ori_des_;
-    Eigen::VectorXd foot_ang_vel_des_;
-    Eigen::VectorXd foot_ang_acc_des_;
+    Eigen::Vector3d foot_ang_vel_des_;
+    Eigen::Vector3d foot_ang_acc_des_;
 
     // Updates the task desired values
     void updateDesired();
@@ -42,6 +42,8 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
     void initializeSwingFootTrajectory(const double _start_time, const double _swing_duration, const Footstep & _landing_foot);
     // Computes the swing foot
     void computeSwingFoot(const double current_time);
+    // computes the swing foot and updates the desired swing foot task
+    void updateSwingFootDesired(const double current_time);
 
     double swing_start_time_;
     double swing_duration_;
