@@ -49,6 +49,14 @@ double DCMPlannerTrajectoryManager::getSwingTime(){
   return t_ss_;
 }
 
+double DCMPlannerTrajectoryManager::getNormalForceRampUpTime(){
+  return alpha_ds_*t_ds_;
+}
+double DCMPlannerTrajectoryManager::getNormalForceRampDownTime(){
+  return (1.0 - alpha_ds_)*t_ds_;
+}
+
+
 void DCMPlannerTrajectoryManager::incrementStepIndex(){
   current_footstep_index_++;
 }
@@ -92,16 +100,18 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in, const
   t_walk_start_ = t_walk_start_in;
   // Clear internal data then copy footsteps
   footstep_list_copy_.clear();
-  for (int i = current_footstep_index_; i < footstep_list_in.size(); i++){
-    footstep_list_copy_.push_back(footstep_list_in[i]);
-  }
+  footstep_list_copy_ = footstep_list_in;
 
-  // Reset index
-  resetStepIndex();
   updateStartingStance();
   left_foot_start_ = left_foot_stance_;
   right_foot_start_ = right_foot_stance_;
   updatePreview(4, footstep_list_copy_);
+
+  // If preview list is empty, don't update.
+  if (footstep_preview_list_.size() == 0){
+    std::cout << "[DCMPlannerTrajectoryManager] ERROR. Footstep preview list is empty." << std::endl;
+    return false;
+  }
 
     // Set DCM reference
   dcm_planner_->setRobotMass(robot_->getRobotMass());
@@ -121,6 +131,15 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in, const
 
   // Initialization successful
   return true;
+}
+
+
+bool DCMPlannerTrajectoryManager::noRemainingSteps(){
+  if (current_footstep_index_ >= footstep_list_copy_.size()){
+    return true;
+  }else {
+    return false;
+  }
 }
 
 // Footstep sequence primitives -----------------------------------------------------------

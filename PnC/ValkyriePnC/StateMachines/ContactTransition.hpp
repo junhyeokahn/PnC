@@ -13,6 +13,7 @@ class ValkyrieMainController;
 class ContactTransition : public StateMachine{
   public:
   	ContactTransition(const StateIdentifier state_identifier_in, 
+                   const int _leg_side,
   					       ValkyrieControlArchitecture* _ctrl_arch, 
   					       RobotSystem* _robot);
   	~ContactTransition();
@@ -28,6 +29,8 @@ class ContactTransition : public StateMachine{
     ValkyrieStateProvider* sp_;
     ValkyrieControlArchitecture* val_ctrl_arch_;
     ValkyrieTaskAndForceContainer* taf_container_;
+
+    int leg_side_;
 
     double ctrl_start_time_;
     double end_time_;

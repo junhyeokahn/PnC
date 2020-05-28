@@ -29,7 +29,7 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
     int getStepIndex(){
       return current_footstep_index_;
     }
-    
+
     void incrementStepIndex();
     void resetStepIndex();
 
@@ -96,6 +96,12 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   double getMidStepContactTransferTime();
   double getFinalContactTransferTime();
   double getSwingTime();
+
+  double getNormalForceRampUpTime();
+  double getNormalForceRampDownTime();
+
+  // checks whether or not there are emaining footsteps.
+  bool noRemainingSteps();
 
 protected:
     void convertTemporalParamsToDCMParams();

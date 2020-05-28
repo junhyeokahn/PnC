@@ -1,7 +1,9 @@
 #include <PnC/ValkyriePnC/StateMachines/ContactTransition.hpp>
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 
-ContactTransition::ContactTransition(const StateIdentifier state_identifier_in, ValkyrieControlArchitecture* _ctrl_arch, RobotSystem* _robot) : 
+ContactTransition::ContactTransition(const StateIdentifier state_identifier_in, 
+                                     const int _leg_side, 
+                                     ValkyrieControlArchitecture* _ctrl_arch, RobotSystem* _robot) : 
                StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Contact Transition");
 
@@ -11,6 +13,8 @@ ContactTransition::ContactTransition(const StateIdentifier state_identifier_in, 
   // Get State Provider
   sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
+  // Set Leg Side
+  leg_side_ = _leg_side;
 }
 
 ContactTransition::~ContactTransition(){
@@ -23,40 +27,65 @@ void ContactTransition::firstVisit(){
   ctrl_start_time_ = sp_->curr_time;
   double t_walk_start = ctrl_start_time_;
 
+  // For all contact transitions, initially ramp up the reaction forces to max
+
+  // Check if it's the last footstep
+
+  // If not recompute DCM trajectory:
+  //  update transfer time by checking what the previous state is.
+  //  check the swing foot type. ramp down the reaction force of the swing foot.
+
+
+  int transfer_type = DCM_TRANSFER_TYPES::INITIAL;
   // Check if Previous State is From Swing
   if ((val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::RL_SWING) ||
       (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::LL_SWING) ){
-      val_ctrl_arch_->dcm_trajectory_manger_->incrementStepIndex();
-      //  incrementStepIndex()
-    
+      // Increment Step Index
+      val_ctrl_arch_->dcm_trajectory_manger_->incrementStepIndex();   
+      // Check if there are no more steps remaining.
+      //  if there are no more steps remaining,
+      //    set end_time_ to settling time.
+      //    set final transition flag.
+      //  else
+      //    normal contact transition
+
   }
 
-  else if (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE){
+  // If previous state is from balancing or ending of contact transition, recompute DCM trajectory
+  else if ((val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE) ||
+           (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::RL_CONTACT_TRANSITION) ||
+           (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::LL_CONTACT_TRANSITION)) {
+
+    // Use Initial transfer time if coming from a balancing state
+    if (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE){
+        transfer_type = DCM_TRANSFER_TYPES::INITIAL;      
+    }else{
+    // Otherwise, this is a midstep.
+        transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;      
+    }
+
+    // 
+
+    // else if previous state is from balance or ending transition
+    //       if ending transition is from the opposite foot, use initial transfer time
+    //       if ending transition is from the same foot, use contact transition time
+    //       initialize the dcm planner
+    //       set valid flag.
+
+    // Recompute DCM Trajectories
+    Eigen::Quaterniond pelvis_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
+    val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start, val_ctrl_arch_->footstep_list_,
+                                                       DCM_TRANSFER_TYPES::INITIAL,
+                                                       pelvis_ori,
+                                                       sp_->dcm, 
+                                                       sp_->dcm_vel);
 
   }
 
-  // if previous state is from swing,
-  //  incrementStepIndex()
 
-  //  if there are no more steps remaining,
-  //    set end_time_ to settling time.
-  //    set final transition flag.
-  //  else
-  //    normal contact transition
 
-  // else if previous state is from balance or ending transition
-  //       if ending transition is from the opposite foot, use initial transfer time
-  //       if ending transition is from the same foot, use contact transition time
-  //       initialize the dcm planner
-  //       set valid flag.
 
-  // Initialize DCM planner
-  Eigen::Quaterniond pelvis_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
-  val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start, val_ctrl_arch_->footstep_list_,
-                                                     DCM_TRANSFER_TYPES::INITIAL,
-                                                     pelvis_ori,
-                                                     sp_->dcm, 
-                                                     sp_->dcm_vel);
+
 
 }
 

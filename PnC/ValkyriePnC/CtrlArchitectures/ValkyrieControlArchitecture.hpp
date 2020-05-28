@@ -21,12 +21,10 @@
 namespace VALKYRIE_STATES {
     constexpr int STAND = 0;
     constexpr int BALANCE = 1;
-    constexpr int RL_CONTACT_TRANSITION_START = 2;
+    constexpr int RL_CONTACT_TRANSITION = 2;
     constexpr int RL_SWING = 3;    
-    constexpr int RL_CONTACT_TRANSITION_END = 4;
-    constexpr int LL_CONTACT_TRANSITION_START = 5;
-    constexpr int LL_SWING = 6;    
-    constexpr int LL_CONTACT_TRANSITION_END = 7;        
+    constexpr int LL_CONTACT_TRANSITION = 4;
+    constexpr int LL_SWING = 5;    
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {

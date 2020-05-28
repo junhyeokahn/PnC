@@ -56,7 +56,11 @@ bool DoubleSupportBalance::endOfState(){
 StateIdentifier DoubleSupportBalance::getNextState(){
   val_ctrl_arch_->dcm_trajectory_manger_->resetStepIndex();
   // Check if the first step is a left or right footstep
-  return VALKYRIE_STATES::RL_CONTACT_TRANSITION_START;
+  // if stepIndex == rightFootstep
+  //    return rightleg Contact transition
+  // else if stepIndex == leftFootstep
+  //    return left leg contact transitions
+  return VALKYRIE_STATES::RL_CONTACT_TRANSITION;
 }
 
 
