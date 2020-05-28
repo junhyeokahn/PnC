@@ -45,7 +45,8 @@ void DoubleSupportBalance::lastVisit(){
 }
 
 bool DoubleSupportBalance::endOfState(){  
-  if (state_switch_button_trigger_){
+  // Also check if footstep list is non-zero
+  if ((state_switch_button_trigger_) && val_ctrl_arch_->footstep_list_.size() > 0){
     std::cout << "[DoubleSupportBalance] Switch State Triggered" << std::endl;
     return true;
   }
@@ -53,7 +54,9 @@ bool DoubleSupportBalance::endOfState(){
 } 
 
 StateIdentifier DoubleSupportBalance::getNextState(){
-  return VALKYRIE_STATES::INITIAL_TRANSFER;
+  val_ctrl_arch_->dcm_trajectory_manger_->resetStepIndex();
+  // Check if the first step is a left or right footstep
+  return VALKYRIE_STATES::RL_CONTACT_TRANSITION_START;
 }
 
 

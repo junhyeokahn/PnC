@@ -18,13 +18,18 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
     void paramInitialization(const YAML::Node& node);
 
     bool initialize(const double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
-                    const double t_transfer_in, 
+                    const int transfer_type_in, 
                     const Eigen::Quaterniond & ori_start_in,
                     const Eigen::Vector3d & dcm_pos_start_in, 
                     const Eigen::Vector3d & dcm_vel_start_in);
 
     // Updates the feet pose of the starting stance 
     void updateStartingStance();
+
+    int getStepIndex(){
+      return current_footstep_index_;
+    }
+    
     void incrementStepIndex();
     void resetStepIndex();
 

@@ -80,7 +80,7 @@ void DCMPlannerTrajectoryManager::updatePreview(const int max_footsteps_to_previ
 }
 
 bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
-                                             const double t_transfer_in,
+                                             const int transfer_type_in, 
                                              const Eigen::Quaterniond & ori_start_in,
                                              const Eigen::Vector3d & dcm_pos_start_in, 
                                              const Eigen::Vector3d & dcm_vel_start_in){
@@ -107,10 +107,17 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in, const
   dcm_planner_->setRobotMass(robot_->getRobotMass());
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
+  // Set transfer time 
+  if (transfer_type_in == DCM_TRANSFER_TYPES::INITIAL){
+    dcm_planner_->t_transfer = t_transfer_init_;
+  } 
+  else if (transfer_type_in == DCM_TRANSFER_TYPES::MIDSTEP){
+    dcm_planner_->t_transfer = t_transfer_mid_;
+  }
+
   dcm_planner_->initialize_footsteps_rvrp(footstep_preview_list_, left_foot_start_, right_foot_start_, 
                       dcm_pos_start_in, dcm_vel_start_in);
-  // Set transfer time
-  dcm_planner_->t_transfer = t_transfer_in;
+
 
   // Initialization successful
   return true;
@@ -130,8 +137,10 @@ void DCMPlannerTrajectoryManager::populateStepInPlace(const int num_steps, const
     }else{
       footstep_list.push_back(right_foot_stance_);
       robot_side = LEFT_ROBOT_SIDE;     
-    }
+    }   
   }
+  std::cout << "num_steps: " << num_steps << std::endl;
+  right_foot_stance_.printInfo();
 }
 
 // Populates the input footstep list with a predefined walking forward behavior

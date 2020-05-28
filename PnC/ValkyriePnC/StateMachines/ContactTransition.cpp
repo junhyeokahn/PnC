@@ -23,6 +23,18 @@ void ContactTransition::firstVisit(){
   ctrl_start_time_ = sp_->curr_time;
   double t_walk_start = ctrl_start_time_;
 
+  // Check if Previous State is From Swing
+  if ((val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::RL_SWING) ||
+      (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::LL_SWING) ){
+      val_ctrl_arch_->dcm_trajectory_manger_->incrementStepIndex();
+      //  incrementStepIndex()
+    
+  }
+
+  else if (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE){
+
+  }
+
   // if previous state is from swing,
   //  incrementStepIndex()
 
@@ -39,10 +51,9 @@ void ContactTransition::firstVisit(){
   //       set valid flag.
 
   // Initialize DCM planner
-  double t_transfer = 0.1;
   Eigen::Quaterniond pelvis_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
   val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start, val_ctrl_arch_->footstep_list_,
-                                                     t_transfer,
+                                                     DCM_TRANSFER_TYPES::INITIAL,
                                                      pelvis_ori,
                                                      sp_->dcm, 
                                                      sp_->dcm_vel);
