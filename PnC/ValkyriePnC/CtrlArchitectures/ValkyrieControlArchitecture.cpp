@@ -13,13 +13,17 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     main_controller_ = new ValkyrieMainController(taf_container_, robot_);
     // Initialize Planner
     dcm_planner_ = new DCMPlanner();
-    dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
 
     // Initialize Trajectory managers
     rfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->rfoot_center_pos_task_, 
                                                              taf_container_->rfoot_center_ori_task_, robot_);
     lfoot_trajectory_manager_ = new FootSE3TrajectoryManager(taf_container_->lfoot_center_pos_task_, 
                                                              taf_container_->lfoot_center_ori_task_, robot_);
+
+    lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->lfoot_contact_, robot_);
+    rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->rfoot_contact_, robot_);
+    dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
+
 
     // Initialize states: add all states to the state machine map
     state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::BALANCE, this, robot_);

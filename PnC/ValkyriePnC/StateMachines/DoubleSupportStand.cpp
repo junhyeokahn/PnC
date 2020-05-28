@@ -66,6 +66,9 @@ void DoubleSupportStand::firstVisit(){
   taf_container_->upper_body_task_->updateDesired(jpos_des.tail(taf_container_->upper_body_joint_indices_.size()),
                                                   Eigen::VectorXd::Zero(Valkyrie::n_adof),
                                                   Eigen::VectorXd::Zero(Valkyrie::n_adof));
+  // Ramp Reaction Force:
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(0.0, 0.1);
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(0.0, 0.1);
 }
 
 void DoubleSupportStand::_taskUpdate(){
@@ -88,6 +91,12 @@ void DoubleSupportStand::_taskUpdate(){
 
 void DoubleSupportStand::oneStep(){  
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
+
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
+
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->updateMaxNormalForce();
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->updateMaxNormalForce();
   _taskUpdate();
 }
 

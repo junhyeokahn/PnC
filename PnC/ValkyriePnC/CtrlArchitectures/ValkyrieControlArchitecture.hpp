@@ -49,6 +49,8 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     // Trajectory Managers
     FootSE3TrajectoryManager* rfoot_trajectory_manager_; 
     FootSE3TrajectoryManager* lfoot_trajectory_manager_; 
+    MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
+    MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
     DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
 
     // Footstep list container
