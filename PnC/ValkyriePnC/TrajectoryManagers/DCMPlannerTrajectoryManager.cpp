@@ -116,5 +116,5 @@ void DCMPlannerTrajectoryManager::populateTurnRight(const double turn_angle,
 
 
 void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node){
-
+  // void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
 }

@@ -1,9 +1,9 @@
-#include <PnC/ValkyriePnC/StateMachines/InitialTransfer.hpp>
+#include <PnC/ValkyriePnC/StateMachines/ContactTransition.hpp>
 #include <PnC/ValkyriePnC/CtrlArchitectures/ValkyrieControlArchitecture.hpp>
 
-InitialTransfer::InitialTransfer(const StateIdentifier state_identifier_in, ValkyrieControlArchitecture* _ctrl_arch, RobotSystem* _robot) : 
+ContactTransition::ContactTransition(const StateIdentifier state_identifier_in, ValkyrieControlArchitecture* _ctrl_arch, RobotSystem* _robot) : 
                StateMachine(state_identifier_in, _robot) {
-  myUtils::pretty_constructor(2, "SM: Initial Transfer");
+  myUtils::pretty_constructor(2, "SM: Contact Transition");
 
   // Set Pointer to Control Architecture
   val_ctrl_arch_ = ((ValkyrieControlArchitecture*) _ctrl_arch);
@@ -13,12 +13,12 @@ InitialTransfer::InitialTransfer(const StateIdentifier state_identifier_in, Valk
 
 }
 
-InitialTransfer::~InitialTransfer(){
+ContactTransition::~ContactTransition(){
 }
 
 
-void InitialTransfer::firstVisit(){
-  std::cout << "Initial Transfer First Visit" << std::endl;
+void ContactTransition::firstVisit(){
+  std::cout << "Contact Transition First Visit" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
   double t_walk_start = ctrl_start_time_;
@@ -49,7 +49,7 @@ void InitialTransfer::firstVisit(){
 
 }
 
-void InitialTransfer::_taskUpdate(){
+void ContactTransition::_taskUpdate(){
   // Get DCM tasks from trajectory manager
 
 
@@ -60,20 +60,20 @@ void InitialTransfer::_taskUpdate(){
   val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
 }
 
-void InitialTransfer::oneStep(){  
+void ContactTransition::oneStep(){  
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
   _taskUpdate();
 }
 
-void InitialTransfer::lastVisit(){  
+void ContactTransition::lastVisit(){  
 }
 
-bool InitialTransfer::endOfState(){  
+bool ContactTransition::endOfState(){  
   // if time exceeds transition time, switch state
   return false;
 } 
 
-StateIdentifier InitialTransfer::getNextState(){
+StateIdentifier ContactTransition::getNextState(){
   // if no more steps remaining, transition to balance. 
   // otherwise, check next step.
   // if next step is for the opposite foot, transition to left leg start
@@ -84,5 +84,5 @@ StateIdentifier InitialTransfer::getNextState(){
 }
 
 
-void InitialTransfer::initialization(const YAML::Node& node){
+void ContactTransition::initialization(const YAML::Node& node){
 }

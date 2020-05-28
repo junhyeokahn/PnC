@@ -6,6 +6,11 @@
 
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 
+namespace DCM_TRANSFER_TYPES {
+    constexpr int INITIAL = 0;
+    constexpr int MIDSTEP = 1;
+};  
+
 class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   public:
   	DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot);
@@ -62,10 +67,24 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
    Footstep right_foot_stance_;
    Footstep left_foot_stance_;
 
-   double t_initial_transfer_;    // the initial transfer time
-   double t_double_support_;	  // the time during double support
-   double t_contact_transition_;  // the transition time used to change reaction forces
-   								  // 	- defined as a ratio of t_double_support_
-   double t_swing_; 			  // the foot swing time. 
+  // // Human readable parameters 
+  // double t_additional_init_transfer_ = 0.0;        // the additional transfer time to switch the stance leg in the beginning
+  // double t_contact_transition_ = 0.45;  // the transition time used to change reaction forces and stance leg
+  // double t_swing_ = 1.0;               // the foot swing time. 
+
+  // // Getter values for the contact transition time.
+  // double t_initial_transfer_time = t_additional_transfer_ + t_ds + (1-alpha_ds_)*t_ds; // the total initial transfer time before the foot swinng
+  // double t_midstep_transfer = t_ds; // midstep transfer time before contact transition
+  // double t_final_transfer = t_ds + settle_time;
+
+  // // polynomial interpolation time during contact transition: t_transfer + t_ds + (1-alpha*t_ds).
+  // // DCM walking parameters
+  // double nominal_com_height_ = 1.0;
+  // double t_transfer_init = t_additional_init_transfer_ ; // additional transfer time offset
+  // double t_transfer_mid = (alpha_ds_-1.0)*t_ds;  // transfer time offset for midstep transfers
+  // double t_ds = t_contact_transition_; // double support polynomial transfer time
+  // double t_ss = t_swing_; // single support exponential interpolation  time
+  // double percentage_settle 0.99;//0.999; // percent to converge at the end of the trajectory
+  // double alpha_ds_ = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
 
 };

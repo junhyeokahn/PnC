@@ -1,9 +1,11 @@
 state_stand_params:
     target_pos_duration: 2.0 # duration to reach target com position
     time_to_max_normal_force: 0.1 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
-    com_pos_deviation: [0, 0, 0.05] # deviation from starting com position
+    com_pos_target: [0, 0, 1.015] # target com position from the midfoot position in world frame
 
 dcm_planner_parameters:
+    nominal_com_height: 1.015 # m from the ground    
+
     # t_init_transfer = t_transfer + t_ds + (1-alpha)*t_ds
     # t_transfer = t_init_transfer - ((2-alpha)*t_ds)
     t_transfer: 0.1 # exponential interpolation transfer time during initial transfer or same step transfer

@@ -26,7 +26,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     // Initialize states: add all states to the state machine map
     state_machines_[VALKYRIE_STATES::STAND] = new DoubleSupportStand(VALKYRIE_STATES::STAND, this, robot_);
     state_machines_[VALKYRIE_STATES::BALANCE] = new DoubleSupportBalance(VALKYRIE_STATES::BALANCE, this, robot_);
-    state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER] = new InitialTransfer(VALKYRIE_STATES::INITIAL_TRANSFER, this, robot_);    
+    state_machines_[VALKYRIE_STATES::INITIAL_TRANSFER] = new ContactTransition(VALKYRIE_STATES::INITIAL_TRANSFER, this, robot_);    
     // Set Starting State
     state_ = VALKYRIE_STATES::STAND;
     prev_state_ = state_;

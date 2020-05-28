@@ -10,12 +10,12 @@ class ValkyrieControlArchitecture;
 class ValkyrieTaskAndForceContainer;
 class ValkyrieMainController;
 
-class InitialTransfer : public StateMachine{
+class ContactTransition : public StateMachine{
   public:
-  	InitialTransfer(const StateIdentifier state_identifier_in, 
+  	ContactTransition(const StateIdentifier state_identifier_in, 
   					       ValkyrieControlArchitecture* _ctrl_arch, 
   					       RobotSystem* _robot);
-  	~InitialTransfer();
+  	~ContactTransition();
 
     void oneStep(); 
     void firstVisit(); 

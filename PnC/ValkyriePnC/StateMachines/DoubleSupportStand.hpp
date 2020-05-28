@@ -44,7 +44,7 @@ class DoubleSupportStand : public StateMachine{
     Eigen::VectorXd des_com_pos_;
     Eigen::VectorXd des_com_vel_;
     Eigen::VectorXd des_com_acc_;
-    Eigen::VectorXd com_pos_dev_;
+    Eigen::VectorXd com_pos_target_;
 
     BS_Basic<3,3,1,2,2> com_traj_;
     Eigen::Quaternion<double> ini_pelvis_quat_;

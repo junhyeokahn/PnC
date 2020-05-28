@@ -24,7 +24,7 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier state_identifier_in
   des_com_pos_ = Eigen::VectorXd::Zero(3);
   des_com_vel_ = Eigen::VectorXd::Zero(3);
   des_com_acc_ = Eigen::VectorXd::Zero(3);
-  com_pos_dev_ = Eigen::VectorXd::Zero(3);
+  com_pos_target_ = Eigen::VectorXd::Zero(3);
 }
 
 DoubleSupportStand::~DoubleSupportStand(){
@@ -40,7 +40,11 @@ void DoubleSupportStand::firstVisit(){
   // Set CoM Trajectory
   // =========================================================================
   ini_com_pos_ = robot_->getCoMPosition();
-  des_com_pos_ = ini_com_pos_ + com_pos_dev_;
+
+  Eigen::Vector3d lfoot_pos = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::leftCOP_Frame).translation();
+  Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).translation();
+  des_com_pos_ = 0.5*(lfoot_pos + rfoot_pos) + com_pos_target_;
+
   _SetBspline(ini_com_pos_,des_com_pos_);
 
   ini_pelvis_quat_ = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(ValkyrieBodyNode::pelvis).linear());
@@ -171,8 +175,8 @@ void DoubleSupportStand::_GetBsplineTrajectory(){
 void DoubleSupportStand::initialization(const YAML::Node& node){
     try {
         myUtils::readParameter(node,"target_pos_duration",end_time_);
-        myUtils::readParameter(node,"com_pos_deviation", com_pos_dev_);
         myUtils::readParameter(node, "time_to_max_normal_force", time_to_max_normal_force_);
+        myUtils::readParameter(node, "com_pos_target", com_pos_target_);
 
      } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
