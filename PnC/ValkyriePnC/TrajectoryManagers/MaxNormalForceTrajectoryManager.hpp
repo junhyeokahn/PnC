@@ -13,8 +13,8 @@
 
 class MaxNormalForceTrajectoryManager : public TrajectoryManagerBase {
   public:
-  	MaxNormalForceTrajectoryManager(ContactSpec* _contact, RobotSystem* _robot);
-  	~MaxNormalForceTrajectoryManager();	
+    MaxNormalForceTrajectoryManager(ContactSpec* _contact, RobotSystem* _robot);
+    ~MaxNormalForceTrajectoryManager(); 
     void paramInitialization(const YAML::Node& node);
 
     ContactSpec* contact_;
@@ -40,6 +40,6 @@ class MaxNormalForceTrajectoryManager : public TrajectoryManagerBase {
 
   protected:
     double local_max_normal_force_z_;
-  	double ramp_up_speed_ = 1;
-  	double ramp_down_speed_ = 1;
+    double ramp_up_speed_ = 1;
+    double ramp_down_speed_ = 1;
 };
