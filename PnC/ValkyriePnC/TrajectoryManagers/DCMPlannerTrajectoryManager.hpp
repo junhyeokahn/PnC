@@ -12,8 +12,8 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   	~DCMPlannerTrajectoryManager();	
     void paramInitialization(const YAML::Node& node);
 
-    void initialize(double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
-                    const int transfer_type_in, 
+    bool initialize(const double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
+                    const double t_transfer_in, 
                     const Eigen::Quaterniond & ori_start_in,
                     const Eigen::Vector3d & dcm_pos_start_in, 
                     const Eigen::Vector3d & dcm_vel_start_in);

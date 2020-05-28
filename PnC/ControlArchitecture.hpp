@@ -24,6 +24,7 @@ class ControlArchitecture {
     virtual void getCommand(void* _command) {};
 
     int getState() { return state_; }
+    int getPrevState() { return prev_state_; }
 
    std::map<StateIdentifier, StateMachine*> state_machines_;
    protected:
