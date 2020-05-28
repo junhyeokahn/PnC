@@ -24,9 +24,6 @@ class DoubleSupportStand : public StateMachine{
     void initialization(const YAML::Node& node); 
     StateIdentifier getNextState(); 
 
-    void setDuration(double time){end_time_ = time;}
-    void setComDeviation(const Eigen::VectorXd& dev){com_pos_dev_ = dev;}
-
     void switchStateButtonTrigger(){
       state_switch_button_trigger_ = true;
     }
@@ -38,6 +35,7 @@ class DoubleSupportStand : public StateMachine{
 
     double ctrl_start_time_;
     double end_time_;
+    double time_to_max_normal_force_;
 
     void _taskUpdate();
 

@@ -80,6 +80,10 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
     main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
     dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
+    // Trajectory Managers initialization
+    lfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
+    rfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
+
     // States Initialization:
     state_machines_[VALKYRIE_STATES::STAND]->initialization(cfg_["state_stand_params"]);
 

@@ -15,6 +15,8 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier state_identifier_in
   // Get State Provider
   sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
+  // Default time to max normal force
+  time_to_max_normal_force_ = 0.1;
 
   // To Do: Belongs to trajectory manager.
   // COM
@@ -66,9 +68,11 @@ void DoubleSupportStand::firstVisit(){
   taf_container_->upper_body_task_->updateDesired(jpos_des.tail(taf_container_->upper_body_joint_indices_.size()),
                                                   Eigen::VectorXd::Zero(Valkyrie::n_adof),
                                                   Eigen::VectorXd::Zero(Valkyrie::n_adof));
-  // Ramp Reaction Force:
-  val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(0.0, 0.1);
-  val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(0.0, 0.1);
+  // =========================================================================  
+  // Initialize Reaction Force Ramp to Max 
+  // =========================================================================
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(0.0, time_to_max_normal_force_);
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(0.0, time_to_max_normal_force_);
 }
 
 void DoubleSupportStand::_taskUpdate(){
@@ -92,9 +96,11 @@ void DoubleSupportStand::_taskUpdate(){
 void DoubleSupportStand::oneStep(){  
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
+  // Compute new maximum reaction forces
   val_ctrl_arch_->lfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
   val_ctrl_arch_->rfoot_max_normal_force_manager_->computeRampToMax(state_machine_time_);
 
+  // Update reaction forces
   val_ctrl_arch_->lfoot_max_normal_force_manager_->updateMaxNormalForce();
   val_ctrl_arch_->rfoot_max_normal_force_manager_->updateMaxNormalForce();
   _taskUpdate();
@@ -167,15 +173,11 @@ void DoubleSupportStand::_GetBsplineTrajectory(){
 
 void DoubleSupportStand::initialization(const YAML::Node& node){
     try {
-        double temp;
-        Eigen::VectorXd temp_vec;
+        myUtils::readParameter(node,"target_pos_duration",end_time_);
+        myUtils::readParameter(node,"com_pos_deviation", com_pos_dev_);
+        myUtils::readParameter(node, "time_to_max_normal_force", time_to_max_normal_force_);
 
-        myUtils::readParameter(node,"target_pos_duration",temp);
-        myUtils::readParameter(node,"com_pos_deviation",temp_vec);
-
-        setDuration(temp);
-        setComDeviation(temp_vec);
-    } catch(std::runtime_error& e) {
+     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
                   << std::endl;

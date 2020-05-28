@@ -39,6 +39,7 @@ class MaxNormalForceTrajectoryManager : public TrajectoryManagerBase {
     void updateMaxNormalForce();
 
   protected:
+    double local_max_normal_force_z_;
   	double ramp_up_speed_ = 1;
   	double ramp_down_speed_ = 1;
 };
