@@ -77,13 +77,13 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
 void ValkyrieControlArchitecture::_InitializeParameters() {
     taf_container_->paramInitialization(cfg_["task_parameters"]);
     main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
-    dcm_planner_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
     // Trajectory Managers initialization
     rfoot_trajectory_manager_->paramInitialization(cfg_["foot_trajectory_parameters"]);
     lfoot_trajectory_manager_->paramInitialization(cfg_["foot_trajectory_parameters"]);
     lfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
     rfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
+    dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
     // States Initialization:
     state_machines_[VALKYRIE_STATES::STAND]->initialization(cfg_["state_stand_params"]);

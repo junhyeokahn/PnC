@@ -3,7 +3,29 @@
 DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot) : TrajectoryManagerBase(_robot){
     myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
   dcm_planner_ = _dcm_planner;
+
+  // Initialize default parameters
+  t_additional_init_transfer_ = 0.0;        
+  t_contact_transition_ = 0.45;  
+  t_swing_ = 1.0;               
+
+  // DCM walking parameters
+  percentage_settle_ = 0.99; // percent to converge at the end of the trajectory
+  alpha_ds_ = 0.5; // value between 0.0 and 1.0 for double support DCM interpolation
+  nominal_com_height_ = 1.015; // vertical m from stance foot
+
+  convertTemporalParamsToDCMParams();
 }
+
+void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams(){
+  // Fixed transforms
+  t_ds_ = t_contact_transition_; // double support polynomial transfer time
+  t_ss_ = t_swing_; // single support exponential interpolation  time
+  // polynomial interpolation time during contact transition: t_transfer + t_ds + (1-alpha*t_ds).
+  t_transfer_init_ = t_additional_init_transfer_ ; // additional transfer time offset
+  t_transfer_mid_ = (alpha_ds_-1.0)*t_ds_;  // transfer time offset for midstep transfers
+}
+
 
 DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager(){
 }
@@ -117,4 +139,30 @@ void DCMPlannerTrajectoryManager::populateTurnRight(const double turn_angle,
 
 void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node){
   // void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
+  // Load Custom Params ----------------------------------
+  try {
+    // Load DCM Parameters
+    myUtils::readParameter(node,"nominal_com_height", nominal_com_height_);
+    myUtils::readParameter(node,"t_additional_init_transfer", t_additional_init_transfer_);
+    myUtils::readParameter(node,"t_contact_transition", t_contact_transition_);
+    myUtils::readParameter(node,"t_swing", t_swing_);
+    myUtils::readParameter(node,"percentage_settle", percentage_settle_);
+    myUtils::readParameter(node,"alpha_ds", alpha_ds_);
+  } catch(std::runtime_error& e) {
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+    exit(0);
+  }
+  // Convert temporal parameters to DCM parameters
+  convertTemporalParamsToDCMParams();
+
+  // Set DCM parameters
+  dcm_planner_->t_transfer = t_transfer_init_; // Time varying after every step
+  dcm_planner_->t_ds = t_ds_;
+  dcm_planner_->t_ss = t_ss_;
+  dcm_planner_->percentage_settle = percentage_settle_;
+  dcm_planner_->alpha_ds = alpha_ds_;
 }
+
+
