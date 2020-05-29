@@ -127,6 +127,11 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in,
   dcm_planner_->setCoMHeight(nominal_com_height_);
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
+  
+  std::cout << "ori_start_in:" << ori_start_in.w() << ", "
+                               << ori_start_in.x() << ", "
+                               << ori_start_in.y() << ", "
+                               << ori_start_in.z() << ", " << std::endl;
   // Set transfer time 
   if (transfer_type_in == DCM_TRANSFER_TYPES::INITIAL){
     dcm_planner_->t_transfer = t_transfer_init_;
@@ -168,8 +173,9 @@ void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time){
   // myUtils::pretty_print(des_com_pos, std::cout, "des_com_pos");
   // myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
 
+
   com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
-  pelvis_ori_task_->updateDesired(des_quat_vec, Eigen::VectorXd::Zero(3),Eigen::VectorXd::Zero(3));
+  pelvis_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
 
 
@@ -192,21 +198,6 @@ bool DCMPlannerTrajectoryManager::noRemainingSteps(){
     return false;
   }
 }
-
-
-
-// void get_ref_com(const double t, Eigen::Vector3d & com_out);
-// void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
-// void get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out);
-// void get_ref_reaction_force(const double t, Eigen::Vector3d & f_out);
-
-// // Global reference quat, ang vel and ang acc
-// void get_ref_ori_ang_vel_acc(const double t, Eigen::Quaterniond & quat_out,
-//                                              Eigen::Vector3d & ang_vel_out,
-//                                              Eigen::Vector3d & ang_acc_out);
-
-
-
 
 // Footstep sequence primitives -----------------------------------------------------------
 // Creates footstep in place
@@ -234,6 +225,19 @@ void DCMPlannerTrajectoryManager::populateWalkForward(const int num_steps,
                             const double nominal_step_width_distance,
                             const double midstep_distance_multiplier){
 
+  updateStartingStance(); // Update the starting foot locations of the robot
+
+  Footstep left_footstep; left_footstep.setLeftSide();
+  Footstep right_footstep; right_footstep.setRightSide();
+
+  // // left_foot_stance_
+  // // right_foot_stance_
+  // int robot_side = RIGHT_ROBOT_SIDE;
+  // for(int i = 0; i < num_steps){
+  //   if robot_side == 
+  // }
+
+  // Add additional step forward to square the feet.
 }
 
 // Populates the input footstep list with a predefined footstep list to turn left

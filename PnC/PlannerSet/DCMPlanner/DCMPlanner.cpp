@@ -205,9 +205,15 @@ void DCMPlanner::initialize_footsteps_rvrp(const std::vector<Footstep> & input_f
                                const Footstep & left_footstance, const Footstep & right_footstance, 
                                const Eigen::Vector3d & initial_dcm, const Eigen::Vector3d & initial_dcm_vel){
 
+
+
   if (input_footstep_list.size() == 0){ 
     return;
   }
+
+  // Update initial footstance
+  initial_leftfoot_stance = left_footstance;
+  initial_rightfoot_stance = right_footstance;
 
   // Set initial DCM velocity boundary condition
   ini_dcm_vel = initial_dcm_vel;
@@ -835,6 +841,8 @@ void DCMPlanner::get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out){
 }
 
 void DCMPlanner::compute_reference_pelvis_ori(){
+  // std::cout << "[DCMPlanner] compute_reference_pelvis_ori()" << std::endl;
+
   pelvis_ori_quat_curves.clear();
 
   Footstep prev_left_stance = initial_leftfoot_stance;
