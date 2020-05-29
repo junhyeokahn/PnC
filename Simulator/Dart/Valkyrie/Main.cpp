@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Friction & Restitution Coefficient
     // =========================================================================
-    double friction(0.9);
+    double friction(1.0);
     double restit(0.0);
     ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
     robot->getBodyNode("rightFoot")->setFrictionCoeff(friction);
