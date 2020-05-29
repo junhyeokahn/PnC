@@ -46,58 +46,19 @@ void ValkyrieWorldNode::customPreStep() {
     GetContactSwitchData_(sensor_data_->rfoot_contact,
                           sensor_data_->lfoot_contact);
 
-
-    // Walking Interface Example
-    // static bool b_first_cmd(true);
-    // if (t_ > 1. && b_first_cmd) {
-    //     std::cout << "[[first command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0., 5);
-    //     b_first_cmd = false;
-    // }
-    // static bool b_second_cmd(true);
-    // if (t_ > 11. && b_second_cmd) {
-    //     std::cout << "[[second command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, 0.15, 5);
-    //     b_second_cmd = false;
-    // }
-    // static bool b_third_cmd(true);
-    // if (t_ > 21. && b_third_cmd) {
-    //     std::cout << "[[third command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0.15, 0.27, 0.27, -0.15, 5);
-    //     b_third_cmd = false;
-    // }
-    // static bool b_fourth_cmd(true);
-    // if (t_ > 31. && b_fourth_cmd) {
-    //     std::cout << "[[fourth command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0., 0.27, 0.27, 0.15, 5);
-    //     b_fourth_cmd = false;
-    // }
-    // static bool b_fifth_cmd(true);
-    // if (t_ > 41. && b_fifth_cmd) {
-    //     std::cout << "[[fifth command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(-0.1, 0.27, 0.27, 0., 5);
-    //     b_fifth_cmd = false;
-    // }
-    // static bool b_sixth_cmd(true);
-    // if (t_ > 55. && b_sixth_cmd) {
-    //     std::cout << "[[sixth command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0., 0.27, 0.2, 0., 7);
-    //     b_sixth_cmd = false;
-    // }
-    // static bool b_seventh_cmd(true);
-    // if (t_ > 70. && b_seventh_cmd) {
-    //     std::cout << "[[seventh command]]" << std::endl;
-    //     ((ValkyrieInterface*)interface_)->Walk(0., 0.2, 0.27, 0., 7);
-    //     b_seventh_cmd = false;
-    // }
-
     // Check for user button presses
-    if (b_button_p){
-        interface_->interrupt_->b_interrupt_button_p = true;       
-    }
-    if (b_button_r){
-        interface_->interrupt_->b_interrupt_button_r = true;
-    }
+    if (b_button_p){ interface_->interrupt_->b_interrupt_button_p = true;}
+    if (b_button_r){ interface_->interrupt_->b_interrupt_button_r = true;}
+    if (b_button_w){ interface_->interrupt_->b_interrupt_button_w = true;}
+    if (b_button_a){ interface_->interrupt_->b_interrupt_button_a = true;}
+    if (b_button_s){ interface_->interrupt_->b_interrupt_button_s = true;}
+    if (b_button_d){ interface_->interrupt_->b_interrupt_button_d = true;}
+    if (b_button_q){ interface_->interrupt_->b_interrupt_button_q = true;}
+    if (b_button_e){ interface_->interrupt_->b_interrupt_button_e = true;}
+    if (b_button_x){ interface_->interrupt_->b_interrupt_button_x = true;}
+    if (b_button_j){ interface_->interrupt_->b_interrupt_button_j = true;}
+    if (b_button_k){ interface_->interrupt_->b_interrupt_button_k = true;}
+
 
     interface_->getCommand(sensor_data_, command_);
 

@@ -46,6 +46,33 @@ class OneStepProgress : public osgGA::GUIEventHandler {
             if (ea.getKey() == 'r'){
                 worldnode_->enableButtonRFlag();
             }
+            if (ea.getKey() == 'w'){  
+                    worldnode_->enableButtonWFlag();
+            }
+            if (ea.getKey() == 'a'){  
+                    worldnode_->enableButtonAFlag();
+            }
+            if (ea.getKey() == 's'){  
+                    worldnode_->enableButtonSFlag();
+            }
+            if (ea.getKey() == 'd'){  
+                    worldnode_->enableButtonDFlag();
+            }
+            if (ea.getKey() == 'q'){  
+                    worldnode_->enableButtonQFlag();
+            }
+            if (ea.getKey() == 'e'){  
+                    worldnode_->enableButtonEFlag();
+            }
+            if (ea.getKey() == 'x'){  
+                    worldnode_->enableButtonXFlag();
+            }
+            if (ea.getKey() == 'j'){  
+                    worldnode_->enableButtonJFlag();
+            }
+            if (ea.getKey() == 'k'){  
+                    worldnode_->enableButtonKFlag();
+            }
 
             if (ea.getKey() == 'f') {
                 int numStepProgress(50);

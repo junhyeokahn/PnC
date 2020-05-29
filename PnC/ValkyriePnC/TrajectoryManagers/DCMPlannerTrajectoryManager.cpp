@@ -233,19 +233,19 @@ void DCMPlannerTrajectoryManager::walkInPlace(){
 }
 void DCMPlannerTrajectoryManager::walkForward(){
   resetIndexAndClearFootsteps();
-  populateWalkForward(4, nominal_forward_step_);
+  populateWalkForward(2, nominal_forward_step_);
   alternateLeg();
 }
 void DCMPlannerTrajectoryManager::walkBackward(){
   resetIndexAndClearFootsteps();
-  populateWalkForward(4, nominal_backward_step_);
+  populateWalkForward(2, nominal_backward_step_);
   alternateLeg();
 }
-void DCMPlannerTrajectoryManager::StrafeLeft(){
+void DCMPlannerTrajectoryManager::strafeLeft(){
   resetIndexAndClearFootsteps();
   populateStrafe(nominal_strafe_distance_, 1);
 }
-void DCMPlannerTrajectoryManager::StrafeRight(){
+void DCMPlannerTrajectoryManager::strafeRight(){
   resetIndexAndClearFootsteps();
   populateStrafe(-nominal_strafe_distance_, 1);
 }

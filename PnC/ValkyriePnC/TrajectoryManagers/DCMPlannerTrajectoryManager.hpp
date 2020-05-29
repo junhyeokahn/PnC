@@ -29,8 +29,8 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
     void walkInPlace();
     void walkForward();
     void walkBackward();
-    void StrafeLeft();
-    void StrafeRight();
+    void strafeLeft();
+    void strafeRight();
     void turnLeft();
     void turnRight();
     void resetIndexAndClearFootsteps();
