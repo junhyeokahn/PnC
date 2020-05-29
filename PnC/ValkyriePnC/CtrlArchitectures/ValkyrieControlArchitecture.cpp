@@ -62,6 +62,8 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {
+    dcm_trajectory_manger_->setCoMandPelvisTasks(taf_container_->com_task_,
+                                                 taf_container_->pelvis_ori_task_);
 }
 
 void ValkyrieControlArchitecture::getCommand(void* _command) {

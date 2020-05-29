@@ -6,6 +6,8 @@
 
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 
+#include <PnC/ValkyriePnC/TaskSet/TaskSet.hpp>
+
 namespace DCM_TRANSFER_TYPES {
     constexpr int INITIAL = 0;
     constexpr int MIDSTEP = 1;
@@ -103,6 +105,11 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   
   // checks whether or not there are emaining footsteps.
   bool noRemainingSteps();
+
+  void setCoMandPelvisTasks(Task* _com_task, Task* _pelvis_ori_task_);
+  void updateDCMTasksDesired(double current_time);
+  Task* com_task_;
+  Task* pelvis_ori_task_;
 
 protected:
     void convertTemporalParamsToDCMParams();

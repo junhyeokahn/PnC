@@ -70,9 +70,9 @@ void ContactTransition::_taskUpdate(){
   val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
 
   // =========================================================================
-  // Get DCM tasks from trajectory manager 
+  // Set DCM tasks from trajectory manager 
   // =========================================================================
-
+  val_ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
   // Set Foot Motion Tasks

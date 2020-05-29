@@ -43,6 +43,11 @@ void SwingControl::_taskUpdate(){
   // Set Foot Motion Tasks
   // =========================================================================
 
+  // =========================================================================
+  // Set DCM tasks from trajectory manager 
+  // =========================================================================
+  val_ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
+
   // Update Swing Foot Trajectories.
   val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();

@@ -23,6 +23,12 @@ DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planne
 DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager(){
 }
 
+void DCMPlannerTrajectoryManager::setCoMandPelvisTasks(Task* _com_task, Task* _pelvis_ori_task_){
+  com_task_ = _com_task;
+  pelvis_ori_task_ = _pelvis_ori_task_;
+}
+
+
 void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams(){
   // Fixed transforms
   t_ds_ = t_contact_transition_; // double support polynomial transfer time
@@ -106,6 +112,10 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in,
   right_foot_start_ = right_foot_stance_;
   updatePreview(4);
 
+  // std::cout << "[DCMPlannerTrajectoryManager]" << std::endl;
+  // std::cout << "  current_footstep_index = " << current_footstep_index_ << std::endl;
+  // std::cout << "  preview size = " << footstep_preview_list_.size() << std::endl;
+
   // If preview list is empty, don't update.
   if (footstep_preview_list_.size() == 0){
     std::cout << "[DCMPlannerTrajectoryManager] ERROR. Footstep preview list is empty." << std::endl;
@@ -114,6 +124,7 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in,
 
     // Set DCM reference
   dcm_planner_->setRobotMass(robot_->getRobotMass());
+  dcm_planner_->setCoMHeight(nominal_com_height_);
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
   // Set transfer time 
@@ -130,6 +141,35 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in,
 
   // Initialization successful
   return true;
+}
+
+void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time){
+  // Initialize containers
+  Eigen::Vector3d des_com_pos, des_com_vel, des_com_acc; 
+  des_com_pos.setZero(); des_com_vel.setZero(); des_com_acc.setZero();
+
+  Eigen::Quaterniond des_quat; des_quat.setIdentity(); 
+  Eigen::Vector3d des_ang_vel, des_ang_acc;
+  des_ang_vel.setZero(); des_ang_acc.setZero();
+
+  dcm_planner_->get_ref_com(current_time, des_com_pos);
+  dcm_planner_->get_ref_com_vel(current_time, des_com_vel);
+  dcm_planner_->get_ref_ori_ang_vel_acc(current_time, des_quat,
+                                                      des_ang_vel,
+                                                      des_ang_acc);
+
+  Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
+  des_quat_vec << des_quat.w(),
+                  des_quat.x(), 
+                  des_quat.y(),
+                  des_quat.z();
+
+  std::cout << "current_time: " << current_time << std::endl;
+  myUtils::pretty_print(des_com_pos, std::cout, "des_com_pos");
+  myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
+
+  com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
+  pelvis_ori_task_->updateDesired(des_quat_vec, Eigen::VectorXd::Zero(3),Eigen::VectorXd::Zero(3));
 }
 
 
@@ -152,6 +192,21 @@ bool DCMPlannerTrajectoryManager::noRemainingSteps(){
     return false;
   }
 }
+
+
+
+// void get_ref_com(const double t, Eigen::Vector3d & com_out);
+// void get_ref_com_vel(const double t, Eigen::Vector3d & com_vel_out);
+// void get_ref_r_vrp(const double t, Eigen::Vector3d & r_vrvp_out);
+// void get_ref_reaction_force(const double t, Eigen::Vector3d & f_out);
+
+// // Global reference quat, ang vel and ang acc
+// void get_ref_ori_ang_vel_acc(const double t, Eigen::Quaterniond & quat_out,
+//                                              Eigen::Vector3d & ang_vel_out,
+//                                              Eigen::Vector3d & ang_acc_out);
+
+
+
 
 // Footstep sequence primitives -----------------------------------------------------------
 // Creates footstep in place

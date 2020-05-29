@@ -45,9 +45,9 @@ void ValkyrieTaskAndForceContainer::_InitializeTasks(){
 }
 void ValkyrieTaskAndForceContainer::_InitializeContacts(){
     rfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.7);
+        robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.9/sqrt(2.0));
     lfoot_contact_ = new SurfaceContactSpec(
-        robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.7);
+        robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.9/sqrt(2.0));
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim(); 
     rfoot_max_z_ = 1500;
     lfoot_max_z_ = 1500;

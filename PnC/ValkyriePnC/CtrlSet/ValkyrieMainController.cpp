@@ -106,6 +106,10 @@ void ValkyrieMainController::getCommand(void* _cmd){
                                                   sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof),
                                                   des_jvel_,
                                                   des_jpos_);
+
+    // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
+    // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+
     // Set Command
     for (int i(0); i < Valkyrie::n_adof; ++i) {
         ((ValkyrieCommand*)_cmd)->jtrq[i] = tau_cmd_[i];

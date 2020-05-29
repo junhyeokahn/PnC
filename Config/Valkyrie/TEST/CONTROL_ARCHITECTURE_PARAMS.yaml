@@ -35,7 +35,7 @@ task_parameters:
 
     # Task hierarchy weights
     w_task_com: 5.0
-    w_task_ang_mom: 3.0
+    w_task_ang_mom: 1e-6 #3.0
     w_task_pelvis: 5.0
     w_task_upper_body: 2.0
     w_task_rfoot: 20.0

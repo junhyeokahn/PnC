@@ -47,6 +47,11 @@ void ContactTransitionEnd::_taskUpdate(){
   // }
 
   // =========================================================================
+  // Set DCM tasks from trajectory manager 
+  // =========================================================================
+  val_ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
+
+  // =========================================================================
   // Set Foot Motion Tasks
   // =========================================================================
   val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
