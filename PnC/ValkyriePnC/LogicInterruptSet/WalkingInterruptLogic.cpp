@@ -91,10 +91,13 @@ void WalkingInterruptLogic::processInterrupts(){
 
   if (b_interrupt_button_j){
     std::cout << "[Walking Interrupt Logic] button J pressed" << std::endl;
+    val_ctrl_arch_->upper_body_joint_trajectory_manager_->initializeLowerRightArmNow();
   }
 
   if (b_interrupt_button_k){
     std::cout << "[Walking Interrupt Logic] button K pressed" << std::endl;
+    val_ctrl_arch_->upper_body_joint_trajectory_manager_->initializeRaiseRightArmNow();
+
   }
 
   resetFlags();

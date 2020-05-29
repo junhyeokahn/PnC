@@ -18,7 +18,7 @@ dcm_planner_parameters:
 
     # Primitive Walking parameters
     nominal_footwidth: 0.27 # meters. Distance between feet
-    nominal_forward_step: 0.25 # meters. Subsequent forward steps are 2x this value.
+    nominal_forward_step: 0.275 # meters. Subsequent forward steps are 2x this value.
     nominal_backward_step: -0.25 # meters. Subsequent backward steps are 2x this value.
     nominal_turn_radians: 0.78539 # M_PI/4.0 
     nominal_strafe_distance: 0.125 # meters
@@ -62,8 +62,8 @@ task_parameters:
     kp_pelvis: [50, 50, 50]
     kd_pelvis: [5, 5, 5]
     # Upper Body Joints (gains for all the upper-body joints)
-    kp_upper_body_joint: 50.0 
-    kd_upper_body_joint: 5.0 
+    kp_upper_body_joint: 100.0 
+    kd_upper_body_joint: 20.0 
     # Foot Linear and orientation gains
     kp_foot: [400, 400, 400]
     kd_foot: [40, 40, 40]

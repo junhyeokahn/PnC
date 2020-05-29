@@ -21,6 +21,8 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
                                                              taf_container_->lfoot_center_ori_task_, robot_);
     rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->rfoot_contact_, robot_);
     lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->lfoot_contact_, robot_);
+    upper_body_joint_trajectory_manager_ = new UpperBodyJointTrajectoryManager(taf_container_->upper_body_task_, robot_);
+
     dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
 
     // Initialize states: add all states to the state machine map
@@ -77,8 +79,12 @@ void ValkyrieControlArchitecture::getCommand(void* _command) {
         state_machines_[state_]->firstVisit();
         b_state_first_visit_ = false;
     }
-    // Get Commands
+
+    // Update State Machine
     state_machines_[state_]->oneStep();
+    // Update Desired of state Independent trajectories
+    upper_body_joint_trajectory_manager_->updateDesired();
+    // Get Wholebody control commands
     main_controller_->getCommand(_command);
 
     // Check for State Transitions
