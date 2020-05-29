@@ -5,9 +5,6 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier state_identifier_in
                StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Double Support Stand");
 
-  // Set Trigger to false
-  state_switch_button_trigger_ = false;
-
   // Set Pointer to Control Architecture
   val_ctrl_arch_ = ((ValkyrieControlArchitecture*) _ctrl_arch);
   taf_container_ = val_ctrl_arch_->taf_container_;
@@ -32,8 +29,7 @@ DoubleSupportStand::~DoubleSupportStand(){
 
 
 void DoubleSupportStand::firstVisit(){
-  // Reset Flags
-  state_switch_button_trigger_ = false;
+  std::cout << "Start [Double Support Stand]" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
   // =========================================================================

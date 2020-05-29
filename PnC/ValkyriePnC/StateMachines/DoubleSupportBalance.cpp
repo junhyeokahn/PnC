@@ -23,8 +23,7 @@ DoubleSupportBalance::~DoubleSupportBalance(){
 void DoubleSupportBalance::firstVisit(){
   // Reset Flags
   state_switch_button_trigger_ = false;
-
-  std::cout << "Double Support Balance First Visit" << std::endl;
+  std::cout << "Start [Double Support Balance]" << std::endl;
   ctrl_start_time_ = sp_->curr_time;
 }
 

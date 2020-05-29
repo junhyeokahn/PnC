@@ -10,12 +10,13 @@ class ValkyrieControlArchitecture;
 class ValkyrieTaskAndForceContainer;
 class ValkyrieMainController;
 
-class DoubleSupportStand : public StateMachine{
+class ContactTransitionEnd : public StateMachine{
   public:
-  	DoubleSupportStand(const StateIdentifier state_identifier_in, 
-  					   ValkyrieControlArchitecture* _ctrl_arch, 
-  					   RobotSystem* _robot);
-  	~DoubleSupportStand();
+    ContactTransitionEnd(const StateIdentifier state_identifier_in, 
+                   const int _leg_side,
+                   ValkyrieControlArchitecture* _ctrl_arch, 
+                   RobotSystem* _robot);
+    ~ContactTransitionEnd();
 
     void oneStep(); 
     void firstVisit(); 
@@ -29,24 +30,11 @@ class DoubleSupportStand : public StateMachine{
     ValkyrieControlArchitecture* val_ctrl_arch_;
     ValkyrieTaskAndForceContainer* taf_container_;
 
+    int leg_side_;
+    bool final_step_;
+
     double ctrl_start_time_;
     double end_time_;
-    double time_to_max_normal_force_;
 
     void _taskUpdate();
-
-    // // Stand Trajectory
-    Eigen::VectorXd ini_com_pos_;
-    Eigen::VectorXd des_com_pos_;
-    Eigen::VectorXd des_com_vel_;
-    Eigen::VectorXd des_com_acc_;
-    Eigen::VectorXd com_pos_target_;
-
-    BS_Basic<3,3,1,2,2> com_traj_;
-    Eigen::Quaternion<double> ini_pelvis_quat_;
-
-    void _SetBspline(const Eigen::VectorXd st_pos,
-                     const Eigen::VectorXd des_pos);
-    void _GetBsplineTrajectory();
-
 };

@@ -7,8 +7,6 @@ ContactTransition::ContactTransition(const StateIdentifier state_identifier_in,
                StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Contact Transition");
 
-  final_step_ = false;
-
   // Set Pointer to Control Architecture
   val_ctrl_arch_ = ((ValkyrieControlArchitecture*) _ctrl_arch);
   taf_container_ = val_ctrl_arch_->taf_container_;
@@ -24,7 +22,7 @@ ContactTransition::~ContactTransition(){
 
 
 void ContactTransition::firstVisit(){
-  std::cout << "Contact Transition First Visit" << std::endl;
+  std::cout << "Start [Contact Transition] Leg Side: " <<  leg_side_ << std::endl;
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 
@@ -34,10 +32,11 @@ void ContactTransition::firstVisit(){
 
   // Check if it's the last footstep
   if (val_ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()){
+    std::cout << "Final Step. Settling..." << std::endl;
     // If this is the last footstep, then we will just wait until we settle.
     end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getFinalContactTransferTime();
-    final_step_ = true;  // set flag.  
   }else{
+    std::cout << "Not the last step. Compute DCM trajectory" << std::endl;
     // This is not the last footstep. We need to recompute the remaining DCM trajectories.
     // Set transfer type to midstep
     int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;
@@ -88,29 +87,31 @@ void ContactTransition::oneStep(){
 }
 
 void ContactTransition::lastVisit(){  
-  // reset flags
-  final_step_ = false;
 }
 
 bool ContactTransition::endOfState(){  
   // if time exceeds transition time, switch state
-  return false;
+  if (state_machine_time_ >= end_time_){    
+    return true;
+  }else{
+    return false;    
+  }
 } 
 
 StateIdentifier ContactTransition::getNextState(){
-  // if no more steps remaining, transition to balance. 
-  // otherwise, check next step.
-  // if next step is for the opposite foot, transition to left leg start
-  // if next step is for the same foot, transition to right leg start
-
-  // if leg_side_ is RIGHT -> transition to right foot end contact transition
-  // if leg_side_ is LEFT -> transition to left foot enc contact transition
-
-  // if last footstep or pause trajectory is activated -> transition to 
-  // if pause trajectory is hit, transition to balance 
-
+  if (val_ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()){ // or pause walking
+    // Return to balancing
+    return VALKYRIE_STATES::BALANCE;
+  }else{
+    if (leg_side_ == LEFT_ROBOT_SIDE){
+      // To left leg contact transition end
+      return VALKYRIE_STATES::LL_CONTACT_TRANSITION_END;
+    }else if (leg_side_ == RIGHT_ROBOT_SIDE){
+      // To right leg contact transition end
+      return VALKYRIE_STATES::RL_CONTACT_TRANSITION_END;
+    }    
+  }
 }
-
 
 void ContactTransition::initialization(const YAML::Node& node){
 }
