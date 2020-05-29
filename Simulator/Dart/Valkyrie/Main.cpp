@@ -175,7 +175,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     q[0] = 0.5;
     q[1] = 0.5;
     q[3] = 3.14159/6.0;
-    // q[rightHipYaw] = -3.14159/12.0;
+    q[rightHipYaw] = -3.14159/12.0;
 
     q[rightShoulderPitch] = 0.2;
     q[rightShoulderRoll] = 1.1;

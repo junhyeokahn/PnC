@@ -82,6 +82,8 @@ void DCMPlannerTrajectoryManager::updateStartingStance(){
     Eigen::Vector3d rfoot_pos = robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).translation();
     Eigen::Quaterniond rfoot_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::rightCOP_Frame).linear());
     right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, RIGHT_ROBOT_SIDE);
+
+    mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_, mid_foot_stance_);
 }
 
 // Updates the local footstep list (ie: footstep preview) for trajectory generation:
@@ -204,14 +206,24 @@ bool DCMPlannerTrajectoryManager::noRemainingSteps(){
 void DCMPlannerTrajectoryManager::populateStepInPlace(const int num_steps, const int robot_side_first){
   updateStartingStance(); // Update the starting foot locations of the robot
 
+  double nominal_midfoot_distance = 0.27;
+
+  Footstep left_footstep = left_foot_stance_;
+  Footstep right_footstep = right_foot_stance_;
+  Footstep mid_footstep = mid_foot_stance_; 
+
   int robot_side = robot_side_first;
   for(int i = 0; i < num_steps; i++){
-    // Add in place step and switch sides
+    // Square feet and switch sides
     if (robot_side == LEFT_ROBOT_SIDE){
-      footstep_list_.push_back(left_foot_stance_);
+      left_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0),
+                              mid_footstep.orientation);
+      footstep_list_.push_back(left_footstep);
       robot_side = RIGHT_ROBOT_SIDE;
     }else{
-      footstep_list_.push_back(right_foot_stance_);
+      right_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0),
+                              mid_footstep.orientation);
+      footstep_list_.push_back(right_footstep);
       robot_side = LEFT_ROBOT_SIDE;     
     }   
   }
@@ -227,8 +239,9 @@ void DCMPlannerTrajectoryManager::populateWalkForward(const int num_steps,
 
   updateStartingStance(); // Update the starting foot locations of the robot
 
-  Footstep left_footstep; left_footstep.setLeftSide();
-  Footstep right_footstep; right_footstep.setRightSide();
+  Footstep left_footstep = left_foot_stance_;
+  Footstep right_footstep = right_foot_stance_;
+  Footstep mid_footstep = mid_foot_stance_; 
 
   // // left_foot_stance_
   // // right_foot_stance_

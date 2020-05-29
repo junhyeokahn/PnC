@@ -70,6 +70,7 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
 
    Footstep right_foot_stance_;
    Footstep left_foot_stance_;
+   Footstep mid_foot_stance_;
 
   // Human readable parameters 
   double t_additional_init_transfer_;        // the additional transfer time to switch the stance leg in the beginning
