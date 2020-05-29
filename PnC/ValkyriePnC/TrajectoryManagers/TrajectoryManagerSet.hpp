@@ -2,4 +2,4 @@
 #include <PnC/ValkyriePnC/TrajectoryManagers/DCMPlannerTrajectoryManager.hpp>
 #include <PnC/ValkyriePnC/TrajectoryManagers/MaxNormalForceTrajectoryManager.hpp>
 #include <PnC/ValkyriePnC/TrajectoryManagers/UpperBodyJointTrajectoryManager.hpp>
-
+#include <PnC/ValkyriePnC/TrajectoryManagers/TaskGainScheduleTrajectoryManager.hpp>

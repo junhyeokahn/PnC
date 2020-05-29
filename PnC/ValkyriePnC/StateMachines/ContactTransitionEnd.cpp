@@ -27,23 +27,33 @@ void ContactTransitionEnd::firstVisit(){
   ctrl_start_time_ = sp_->curr_time;
 
   // Ramp Down Reaction force for the upcoming swing foot
+  // Ramp to minimum the foot task hierarchy weight in prep for swing
   end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
   if (leg_side_ == LEFT_ROBOT_SIDE){
     val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToZero(0.0, end_time_);        
+    val_ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->initializeRampToMin(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+    val_ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->initializeRampToMin(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
   }else{
     val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToZero(0.0, end_time_);        
+    val_ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->initializeRampToMin(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+    val_ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->initializeRampToMin(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
   }
 
 }
 
 void ContactTransitionEnd::_taskUpdate(){
   // =========================================================================
-  // Compute and update new maximum reaction forces
+  // - Compute and update new maximum reaction forces
+  // - Ramp to minimum the foot task hierarchy weight in prep for swing
   // =========================================================================
   if (leg_side_ == LEFT_ROBOT_SIDE){
     val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
+    val_ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->updateRampToMinDesired(state_machine_time_);
+    val_ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->updateRampToMinDesired(state_machine_time_);
   }else{
     val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
+    val_ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->updateRampToMinDesired(state_machine_time_);
+    val_ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->updateRampToMinDesired(state_machine_time_);
   }
 
   // =========================================================================

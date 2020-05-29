@@ -107,8 +107,8 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     w_task_ang_mom_ = 3.0;
     w_task_pelvis_ = 5.0;
     w_task_upper_body_ = 2.0;
-    w_task_rfoot_ = 20.0;
-    w_task_lfoot_ = 20.0;
+    w_task_foot_contact_ = 20.0;
+    w_task_foot_swing_ = 20.0;
 
     // Try Loading Custom Parmams ----------------------------------
     try {
@@ -139,8 +139,8 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
         myUtils::readParameter(node, "w_task_ang_mom", w_task_ang_mom_);        
         myUtils::readParameter(node, "w_task_pelvis", w_task_pelvis_);        
         myUtils::readParameter(node, "w_task_upper_body", w_task_upper_body_); 
-        myUtils::readParameter(node, "w_task_rfoot", w_task_rfoot_);        
-        myUtils::readParameter(node, "w_task_lfoot", w_task_lfoot_);               
+        myUtils::readParameter(node, "w_task_foot_contact", w_task_foot_contact_);        
+        myUtils::readParameter(node, "w_task_foot_swing", w_task_foot_swing_);               
 
     } catch(std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -165,10 +165,10 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     ang_momentum_task_->setHierarchy(w_task_ang_mom_);
     pelvis_ori_task_->setHierarchy(w_task_pelvis_);
     upper_body_task_->setHierarchy(w_task_upper_body_);
-    rfoot_center_pos_task_->setHierarchy(w_task_rfoot_);
-    rfoot_center_ori_task_->setHierarchy(w_task_rfoot_);
-    lfoot_center_pos_task_->setHierarchy(w_task_lfoot_);
-    lfoot_center_ori_task_->setHierarchy(w_task_lfoot_);    
+    rfoot_center_pos_task_->setHierarchy(w_task_foot_contact_);
+    rfoot_center_ori_task_->setHierarchy(w_task_foot_contact_);
+    lfoot_center_pos_task_->setHierarchy(w_task_foot_contact_);
+    lfoot_center_ori_task_->setHierarchy(w_task_foot_contact_);    
 
     // Set Maximum Forces
     ((SurfaceContactSpec*)rfoot_contact_)->setMaxFz(rfoot_max_z_);    

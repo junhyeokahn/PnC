@@ -57,6 +57,12 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
     MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
     UpperBodyJointTrajectoryManager* upper_body_joint_trajectory_manager_;
+    TaskGainScheduleTrajectoryManager* lfoot_contact_pos_hierarchy_manager_;
+    TaskGainScheduleTrajectoryManager* lfoot_contact_ori_hierarchy_manager_;
+    TaskGainScheduleTrajectoryManager* rfoot_contact_pos_hierarchy_manager_;
+    TaskGainScheduleTrajectoryManager* rfoot_contact_ori_hierarchy_manager_;
     DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
+
+
 
 };

@@ -54,8 +54,8 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
       double w_task_ang_mom_;
       double w_task_upper_body_;
       double w_task_pelvis_;
-      double w_task_rfoot_;
-      double w_task_lfoot_;
+      double w_task_foot_contact_;
+      double w_task_foot_swing_;
 
       // Task Gains
       Eigen::VectorXd kp_com_;

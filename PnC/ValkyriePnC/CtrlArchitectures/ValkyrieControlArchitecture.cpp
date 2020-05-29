@@ -23,6 +23,11 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot) : 
     lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(taf_container_->lfoot_contact_, robot_);
     upper_body_joint_trajectory_manager_ = new UpperBodyJointTrajectoryManager(taf_container_->upper_body_task_, robot_);
 
+    rfoot_contact_pos_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(taf_container_->rfoot_center_pos_task_, robot_);
+    rfoot_contact_ori_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(taf_container_->rfoot_center_ori_task_, robot_);
+    lfoot_contact_pos_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(taf_container_->lfoot_center_pos_task_, robot_);
+    lfoot_contact_ori_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(taf_container_->lfoot_center_ori_task_, robot_);
+
     dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(dcm_planner_, robot_);
 
     // Initialize states: add all states to the state machine map
@@ -55,6 +60,11 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete rfoot_max_normal_force_manager_;
     delete lfoot_max_normal_force_manager_;
     delete dcm_trajectory_manger_;
+
+    delete rfoot_contact_pos_hierarchy_manager_;
+    delete rfoot_contact_ori_hierarchy_manager_;
+    delete lfoot_contact_pos_hierarchy_manager_;
+    delete lfoot_contact_ori_hierarchy_manager_;
 
     // Delete the state machines
     delete state_machines_[VALKYRIE_STATES::STAND];
@@ -105,6 +115,12 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
     lfoot_trajectory_manager_->paramInitialization(cfg_["foot_trajectory_parameters"]);
     lfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
     rfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);   
+
+    rfoot_contact_pos_hierarchy_manager_->paramInitialization(cfg_["task_parameters"]);   
+    rfoot_contact_ori_hierarchy_manager_->paramInitialization(cfg_["task_parameters"]);   
+    lfoot_contact_pos_hierarchy_manager_->paramInitialization(cfg_["task_parameters"]);   
+    lfoot_contact_ori_hierarchy_manager_->paramInitialization(cfg_["task_parameters"]);   
+
     dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
     // States Initialization:

@@ -30,6 +30,12 @@ void ContactTransition::firstVisit(){
   val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
   val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
 
+  // Ramp to max the contact hierarchy weight
+  val_ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  val_ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  val_ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  val_ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+
   // Check if it's the last footstep
   if (val_ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()){
     std::cout << "Final Step. Settling..." << std::endl;
@@ -68,6 +74,14 @@ void ContactTransition::_taskUpdate(){
   // =========================================================================
   val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
   val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
+
+  // =========================================================================
+  // Ramp task hierarchy weights
+  // =========================================================================
+  val_ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
+  val_ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
+  val_ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
+  val_ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
 
   // =========================================================================
   // Set DCM tasks from trajectory manager 
