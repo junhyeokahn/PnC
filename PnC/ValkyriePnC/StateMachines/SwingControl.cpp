@@ -28,13 +28,11 @@ SwingControl::~SwingControl(){
 
 
 void SwingControl::firstVisit(){
-  std::cout << "Start [Swing Control] Leg Side: " <<  leg_side_ << std::endl;
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 
   // Set swing foot trajectory time
   end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getSwingTime();
-
 
   int footstep_index = val_ctrl_arch_->dcm_trajectory_manger_->current_footstep_index_;
 
@@ -46,10 +44,10 @@ void SwingControl::firstVisit(){
   // Initialize the swing foot trajectory  
   if (leg_side_ == LEFT_ROBOT_SIDE){
     // Set Left Swing Foot Trajectory
-    std::cout << "left foot swing" << std::endl;
+    std::cout << "Start [Swing Control] Left Leg"<< std::endl;
     val_ctrl_arch_->lfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }else{
-    std::cout << "right foot swing" << std::endl;
+    std::cout << "Start [Swing Control] Right Leg"<< std::endl;
     val_ctrl_arch_->rfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }
 

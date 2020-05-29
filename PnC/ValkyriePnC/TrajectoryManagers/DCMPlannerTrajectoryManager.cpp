@@ -206,29 +206,64 @@ bool DCMPlannerTrajectoryManager::noRemainingSteps(){
 void DCMPlannerTrajectoryManager::populateStepInPlace(const int num_steps, const int robot_side_first){
   updateStartingStance(); // Update the starting foot locations of the robot
 
-  double nominal_midfoot_distance = 0.27;
+  // double nominal_midfoot_distance = 0.27;
 
-  Footstep left_footstep = left_foot_stance_;
-  Footstep right_footstep = right_foot_stance_;
+  // Footstep left_footstep = left_foot_stance_;
+  // Footstep right_footstep = right_foot_stance_;
+  // Footstep mid_footstep = mid_foot_stance_; 
+
+  // int robot_side = robot_side_first;
+  // for(int i = 0; i < num_steps; i++){
+  //   // Square feet and switch sides
+  //   if (robot_side == LEFT_ROBOT_SIDE){
+  //     left_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0.0),
+  //                             mid_footstep.orientation);
+  //     footstep_list_.push_back(left_footstep);
+  //     robot_side = RIGHT_ROBOT_SIDE;
+  //   }else{
+  //     right_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0.0),
+  //                             mid_footstep.orientation);
+  //     footstep_list_.push_back(right_footstep);
+  //     robot_side = LEFT_ROBOT_SIDE;     
+  //   }   
+  // }
+
+ // Take Forward Steps
+  double nominal_step_forward_distance_in = 0.25;
+  double nominal_midfoot_distance_in = 0.27;
+
+  Footstep new_footstep;
   Footstep mid_footstep = mid_foot_stance_; 
 
-  int robot_side = robot_side_first;
+  int robot_side = LEFT_ROBOT_SIDE;
   for(int i = 0; i < num_steps; i++){
-    // Square feet and switch sides
     if (robot_side == LEFT_ROBOT_SIDE){
-      left_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, nominal_midfoot_distance/2.0, 0),
-                              mid_footstep.orientation);
-      footstep_list_.push_back(left_footstep);
+      Eigen::Vector3d translate((i+1)*nominal_step_forward_distance_in, nominal_midfoot_distance_in/2.0, 0);
+      new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                                 mid_footstep.orientation, LEFT_ROBOT_SIDE);
       robot_side = RIGHT_ROBOT_SIDE;
     }else{
-      right_footstep.setPosOri(mid_footstep.position + mid_footstep.R_ori*Eigen::Vector3d(0, -nominal_midfoot_distance/2.0, 0),
-                              mid_footstep.orientation);
-      footstep_list_.push_back(right_footstep);
-      robot_side = LEFT_ROBOT_SIDE;     
-    }   
+      Eigen::Vector3d translate((i+1)*nominal_step_forward_distance_in, -nominal_midfoot_distance_in/2.0, 0);      
+      new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                                 mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+      robot_side = LEFT_ROBOT_SIDE;
+    }
+    footstep_list_.push_back(new_footstep);
   }
-  // std::cout << "num_steps: " << num_steps << std::endl;
-  // right_foot_stance_.printInfo();
+
+  // Add additional step forward to square the feet.
+  if (robot_side == LEFT_ROBOT_SIDE){
+    Eigen::Vector3d translate(num_steps*nominal_step_forward_distance_in, nominal_midfoot_distance_in/2.0, 0);
+    new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                           mid_footstep.orientation, LEFT_ROBOT_SIDE);
+  }else{
+    Eigen::Vector3d translate(num_steps*nominal_step_forward_distance_in, -nominal_midfoot_distance_in/2.0, 0);
+    new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                               mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+  }
+  footstep_list_.push_back(new_footstep);
+
+
 }
 
 // Populates the input footstep list with a predefined walking forward behavior
@@ -239,18 +274,42 @@ void DCMPlannerTrajectoryManager::populateWalkForward(const int num_steps,
 
   updateStartingStance(); // Update the starting foot locations of the robot
 
-  Footstep left_footstep = left_foot_stance_;
-  Footstep right_footstep = right_foot_stance_;
+ // Take Forward Steps
+  double nominal_step_forward_distance_in = 0.25;
+  double nominal_midfoot_distance_in = 0.27;
+
+  Footstep new_footstep;
   Footstep mid_footstep = mid_foot_stance_; 
 
-  // // left_foot_stance_
-  // // right_foot_stance_
-  // int robot_side = RIGHT_ROBOT_SIDE;
-  // for(int i = 0; i < num_steps){
-  //   if robot_side == 
-  // }
+  int robot_side = LEFT_ROBOT_SIDE;
+  for(int i = 0; i < num_steps; i++){
+    if (robot_side == LEFT_ROBOT_SIDE){
+      Eigen::Vector3d translate((i+1)*nominal_step_forward_distance_in, nominal_midfoot_distance_in/2.0, 0);
+      new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                                 mid_footstep.orientation, LEFT_ROBOT_SIDE);
+      robot_side = RIGHT_ROBOT_SIDE;
+    }else{
+      Eigen::Vector3d translate((i+1)*nominal_step_forward_distance_in, -nominal_midfoot_distance_in/2.0, 0);      
+      new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                                 mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+      robot_side = LEFT_ROBOT_SIDE;
+    }
+    footstep_list_.push_back(new_footstep);
+  }
 
   // Add additional step forward to square the feet.
+  if (robot_side == LEFT_ROBOT_SIDE){
+    Eigen::Vector3d translate(num_steps*nominal_step_forward_distance_in, -nominal_midfoot_distance_in/2.0, 0);
+    new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                               mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+  }else{
+    Eigen::Vector3d translate(num_steps*nominal_step_forward_distance_in, nominal_midfoot_distance_in/2.0, 0);
+    new_footstep.setPosOriSide(mid_footstep.position + mid_footstep.R_ori*translate,
+                           mid_footstep.orientation, LEFT_ROBOT_SIDE);
+  }
+  footstep_list_.push_back(new_footstep);
+
+
 }
 
 // Populates the input footstep list with a predefined footstep list to turn left
