@@ -58,7 +58,12 @@ ValkyrieControlArchitecture::~ValkyrieControlArchitecture() {
     delete state_machines_[VALKYRIE_STATES::STAND];
     delete state_machines_[VALKYRIE_STATES::BALANCE];
     delete state_machines_[VALKYRIE_STATES::RL_CONTACT_TRANSITION_START];
+    delete state_machines_[VALKYRIE_STATES::RL_CONTACT_TRANSITION_END];
+    delete state_machines_[VALKYRIE_STATES::RL_SWING];
     delete state_machines_[VALKYRIE_STATES::LL_CONTACT_TRANSITION_START];    
+    delete state_machines_[VALKYRIE_STATES::LL_CONTACT_TRANSITION_END];
+    delete state_machines_[VALKYRIE_STATES::LL_SWING];
+
 }
 
 void ValkyrieControlArchitecture::ControlArchitectureInitialization() {

@@ -22,9 +22,13 @@ void WalkingInterruptLogic::processInterrupts(){
     if (val_ctrl_arch_->getState() == VALKYRIE_STATES::BALANCE){
       std::cout << " -- Trigger Walk --" << std::endl;
 
-      val_ctrl_arch_->dcm_trajectory_manger_->resetStepIndex();
-      val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_.clear();     
-      val_ctrl_arch_->dcm_trajectory_manger_->populateStepInPlace(4, RIGHT_ROBOT_SIDE);     
+      // val_ctrl_arch_->dcm_trajectory_manger_->walkInPlace();
+      // val_ctrl_arch_->dcm_trajectory_manger_->walkForward();
+      // val_ctrl_arch_->dcm_trajectory_manger_->walkBackward();
+      // val_ctrl_arch_->dcm_trajectory_manger_->StrafeLeft();
+      // val_ctrl_arch_->dcm_trajectory_manger_->StrafeRight();
+      // val_ctrl_arch_->dcm_trajectory_manger_->turnLeft();
+      val_ctrl_arch_->dcm_trajectory_manger_->turnRight();
 
       static_cast<DoubleSupportBalance*>(val_ctrl_arch_->state_machines_[VALKYRIE_STATES::BALANCE])->switchStateButtonTrigger();
     }else{

@@ -25,6 +25,17 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
                     const Eigen::Vector3d & dcm_pos_start_in, 
                     const Eigen::Vector3d & dcm_vel_start_in);
 
+    // Walking Primitives
+    void walkInPlace();
+    void walkForward();
+    void walkBackward();
+    void StrafeLeft();
+    void StrafeRight();
+    void turnLeft();
+    void turnRight();
+    void resetIndexAndClearFootsteps();
+    void alternateLeg();
+
     // Updates the feet pose of the starting stance 
     void updateStartingStance();
 
@@ -44,17 +55,14 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
 
     // Populates the input footstep list with a predefined walking forward behavior
     void populateWalkForward(const int num_steps,
-    						 const double nominal_step_forward_distance,
-    						 const double nominal_step_width_distance,
-    						 const double midstep_distance_multiplier);
+    						             const double forward_distance);
 
-    // Populates the input footstep list with a predefined footstep list to turn left
-    void populateTurnLeft(const double turn_angle,
-    					  const double nominal_step_width_distance);
+    // Rotate at the specified turn angle
+    void populateRotateTurn(const double turn_radians_per_step, const int num_times);
 
-    // Populates the input footstep list with a predefined footstep list to turn right
-    void populateTurnRight(const double turn_angle,
-                					 const double nominal_step_width_distance);
+    // Rotate at the specified turn angle
+    void populateStrafe(const double strafe_distance, const int num_times);
+
 
    DCMPlanner* dcm_planner_;
    std::vector<Footstep> footstep_list_;
@@ -67,12 +75,21 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
    Footstep right_foot_start_;
    Footstep left_foot_start_;
 
-
    Footstep right_foot_stance_;
    Footstep left_foot_stance_;
    Footstep mid_foot_stance_;
 
-  // Human readable parameters 
+   // Nominal walking parameter primitives
+  double nominal_footwidth_;
+  double nominal_forward_step_;
+  double nominal_backward_step_;
+  double nominal_turn_radians_;
+  double nominal_strafe_distance_;   
+
+  int robot_side_first_;
+
+
+  // Human readable parameters  DCM parameters
   double t_additional_init_transfer_;        // the additional transfer time to switch the stance leg in the beginning
   double t_contact_transition_;  // the transition time used to change reaction forces and stance leg
   double t_swing_;               // the foot swing time. 
