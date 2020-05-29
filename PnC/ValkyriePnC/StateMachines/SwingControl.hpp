@@ -31,10 +31,12 @@ class SwingControl : public StateMachine{
     ValkyrieTaskAndForceContainer* taf_container_;
 
     int leg_side_;
-    bool final_step_;
 
     double ctrl_start_time_;
     double end_time_;
+
+    double swing_time_percent_early_contact_check_;
+    double early_contact_force_threshold_;
 
     void _taskUpdate();
 };

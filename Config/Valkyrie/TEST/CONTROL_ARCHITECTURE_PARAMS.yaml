@@ -3,6 +3,10 @@ state_stand_params:
     time_to_max_normal_force: 0.1 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     com_pos_target: [0, 0, 1.015] # target com position from the midfoot position in world frame
 
+state_swing:
+    swing_time_percent_early_contact_check: 0.5 # Percent of end_time to check if there are early contacts 
+    early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
+
 dcm_planner_parameters:
     nominal_com_height: 1.015 # m from the ground    
 

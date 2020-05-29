@@ -98,5 +98,7 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
 
     // States Initialization:
     state_machines_[VALKYRIE_STATES::STAND]->initialization(cfg_["state_stand_params"]);
+    state_machines_[VALKYRIE_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
+    state_machines_[VALKYRIE_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
 
 }
