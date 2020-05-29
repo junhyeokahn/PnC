@@ -95,8 +95,11 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     kp_upper_body_joint_ = 50.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
     kd_upper_body_joint_ = 5.0*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
     // Foot
-    kp_foot_ = 50*Eigen::VectorXd::Ones(3); 
-    kd_foot_ = 5.0*Eigen::VectorXd::Ones(3);
+    kp_foot_pos_ = 50*Eigen::VectorXd::Ones(3); 
+    kd_foot_pos_ = 5.0*Eigen::VectorXd::Ones(3);
+
+    kp_foot_ori_ = 50*Eigen::VectorXd::Ones(3);
+    kd_foot_ori_ = 5.0*Eigen::VectorXd::Ones(3);
 
     // Task Hierachies
     // Set Hierarchy
@@ -126,8 +129,10 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
         kp_upper_body_joint_ = temp_double*Eigen::VectorXd::Ones(upper_body_joint_indices_.size()); 
         myUtils::readParameter(node, "kd_upper_body_joint", temp_double);        
         kd_upper_body_joint_ = temp_double*Eigen::VectorXd::Ones(upper_body_joint_indices_.size());
-        myUtils::readParameter(node, "kp_foot", kp_foot_);
-        myUtils::readParameter(node, "kd_foot", kd_foot_);
+        myUtils::readParameter(node, "kp_foot_pos", kp_foot_pos_);
+        myUtils::readParameter(node, "kd_foot_pos", kd_foot_pos_);
+        myUtils::readParameter(node, "kp_foot_ori", kp_foot_ori_);
+        myUtils::readParameter(node, "kd_foot_ori", kd_foot_ori_);      
 
          // Load Task Hierarchies
         myUtils::readParameter(node, "w_task_com", w_task_com_);        
@@ -150,10 +155,10 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
     ang_momentum_task_->setGain(kp_ang_mom_, kd_ang_mom_);
     pelvis_ori_task_->setGain(kp_pelvis_, kd_pelvis_);
     upper_body_task_->setGain(kp_upper_body_joint_, kd_upper_body_joint_);
-    rfoot_center_pos_task_->setGain(kp_foot_, kd_foot_);
-    rfoot_center_ori_task_->setGain(kp_foot_, kd_foot_);
-    lfoot_center_pos_task_->setGain(kp_foot_, kd_foot_);
-    lfoot_center_ori_task_->setGain(kp_foot_, kd_foot_);
+    rfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
+    lfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
+    rfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
+    lfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
 
     // Set Task Hierarchies
     com_task_->setHierarchy(w_task_com_);

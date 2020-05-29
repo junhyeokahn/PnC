@@ -68,6 +68,10 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
       Eigen::VectorXd kd_joint_;
       Eigen::VectorXd kp_upper_body_joint_;
       Eigen::VectorXd kd_upper_body_joint_;
-      Eigen::VectorXd kp_foot_;
-      Eigen::VectorXd kd_foot_;
+      Eigen::VectorXd kp_foot_pos_;
+      Eigen::VectorXd kd_foot_pos_;
+      Eigen::VectorXd kp_foot_ori_;
+      Eigen::VectorXd kd_foot_ori_;
+
+
 };
