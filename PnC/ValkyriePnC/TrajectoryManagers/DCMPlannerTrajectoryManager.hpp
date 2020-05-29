@@ -17,7 +17,7 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   	~DCMPlannerTrajectoryManager();	
     void paramInitialization(const YAML::Node& node);
 
-    bool initialize(const double t_walk_start_in, const std::vector<Footstep> & footstep_list_in,
+    bool initialize(const double t_walk_start_in,
                     const int transfer_type_in, 
                     const Eigen::Quaterniond & ori_start_in,
                     const Eigen::Vector3d & dcm_pos_start_in, 
@@ -34,31 +34,28 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
     void resetStepIndex();
 
     // Updates the local footstep list (ie: footstep preview) for trajectory generation:
-    void updatePreview(const int max_footsteps_to_preview, std::vector<Footstep> & footstep_list);
+    void updatePreview(const int max_footsteps_to_preview);
 
     // Footstep sequence primitives -----------------------------------------------------------
     // Creates footstep in place
-    void populateStepInPlace(const int num_steps, const int robot_side_first, std::vector<Footstep> & footstep_list);
+    void populateStepInPlace(const int num_steps, const int robot_side_first);
 
     // Populates the input footstep list with a predefined walking forward behavior
     void populateWalkForward(const int num_steps,
     						 const double nominal_step_forward_distance,
     						 const double nominal_step_width_distance,
-    						 const double midstep_distance_multiplier,
-    						 std::vector<Footstep> & footstep_list);
+    						 const double midstep_distance_multiplier);
 
     // Populates the input footstep list with a predefined footstep list to turn left
     void populateTurnLeft(const double turn_angle,
-    					  const double nominal_step_width_distance,
-    					  std::vector<Footstep> & footstep_list);
+    					  const double nominal_step_width_distance);
 
     // Populates the input footstep list with a predefined footstep list to turn right
     void populateTurnRight(const double turn_angle,
-    					  const double nominal_step_width_distance,
-    					  std::vector<Footstep> & footstep_list);
+                					 const double nominal_step_width_distance);
 
    DCMPlanner* dcm_planner_;
-   std::vector<Footstep> footstep_list_copy_;
+   std::vector<Footstep> footstep_list_;
    std::vector<Footstep> footstep_preview_list_;
    int current_footstep_index_; // keeps track of which footstep to take.
 
@@ -100,6 +97,10 @@ class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
   double getNormalForceRampUpTime();
   double getNormalForceRampDownTime();
 
+  // Returns false if footstep_list is empty or current_step_index_ is greater than the footstep list
+  // populates the robot_side when true.
+  bool nextStepRobotSide(int & robot_side);
+  
   // checks whether or not there are emaining footsteps.
   bool noRemainingSteps();
 

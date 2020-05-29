@@ -31,6 +31,7 @@ class ContactTransition : public StateMachine{
     ValkyrieTaskAndForceContainer* taf_container_;
 
     int leg_side_;
+    bool final_step_;
 
     double ctrl_start_time_;
     double end_time_;

@@ -7,6 +7,8 @@ ContactTransition::ContactTransition(const StateIdentifier state_identifier_in,
                StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Contact Transition");
 
+  final_step_ = false;
+
   // Set Pointer to Control Architecture
   val_ctrl_arch_ = ((ValkyrieControlArchitecture*) _ctrl_arch);
   taf_container_ = val_ctrl_arch_->taf_container_;
@@ -23,74 +25,54 @@ ContactTransition::~ContactTransition(){
 
 void ContactTransition::firstVisit(){
   std::cout << "Contact Transition First Visit" << std::endl;
-
+  // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
-  double t_walk_start = ctrl_start_time_;
 
   // For all contact transitions, initially ramp up the reaction forces to max
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(0.0, val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
 
   // Check if it's the last footstep
+  if (val_ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()){
+    // If this is the last footstep, then we will just wait until we settle.
+    end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getFinalContactTransferTime();
+    final_step_ = true;  // set flag.  
+  }else{
+    // This is not the last footstep. We need to recompute the remaining DCM trajectories.
+    // Set transfer type to midstep
+    int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;
+    end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getMidStepContactTransferTime() -
+                val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
 
-  // If not recompute DCM trajectory:
-  //  update transfer time by checking what the previous state is.
-  //  check the swing foot type. ramp down the reaction force of the swing foot.
-
-
-  int transfer_type = DCM_TRANSFER_TYPES::INITIAL;
-  // Check if Previous State is From Swing
-  if ((val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::RL_SWING) ||
-      (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::LL_SWING) ){
-      // Increment Step Index
-      val_ctrl_arch_->dcm_trajectory_manger_->incrementStepIndex();   
-      // Check if there are no more steps remaining.
-      //  if there are no more steps remaining,
-      //    set end_time_ to settling time.
-      //    set final transition flag.
-      //  else
-      //    normal contact transition
-
-  }
-
-  // If previous state is from balancing or ending of contact transition, recompute DCM trajectory
-  else if ((val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE) ||
-           (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::RL_CONTACT_TRANSITION) ||
-           (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::LL_CONTACT_TRANSITION)) {
-
-    // Use Initial transfer time if coming from a balancing state
+    // If coming from a balancing state, use initial transfer time 
     if (val_ctrl_arch_->getPrevState() == VALKYRIE_STATES::BALANCE){
         transfer_type = DCM_TRANSFER_TYPES::INITIAL;      
-    }else{
-    // Otherwise, this is a midstep.
-        transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;      
+        end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getInitialContactTransferTime() -
+                    val_ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
     }
 
-    // 
-
-    // else if previous state is from balance or ending transition
-    //       if ending transition is from the opposite foot, use initial transfer time
-    //       if ending transition is from the same foot, use contact transition time
-    //       initialize the dcm planner
-    //       set valid flag.
-
     // Recompute DCM Trajectories
+    double t_walk_start = ctrl_start_time_;
     Eigen::Quaterniond pelvis_ori(robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
-    val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start, val_ctrl_arch_->footstep_list_,
-                                                       DCM_TRANSFER_TYPES::INITIAL,
+    val_ctrl_arch_->dcm_trajectory_manger_->initialize(t_walk_start,
+                                                       transfer_type,
                                                        pelvis_ori,
                                                        sp_->dcm, 
                                                        sp_->dcm_vel);
-
   }
-
-
-
-
-
 
 }
 
 void ContactTransition::_taskUpdate(){
-  // Get DCM tasks from trajectory manager
+  // =========================================================================
+  // Compute and update new maximum reaction forces
+  // =========================================================================
+  val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
+  val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(state_machine_time_);
+
+  // =========================================================================
+  // Get DCM tasks from trajectory manager 
+  // =========================================================================
 
 
   // =========================================================================
@@ -106,6 +88,8 @@ void ContactTransition::oneStep(){
 }
 
 void ContactTransition::lastVisit(){  
+  // reset flags
+  final_step_ = false;
 }
 
 bool ContactTransition::endOfState(){  
@@ -119,6 +103,10 @@ StateIdentifier ContactTransition::getNextState(){
   // if next step is for the opposite foot, transition to left leg start
   // if next step is for the same foot, transition to right leg start
 
+  // if leg_side_ is RIGHT -> transition to right foot end contact transition
+  // if leg_side_ is LEFT -> transition to left foot enc contact transition
+
+  // if last footstep or pause trajectory is activated -> transition to 
   // if pause trajectory is hit, transition to balance 
 
 }

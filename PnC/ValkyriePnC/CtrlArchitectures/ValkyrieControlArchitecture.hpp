@@ -21,10 +21,12 @@
 namespace VALKYRIE_STATES {
     constexpr int STAND = 0;
     constexpr int BALANCE = 1;
-    constexpr int RL_CONTACT_TRANSITION = 2;
-    constexpr int RL_SWING = 3;    
-    constexpr int LL_CONTACT_TRANSITION = 4;
-    constexpr int LL_SWING = 5;    
+    constexpr int RL_CONTACT_TRANSITION_START = 2;
+    constexpr int RL_CONTACT_TRANSITION_END = 3;
+    constexpr int RL_SWING = 4;    
+    constexpr int LL_CONTACT_TRANSITION_START = 5;
+    constexpr int LL_CONTACT_TRANSITION_END = 6;        
+    constexpr int LL_SWING = 7;    
 };  
 
 class ValkyrieControlArchitecture : public ControlArchitecture {
@@ -55,9 +57,5 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
     MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
     MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
     DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
-
-    // Footstep list container
-    std::vector<Footstep> footstep_list_;
-
 
 };

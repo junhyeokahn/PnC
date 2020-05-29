@@ -21,8 +21,11 @@ void WalkingInterruptLogic::processInterrupts(){
     std::cout << "[Walking Interrupt Logic] button R pressed" << std::endl;
     if (val_ctrl_arch_->getState() == VALKYRIE_STATES::BALANCE){
       std::cout << " -- Trigger Walk --" << std::endl;
-      val_ctrl_arch_->footstep_list_.clear();
-      val_ctrl_arch_->dcm_trajectory_manger_->populateStepInPlace(1, RIGHT_ROBOT_SIDE, val_ctrl_arch_->footstep_list_);     
+
+      val_ctrl_arch_->dcm_trajectory_manger_->resetStepIndex();
+      val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_.clear();     
+      val_ctrl_arch_->dcm_trajectory_manger_->populateStepInPlace(1, RIGHT_ROBOT_SIDE);     
+
       static_cast<DoubleSupportBalance*>(val_ctrl_arch_->state_machines_[VALKYRIE_STATES::BALANCE])->switchStateButtonTrigger();
     }else{
       std::cout << " -- Command Ignored --" << std::endl;
