@@ -36,18 +36,13 @@ void SwingControl::firstVisit(){
 
   int footstep_index = val_ctrl_arch_->dcm_trajectory_manger_->current_footstep_index_;
 
-  // Computes the swing foot
-  void computeSwingFoot(const double current_time);
-  // computes the swing foot and updates the desired swing foot task
-  void updateSwingFootDesired(const double current_time);
-
   // Initialize the swing foot trajectory  
   if (leg_side_ == LEFT_ROBOT_SIDE){
     // Set Left Swing Foot Trajectory
-    std::cout << "Start [Swing Control] Left Leg"<< std::endl;
+    std::cout << "[Swing Control] Left Leg"<< std::endl;
     val_ctrl_arch_->lfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }else{
-    std::cout << "Start [Swing Control] Right Leg"<< std::endl;
+    std::cout << "[Swing Control] Right Leg"<< std::endl;
     val_ctrl_arch_->rfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }
 

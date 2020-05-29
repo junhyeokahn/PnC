@@ -140,10 +140,10 @@ bool DCMPlannerTrajectoryManager::initialize(const double t_walk_start_in,
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
   
-  std::cout << "ori_start_in:" << ori_start_in.w() << ", "
-                               << ori_start_in.x() << ", "
-                               << ori_start_in.y() << ", "
-                               << ori_start_in.z() << ", " << std::endl;
+  // std::cout << "ori_start_in:" << ori_start_in.w() << ", "
+  //                              << ori_start_in.x() << ", "
+  //                              << ori_start_in.y() << ", "
+  //                              << ori_start_in.z() << ", " << std::endl;
   // Set transfer time 
   if (transfer_type_in == DCM_TRANSFER_TYPES::INITIAL){
     dcm_planner_->t_transfer = t_transfer_init_;

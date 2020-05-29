@@ -87,8 +87,8 @@ void FootSE3TrajectoryManager::initializeSwingFootTrajectory(const double _start
   Eigen::Vector3d mid_swing_position = swing_midfoot_.position + swing_midfoot_.R_ori*mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity = (swing_land_foot_.position - swing_init_foot_.position)/swing_duration_;
 
-  myUtils::pretty_print(mid_swing_position, std::cout, "mid_swing_position");
-  myUtils::pretty_print(mid_swing_velocity, std::cout, "mid_swing_velocity");
+  // myUtils::pretty_print(mid_swing_position, std::cout, "mid_swing_position");
+  // myUtils::pretty_print(mid_swing_velocity, std::cout, "mid_swing_velocity");
 
   // Construct Position trajectories  
   pos_traj_init_to_mid_.initialize(swing_init_foot_.position, Eigen::Vector3d::Zero(3), 

@@ -22,7 +22,7 @@ ContactTransition::~ContactTransition(){
 
 
 void ContactTransition::firstVisit(){
-  std::cout << "Start [Contact Transition] Leg Side: " <<  leg_side_ << std::endl;
+  std::cout << "[Contact Transition Start] Leg Side: " <<  leg_side_ << std::endl;
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 
@@ -38,11 +38,11 @@ void ContactTransition::firstVisit(){
 
   // Check if it's the last footstep
   if (val_ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()){
-    std::cout << "Final Step. Settling..." << std::endl;
+    // std::cout << "Final Step. Settling..." << std::endl;
     // If this is the last footstep, then we will just wait until we settle.
     end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getFinalContactTransferTime();
   }else{
-    std::cout << "Not the last step. Compute DCM trajectory" << std::endl;
+    // std::cout << "Not the last step. Compute DCM trajectory" << std::endl;
     // This is not the last footstep. We need to recompute the remaining DCM trajectories.
     // Set transfer type to midstep
     int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;

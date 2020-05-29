@@ -29,7 +29,7 @@ DoubleSupportStand::~DoubleSupportStand(){
 
 
 void DoubleSupportStand::firstVisit(){
-  std::cout << "Start [Double Support Stand]" << std::endl;
+  std::cout << "[Double Support Stand] Start" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
   // =========================================================================
@@ -108,7 +108,7 @@ void DoubleSupportStand::lastVisit(){
 
 bool DoubleSupportStand::endOfState(){  
   if (state_machine_time_ > end_time_){
-    std::cout << "[DoubleSupportStand] State End" << std::endl;
+     // std::cout << "[DoubleSupportStand] State End" << std::endl;
     return true;
   }
   return false;

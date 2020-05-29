@@ -26,8 +26,6 @@ void TaskGainScheduleTrajectoryManager::paramInitialization(const YAML::Node& no
                   << std::endl;
         exit(0);
     }
-    std::cout << "foot nominal_w_max_: " << nominal_w_max_ << std::endl;
-    std::cout << "foot nominal_w_min_: " << nominal_w_min_ << std::endl;
 }
 
 void TaskGainScheduleTrajectoryManager::initializeRampToMin(const double start_time, const double nominal_ramp_duration){

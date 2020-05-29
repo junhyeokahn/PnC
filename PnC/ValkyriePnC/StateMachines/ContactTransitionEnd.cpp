@@ -22,7 +22,7 @@ ContactTransitionEnd::~ContactTransitionEnd(){
 
 
 void ContactTransitionEnd::firstVisit(){
-  std::cout << "Start [Contact Transition End] Leg Side: " <<  leg_side_ << std::endl;
+  std::cout << "[Contact Transition End] Leg Side: " <<  leg_side_ << std::endl;
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 
