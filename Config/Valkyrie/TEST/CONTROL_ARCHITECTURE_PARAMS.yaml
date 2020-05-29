@@ -18,7 +18,7 @@ dcm_planner_parameters:
 
     # Primitive Walking parameters
     nominal_footwidth: 0.27 # meters. Distance between feet
-    nominal_forward_step: 0.275 # meters. Subsequent forward steps are 2x this value.
+    nominal_forward_step: 0.325 # meters. Subsequent forward steps are 2x this value.
     nominal_backward_step: -0.25 # meters. Subsequent backward steps are 2x this value.
     nominal_turn_radians: 0.78539 # M_PI/4.0 
     nominal_strafe_distance: 0.125 # meters
@@ -46,7 +46,7 @@ task_parameters:
 
     # Task hierarchy weights
     w_task_com: 5.0
-    w_task_ang_mom: 1e-6 #3.0
+    w_task_ang_mom: 1e-4 
     w_task_pelvis: 5.0
     w_task_upper_body: 2.0
     w_task_rfoot: 20.0
@@ -55,7 +55,7 @@ task_parameters:
     # Task Gains
     # COM
     kp_com: [50, 50, 50] 
-    kd_com: [5, 5, 5] 
+    kd_com: [5, 5,5] 
     # Ang Momentum
     kd_ang_mom: [50, 50, 50]
     # Pelvis
