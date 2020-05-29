@@ -12,8 +12,8 @@ dcm_planner_parameters:
 
     t_additional_init_transfer: 0.0 # seconds. The additional initial transfer time to switch the stance leg
     t_contact_transition: 0.45 # seconds. The transition time used to change reaction forces and stance leg
-    t_swing: 0.85 # seconds. The single support swing time.
-    percentage_settle: 0.99 # percent to converge at the end of the trajectory
+    t_swing: 1.0 # seconds. The single support swing time.
+    percentage_settle: 0.9 # percent to converge at the end of the trajectory
     alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
 
 foot_trajectory_parameters:
