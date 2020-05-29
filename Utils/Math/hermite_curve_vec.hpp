@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <Eigen/Dense>
+#include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/hermite_curve.hpp>
 
 // vector version of hermite curve interpolation

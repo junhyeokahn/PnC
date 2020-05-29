@@ -164,9 +164,9 @@ void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time){
                   des_quat.y(),
                   des_quat.z();
 
-  std::cout << "current_time: " << current_time << std::endl;
-  myUtils::pretty_print(des_com_pos, std::cout, "des_com_pos");
-  myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
+  // std::cout << "current_time: " << current_time << std::endl;
+  // myUtils::pretty_print(des_com_pos, std::cout, "des_com_pos");
+  // myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
 
   com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
   pelvis_ori_task_->updateDesired(des_quat_vec, Eigen::VectorXd::Zero(3),Eigen::VectorXd::Zero(3));

@@ -82,6 +82,9 @@ void FootSE3TrajectoryManager::initializeSwingFootTrajectory(const double _start
   Eigen::Vector3d mid_swing_position = swing_midfoot_.position + swing_midfoot_.R_ori*mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity = (swing_land_foot_.position - swing_init_foot_.position)/swing_duration_;
 
+  myUtils::pretty_print(mid_swing_position, std::cout, "mid_swing_position");
+  myUtils::pretty_print(mid_swing_velocity, std::cout, "mid_swing_velocity");
+
   // Construct Position trajectories  
   pos_traj_init_to_mid_.initialize(swing_init_foot_.position, Eigen::Vector3d::Zero(3), 
                                    mid_swing_position, mid_swing_velocity);
@@ -117,10 +120,15 @@ void FootSE3TrajectoryManager::computeSwingFoot(const double current_time){
       }
 
       // Get foot orientation and its derivatives
+      s = (current_time - swing_start_time_)/swing_duration_;
       quat_hermite_curve_.evaluate(s, foot_quat_des_);
       quat_hermite_curve_.getAngularVelocity(s, foot_ang_vel_des_);
       quat_hermite_curve_.getAngularAcceleration(s, foot_ang_acc_des_);
       convertQuatDesToOriDes();
+
+      // myUtils::pretty_print(foot_pos_des_, std::cout, "foot_pos_des_");
+      // myUtils::pretty_print(foot_ori_des_, std::cout, "foot_ori_des_");
+
 }
 
 void FootSE3TrajectoryManager::updateSwingFootDesired(const double current_time){

@@ -30,10 +30,23 @@ void SwingControl::firstVisit(){
 
   // Set swing foot trajectory time
   end_time_ = val_ctrl_arch_->dcm_trajectory_manger_->getSwingTime();
+
+
+  int footstep_index = val_ctrl_arch_->dcm_trajectory_manger_->current_footstep_index_;
+
+  // Computes the swing foot
+  void computeSwingFoot(const double current_time);
+  // computes the swing foot and updates the desired swing foot task
+  void updateSwingFootDesired(const double current_time);
+
+  // Initialize the swing foot trajectory  
   if (leg_side_ == LEFT_ROBOT_SIDE){
     // Set Left Swing Foot Trajectory
+    std::cout << "left foot swing" << std::endl;
+    val_ctrl_arch_->lfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }else{
-    // Set Right Foot Swing Trajectory
+    std::cout << "right foot swing" << std::endl;
+    val_ctrl_arch_->rfoot_trajectory_manager_->initializeSwingFootTrajectory(0.0, end_time_, val_ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
   }
 
 }
@@ -42,15 +55,21 @@ void SwingControl::_taskUpdate(){
   // =========================================================================
   // Set Foot Motion Tasks
   // =========================================================================
+  if (leg_side_ == LEFT_ROBOT_SIDE){
+    // Set Left Swing Foot Trajectory. Hold Other foot in place.
+    val_ctrl_arch_->lfoot_trajectory_manager_->updateSwingFootDesired(state_machine_time_);
+    val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
+
+  }else{
+    // Set Right Swing FOot Trajectory. Hold Other foot in place.
+    val_ctrl_arch_->rfoot_trajectory_manager_->updateSwingFootDesired(state_machine_time_);
+    val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
+  }
 
   // =========================================================================
   // Set DCM tasks from trajectory manager 
   // =========================================================================
   val_ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
-
-  // Update Swing Foot Trajectories.
-  val_ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
-  val_ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
 }
 
 void SwingControl::oneStep(){  

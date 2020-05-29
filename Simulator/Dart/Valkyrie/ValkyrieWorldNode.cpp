@@ -242,8 +242,8 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
     Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
     Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
 
-    dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftCOP_Frame");
-    dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightCOP_Frame");
+    dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftFoot");
+    dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightFoot");
     const dart::collision::CollisionResult& _result =
         world_->getLastCollisionResult();
 
@@ -269,7 +269,7 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
-                    robot_->getBodyNode("leftCOP_Frame")
+                    robot_->getBodyNode("leftFoot")
                         ->getTransform(dart::dynamics::Frame::World());
                 Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
@@ -297,7 +297,7 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
                 Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
                 T_wc.translation() = contact.point;
                 Eigen::Isometry3d T_wa =
-                    robot_->getBodyNode("rightCOP_Frame")
+                    robot_->getBodyNode("rightFoot")
                         ->getTransform(dart::dynamics::Frame::World());
                 Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
                 Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);

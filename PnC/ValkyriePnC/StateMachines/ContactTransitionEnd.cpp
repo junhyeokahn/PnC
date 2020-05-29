@@ -40,11 +40,11 @@ void ContactTransitionEnd::_taskUpdate(){
   // =========================================================================
   // Compute and update new maximum reaction forces
   // =========================================================================
-  // if (leg_side_ == LEFT_ROBOT_SIDE){
-  //   val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
-  // }else{
-  //   val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
-  // }
+  if (leg_side_ == LEFT_ROBOT_SIDE){
+    val_ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
+  }else{
+    val_ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(state_machine_time_);
+  }
 
   // =========================================================================
   // Set DCM tasks from trajectory manager 
