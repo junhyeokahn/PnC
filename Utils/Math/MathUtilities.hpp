@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <Utils/IO/IOUtilities.hpp>
 #include <iostream>
 
@@ -34,15 +35,14 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
 // ETC
 // =============================================================================
 
-void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori);
-
-Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q );
+double computeAlphaGivenBreakFrequency(double hz, double dt);
 
 double bind_half_pi(double);
 
 bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
              const double threshold = 0.00001);
 double CropValue(double value, double min, double max, std::string source);
+double CropValue(double value, double min, double max);
 
 Eigen::VectorXd CropVector(Eigen::VectorXd value, Eigen::VectorXd min,
                            Eigen::VectorXd max, std::string source);
@@ -67,4 +67,29 @@ Eigen::VectorXd eulerIntegration(const Eigen::VectorXd& x,
 Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
                                   const Eigen::VectorXd& alpha,
                                   const Eigen::VectorXd& alphad, double dt);
+
+Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg);
+Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p);
+
+double QuatToYaw(const Eigen::Quaternion<double> q);
+
+// Euler ZYX 
+//     Represents either:
+//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then fixed-frame yaw.
+//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then body-frame roll 
+//
+//     The equation is similar, but the values for fixed and body frame rotations are different.
+// World Orientation is R = Rz*Ry*Rx
+Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw);
+
+// Quaternion to Euler ZYX 
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in);
+
+
+// ZYX extrinsic rotation rates to world angular velocity
+// angular vel = [wx, wy, wz]
+Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
+                                      const double roll_rate, const double pitch_rate, const double yaw_rate);
+
+void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori);
 }  // namespace myUtils

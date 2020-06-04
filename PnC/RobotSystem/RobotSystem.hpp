@@ -51,6 +51,21 @@ class RobotSystem {
     int getJointIdx(const std::string& jointName_);
     int getDofIdx(const std::string& dofName_);
 
+    // Position Limits
+    Eigen::VectorXd getPositionLowerLimits() {
+        return skel_ptr_->getPositionLowerLimits();
+    }
+    Eigen::VectorXd getPositionUpperLimits() {
+        return skel_ptr_->getPositionUpperLimits();
+    }
+    // Velocity Limits
+    Eigen::VectorXd getVelocityLowerLimits() {
+        return skel_ptr_->getVelocityLowerLimits();
+    }
+    Eigen::VectorXd getVelocityUpperLimits() {
+        return skel_ptr_->getVelocityUpperLimits();
+    }
+    // Force Torque Limits
     Eigen::VectorXd GetTorqueLowerLimits() {
         return skel_ptr_->getForceLowerLimits();
     }
@@ -78,6 +93,7 @@ class RobotSystem {
         dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
     void updateSystem(const Eigen::VectorXd& q_, const Eigen::VectorXd& qdot_,
                       bool isUpdatingCentroid_ = true);
+    void updateCentroidFrame();
 
     Eigen::Isometry3d getBodyNodeIsometry(
         const std::string& name_,

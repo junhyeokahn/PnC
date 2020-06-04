@@ -203,6 +203,10 @@ void RobotSystem::updateSystem(const Eigen::VectorXd& q_,
     skel_ptr_->computeForwardKinematics();
 }
 
+void RobotSystem::updateCentroidFrame(){
+    _updateCentroidFrame(this->getQ(), this->getQdot());
+}
+
 void RobotSystem::_updateCentroidFrame(const Eigen::VectorXd& q_,
                                        const Eigen::VectorXd& qdot_) {
     Eigen::MatrixXd Jsp = Eigen::MatrixXd::Zero(6, num_dof_);

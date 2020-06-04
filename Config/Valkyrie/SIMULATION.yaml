@@ -1,8 +1,9 @@
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
 is_record: false
 show_joint_frame: false
-plot_mpc_result: true
 
+# Low-level Joint PD gains
 control_configuration:
-  kp: 300
-  kd: 2
+  kp: 4 
+  kd: 4
+

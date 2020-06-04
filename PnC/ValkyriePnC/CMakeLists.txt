@@ -7,4 +7,5 @@ target_link_libraries(ValkyriePnC ${DART_LIBRARIES}
                                   myUtils
                                   myFilters
                                   myPlanner
-                                  myWBC)
+                                  myWBC
+                                  myTrajectoryManager)

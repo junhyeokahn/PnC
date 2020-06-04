@@ -42,6 +42,13 @@ Eigen::MatrixXd deleteRow(const Eigen::MatrixXd& a_, int row_) {
     return ret;
 }
 
+double computeAlphaGivenBreakFrequency(double hz, double dt){
+    double omega = 2.0 * M_PI * hz;
+    double alpha = (1.0 - (omega*dt/2.0)) / (1.0 + (omega*dt/2.0));
+    alpha = CropValue(alpha, 0.0, 1.0);
+    return alpha;
+}
+
 double bind_half_pi(double ang) {
     if (ang > M_PI / 2) {
         return ang - M_PI;
@@ -91,6 +98,17 @@ double CropValue(double value, double min, double max, std::string source) {
     }
     if (value < min) {
         printf("%s: %f is cropped to %f.\n", source.c_str(), value, min);
+        value = min;
+    }
+    return value;
+}
+
+double CropValue(double value, double min, double max) {
+    assert(min < max);
+    if (value > max) {
+        value = max;
+    }
+    if (value < min) {
         value = min;
     }
     return value;
@@ -176,17 +194,113 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
     return ret;
 }
 
-Eigen::Quaternion<double> bind_qaut_pi( Eigen::Quaternion<double> q ){
-    Eigen::Quaternion<double> ret;
-    if (q.w() <= 1e-7) {
-        ret.x() = -q.x();
-        ret.y() = -q.y();
-        ret.z() = -q.z();
-        ret.w() = -q.w();
-    } else {
-        ret = q;
-    }
-    return ret;
+// From Modern Robotics 
+// Lynch, Kevin M., and Frank C. Park. Modern Robotics. Cambridge University Press, 2017.
+// CPP Implementation: https://github.com/Le0nX/ModernRoboticsCpp
+/* Function: Returns the skew symmetric matrix representation of an angular velocity vector
+ * Input: Eigen::Vector3d 3x1 angular velocity vector
+ * Returns: Eigen::MatrixXd 3x3 skew symmetric matrix
+ */
+Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg) {
+    Eigen::Matrix3d m_ret;
+    m_ret <<   0,    -omg(2), omg(1),
+             omg(2),    0,   -omg(0),
+            -omg(1),  omg(0),    0;
+    return m_ret;
+}
+
+// From Modern Robotics 
+// Lynch, Kevin M., and Frank C. Park. Modern Robotics. Cambridge University Press, 2017.
+// CPP Implementation:  https://github.com/Le0nX/ModernRoboticsCpp
+/* Function: Provides the adjoint representation of a transformation matrix
+             Used to change the frame of reference for spatial velocity vectors
+ * Inputs: Eigen::MatrixXd 3x3 Rotation matrix, Eigen::Vector3d, 3x1 translation vector
+ * Returns: Eigen::MatrixXd 6x6 Adjoint matrix for transforming twists representation to a different frame
+*/ 
+Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p) {
+    Eigen::MatrixXd ad_ret = Eigen::MatrixXd::Zero(6, 6);
+    Eigen::MatrixXd zeroes = Eigen::MatrixXd::Zero(3, 3);
+    ad_ret << R, zeroes,
+        VecToso3(p) * R, R;
+    return ad_ret;
+}
+
+double QuatToYaw(const Eigen::Quaternion<double> q) {
+    // to match equation from:
+    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    const double& q0 = q.w();
+    const double& q1 = q.x();
+    const double& q2 = q.y();
+    const double& q3 = q.z();
+
+    return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
+}
+
+// Euler ZYX 
+//     Represents either:
+//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then fixed-frame yaw.
+//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then body-frame roll 
+//
+//     The equation is similar, but the values for fixed and body frame rotations are different.
+// World Orientation is R = Rz*Ry*Rx
+Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw){
+    Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitX());
+    Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitZ());
+
+    Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
+    return q.normalized();
+}
+
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in){
+    // to match equation from:
+    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+    // roll (x-axis rotation)
+    double sinr_cosp = 2 * (quat_in.w() * quat_in.x() + quat_in.y() * quat_in.z());
+    double cosr_cosp = 1 - 2 * (quat_in.x() * quat_in.x() + quat_in.y() * quat_in.y());
+    double roll = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = 2 * (quat_in.w() * quat_in.y() - quat_in.z() * quat_in.x());
+    double pitch;
+    if (std::abs(sinp) >= 1)
+        pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        pitch = std::asin(sinp);
+
+    // yaw rotation (z-axis rotation)
+    double siny_cosp = 2 * (quat_in.w() * quat_in.z() + quat_in.x() * quat_in.y());
+    double cosy_cosp = 1 - 2 * (quat_in.y() * quat_in.y() + quat_in.z() * quat_in.z());
+    double yaw = std::atan2(siny_cosp, cosy_cosp);
+
+    // The following is the Eigen library method. But it flips for a negative yaw..
+    // Eigen::Matrix3d mat = quat_in.toRotationMatrix();
+    // return mat.eulerAngles(2,1,0);
+
+    return Eigen::Vector3d(yaw, pitch, roll);
+}
+
+
+// ZYX extrinsic rotation rates to world angular velocity
+// angular vel = [wx, wy, wz]
+Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
+                                      const double roll_rate, const double pitch_rate, const double yaw_rate){
+    // From Robot Dynamics Lecture Notes - Robotic Systems Lab, ETH Zurich
+    // Equation (2.86). The matrix has been reordered so that omega = E*[r;p;y]
+    Eigen::Vector3d rpy_rates; 
+    rpy_rates << roll_rate, pitch_rate, yaw_rate;
+
+    Eigen::MatrixXd E(3,3); 
+
+    double y = pitch;   
+    double z = yaw;
+
+    E << cos(y)*cos(z), -sin(z),   0,
+         cos(y)*sin(z),  cos(z),   0,
+           -sin(y)    ,     0    , 1;
+
+    return E*rpy_rates;
 }
 
 void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori){
@@ -204,11 +318,11 @@ void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion
     ori_diff2.z() = des_ori.z() + act_ori.z();
 
     if(ori_diff1.squaredNorm() > ori_diff2.squaredNorm()){
-        act_ori.w() = -act_ori.w();
-        act_ori.x() = -act_ori.x();
-        act_ori.y() = -act_ori.y();
-        act_ori.z() = -act_ori.z();
-    }
+            act_ori.w() = -act_ori.w();
+            act_ori.x() = -act_ori.x();
+            act_ori.y() = -act_ori.y();
+            act_ori.z() = -act_ori.z();
+        }
     else
         act_ori = act_ori;
 }

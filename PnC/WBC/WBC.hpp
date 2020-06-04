@@ -1,90 +1,140 @@
-#ifndef WHOLE_BODY_CONTROLLER
-#define WHOLE_BODY_CONTROLLER
+#pragma once
 
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/pseudo_inverse.hpp>
-#include <PnC/WBC/Task.hpp>
+#include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
 #include <PnC/WBC/ContactSpec.hpp>
+#include <PnC/WBC/Task.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 
-// Assume first 6 (or 3 in 2D case) joints are for the representation of 
-// a floating base.
-class WBC{
-    public:
-        WBC(const std::vector<bool> & act_list, 
-                const Eigen::MatrixXd * Jc_internal = NULL):
-            num_act_joint_(0),
-            num_passive_(0),
-            b_internal_constraint_(false)
-    {
-        num_qdot_ = act_list.size();
-        for(int i(0); i<num_qdot_; ++i){
-            if(act_list[i] == true) ++num_act_joint_;
-            else ++num_passive_;
-        }
-        Sa_ = Eigen::MatrixXd::Zero(num_act_joint_, num_qdot_);
-        Sv_ = Eigen::MatrixXd::Zero(num_passive_, num_qdot_);
+// Implicit Hierarchical Whole Body Controller
+class WBC {
+ public:
+  WBC(const std::vector<bool>& act_list);
+  virtual ~WBC();
 
-        // Set virtual & actuated selection matrix
-        int j(0);
-        int k(0);
-        for(int i(0); i <num_qdot_; ++i){
-            if(act_list[i] == true){
-                Sa_(j, i) = 1.;
-                ++j;
-            }
-            else{
-                Sv_(k,i) = 1.;
-                ++k;
-            }
-        }
+  void updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
+                     const Eigen::VectorXd& cori, const Eigen::VectorXd& grav,
+                     void* extra_setting = NULL);
 
-        if(Jc_internal){
-            Jci_ = *Jc_internal;
-            b_internal_constraint_ = true;
-        }
+  void solve(const std::vector<Task*>& task_list,
+             const std::vector<ContactSpec*>& contact_list,
+             const Eigen::VectorXd& Fd, Eigen::VectorXd& tau_cmd,
+             Eigen::VectorXd& qddot_cmd);
 
-    }
-        virtual ~WBC(){}
+  // Returns the joint acceleration computed by the QP
+  void getQddotResult(Eigen::VectorXd& qddot_out);
+  // Returns the reaction forces computed by the QP
+  void getFrResult(Eigen::VectorXd& Fr_out);
 
-        virtual void updateSetting(const Eigen::MatrixXd & A,
-                const Eigen::MatrixXd & Ainv,
-                const Eigen::VectorXd & cori,
-                const Eigen::VectorXd & grav,
-                void* extra_setting = NULL) = 0;
+  // w_task_hierarchy_in:
+  //  - sets relative weight between task priority
+  //  - must have dimension equal to the number of tasks.
+  // w_rf_contacts_in (for target wrench minimization only)
+  //  - note that ||w_rf_contacts_in||_1 = 1.0
+  //      - ie: sum of w_rf_contacts[i] = 1.0
+  //      - a higher number on the i-th contact will put more force on that
+  //      contact
+  //  - sets relative weight to distribute the foces between contacts
+  //  - must have dimension equal to the number of contacts
+  //
+  // w_contact_weight_in
+  //  - sets the relative weight of the contact forces and the task hierarchies
+  void setQPWeights(const Eigen::VectorXd& w_task_hierarchy_in,
+                    const Eigen::VectorXd& w_rf_contacts_in,
+                    const double& w_contact_weight_in);
+  void setQPWeights(const Eigen::VectorXd& w_task_hierarchy_in,
+                    const double& w_contact_weight_in);
+  void setRegularizationTerms(const double lambda_qddot_in,
+                              const double lambda_Fr_in);
 
-        virtual void makeTorque(const std::vector<Task*> & task_list,
-                const std::vector<ContactSpec*> & contact_list,
-                Eigen::VectorXd & cmd,
-                void* extra_input = NULL) =0;
+  void setTorqueLimits(const Eigen::VectorXd& tau_min_in,
+                       const Eigen::VectorXd& tau_max_in);
+  void enableTorqueLimits(const bool b_torque_limit_in);
 
-    protected:
-        // full rank fat matrix only
-        void _WeightedInverse(const Eigen::MatrixXd & J,
-                const Eigen::MatrixXd & Winv,
-                Eigen::MatrixXd & Jinv){
-            Eigen::MatrixXd lambda(J* Winv * J.transpose());
-            Eigen::MatrixXd lambda_inv;
-            myUtils::pseudoInverse(lambda, 0.0001, lambda_inv);
-            Jinv = Winv * J.transpose() * lambda_inv;
-        }
+  // If true, we try to minimize for a target wrench value. Fd \in mathbf{R}^6.
+  // If false, we try to minimize the desired contact forces term by term: Fd
+  // \in mathbf{R}^(n). n = dim of reaction force
+  void setTargetWrenchMinimization(const bool target_wrench_minimization_in);
+  bool target_wrench_minimization;
 
-        int num_qdot_;
-        int num_act_joint_;
-        int num_passive_;
+  // Weight of task hierarchies
+  Eigen::VectorXd w_task_hierarchy;
+  // Weights of contact reaction forces
+  Eigen::VectorXd w_rf_contacts;
+  double w_contact_weight;
 
-        Eigen::MatrixXd Sa_; // Actuated joint
-        Eigen::MatrixXd Sv_; // Virtual joint
+  // Tikhonov regularization
+  double lambda_qddot;
+  double lambda_Fr;
 
-        Eigen::MatrixXd A_;
-        Eigen::MatrixXd Ainv_;
-        Eigen::VectorXd cori_;
-        Eigen::VectorXd grav_;
+ private:
+  int num_qdot_;                 // Number of degrees of freedom
+  int num_act_joint_;            // Actuated Joints
+  int num_passive_;              // Passive Joints
+  int dim_contacts_;             // Dimension of Contacts
+  int dim_contact_constraints_;  // Dimension of Contact Constraints
 
-        bool b_updatesetting_;
+  int dim_dec_vars_;
+  int dim_inequality_constraints_;
 
-        bool b_internal_constraint_;
-        Eigen::MatrixXd Jci_; // internal constraint Jacobian
-        Eigen::MatrixXd Nci_;
+  // Selection Matrices
+  Eigen::MatrixXd Sa_;  // Actuated joint
+  Eigen::MatrixXd Sv_;  // Virtual joint
+  Eigen::MatrixXd Sf_;  // Floating base
+
+  Eigen::MatrixXd A_;
+  Eigen::MatrixXd Ainv_;
+  Eigen::VectorXd cori_;
+  Eigen::VectorXd grav_;
+
+  // Contact Jacobians
+  Eigen::MatrixXd Jc_;
+  std::vector<Eigen::MatrixXd> Jc_list_;
+
+  // Contact Constraints
+  Eigen::MatrixXd Uf_;
+  Eigen::VectorXd uf_ieq_vec_;
+
+  // Set Torque limits
+  Eigen::VectorXd tau_min_;
+  Eigen::VectorXd tau_max_;
+
+  bool b_weights_set_;
+  bool b_updatesetting_;
+  bool b_torque_limits_;
+
+  // Quadprog sizes
+  int n_quadprog_ = 1;  // Number of Decision Variables
+  int p_quadprog_ = 0;  // Number of Inequality Constraints
+  int m_quadprog_ = 0;  // Number of Equality Constraints
+
+  // Quadprog Variables
+  GolDIdnani::GVect<double> x;
+  // Cost
+  GolDIdnani::GMatr<double> G;
+  GolDIdnani::GVect<double> g0;
+
+  // Equality
+  GolDIdnani::GMatr<double> CE;
+  GolDIdnani::GVect<double> ce0;
+
+  // Inequality
+  GolDIdnani::GMatr<double> CI;
+  GolDIdnani::GVect<double> ci0;
+
+  // Quadprog Result Containers
+  Eigen::VectorXd qp_dec_vars_;
+  Eigen::VectorXd qddot_result_;
+  Eigen::VectorXd Fr_result_;
+
+  void buildContactStacks(const std::vector<ContactSpec*>& contact_list,
+                          const Eigen::VectorXd& w_rf_contacts_in);
+
+  void prepareQPSizes();
+  void setQuadProgCosts(const Eigen::MatrixXd& P_cost,
+                        const Eigen::VectorXd& v_cost);
+  void setEqualityConstraints(const Eigen::MatrixXd& Eq_mat,
+                              const Eigen::VectorXd& Eq_vec);
+  void setInequalityConstraints(const Eigen::MatrixXd& IEq_mat,
+                                const Eigen::VectorXd& IEq_vec);
+  void solveQP();
 };
-
-#endif

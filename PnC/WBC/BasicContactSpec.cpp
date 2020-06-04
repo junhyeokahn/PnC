@@ -20,10 +20,12 @@ bool PointContactSpec::_UpdateJc() {
 
 bool PointContactSpec::_UpdateJcDotQdot() {
     Eigen::VectorXd JcDotQdot_tmp =
-        robot_->getBodyNodeCoMJacobianDot(link_idx_) * robot_->getQdot();
+        robot_->getBodyNodeCoMJacobianDot(link_idx_,
+                                          robot_->getBodyNode(link_idx_)) *
+        robot_->getQdot();
     JcDotQdot_ = JcDotQdot_tmp.tail(dim_contact_);
 
-    // JcDotQdot_.setZero();
+    JcDotQdot_.setZero();
     return true;
 }
 
@@ -110,7 +112,6 @@ bool SurfaceContactSpec::_UpdateJc() {
 
 bool SurfaceContactSpec::_UpdateJcDotQdot() {
     JcDotQdot_ = robot_->getBodyNodeJacobianDot(link_idx_) * robot_->getQdot();
-    // JcDotQdot_.setZero();
     return true;
 }
 
@@ -125,7 +126,19 @@ bool SurfaceContactSpec::_UpdateUf() {
     Rot_foot.setZero();
     Rot_foot.block(0, 0, 3, 3) = Rot_foot_mtx.transpose();
     Rot_foot.block(3, 3, 3, 3) = Rot_foot_mtx.transpose();
-    Uf_ = U * Rot_foot;
+
+    // Contact Wrench transform as discussed in:
+    // https://github.com/stephane-caron/analytical-wrench-cone/issues/2
+    // Uf_ = U * Rot_foot;
+
+    // Equivalent to Adjoint mapping below:
+    // With the geometric Jacobian used by dart (world frame representation of body twists and wrenches),
+    // The wrenches are defined to be at link frame center (p = 0) with moment axes parallel to the world frame.
+    Eigen::MatrixXd Adj_foot(6, 6); Adj_foot.setZero();
+    Eigen::VectorXd pos_vec  = Eigen::Vector3d::Zero();
+    Adj_foot = myUtils::Adjoint(Rot_foot_mtx, pos_vec);
+    Uf_ = U * Adj_foot.transpose();
+
     return true;
 }
 

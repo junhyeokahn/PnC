@@ -51,12 +51,6 @@ if(MOSEK_FOUND)
   include_directories(${MOSEK_INCLUDE_DIRS})
 endif()
 
-# GTest
-find_package(GTest)
-if(GTEST_FOUND)
-    enable_testing()
-endif()
-
 ##=============================================================================
 ## Include Directory
 ##=============================================================================
@@ -69,10 +63,6 @@ add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
-if(GTEST_FOUND)
-  add_subdirectory(UnitTest)
-endif()
-
 
 ##=============================================================================
 ## Configuration File

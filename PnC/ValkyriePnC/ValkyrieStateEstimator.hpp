@@ -8,21 +8,22 @@ class RobotSystem;
 class ValkyrieSensorData;
 
 class ValkyrieStateEstimator {
-   public:
-    ValkyrieStateEstimator(RobotSystem* robot);
-    ~ValkyrieStateEstimator();
+ public:
+  ValkyrieStateEstimator(RobotSystem* robot);
+  ~ValkyrieStateEstimator();
 
-    void Initialization(ValkyrieSensorData*);
-    void Update(ValkyrieSensorData*);
+  void Initialization(ValkyrieSensorData*);
+  void Update(ValkyrieSensorData*);
 
-   protected:
-    ValkyrieStateProvider* sp_;
-    RobotSystem* robot_;
+ protected:
+  ValkyrieStateProvider* sp_;
+  RobotSystem* robot_;
 
-    Eigen::VectorXd curr_config_;
-    Eigen::VectorXd curr_qdot_;
+  Eigen::VectorXd curr_config_;
+  Eigen::VectorXd curr_qdot_;
 
-    void _JointUpdate(ValkyrieSensorData* data);
-    void _ConfigurationAndModelUpdate();
-    void _FootContactUpdate(ValkyrieSensorData* data);
+  void _JointUpdate(ValkyrieSensorData* data);
+  void _ConfigurationAndModelUpdate();
+  void _FootContactUpdate(ValkyrieSensorData* data);
+  void _UpdateDCM();
 };
