@@ -20,9 +20,9 @@ ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr& _world)
   sensor_data_ = new ValkyrieSensorData();
   command_ = new ValkyrieCommand();
 
-  reset_button_flags();
+  resetButtonFlags();
 
-  set_params_();
+  SetParams_();
 }
 
 ValkyrieWorldNode::~ValkyrieWorldNode() {
@@ -40,10 +40,10 @@ void ValkyrieWorldNode::customPreStep() {
   sensor_data_->virtual_qdot = robot_->getVelocities().head(6);
 
   // Compute local frame wrenches on the sensor
-  get_ft_data_();
+  GetForceTorqueData_();
   // Use force thresholding to detect contacts
-  get_contact_switch_data_(sensor_data_->rfoot_contact,
-                           sensor_data_->lfoot_contact);
+  GetContactSwitchData_(sensor_data_->rfoot_contact,
+                        sensor_data_->lfoot_contact);
 
   // Check for user button presses
   if (b_button_p) {
@@ -101,11 +101,11 @@ void ValkyrieWorldNode::customPreStep() {
   count_++;
 
   // reset flags
-  reset_button_flags();
+  resetButtonFlags();
 }
 
-void ValkyrieWorldNode::get_contact_switch_data_(bool& rfoot_contact,
-                                                 bool& lfoot_contact) {
+void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
+                                              bool& lfoot_contact) {
   // Get Sensor Wrench Data
   Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
   Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
@@ -132,7 +132,7 @@ void ValkyrieWorldNode::get_contact_switch_data_(bool& rfoot_contact,
   // std::cout << "Lfoot contact = " << lfoot_contact << std::endl;
 }
 
-void ValkyrieWorldNode::set_params_() {
+void ValkyrieWorldNode::SetParams_() {
   try {
     YAML::Node simulation_cfg =
         YAML::LoadFile(THIS_COM "Config/Valkyrie/SIMULATION.yaml");
@@ -147,7 +147,7 @@ void ValkyrieWorldNode::set_params_() {
   }
 }
 
-void ValkyrieWorldNode::get_ft_data_() {
+void ValkyrieWorldNode::GetForceTorqueData_() {
   Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
 
@@ -211,6 +211,7 @@ void ValkyrieWorldNode::get_ft_data_() {
         Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
         Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
         w_a = AdT_ca.transpose() * w_c;
+        // myUtils::pretty_print(w_a, std::cout, "right");
         rf_wrench += w_a;
       }
     }

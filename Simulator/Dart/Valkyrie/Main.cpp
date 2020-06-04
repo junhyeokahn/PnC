@@ -6,8 +6,8 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include <dart/utils/utils.hpp>
 
-void display_joint_frames(const dart::simulation::WorldPtr& world,
-                          const dart::dynamics::SkeletonPtr& robot) {
+void displayJointFrames(const dart::simulation::WorldPtr& world,
+                        const dart::dynamics::SkeletonPtr& robot) {
   for (std::size_t i = 0; i < robot->getNumBodyNodes(); ++i) {
     dart::dynamics::BodyNode* bn = robot->getBodyNode(i);
     for (std::size_t j = 0; j < bn->getNumChildJoints(); ++j) {
@@ -36,6 +36,42 @@ class OneStepProgress : public osgGA::GUIEventHandler {
   virtual bool handle(const osgGA::GUIEventAdapter& ea,
                       osgGA::GUIActionAdapter& /*aa*/) {
     if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
+      // custom buttons
+      // World Node Buttons
+      if (ea.getKey() == 'p') {
+        worldnode_->enableButtonPFlag();
+      }
+      if (ea.getKey() == 'r') {
+        worldnode_->enableButtonRFlag();
+      }
+      if (ea.getKey() == 'w') {
+        worldnode_->enableButtonWFlag();
+      }
+      if (ea.getKey() == 'a') {
+        worldnode_->enableButtonAFlag();
+      }
+      if (ea.getKey() == 's') {
+        worldnode_->enableButtonSFlag();
+      }
+      if (ea.getKey() == 'd') {
+        worldnode_->enableButtonDFlag();
+      }
+      if (ea.getKey() == 'q') {
+        worldnode_->enableButtonQFlag();
+      }
+      if (ea.getKey() == 'e') {
+        worldnode_->enableButtonEFlag();
+      }
+      if (ea.getKey() == 'x') {
+        worldnode_->enableButtonXFlag();
+      }
+      if (ea.getKey() == 'j') {
+        worldnode_->enableButtonJFlag();
+      }
+      if (ea.getKey() == 'k') {
+        worldnode_->enableButtonKFlag();
+      }
+
       if (ea.getKey() == 'f') {
         int numStepProgress(50);
         for (int i = 0; i < numStepProgress; ++i) {
@@ -51,14 +87,14 @@ class OneStepProgress : public osgGA::GUIEventHandler {
   ValkyrieWorldNode* worldnode_;
 };
 
-void set_joint_limit(dart::dynamics::SkeletonPtr robot) {
+void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
   for (int i = 0; i < robot->getNumJoints(); ++i) {
     dart::dynamics::Joint* joint = robot->getJoint(i);
     joint->setPositionLimitEnforced(true);
   }
 }
 
-void print_robot_model(dart::dynamics::SkeletonPtr robot) {
+void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
   // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
   // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
   // std::cout << i << "th" << std::endl;
@@ -108,7 +144,7 @@ void print_robot_model(dart::dynamics::SkeletonPtr robot) {
   exit(0);
 }
 
-void set_init_config(dart::dynamics::SkeletonPtr robot) {
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
   int leftHipPitch = robot->getDof("leftHipPitch")->getIndexInSkeleton();
   int rightHipPitch = robot->getDof("rightHipPitch")->getIndexInSkeleton();
   int leftKneePitch = robot->getDof("leftKneePitch")->getIndexInSkeleton();
@@ -191,7 +227,7 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Friction & Restitution Coefficient
   // =========================================================================
-  double friction(0.9);
+  double friction(1.0);
   double restit(0.0);
   ground->getBodyNode("ground_link")->setFrictionCoeff(friction);
   robot->getBodyNode("rightFoot")->setFrictionCoeff(friction);
@@ -204,22 +240,22 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Display Joints Frame
   // =========================================================================
-  if (b_show_joint_frame) display_joint_frames(world, robot);
+  if (b_show_joint_frame) displayJointFrames(world, robot);
 
   // =========================================================================
   // Initial configuration
   // =========================================================================
-  set_init_config(robot);
+  _setInitialConfiguration(robot);
 
   // =========================================================================
   // Enabel Joit Limits
   // =========================================================================
-  // set_joint_limit(robot);
+  //_setJointLimitConstraint(robot);
 
   // =========================================================================
   // Print Model Info
   // =========================================================================
-  // print_robot_model(robot);
+  //_printRobotModel(robot);
 
   // =========================================================================
   // Wrap a worldnode

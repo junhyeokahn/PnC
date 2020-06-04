@@ -11,9 +11,9 @@ class ValkyrieCommand;
 
 class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
  private:
-  void get_contact_switch_data_(bool& rfoot_contact, bool& lfoot_contact);
-  void set_params_();
-  void get_ft_data_();
+  void GetContactSwitchData_(bool& rfoot_contact, bool& lfoot_contact);
+  void SetParams_();
+  void GetForceTorqueData_();
 
   EnvInterface* interface_;
   ValkyrieSensorData* sensor_data_;
@@ -53,19 +53,19 @@ class ValkyrieWorldNode : public dart::gui::osg::WorldNode {
   bool b_button_j;
   bool b_button_k;
 
-  void enable_button_p_fjlag() { b_button_p = true; }
-  void enable_button_r_flag() { b_button_r = true; }
-  void enable_button_w_flag() { b_button_w = true; }
-  void enable_button_a_flag() { b_button_a = true; }
-  void enable_button_s_flag() { b_button_s = true; }
-  void enable_button_d_flag() { b_button_d = true; }
-  void enable_button_q_flag() { b_button_q = true; }
-  void enable_button_e_flag() { b_button_e = true; }
-  void enable_button_x_flag() { b_button_x = true; }
-  void enable_button_j_flag() { b_button_j = true; }
-  void enable_button_k_flag() { b_button_k = true; }
+  void enableButtonPFlag() { b_button_p = true; }
+  void enableButtonRFlag() { b_button_r = true; }
+  void enableButtonWFlag() { b_button_w = true; }
+  void enableButtonAFlag() { b_button_a = true; }
+  void enableButtonSFlag() { b_button_s = true; }
+  void enableButtonDFlag() { b_button_d = true; }
+  void enableButtonQFlag() { b_button_q = true; }
+  void enableButtonEFlag() { b_button_e = true; }
+  void enableButtonXFlag() { b_button_x = true; }
+  void enableButtonJFlag() { b_button_j = true; }
+  void enableButtonKFlag() { b_button_k = true; }
 
-  void reset_button_flags() {
+  void resetButtonFlags() {
     b_button_p = false;
     b_button_r = false;
     b_button_w = false;

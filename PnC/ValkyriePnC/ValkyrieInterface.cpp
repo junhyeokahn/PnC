@@ -91,6 +91,9 @@ void ValkyrieInterface::_ParameterSetting() {
         myUtils::readParameter<std::string>(cfg, "test_name");
     if (test_name == "walking") {
       control_architecture_ = new ValkyrieControlArchitecture(robot_);
+      delete interrupt_;
+      interrupt_ = new WalkingInterruptLogic(
+          static_cast<ValkyrieControlArchitecture*>(control_architecture_));
     } else {
       printf(
           "[Valkyrie Interface] There is no test matching test with "
