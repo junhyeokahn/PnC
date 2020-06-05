@@ -48,6 +48,7 @@ void ValkyrieTaskAndForceContainer::_InitializeContacts(){
         robot_, ValkyrieBodyNode::rightCOP_Frame, 0.135, 0.08, 0.9/sqrt(2.0));
     lfoot_contact_ = new SurfaceContactSpec(
         robot_, ValkyrieBodyNode::leftCOP_Frame, 0.135, 0.08, 0.9/sqrt(2.0));
+
     dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim(); 
     rfoot_max_z_ = 1500;
     lfoot_max_z_ = 1500;
@@ -122,7 +123,7 @@ void ValkyrieTaskAndForceContainer::paramInitialization(const YAML::Node& node){
         // Load Task Gains
         myUtils::readParameter(node, "kp_com", kp_com_);
         myUtils::readParameter(node, "kd_com", kd_com_);                               
-        myUtils::readParameter(node, "kd_ang_mom", kp_ang_mom_);         
+        myUtils::readParameter(node, "kd_ang_mom", kd_ang_mom_);         
         myUtils::readParameter(node, "kp_pelvis", kp_pelvis_);
         myUtils::readParameter(node, "kd_pelvis", kd_pelvis_);
         myUtils::readParameter(node, "kp_upper_body_joint", temp_double);        
