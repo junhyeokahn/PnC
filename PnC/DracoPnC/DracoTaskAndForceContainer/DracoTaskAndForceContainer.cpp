@@ -1,0 +1,135 @@
+#include <PnC/DracoPnC/DracoTaskAndForceContainer/DracoTaskAndForceContainer.hpp>
+
+DracoTaskAndForceContainer::DracoTaskAndForceContainer(RobotSystem* _robot)
+    : TaskAndForceContainer(_robot) {
+  _InitializeTasks();
+  _InitializeContacts();
+}
+
+DracoTaskAndForceContainer::~DracoTaskAndForceContainer() {
+  _DeleteTasks();
+  _DeleteContacts();
+}
+
+void DracoTaskAndForceContainer::_InitializeTasks() {
+  myUtils::pretty_constructor(2, "Draco Task And Force Container");
+
+  // CoM and Pelvis Tasks
+  com_task_ = new CoMxyz(robot_);
+  torso_ori_task_ =
+      new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::torso);
+
+  // Set Foot Motion Tasks
+  rfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
+                                         DracoBodyNode::rFootCenter);
+  lfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
+                                         DracoBodyNode::lFootCenter);
+  rfoot_center_ori_task_ = new BasicTask(robot_, DracoBodyNode::rFootCenter);
+  lfoot_center_ori_task_ = new BasicTask(robot_, DracoBodyNode::lFootCenter);
+
+  // Add all tasks initially. Remove later as needed.
+  task_list_.push_back(com_task_);
+  task_list_.push_back(torso_ori_task_);
+
+  task_list_.push_back(rfoot_center_pos_task_);
+  task_list_.push_back(lfoot_center_pos_task_);
+  task_list_.push_back(rfoot_center_ori_task_);
+  task_list_.push_back(lfoot_center_ori_task_);
+}
+
+void DracoTaskAndForceContainer::_InitializeContacts() {
+  rfoot_front_contact_ =
+      new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.9);
+  rfoot_back_contact_ =
+      new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.9);
+  lfoot_front_contact_ =
+      new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.9);
+  lfoot_back_contact_ =
+      new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.9);
+
+  dim_contact_ = rfoot_front_contact_->getDim() +
+                 rfoot_back_contact_->getDim() +
+                 lfoot_front_contact_->getDim() + lfoot_back_contact_->getDim();
+  max_z_ = 500.;
+
+  // Set desired reaction forces
+  Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
+
+  // Add all contacts initially. Remove later as needed.
+  contact_list_.push_back(rfoot_front_contact_);
+  contact_list_.push_back(rfoot_back_contact_);
+  contact_list_.push_back(lfoot_front_contact_);
+  contact_list_.push_back(lfoot_back_contact_);
+}
+
+void DracoTaskAndForceContainer::_DeleteTasks() {
+  delete com_task_;
+  delete torso_ori_task_;
+  delete rfoot_center_pos_task_;
+  delete lfoot_center_pos_task_;
+  delete rfoot_center_ori_task_;
+  delete lfoot_center_ori_task_;
+  task_list_.clear();
+}
+
+void DracoTaskAndForceContainer::_DeleteContacts() {
+  delete rfoot_front_contact_;
+  delete rfoot_back_contact_;
+  delete lfoot_front_contact_;
+  delete lfoot_back_contact_;
+  contact_list_.clear();
+}
+
+void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
+  try {
+    double temp_double;
+    Eigen::VectorXd temp_vec;
+
+    // Load Maximum normal force
+    myUtils::readParameter(node, "max_z", max_z_);
+
+    // Load Task Gains
+    myUtils::readParameter(node, "kp_com", kp_com_);
+    myUtils::readParameter(node, "kd_com", kd_com_);
+    myUtils::readParameter(node, "kp_torso", kp_torso_);
+    myUtils::readParameter(node, "kd_torso", kd_torso_);
+    myUtils::readParameter(node, "kp_foot_pos", kp_foot_pos_);
+    myUtils::readParameter(node, "kd_foot_pos", kd_foot_pos_);
+    myUtils::readParameter(node, "kp_foot_ori", kp_foot_ori_);
+    myUtils::readParameter(node, "kd_foot_ori", kd_foot_ori_);
+
+    // Load Task Hierarchies
+    myUtils::readParameter(node, "w_task_com", w_task_com_);
+    myUtils::readParameter(node, "w_task_torso", w_task_torso_);
+    myUtils::readParameter(node, "w_task_foot_contact", w_task_foot_contact_);
+    myUtils::readParameter(node, "w_task_foot_swing", w_task_foot_swing_);
+
+  } catch (std::runtime_error& e) {
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+    exit(0);
+  }
+
+  // Set Task Gains
+  com_task_->setGain(kp_com_, kd_com_);
+  torso_ori_task_->setGain(kp_torso_, kd_torso_);
+  rfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
+  lfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
+  rfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
+  lfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
+
+  // Set Task Hierarchies
+  com_task_->setHierarchyWeight(w_task_com_);
+  torso_ori_task_->setHierarchyWeight(w_task_torso_);
+  rfoot_center_pos_task_->setHierarchyWeight(w_task_foot_contact_);
+  rfoot_center_ori_task_->setHierarchyWeight(w_task_foot_contact_);
+  lfoot_center_pos_task_->setHierarchyWeight(w_task_foot_contact_);
+  lfoot_center_ori_task_->setHierarchyWeight(w_task_foot_contact_);
+
+  // Set Maximum Forces
+  ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(max_z_);
+  ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(max_z_);
+  ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(max_z_);
+  ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(max_z_);
+}

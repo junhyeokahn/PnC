@@ -174,14 +174,14 @@ void ValkyrieTaskAndForceContainer::paramInitialization(
   lfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
 
   // Set Task Hierarchies
-  com_task_->setHierarchy(w_task_com_);
-  ang_momentum_task_->setHierarchy(w_task_ang_mom_);
-  pelvis_ori_task_->setHierarchy(w_task_pelvis_);
-  upper_body_task_->setHierarchy(w_task_upper_body_);
-  rfoot_center_pos_task_->setHierarchy(w_task_foot_contact_);
-  rfoot_center_ori_task_->setHierarchy(w_task_foot_contact_);
-  lfoot_center_pos_task_->setHierarchy(w_task_foot_contact_);
-  lfoot_center_ori_task_->setHierarchy(w_task_foot_contact_);
+  com_task_->setHierarchyWeight(w_task_com_);
+  ang_momentum_task_->setHierarchyWeight(w_task_ang_mom_);
+  pelvis_ori_task_->setHierarchyWeight(w_task_pelvis_);
+  upper_body_task_->setHierarchyWeight(w_task_upper_body_);
+  rfoot_center_pos_task_->setHierarchyWeight(w_task_foot_contact_);
+  rfoot_center_ori_task_->setHierarchyWeight(w_task_foot_contact_);
+  lfoot_center_pos_task_->setHierarchyWeight(w_task_foot_contact_);
+  lfoot_center_ori_task_->setHierarchyWeight(w_task_foot_contact_);
 
   // Set Maximum Forces
   ((SurfaceContactSpec*)rfoot_contact_)->setMaxFz(rfoot_max_z_);

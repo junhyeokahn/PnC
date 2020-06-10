@@ -78,5 +78,5 @@ void TaskGainScheduleTrajectoryManager::updateRampToMaxDesired(
 }
 
 void TaskGainScheduleTrajectoryManager::updateTaskHierarchy() {
-  task_->setHierarchy(current_w_);
+  task_->setHierarchyWeight(current_w_);
 }

@@ -1,0 +1,4 @@
+- [ ] LineFootTask --> Using local error, local jacobian to eliminate
+x-directional error
+
+- [ ]

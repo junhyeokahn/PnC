@@ -1,13 +1,15 @@
 #include <PnC/TrajectoryManager/DCMPlannerTrajectoryManager.hpp>
 
 DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(
-    DCMPlanner* _dcm_planner, RobotSystem* _robot, int _lfoot_idx,
-    int _rfoot_idx)
-    : TrajectoryManagerBase(_robot),
-      lfoot_id_(_lfoot_idx),
-      rfoot_id_(_rfoot_idx) {
+    DCMPlanner* _dcm_planner, Task* _com_task, Task* _base_ori_task,
+    RobotSystem* _robot, int _lfoot_idx, int _rfoot_idx)
+    : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
   dcm_planner_ = _dcm_planner;
+  com_task_ = _com_task;
+  base_ori_task_ = _base_ori_task;
+  lfoot_id_ = _lfoot_idx;
+  rfoot_id_ = _rfoot_idx;
 
   // Initialize step index
   resetStepIndex();
@@ -38,12 +40,6 @@ DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(
 }
 
 DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager() {}
-
-void DCMPlannerTrajectoryManager::setCoMandPelvisTasks(
-    Task* _com_task, Task* _pelvis_ori_task_) {
-  com_task_ = _com_task;
-  pelvis_ori_task_ = _pelvis_ori_task_;
-}
 
 void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams() {
   // Fixed transforms
@@ -209,7 +205,7 @@ void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time) {
   // myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
 
   com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
-  pelvis_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
+  base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
 
 bool DCMPlannerTrajectoryManager::nextStepRobotSide(int& robot_side) {

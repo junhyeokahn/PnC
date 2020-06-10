@@ -71,7 +71,6 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
   ++count_;
   running_time_ = (double)(count_)*ValkyrieAux::servo_rate;
   sp_->curr_time = running_time_;
-
   sp_->phase_copy = control_architecture_->getState();
 }
 

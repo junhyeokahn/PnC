@@ -11,12 +11,11 @@ class EnvInterface {
  protected:
   ControlArchitecture* control_architecture_;
   RobotSystem* robot_;
+  InterruptLogic* interrupt_;
   int count_;
   double running_time_;
 
  public:
-  InterruptLogic* interrupt_;
-
   EnvInterface() {
     count_ = 0;
     running_time_ = 0.;
