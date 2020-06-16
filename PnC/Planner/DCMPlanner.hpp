@@ -16,16 +16,13 @@ class DCMPlanner {
   DCMPlanner();
   ~DCMPlanner();
 
-  static int const DCM_RL_SWING_VRP_TYPE;
-  static int const DCM_LL_SWING_VRP_TYPE;
-  static int const DCM_MIDSTEP_TRANSFER_VRP_TYPE;
-  static int const DCM_TRANSFER_VRP_TYPE;
-  static int const DCM_END_VRP_TYPE;
+  static int const DCM_RL_SWING_VRP_TYPE;  // 1
+  static int const DCM_LL_SWING_VRP_TYPE;  // 2
+  static int const DCM_TRANSFER_VRP_TYPE;  // 3
+  static int const DCM_END_VRP_TYPE;       // 4
 
   std::vector<int> rvrp_type_list;  // List of type of virtual repelant point
-
-  std::vector<Footstep> footstep_list;  // Footstep list to generate pattern
-
+  std::vector<Footstep> footstep_list;     // Footstep list to generate pattern
   std::vector<Eigen::Vector3d> rvrp_list;  // List of virtual repelant points.
   std::vector<Eigen::Vector3d> dcm_ini_list;  // List of initial DCM states
   std::vector<Eigen::Vector3d> dcm_eos_list;  // List of end-of-step DCM states

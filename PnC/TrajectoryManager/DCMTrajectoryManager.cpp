@@ -63,17 +63,15 @@ double DCMTrajectoryManager::getInitialContactTransferTime() {
   return t_initial_transfer_time;
 }
 
+// midstep transfer time before contact transition
 double DCMTrajectoryManager::getMidStepContactTransferTime() {
-  double t_midstep_transfer =
-      t_ds_;  // midstep transfer time before contact transition
+  double t_midstep_transfer = t_ds_;
   return t_midstep_transfer;
 }
 
+// total time after landing the last step.
 double DCMTrajectoryManager::getFinalContactTransferTime() {
-  double t_final_transfer =
-      t_ds_ +
-      dcm_planner_
-          ->get_settle_time();  // total time after landing the last step.
+  double t_final_transfer = t_ds_ + dcm_planner_->get_settle_time();
   return t_final_transfer;
 }
 
@@ -137,12 +135,6 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   right_foot_start_ = right_foot_stance_;
   updatePreview(4);
 
-  // std::cout << "[DCMTrajectoryManager]" << std::endl;
-  // std::cout << "  current_footstep_index = " << current_footstep_index_ <<
-  // std::endl;
-  // std::cout << "  preview size = " << footstep_preview_list_.size() <<
-  // std::endl;
-
   // If preview list is empty, don't update.
   if (footstep_preview_list_.size() == 0) {
     std::cout << "[DCMTrajectoryManager] ERROR. Footstep preview list "
@@ -157,10 +149,6 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
 
-  // std::cout << "ori_start_in:" << ori_start_in.w() << ", "
-  //                              << ori_start_in.x() << ", "
-  //                              << ori_start_in.y() << ", "
-  //                              << ori_start_in.z() << ", " << std::endl;
   // Set transfer time
   if (transfer_type_in == DCM_TRANSFER_TYPES::INITIAL) {
     dcm_planner_->t_transfer = t_transfer_init_;

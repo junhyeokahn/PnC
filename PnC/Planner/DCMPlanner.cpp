@@ -209,6 +209,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   }
 }
 
+// Method using in DCMTrajectoryManager
 void DCMPlanner::initialize_footsteps_rvrp(
     const std::vector<Footstep>& input_footstep_list,
     const Footstep& left_footstance, const Footstep& right_footstance,

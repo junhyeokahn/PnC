@@ -49,39 +49,45 @@ void ContactTransitionEnd::firstVisit() {
 
 void ContactTransitionEnd::_taskUpdate() {
   // =========================================================================
-  // - Compute and update new maximum reaction forces
-  // - Ramp to minimum the foot task hierarchy weight in prep for swing
-  // =========================================================================
-  if (leg_side_ == LEFT_ROBOT_SIDE) {
-    ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(
-        state_machine_time_);
-    ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->updateRampToMinDesired(
-        state_machine_time_);
-    ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->updateRampToMinDesired(
-        state_machine_time_);
-  } else {
-    ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(
-        state_machine_time_);
-    ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->updateRampToMinDesired(
-        state_machine_time_);
-    ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->updateRampToMinDesired(
-        state_machine_time_);
-  }
-
-  // =========================================================================
-  // Set DCM tasks from trajectory manager
+  // Floating Base
   // =========================================================================
   ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
-  // Set Foot Motion Tasks
+  // Foot, Joint
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->joint_trajectory_manager_->useCurrent();
 }
 
 void ContactTransitionEnd::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
+
+  // =========================================================================
+  // - Compute and update new maximum reaction forces
+  // - Ramp to minimum the foot task hierarchy weight in prep for swing
+  // =========================================================================
+  if (leg_side_ == LEFT_ROBOT_SIDE) {
+    ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
+        state_machine_time_);
+    ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
+        state_machine_time_);
+    ctrl_arch_->lfoot_pos_hierarchy_manager_->updateRampToMinDesired(
+        state_machine_time_);
+    ctrl_arch_->lfoot_ori_hierarchy_manager_->updateRampToMinDesired(
+        state_machine_time_);
+  } else {
+    ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
+        state_machine_time_);
+    ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
+        state_machine_time_);
+    ctrl_arch_->rfoot_pos_hierarchy_manager_->updateRampToMinDesired(
+        state_machine_time_);
+    ctrl_arch_->rfoot_ori_hierarchy_manager_->updateRampToMinDesired(
+        state_machine_time_);
+  }
+
   _taskUpdate();
 }
 

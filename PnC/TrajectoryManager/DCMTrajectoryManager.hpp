@@ -9,7 +9,7 @@
 namespace DCM_TRANSFER_TYPES {
 constexpr int INITIAL = 0;
 constexpr int MIDSTEP = 1;
-};
+};  // namespace DCM_TRANSFER_TYPES
 
 class DCMTrajectoryManager : public TrajectoryManagerBase {
  public:
