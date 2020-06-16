@@ -1,10 +1,9 @@
 #include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
-#include <PnC/DracoPnC/DracoStateMachine/ContactTransition.hpp>
+#include <PnC/DracoPnC/DracoStateMachine/ContactTransitionStart.hpp>
 
-ContactTransition::ContactTransition(const StateIdentifier state_identifier_in,
-                                     const int _leg_side,
-                                     DracoControlArchitecture* _ctrl_arch,
-                                     RobotSystem* _robot)
+ContactTransitionStart::ContactTransitionStart(
+    const StateIdentifier state_identifier_in, const int _leg_side,
+    DracoControlArchitecture* _ctrl_arch, RobotSystem* _robot)
     : StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Contact Transition");
 
@@ -12,34 +11,36 @@ ContactTransition::ContactTransition(const StateIdentifier state_identifier_in,
   ctrl_arch_ = ((DracoControlArchitecture*)_ctrl_arch);
   taf_container_ = ctrl_arch_->taf_container_;
   // Get State Provider
-  sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+  sp_ = DracoStateProvider::getStateProvider(robot_);
 
   // Set Leg Side
   leg_side_ = _leg_side;
 }
 
-ContactTransition::~ContactTransition() {}
+ContactTransitionStart::~ContactTransitionStart() {}
 
-void ContactTransition::firstVisit() {
-  std::cout << "[Contact Transition Start] Leg Side: " << leg_side_
-            << std::endl;
+void ContactTransitionStart::firstVisit() {
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 
   // For all contact transitions, initially ramp up the reaction forces to max
-  ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
-  ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
+      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+  ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
 
   // Ramp to max the contact hierarchy weight
-  ctrl_arch_->lfoot_contact_pos_hierarchy_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
-  ctrl_arch_->lfoot_contact_ori_hierarchy_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
-  ctrl_arch_->rfoot_contact_pos_hierarchy_manager_->initializeRampToMax(
+  ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
-  ctrl_arch_->rfoot_contact_ori_hierarchy_manager_->initializeRampToMax(
+  ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
 
   // Check if it's the last footstep
@@ -68,14 +69,14 @@ void ContactTransition::firstVisit() {
 
     // Recompute DCM Trajectories
     double t_walk_start = ctrl_start_time_;
-    Eigen::Quaterniond pelvis_ori(
-        robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
+    Eigen::Quaterniond base_ori(
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::torso).linear());
     ctrl_arch_->dcm_trajectory_manger_->initialize(
-        t_walk_start, transfer_type, pelvis_ori, sp_->dcm, sp_->dcm_vel);
+        t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
   }
 }
 
-void ContactTransition::_taskUpdate() {
+void ContactTransitionStart::_taskUpdate() {
   // =========================================================================
   // Compute and update new maximum reaction forces
   // =========================================================================
@@ -108,14 +109,14 @@ void ContactTransition::_taskUpdate() {
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
 }
 
-void ContactTransition::oneStep() {
+void ContactTransitionStart::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
   _taskUpdate();
 }
 
-void ContactTransition::lastVisit() {}
+void ContactTransitionStart::lastVisit() {}
 
-bool ContactTransition::endOfState() {
+bool ContactTransitionStart::endOfState() {
   // if time exceeds transition time, switch state
   if (state_machine_time_ >= end_time_) {
     return true;
@@ -124,7 +125,7 @@ bool ContactTransition::endOfState() {
   }
 }
 
-StateIdentifier ContactTransition::getNextState() {
+StateIdentifier ContactTransitionStart::getNextState() {
   if (ctrl_arch_->dcm_trajectory_manger_
           ->noRemainingSteps()) {  // or pause walking
     // Return to balancing
@@ -140,4 +141,4 @@ StateIdentifier ContactTransition::getNextState() {
   }
 }
 
-void ContactTransition::initialization(const YAML::Node& node) {}
+void ContactTransitionStart::initialization(const YAML::Node& node) {}

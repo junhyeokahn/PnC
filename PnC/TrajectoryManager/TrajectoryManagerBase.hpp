@@ -15,7 +15,7 @@ class TrajectoryManagerBase {
  public:
   TrajectoryManagerBase(RobotSystem* _robot) { robot_ = _robot; }
   virtual ~TrajectoryManagerBase() {}
-  virtual void paramInitialization(const YAML::Node& node) = 0;
+  virtual void paramInitialization(const YAML::Node& node);
 
   RobotSystem* robot_;
 

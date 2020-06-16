@@ -1,14 +1,18 @@
+state_initialize_params:
+    target_pos_duration: 2.0
+    target_pos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+
 state_stand_params:
-    target_pos_duration: 1.0 # duration to reach target com position
-    time_to_max_normal_force: 0.1 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
-    com_pos_target: [0, 0, 1.015] # target com position from the midfoot position in world frame
+    target_pos_duration: 2.0 # duration to reach target com position
+    time_to_max_normal_force: 0.5 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    target_height: 0.7
 
 state_swing:
     swing_time_percent_early_contact_check: 0.5 # Percent of end_time to check if there are early contacts 
     early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
 
 dcm_planner_parameters:
-    nominal_com_height: 1.015 # m from the ground    
+    nominal_com_height: 0.7 # m from the ground    
 
     t_additional_init_transfer: 0.0 # seconds. The additional initial transfer time to switch the stance leg
     t_contact_transition: 0.45 # seconds. The transition time used to change reaction forces and stance leg
@@ -42,21 +46,35 @@ controller_parameters:
 
 task_parameters:
     # Maximum normal force
+    ini_z_force: 0.0
     max_z_force: 500
 
     # Task hierarchy weights
-    w_task_com: 10.0
-    w_task_torso: 10.0
-    w_task_foot_contact: 40.0
-    w_task_foot_swing: 20.0 
+    ini_w_task_com: 0.0
+    ini_w_task_base_ori: 0.0
+    ini_w_task_foot_pos: 0.0
+    ini_w_task_foot_ori: 0.0
+    ini_w_task_joint: 20.0
+
+    max_w_task_com: 10.0
+    max_w_task_base_ori: 10.0
+    max_w_task_foot_pos: 40.0
+    max_w_task_foot_ori: 40.0
+    max_w_task_joint: 20.0
+
+    min_w_task_com: 0.0
+    min_w_task_base_ori: 0.0
+    min_w_task_foot_pos: 20.0
+    min_w_task_foot_ori: 20.0
+    min_w_task_joint: 0.0
 
     # Task Gains
     # COM
     kp_com: [50, 50, 50] 
     kd_com: [5, 5,5] 
     # Pelvis
-    kp_pelvis: [50, 50, 50]
-    kd_pelvis: [5, 5, 5]
+    kp_base_ori: [50, 50, 50]
+    kd_base_ori: [5, 5, 5]
     # Foot Linear and orientation gains
     kp_foot_pos: [400, 400, 400]
     kd_foot_pos: [40, 40, 40]

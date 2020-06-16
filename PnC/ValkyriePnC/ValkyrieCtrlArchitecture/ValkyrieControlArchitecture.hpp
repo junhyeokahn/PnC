@@ -5,10 +5,10 @@
 #include <PnC/ControlArchitecture.hpp>
 #include <PnC/Planner/DCMPlanner.hpp>
 #include <PnC/Planner/Footstep.hpp>
-#include <PnC/TrajectoryManager/DCMPlannerTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/DCMTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/FootSE3TrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
-#include <PnC/TrajectoryManager/TaskGainScheduleTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
 #include <PnC/ValkyriePnC/ValkyrieCtrl/ValkyrieMainController.hpp>
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/ValkyriePnC/ValkyrieStateMachine/ContactTransition.hpp>
@@ -59,9 +59,9 @@ class ValkyrieControlArchitecture : public ControlArchitecture {
   MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
   UpperBodyJointTrajectoryManager* upper_body_joint_trajectory_manager_;
-  TaskGainScheduleTrajectoryManager* lfoot_contact_pos_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* lfoot_contact_ori_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* rfoot_contact_pos_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* rfoot_contact_ori_hierarchy_manager_;
-  DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
+  TaskWeightTrajectoryManager* lfoot_contact_pos_hierarchy_manager_;
+  TaskWeightTrajectoryManager* lfoot_contact_ori_hierarchy_manager_;
+  TaskWeightTrajectoryManager* rfoot_contact_pos_hierarchy_manager_;
+  TaskWeightTrajectoryManager* rfoot_contact_ori_hierarchy_manager_;
+  DCMTrajectoryManager* dcm_trajectory_manger_;
 };

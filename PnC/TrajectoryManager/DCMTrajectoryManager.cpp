@@ -1,8 +1,10 @@
-#include <PnC/TrajectoryManager/DCMPlannerTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/DCMTrajectoryManager.hpp>
 
-DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(
-    DCMPlanner* _dcm_planner, Task* _com_task, Task* _base_ori_task,
-    RobotSystem* _robot, int _lfoot_idx, int _rfoot_idx)
+DCMTrajectoryManager::DCMTrajectoryManager(DCMPlanner* _dcm_planner,
+                                           Task* _com_task,
+                                           Task* _base_ori_task,
+                                           RobotSystem* _robot, int _lfoot_idx,
+                                           int _rfoot_idx)
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
   dcm_planner_ = _dcm_planner;
@@ -39,9 +41,9 @@ DCMPlannerTrajectoryManager::DCMPlannerTrajectoryManager(
   convertTemporalParamsToDCMParams();
 }
 
-DCMPlannerTrajectoryManager::~DCMPlannerTrajectoryManager() {}
+DCMTrajectoryManager::~DCMTrajectoryManager() {}
 
-void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams() {
+void DCMTrajectoryManager::convertTemporalParamsToDCMParams() {
   // Fixed transforms
   t_ds_ = t_contact_transition_;  // double support polynomial transfer time
   t_ss_ = t_swing_;  // single support exponential interpolation  time
@@ -53,7 +55,7 @@ void DCMPlannerTrajectoryManager::convertTemporalParamsToDCMParams() {
       (alpha_ds_ - 1.0) * t_ds_;  // transfer time offset for midstep transfers
 }
 
-double DCMPlannerTrajectoryManager::getInitialContactTransferTime() {
+double DCMTrajectoryManager::getInitialContactTransferTime() {
   double t_initial_transfer_time =
       t_additional_init_transfer_ + t_ds_ +
       (1 - alpha_ds_) *
@@ -61,13 +63,13 @@ double DCMPlannerTrajectoryManager::getInitialContactTransferTime() {
   return t_initial_transfer_time;
 }
 
-double DCMPlannerTrajectoryManager::getMidStepContactTransferTime() {
+double DCMTrajectoryManager::getMidStepContactTransferTime() {
   double t_midstep_transfer =
       t_ds_;  // midstep transfer time before contact transition
   return t_midstep_transfer;
 }
 
-double DCMPlannerTrajectoryManager::getFinalContactTransferTime() {
+double DCMTrajectoryManager::getFinalContactTransferTime() {
   double t_final_transfer =
       t_ds_ +
       dcm_planner_
@@ -75,24 +77,20 @@ double DCMPlannerTrajectoryManager::getFinalContactTransferTime() {
   return t_final_transfer;
 }
 
-double DCMPlannerTrajectoryManager::getSwingTime() { return t_ss_; }
+double DCMTrajectoryManager::getSwingTime() { return t_ss_; }
 
-double DCMPlannerTrajectoryManager::getNormalForceRampUpTime() {
+double DCMTrajectoryManager::getNormalForceRampUpTime() {
   return alpha_ds_ * t_ds_;
 }
-double DCMPlannerTrajectoryManager::getNormalForceRampDownTime() {
+double DCMTrajectoryManager::getNormalForceRampDownTime() {
   return (1.0 - alpha_ds_) * t_ds_;
 }
 
-void DCMPlannerTrajectoryManager::incrementStepIndex() {
-  current_footstep_index_++;
-}
-void DCMPlannerTrajectoryManager::resetStepIndex() {
-  current_footstep_index_ = 0;
-}
+void DCMTrajectoryManager::incrementStepIndex() { current_footstep_index_++; }
+void DCMTrajectoryManager::resetStepIndex() { current_footstep_index_ = 0; }
 
 // Updates the feet pose of the starting stance
-void DCMPlannerTrajectoryManager::updateStartingStance() {
+void DCMTrajectoryManager::updateStartingStance() {
   Eigen::Vector3d lfoot_pos =
       robot_->getBodyNodeCoMIsometry(lfoot_id_).translation();
   Eigen::Quaterniond lfoot_ori(
@@ -111,8 +109,7 @@ void DCMPlannerTrajectoryManager::updateStartingStance() {
 
 // Updates the local footstep list (ie: footstep preview) for trajectory
 // generation:
-void DCMPlannerTrajectoryManager::updatePreview(
-    const int max_footsteps_to_preview) {
+void DCMTrajectoryManager::updatePreview(const int max_footsteps_to_preview) {
   footstep_preview_list_.clear();
   for (int i = 0; i < max_footsteps_to_preview; i++) {
     if ((i + current_footstep_index_) < footstep_list_.size()) {
@@ -124,11 +121,11 @@ void DCMPlannerTrajectoryManager::updatePreview(
   }
 }
 
-bool DCMPlannerTrajectoryManager::initialize(
-    const double t_walk_start_in, const int transfer_type_in,
-    const Eigen::Quaterniond& ori_start_in,
-    const Eigen::Vector3d& dcm_pos_start_in,
-    const Eigen::Vector3d& dcm_vel_start_in) {
+bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
+                                      const int transfer_type_in,
+                                      const Eigen::Quaterniond& ori_start_in,
+                                      const Eigen::Vector3d& dcm_pos_start_in,
+                                      const Eigen::Vector3d& dcm_vel_start_in) {
   if (footstep_list_.size() == 0) {
     return false;
   }
@@ -140,7 +137,7 @@ bool DCMPlannerTrajectoryManager::initialize(
   right_foot_start_ = right_foot_stance_;
   updatePreview(4);
 
-  // std::cout << "[DCMPlannerTrajectoryManager]" << std::endl;
+  // std::cout << "[DCMTrajectoryManager]" << std::endl;
   // std::cout << "  current_footstep_index = " << current_footstep_index_ <<
   // std::endl;
   // std::cout << "  preview size = " << footstep_preview_list_.size() <<
@@ -148,7 +145,7 @@ bool DCMPlannerTrajectoryManager::initialize(
 
   // If preview list is empty, don't update.
   if (footstep_preview_list_.size() == 0) {
-    std::cout << "[DCMPlannerTrajectoryManager] ERROR. Footstep preview list "
+    std::cout << "[DCMTrajectoryManager] ERROR. Footstep preview list "
                  "is empty."
               << std::endl;
     return false;
@@ -179,7 +176,7 @@ bool DCMPlannerTrajectoryManager::initialize(
   return true;
 }
 
-void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time) {
+void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
   // Initialize containers
   Eigen::Vector3d des_com_pos, des_com_vel, des_com_acc;
   des_com_pos.setZero();
@@ -208,7 +205,7 @@ void DCMPlannerTrajectoryManager::updateDCMTasksDesired(double current_time) {
   base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
 
-bool DCMPlannerTrajectoryManager::nextStepRobotSide(int& robot_side) {
+bool DCMTrajectoryManager::nextStepRobotSide(int& robot_side) {
   if ((footstep_list_.size() > 0) &&
       (current_footstep_index_ < footstep_list_.size())) {
     // std::cout << "hello:" << std::endl;
@@ -220,7 +217,7 @@ bool DCMPlannerTrajectoryManager::nextStepRobotSide(int& robot_side) {
   }
 }
 
-bool DCMPlannerTrajectoryManager::noRemainingSteps() {
+bool DCMTrajectoryManager::noRemainingSteps() {
   if (current_footstep_index_ >= footstep_list_.size()) {
     return true;
   } else {
@@ -228,7 +225,7 @@ bool DCMPlannerTrajectoryManager::noRemainingSteps() {
   }
 }
 
-void DCMPlannerTrajectoryManager::alternateLeg() {
+void DCMTrajectoryManager::alternateLeg() {
   if (robot_side_first_ == LEFT_ROBOT_SIDE) {
     robot_side_first_ = RIGHT_ROBOT_SIDE;
   } else {
@@ -236,40 +233,40 @@ void DCMPlannerTrajectoryManager::alternateLeg() {
   }
 }
 
-void DCMPlannerTrajectoryManager::resetIndexAndClearFootsteps() {
+void DCMTrajectoryManager::resetIndexAndClearFootsteps() {
   // Reset index and footstep list
   resetStepIndex();
   footstep_list_.clear();
 }
 
-void DCMPlannerTrajectoryManager::walkInPlace() {
+void DCMTrajectoryManager::walkInPlace() {
   resetIndexAndClearFootsteps();
   populateStepInPlace(2, robot_side_first_);
   alternateLeg();
 }
-void DCMPlannerTrajectoryManager::walkForward() {
+void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
   populateWalkForward(3, nominal_forward_step_);
   alternateLeg();
 }
-void DCMPlannerTrajectoryManager::walkBackward() {
+void DCMTrajectoryManager::walkBackward() {
   resetIndexAndClearFootsteps();
   populateWalkForward(3, nominal_backward_step_);
   alternateLeg();
 }
-void DCMPlannerTrajectoryManager::strafeLeft() {
+void DCMTrajectoryManager::strafeLeft() {
   resetIndexAndClearFootsteps();
   populateStrafe(nominal_strafe_distance_, 2);
 }
-void DCMPlannerTrajectoryManager::strafeRight() {
+void DCMTrajectoryManager::strafeRight() {
   resetIndexAndClearFootsteps();
   populateStrafe(-nominal_strafe_distance_, 2);
 }
-void DCMPlannerTrajectoryManager::turnLeft() {
+void DCMTrajectoryManager::turnLeft() {
   resetIndexAndClearFootsteps();
   populateRotateTurn(nominal_turn_radians_, 2);
 }
-void DCMPlannerTrajectoryManager::turnRight() {
+void DCMTrajectoryManager::turnRight() {
   resetIndexAndClearFootsteps();
   populateRotateTurn(-nominal_turn_radians_, 2);
 }
@@ -277,8 +274,8 @@ void DCMPlannerTrajectoryManager::turnRight() {
 // Footstep sequence primitives
 // -----------------------------------------------------------
 // Creates footstep in place
-void DCMPlannerTrajectoryManager::populateStepInPlace(
-    const int num_steps, const int robot_side_first) {
+void DCMTrajectoryManager::populateStepInPlace(const int num_steps,
+                                               const int robot_side_first) {
   updateStartingStance();  // Update the starting foot locations of the robot
 
   Footstep left_footstep = left_foot_stance_;
@@ -309,8 +306,8 @@ void DCMPlannerTrajectoryManager::populateStepInPlace(
 }
 
 // Populates the input footstep list with a predefined walking forward behavior
-void DCMPlannerTrajectoryManager::populateWalkForward(
-    const int num_steps, const double forward_distance) {
+void DCMTrajectoryManager::populateWalkForward(const int num_steps,
+                                               const double forward_distance) {
   updateStartingStance();  // Update the starting foot locations of the robot
 
   Footstep new_footstep;
@@ -354,7 +351,7 @@ void DCMPlannerTrajectoryManager::populateWalkForward(
 }
 
 // Take two steps to rotate at the specified radians. Repeat num_times
-void DCMPlannerTrajectoryManager::populateRotateTurn(
+void DCMTrajectoryManager::populateRotateTurn(
     const double turn_radians_per_step, const int num_times) {
   updateStartingStance();  // Update the starting foot locations of the robot
 
@@ -392,8 +389,8 @@ void DCMPlannerTrajectoryManager::populateRotateTurn(
 }
 
 // Take two steps to strafe at the specified distance. Repeat num_times.
-void DCMPlannerTrajectoryManager::populateStrafe(const double strafe_distance,
-                                                 const int num_times) {
+void DCMTrajectoryManager::populateStrafe(const double strafe_distance,
+                                          const int num_times) {
   updateStartingStance();  // Update the starting foot locations of the robot
 
   // Strafe
@@ -431,7 +428,7 @@ void DCMPlannerTrajectoryManager::populateStrafe(const double strafe_distance,
   }
 }
 
-void DCMPlannerTrajectoryManager::paramInitialization(const YAML::Node& node) {
+void DCMTrajectoryManager::paramInitialization(const YAML::Node& node) {
   // void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
   // Load Custom Params ----------------------------------
   try {

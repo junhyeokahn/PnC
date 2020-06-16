@@ -14,19 +14,12 @@ MaxNormalForceTrajectoryManager::MaxNormalForceTrajectoryManager(
 
 MaxNormalForceTrajectoryManager::~MaxNormalForceTrajectoryManager() {}
 
-void MaxNormalForceTrajectoryManager::paramInitialization(
-    const YAML::Node& node) {
-  try {
-    // Load Maximum normal force
-    myUtils::readParameter(node, "max_z_force", nominal_max_normal_force_z_);
-
-  } catch (std::runtime_error& e) {
-    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-              << __FILE__ << "]" << std::endl
-              << std::endl;
-    exit(0);
-  }
+void MaxNormalForceTrajectoryManager::setMaxFz(const double _fr_max) {
+  nominal_max_normal_force_z_ = _fr_max;
 }
+
+void MaxNormalForceTrajectoryManager::paramInitialization(
+    const YAML::Node& node) {}
 
 void MaxNormalForceTrajectoryManager::initializeRampToZero(
     const double start_time, const double nominal_ramp_duration) {
@@ -81,5 +74,5 @@ void MaxNormalForceTrajectoryManager::updateRampToMaxDesired(
 }
 
 void MaxNormalForceTrajectoryManager::updateMaxNormalForce() {
-  ((SurfaceContactSpec*)contact_)->setMaxFz(current_max_normal_force_z_);
+  contact_->setMaxFz(current_max_normal_force_z_);
 }

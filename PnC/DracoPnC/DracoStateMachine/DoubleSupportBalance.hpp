@@ -1,17 +1,16 @@
 #pragma once
 
 #include <Utils/Math/BSplineBasic.h>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/StateMachine.hpp>
-#include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 
-class ValkyrieControlArchitecture;
-class ValkyrieTaskAndForceContainer;
-class ValkyrieMainController;
+class DracoControlArchitecture;
+class DracoTaskAndForceContainer;
 
 class DoubleSupportBalance : public StateMachine {
  public:
   DoubleSupportBalance(const StateIdentifier state_identifier_in,
-                       ValkyrieControlArchitecture* _ctrl_arch,
+                       DracoControlArchitecture* _ctrl_arch,
                        RobotSystem* _robot);
   ~DoubleSupportBalance();
 
@@ -25,9 +24,9 @@ class DoubleSupportBalance : public StateMachine {
   void switchStateButtonTrigger() { state_switch_button_trigger_ = true; }
 
  protected:
-  ValkyrieStateProvider* sp_;
-  ValkyrieControlArchitecture* val_ctrl_arch_;
-  ValkyrieTaskAndForceContainer* taf_container_;
+  DracoStateProvider* sp_;
+  DracoControlArchitecture* ctrl_arch_;
+  DracoTaskAndForceContainer* taf_container_;
 
   double ctrl_start_time_;
   double end_time_;

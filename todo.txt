@@ -1,4 +1,4 @@
 - [ ] LineFootTask --> Using local error, local jacobian to eliminate
 x-directional error
 
-- [ ]
+- [ ] Initial joint & com trajecotry manager

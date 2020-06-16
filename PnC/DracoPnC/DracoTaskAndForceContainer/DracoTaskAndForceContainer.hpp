@@ -25,7 +25,8 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // Task Member variables
   // -------------------------------------------------------
   Task* com_task_;
-  Task* torso_ori_task_;
+  Task* joint_task_;
+  Task* base_ori_task_;
   Task* rfoot_center_pos_task_;
   Task* lfoot_center_pos_task_;
   Task* rfoot_center_ori_task_;
@@ -48,15 +49,18 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // Task Hierarchy Weights
   Eigen::VectorXd w_task_hierarchy_;
   double w_task_com_;
-  double w_task_torso_;
-  double w_task_foot_contact_;
-  double w_task_foot_swing_;
+  double w_task_base_ori_;
+  double w_task_foot_pos_;
+  double w_task_foot_ori_;
+  double w_task_joint_;
 
   // Task Gains
+  Eigen::VectorXd kp_joint_;
+  Eigen::VectorXd kd_joint_;
   Eigen::VectorXd kp_com_;
   Eigen::VectorXd kd_com_;
-  Eigen::VectorXd kp_torso_;
-  Eigen::VectorXd kd_torso_;
+  Eigen::VectorXd kp_base_ori_;
+  Eigen::VectorXd kd_base_ori_;
   Eigen::VectorXd kp_foot_pos_;
   Eigen::VectorXd kd_foot_pos_;
   Eigen::VectorXd kp_foot_ori_;

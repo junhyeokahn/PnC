@@ -3,23 +3,23 @@
 #include <vector>
 
 #include <PnC/ControlArchitecture.hpp>
-#include <PnC/Planner/DCMPlanner.hpp>
-#include <PnC/Planner/Footstep.hpp>
-#include <PnC/TrajectoryManager/DCMPlannerTrajectoryManager.hpp>
-#include <PnC/TrajectoryManager/FootSE3TrajectoryManager.hpp>
-#include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
-#include <PnC/TrajectoryManager/TaskGainScheduleTrajectoryManager.hpp>
-
 #include <PnC/DracoPnC/DracoCtrl/DracoMainController.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
-#include <PnC/DracoPnC/DracoStateMachine/ContactTransition.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/ContactTransitionEnd.hpp>
+#include <PnC/DracoPnC/DracoStateMachine/ContactTransitionStart.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportBalance.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportStand.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/SwingControl.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoTaskAndForceContainer/DracoTaskAndForceContainer.hpp>
-#include <PnC/DracoPnC/DracoTrajectoryManager/UpperBodyJointTrajectoryManager.hpp>
+#include <PnC/Planner/DCMPlanner.hpp>
+#include <PnC/Planner/Footstep.hpp>
+#include <PnC/TrajectoryManager/DCMTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/FootSE3TrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
 
 namespace DRACO_STATES {
 constexpr int INITIALIZE = 0;
@@ -58,13 +58,18 @@ class DracoControlArchitecture : public ControlArchitecture {
   // Trajectory Managers
   FootSE3TrajectoryManager* rfoot_trajectory_manager_;
   FootSE3TrajectoryManager* lfoot_trajectory_manager_;
+  DCMTrajectoryManager* dcm_trajectory_manger_;
+  JointTrajectoryManager* joint_trajectory_manager_;
+  FloatingBaseTrajectoryManager* floating_base_lifting_up_manager_;
   MaxNormalForceTrajectoryManager* rfoot_front_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* rfoot_back_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* lfoot_front_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* lfoot_back_max_normal_force_manager_;
-  TaskGainScheduleTrajectoryManager* lfoot_contact_pos_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* lfoot_contact_ori_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* rfoot_contact_pos_hierarchy_manager_;
-  TaskGainScheduleTrajectoryManager* rfoot_contact_ori_hierarchy_manager_;
-  DCMPlannerTrajectoryManager* dcm_trajectory_manger_;
+  TaskWeightTrajectoryManager* lfoot_pos_hierarchy_manager_;
+  TaskWeightTrajectoryManager* lfoot_ori_hierarchy_manager_;
+  TaskWeightTrajectoryManager* rfoot_pos_hierarchy_manager_;
+  TaskWeightTrajectoryManager* rfoot_ori_hierarchy_manager_;
+  TaskWeightTrajectoryManager* com_hierarchy_manager_;
+  TaskWeightTrajectoryManager* base_ori_hierarchy_manager_;
+  TaskWeightTrajectoryManager* jpos_hierarchy_manager_;
 };

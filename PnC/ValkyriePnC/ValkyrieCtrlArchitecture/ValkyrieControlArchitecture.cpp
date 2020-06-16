@@ -30,16 +30,16 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot)
   upper_body_joint_trajectory_manager_ = new UpperBodyJointTrajectoryManager(
       taf_container_->upper_body_task_, robot_);
 
-  rfoot_contact_pos_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(
+  rfoot_contact_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->rfoot_center_pos_task_, robot_);
-  rfoot_contact_ori_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(
+  rfoot_contact_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->rfoot_center_ori_task_, robot_);
-  lfoot_contact_pos_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(
+  lfoot_contact_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->lfoot_center_pos_task_, robot_);
-  lfoot_contact_ori_hierarchy_manager_ = new TaskGainScheduleTrajectoryManager(
+  lfoot_contact_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->lfoot_center_ori_task_, robot_);
 
-  dcm_trajectory_manger_ = new DCMPlannerTrajectoryManager(
+  dcm_trajectory_manger_ = new DCMTrajectoryManager(
       dcm_planner_, taf_container_->com_task_, taf_container_->pelvis_ori_task_,
       robot_, ValkyrieBodyNode::leftCOP_Frame,
       ValkyrieBodyNode::rightCOP_Frame);
@@ -137,17 +137,17 @@ void ValkyrieControlArchitecture::_InitializeParameters() {
       cfg_["foot_trajectory_parameters"]);
   lfoot_trajectory_manager_->paramInitialization(
       cfg_["foot_trajectory_parameters"]);
-  lfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);
-  rfoot_max_normal_force_manager_->paramInitialization(cfg_["task_parameters"]);
 
-  rfoot_contact_pos_hierarchy_manager_->paramInitialization(
-      cfg_["task_parameters"]);
-  rfoot_contact_ori_hierarchy_manager_->paramInitialization(
-      cfg_["task_parameters"]);
-  lfoot_contact_pos_hierarchy_manager_->paramInitialization(
-      cfg_["task_parameters"]);
-  lfoot_contact_ori_hierarchy_manager_->paramInitialization(
-      cfg_["task_parameters"]);
+  lfoot_max_normal_force_manager_->setMaxFz(1500.);
+  rfoot_max_normal_force_manager_->setMaxFz(1500.);
+  rfoot_contact_pos_hierarchy_manager_->setMaxGain(40.0);
+  rfoot_contact_pos_hierarchy_manager_->setMinGain(20.0);
+  rfoot_contact_ori_hierarchy_manager_->setMaxGain(40.0);
+  rfoot_contact_ori_hierarchy_manager_->setMinGain(20.0);
+  lfoot_contact_pos_hierarchy_manager_->setMaxGain(40.0);
+  lfoot_contact_pos_hierarchy_manager_->setMinGain(20.0);
+  lfoot_contact_ori_hierarchy_manager_->setMaxGain(40.0);
+  lfoot_contact_ori_hierarchy_manager_->setMinGain(20.0);
 
   dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
 

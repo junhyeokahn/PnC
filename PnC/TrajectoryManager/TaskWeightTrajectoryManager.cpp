@@ -1,7 +1,7 @@
-#include <PnC/TrajectoryManager/TaskGainScheduleTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
 
-TaskGainScheduleTrajectoryManager::TaskGainScheduleTrajectoryManager(
-    Task* _task, RobotSystem* _robot)
+TaskWeightTrajectoryManager::TaskWeightTrajectoryManager(Task* _task,
+                                                         RobotSystem* _robot)
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: Task Gain Schedule");
   task_ = _task;
@@ -13,24 +13,19 @@ TaskGainScheduleTrajectoryManager::TaskGainScheduleTrajectoryManager(
   nominal_ramp_duration_ = 1.0;  // seconds
 }
 
-TaskGainScheduleTrajectoryManager::~TaskGainScheduleTrajectoryManager() {}
+TaskWeightTrajectoryManager::~TaskWeightTrajectoryManager() {}
 
-void TaskGainScheduleTrajectoryManager::paramInitialization(
-    const YAML::Node& node) {
-  try {
-    // Load Maximum normal force
-    myUtils::readParameter(node, "w_task_foot_contact", nominal_w_max_);
-    myUtils::readParameter(node, "w_task_foot_swing", nominal_w_min_);
-
-  } catch (std::runtime_error& e) {
-    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-              << __FILE__ << "]" << std::endl
-              << std::endl;
-    exit(0);
-  }
+void TaskWeightTrajectoryManager::setMaxGain(const double _w_max) {
+  nominal_w_max_ = _w_max;
 }
 
-void TaskGainScheduleTrajectoryManager::initializeRampToMin(
+void TaskWeightTrajectoryManager::setMinGain(const double _w_min) {
+  nominal_w_min_ = _w_min;
+}
+
+void TaskWeightTrajectoryManager::paramInitialization(const YAML::Node& node) {}
+
+void TaskWeightTrajectoryManager::initializeRampToMin(
     const double start_time, const double nominal_ramp_duration) {
   // Initialize start times and starting max value
   ramp_start_time_ = start_time;
@@ -40,7 +35,7 @@ void TaskGainScheduleTrajectoryManager::initializeRampToMin(
   ramp_down_speed_ = -nominal_w_max_ / nominal_ramp_duration_;
 }
 
-void TaskGainScheduleTrajectoryManager::initializeRampToMax(
+void TaskWeightTrajectoryManager::initializeRampToMax(
     const double start_time, const double nominal_ramp_duration) {
   // Initialize start times and starting max value
   ramp_start_time_ = start_time;
@@ -50,33 +45,31 @@ void TaskGainScheduleTrajectoryManager::initializeRampToMax(
   ramp_up_speed_ = nominal_w_max_ / nominal_ramp_duration_;
 }
 
-void TaskGainScheduleTrajectoryManager::computeRampToMin(
-    const double current_time) {
+void TaskWeightTrajectoryManager::computeRampToMin(const double current_time) {
   double t_current = myUtils::CropValue(current_time, ramp_start_time_,
                                         nominal_ramp_duration_);
   local_w_ = ramp_down_speed_ * (t_current - ramp_start_time_) + starting_w_;
   current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
 }
 
-void TaskGainScheduleTrajectoryManager::computeRampToMax(
-    const double current_time) {
+void TaskWeightTrajectoryManager::computeRampToMax(const double current_time) {
   double t_current = myUtils::CropValue(current_time, ramp_start_time_,
                                         nominal_ramp_duration_);
   local_w_ = ramp_up_speed_ * (t_current - ramp_start_time_) + starting_w_;
   current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
 }
 
-void TaskGainScheduleTrajectoryManager::updateRampToMinDesired(
+void TaskWeightTrajectoryManager::updateRampToMinDesired(
     const double current_time) {
   computeRampToMin(current_time);
-  updateTaskHierarchy();
+  updateTaskWeight();
 }
-void TaskGainScheduleTrajectoryManager::updateRampToMaxDesired(
+void TaskWeightTrajectoryManager::updateRampToMaxDesired(
     const double current_time) {
   computeRampToMax(current_time);
-  updateTaskHierarchy();
+  updateTaskWeight();
 }
 
-void TaskGainScheduleTrajectoryManager::updateTaskHierarchy() {
+void TaskWeightTrajectoryManager::updateTaskWeight() {
   task_->setHierarchyWeight(current_w_);
 }

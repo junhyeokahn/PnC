@@ -4,14 +4,14 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/StateMachine.hpp>
 
-class DrcoControlArchitecture;
+class DracoControlArchitecture;
 class DracoTaskAndForceContainer;
 
-class DoubleSupportStand : public StateMachine {
+class Initialize : public StateMachine {
  public:
-  DoubleSupportStand(const StateIdentifier state_identifier_in,
-                     DrcoControlArchitecture* _ctrl_arch, RobotSystem* _robot);
-  ~DoubleSupportStand();
+  Initialize(const StateIdentifier state_identifier_in,
+             DracoControlArchitecture* _ctrl_arch, RobotSystem* _robot);
+  ~Initialize();
 
   void oneStep();
   void firstVisit();
@@ -22,13 +22,12 @@ class DoubleSupportStand : public StateMachine {
 
  protected:
   DracoStateProvider* sp_;
-  DrcoControlArchitecture* ctrl_arch_;
+  DracoControlArchitecture* ctrl_arch_;
   DracoTaskAndForceContainer* taf_container_;
 
   double ctrl_start_time_;
   double end_time_;
-  double time_to_max_normal_force_;
-  double target_height_;
+  Eigen::VectorXd target_pos_;
 
   void _taskUpdate();
 };

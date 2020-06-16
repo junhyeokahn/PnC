@@ -17,6 +17,7 @@ class MaxNormalForceTrajectoryManager : public TrajectoryManagerBase {
   MaxNormalForceTrajectoryManager(ContactSpec* _contact, RobotSystem* _robot);
   ~MaxNormalForceTrajectoryManager();
   void paramInitialization(const YAML::Node& node);
+  void setMaxFz(const double);
 
   ContactSpec* contact_;
   double nominal_max_normal_force_z_;

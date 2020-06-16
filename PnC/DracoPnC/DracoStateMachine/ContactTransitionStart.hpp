@@ -1,18 +1,19 @@
 #pragma once
 
 #include <Utils/Math/BSplineBasic.h>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/StateMachine.hpp>
-#include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 
 class DracoControlArchitecture;
 class DracoTaskAndForceContainer;
 
-class ContactTransition : public StateMachine {
+class ContactTransitionStart : public StateMachine {
  public:
-  ContactTransition(const StateIdentifier state_identifier_in,
-                    const int _leg_side, DracoControlArchitecture* _ctrl_arch,
-                    RobotSystem* _robot);
-  ~ContactTransition();
+  ContactTransitionStart(const StateIdentifier state_identifier_in,
+                         const int _leg_side,
+                         DracoControlArchitecture* _ctrl_arch,
+                         RobotSystem* _robot);
+  ~ContactTransitionStart();
 
   void oneStep();
   void firstVisit();
@@ -22,7 +23,7 @@ class ContactTransition : public StateMachine {
   StateIdentifier getNextState();
 
  protected:
-  ValkyrieStateProvider* sp_;
+  DracoStateProvider* sp_;
   DracoControlArchitecture* ctrl_arch_;
   DracoTaskAndForceContainer* taf_container_;
 

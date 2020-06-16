@@ -10,13 +10,15 @@
 // 1) initializeRampToMin/Max in the initialization step with the current time
 // and nominal ramp duration
 // 2) computeRampToMin() in the update step with the current time
-// 3) updateTaskHierarchy() in the update step after computing
+// 3) updateTaskWeight() in the update step after computing
 
-class TaskGainScheduleTrajectoryManager : public TrajectoryManagerBase {
+class TaskWeightTrajectoryManager : public TrajectoryManagerBase {
  public:
-  TaskGainScheduleTrajectoryManager(Task* _task, RobotSystem* _robot);
-  ~TaskGainScheduleTrajectoryManager();
+  TaskWeightTrajectoryManager(Task* _task, RobotSystem* _robot);
+  ~TaskWeightTrajectoryManager();
   void paramInitialization(const YAML::Node& node);
+  void setMaxGain(const double);
+  void setMinGain(const double);
 
   Task* task_;
 
@@ -48,7 +50,7 @@ class TaskGainScheduleTrajectoryManager : public TrajectoryManagerBase {
   void updateRampToMaxDesired(const double current_time);
 
   // Update the maximum normal force
-  void updateTaskHierarchy();
+  void updateTaskWeight();
 
  protected:
   double local_w_;

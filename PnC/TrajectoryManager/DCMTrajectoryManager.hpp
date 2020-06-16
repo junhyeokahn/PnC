@@ -11,11 +11,11 @@ constexpr int INITIAL = 0;
 constexpr int MIDSTEP = 1;
 };
 
-class DCMPlannerTrajectoryManager : public TrajectoryManagerBase {
+class DCMTrajectoryManager : public TrajectoryManagerBase {
  public:
-  DCMPlannerTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot,
-                              int _lfoot_idx, int _rfoot_idx);
-  ~DCMPlannerTrajectoryManager();
+  DCMTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot,
+                       int _lfoot_idx, int _rfoot_idx);
+  ~DCMTrajectoryManager();
   void paramInitialization(const YAML::Node& node);
 
   bool initialize(const double t_walk_start_in, const int transfer_type_in,
