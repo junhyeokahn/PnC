@@ -40,6 +40,7 @@ class DracoControlArchitecture : public ControlArchitecture {
   virtual ~DracoControlArchitecture();
   virtual void ControlArchitectureInitialization();
   virtual void getCommand(void* _command);
+  void saveData();
 
  protected:
   DracoStateProvider* sp_;

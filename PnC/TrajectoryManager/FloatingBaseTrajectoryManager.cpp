@@ -30,9 +30,10 @@ void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
   start_time_ = _start_time;
   duration_ = _duration;
   ini_com_pos_ = ((Eigen::VectorXd)robot_->getCoMPosition());
-  Eigen::Quaternion<double> base_quat =
+  base_ori_quat_des_ =
       Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  ini_base_quat_ << base_quat.w(), base_quat.x(), base_quat.y(), base_quat.z();
+  ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
+      base_ori_quat_des_.y(), base_ori_quat_des_.z();
   target_com_pos_ = _target_com_pos;
 }
 
@@ -41,9 +42,10 @@ void FloatingBaseTrajectoryManager::useCurrent() {
   com_vel_des_ = Eigen::VectorXd::Zero(3);
   com_acc_des_ = Eigen::VectorXd::Zero(3);
 
-  Eigen::Quaternion<double> base_quat =
+  base_ori_quat_des_ =
       Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  base_ori_des_ << base_quat.w(), base_quat.x(), base_quat.y(), base_quat.z();
+  base_ori_des_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
+      base_ori_quat_des_.y(), base_ori_quat_des_.z();
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
 

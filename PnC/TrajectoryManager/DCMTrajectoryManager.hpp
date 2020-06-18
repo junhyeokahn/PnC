@@ -136,6 +136,12 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   void updateDCMTasksDesired(double current_time);
   Task* com_task_;
   Task* base_ori_task_;
+  Eigen::Vector3d des_com_pos;
+  Eigen::Vector3d des_com_vel;
+  Eigen::Vector3d des_com_acc;
+  Eigen::Quaternion<double> des_quat;
+  Eigen::Vector3d des_ang_vel;
+  Eigen::Vector3d des_ang_acc;
 
  protected:
   void convertTemporalParamsToDCMParams();

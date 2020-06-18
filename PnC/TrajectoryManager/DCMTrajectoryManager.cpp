@@ -13,6 +13,13 @@ DCMTrajectoryManager::DCMTrajectoryManager(DCMPlanner* _dcm_planner,
   lfoot_id_ = _lfoot_idx;
   rfoot_id_ = _rfoot_idx;
 
+  des_com_pos.setZero();
+  des_com_vel.setZero();
+  des_com_acc.setZero();
+  des_quat.setIdentity();
+  des_ang_vel.setZero();
+  des_ang_acc.setZero();
+
   // Initialize step index
   resetStepIndex();
 
@@ -165,18 +172,6 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
 }
 
 void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
-  // Initialize containers
-  Eigen::Vector3d des_com_pos, des_com_vel, des_com_acc;
-  des_com_pos.setZero();
-  des_com_vel.setZero();
-  des_com_acc.setZero();
-
-  Eigen::Quaterniond des_quat;
-  des_quat.setIdentity();
-  Eigen::Vector3d des_ang_vel, des_ang_acc;
-  des_ang_vel.setZero();
-  des_ang_acc.setZero();
-
   dcm_planner_->get_ref_com(current_time, des_com_pos);
   dcm_planner_->get_ref_com_vel(current_time, des_com_vel);
   dcm_planner_->get_ref_ori_ang_vel_acc(current_time, des_quat, des_ang_vel,
@@ -184,10 +179,6 @@ void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
 
   Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
   des_quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
-
-  // std::cout << "current_time: " << current_time << std::endl;
-  // myUtils::pretty_print(des_com_pos, std::cout, "des_com_pos");
-  // myUtils::pretty_print(des_quat_vec, std::cout, "des_quat_vec");
 
   com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
   base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);

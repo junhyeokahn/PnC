@@ -95,6 +95,10 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
   _ConfigurationAndModelUpdate();
   sp_->com_pos = robot_->getCoMPosition();
   sp_->com_vel = robot_->getCoMVelocity();
+  sp_->base_quat = Eigen::Quaternion<double>(
+      robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear());
+  sp_->base_ang_vel =
+      robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
   sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel / sp_->omega;
   sp_->prev_dcm = sp_->dcm;
 
@@ -225,7 +229,6 @@ void DracoStateEstimator::_JointUpdate(DracoSensorData* data) {
         (1.0 - alphaVelocity) * prev_qdot_[robot_->getNumVirtualDofs() + i];
   }
   prev_qdot_ = curr_qdot_;
-  sp_->rotor_inertia = data->rotor_inertia;
   sp_->l_rf = data->lf_wrench;
   sp_->r_rf = data->rf_wrench;
 }

@@ -18,14 +18,22 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
   q = Eigen::VectorXd::Zero(robot_->getNumDofs());
   qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
-  rotor_inertia = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-  global_pos_local.setZero();
-  des_location.setZero();
+  q_des = Eigen::VectorXd::Zero(10);
+  qdot_des = Eigen::VectorXd::Zero(10);
+  q_task_des = Eigen::VectorXd::Zero(10);
+  qdot_task_des = Eigen::VectorXd::Zero(10);
   b_rfoot_contact = 0;
   b_lfoot_contact = 0;
   qddot_cmd = Eigen::VectorXd::Zero(16);
-  reaction_forces = Eigen::VectorXd::Zero(12);
-  filtered_rf = Eigen::VectorXd::Zero(12);
+
+  rfoot_center_pos_des.setZero();
+  lfoot_center_pos_des.setZero();
+  rfoot_center_vel_des.setZero();
+  lfoot_center_vel_des.setZero();
+  rfoot_center_quat_des = Eigen::Quaternion<double>::Identity();
+  lfoot_center_quat_des = Eigen::Quaternion<double>::Identity();
+  rfoot_center_so3_des.setZero();
+  lfoot_center_so3_des.setZero();
 
   rfoot_center_pos.setZero();
   lfoot_center_pos.setZero();
@@ -42,9 +50,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   com_vel_des.setZero();
   est_com_vel.setZero();
 
-  des_jpos = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-  des_jvel = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-
   dcm.setZero();
   dcm_des.setZero();
   prev_dcm.setZero();
@@ -55,27 +60,56 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
   r_rf = Eigen::VectorXd::Zero(6);
   l_rf = Eigen::VectorXd::Zero(6);
-  r_rf_des = Eigen::VectorXd::Zero(6);
-  l_rf_des = Eigen::VectorXd::Zero(6);
+  r_rf_front_des.setZero();
+  r_rf_back_des.setZero();
+  l_rf_front_des.setZero();
+  l_rf_back_des.setZero();
 
-  omega = 0.7;
+  omega = 0.7;  // TODO : Should be set in different way
 
   DataManager* data_manager = DataManager::GetDataManager();
 
   data_manager->RegisterData(&curr_time, DOUBLE, "time");
+
+  // ---------------------------------------------------------------------------
+  // Robot States
+  // ---------------------------------------------------------------------------
   data_manager->RegisterData(&q, VECT, "config", robot_->getNumDofs());
   data_manager->RegisterData(&qdot, VECT, "qdot", robot_->getNumDofs());
-  data_manager->RegisterData(&rotor_inertia, VECT, "rotor_inertia",
-                             robot_->getNumActuatedDofs());
-  data_manager->RegisterData(&global_pos_local, VECT3, "global_pos_local", 3);
 
+  // ---------------------------------------------------------------------------
+  // Contact
+  // ---------------------------------------------------------------------------
   data_manager->RegisterData(&b_rfoot_contact, INT, "rfoot_contact", 1);
   data_manager->RegisterData(&b_lfoot_contact, INT, "lfoot_contact", 1);
+  data_manager->RegisterData(&r_rf, VECT, "r_rf", 6);
+  data_manager->RegisterData(&l_rf, VECT, "l_rf", 6);
+  data_manager->RegisterData(&r_rf_front_des, VECT3, "r_rf_front_des", 3);
+  data_manager->RegisterData(&r_rf_back_des, VECT3, "r_rf_back_des", 3);
+  data_manager->RegisterData(&l_rf_front_des, VECT3, "l_rf_front_des", 3);
+  data_manager->RegisterData(&l_rf_back_des, VECT3, "l_rf_back_des", 3);
 
-  data_manager->RegisterData(&reaction_forces, VECT, "reaction_force", 12);
-  data_manager->RegisterData(&filtered_rf, VECT, "filtered_rf", 12);
-  data_manager->RegisterData(&qddot_cmd, VECT, "qddot_cmd", 16);
+  // ---------------------------------------------------------------------------
+  // WBC
+  // ---------------------------------------------------------------------------
+  data_manager->RegisterData(&qddot_cmd, VECT, "qddot_des", 16);
+  data_manager->RegisterData(&q_des, INT, "q_des", 10);
+  data_manager->RegisterData(&qdot_des, INT, "qdot_des", 10);
+  data_manager->RegisterData(&w_rfoot_pos, DOUBLE, "w_rfoot_pos", 1);
+  data_manager->RegisterData(&w_rfoot_ori, DOUBLE, "w_rfoot_ori", 1);
+  data_manager->RegisterData(&w_lfoot_pos, DOUBLE, "w_lfoot_pos", 1);
+  data_manager->RegisterData(&w_lfoot_ori, DOUBLE, "w_lfoot_ori", 1);
+  data_manager->RegisterData(&w_com, DOUBLE, "w_com", 1);
+  data_manager->RegisterData(&w_base_ori, DOUBLE, "w_base_ori", 1);
+  data_manager->RegisterData(&w_joint, DOUBLE, "w_joint", 1);
+  data_manager->RegisterData(&w_rf_rffront, DOUBLE, "w_rf_rffront", 1);
+  data_manager->RegisterData(&w_rf_rfback, DOUBLE, "w_rf_rfback", 1);
+  data_manager->RegisterData(&w_rf_lffront, DOUBLE, "w_rf_lffront", 1);
+  data_manager->RegisterData(&w_rf_lfback, DOUBLE, "w_rf_lfback", 1);
 
+  // ---------------------------------------------------------------------------
+  // Foot
+  // ---------------------------------------------------------------------------
   data_manager->RegisterData(&rfoot_center_pos, VECT3, "rfoot_pos", 3);
   data_manager->RegisterData(&lfoot_center_pos, VECT3, "lfoot_pos", 3);
   data_manager->RegisterData(&rfoot_center_vel, VECT3, "rfoot_vel", 3);
@@ -85,19 +119,41 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&rfoot_center_quat, QUATERNION, "rfoot_quat", 4);
   data_manager->RegisterData(&lfoot_center_quat, QUATERNION, "lfoot_quat", 4);
 
+  data_manager->RegisterData(&rfoot_center_pos_des, VECT3, "rfoot_pos_des", 3);
+  data_manager->RegisterData(&lfoot_center_pos_des, VECT3, "lfoot_pos_des", 3);
+  data_manager->RegisterData(&rfoot_center_vel_des, VECT3, "rfoot_vel_des", 3);
+  data_manager->RegisterData(&lfoot_center_vel_des, VECT3, "lfoot_vel_des", 3);
+  data_manager->RegisterData(&rfoot_center_so3_des, VECT3, "rfoot_so3_des", 3);
+  data_manager->RegisterData(&lfoot_center_so3_des, VECT3, "lfoot_so3_des", 3);
+  data_manager->RegisterData(&rfoot_center_quat_des, QUATERNION,
+                             "rfoot_quat_des", 4);
+  data_manager->RegisterData(&lfoot_center_quat_des, QUATERNION,
+                             "lfoot_quat_des", 4);
+
+  // ---------------------------------------------------------------------------
+  // COM
+  // ---------------------------------------------------------------------------
   data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3);
   data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3);
-  data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
-
   data_manager->RegisterData(&com_pos_des, VECT3, "com_pos_des", 3);
   data_manager->RegisterData(&com_vel_des, VECT3, "com_vel_des", 3);
-
-  data_manager->RegisterData(&dcm, VECT3, "dcm", 3);
+  data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
   data_manager->RegisterData(&dcm_des, VECT3, "dcm_des", 3);
-  data_manager->RegisterData(&dcm_vel, VECT3, "dcm_vel", 3);
   data_manager->RegisterData(&dcm_vel_des, VECT3, "dcm_vel_des", 3);
-  data_manager->RegisterData(&r_vrp, VECT3, "r_vrp", 3);
   data_manager->RegisterData(&r_vrp_des, VECT3, "r_vrp_des", 3);
+  data_manager->RegisterData(&dcm, VECT3, "dcm", 3);
+  data_manager->RegisterData(&dcm_vel, VECT3, "dcm_vel", 3);
+  data_manager->RegisterData(&r_vrp, VECT3, "r_vrp", 3);
+  data_manager->RegisterData(&base_quat, QUATERNION, "base_quat", 4);
+  data_manager->RegisterData(&base_ang_vel, VECT3, "base_ang_vel", 3);
+  data_manager->RegisterData(&base_quat_des, QUATERNION, "base_quat_des", 4);
+  data_manager->RegisterData(&base_ang_vel_des, VECT3, "base_ang_vel_des", 3);
+
+  // ---------------------------------------------------------------------------
+  // Joint
+  // ---------------------------------------------------------------------------
+  data_manager->RegisterData(&q_task_des, INT, "q_task_des", 10);
+  data_manager->RegisterData(&qdot_task_des, INT, "qdot_task_des", 10);
 }
 
 void DracoStateProvider::saveCurrentData() {

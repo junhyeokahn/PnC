@@ -101,7 +101,14 @@ void DracoMainController::getCommand(void* _cmd) {
 
   // Get Results
   wbc_->getQddotResult(qddot_res);
+  sp_->qddot_cmd = qddot_res;
   wbc_->getFrResult(Fr_res);
+  for (int i = 0; i < 3; ++i) {
+    sp_->r_rf_front_des[i] = Fr_res[i];
+    sp_->r_rf_back_des[i] = Fr_res[i + 3];
+    sp_->l_rf_front_des[i] = Fr_res[i + 6];
+    sp_->l_rf_back_des[i] = Fr_res[i + 9];
+  }
 
   // Integrate Joint Velocities and Positions
   des_jacc_ = qddot_cmd_;

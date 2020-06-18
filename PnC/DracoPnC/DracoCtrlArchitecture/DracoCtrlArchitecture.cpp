@@ -216,3 +216,47 @@ void DracoControlArchitecture::_InitializeParameters() {
   state_machines_[DRACO_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
   state_machines_[DRACO_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
 }
+
+void DracoControlArchitecture::saveData() {
+  // Task weights, Reaction force weights
+  sp_->w_rfoot_pos = rfoot_pos_hierarchy_manager_->current_w_;
+  sp_->w_rfoot_ori = rfoot_ori_hierarchy_manager_->current_w_;
+  sp_->w_lfoot_pos = lfoot_pos_hierarchy_manager_->current_w_;
+  sp_->w_lfoot_ori = lfoot_ori_hierarchy_manager_->current_w_;
+  sp_->w_com = com_hierarchy_manager_->current_w_;
+  sp_->w_base_ori = base_ori_hierarchy_manager_->current_w_;
+  sp_->w_joint = jpos_hierarchy_manager_->current_w_;
+  sp_->w_rf_rffront =
+      rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_rfback =
+      rfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lffront =
+      lfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lfback =
+      lfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+
+  // Task desired
+  sp_->rfoot_center_pos_des = rfoot_trajectory_manager_->foot_pos_des_;
+  sp_->rfoot_center_vel_des = rfoot_trajectory_manager_->foot_vel_des_;
+  sp_->lfoot_center_pos_des = lfoot_trajectory_manager_->foot_pos_des_;
+  sp_->lfoot_center_vel_des = lfoot_trajectory_manager_->foot_vel_des_;
+  sp_->rfoot_center_quat_des = rfoot_trajectory_manager_->foot_quat_des_;
+  sp_->rfoot_center_so3_des = rfoot_trajectory_manager_->foot_ang_vel_des_;
+  sp_->lfoot_center_quat_des = lfoot_trajectory_manager_->foot_quat_des_;
+  sp_->lfoot_center_so3_des = lfoot_trajectory_manager_->foot_ang_vel_des_;
+  sp_->q_task_des = joint_trajectory_manager_->joint_pos_des_;
+  sp_->qdot_task_des = joint_trajectory_manager_->joint_vel_des_;
+
+  if (state_ == DRACO_STATES::INITIALIZE || state_ == DRACO_STATES::STAND) {
+    sp_->com_pos_des = floating_base_lifting_up_manager_->com_pos_des_;
+    sp_->com_vel_des = floating_base_lifting_up_manager_->com_vel_des_;
+    sp_->base_quat_des = floating_base_lifting_up_manager_->base_ori_quat_des_;
+    sp_->base_ang_vel_des =
+        floating_base_lifting_up_manager_->base_ang_vel_des_;
+  } else {
+    sp_->com_pos_des = dcm_trajectory_manger_->des_com_pos;
+    sp_->com_vel_des = dcm_trajectory_manger_->des_com_vel;
+    sp_->base_quat_des = dcm_trajectory_manger_->des_quat;
+    sp_->base_ang_vel_des = dcm_trajectory_manger_->des_ang_vel;
+  }
+}
