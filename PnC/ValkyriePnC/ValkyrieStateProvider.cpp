@@ -13,7 +13,6 @@ ValkyrieStateProvider::ValkyrieStateProvider(RobotSystem* _robot) {
   myUtils::pretty_constructor(1, "Valkyrie State Provider");
 
   // API related parameters
-  b_walking = false;
   ft_length = 0.;
   r_ft_width = 0.;
   l_ft_width = 0.;

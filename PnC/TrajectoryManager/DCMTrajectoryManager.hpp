@@ -13,7 +13,8 @@ constexpr int MIDSTEP = 1;
 
 class DCMTrajectoryManager : public TrajectoryManagerBase {
  public:
-  DCMTrajectoryManager(DCMPlanner* _dcm_planner, RobotSystem* _robot,
+  DCMTrajectoryManager(DCMPlanner* _dcm_planner, Task* _com_task,
+                       Task* _base_ori_task, RobotSystem* _robot,
                        int _lfoot_idx, int _rfoot_idx);
   ~DCMTrajectoryManager();
   void paramInitialization(const YAML::Node& node);

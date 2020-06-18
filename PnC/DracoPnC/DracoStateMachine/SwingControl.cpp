@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/SwingControl.hpp>
 
 SwingControl::SwingControl(const StateIdentifier state_identifier_in,
@@ -18,7 +18,7 @@ SwingControl::SwingControl(const StateIdentifier state_identifier_in,
   ctrl_arch_ = ((DracoControlArchitecture*)_ctrl_arch);
   taf_container_ = ctrl_arch_->taf_container_;
   // Get State Provider
-  sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+  sp_ = DracoStateProvider::getStateProvider(robot_);
 
   // Set Leg Side
   leg_side_ = _leg_side;

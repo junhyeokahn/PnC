@@ -2,7 +2,7 @@
 
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
-#include <PnC/DracoPnC/DracoTask/LineFootTask.hpp>
+#include <PnC/DracoPnC/DracoTask/FootLocalRyRzTask.hpp>
 #include <PnC/TaskAndForceContainer.hpp>
 #include <PnC/WBC/BasicContactSpec.hpp>
 #include <PnC/WBC/BasicTask.hpp>

@@ -16,18 +16,20 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
 
   // CoM and Pelvis Tasks
   joint_task_ =
-      new BasicTask(robot_, Basic::JOINT, robot_->getNumActuatedDofs());
+      new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
   com_task_ = new CoMxyz(robot_);
   base_ori_task_ =
-      new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::torso);
+      new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
 
   // Set Foot Motion Tasks
   rfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
                                          DracoBodyNode::rFootCenter);
   lfoot_center_pos_task_ = new BasicTask(robot_, BasicTaskType::LINKXYZ, 3,
                                          DracoBodyNode::lFootCenter);
-  rfoot_center_ori_task_ = new BasicTask(robot_, DracoBodyNode::rFootCenter);
-  lfoot_center_ori_task_ = new BasicTask(robot_, DracoBodyNode::lFootCenter);
+  rfoot_center_ori_task_ =
+      new FootLocalRyRzTask(robot_, DracoBodyNode::rFootCenter);
+  lfoot_center_ori_task_ =
+      new FootLocalRyRzTask(robot_, DracoBodyNode::lFootCenter);
 
   // Add all tasks initially. Remove later as needed.
   task_list_.push_back(joint_task_);
@@ -97,8 +99,8 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "kd_joint", kd_joint_);
     myUtils::readParameter(node, "kp_com", kp_com_);
     myUtils::readParameter(node, "kd_com", kd_com_);
-    myUtils::readParameter(node, "kp_base_ori", kp_torso_ori_);
-    myUtils::readParameter(node, "kd_base_ori", kd_torso_ori_);
+    myUtils::readParameter(node, "kp_base_ori", kp_base_ori_);
+    myUtils::readParameter(node, "kd_base_ori", kd_base_ori_);
     myUtils::readParameter(node, "kp_foot_pos", kp_foot_pos_);
     myUtils::readParameter(node, "kd_foot_pos", kd_foot_pos_);
     myUtils::readParameter(node, "kp_foot_ori", kp_foot_ori_);
@@ -109,7 +111,7 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "ini_w_task_com", w_task_com_);
     myUtils::readParameter(node, "ini_w_task_base_ori", w_task_base_ori_);
     myUtils::readParameter(node, "ini_w_task_foot_pos", w_task_foot_pos_);
-    myUtils::readParameter(node, "ini_w_task_foot_ori", w_task_foot_oir_);
+    myUtils::readParameter(node, "ini_w_task_foot_ori", w_task_foot_ori_);
 
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -121,7 +123,7 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   // Set Task Gains
   joint_task_->setGain(kp_joint_, kd_joint_);
   com_task_->setGain(kp_com_, kd_com_);
-  base_ori_task_->setGain(kp_torso_ori_, kd_torso_ori_);
+  base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
   rfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   lfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   rfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);

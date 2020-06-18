@@ -8,15 +8,14 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
  public:
   FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task,
                                 RobotSystem* _robot);
-  ~FloatingBaseTrajectoryManager();
+  ~FloatingBaseTrajectoryManager(){};
 
-  // Use current pose to set the task.
   void useCurrent();
-  // Initialize the joint trajectory
   void initializeFloatingBaseTrajectory(const double _start_time,
                                         const double _duration,
                                         const Eigen::VectorXd& _target_com_pos);
   void updateFloatingBaseDesired(const double current_time);
+  void paramInitialization(const YAML::Node& node){};
 
   Task* com_task_;
   Task* base_ori_task_;

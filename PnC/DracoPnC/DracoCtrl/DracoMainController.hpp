@@ -3,7 +3,7 @@
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/DracoTaskAndForceContainer/ValkyrieTaskAndForceContainer.hpp>
+#include <PnC/DracoPnC/DracoTaskAndForceContainer/DracoTaskAndForceContainer.hpp>
 #include <PnC/WBC/JointIntegrator.hpp>
 #include <PnC/WBC/WBC.hpp>
 

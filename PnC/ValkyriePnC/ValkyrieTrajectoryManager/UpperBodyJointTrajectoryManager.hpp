@@ -10,7 +10,7 @@
 class UpperBodyJointTrajectoryManager : public TrajectoryManagerBase {
  public:
   UpperBodyJointTrajectoryManager(Task* _upper_body_task, RobotSystem* _robot);
-  ~UpperBodyJointTrajectoryManager();
+  ~UpperBodyJointTrajectoryManager(){};
   void paramInitialization(const YAML::Node& node);
 
   ValkyrieStateProvider* sp_;

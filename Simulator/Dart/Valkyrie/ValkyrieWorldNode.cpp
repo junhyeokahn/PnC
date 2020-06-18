@@ -47,37 +47,37 @@ void ValkyrieWorldNode::customPreStep() {
 
   // Check for user button presses
   if (b_button_p) {
-    interface_->interrupt_->b_interrupt_button_p = true;
+    interface_->interrupt->b_interrupt_button_p = true;
   }
   if (b_button_r) {
-    interface_->interrupt_->b_interrupt_button_r = true;
+    interface_->interrupt->b_interrupt_button_r = true;
   }
   if (b_button_w) {
-    interface_->interrupt_->b_interrupt_button_w = true;
+    interface_->interrupt->b_interrupt_button_w = true;
   }
   if (b_button_a) {
-    interface_->interrupt_->b_interrupt_button_a = true;
+    interface_->interrupt->b_interrupt_button_a = true;
   }
   if (b_button_s) {
-    interface_->interrupt_->b_interrupt_button_s = true;
+    interface_->interrupt->b_interrupt_button_s = true;
   }
   if (b_button_d) {
-    interface_->interrupt_->b_interrupt_button_d = true;
+    interface_->interrupt->b_interrupt_button_d = true;
   }
   if (b_button_q) {
-    interface_->interrupt_->b_interrupt_button_q = true;
+    interface_->interrupt->b_interrupt_button_q = true;
   }
   if (b_button_e) {
-    interface_->interrupt_->b_interrupt_button_e = true;
+    interface_->interrupt->b_interrupt_button_e = true;
   }
   if (b_button_x) {
-    interface_->interrupt_->b_interrupt_button_x = true;
+    interface_->interrupt->b_interrupt_button_x = true;
   }
   if (b_button_j) {
-    interface_->interrupt_->b_interrupt_button_j = true;
+    interface_->interrupt->b_interrupt_button_j = true;
   }
   if (b_button_k) {
-    interface_->interrupt_->b_interrupt_button_k = true;
+    interface_->interrupt->b_interrupt_button_k = true;
   }
 
   interface_->getCommand(sensor_data_, command_);

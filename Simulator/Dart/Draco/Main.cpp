@@ -30,7 +30,7 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
 
 class OneStepProgress : public osgGA::GUIEventHandler {
  public:
-  OneStepProgress(ValkyrieWorldNode* worldnode) : worldnode_(worldnode) {}
+  OneStepProgress(DracoWorldNode* worldnode) : worldnode_(worldnode) {}
 
   /** Deprecated, Handle events, return true if handled, false otherwise. */
   virtual bool handle(const osgGA::GUIEventAdapter& ea,
@@ -65,13 +65,6 @@ class OneStepProgress : public osgGA::GUIEventHandler {
       if (ea.getKey() == 'x') {
         worldnode_->enableButtonXFlag();
       }
-      if (ea.getKey() == 'j') {
-        worldnode_->enableButtonJFlag();
-      }
-      if (ea.getKey() == 'k') {
-        worldnode_->enableButtonKFlag();
-      }
-
       if (ea.getKey() == 'f') {
         int numStepProgress(50);
         for (int i = 0; i < numStepProgress; ++i) {

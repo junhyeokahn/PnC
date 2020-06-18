@@ -1,6 +1,5 @@
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoInterface.hpp>
-#include <Simulator/Dart/Draco/DracoLedPosAnnouncer.hpp>
 #include <Simulator/Dart/Draco/DracoWorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
@@ -201,12 +200,12 @@ void DracoWorldNode::hold_xy_() {
   // trq_cmd_[2] = kp * (des_z - q[2]) + kd * (des_zdot - v[2]);
 }
 
-void get_force_torque_data_() {
+void DracoWorldNode::get_force_torque_data_() {
   Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
 
-  dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("lAnkle");
-  dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rAnkle");
+  dart::dynamics::BodyNode* lfoot_bn = skel_->getBodyNode("lAnkle");
+  dart::dynamics::BodyNode* rfoot_bn = skel_->getBodyNode("rAnkle");
   const dart::collision::CollisionResult& _result =
       world_->getLastCollisionResult();
 
@@ -227,7 +226,7 @@ void get_force_torque_data_() {
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
         T_wc.translation() = contact.point;
-        Eigen::Isometry3d T_wa = robot_->getBodyNode("lAnkle")->getTransform(
+        Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
         Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
@@ -253,7 +252,7 @@ void get_force_torque_data_() {
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
         T_wc.translation() = contact.point;
-        Eigen::Isometry3d T_wa = robot_->getBodyNode("rAnkle")->getTransform(
+        Eigen::Isometry3d T_wa = skel_->getBodyNode("rAnkle")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
         Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);

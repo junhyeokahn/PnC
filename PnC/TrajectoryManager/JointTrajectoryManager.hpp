@@ -7,7 +7,7 @@
 class JointTrajectoryManager : public TrajectoryManagerBase {
  public:
   JointTrajectoryManager(Task* _joint_task, RobotSystem* _robot);
-  ~JointTrajectoryManager();
+  ~JointTrajectoryManager(){};
 
   // Use current pose to set the task.
   void useCurrent();
@@ -25,8 +25,8 @@ class JointTrajectoryManager : public TrajectoryManagerBase {
   void initializeJointTrajectory(const double _start_time,
                                  const double _duration,
                                  const Eigen::VectorXd& _target_jpos);
-
   void updateJointDesired(const double current_time);
+  void paramInitialization(const YAML::Node& node){};
 
   double start_time_;
   double duration_;

@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportStand.hpp>
 
 DoubleSupportStand::DoubleSupportStand(
@@ -31,7 +31,7 @@ void DoubleSupportStand::firstVisit() {
       robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
   Eigen::VectorXd target_com_pos = (lfoot_pos + rfoot_pos) / 2.0;
   target_com_pos[2] = target_height_;
-  ctrl_arch_->joint_trajectory_manager_->initializeFloatingBaseTrajectory(
+  ctrl_arch_->joint_trajectory_manager_->initializeJointTrajectory(
       0., end_time_, target_com_pos);
 
   // =========================================================================
@@ -97,13 +97,20 @@ void DoubleSupportStand::oneStep() {
       state_machine_time_);
 
   // Compute and update new hierarchy weights
-  rfoot_pos_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  rfoot_ori_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  lfoot_pos_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  lfoot_ori_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  com_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  base_ori_hierarchy_manager_->updateRampToMaxDesired(state_machine_time_);
-  jpos_hierarchy_manager_->updateRampToMinDesired(state_machine_time_);
+  ctrl_arch_->rfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->rfoot_ori_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->lfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->lfoot_ori_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->com_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->base_ori_hierarchy_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->jpos_hierarchy_manager_->updateRampToMinDesired(
+      state_machine_time_);
 
   _taskUpdate();
 }
@@ -118,7 +125,7 @@ bool DoubleSupportStand::endOfState() {
 }
 
 StateIdentifier DoubleSupportStand::getNextState() {
-  return VALKYRIE_STATES::BALANCE;
+  return DRACO_STATES::BALANCE;
 }
 
 void DoubleSupportStand::initialization(const YAML::Node& node) {

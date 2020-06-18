@@ -4,13 +4,13 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/StateMachine.hpp>
 
-class DrcoControlArchitecture;
+class DracoControlArchitecture;
 class DracoTaskAndForceContainer;
 
 class DoubleSupportStand : public StateMachine {
  public:
   DoubleSupportStand(const StateIdentifier state_identifier_in,
-                     DrcoControlArchitecture* _ctrl_arch, RobotSystem* _robot);
+                     DracoControlArchitecture* _ctrl_arch, RobotSystem* _robot);
   ~DoubleSupportStand();
 
   void oneStep();
@@ -22,7 +22,7 @@ class DoubleSupportStand : public StateMachine {
 
  protected:
   DracoStateProvider* sp_;
-  DrcoControlArchitecture* ctrl_arch_;
+  DracoControlArchitecture* ctrl_arch_;
   DracoTaskAndForceContainer* taf_container_;
 
   double ctrl_start_time_;

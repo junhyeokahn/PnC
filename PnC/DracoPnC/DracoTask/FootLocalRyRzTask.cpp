@@ -1,6 +1,6 @@
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
-#include <PnC/DracoPnC/TaskSet/TaskSet.hpp>
+#include <PnC/DracoPnC/DracoTask/FootLocalRyRzTask.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
 FootLocalRyRzTask::FootLocalRyRzTask(RobotSystem* robot, int _link_idx)

@@ -22,7 +22,7 @@ class SwingControl : public StateMachine {
 
  protected:
   DracoStateProvider* sp_;
-  DracoControlArchitecture* val_ctrl_arch_;
+  DracoControlArchitecture* ctrl_arch_;
   DracoTaskAndForceContainer* taf_container_;
 
   int leg_side_;

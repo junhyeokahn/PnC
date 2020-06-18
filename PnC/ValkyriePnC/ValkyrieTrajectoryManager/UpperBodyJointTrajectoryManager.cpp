@@ -5,10 +5,7 @@ UpperBodyJointTrajectoryManager::UpperBodyJointTrajectoryManager(
     Task* _upper_body_task, RobotSystem* _robot)
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "Trajectory Manager: Upper Body Joints");
-  // Set Task
   upper_body_task_ = _upper_body_task;
-
-  // Get State Provider
   sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
   raising_arm = false;
@@ -26,8 +23,6 @@ UpperBodyJointTrajectoryManager::UpperBodyJointTrajectoryManager(
 
   t_start_ = 0.0;
 }
-
-UpperBodyJointTrajectoryManager::~UpperBodyJointTrajectoryManager() {}
 
 void UpperBodyJointTrajectoryManager::initializeRaiseRightArmNow() {
   std::cout << "[UpperBodyJointTrajectoryManager] intiialize raising arm"

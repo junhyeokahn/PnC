@@ -11,7 +11,6 @@ class EnvInterface {
  protected:
   ControlArchitecture* control_architecture_;
   RobotSystem* robot_;
-  InterruptLogic* interrupt_;
   int count_;
   double running_time_;
 
@@ -20,6 +19,7 @@ class EnvInterface {
     count_ = 0;
     running_time_ = 0.;
   }
+  InterruptLogic* interrupt;
   virtual ~EnvInterface(){};
 
   // Get Command through Test

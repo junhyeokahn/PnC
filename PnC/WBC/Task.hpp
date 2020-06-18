@@ -29,6 +29,12 @@ class Task {
   }
   virtual ~Task() {}
 
+  virtual int getLinkID() {
+    std::cout
+        << "Called in Parent Clasee Task.hpp, if this happen use pure virtual"
+        << std::endl;
+    exit(0);
+  }
   void getCommand(Eigen::VectorXd& _op_cmd) { _op_cmd = op_cmd; }
   void getTaskJacobian(Eigen::MatrixXd& Jt) { Jt = Jt_; }
   void getTaskJacobianDotQdot(Eigen::VectorXd& JtDotQdot) {

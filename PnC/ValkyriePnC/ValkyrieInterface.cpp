@@ -26,7 +26,7 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
   sp_ = ValkyrieStateProvider::getStateProvider(robot_);
 
   // Initialize empty interrupt class
-  interrupt_ = new InterruptLogic();
+  interrupt = new InterruptLogic();
 
   sp_->stance_foot = ValkyrieBodyNode::leftCOP_Frame;
 
@@ -49,7 +49,7 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
 ValkyrieInterface::~ValkyrieInterface() {
   delete robot_;
   delete state_estimator_;
-  delete interrupt_;
+  delete interrupt;
   delete control_architecture_;
 }
 
@@ -59,7 +59,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
 
   if (!Initialization_(data, cmd)) {
     state_estimator_->Update(data);
-    interrupt_->processInterrupts();
+    interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
     CropTorque_(cmd);
   }
@@ -75,12 +75,12 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
 }
 
 void ValkyrieInterface::CropTorque_(ValkyrieCommand* cmd) {
-  cmd->jtrq =
-      myUtils::CropVector(cmd->jtrq, robot_->GetTorqueLowerLimits().segment(
-                                         Valkyrie::n_vdof, Valkyrie::n_adof),
-                          robot_->GetTorqueUpperLimits().segment(
-                              Valkyrie::n_vdof, Valkyrie::n_adof),
-                          "clip trq in interface");
+  cmd->jtrq = myUtils::CropVector(cmd->jtrq,
+                                  robot_->GetTorqueLowerLimits().segment(
+                                      Valkyrie::n_vdof, Valkyrie::n_adof),
+                                  robot_->GetTorqueUpperLimits().segment(
+                                      Valkyrie::n_vdof, Valkyrie::n_adof),
+                                  "clip trq in interface");
 }
 
 void ValkyrieInterface::_ParameterSetting() {
@@ -90,8 +90,8 @@ void ValkyrieInterface::_ParameterSetting() {
         myUtils::readParameter<std::string>(cfg, "test_name");
     if (test_name == "walking") {
       control_architecture_ = new ValkyrieControlArchitecture(robot_);
-      delete interrupt_;
-      interrupt_ = new WalkingInterruptLogic(
+      delete interrupt;
+      interrupt = new WalkingInterruptLogic(
           static_cast<ValkyrieControlArchitecture*>(control_architecture_));
     } else {
       printf(

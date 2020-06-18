@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 
 DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
     : ControlArchitecture(_robot) {
@@ -52,7 +52,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
       new TaskWeightTrajectoryManager(taf_container_->base_ori_task_, robot_);
 
   dcm_trajectory_manger_ = new DCMTrajectoryManager(
-      dcm_planner_, taf_container_->com_task_, taf_container_->torso_ori_task_,
+      dcm_planner_, taf_container_->com_task_, taf_container_->base_ori_task_,
       robot_, DracoBodyNode::lFootCenter, DracoBodyNode::rFootCenter);
 
   // Initialize states: add all states to the state machine map
@@ -164,18 +164,23 @@ void DracoControlArchitecture::_InitializeParameters() {
     rfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
     lfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
     lfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
-    com_hierarchy_manager_->setMaxGain(
-        myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com"));
-    com_hierarchy_manager_->setMinGain(
-        myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com"));
-    base_ori_hierarchy_manager_->setMaxGain(
-        myUtils::readParameter(cfg_["task_parameters"], "max_w_task_base_ori"));
-    base_ori_hierarchy_manager_->setMinGain(
-        myUtils::readParameter(cfg_["task_parameters"], "min_w_task_base_ori"));
-    jpos_hierarchy_manager_->setMaxGain(
-        myUtils::readParameter(cfg_["task_parameters"], "max_w_task_joint"));
-    jpos_hierarchy_manager_->setMinGain(
-        myUtils::readParameter(cfg_["task_parameters"], "min_w_task_joint"));
+    double max_gain, min_gain;
+    myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
+    myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com", min_gain);
+    com_hierarchy_manager_->setMaxGain(max_gain);
+    com_hierarchy_manager_->setMinGain(min_gain);
+    myUtils::readParameter(cfg_["task_parameters"], "max_w_task_base_ori",
+                           max_gain);
+    myUtils::readParameter(cfg_["task_parameters"], "min_w_task_base_ori",
+                           min_gain);
+    base_ori_hierarchy_manager_->setMaxGain(max_gain);
+    base_ori_hierarchy_manager_->setMinGain(min_gain);
+    myUtils::readParameter(cfg_["task_parameters"], "max_w_task_joint",
+                           max_gain);
+    myUtils::readParameter(cfg_["task_parameters"], "min_w_task_joint",
+                           min_gain);
+    jpos_hierarchy_manager_->setMaxGain(max_gain);
+    jpos_hierarchy_manager_->setMinGain(min_gain);
     double max_foot_pos_gain, min_foot_pos_gain, max_foot_ori_gain,
         min_foot_ori_gain;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_foot_pos",

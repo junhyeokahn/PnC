@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportBalance.hpp>
 
 DoubleSupportBalance::DoubleSupportBalance(

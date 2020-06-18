@@ -9,6 +9,7 @@
 #include <PnC/DracoPnC/DracoStateMachine/ContactTransitionStart.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportBalance.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/DoubleSupportStand.hpp>
+#include <PnC/DracoPnC/DracoStateMachine/Initialize.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/SwingControl.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoTaskAndForceContainer/DracoTaskAndForceContainer.hpp>
@@ -31,7 +32,7 @@ constexpr int RL_SWING = 5;
 constexpr int LL_CONTACT_TRANSITION_START = 6;
 constexpr int LL_CONTACT_TRANSITION_END = 7;
 constexpr int LL_SWING = 8;
-};
+};  // namespace DRACO_STATES
 
 class DracoControlArchitecture : public ControlArchitecture {
  public:

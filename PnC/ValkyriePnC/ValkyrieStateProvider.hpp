@@ -34,7 +34,6 @@ class ValkyrieStateProvider {
   int phase_copy;
 
   // API related variable
-  bool b_walking;
   double ft_length;
   double r_ft_width;
   double l_ft_width;

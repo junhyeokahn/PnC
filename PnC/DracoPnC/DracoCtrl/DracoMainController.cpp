@@ -1,7 +1,7 @@
 #include <PnC/DracoPnC/DracoCtrl/DracoMainController.hpp>
 
 DracoMainController::DracoMainController(
-    ValkyrieTaskAndForceContainer* _taf_container, RobotSystem* _robot) {
+    DracoTaskAndForceContainer* _taf_container, RobotSystem* _robot) {
   myUtils::pretty_constructor(2, "Draco Main Controller");
   // Initialize Flag
   b_first_visit_ = true;
@@ -11,25 +11,25 @@ DracoMainController::DracoMainController(
   robot_ = _robot;
 
   // Initialize State Provider
-  sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+  sp_ = DracoStateProvider::getStateProvider(robot_);
 
   // Initialize WBC
   std::vector<bool> act_list;
-  act_list.resize(Valkyrie::n_dof, true);
-  for (int i(0); i < Valkyrie::n_vdof; ++i) act_list[i] = false;
+  act_list.resize(Draco::n_dof, true);
+  for (int i(0); i < Draco::n_vdof; ++i) act_list[i] = false;
   wbc_ = new WBC(act_list);
 
-  tau_cmd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-  qddot_cmd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
+  tau_cmd_ = Eigen::VectorXd::Zero(Draco::n_adof);
+  qddot_cmd_ = Eigen::VectorXd::Zero(Draco::n_adof);
 
   // Initialize Joint Integrator
-  wbc_dt_ = ValkyrieAux::servo_rate;
-  joint_integrator_ = new JointIntegrator(Valkyrie::n_adof, wbc_dt_);
+  wbc_dt_ = DracoAux::servo_rate;
+  joint_integrator_ = new JointIntegrator(Draco::n_adof, wbc_dt_);
 
   // Initialize desired pos, vel, acc containers
-  des_jpos_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-  des_jvel_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
-  des_jacc_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
+  des_jpos_ = Eigen::VectorXd::Zero(Draco::n_adof);
+  des_jvel_ = Eigen::VectorXd::Zero(Draco::n_adof);
+  des_jacc_ = Eigen::VectorXd::Zero(Draco::n_adof);
 }
 
 DracoMainController::~DracoMainController() {
@@ -106,30 +106,30 @@ void DracoMainController::getCommand(void* _cmd) {
   // Integrate Joint Velocities and Positions
   des_jacc_ = qddot_cmd_;
   joint_integrator_->integrate(
-      des_jacc_, sp_->qdot.segment(Valkyrie::n_vdof, Valkyrie::n_adof),
-      sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof), des_jvel_, des_jpos_);
+      des_jacc_, sp_->qdot.segment(Draco::n_vdof, Draco::n_adof),
+      sp_->q.segment(Draco::n_vdof, Draco::n_adof), des_jvel_, des_jpos_);
 
   // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
   // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 
   // Set Command
-  for (int i(0); i < Valkyrie::n_adof; ++i) {
-    ((ValkyrieCommand*)_cmd)->jtrq[i] = tau_cmd_[i];
-    ((ValkyrieCommand*)_cmd)->q[i] = des_jpos_[i];
-    ((ValkyrieCommand*)_cmd)->qdot[i] = des_jvel_[i];
+  for (int i(0); i < Draco::n_adof; ++i) {
+    ((DracoCommand*)_cmd)->jtrq[i] = tau_cmd_[i];
+    ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
+    ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
   }
 }
 
 void DracoMainController::firstVisit() {
   // Initialize joint integrator
-  Eigen::VectorXd jpos_ini = sp_->q.segment(Valkyrie::n_vdof, Valkyrie::n_adof);
-  joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Valkyrie::n_adof),
+  Eigen::VectorXd jpos_ini = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
+  joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Draco::n_adof),
                                       jpos_ini);
 }
 
 void DracoMainController::ctrlInitialization(const YAML::Node& node) {
   // WBC Defaults
-  wbc_dt_ = ValkyrieAux::servo_rate;
+  wbc_dt_ = DracoAux::servo_rate;
   w_contact_weight_ = 1e-3;        // Contact Weight
   lambda_qddot_ = 1e-8;            // Generalized Coord Acceleration
   lambda_Fr_ = 1e-8;               // Reaction Force Regularization
@@ -164,10 +164,10 @@ void DracoMainController::ctrlInitialization(const YAML::Node& node) {
   // Set WBC Parameters
   // Enable Torque Limits
   wbc_->enableTorqueLimits(b_enable_torque_limits_);
-  Eigen::VectorXd tau_min = robot_->GetTorqueLowerLimits().segment(
-      Valkyrie::n_vdof, Valkyrie::n_adof);
-  Eigen::VectorXd tau_max = robot_->GetTorqueUpperLimits().segment(
-      Valkyrie::n_vdof, Valkyrie::n_adof);
+  Eigen::VectorXd tau_min =
+      robot_->GetTorqueLowerLimits().segment(Draco::n_vdof, Draco::n_adof);
+  Eigen::VectorXd tau_max =
+      robot_->GetTorqueUpperLimits().segment(Draco::n_vdof, Draco::n_adof);
   wbc_->setTorqueLimits(tau_min, tau_max);
 
   // Set Joint Integrator Parameters
@@ -177,12 +177,10 @@ void DracoMainController::ctrlInitialization(const YAML::Node& node) {
   // Set Maximum Current Position Deviation
   joint_integrator_->setMaxPositionError(max_pos_error_);
   // Set Joint velocity and position hardware limits
-  joint_integrator_->setVelocityBounds(robot_->getVelocityLowerLimits().segment(
-                                           Valkyrie::n_vdof, Valkyrie::n_adof),
-                                       robot_->getVelocityUpperLimits().segment(
-                                           Valkyrie::n_vdof, Valkyrie::n_adof));
-  joint_integrator_->setPositionBounds(robot_->getPositionLowerLimits().segment(
-                                           Valkyrie::n_vdof, Valkyrie::n_adof),
-                                       robot_->getPositionUpperLimits().segment(
-                                           Valkyrie::n_vdof, Valkyrie::n_adof));
+  joint_integrator_->setVelocityBounds(
+      robot_->getVelocityLowerLimits().segment(Draco::n_vdof, Draco::n_adof),
+      robot_->getVelocityUpperLimits().segment(Draco::n_vdof, Draco::n_adof));
+  joint_integrator_->setPositionBounds(
+      robot_->getPositionLowerLimits().segment(Draco::n_vdof, Draco::n_adof),
+      robot_->getPositionUpperLimits().segment(Draco::n_vdof, Draco::n_adof));
 }

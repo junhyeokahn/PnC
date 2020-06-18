@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/ContactTransitionStart.hpp>
 
 ContactTransitionStart::ContactTransitionStart(
@@ -68,7 +68,7 @@ void ContactTransitionStart::firstVisit() {
     // Recompute DCM Trajectories
     double t_walk_start = ctrl_start_time_;
     Eigen::Quaterniond base_ori(
-        robot_->getBodyNodeCoMIsometry(DracoBodyNode::torso).linear());
+        robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
     ctrl_arch_->dcm_trajectory_manger_->initialize(
         t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
   }

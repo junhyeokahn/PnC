@@ -56,5 +56,5 @@ constexpr int rAnkle = 15;
 }  // namespace DracoDoF
 
 namespace DracoAux {
-constexpr double ServoRate = 1.0 / 1000.0;
+constexpr double servo_rate = 1.0 / 1000.0;
 }

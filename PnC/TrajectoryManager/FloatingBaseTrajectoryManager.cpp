@@ -24,7 +24,7 @@ void FloatingBaseTrajectoryManager::updateDesired() {
                                 base_ang_acc_des_);
 }
 
-void FloatingBaseTrajectoryManager::initializeJointTrajectory(
+void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
     const double _start_time, const double _duration,
     const Eigen::VectorXd& _target_com_pos) {
   start_time_ = _start_time;
@@ -43,7 +43,7 @@ void FloatingBaseTrajectoryManager::useCurrent() {
 
   Eigen::Quaternion<double> base_quat =
       Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  base_ori_des_ = base_quat.w(), base_quat.x(), base_quat.y(), base_quat.z();
+  base_ori_des_ << base_quat.w(), base_quat.x(), base_quat.y(), base_quat.z();
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
 
@@ -54,11 +54,11 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseDesired(
     const double current_time) {
   for (int i = 0; i < 3; ++i) {
     com_pos_des_[i] = myUtils::smooth_changing(
-        ini_com_pos[i], target_com_pos_[i], duration_, current_time);
+        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
     com_vel_des_[i] = myUtils::smooth_changing_vel(
-        ini_com_pos[i], target_com_pos_[i], duration_, current_time);
+        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
     com_acc_des_[i] = myUtils::smooth_changing_acc(
-        ini_com_pos[i], target_com_pos_[i], duration_, current_time);
+        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
   }
 
   base_ori_des_ = ini_base_quat_;

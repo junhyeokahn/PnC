@@ -16,6 +16,7 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
   DracoSensorData* sensor_data_;
   DracoCommand* command_;
 
+  void get_force_torque_data_();
   void get_imu_data_(Eigen::VectorXd& ang_vel, Eigen::VectorXd& acc,
                      Eigen::VectorXd& mag);
   void check_foot_contact_by_pos_(bool& rfoot_contact, bool& lfoot_contact);
@@ -53,8 +54,6 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
   bool b_button_q;
   bool b_button_e;
   bool b_button_x;
-  bool b_button_j;
-  bool b_button_k;
 
   void enableButtonPFlag() { b_button_p = true; }
   void enableButtonRFlag() { b_button_r = true; }
@@ -65,8 +64,6 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
   void enableButtonQFlag() { b_button_q = true; }
   void enableButtonEFlag() { b_button_e = true; }
   void enableButtonXFlag() { b_button_x = true; }
-  void enableButtonJFlag() { b_button_j = true; }
-  void enableButtonKFlag() { b_button_k = true; }
 
   void resetButtonFlags() {
     b_button_p = false;
@@ -78,7 +75,5 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     b_button_q = false;
     b_button_e = false;
     b_button_x = false;
-    b_button_j = false;
-    b_button_k = false;
   }
 };

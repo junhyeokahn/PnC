@@ -1,13 +1,12 @@
 #include <math.h>
 #include <stdio.h>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
+#include <PnC/DracoPnC/DracoLogicInterrupt/WalkingInterruptLogic.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
-#include <PnC/DracoPnC/TestSet/TestSet.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/ValkyriePnC/DracoCtrlArchitecture/ValkyrieControlArchitecture.hpp>
-#include <PnC/ValkyriePnC/DracoLogicInterrupt/WalkingInterruptLogic.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
@@ -24,7 +23,7 @@ DracoInterface::DracoInterface() : EnvInterface() {
   robot_ =
       new RobotSystem(6, THIS_COM "RobotModel/Robot/Draco/DracoPnC_Dart.urdf");
   // robot_->printRobotInfo();
-  interrupt_ = new InterruptLogic();
+  interrupt = new InterruptLogic();
 
   test_cmd_ = new DracoCommand();
   state_estimator_ = new DracoStateEstimator(robot_);
@@ -73,7 +72,7 @@ DracoInterface::DracoInterface() : EnvInterface() {
 DracoInterface::~DracoInterface() {
   delete test_cmd_;
   delete state_estimator_;
-  delete interrupt_;
+  delete interrupt;
   delete control_architecture_;
   delete robot_;
 }
@@ -84,7 +83,7 @@ void DracoInterface::getCommand(void* _data, void* _command) {
 
   if (!_Initialization(data, cmd)) {
     state_estimator_->update(data);
-    interrupt_->processInterrupts();
+    interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
     stop_test_ = _UpdateTestCommand(test_cmd_);
     if (stop_test_) {
@@ -104,9 +103,9 @@ void DracoInterface::getCommand(void* _data, void* _command) {
   rfoot_ati_ = data->rf_wrench;
   lfoot_ati_ = data->lf_wrench;
 
-  running_time_ = (double)(count_)*DracoAux::ServoRate;
+  running_time_ = (double)(count_)*DracoAux::servo_rate;
   sp_->curr_time = running_time_;
-  sp_->phase_copy = control_architecture_->getPhase();
+  sp_->phase_copy = control_architecture_->getState();
   ++count_;
 }
 
@@ -182,10 +181,10 @@ void DracoInterface::_ParameterSetting() {
     std::string test_name =
         myUtils::readParameter<std::string>(cfg, "test_name");
     if (test_name == "walking") {
-      control_architecture_ = new ValkyrieControlArchitecture(robot_);
-      delete interrupt_;
-      interrupt_ = new WalkingInterruptLogic(
-          static_cast<ValkyrieControlArchitecture*>(control_architecture_));
+      control_architecture_ = new DracoControlArchitecture(robot_);
+      delete interrupt;
+      interrupt = new WalkingInterruptLogic(
+          static_cast<DracoControlArchitecture*>(control_architecture_));
     } else {
       printf(
           "[Draco Interface] There is no matching test with the "

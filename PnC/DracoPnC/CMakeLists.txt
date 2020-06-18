@@ -1,28 +1,37 @@
 file(GLOB_RECURSE sources "*.cpp")
 file(GLOB draco_pnc_headers "*.hpp")
-file(GLOB draco_testset_headers "TestSet/*.hpp")
-file(GLOB draco_ctrlset_headers "CtrlSet/*.hpp")
-file(GLOB draco_contactset_headers "ContactSet/*.hpp")
-file(GLOB draco_prediction_module_headers "PredictionModule/*.hpp")
+file(GLOB draco_logic_interrupt_headers "DracoLogicInterrupt/*.hpp")
+file(GLOB draco_ctrl_headers "DracoCtrl/*.hpp")
+file(GLOB draco_state_estimator_headers "DracoStateEstimator/*.hpp")
+file(GLOB draco_state_machine_headers "DracoStateMachine/*.hpp")
+file(GLOB draco_task_headers "DracoTask/*.hpp")
+file(GLOB draco_ctrl_arch_headers "DracoCtrlArchitecture/*.hpp")
+file(GLOB draco_taf_headers "DracoTaskAndForceContainer/*.hpp")
 
 add_library(DracoPnC SHARED ${sources})
 target_link_libraries(DracoPnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
-                               myMPC
-                               myGaitCycle
                                myWBC
                                myFilters
-                               myPlanner)
+                               myPlanner
+                               myTrajectoryManager)
 
 install(TARGETS DracoPnC DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${draco_pnc_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC")
-install(FILES ${draco_testset_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/TestSet")
-install(FILES ${draco_ctrlset_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/CtrlSet")
-install(FILES ${draco_contactset_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/ContactSet")
-install(FILES ${draco_prediction_module_headers} DESTINATION
-    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/PredictionModule")
+
+install(FILES ${draco_logic_interrupt_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoLogicInterrupt")
+install(FILES ${draco_ctrl_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoCtrl")
+install(FILES ${draco_state_estimator_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoStateEstimator")
+install(FILES ${draco_state_machine_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoStateMachine")
+install(FILES ${draco_task_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoTask")
+install(FILES ${draco_ctrl_arch_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoCtrlArchitecture")
+install(FILES ${draco_taf_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/DracoPnC/DracoTaskAndForceContainer")

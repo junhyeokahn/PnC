@@ -87,4 +87,4 @@ std::string pretty_string(Eigen::VectorXd const& vv);
 std::string pretty_string(Eigen::MatrixXd const& mm, std::string const& prefix);
 std::string pretty_string(double vv);
 
-} /* myUtils */
+}  // namespace myUtils

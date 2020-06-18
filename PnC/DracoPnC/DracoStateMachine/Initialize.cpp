@@ -1,4 +1,4 @@
-#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoControlArchitecture.hpp>
+#include <PnC/DracoPnC/DracoCtrlArchitecture/DracoCtrlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/Initialize.hpp>
 
 Initialize::Initialize(const StateIdentifier state_identifier_in,
@@ -11,7 +11,7 @@ Initialize::Initialize(const StateIdentifier state_identifier_in,
   ctrl_arch_ = ((DracoControlArchitecture*)_ctrl_arch);
   taf_container_ = ctrl_arch_->taf_container_;
   // Get State Provider
-  sp_ = ValkyrieStateProvider::getStateProvider(robot_);
+  sp_ = DracoStateProvider::getStateProvider(robot_);
 }
 
 Initialize::~Initialize() {}
