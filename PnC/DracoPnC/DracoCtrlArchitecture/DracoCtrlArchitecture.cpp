@@ -5,8 +5,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   b_state_first_visit_ = true;
 
   myUtils::pretty_constructor(1, "Draco Control Architecture");
-  cfg_ = YAML::LoadFile(
-      THIS_COM "Config/Draco/TEST/WALKING_CONTROL_ARCHITECTURE_PARAMS.yaml");
+  cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_PARAMS.yaml");
 
   sp_ = DracoStateProvider::getStateProvider(robot_);
 
