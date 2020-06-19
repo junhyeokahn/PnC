@@ -40,6 +40,8 @@ class JointIntegrator {
   // Debug
   void printIntegrationParams();
 
+  bool isInitialized() { return b_initialized; };
+
  private:
   int n_joints_;            // number of joints
   double vel_freq_cutoff_;  // frequency cut-off for the velocity  in Hz
@@ -47,6 +49,7 @@ class JointIntegrator {
   double alpha_vel_;  // the equivalent alpha cut-off for velocity integration
   double alpha_pos_;  // the equivalent alpha cut-off for position integration
   double dt_;         // integration time in seconds
+  bool b_initialized;
 
   // Internal Integration States
   Eigen::VectorXd vel_;

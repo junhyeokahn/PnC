@@ -25,7 +25,6 @@ DracoInterface::DracoInterface() : EnvInterface() {
   // robot_->printRobotInfo();
   interrupt = new InterruptLogic();
 
-  test_cmd_ = new DracoCommand();
   state_estimator_ = new DracoStateEstimator(robot_);
   sp_ = DracoStateProvider::getStateProvider(robot_);
   sp_->stance_foot = DracoBodyNode::lFootCenter;
@@ -70,7 +69,6 @@ DracoInterface::DracoInterface() : EnvInterface() {
 }
 
 DracoInterface::~DracoInterface() {
-  delete test_cmd_;
   delete state_estimator_;
   delete interrupt;
   delete control_architecture_;
@@ -85,7 +83,8 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     state_estimator_->update(data);
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
-    stop_test_ = _UpdateTestCommand(test_cmd_);
+
+    stop_test_ = _UpdateTestCommand(cmd);
     if (stop_test_) {
       std::cout << "Setting Stop Command" << std::endl;
       _SetStopCommand(data, cmd);
@@ -109,36 +108,37 @@ void DracoInterface::getCommand(void* _data, void* _command) {
   ++count_;
 }
 
-bool DracoInterface::_UpdateTestCommand(DracoCommand* test_cmd) {
+bool DracoInterface::_UpdateTestCommand(DracoCommand* cmd) {
   bool over_limit(false);
+
   for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
     // JPos limit check
-    if (test_cmd->q[i] > jpos_max_[i])
+    if (cmd->q[i] > jpos_max_[i])
       cmd_jpos_[i] = jpos_max_[i];
-    else if (test_cmd->q[i] < jpos_min_[i])
+    else if (cmd->q[i] < jpos_min_[i])
       cmd_jpos_[i] = jpos_min_[i];
     else
-      cmd_jpos_[i] = test_cmd->q[i];
+      cmd_jpos_[i] = cmd->q[i];
 
     // Velocity limit
-    if (test_cmd->qdot[i] > jvel_max_[i])
+    if (cmd->qdot[i] > jvel_max_[i])
       over_limit = true;
-    else if (test_cmd->qdot[i] < jvel_min_[i])
+    else if (cmd->qdot[i] < jvel_min_[i])
       over_limit = true;
     else
-      cmd_jvel_[i] = test_cmd->qdot[i];
+      cmd_jvel_[i] = cmd->qdot[i];
 
     // Torque limit
-    if (test_cmd->jtrq[i] > jtrq_max_[i]) {
+    if (cmd->jtrq[i] > jtrq_max_[i]) {
       over_limit = true;
-      test_cmd->jtrq[i] = jtrq_max_[i];
-      cmd_jtrq_[i] = test_cmd->jtrq[i];
-    } else if (test_cmd->jtrq[i] < jtrq_min_[i]) {
+      cmd->jtrq[i] = jtrq_max_[i];
+      cmd_jtrq_[i] = cmd->jtrq[i];
+    } else if (cmd->jtrq[i] < jtrq_min_[i]) {
       over_limit = true;
-      test_cmd->jtrq[i] = jtrq_min_[i];
-      cmd_jtrq_[i] = test_cmd->jtrq[i];
+      cmd->jtrq[i] = jtrq_min_[i];
+      cmd_jtrq_[i] = cmd->jtrq[i];
     } else {
-      cmd_jtrq_[i] = test_cmd->jtrq[i];
+      cmd_jtrq_[i] = cmd->jtrq[i];
     }
   }
   return over_limit;

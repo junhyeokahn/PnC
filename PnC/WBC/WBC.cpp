@@ -108,6 +108,7 @@ void WBC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
   grav_ = grav;
   b_updatesetting_ = true;
 }
+
 void WBC::solve(const std::vector<Task*>& task_list,
                 const std::vector<ContactSpec*>& contact_list,
                 const Eigen::VectorXd& Fd, Eigen::VectorXd& tau_cmd,

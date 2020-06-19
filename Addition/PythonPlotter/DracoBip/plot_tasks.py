@@ -71,14 +71,3 @@ for (k_des, v_des), (k, v) in zip(tasks_des.items(), tasks.items()):
         fig.suptitle(k)
 
 plt.show()
-
-# dcm_vel_des.txt       qdot_task_des.txt   w_com.txt
-# dcm_vel.txt           qdot.txt            w_joint.txt
-# est_com_vel.txt       q_task_des.txt      w_lfoot_ori.txt
-# jpos_des.txt          rfoot_ati.txt       w_lfoot_pos.txt
-# jvel_des.txt          rfoot_contact.txt   w_rf_lfback.txt
-# lfoot_ati.txt         rfoot_pos_des.txt   w_rf_lffront.txt
-# lfoot_contact.txt     rfoot_pos.txt       w_rfoot_ori.txt
-# lfoot_pos_des.txt     rfoot_quat_des.txt  w_rfoot_pos.txt
-# lfoot_pos.txt         rfoot_quat.txt      w_rf_rfback.txt
-# lfoot_quat_des.txt    rfoot_so3_des.txt   w_rf_rffront.txt

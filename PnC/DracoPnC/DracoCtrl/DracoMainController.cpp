@@ -112,9 +112,14 @@ void DracoMainController::getCommand(void* _cmd) {
 
   // Integrate Joint Velocities and Positions
   des_jacc_ = qddot_cmd_;
-  joint_integrator_->integrate(
-      des_jacc_, sp_->qdot.segment(Draco::n_vdof, Draco::n_adof),
-      sp_->q.segment(Draco::n_vdof, Draco::n_adof), des_jvel_, des_jpos_);
+  if (joint_integrator_->isInitialized()) {
+    joint_integrator_->integrate(
+        des_jacc_, sp_->qdot.segment(Draco::n_vdof, Draco::n_adof),
+        sp_->q.segment(Draco::n_vdof, Draco::n_adof), des_jvel_, des_jpos_);
+  } else {
+    des_jpos_ = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
+    des_jvel_ = sp_->qdot.segment(Draco::n_vdof, Draco::n_adof);
+  }
 
   // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_");
   // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
@@ -125,14 +130,19 @@ void DracoMainController::getCommand(void* _cmd) {
     ((DracoCommand*)_cmd)->q[i] = des_jpos_[i];
     ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
   }
+
+  // myUtils::pretty_print(((DracoCommand*)_cmd)->jtrq, std::cout, "jtrq");
+  // myUtils::pretty_print(((DracoCommand*)_cmd)->q, std::cout, "q");
+  // myUtils::pretty_print(((DracoCommand*)_cmd)->qdot, std::cout, "qdot");
 }
 
-void DracoMainController::firstVisit() {
-  // Initialize joint integrator
+void DracoMainController::initializeJointIntegrator() {
   Eigen::VectorXd jpos_ini = sp_->q.segment(Draco::n_vdof, Draco::n_adof);
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(Draco::n_adof),
                                       jpos_ini);
 }
+
+void DracoMainController::firstVisit() {}
 
 void DracoMainController::ctrlInitialization(const YAML::Node& node) {
   // WBC Defaults

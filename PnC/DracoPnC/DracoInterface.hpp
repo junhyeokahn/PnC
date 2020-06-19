@@ -66,7 +66,6 @@ class DracoInterface : public EnvInterface {
   void _SetStopCommand(DracoSensorData*, DracoCommand* cmd);
   void _CopyCommand(DracoCommand* cmd);
 
-  DracoCommand* test_cmd_;
   DracoStateEstimator* state_estimator_;
   DracoStateProvider* sp_;
 

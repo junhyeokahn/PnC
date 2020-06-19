@@ -3,12 +3,13 @@
 JointIntegrator::JointIntegrator(const int num_joints_in, const double dt_in) {
   myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
   n_joints_ = num_joints_in;
-  initializeStates(Eigen::VectorXd::Zero(n_joints_),
-                   Eigen::VectorXd::Zero(n_joints_));
+  vel_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_ = Eigen::VectorXd::Zero(n_joints_);
   setDt(dt_in);
   setDefaultSaturation();
   setVelocityFrequencyCutOff(default_vel_freq_cutoff_);
   setPositionFrequencyCutOff(default_pos_freq_cutoff_);
+  b_initialized = false;
 }
 
 JointIntegrator::JointIntegrator(const int num_joints_in,
@@ -17,12 +18,13 @@ JointIntegrator::JointIntegrator(const int num_joints_in,
                                  const double dt_in) {
   myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
   n_joints_ = num_joints_in;
-  initializeStates(Eigen::VectorXd::Zero(n_joints_),
-                   Eigen::VectorXd::Zero(n_joints_));
+  vel_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_ = Eigen::VectorXd::Zero(n_joints_);
   setDt(dt_in);
   setDefaultSaturation();
   setVelocityFrequencyCutOff(vel_cutoff_in);
   setPositionFrequencyCutOff(pos_cutoff_in);
+  b_initialized = false;
 }
 
 void JointIntegrator::integrate(const Eigen::VectorXd acc_in,
@@ -65,6 +67,7 @@ void JointIntegrator::initializeStates(const Eigen::VectorXd init_vel,
                                        const Eigen::VectorXd init_pos) {
   vel_ = init_vel;
   pos_ = init_pos;
+  b_initialized = true;
 }
 
 void JointIntegrator::setDt(const double dt_in) { dt_ = dt_in; }

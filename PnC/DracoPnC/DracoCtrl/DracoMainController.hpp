@@ -15,6 +15,7 @@ class DracoMainController {
 
   void getCommand(void* _cmd);
   virtual void ctrlInitialization(const YAML::Node& node);
+  void initializeJointIntegrator();
 
  protected:
   RobotSystem* robot_;
@@ -54,8 +55,8 @@ class DracoMainController {
   // Joint Integrator parameters
   double vel_freq_cutoff_;  // Hz
   double pos_freq_cutoff_;  // Hz
-  double max_pos_error_;  // radians. After position integrator, deviation from
-                          // current position
+  double max_pos_error_;    // radians. After position integrator, deviation
+                            // from current position
 
   Eigen::MatrixXd A_;
   Eigen::MatrixXd Ainv_;
