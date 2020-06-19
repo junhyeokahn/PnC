@@ -25,7 +25,7 @@ void JointTrajectoryManager::initializeJointTrajectory(
 
 void JointTrajectoryManager::useCurrent() {
   joint_pos_des_ = robot_->getQ().tail(joint_task_->getDim());
-  joint_vel_des_ = robot_->getQ().tail(joint_task_->getDim());
+  joint_vel_des_ = robot_->getQdot().tail(joint_task_->getDim());
   joint_acc_des_ = Eigen::VectorXd::Zero(joint_task_->getDim());
   updateDesired();
 }

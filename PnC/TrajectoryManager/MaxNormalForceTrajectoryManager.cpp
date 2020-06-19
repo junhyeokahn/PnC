@@ -5,9 +5,9 @@ MaxNormalForceTrajectoryManager::MaxNormalForceTrajectoryManager(
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: Max Normal Force");
   contact_ = _contact;
-  nominal_max_normal_force_z_ = 1500;  // Default
-  starting_max_normal_force_z_ = 0.0;  // Default
-  current_max_normal_force_z_ = 0.0;   // Default
+  nominal_max_normal_force_z_ = 1500;                  // Default
+  starting_max_normal_force_z_ = 0.0;                  // Default
+  current_max_normal_force_z_ = _contact->getMaxFz();  // Default
   local_max_normal_force_z_ = 0.0;
   nominal_ramp_duration_ = 1.0;  // seconds
 }

@@ -27,13 +27,8 @@ class ContactSpec {
   void getJcDotQdot(Eigen::VectorXd& JcDotQdot) { JcDotQdot = JcDotQdot_; }
   int getDim() { return dim_contact_; }
   void unsetContact() { b_set_contact_ = false; }
-  virtual void setMaxFz(double _max_fz) {
-    std::cout
-        << "Do you mean to call me? @ ContactSpec Otherwise use virtual void"
-        << std::endl;
-    exit(0);
-  }
-
+  virtual void setMaxFz(double _max_fz) {}
+  virtual double getMaxFz() { return 0.; }
   bool updateContactSpec() {
     _UpdateJc();
     _UpdateJcDotQdot();

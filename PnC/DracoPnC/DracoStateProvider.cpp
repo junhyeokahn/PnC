@@ -18,10 +18,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
   q = Eigen::VectorXd::Zero(robot_->getNumDofs());
   qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
-  q_des = Eigen::VectorXd::Zero(10);
-  qdot_des = Eigen::VectorXd::Zero(10);
   q_task_des = Eigen::VectorXd::Zero(10);
   qdot_task_des = Eigen::VectorXd::Zero(10);
+  q_task = Eigen::VectorXd::Zero(10);
+  qdot_task = Eigen::VectorXd::Zero(10);
   b_rfoot_contact = 0;
   b_lfoot_contact = 0;
   qddot_cmd = Eigen::VectorXd::Zero(16);
@@ -69,8 +69,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
 
   DataManager* data_manager = DataManager::GetDataManager();
 
-  data_manager->RegisterData(&curr_time, DOUBLE, "time");
-
   // ---------------------------------------------------------------------------
   // Robot States
   // ---------------------------------------------------------------------------
@@ -93,8 +91,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   // WBC
   // ---------------------------------------------------------------------------
   data_manager->RegisterData(&qddot_cmd, VECT, "qddot_des", 16);
-  data_manager->RegisterData(&q_des, INT, "q_des", 10);
-  data_manager->RegisterData(&qdot_des, INT, "qdot_des", 10);
   data_manager->RegisterData(&w_rfoot_pos, DOUBLE, "w_rfoot_pos", 1);
   data_manager->RegisterData(&w_rfoot_ori, DOUBLE, "w_rfoot_ori", 1);
   data_manager->RegisterData(&w_lfoot_pos, DOUBLE, "w_lfoot_pos", 1);
@@ -152,8 +148,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   // Joint
   // ---------------------------------------------------------------------------
-  data_manager->RegisterData(&q_task_des, INT, "q_task_des", 10);
-  data_manager->RegisterData(&qdot_task_des, INT, "qdot_task_des", 10);
+  data_manager->RegisterData(&q_task_des, VECT, "q_task_des", 10);
+  data_manager->RegisterData(&qdot_task_des, VECT, "qdot_task_des", 10);
+  data_manager->RegisterData(&q_task, VECT, "q_task", 10);
+  data_manager->RegisterData(&qdot_task, VECT, "qdot_task", 10);
 }
 
 void DracoStateProvider::saveCurrentData() {

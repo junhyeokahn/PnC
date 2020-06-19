@@ -5,10 +5,10 @@ TaskWeightTrajectoryManager::TaskWeightTrajectoryManager(Task* _task,
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: Task Gain Schedule");
   task_ = _task;
-  nominal_w_max_ = 40;           // Default
-  nominal_w_min_ = 20;           // Default
-  starting_w_ = nominal_w_max_;  // Default
-  current_w_ = nominal_w_max_;   // Default
+  nominal_w_max_ = 40;                       // Default
+  nominal_w_min_ = 20;                       // Default
+  starting_w_ = nominal_w_max_;              // Default
+  current_w_ = task_->getHierarchyWeight();  // Default
   local_w_ = 0.0;
   nominal_ramp_duration_ = 1.0;  // seconds
 }

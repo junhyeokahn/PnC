@@ -183,6 +183,10 @@ void DracoStateEstimator::update(DracoSensorData* data) {
   _ConfigurationAndModelUpdate();
   sp_->com_pos = robot_->getCoMPosition();
   sp_->com_vel = robot_->getCoMVelocity();
+  sp_->base_quat = Eigen::Quaternion<double>(
+      robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear());
+  sp_->base_ang_vel =
+      robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
   sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel / sp_->omega;
 
   double alphaVelocity =

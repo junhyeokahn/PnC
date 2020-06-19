@@ -11,7 +11,9 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
 
   // Initialize Main Controller
   taf_container_ = new DracoTaskAndForceContainer(robot_);
+  taf_container_->paramInitialization(cfg_["task_parameters"]);
   main_controller_ = new DracoMainController(taf_container_, robot_);
+
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();
 
@@ -144,10 +146,11 @@ void DracoControlArchitecture::getCommand(void* _command) {
     state_ = state_machines_[state_]->getNextState();
     b_state_first_visit_ = true;
   }
+  saveData();
 };
 
 void DracoControlArchitecture::_InitializeParameters() {
-  taf_container_->paramInitialization(cfg_["task_parameters"]);
+  // Controller initialization
   main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
 
   // Trajectory Managers initialization
@@ -155,6 +158,7 @@ void DracoControlArchitecture::_InitializeParameters() {
       cfg_["foot_trajectory_parameters"]);
   lfoot_trajectory_manager_->paramInitialization(
       cfg_["foot_trajectory_parameters"]);
+  dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
   try {
     double max_z_force;
@@ -206,8 +210,6 @@ void DracoControlArchitecture::_InitializeParameters() {
     exit(0);
   }
 
-  dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
-
   // States Initialization:
   state_machines_[DRACO_STATES::INITIALIZE]->initialization(
       cfg_["state_initialize_params"]);
@@ -246,6 +248,8 @@ void DracoControlArchitecture::saveData() {
   sp_->lfoot_center_so3_des = lfoot_trajectory_manager_->foot_ang_vel_des_;
   sp_->q_task_des = joint_trajectory_manager_->joint_pos_des_;
   sp_->qdot_task_des = joint_trajectory_manager_->joint_vel_des_;
+  sp_->q_task = sp_->q.tail(Draco::n_adof);
+  sp_->qdot_task = sp_->qdot.tail(Draco::n_adof);
 
   if (state_ == DRACO_STATES::INITIALIZE || state_ == DRACO_STATES::STAND) {
     sp_->com_pos_des = floating_base_lifting_up_manager_->com_pos_des_;

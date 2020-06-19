@@ -20,10 +20,10 @@ class DracoStateProvider {
 
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
-  Eigen::VectorXd q_des;
-  Eigen::VectorXd qdot_des;
   Eigen::VectorXd q_task_des;
   Eigen::VectorXd qdot_task_des;
+  Eigen::VectorXd q_task;
+  Eigen::VectorXd qdot_task;
 
   Eigen::Vector3d com_pos_des;
   Eigen::Vector3d com_vel_des;

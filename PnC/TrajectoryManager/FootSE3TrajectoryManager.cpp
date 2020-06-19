@@ -42,7 +42,11 @@ void FootSE3TrajectoryManager::paramInitialization(const YAML::Node& node) {
 void FootSE3TrajectoryManager::useCurrent() {
   // Update desired to use current foot pose
   foot_pos_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+  foot_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).tail(3);
+  foot_acc_des_.setZero();
   foot_quat_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).linear();
+  foot_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).head(3);
+  foot_ang_acc_des_.setZero();
   convertQuatDesToOriDes();
   updateDesired();
 }

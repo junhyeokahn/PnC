@@ -10,6 +10,7 @@ class PointContactSpec : public ContactSpec {
   virtual ~PointContactSpec();
 
   void setMaxFz(double max_fz) { max_Fz_ = max_fz; }
+  double getMaxFz() { return max_Fz_; }
   int get_link_idx() { return link_idx_; }
 
  protected:

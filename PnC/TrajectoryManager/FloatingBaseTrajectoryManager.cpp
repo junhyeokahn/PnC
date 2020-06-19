@@ -39,14 +39,14 @@ void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
 
 void FloatingBaseTrajectoryManager::useCurrent() {
   com_pos_des_ = ((Eigen::VectorXd)robot_->getCoMPosition());
-  com_vel_des_ = Eigen::VectorXd::Zero(3);
+  com_vel_des_ = ((Eigen::VectorXd)robot_->getCoMVelocity());
   com_acc_des_ = Eigen::VectorXd::Zero(3);
 
   base_ori_quat_des_ =
       Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
   base_ori_des_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
       base_ori_quat_des_.y(), base_ori_quat_des_.z();
-  base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
+  base_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(base_id_).head(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
 
   updateDesired();

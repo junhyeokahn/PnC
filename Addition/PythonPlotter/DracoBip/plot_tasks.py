@@ -1,0 +1,84 @@
+import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+import os
+
+## -----------------------------------------------------------------------------
+## Read Data
+## -----------------------------------------------------------------------------
+file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
+
+t = np.genfromtxt(file_path+'running_time.txt', delimiter='\n', dtype=(float))
+
+st_idx = 1
+end_idx = len(t) - 10
+t = t[st_idx:end_idx]
+
+task_names = ['q_task', 'qdot_task', 'rfoot_pos', 'rfoot_vel', 'rfoot_quat', \
+        'rfoot_so3', 'lfoot_pos', 'lfoot_vel', 'lfoot_quat', 'lfoot_so3', \
+        'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
+task_labels = ['joint', 'rfoot lin', 'rfoot ori', 'lfoot lin', 'lfoot ori', 'com lin', 'base ori']
+tasks = dict()
+tasks_des = dict()
+for i, label in enumerate(task_labels):
+    p_d = np.genfromtxt(file_path+task_names[2*i]+"_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
+    v_d = np.genfromtxt(file_path+task_names[2*i+1]+"_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
+    p = np.genfromtxt(file_path+task_names[2*i]+".txt", delimiter=None, dtype=(float))[st_idx:end_idx]
+    v = np.genfromtxt(file_path+task_names[2*i+1]+".txt", delimiter=None, dtype=(float))[st_idx:end_idx]
+    tasks_des[label] = [p_d, v_d]
+    tasks[label] = [p, v]
+
+data_phse = np.genfromtxt(file_path+'phase.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
+phseChange = []
+for i in range(0,len(t)-1):
+        if data_phse[i] != data_phse[i+1]:
+            phseChange.append(i)
+        else:
+            pass
+
+## -----------------------------------------------------------------------------
+## Plot Tasks
+## -----------------------------------------------------------------------------
+def plot_phase(ax):
+    for j in phseChange:
+        ax.axvline(x=t[j],color='indigo',linestyle='-')
+        ax.text(t[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+
+for (k_des, v_des), (k, v) in zip(tasks_des.items(), tasks.items()):
+    dim = v_des[0].shape[1]
+    if dim == 4:
+        fig, axes = plt.subplots(dim, 2)
+        for i in range(dim):
+            for j in range(2):
+                if not((i == dim-1) and (j == 1)):
+                    axes[i,j].plot(t, v_des[j][:,i], color='r', linestyle='dashed', linewidth=4)
+                    axes[i,j].plot(t, v[j][:,i], color='b', linestyle='solid', linewidth=2)
+                    plot_phase(axes[i,j])
+                    axes[i,j].grid(True)
+        axes[3, 0].set_xlabel('time')
+        axes[2, 1].set_xlabel('time')
+        fig.suptitle(k)
+    else:
+        fig, axes = plt.subplots(dim, 2)
+        for i in range(dim):
+            for j in range(2):
+                axes[i,j].plot(t, v_des[j][:,i], color='r', linestyle='dashed', linewidth=4)
+                axes[i,j].plot(t, v[j][:,i], color='b', linestyle='solid', linewidth=2)
+                plot_phase(axes[i,j])
+                axes[i,j].grid(True)
+            axes[dim-1, j].set_xlabel('time')
+        fig.suptitle(k)
+
+plt.show()
+
+# dcm_vel_des.txt       qdot_task_des.txt   w_com.txt
+# dcm_vel.txt           qdot.txt            w_joint.txt
+# est_com_vel.txt       q_task_des.txt      w_lfoot_ori.txt
+# jpos_des.txt          rfoot_ati.txt       w_lfoot_pos.txt
+# jvel_des.txt          rfoot_contact.txt   w_rf_lfback.txt
+# lfoot_ati.txt         rfoot_pos_des.txt   w_rf_lffront.txt
+# lfoot_contact.txt     rfoot_pos.txt       w_rfoot_ori.txt
+# lfoot_pos_des.txt     rfoot_quat_des.txt  w_rfoot_pos.txt
+# lfoot_pos.txt         rfoot_quat.txt      w_rf_rfback.txt
+# lfoot_quat_des.txt    rfoot_so3_des.txt   w_rf_rffront.txt
