@@ -16,6 +16,10 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   base_ori_des_ = Eigen::VectorXd::Zero(4);
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  ini_com_pos_ = Eigen::VectorXd::Zero(3);
+  ini_base_quat_ = Eigen::VectorXd::Zero(4);
+  target_com_pos_ = Eigen::VectorXd::Zero(3);
 }
 
 void FloatingBaseTrajectoryManager::updateDesired() {

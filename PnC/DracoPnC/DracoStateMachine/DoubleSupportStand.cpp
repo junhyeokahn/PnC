@@ -31,8 +31,8 @@ void DoubleSupportStand::firstVisit() {
       robot_->getBodyNodeCoMIsometry(DracoBodyNode::rFootCenter).translation();
   Eigen::VectorXd target_com_pos = (lfoot_pos + rfoot_pos) / 2.0;
   target_com_pos[2] = target_height_;
-  ctrl_arch_->joint_trajectory_manager_->initializeJointTrajectory(
-      0., end_time_, target_com_pos);
+  ctrl_arch_->floating_base_lifting_up_manager_
+      ->initializeFloatingBaseTrajectory(0., end_time_, target_com_pos);
 
   // =========================================================================
   // Initialize Reaction Force Ramp to Max

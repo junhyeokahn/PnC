@@ -20,6 +20,7 @@ DoubleSupportBalance::DoubleSupportBalance(
 DoubleSupportBalance::~DoubleSupportBalance() {}
 
 void DoubleSupportBalance::firstVisit() {
+  std::cout << "[Double Support Stand] Start" << std::endl;
   // Reset Flags
   state_switch_button_trigger_ = false;
   ctrl_start_time_ = sp_->curr_time;
