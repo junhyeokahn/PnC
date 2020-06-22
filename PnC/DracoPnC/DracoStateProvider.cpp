@@ -15,6 +15,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   stance_foot = "lFoot";
   prev_stance_foot = stance_foot;
   curr_time = 0.;
+  planning_id = 0;
 
   q = Eigen::VectorXd::Zero(robot_->getNumDofs());
   qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());

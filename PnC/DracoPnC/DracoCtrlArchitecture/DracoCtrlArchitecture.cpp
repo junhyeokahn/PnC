@@ -52,7 +52,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   base_ori_hierarchy_manager_ =
       new TaskWeightTrajectoryManager(taf_container_->base_ori_task_, robot_);
 
-  dcm_trajectory_manger_ = new DCMTrajectoryManager(
+  dcm_trajectory_manager_ = new DCMTrajectoryManager(
       dcm_planner_, taf_container_->com_task_, taf_container_->base_ori_task_,
       robot_, DracoBodyNode::lFootCenter, DracoBodyNode::rFootCenter);
 
@@ -101,7 +101,7 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete rfoot_back_max_normal_force_manager_;
   delete lfoot_front_max_normal_force_manager_;
   delete lfoot_back_max_normal_force_manager_;
-  delete dcm_trajectory_manger_;
+  delete dcm_trajectory_manager_;
   delete joint_trajectory_manager_;
   delete floating_base_lifting_up_manager_;
 
@@ -166,7 +166,7 @@ void DracoControlArchitecture::_InitializeParameters() {
       cfg_["foot_trajectory_parameters"]);
   lfoot_trajectory_manager_->paramInitialization(
       cfg_["foot_trajectory_parameters"]);
-  dcm_trajectory_manger_->paramInitialization(cfg_["dcm_planner_parameters"]);
+  dcm_trajectory_manager_->paramInitialization(cfg_["dcm_planner_parameters"]);
 
   try {
     double max_z_force;
@@ -267,9 +267,9 @@ void DracoControlArchitecture::saveData() {
     sp_->base_ang_vel_des =
         floating_base_lifting_up_manager_->base_ang_vel_des_;
   } else {
-    sp_->com_pos_des = dcm_trajectory_manger_->des_com_pos;
-    sp_->com_vel_des = dcm_trajectory_manger_->des_com_vel;
-    sp_->base_quat_des = dcm_trajectory_manger_->des_quat;
-    sp_->base_ang_vel_des = dcm_trajectory_manger_->des_ang_vel;
+    sp_->com_pos_des = dcm_trajectory_manager_->des_com_pos;
+    sp_->com_vel_des = dcm_trajectory_manager_->des_com_vel;
+    sp_->base_quat_des = dcm_trajectory_manager_->des_quat;
+    sp_->base_ang_vel_des = dcm_trajectory_manager_->des_ang_vel;
   }
 }

@@ -44,8 +44,8 @@ void DoubleSupportBalance::lastVisit() {}
 bool DoubleSupportBalance::endOfState() {
   // Also check if footstep list is non-zero
   if (state_switch_button_trigger_ &&
-      (ctrl_arch_->dcm_trajectory_manger_->footstep_list_.size() > 0) &&
-      (!ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps())) {
+      (ctrl_arch_->dcm_trajectory_manager_->footstep_list_.size() > 0) &&
+      (!ctrl_arch_->dcm_trajectory_manager_->noRemainingSteps())) {
     return true;
   }
   return false;
@@ -54,7 +54,7 @@ bool DoubleSupportBalance::endOfState() {
 StateIdentifier DoubleSupportBalance::getNextState() {
   int robot_side;
   // Check if there's a valid step
-  if (ctrl_arch_->dcm_trajectory_manger_->nextStepRobotSide(robot_side)) {
+  if (ctrl_arch_->dcm_trajectory_manager_->nextStepRobotSide(robot_side)) {
     // Check which side is the next footstep
     if (robot_side == LEFT_ROBOT_SIDE) {
       return DRACO_STATES::LL_CONTACT_TRANSITION_START;

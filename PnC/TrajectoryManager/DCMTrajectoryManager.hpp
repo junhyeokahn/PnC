@@ -63,6 +63,8 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   // Rotate at the specified turn angle
   void populateStrafe(const double strafe_distance, const int num_times);
 
+  void saveSolution(const std::string&);
+
   DCMPlanner* dcm_planner_;
   std::vector<Footstep> footstep_list_;
   std::vector<Footstep> footstep_preview_list_;

@@ -30,25 +30,25 @@ void ContactTransitionEnd::firstVisit() {
 
   // Ramp Down Reaction force for the upcoming swing foot
   // Ramp to minimum the foot task hierarchy weight in prep for swing
-  end_time_ = ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
+  end_time_ = ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime();
   if (leg_side_ == LEFT_ROBOT_SIDE) {
     ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToZero(
         0.0, end_time_);
     ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToZero(
         0.0, end_time_);
     ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMin(
-        0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+        0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
     ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMin(
-        0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+        0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
   } else {
     ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToZero(
         0.0, end_time_);
     ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToZero(
         0.0, end_time_);
     ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMin(
-        0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+        0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
     ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMin(
-        0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime());
+        0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
   }
 }
 
@@ -56,7 +56,7 @@ void ContactTransitionEnd::_taskUpdate() {
   // =========================================================================
   // Floating Base
   // =========================================================================
-  ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
+  ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
   // Foot, Joint

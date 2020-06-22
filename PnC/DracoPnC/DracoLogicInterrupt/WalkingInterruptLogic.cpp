@@ -23,7 +23,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_w) {
     std::cout << "[Walking Interrupt Logic] button W pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->walkForward();
+      ctrl_arch_->dcm_trajectory_manager_->walkForward();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------   Walking Forward  ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -36,7 +36,7 @@ void WalkingInterruptLogic::processInterrupts() {
   }
   if (b_interrupt_button_a) {
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->strafeLeft();
+      ctrl_arch_->dcm_trajectory_manager_->strafeLeft();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------   Strafing Left    ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -50,7 +50,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_s) {
     std::cout << "[Walking Interrupt Logic] button S pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->walkBackward();
+      ctrl_arch_->dcm_trajectory_manager_->walkBackward();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "--------- Walking Backwards  ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -65,7 +65,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_d) {
     std::cout << "[Walking Interrupt Logic] button D pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->strafeRight();
+      ctrl_arch_->dcm_trajectory_manager_->strafeRight();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------   Strafing Right   ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -80,7 +80,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_q) {
     std::cout << "[Walking Interrupt Logic] button Q pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->turnLeft();
+      ctrl_arch_->dcm_trajectory_manager_->turnLeft();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------     Turn Left      ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -95,7 +95,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_e) {
     std::cout << "[Walking Interrupt Logic] button E pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->turnRight();
+      ctrl_arch_->dcm_trajectory_manager_->turnRight();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------     Turn Right      ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(
@@ -110,7 +110,7 @@ void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_x) {
     std::cout << "[Walking Interrupt Logic] button X pressed" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      ctrl_arch_->dcm_trajectory_manger_->walkInPlace();
+      ctrl_arch_->dcm_trajectory_manager_->walkInPlace();
       std::cout << "---------                        ---------" << std::endl;
       std::cout << "---------     Walk In Place      ---------" << std::endl;
       static_cast<DoubleSupportBalance*>(

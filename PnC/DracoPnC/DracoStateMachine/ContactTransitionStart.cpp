@@ -30,52 +30,55 @@ void ContactTransitionStart::firstVisit() {
 
   // For all contact transitions, initially ramp up the reaction forces to max
   ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
 
   // Ramp to max the contact hierarchy weight
   ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
   ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampUpTime());
+      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
 
   // Check if it's the last footstep
-  if (ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()) {
+  if (ctrl_arch_->dcm_trajectory_manager_->noRemainingSteps()) {
     // If this is the last footstep, then we will just wait until we settle.
     end_time_ =
-        ctrl_arch_->dcm_trajectory_manger_->getFinalContactTransferTime();
+        ctrl_arch_->dcm_trajectory_manager_->getFinalContactTransferTime();
   } else {
     // This is not the last footstep. We need to recompute the remaining DCM
     // trajectories.
     // Set transfer type to midstep
     int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;
     end_time_ =
-        ctrl_arch_->dcm_trajectory_manger_->getMidStepContactTransferTime() -
-        ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
+        ctrl_arch_->dcm_trajectory_manager_->getMidStepContactTransferTime() -
+        ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime();
 
     // If coming from a balancing state, use initial transfer time
     if (ctrl_arch_->getPrevState() == DRACO_STATES::BALANCE) {
       transfer_type = DCM_TRANSFER_TYPES::INITIAL;
       end_time_ =
-          ctrl_arch_->dcm_trajectory_manger_->getInitialContactTransferTime() -
-          ctrl_arch_->dcm_trajectory_manger_->getNormalForceRampDownTime();
+          ctrl_arch_->dcm_trajectory_manager_->getInitialContactTransferTime() -
+          ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime();
     }
 
     // Recompute DCM Trajectories
     double t_walk_start = ctrl_start_time_;
     Eigen::Quaterniond base_ori(
         robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
-    ctrl_arch_->dcm_trajectory_manger_->initialize(
+    ctrl_arch_->dcm_trajectory_manager_->initialize(
         t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
+    ctrl_arch_->dcm_trajectory_manager_->saveSolution(
+        std::to_string(sp_->planning_id));
+    sp_->planning_id += 1;
   }
 }
 
@@ -83,7 +86,7 @@ void ContactTransitionStart::_taskUpdate() {
   // =========================================================================
   // Floating Base
   // =========================================================================
-  ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
+  ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
   // Foot, Joint
@@ -134,7 +137,7 @@ bool ContactTransitionStart::endOfState() {
 }
 
 StateIdentifier ContactTransitionStart::getNextState() {
-  if (ctrl_arch_->dcm_trajectory_manger_->noRemainingSteps()) {
+  if (ctrl_arch_->dcm_trajectory_manager_->noRemainingSteps()) {
     return DRACO_STATES::BALANCE;
   } else {
     if (leg_side_ == LEFT_ROBOT_SIDE) {

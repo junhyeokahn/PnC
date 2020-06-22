@@ -57,6 +57,8 @@ class DracoStateProvider {
 
   int phase_copy;
 
+  int planning_id;
+
   Eigen::Vector3d rfoot_center_pos_des;
   Eigen::Vector3d lfoot_center_pos_des;
   Eigen::Vector3d rfoot_center_vel_des;

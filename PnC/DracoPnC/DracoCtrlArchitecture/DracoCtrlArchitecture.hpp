@@ -60,7 +60,7 @@ class DracoControlArchitecture : public ControlArchitecture {
   // Trajectory Managers
   FootSE3TrajectoryManager* rfoot_trajectory_manager_;
   FootSE3TrajectoryManager* lfoot_trajectory_manager_;
-  DCMTrajectoryManager* dcm_trajectory_manger_;
+  DCMTrajectoryManager* dcm_trajectory_manager_;
   JointTrajectoryManager* joint_trajectory_manager_;
   FloatingBaseTrajectoryManager* floating_base_lifting_up_manager_;
   MaxNormalForceTrajectoryManager* rfoot_front_max_normal_force_manager_;

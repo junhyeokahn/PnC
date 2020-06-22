@@ -446,3 +446,147 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node& node) {
   dcm_planner_->alpha_ds = alpha_ds_;
 }
 
+void DCMTrajectoryManager::saveSolution(const std::string& file_name) {
+  try {
+    double t_start = dcm_planner_->getInitialTime();
+    double t_end = t_start + dcm_planner_->get_total_trajectory_time();
+    double t_step(0.01);
+    int n_eval = std::floor((t_end - t_start) / t_step);
+
+    YAML::Node cfg;
+
+    // =====================================================================
+    // Temporal Parameters
+    // =====================================================================
+
+    cfg["temporal_parameters"]["initial_time"] = t_start;
+    cfg["temporal_parameters"]["final_time"] = t_end;
+    cfg["temporal_parameters"]["time_step"] = t_step;
+    cfg["temporal_parameters"]["t_ds"] = dcm_planner_->t_ds;
+    cfg["temporal_parameters"]["t_ss"] = dcm_planner_->t_ss;
+    cfg["temporal_parameters"]["t_transfer"] = dcm_planner_->t_transfer;
+
+    // =====================================================================
+    // Contact Information
+    // =====================================================================
+    Eigen::MatrixXd curr_rfoot_pos = Eigen::MatrixXd::Zero(1, 3);
+    Eigen::MatrixXd curr_rfoot_quat = Eigen::MatrixXd::Zero(1, 4);
+    Eigen::MatrixXd curr_lfoot_pos = Eigen::MatrixXd::Zero(1, 3);
+    Eigen::MatrixXd curr_lfoot_quat = Eigen::MatrixXd::Zero(1, 4);
+    for (int i = 0; i < 3; ++i) {
+      curr_rfoot_pos(0, i) = right_foot_start_.position(i);
+      curr_lfoot_pos(0, i) = left_foot_start_.position(i);
+    }
+    curr_rfoot_quat(0, 0) = right_foot_start_.orientation.w();
+    curr_rfoot_quat(0, 1) = right_foot_start_.orientation.x();
+    curr_rfoot_quat(0, 2) = right_foot_start_.orientation.y();
+    curr_rfoot_quat(0, 3) = right_foot_start_.orientation.z();
+
+    curr_lfoot_quat(0, 0) = left_foot_start_.orientation.w();
+    curr_lfoot_quat(0, 1) = left_foot_start_.orientation.x();
+    curr_lfoot_quat(0, 2) = left_foot_start_.orientation.y();
+    curr_lfoot_quat(0, 3) = left_foot_start_.orientation.z();
+
+    int n_rf(0);
+    int n_lf(0);
+    for (int i = 0; i < footstep_list_.size(); ++i) {
+      if (footstep_list_[i].robot_side == LEFT_ROBOT_SIDE) {
+        n_lf += 1;
+      } else {
+        n_rf += 1;
+      }
+    }
+    Eigen::MatrixXd rfoot_pos = Eigen::MatrixXd::Zero(n_rf, 3);
+    Eigen::MatrixXd rfoot_quat = Eigen::MatrixXd::Zero(n_rf, 4);
+    Eigen::MatrixXd lfoot_pos = Eigen::MatrixXd::Zero(n_lf, 3);
+    Eigen::MatrixXd lfoot_quat = Eigen::MatrixXd::Zero(n_lf, 4);
+    int rf_id(0);
+    int lf_id(0);
+    for (int i = 0; i < footstep_list_.size(); ++i) {
+      if (footstep_list_[i].robot_side == RIGHT_ROBOT_SIDE) {
+        for (int j = 0; j < 3; ++j) {
+          rfoot_pos(rf_id, j) = footstep_list_[i].position(j);
+        }
+        rfoot_quat(rf_id, 0) = footstep_list_[i].orientation.w();
+        rfoot_quat(rf_id, 1) = footstep_list_[i].orientation.x();
+        rfoot_quat(rf_id, 2) = footstep_list_[i].orientation.y();
+        rfoot_quat(rf_id, 3) = footstep_list_[i].orientation.z();
+        rf_id += 1;
+      } else {
+        for (int j = 0; j < 3; ++j) {
+          lfoot_pos(lf_id, j) = footstep_list_[i].position(j);
+        }
+        lfoot_quat(lf_id, 0) = footstep_list_[i].orientation.w();
+        lfoot_quat(lf_id, 1) = footstep_list_[i].orientation.x();
+        lfoot_quat(lf_id, 2) = footstep_list_[i].orientation.y();
+        lfoot_quat(lf_id, 3) = footstep_list_[i].orientation.z();
+        lf_id += 1;
+      }
+    }
+
+    cfg["contact"]["curr_right_foot"]["pos"] = curr_rfoot_pos;
+    cfg["contact"]["curr_right_foot"]["ori"] = curr_rfoot_quat;
+    cfg["contact"]["curr_left_foot"]["pos"] = curr_lfoot_pos;
+    cfg["contact"]["curr_left_foot"]["ori"] = curr_lfoot_quat;
+    cfg["contact"]["right_foot"]["pos"] = rfoot_pos;
+    cfg["contact"]["right_foot"]["ori"] = rfoot_quat;
+    cfg["contact"]["left_foot"]["pos"] = lfoot_pos;
+    cfg["contact"]["left_foot"]["ori"] = lfoot_quat;
+
+    // =====================================================================
+    // Reference Trajectory
+    // =====================================================================
+    Eigen::MatrixXd dcm_pos_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+    Eigen::MatrixXd dcm_vel_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+    Eigen::MatrixXd com_pos_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+    Eigen::MatrixXd com_vel_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+    Eigen::MatrixXd vrp_ref = Eigen::MatrixXd::Zero(n_eval, 3);
+    Eigen::MatrixXd t_traj = Eigen::MatrixXd::Zero(n_eval, 1);
+
+    double t(t_start);
+    Eigen::Vector3d v3;
+    for (int i = 0; i < n_eval; ++i) {
+      t_traj(i, 0) = t;
+      dcm_planner_->get_ref_dcm(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        dcm_pos_ref(i, j) = v3(j);
+      }
+      dcm_planner_->get_ref_dcm_vel(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        dcm_vel_ref(i, j) = v3(j);
+      }
+      dcm_planner_->get_ref_dcm_vel(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        dcm_vel_ref(i, j) = v3(j);
+      }
+      dcm_planner_->get_ref_com(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        com_pos_ref(i, j) = v3(j);
+      }
+      dcm_planner_->get_ref_com_vel(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        com_vel_ref(i, j) = v3(j);
+      }
+      dcm_planner_->get_ref_r_vrp(t, v3);
+      for (int j = 0; j < 3; ++j) {
+        vrp_ref(i, j) = v3(j);
+      }
+      t += t_step;
+    }
+
+    cfg["reference"]["dcm_pos"] = dcm_pos_ref;
+    cfg["reference"]["dcm_vel"] = dcm_vel_ref;
+    cfg["reference"]["com_pos"] = com_pos_ref;
+    cfg["reference"]["com_vel"] = com_vel_ref;
+    cfg["reference"]["vrp"] = vrp_ref;
+    cfg["reference"]["time"] = t_traj;
+
+    std::string full_path = THIS_COM + std::string("ExperimentData/") +
+                            file_name + std::string(".yaml");
+    std::ofstream file_out(full_path);
+    file_out << cfg;
+
+  } catch (YAML::ParserException& e) {
+    std::cout << e.what() << std::endl;
+  }
+}

@@ -36,21 +36,21 @@ void SwingControl::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   // Set swing foot trajectory time
-  end_time_ = ctrl_arch_->dcm_trajectory_manger_->getSwingTime();
+  end_time_ = ctrl_arch_->dcm_trajectory_manager_->getSwingTime();
 
   int footstep_index =
-      ctrl_arch_->dcm_trajectory_manger_->current_footstep_index_;
+      ctrl_arch_->dcm_trajectory_manager_->current_footstep_index_;
 
   // Initialize the swing foot trajectory
   if (leg_side_ == LEFT_ROBOT_SIDE) {
     // Set Left Swing Foot Trajectory
     ctrl_arch_->lfoot_trajectory_manager_->initializeSwingFootTrajectory(
         0.0, end_time_,
-        ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
+        ctrl_arch_->dcm_trajectory_manager_->footstep_list_[footstep_index]);
   } else {
     ctrl_arch_->rfoot_trajectory_manager_->initializeSwingFootTrajectory(
         0.0, end_time_,
-        ctrl_arch_->dcm_trajectory_manger_->footstep_list_[footstep_index]);
+        ctrl_arch_->dcm_trajectory_manager_->footstep_list_[footstep_index]);
   }
 }
 
@@ -74,7 +74,7 @@ void SwingControl::_taskUpdate() {
   // =========================================================================
   // Floating Base
   // =========================================================================
-  ctrl_arch_->dcm_trajectory_manger_->updateDCMTasksDesired(sp_->curr_time);
+  ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
   // Joint
@@ -89,7 +89,7 @@ void SwingControl::oneStep() {
 
 void SwingControl::lastVisit() {
   // Increment Step Index
-  ctrl_arch_->dcm_trajectory_manger_->incrementStepIndex();
+  ctrl_arch_->dcm_trajectory_manager_->incrementStepIndex();
 }
 
 bool SwingControl::endOfState() {
@@ -128,7 +128,7 @@ bool SwingControl::endOfState() {
 StateIdentifier SwingControl::getNextState() {
   int next_footstep_robot_side;
   // If there's a next footstep, transition to the footstep side.
-  if (ctrl_arch_->dcm_trajectory_manger_->nextStepRobotSide(
+  if (ctrl_arch_->dcm_trajectory_manager_->nextStepRobotSide(
           next_footstep_robot_side)) {
     if (next_footstep_robot_side == LEFT_ROBOT_SIDE) {
       return DRACO_STATES::LL_CONTACT_TRANSITION_START;
