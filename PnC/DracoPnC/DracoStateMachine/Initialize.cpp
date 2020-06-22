@@ -17,7 +17,7 @@ Initialize::Initialize(const StateIdentifier state_identifier_in,
 Initialize::~Initialize() {}
 
 void Initialize::firstVisit() {
-  std::cout << "[Initialize] Start" << std::endl;
+  std::cout << "[Initialize]" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
   ctrl_arch_->joint_trajectory_manager_->initializeJointTrajectory(

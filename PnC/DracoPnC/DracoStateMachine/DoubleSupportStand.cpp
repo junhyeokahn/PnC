@@ -18,7 +18,7 @@ DoubleSupportStand::DoubleSupportStand(
 DoubleSupportStand::~DoubleSupportStand() {}
 
 void DoubleSupportStand::firstVisit() {
-  std::cout << "[Double Support Stand] Start" << std::endl;
+  std::cout << "[Double Support Stand]" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
 
@@ -84,7 +84,7 @@ void DoubleSupportStand::_taskUpdate() {
   // =========================================================================
   // Joint
   // =========================================================================
-  ctrl_arch_->joint_trajectory_manager_->ignoreTask();
+  // ctrl_arch_->joint_trajectory_manager_->ignoreTask();
 }
 
 void DoubleSupportStand::oneStep() {

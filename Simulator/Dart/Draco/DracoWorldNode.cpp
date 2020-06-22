@@ -61,6 +61,18 @@ void DracoWorldNode::customPreStep() {
                              sensor_data_->lfoot_contact);
   // check_foot_contact_by_ft_(sensor_data_->rfoot_contact,
   // sensor_data_->lfoot_contact);
+
+  // Check for user button presses
+  if (b_button_p) interface_->interrupt->b_interrupt_button_p = true;
+  if (b_button_r) interface_->interrupt->b_interrupt_button_r = true;
+  if (b_button_w) interface_->interrupt->b_interrupt_button_w = true;
+  if (b_button_a) interface_->interrupt->b_interrupt_button_a = true;
+  if (b_button_s) interface_->interrupt->b_interrupt_button_s = true;
+  if (b_button_d) interface_->interrupt->b_interrupt_button_d = true;
+  if (b_button_q) interface_->interrupt->b_interrupt_button_q = true;
+  if (b_button_e) interface_->interrupt->b_interrupt_button_e = true;
+  if (b_button_x) interface_->interrupt->b_interrupt_button_x = true;
+
   interface_->getCommand(sensor_data_, command_);
 
   trq_cmd_.setZero();
@@ -94,6 +106,9 @@ void DracoWorldNode::customPreStep() {
   skel_->setForces(trq_cmd_);
 
   count_++;
+
+  // reset flags
+  resetButtonFlags();
 }
 
 void DracoWorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,

@@ -21,6 +21,11 @@ ContactTransitionStart::~ContactTransitionStart() {}
 
 void ContactTransitionStart::firstVisit() {
   // Set control Starting time
+  if (state_identity_ == DRACO_STATES::RL_CONTACT_TRANSITION_START) {
+    std::cout << "[Right Foot Contact Transition Start]" << std::endl;
+  } else {
+    std::cout << "[Left Foot Contact Transition Start]" << std::endl;
+  }
   ctrl_start_time_ = sp_->curr_time;
 
   // For all contact transitions, initially ramp up the reaction forces to max

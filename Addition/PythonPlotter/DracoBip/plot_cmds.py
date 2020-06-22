@@ -77,8 +77,8 @@ fig.suptitle("Joint Vel")
 
 fig, axes = plt.subplots(5, 2)
 for i in range(5):
-    axes[i,0].plot(t, trq_cmd[:,i], color='r', linestyle='dashed', linewidth=4)
-    axes[i,1].plot(t, trq_cmd[:,i+5], color='r', linestyle='dashed', linewidth=4)
+    axes[i,0].plot(t, trq_cmd[:,i], color='r', linestyle='solid', linewidth=3)
+    axes[i,1].plot(t, trq_cmd[:,i+5], color='r', linestyle='solid', linewidth=3)
     axes[i,0].plot(t, jtrq_max[i] * np.ones_like(trq_cmd[:,i]), color='k', linestyle='solid', linewidth=3 )
     axes[i,0].plot(t, -jtrq_max[i] * np.ones_like(trq_cmd[:,i]), color='k', linestyle='solid', linewidth=3 )
     axes[i,1].plot(t, jtrq_max[i+5] * np.ones_like(trq_cmd[:,i]), color='k', linestyle='solid', linewidth=3 )

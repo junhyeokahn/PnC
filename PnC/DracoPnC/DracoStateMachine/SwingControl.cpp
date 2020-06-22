@@ -27,6 +27,11 @@ SwingControl::SwingControl(const StateIdentifier state_identifier_in,
 SwingControl::~SwingControl() {}
 
 void SwingControl::firstVisit() {
+  if (state_identity_ == DRACO_STATES::RL_SWING) {
+    std::cout << "[Right Foot Swing]" << std::endl;
+  } else {
+    std::cout << "[Left Foot Swing]" << std::endl;
+  }
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
 

@@ -49,16 +49,16 @@ void TaskWeightTrajectoryManager::computeRampToMin(const double current_time) {
   double t_current = myUtils::CropValue(current_time, ramp_start_time_,
                                         nominal_ramp_duration_);
   local_w_ = ramp_down_speed_ * (t_current - ramp_start_time_) + starting_w_;
-  // current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
-  current_w_ = local_w_;
+  current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
+  // current_w_ = local_w_;
 }
 
 void TaskWeightTrajectoryManager::computeRampToMax(const double current_time) {
   double t_current = myUtils::CropValue(current_time, ramp_start_time_,
                                         nominal_ramp_duration_);
   local_w_ = ramp_up_speed_ * (t_current - ramp_start_time_) + starting_w_;
-  // current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
-  current_w_ = local_w_;
+  current_w_ = myUtils::CropValue(local_w_, nominal_w_min_, nominal_w_max_);
+  // current_w_ = local_w_;
 }
 
 void TaskWeightTrajectoryManager::updateRampToMinDesired(

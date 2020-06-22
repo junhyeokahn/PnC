@@ -11,7 +11,7 @@ file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 
 t = np.genfromtxt(file_path+'running_time.txt', delimiter='\n', dtype=(float))
 
-st_idx = 1
+st_idx = 5
 end_idx = len(t) - 10
 t = t[st_idx:end_idx]
 

@@ -4,7 +4,7 @@ state_initialize_params:
 
 state_stand_params:
     target_pos_duration: 2.0 # duration to reach target com position
-    time_to_max_normal_force: 0.5 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    time_to_max_normal_force: 1.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.7
 
 state_swing:
@@ -12,20 +12,20 @@ state_swing:
     early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
 
 dcm_planner_parameters:
-    nominal_com_height: 0.7 # m from the ground    
+    nominal_com_height: 0.7 # m from the ground
 
     t_additional_init_transfer: 0.0 # seconds. The additional initial transfer time to switch the stance leg
-    t_contact_transition: 0.45 # seconds. The transition time used to change reaction forces and stance leg
-    t_swing: 0.75 # seconds. The single support swing time.
+    t_contact_transition: 0.06 # seconds. The transition time used to change reaction forces and stance leg
+    t_swing: 0.27 # seconds. The single support swing time.
     percentage_settle: 0.9 # percent to converge at the end of the trajectory
     alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
 
     # Primitive Walking parameters
-    nominal_footwidth: 0.27 # meters. Distance between feet
-    nominal_forward_step: 0.25 # meters. Subsequent forward steps are 2x this value.
-    nominal_backward_step: -0.25 # meters. Subsequent backward steps are 2x this value.
-    nominal_turn_radians: 0.78539 # M_PI/4.0 
-    nominal_strafe_distance: 0.125 # meters
+    nominal_footwidth: 0.35 # meters. Distance between feet
+    nominal_forward_step: 0.05 # meters. Subsequent forward steps are 2x this value.
+    nominal_backward_step: -0.05 # meters. Subsequent backward steps are 2x this value.
+    nominal_turn_radians: 0.15 # radian
+    nominal_strafe_distance: 0.02 # meters
 
 foot_trajectory_parameters:
     swing_height: 0.05 # cm off the ground
@@ -34,7 +34,7 @@ controller_parameters:
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
     # Regularization terms
-    lambda_qddot: 1e-8 
+    lambda_qddot: 1e-8
     lambda_Fr: 1e-8
     # Enable limits
     enable_torque_limits: true
@@ -47,7 +47,7 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 500
+    max_z_force: 250
 
     # Task hierarchy weights
     ini_w_task_com: 0.0
@@ -70,16 +70,16 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [200, 200, 200] 
-    kd_com: [20, 20,20] 
+    kp_com: [100, 100, 100] 
+    kd_com: [10, 10,10] 
     # Pelvis
     kp_base_ori: [5, 5, 5]
     kd_base_ori: [20, 20, 20]
     # Foot Linear and orientation gains
-    kp_foot_pos: [500, 500, 500]
-    kd_foot_pos: [35, 35, 35]
-    kp_foot_ori: [500, 500, 500]
-    kd_foot_ori: [35, 35, 35]
+    kp_foot_pos: [400, 400, 400]
+    kd_foot_pos: [30, 30, 30]
+    kp_foot_ori: [400, 400, 400]
+    kd_foot_ori: [30, 30, 30]
     # Joint
     kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
     kd_joint: [5., 5., 5., 5., 5., 5., 5., 5., 5., 5.]
