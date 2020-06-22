@@ -28,9 +28,9 @@ void Initialize::_taskUpdate() {
   // =========================================================================
   // Foot, Floating Base
   // =========================================================================
-  ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->floating_base_lifting_up_manager_->useCurrent();
+  ctrl_arch_->rfoot_trajectory_manager_->ignoreTask();
+  ctrl_arch_->lfoot_trajectory_manager_->ignoreTask();
+  ctrl_arch_->floating_base_lifting_up_manager_->ignoreTask();
 
   // =========================================================================
   // Joint

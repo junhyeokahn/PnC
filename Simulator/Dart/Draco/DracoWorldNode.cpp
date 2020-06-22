@@ -192,7 +192,7 @@ void DracoWorldNode::hold_xy_() {
   Eigen::VectorXd q = skel_->getPositions();
   Eigen::VectorXd v = skel_->getVelocities();
 
-  double kp(1500);
+  double kp(500);
   double kd(100);
 
   trq_cmd_[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);

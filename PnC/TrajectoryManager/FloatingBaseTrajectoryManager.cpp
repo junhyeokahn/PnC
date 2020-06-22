@@ -28,6 +28,21 @@ void FloatingBaseTrajectoryManager::updateDesired() {
                                 base_ang_acc_des_);
 }
 
+void FloatingBaseTrajectoryManager::ignoreTask() {
+  // Update desired to use current foot pose
+  com_pos_des_ = ((Eigen::VectorXd)robot_->getCoMPosition());
+  com_vel_des_ = ((Eigen::VectorXd)robot_->getCoMVelocity());
+  com_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  base_ori_quat_des_ =
+      Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
+  base_ori_des_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
+      base_ori_quat_des_.y(), base_ori_quat_des_.z();
+  base_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(base_id_).head(3);
+  base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
+  updateDesired();
+}
+
 void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
     const double _start_time, const double _duration,
     const Eigen::VectorXd& _target_com_pos) {
@@ -39,21 +54,6 @@ void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
   ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
       base_ori_quat_des_.y(), base_ori_quat_des_.z();
   target_com_pos_ = _target_com_pos;
-}
-
-void FloatingBaseTrajectoryManager::useCurrent() {
-  com_pos_des_ = ((Eigen::VectorXd)robot_->getCoMPosition());
-  com_vel_des_ = ((Eigen::VectorXd)robot_->getCoMVelocity());
-  com_acc_des_ = Eigen::VectorXd::Zero(3);
-
-  base_ori_quat_des_ =
-      Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  base_ori_des_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
-      base_ori_quat_des_.y(), base_ori_quat_des_.z();
-  base_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(base_id_).head(3);
-  base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
-
-  updateDesired();
 }
 
 void FloatingBaseTrajectoryManager::updateFloatingBaseDesired(

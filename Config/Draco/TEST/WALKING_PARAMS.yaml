@@ -70,16 +70,16 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [50, 50, 50] 
-    kd_com: [5, 5,5] 
+    kp_com: [200, 200, 200] 
+    kd_com: [20, 20,20] 
     # Pelvis
-    kp_base_ori: [50, 50, 50]
-    kd_base_ori: [5, 5, 5]
+    kp_base_ori: [5, 5, 5]
+    kd_base_ori: [20, 20, 20]
     # Foot Linear and orientation gains
-    kp_foot_pos: [400, 400, 400]
-    kd_foot_pos: [40, 40, 40]
-    kp_foot_ori: [400, 400, 400]
-    kd_foot_ori: [40, 40, 40]
+    kp_foot_pos: [500, 500, 500]
+    kd_foot_pos: [35, 35, 35]
+    kp_foot_ori: [500, 500, 500]
+    kd_foot_ori: [35, 35, 35]
     # Joint
     kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
     kd_joint: [5., 5., 5., 5., 5., 5., 5., 5., 5., 5.]

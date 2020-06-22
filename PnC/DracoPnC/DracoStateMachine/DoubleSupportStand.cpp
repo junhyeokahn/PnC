@@ -76,11 +76,15 @@ void DoubleSupportStand::_taskUpdate() {
       state_machine_time_);
 
   // =========================================================================
-  // Foot, Joint
+  // Foot
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->joint_trajectory_manager_->useCurrent();
+
+  // =========================================================================
+  // Joint
+  // =========================================================================
+  ctrl_arch_->joint_trajectory_manager_->ignoreTask();
 }
 
 void DoubleSupportStand::oneStep() {

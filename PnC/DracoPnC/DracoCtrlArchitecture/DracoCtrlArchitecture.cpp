@@ -137,6 +137,7 @@ void DracoControlArchitecture::getCommand(void* _command) {
   static bool b_initialize_joint_integrator = true;
   if ((prev_state_ == DRACO_STATES::STAND || state_ == DRACO_STATES::BALANCE) &&
       b_initialize_joint_integrator) {
+    std::cout << "[Joint Integrator] Start" << std::endl;
     main_controller_->initializeJointIntegrator();
     b_initialize_joint_integrator = false;
   }
@@ -258,7 +259,8 @@ void DracoControlArchitecture::saveData() {
   sp_->q_task = sp_->q.tail(Draco::n_adof);
   sp_->qdot_task = sp_->qdot.tail(Draco::n_adof);
 
-  if (state_ == DRACO_STATES::INITIALIZE || state_ == DRACO_STATES::STAND) {
+  if (state_ == DRACO_STATES::INITIALIZE || state_ == DRACO_STATES::STAND ||
+      state_ == DRACO_STATES::BALANCE) {
     sp_->com_pos_des = floating_base_lifting_up_manager_->com_pos_des_;
     sp_->com_vel_des = floating_base_lifting_up_manager_->com_vel_des_;
     sp_->base_quat_des = floating_base_lifting_up_manager_->base_ori_quat_des_;

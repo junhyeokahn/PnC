@@ -17,6 +17,7 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
 
   // Use current pose to set the task.
   void useCurrent();
+  void ignoreTask();
 
   Task* foot_pos_task_;
   Task* foot_ori_task_;

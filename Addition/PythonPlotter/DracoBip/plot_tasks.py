@@ -43,7 +43,7 @@ for i in range(0,len(t)-1):
 def plot_phase(ax):
     for j in phseChange:
         ax.axvline(x=t[j],color='indigo',linestyle='-')
-        ax.text(t[j],ax1.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
+        ax.text(t[j],ax.get_ylim()[1],'%d'%(data_phse[j]),color='indigo')
 
 for (k_des, v_des), (k, v) in zip(tasks_des.items(), tasks.items()):
     dim = v_des[0].shape[1]

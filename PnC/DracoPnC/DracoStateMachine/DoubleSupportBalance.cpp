@@ -20,7 +20,7 @@ DoubleSupportBalance::DoubleSupportBalance(
 DoubleSupportBalance::~DoubleSupportBalance() {}
 
 void DoubleSupportBalance::firstVisit() {
-  std::cout << "[Double Support Stand] Start" << std::endl;
+  std::cout << "[Double Support Balance] Start" << std::endl;
   // Reset Flags
   state_switch_button_trigger_ = false;
   ctrl_start_time_ = sp_->curr_time;
@@ -32,8 +32,6 @@ void DoubleSupportBalance::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->joint_trajectory_manager_->useCurrent();
-  ctrl_arch_->floating_base_lifting_up_manager_->useCurrent();
 }
 
 void DoubleSupportBalance::oneStep() {

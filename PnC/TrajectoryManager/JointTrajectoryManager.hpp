@@ -11,6 +11,7 @@ class JointTrajectoryManager : public TrajectoryManagerBase {
 
   // Use current pose to set the task.
   void useCurrent();
+  void ignoreTask();
 
   Task* joint_task_;
 

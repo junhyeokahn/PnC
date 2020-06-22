@@ -1,4 +1,8 @@
+Todo List
+- [v] Initial joint & com trajecotry manager
 - [ ] LineFootTask --> Using local error, local jacobian to eliminate
 x-directional error
+- [ ] Walking
 
-- [ ] Initial joint & com trajecotry manager
+Debugging List
+

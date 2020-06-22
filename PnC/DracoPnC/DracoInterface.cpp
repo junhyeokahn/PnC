@@ -86,7 +86,9 @@ void DracoInterface::getCommand(void* _data, void* _command) {
 
     stop_test_ = _UpdateTestCommand(cmd);
     if (stop_test_) {
-      std::cout << "Setting Stop Command" << std::endl;
+      if (count_ % 100 == 0) {
+        myUtils::color_print(myColor::Yellow, "[Setting Stop Command]");
+      }
       _SetStopCommand(data, cmd);
     } else {
       _CopyCommand(cmd);
@@ -121,11 +123,11 @@ bool DracoInterface::_UpdateTestCommand(DracoCommand* cmd) {
       cmd_jpos_[i] = cmd->q[i];
 
     // Velocity limit
-    if (cmd->qdot[i] > jvel_max_[i])
+    if (cmd->qdot[i] > jvel_max_[i]) {
       over_limit = true;
-    else if (cmd->qdot[i] < jvel_min_[i])
+    } else if (cmd->qdot[i] < jvel_min_[i]) {
       over_limit = true;
-    else
+    } else
       cmd_jvel_[i] = cmd->qdot[i];
 
     // Torque limit

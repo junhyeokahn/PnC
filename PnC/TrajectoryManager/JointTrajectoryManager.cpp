@@ -25,11 +25,16 @@ void JointTrajectoryManager::initializeJointTrajectory(
 
 void JointTrajectoryManager::useCurrent() {
   joint_pos_des_ = robot_->getQ().tail(joint_task_->getDim());
-  joint_vel_des_ = robot_->getQdot().tail(joint_task_->getDim());
+  joint_vel_des_ = Eigen::VectorXd::Zero(joint_task_->getDim());
   joint_acc_des_ = Eigen::VectorXd::Zero(joint_task_->getDim());
   updateDesired();
 }
 
+void JointTrajectoryManager::ignoreTask() {
+  joint_pos_des_ = robot_->getQ().tail(joint_task_->getDim());
+  joint_vel_des_ = robot_->getQdot().tail(joint_task_->getDim());
+  joint_acc_des_ = Eigen::VectorXd::Zero(joint_task_->getDim());
+}
 void JointTrajectoryManager::updateJointDesired(const double current_time) {
   for (int i = 0; i < joint_task_->getDim(); ++i) {
     joint_pos_des_[i] = myUtils::smooth_changing(ini_jpos_[i], target_jpos_[i],
