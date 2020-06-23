@@ -58,6 +58,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   dcm_vel_des.setZero();
   r_vrp.setZero();
   r_vrp_des.setZero();
+  dcm_omega = 1.0;
 
   r_rf = Eigen::VectorXd::Zero(6);
   l_rf = Eigen::VectorXd::Zero(6);
@@ -65,8 +66,6 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   r_rf_back_des.setZero();
   l_rf_front_des.setZero();
   l_rf_back_des.setZero();
-
-  omega = 0.7;  // TODO : Should be set in different way
 
   DataManager* data_manager = DataManager::GetDataManager();
 
@@ -173,4 +172,9 @@ void DracoStateProvider::saveCurrentData() {
       robot_->getBodyNodeSpatialVelocity(DracoBodyNode::rFootCenter).head(3);
   lfoot_center_so3 =
       robot_->getBodyNodeSpatialVelocity(DracoBodyNode::lFootCenter).head(3);
+
+  base_quat = Eigen::Quaternion<double>(
+      robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear());
+  base_ang_vel =
+      robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
 }

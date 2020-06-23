@@ -73,7 +73,7 @@ task_parameters:
     #kp_com: [200, 200, 200]
     #kd_com: [15, 15, 15]
     kp_com: [200, 200, 200]
-    kd_com: [15, 55, 15]
+    kd_com: [15, 15, 15]
     # Pelvis
     kp_base_ori: [5, 5, 5]
     kd_base_ori: [20, 20, 20]

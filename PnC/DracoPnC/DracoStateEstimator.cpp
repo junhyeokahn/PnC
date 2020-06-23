@@ -61,6 +61,19 @@ double DracoStateEstimator::computeAlphaGivenBreakFrequency(double hz,
   return alpha;
 }
 
+void DracoStateEstimator::_UpdateDCM() {
+  sp_->com_pos = robot_->getCoMPosition();
+  sp_->com_vel = robot_->getCoMVelocity();
+  sp_->dcm_omega = sqrt(9.81 / sp_->com_pos[2]);
+  sp_->prev_dcm = sp_->dcm;
+  sp_->dcm = robot_->getCoMPosition() + sp_->com_vel / sp_->dcm_omega;
+  double alpha_vel = 0.1;
+  sp_->dcm_vel =
+      alpha_vel * ((sp_->dcm - sp_->prev_dcm) / DracoAux::servo_rate) +
+      (1.0 - alpha_vel) * sp_->dcm_vel;
+  sp_->r_vrp = sp_->dcm - (sp_->dcm_vel / sp_->dcm_omega);
+}
+
 void DracoStateEstimator::initialization(DracoSensorData* data) {
   _JointUpdate(data);
 
@@ -84,14 +97,7 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
       dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
   _ConfigurationAndModelUpdate();
-  sp_->com_pos = robot_->getCoMPosition();
-  sp_->com_vel = robot_->getCoMVelocity();
-  sp_->base_quat = Eigen::Quaternion<double>(
-      robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear());
-  sp_->base_ang_vel =
-      robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
-  sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel / sp_->omega;
-  sp_->prev_dcm = sp_->dcm;
+  _UpdateDCM();
 
   ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
   ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
@@ -142,22 +148,7 @@ void DracoStateEstimator::update(DracoSensorData* data) {
       dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
   _ConfigurationAndModelUpdate();
-  sp_->com_pos = robot_->getCoMPosition();
-  sp_->com_vel = robot_->getCoMVelocity();
-  sp_->base_quat = Eigen::Quaternion<double>(
-      robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear());
-  sp_->base_ang_vel =
-      robot_->getBodyNodeCoMSpatialVelocity(DracoBodyNode::Torso).head(3);
-  sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel / sp_->omega;
-
-  double alphaVelocity =
-      computeAlphaGivenBreakFrequency(100.0, DracoAux::servo_rate);
-  // sp_->dcm_vel = (sp_->dcm - sp_->prev_dcm)/DracoAux::servo_rate;
-  sp_->dcm_vel =
-      alphaVelocity * ((sp_->dcm - sp_->prev_dcm) / DracoAux::servo_rate) +
-      (1.0 - alphaVelocity) * sp_->dcm_vel;
-  sp_->prev_dcm = sp_->dcm;
-  sp_->r_vrp = sp_->dcm - (sp_->dcm_vel / sp_->omega);
+  _UpdateDCM();
 
   static bool visit_once(false);
   if ((sp_->phase_copy == 2) && (!visit_once)) {

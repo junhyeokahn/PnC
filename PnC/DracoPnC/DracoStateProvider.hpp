@@ -92,7 +92,7 @@ class DracoStateProvider {
   Eigen::Quaternion<double> rfoot_center_quat;
   Eigen::Quaternion<double> lfoot_center_quat;
 
-  double omega;
+  double dcm_omega;
 
   void saveCurrentData();
 
