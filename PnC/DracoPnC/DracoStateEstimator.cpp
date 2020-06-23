@@ -41,7 +41,6 @@ DracoStateEstimator::~DracoStateEstimator() {
   delete x_vel_est_;
   delete y_vel_est_;
   delete z_vel_est_;
-  // delete imu_frame_est_;
 }
 
 double DracoStateEstimator::clamp_value(double in, double min, double max) {
@@ -67,12 +66,7 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
 
   std::vector<double> torso_acc(3);
   std::vector<double> torso_ang_vel(3);
-  Eigen::VectorXd torso_acc_2 = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd torso_ang_vel_2 = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd torso_mag_2 = Eigen::VectorXd::Zero(3);
   MapToTorso_(data->imu_acc, data->imu_ang_vel, torso_acc, torso_ang_vel);
-  MapToTorso2_(data->imu_acc, data->imu_ang_vel, data->imu_mag, torso_acc_2,
-               torso_ang_vel_2, torso_mag_2);
 
   ori_est_->estimatorInitialization(torso_acc, torso_ang_vel);
   ori_est_->getEstimatedState(global_body_euler_zyx_,
@@ -86,9 +80,6 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
       (1.0 - alphaAngularVelocity) * prev_body_euler_zyx_dot_;
   prev_body_euler_zyx_dot_ = global_body_euler_zyx_dot_;
 
-  // imu_frame_est_->estimatorInitialization(torso_acc_2, torso_ang_vel_2,
-  // torso_mag_2);
-  // imu_frame_est_->getVirtualJointPosAndVel(virtual_q_, virtual_qdot_);
   global_body_quat_ = Eigen::Quaternion<double>(
       dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
@@ -135,47 +126,17 @@ void DracoStateEstimator::MapToTorso_(const Eigen::VectorXd& imu_acc,
   }
 }
 
-void DracoStateEstimator::MapToTorso2_(const Eigen::VectorXd& imu_acc,
-                                       const Eigen::VectorXd& imu_angvel,
-                                       const Eigen::VectorXd& imu_mag,
-                                       Eigen::VectorXd& torso_acc,
-                                       Eigen::VectorXd& torso_ang_vel,
-                                       Eigen::VectorXd& torso_mag) {
-  Eigen::MatrixXd R_world_imu = Eigen::MatrixXd::Zero(3, 3);
-  Eigen::MatrixXd R_world_torso = Eigen::MatrixXd::Zero(3, 3);
-  Eigen::MatrixXd R_torso_imu = Eigen::MatrixXd::Zero(3, 3);
-
-  Eigen::VectorXd t_acc_local = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd t_angvel_local = Eigen::VectorXd::Zero(3);
-
-  R_world_imu = robot_->getBodyNodeIsometry(DracoBodyNode::IMU).linear();
-  R_world_torso = robot_->getBodyNodeIsometry(DracoBodyNode::Torso).linear();
-  R_torso_imu = R_world_torso.transpose() * R_world_imu;
-
-  torso_acc = R_torso_imu * imu_acc;
-  torso_ang_vel = R_torso_imu * imu_angvel;
-  torso_mag = R_torso_imu * imu_mag;
-}
-
 void DracoStateEstimator::update(DracoSensorData* data) {
   _JointUpdate(data);
 
   std::vector<double> torso_acc(3);
   std::vector<double> torso_ang_vel(3);
-  Eigen::VectorXd torso_acc_2 = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd torso_ang_vel_2 = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd torso_mag_2 = Eigen::VectorXd::Zero(3);
 
   MapToTorso_(data->imu_acc, data->imu_ang_vel, torso_acc, torso_ang_vel);
-  MapToTorso2_(data->imu_acc, data->imu_ang_vel, data->imu_mag, torso_acc_2,
-               torso_ang_vel_2, torso_mag_2);
 
   ori_est_->setSensorData(torso_acc, torso_ang_vel);
   ori_est_->getEstimatedState(global_body_euler_zyx_,
                               global_body_euler_zyx_dot_);
-  // imu_frame_est_->estimatorInitialization(torso_acc_2, torso_ang_vel_2,
-  // torso_mag_2);
-  // imu_frame_est_->getVirtualJointPosAndVel(virtual_q_, virtual_qdot_);
 
   global_body_quat_ = Eigen::Quaternion<double>(
       dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
@@ -247,7 +208,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
   robot_->updateSystem(curr_config_, curr_qdot_, false);
   Eigen::VectorXd foot_pos;
   Eigen::VectorXd foot_vel;
-  if (sp_->stance_foot == "rFoot") {
+  if (sp_->stance_foot == DracoBodyNode::rFootCenter) {
     foot_pos =
         robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
     foot_vel =
@@ -260,10 +221,10 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
   }
 
   // check if stance foot changes. If so, find the new linear offset
-  if (sp_->stance_foot.compare(sp_->prev_stance_foot) != 0) {
+  if (sp_->stance_foot != sp_->prev_stance_foot) {
     Eigen::Vector3d new_stance_foot = foot_pos;
     Eigen::Vector3d old_stance_foot;
-    if (sp_->prev_stance_foot == "rFoot") {
+    if (sp_->prev_stance_foot == DracoBodyNode::rFootCenter) {
       old_stance_foot =
           robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation();
     } else {

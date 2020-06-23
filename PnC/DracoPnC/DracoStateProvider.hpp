@@ -15,8 +15,8 @@ class DracoStateProvider {
   // ---------------------------------------------------------------------------
   double curr_time;
 
-  std::string stance_foot;
-  std::string prev_stance_foot;
+  int stance_foot;
+  int prev_stance_foot;
 
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;

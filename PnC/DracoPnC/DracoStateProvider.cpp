@@ -12,7 +12,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   myUtils::pretty_constructor(1, "State Provider");
 
   robot_ = _robot;
-  stance_foot = "lFoot";
+  stance_foot = DracoBodyNode::lFootCenter;
   prev_stance_foot = stance_foot;
   curr_time = 0.;
   planning_id = 0;

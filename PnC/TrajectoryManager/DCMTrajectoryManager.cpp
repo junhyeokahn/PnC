@@ -225,7 +225,7 @@ void DCMTrajectoryManager::walkInPlace() {
 }
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(3, nominal_forward_step_);
+  populateWalkForward(1, nominal_forward_step_);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {

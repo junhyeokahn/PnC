@@ -138,7 +138,15 @@ def main(args):
     # Plot Trajectory
     # ==========================================================================
 
-    # fig1 = plt.figure()
+    fig, axes = plt.subplots(3, 2)
+    for i in range(3):
+        axes[i,0].plot(t,com_pos_ref[:,i], color='k', linewidth=3)
+        axes[i,1].plot(t,com_vel_ref[:,i], color='k', linewidth=3)
+        axes[i,0].grid(True)
+        axes[i,1].grid(True)
+    axes[0,0].set_title('com pos')
+    axes[0,1].set_title('com vel')
+
     plt.show()
 if __name__ == "__main__":
     import argparse

@@ -146,6 +146,8 @@ void DracoControlArchitecture::getCommand(void* _command) {
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
+  // Save Data
+  saveData();
 
   // Check for State Transitions
   if (state_machines_[state_]->endOfState()) {
@@ -154,7 +156,6 @@ void DracoControlArchitecture::getCommand(void* _command) {
     state_ = state_machines_[state_]->getNextState();
     b_state_first_visit_ = true;
   }
-  saveData();
 };
 
 void DracoControlArchitecture::_InitializeParameters() {

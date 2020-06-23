@@ -1,8 +1,10 @@
 Todo List
 - [v] Initial joint & com trajecotry manager
-- [ ] LineFootTask --> Using local error, local jacobian to eliminate
-x-directional error
-- [ ] Walking
+- [ ] LineFootTask --> Using local error, local jacobian to eliminate,
+  eliminate standing leg parts in jacobian
+- [ ] CoM XYZ Task --> Error & Jacobian
 
 Debugging List
+Fall down in one step
+ - [] Save dcm
 

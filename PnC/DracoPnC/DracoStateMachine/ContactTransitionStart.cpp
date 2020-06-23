@@ -141,10 +141,10 @@ StateIdentifier ContactTransitionStart::getNextState() {
     return DRACO_STATES::BALANCE;
   } else {
     if (leg_side_ == LEFT_ROBOT_SIDE) {
-      // To left leg contact transition end
+      sp_->stance_foot = DracoBodyNode::rFootCenter;
       return DRACO_STATES::LL_CONTACT_TRANSITION_END;
     } else if (leg_side_ == RIGHT_ROBOT_SIDE) {
-      // To right leg contact transition end
+      sp_->stance_foot = DracoBodyNode::lFootCenter;
       return DRACO_STATES::RL_CONTACT_TRANSITION_END;
     }
   }
