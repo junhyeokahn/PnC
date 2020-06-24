@@ -13,6 +13,8 @@ DCMTrajectoryManager::DCMTrajectoryManager(DCMPlanner* _dcm_planner,
   lfoot_id_ = _lfoot_idx;
   rfoot_id_ = _rfoot_idx;
 
+  des_dcm.setZero();
+  des_dcm_vel.setZero();
   des_com_pos.setZero();
   des_com_vel.setZero();
   des_com_acc.setZero();
@@ -150,6 +152,12 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
     return false;
   }
 
+  // std::cout << "[[DCM INITIALIZATION]]" << std::endl;
+  // std::cout << "dcm" << std::endl;
+  // std::cout << dcm_pos_start_in << std::endl;
+  // std::cout << "dcm vel" << std::endl;
+  // std::cout << dcm_vel_start_in << std::endl;
+
   // Set DCM reference
   dcm_planner_->setRobotMass(robot_->getRobotMass());
   dcm_planner_->setCoMHeight(nominal_com_height_);
@@ -172,6 +180,8 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
 }
 
 void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
+  dcm_planner_->get_ref_dcm(current_time, des_dcm);
+  dcm_planner_->get_ref_dcm_vel(current_time, des_dcm_vel);
   dcm_planner_->get_ref_com(current_time, des_com_pos);
   dcm_planner_->get_ref_com_vel(current_time, des_com_vel);
   dcm_planner_->get_ref_ori_ang_vel_acc(current_time, des_quat, des_ang_vel,

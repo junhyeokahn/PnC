@@ -76,6 +76,14 @@ void ContactTransitionStart::firstVisit() {
         robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
     ctrl_arch_->dcm_trajectory_manager_->initialize(
         t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
+
+    // std::cout << "com pos" << std::endl;
+    // std::cout << sp_->com_pos << std::endl;
+    // std::cout << "com vel" << std::endl;
+    // std::cout << sp_->com_vel << std::endl;
+    // std::cout << "omega" << std::endl;
+    // std::cout << sp_->dcm_omega << std::endl;
+
     ctrl_arch_->dcm_trajectory_manager_->saveSolution(
         std::to_string(sp_->planning_id));
     sp_->planning_id += 1;

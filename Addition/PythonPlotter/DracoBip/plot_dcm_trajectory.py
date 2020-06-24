@@ -138,14 +138,20 @@ def main(args):
     # Plot Trajectory
     # ==========================================================================
 
-    fig, axes = plt.subplots(3, 2)
+    fig, axes = plt.subplots(3, 4)
     for i in range(3):
         axes[i,0].plot(t,com_pos_ref[:,i], color='k', linewidth=3)
         axes[i,1].plot(t,com_vel_ref[:,i], color='k', linewidth=3)
+        axes[i,2].plot(t,dcm_pos_ref[:,i], color='k', linewidth=3)
+        axes[i,3].plot(t,dcm_vel_ref[:,i], color='k', linewidth=3)
         axes[i,0].grid(True)
         axes[i,1].grid(True)
+        axes[i,2].grid(True)
+        axes[i,3].grid(True)
     axes[0,0].set_title('com pos')
     axes[0,1].set_title('com vel')
+    axes[0,2].set_title('dcm pos')
+    axes[0,3].set_title('dcm vel')
 
     plt.show()
 if __name__ == "__main__":

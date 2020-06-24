@@ -1,5 +1,6 @@
 #include <Configuration.h>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
@@ -14,26 +15,16 @@ CoMxyz::~CoMxyz() {}
 bool CoMxyz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                             const Eigen::VectorXd& _vel_des,
                             const Eigen::VectorXd& _acc_des) {
-  // (X, Y, Z)
   for (int i = 0; i < 3; ++i) {
     pos_err[i] = _pos_des[i] - robot_->getCoMPosition()[i];
     vel_des[i] = _vel_des[i];
     acc_des[i] = _acc_des[i];
   }
-
-  // com_vel_act
   Eigen::Vector3d com_vel_act = robot_->getCoMVelocity();
-
-  // op_cmd
   for (int i(0); i < 3; ++i) {
     op_cmd[i] = acc_des[i] + kp_[i] * pos_err[i] +
                 kd_[i] * (vel_des[i] - com_vel_act[i]);
   }
-
-  // myUtils::pretty_print(des_ori, std::cout, "ori_des");
-  // myUtils::pretty_print(ori_act, std::cout, "ori_act");
-  // myUtils::pretty_print(pos_err, std::cout, "pos_err in
-  // com_lin_body_ori_task");
 
   return true;
 }

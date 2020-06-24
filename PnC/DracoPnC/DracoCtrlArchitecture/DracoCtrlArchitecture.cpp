@@ -272,5 +272,7 @@ void DracoControlArchitecture::saveData() {
     sp_->com_vel_des = dcm_trajectory_manager_->des_com_vel;
     sp_->base_quat_des = dcm_trajectory_manager_->des_quat;
     sp_->base_ang_vel_des = dcm_trajectory_manager_->des_ang_vel;
+    sp_->dcm_des = dcm_trajectory_manager_->des_dcm;
+    sp_->dcm_vel_des = dcm_trajectory_manager_->des_dcm_vel;
   }
 }
