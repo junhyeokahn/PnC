@@ -2,6 +2,7 @@
 
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
+#include <PnC/DracoPnC/DracoTask/DCMTask.hpp>
 #include <PnC/DracoPnC/DracoTask/FootLocalRyRzTask.hpp>
 #include <PnC/DracoPnC/DracoTask/Footxyz.hpp>
 #include <PnC/TaskAndForceContainer.hpp>
@@ -26,6 +27,7 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // Task Member variables
   // -------------------------------------------------------
   Task* com_task_;
+  Task* dcm_task_;
   Task* joint_task_;
   Task* base_ori_task_;
   Task* rfoot_center_pos_task_;

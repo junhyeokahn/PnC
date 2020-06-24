@@ -24,6 +24,10 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd com_vel_des_;
   Eigen::VectorXd com_acc_des_;
 
+  Eigen::VectorXd dcm_pos_des_;
+  Eigen::VectorXd dcm_vel_des_;
+  Eigen::VectorXd dcm_acc_des_;
+
   Eigen::Quaternion<double> base_ori_quat_des_;
   Eigen::VectorXd base_ori_des_;
   Eigen::VectorXd base_ang_vel_des_;

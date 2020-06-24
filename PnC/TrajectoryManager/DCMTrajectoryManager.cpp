@@ -179,6 +179,22 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   return true;
 }
 
+/*void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {*/
+// dcm_planner_->get_ref_dcm(current_time, des_dcm);
+// dcm_planner_->get_ref_dcm_vel(current_time, des_dcm_vel);
+// dcm_planner_->get_ref_com(current_time, des_com_pos);
+// dcm_planner_->get_ref_com_vel(current_time, des_com_vel);
+// dcm_planner_->get_ref_ori_ang_vel_acc(current_time, des_quat, des_ang_vel,
+// des_ang_acc);
+
+// Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
+// des_quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
+
+// com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
+// base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
+/*}*/
+
+// TEST
 void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
   dcm_planner_->get_ref_dcm(current_time, des_dcm);
   dcm_planner_->get_ref_dcm_vel(current_time, des_dcm_vel);
@@ -190,9 +206,16 @@ void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
   Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
   des_quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
 
-  com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
+  Eigen::VectorXd _p, _v, _a;
+  _p = des_dcm;
+  _p[2] = nominal_com_height_;
+  _v = des_dcm_vel;
+  _v[2] = des_com_vel[2];
+  _a = Eigen::VectorXd::Zero(3);
+  com_task_->updateDesired(_p, _v, _a);
   base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
+// TEST
 
 bool DCMTrajectoryManager::nextStepRobotSide(int& robot_side) {
   if ((footstep_list_.size() > 0) &&

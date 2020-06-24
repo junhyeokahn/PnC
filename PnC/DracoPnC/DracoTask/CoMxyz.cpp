@@ -8,6 +8,7 @@ CoMxyz::CoMxyz(RobotSystem* robot) : Task(robot, 3) {
   myUtils::pretty_constructor(3, "CoM xyz Task");
   Jt_ = Eigen::MatrixXd::Zero(dim_task_, robot_->getNumDofs());
   JtDotQdot_ = Eigen::VectorXd::Zero(dim_task_);
+  sp_ = DracoStateProvider::getStateProvider(robot_);
 }
 
 CoMxyz::~CoMxyz() {}

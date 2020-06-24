@@ -13,6 +13,10 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   com_vel_des_ = Eigen::VectorXd::Zero(3);
   com_acc_des_ = Eigen::VectorXd::Zero(3);
 
+  dcm_pos_des_ = Eigen::VectorXd::Zero(3);
+  dcm_vel_des_ = Eigen::VectorXd::Zero(3);
+  dcm_acc_des_ = Eigen::VectorXd::Zero(3);
+
   base_ori_des_ = Eigen::VectorXd::Zero(4);
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
@@ -23,9 +27,18 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 }
 
 void FloatingBaseTrajectoryManager::updateDesired() {
-  com_task_->updateDesired(com_pos_des_, com_vel_des_, com_acc_des_);
+  // com_task_->updateDesired(com_pos_des_, com_vel_des_, com_acc_des_);
   base_ori_task_->updateDesired(base_ori_des_, base_ang_vel_des_,
                                 base_ang_acc_des_);
+  // TEST
+  double dcm_omega = sqrt(9.81 / robot_->getCoMPosition()[2]);
+  dcm_pos_des_ = com_pos_des_ + com_vel_des_ / dcm_omega;
+  dcm_vel_des_ = com_vel_des_ + com_acc_des_ / dcm_omega;
+  dcm_pos_des_[2] = com_pos_des_[2];
+  com_vel_des_[2] = com_vel_des_[2];
+  dcm_acc_des_.setZero();
+  com_task_->updateDesired(dcm_pos_des_, dcm_vel_des_, dcm_acc_des_);
+  // TEST
 }
 
 void FloatingBaseTrajectoryManager::ignoreTask() {
