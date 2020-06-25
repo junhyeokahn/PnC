@@ -74,8 +74,11 @@ void ContactTransitionStart::firstVisit() {
     double t_walk_start = ctrl_start_time_;
     Eigen::Quaterniond base_ori(
         robot_->getBodyNodeCoMIsometry(DracoBodyNode::Torso).linear());
-    ctrl_arch_->dcm_trajectory_manager_->initialize(
-        t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
+
+    if (ctrl_arch_->getPrevState() == DRACO_STATES::BALANCE) {
+      ctrl_arch_->dcm_trajectory_manager_->initialize(
+          t_walk_start, transfer_type, base_ori, sp_->dcm, sp_->dcm_vel);
+    }
 
     // std::cout << "com pos" << std::endl;
     // std::cout << sp_->com_pos << std::endl;

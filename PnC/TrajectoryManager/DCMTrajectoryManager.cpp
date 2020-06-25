@@ -142,7 +142,7 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   updateStartingStance();
   left_foot_start_ = left_foot_stance_;
   right_foot_start_ = right_foot_stance_;
-  updatePreview(4);
+  updatePreview(40);
 
   // If preview list is empty, don't update.
   if (footstep_preview_list_.size() == 0) {
@@ -258,7 +258,7 @@ void DCMTrajectoryManager::walkInPlace() {
 }
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(1, nominal_forward_step_);
+  populateWalkForward(5, nominal_forward_step_);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {
