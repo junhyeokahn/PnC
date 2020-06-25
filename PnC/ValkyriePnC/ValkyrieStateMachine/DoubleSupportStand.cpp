@@ -94,8 +94,16 @@ void DoubleSupportStand::_taskUpdate() {
     (sp_->com_pos_des)[i] = des_com_pos_[i];
     (sp_->com_vel_des)[i] = des_com_vel_[i];
   }
-  taf_container_->com_task_->updateDesired(des_com_pos_, des_com_vel_,
-                                           des_com_acc_);
+
+  double dcm_omega = sqrt(9.81 / robot_->getCoMPosition()[2]);
+  Eigen::VectorXd dcm_pos_des_ =
+      sp_->com_pos_des + sp_->com_vel_des / dcm_omega;
+  Eigen::VectorXd dcm_vel_des_ = sp_->com_vel_des + des_com_acc_ / dcm_omega;
+  dcm_pos_des_[2] = sp_->com_pos_des[2];
+  dcm_vel_des_[2] = sp_->com_vel_des[2];
+  Eigen::VectorXd dcm_acc_des_ = Eigen::VectorXd::Zero(3);
+  taf_container_->dcm_task_->updateDesired(dcm_pos_des_, dcm_vel_des_,
+                                           dcm_acc_des_);
 
   // =========================================================================
   // Set Foot Motion Tasks

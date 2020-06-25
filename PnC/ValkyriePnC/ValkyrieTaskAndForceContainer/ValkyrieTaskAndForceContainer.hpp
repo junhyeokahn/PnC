@@ -4,6 +4,7 @@
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/ValkyriePnC/ValkyrieTask/AngularMomentumTask.hpp>
 #include <PnC/ValkyriePnC/ValkyrieTask/CoMxyz.hpp>
+#include <PnC/ValkyriePnC/ValkyrieTask/DCMTask.hpp>
 #include <PnC/ValkyriePnC/ValkyrieTask/SelectedJointTask.hpp>
 #include <PnC/WBC/BasicContactSpec.hpp>
 #include <PnC/WBC/BasicTask.hpp>
@@ -25,7 +26,7 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Task Member variables
   // -------------------------------------------------------
-  Task* com_task_;
+  Task* dcm_task_;
   Task* pelvis_ori_task_;
   Task* ang_momentum_task_;
   Task* upper_body_task_;
