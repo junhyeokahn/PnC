@@ -19,10 +19,12 @@ bool DCMTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   Eigen::VectorXd r_ic = sp_->dcm.head(2);
   Eigen::VectorXd r_ic_des = _pos_des.head(2);
   Eigen::VectorXd rdot_ic_des = _vel_des.head(2);
-  double kp_ic(20);
   double omega_o = std::sqrt(9.81 / _pos_des[2]);
-  Eigen::VectorXd r_cmp_des =
-      r_ic - rdot_ic_des / omega_o + kp_ic * (r_ic - r_ic_des);
+  Eigen::VectorXd r_cmp_des = Eigen::VectorXd::Zero(2);
+  for (int i = 0; i < 2; ++i) {
+    r_cmp_des[i] =
+        r_ic[i] - rdot_ic_des[i] / omega_o + kp_[i] * (r_ic[i] - r_ic_des[i]);
+  }
 
   op_cmd.head(2) = (9.81 / _pos_des[2]) * (sp_->com_pos.head(2) - r_cmp_des);
   op_cmd[2] = kp_[2] * (_pos_des[2] - sp_->com_pos[2]) +

@@ -206,13 +206,9 @@ void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
   Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
   des_quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
 
-  Eigen::VectorXd _p, _v, _a;
-  _p = des_dcm;
-  _p[2] = nominal_com_height_;
-  _v = des_dcm_vel;
-  _v[2] = des_com_vel[2];
-  _a = Eigen::VectorXd::Zero(3);
-  com_task_->updateDesired(_p, _v, _a);
+  des_dcm[2] = des_com_pos[2];
+  des_dcm_vel[2] = des_com_vel[2];
+  com_task_->updateDesired(des_dcm, des_dcm_vel, Eigen::VectorXd::Zero(3));
   base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
 // TEST
