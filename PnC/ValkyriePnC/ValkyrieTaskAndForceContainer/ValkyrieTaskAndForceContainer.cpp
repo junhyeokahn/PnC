@@ -16,7 +16,7 @@ void ValkyrieTaskAndForceContainer::_InitializeTasks() {
   myUtils::pretty_constructor(2, "Valkyrie Task And Force Container");
 
   // CoM and Pelvis Tasks
-  dcm_task_ = new CoMxyz(robot_);
+  dcm_task_ = new DCMTask(robot_);
   ang_momentum_task_ = new AngularMomentumTask(robot_, ValkyrieAux::servo_rate);
   pelvis_ori_task_ = new BasicTask(robot_, BasicTaskType::LINKORI, 3,
                                    ValkyrieBodyNode::pelvis);
