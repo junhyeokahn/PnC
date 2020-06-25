@@ -48,13 +48,13 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
 
 void DracoTaskAndForceContainer::_InitializeContacts() {
   rfoot_front_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.9);
+      new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
   rfoot_back_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.9);
+      new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
   lfoot_front_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.9);
+      new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);
   lfoot_back_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.9);
+      new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);
 
   dim_contact_ = rfoot_front_contact_->getDim() +
                  rfoot_back_contact_->getDim() +

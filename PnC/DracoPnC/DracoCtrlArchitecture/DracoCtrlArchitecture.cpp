@@ -261,9 +261,11 @@ void DracoControlArchitecture::saveData() {
   sp_->qdot_task = sp_->qdot.tail(Draco::n_adof);
 
   if (state_ == DRACO_STATES::INITIALIZE || state_ == DRACO_STATES::STAND ||
-      state_ == DRACO_STATES::BALANCE) {
+      prev_state_ == DRACO_STATES::STAND) {
     sp_->com_pos_des = floating_base_lifting_up_manager_->com_pos_des_;
     sp_->com_vel_des = floating_base_lifting_up_manager_->com_vel_des_;
+    sp_->dcm_des = floating_base_lifting_up_manager_->dcm_pos_des_;
+    sp_->dcm_vel_des = floating_base_lifting_up_manager_->dcm_vel_des_;
     sp_->base_quat_des = floating_base_lifting_up_manager_->base_ori_quat_des_;
     sp_->base_ang_vel_des =
         floating_base_lifting_up_manager_->base_ang_vel_des_;

@@ -46,6 +46,7 @@ void DCMPlanner::setInitialOri(const Eigen::Quaterniond initial_ori_in) {
   initial_ori = initial_ori_in;
 }
 
+// Third method : set the rest of vrp
 void DCMPlanner::initialize_footsteps_rvrp(
     const std::vector<Footstep>& input_footstep_list,
     const Footstep& initial_footstance, bool clear_list) {
@@ -134,6 +135,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   computeDCM_states();
 }
 
+// Second method : Add first vrp
 void DCMPlanner::initialize_footsteps_rvrp(
     const std::vector<Footstep>& input_footstep_list,
     const Footstep& initial_footstance, const Eigen::Vector3d& initial_rvrp) {

@@ -32,9 +32,13 @@ bool FootLocalRyRzTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     acc_des[i] = _acc_des[i + 1];
   }
 
-  // myUtils::pretty_print(des_ori, std::cout, "ori_des");
-  // myUtils::pretty_print(ori_act, std::cout, "ori_act");
-  // myUtils::pretty_print(pos_err, std::cout, "pos_err in bodyrpz");
+  Eigen::VectorXd vel_act =
+      robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(2);
+
+  for (int i(0); i < 2; ++i) {
+    op_cmd[i] =
+        acc_des[i] + kp_[i] * pos_err[i] + kd_[i] * (vel_des[i] - vel_act[i]);
+  }
 
   return true;
 }

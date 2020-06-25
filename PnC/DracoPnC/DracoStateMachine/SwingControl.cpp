@@ -129,14 +129,14 @@ bool SwingControl::endOfState() {
       if (leg_side_ == (LEFT_ROBOT_SIDE)) {
         if (sp_->b_lfoot_contact == 1) {
           std::cout << "early left foot contact" << std::endl;
-          std::cout << "state_machine_time_ :" << state_machine_time_
-                    << std::endl;
+          std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
+                    << end_time_ << std::endl;
           return true;
         }
       } else {
         if (sp_->b_rfoot_contact == 1) {
-          std::cout << "state_machine_time_ :" << state_machine_time_
-                    << std::endl;
+          std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
+                    << end_time_ << std::endl;
           std::cout << "early right foot contact" << std::endl;
           return true;
         }

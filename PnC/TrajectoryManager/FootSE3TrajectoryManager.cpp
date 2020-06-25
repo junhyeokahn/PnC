@@ -71,12 +71,6 @@ void FootSE3TrajectoryManager::convertQuatDesToOriDes() {
 }
 
 void FootSE3TrajectoryManager::updateDesired() {
-  Eigen::Vector3d cur_foot_pos =
-      robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-
-  // myUtils::pretty_print(cur_foot_pos, std::cout, "cur_foot_pos");
-  // myUtils::pretty_print(foot_pos_des_, std::cout, "foot_pos_des_");
-
   foot_pos_task_->updateDesired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
   foot_ori_task_->updateDesired(foot_ori_des_, foot_ang_vel_des_,
                                 foot_ang_acc_des_);

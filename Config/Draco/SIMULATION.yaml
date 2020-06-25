@@ -1,7 +1,6 @@
 is_record: false
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
 num_steps_per_cycle: 30
-#hanging_height: 0.8729 #0.83
 hanging_height: 0.89 #0.83
 display_joint_frame: false
 joint_limit_enforced: true
@@ -11,6 +10,3 @@ release_time: 4.0
 control_configuration:
   kp: [100 , 100 , 100 , 100 , 100 , 100 , 100 , 100 , 100 , 100]
   kd: [20  , 20  , 20  , 20  , 1  , 20  , 20  , 20  , 20  , 1]
-
-  #kp: [0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0]
-  #kd: [0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0]

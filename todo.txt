@@ -1,10 +1,16 @@
 Todo List
-- [v] Initial joint & com trajecotry manager
-- [ ] LineFootTask --> Using local error, local jacobian to eliminate,
+- LineFootTask --> Using local error, local jacobian to eliminate,
   eliminate standing leg parts in jacobian
-- [ ] CoM XYZ Task --> Error & Jacobian
+- Swing foot trajectory
+- Swing foot orientation goal
+- Torso orientation goal
 
 Debugging List
 Fall down in one step
  - [] Save dcm
 
+
+Problem I am suspecting:
+0) Footstep tracking is very bad
+1) replanning at double support phase
+2) repopulating footstep

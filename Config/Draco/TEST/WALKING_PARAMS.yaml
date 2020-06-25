@@ -15,8 +15,8 @@ dcm_planner_parameters:
     nominal_com_height: 0.7 # m from the ground
 
     t_additional_init_transfer: 0.175 # seconds. The additional initial transfer time to switch the stance leg
-    t_contact_transition: 0.035 # seconds. The transition time used to change reaction forces and stance leg
-    t_swing: 0.27 # seconds. The single support swing time.
+    t_contact_transition: 0.04 # seconds. The transition time used to change reaction forces and stance leg
+    t_swing: 0.35 # seconds. The single support swing time.
     percentage_settle: 0.9 # percent to converge at the end of the trajectory
     alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
 
@@ -35,9 +35,9 @@ controller_parameters:
     w_contact_weight: 1e-3
     # Regularization terms
     lambda_qddot: 1e-8
-    lambda_Fr: 1e-8
+    lambda_Fr: 1e-16
     # Enable limits
-    enable_torque_limits: true
+    enable_torque_limits: false
 
     # Integration_parameters
     velocity_freq_cutoff: 2.0 #Hz
@@ -47,7 +47,7 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 250
+    max_z_force: 500
 
     # Task hierarchy weights
     ini_w_task_com: 0.0
@@ -56,30 +56,28 @@ task_parameters:
     ini_w_task_foot_ori: 0.0
     ini_w_task_joint: 20.0
 
-    max_w_task_com: 10.0
-    max_w_task_base_ori: 10.0
-    max_w_task_foot_pos: 40.0
-    max_w_task_foot_ori: 40.0
-    max_w_task_joint: 20.0
+    max_w_task_com: 20.
+    max_w_task_base_ori: 20.
+    max_w_task_foot_pos: 200.0
+    max_w_task_foot_ori: 20.0
+    max_w_task_joint: 1e-3
 
     min_w_task_com: 0.0
     min_w_task_base_ori: 0.0
-    min_w_task_foot_pos: 20.0
+    min_w_task_foot_pos: 200.0
     min_w_task_foot_ori: 20.0
     min_w_task_joint: 0.0
 
     # Task Gains
     # COM
-    #kp_com: [200, 200, 200]
-    #kd_com: [15, 15, 15]
     kp_com: [200, 200, 200]
     kd_com: [15, 15, 15]
     # Pelvis
     kp_base_ori: [5, 5, 5]
     kd_base_ori: [20, 20, 20]
     # Foot Linear and orientation gains
-    kp_foot_pos: [400, 400, 400]
-    kd_foot_pos: [40, 40, 40]
+    kp_foot_pos: [500, 500, 500]
+    kd_foot_pos: [50, 50, 50]
     kp_foot_ori: [200, 200]
     kd_foot_ori: [20, 20]
     # Joint
