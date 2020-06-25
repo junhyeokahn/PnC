@@ -4,7 +4,15 @@
 
 #include <PnC/WBC/Task.hpp>
 
-enum BasicTaskType { JOINT, LINKXYZ, LINKORI, CENTROID, COM };
+enum BasicTaskType {
+  JOINT,
+  LINKXYZ,
+  LINKORI,
+  ISOLATED_LINKXYZ,
+  ISOLATED_LINKORI,
+  CENTROID,
+  COM
+};
 
 class BasicTask : public Task {
  public:

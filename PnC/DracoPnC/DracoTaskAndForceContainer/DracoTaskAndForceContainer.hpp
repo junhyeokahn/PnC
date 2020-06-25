@@ -26,7 +26,6 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Task Member variables
   // -------------------------------------------------------
-  Task* com_task_;
   Task* dcm_task_;
   Task* joint_task_;
   Task* base_ori_task_;

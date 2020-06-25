@@ -35,6 +35,22 @@ BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
         kd_[i] = 0.;
       }
       break;
+    case BasicTaskType::ISOLATED_LINKXYZ:
+      assert(dim_task_ = 3);
+      task_type_string_ = "Isolated LinkXYZ";
+      for (int i = 0; i < dim_task_; ++i) {
+        kp_[i] = 0.;
+        kd_[i] = 0.;
+      }
+      break;
+    case BasicTaskType::ISOLATED_LINKORI:
+      assert(dim_task_ = 3);
+      task_type_string_ = "Isolated LinkRPY";
+      for (int i = 0; i < dim_task_; ++i) {
+        kp_[i] = 0.;
+        kd_[i] = 0.;
+      }
+      break;
     case BasicTaskType::CENTROID:
       assert(dim_task_ = 6);
       task_type_string_ = "Centroid";
@@ -93,6 +109,29 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
       // myUtils::pretty_print(pos_err, std::cout, "pos_err in ori");
       break;
     }
+    case BasicTaskType::ISOLATED_LINKORI: {
+      // pos_err
+      Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2],
+                                        _pos_des[3]);
+      Eigen::Quaternion<double> ori_act(
+          robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+      myUtils::avoid_quat_jump(ori_des, ori_act);
+
+      Eigen::Quaternion<double> quat_ori_err;
+      quat_ori_err = ori_des * (ori_act.inverse());
+      Eigen::Vector3d ori_err;
+      ori_err = dart::math::quatToExp(quat_ori_err);
+      for (int i = 0; i < 3; ++i) {
+        // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+      }
+      pos_err = ori_err;
+
+      // vel_act
+      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
+      // myUtils::pretty_print(pos_err, std::cout, "pos_err in ori");
+      break;
+    }
     case BasicTaskType::JOINT: {
       // pos_err
       pos_err = _pos_des - robot_->getQ().tail(dim_task_);
@@ -101,6 +140,14 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
       break;
     }
     case BasicTaskType::LINKXYZ: {
+      // pos_err
+      pos_err =
+          _pos_des - robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+      // vel_act
+      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKXYZ: {
       // pos_err
       pos_err =
           _pos_des - robot_->getBodyNodeCoMIsometry(link_idx_).translation();
@@ -149,9 +196,23 @@ bool BasicTask::_UpdateTaskJacobian() {
                 .block(3, 0, dim_task_, robot_->getNumDofs());
       break;
     }
+    case BasicTaskType::ISOLATED_LINKXYZ: {
+      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
+                .block(3, 0, dim_task_, robot_->getNumDofs());
+      Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+      break;
+    }
     case BasicTaskType::LINKORI: {
       Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
                 .block(0, 0, dim_task_, robot_->getNumDofs());
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKORI: {
+      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
+                .block(0, 0, dim_task_, robot_->getNumDofs());
+      Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
       break;
     }
     case BasicTaskType::CENTROID: {
@@ -184,6 +245,22 @@ bool BasicTask::_UpdateTaskJDotQdot() {
       JtDotQdot_ = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
                        0, 0, dim_task_, robot_->getNumDofs()) *
                    robot_->getQdot();
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKXYZ: {
+      Eigen::MatrixXd Jdot = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
+          3, 0, dim_task_, robot_->getNumDofs());
+      Jdot.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+      JtDotQdot_ = Jdot * robot_->getQdot();
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKORI: {
+      Eigen::MatrixXd Jdot = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
+          0, 0, dim_task_, robot_->getNumDofs());
+      Jdot.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
+          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
+      JtDotQdot_ = Jdot * robot_->getQdot();
       break;
     }
     case BasicTaskType::CENTROID: {
