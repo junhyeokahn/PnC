@@ -267,7 +267,7 @@ bool BasicTask::_UpdateTaskJDotQdot() {
       // JtDotQdot_ = robot_->getCentroidJacobian() *
       // robot_->getInvMassMatrix() *
       // robot_->getCoriolis();
-      JtDotQdot_.setZero();  // TODO : what this should be
+      JtDotQdot_.setZero();
       break;
     }
     case BasicTaskType::COM: {

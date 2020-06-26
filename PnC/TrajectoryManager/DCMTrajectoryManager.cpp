@@ -259,7 +259,7 @@ void DCMTrajectoryManager::walkForward() {
 }
 void DCMTrajectoryManager::walkBackward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(3, nominal_backward_step_);
+  populateWalkForward(5, nominal_backward_step_);
   alternateLeg();
 }
 void DCMTrajectoryManager::strafeLeft() {
