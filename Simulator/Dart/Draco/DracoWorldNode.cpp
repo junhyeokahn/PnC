@@ -278,11 +278,6 @@ void DracoWorldNode::get_force_torque_data_() {
     }
   }
 
-  // myUtils::pretty_print(rf_wrench, std::cout, "sensor true local
-  // rf_wrench");
-  // myUtils::pretty_print(lf_wrench, std::cout, "sensor true local lf_wrench
-  //");
-
   sensor_data_->lf_wrench = lf_wrench;
   sensor_data_->rf_wrench = rf_wrench;
 }

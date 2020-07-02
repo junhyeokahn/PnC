@@ -66,6 +66,15 @@ void DoubleSupportStand::firstVisit() {
   // =========================================================================
   ctrl_arch_->jpos_hierarchy_manager_->initializeRampToMin(
       0.0, time_to_max_normal_force_);
+
+  // std::cout << "jpos" << std::endl;
+  // std::cout << ctrl_arch_->jpos_hierarchy_manager_->starting_w_ << std::endl;
+  // std::cout << "rfoot_pos" << std::endl;
+  // std::cout << ctrl_arch_->rfoot_pos_hierarchy_manager_->starting_w_
+  //<< std::endl;
+  // std::cout << "rfoot_ori" << std::endl;
+  // std::cout << ctrl_arch_->rfoot_ori_hierarchy_manager_->starting_w_
+  //<< std::endl;
 }
 
 void DoubleSupportStand::_taskUpdate() {
@@ -115,8 +124,17 @@ void DoubleSupportStand::oneStep() {
       state_machine_time_);
   ctrl_arch_->jpos_hierarchy_manager_->updateRampToMinDesired(
       state_machine_time_);
-
   _taskUpdate();
+
+  // std::cout << "jpos" << std::endl;
+  // std::cout << ctrl_arch_->jpos_hierarchy_manager_->current_w_ << std::endl;
+  // std::cout << "rfoot_pos" << std::endl;
+  // std::cout << ctrl_arch_->rfoot_pos_hierarchy_manager_->current_w_
+  //<< std::endl;
+  // std::cout << "rfoot_ori" << std::endl;
+  // std::cout << ctrl_arch_->rfoot_ori_hierarchy_manager_->current_w_
+  //<< std::endl;
+  // exit(0);
 }
 
 void DoubleSupportStand::lastVisit() {}

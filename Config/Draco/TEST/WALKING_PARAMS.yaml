@@ -37,7 +37,7 @@ controller_parameters:
     lambda_qddot: 1e-8
     lambda_Fr: 1e-16
     # Enable limits
-    enable_torque_limits: false
+    enable_torque_limits: true
 
     # Integration_parameters
     velocity_freq_cutoff: 2.0 #Hz
@@ -56,17 +56,31 @@ task_parameters:
     ini_w_task_foot_ori: 0.0
     ini_w_task_joint: 20.0
 
-    max_w_task_com: 20.
-    max_w_task_base_ori: 20.
-    max_w_task_foot_pos: 200.0
-    max_w_task_foot_ori: 20.0
+    #max_w_task_com: 20.
+    #max_w_task_base_ori: 20.
+    #max_w_task_foot_pos: 200.0
+    #max_w_task_foot_ori: 20.0
+    #max_w_task_joint: 20.0
+
+    #min_w_task_com: 0.0
+    #min_w_task_base_ori: 0.0
+    #min_w_task_foot_pos: 200.0
+    #min_w_task_foot_ori: 20.0
+    #min_w_task_joint: 0.0
+
+    max_w_task_com: 1e-1
+    max_w_task_base_ori: 1e-1
+    max_w_task_foot_pos: 10.0
+    max_w_task_foot_ori: 10.0
     max_w_task_joint: 1e-3
 
     min_w_task_com: 0.0
     min_w_task_base_ori: 0.0
-    min_w_task_foot_pos: 200.0
-    min_w_task_foot_ori: 20.0
+    min_w_task_foot_pos: 10.0
+    min_w_task_foot_ori: 10.0
     min_w_task_joint: 0.0
+
+
 
     # Task Gains
     # COM
@@ -81,5 +95,5 @@ task_parameters:
     kp_foot_ori: [200, 200]
     kd_foot_ori: [20, 20]
     # Joint
-    kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
-    kd_joint: [5., 5., 5., 5., 5., 5., 5., 5., 5., 5.]
+    kp_joint: [200., 200., 200., 200., 10., 200., 200., 200., 200., 10.]
+    kd_joint: [20., 20., 20., 20., 20., 1., 20., 20., 20., 1.]

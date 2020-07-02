@@ -20,6 +20,10 @@ r_rf_back_des = np.genfromtxt(file_path+'r_rf_back_des.txt', delimiter=None, dty
 l_rf_front_des = np.genfromtxt(file_path+'l_rf_front_des.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 l_rf_back_des = np.genfromtxt(file_path+'l_rf_back_des.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 
+rfoot_ati = np.genfromtxt(file_path+'rfoot_ati.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
+lfoot_ati = np.genfromtxt(file_path+'lfoot_ati.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
+
+
 data_phse = np.genfromtxt(file_path+'phase.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 phseChange = []
 for i in range(0,len(t)-1):
@@ -51,9 +55,19 @@ for i in range(3):
     axes[i,3].grid(True)
     plot_phase(axes[i,3])
 
-axes[0,0].set_title("Right Foot Toe")
-axes[0,1].set_title("Right Foot Heel")
-axes[0,2].set_title("Left Foot Toe")
-axes[0,3].set_title("Left Foot Heel")
+axes[0,0].set_title("Right Foot Toe RF Des")
+axes[0,1].set_title("Right Foot Heel RF Des")
+axes[0,2].set_title("Left Foot Toe RF Des")
+axes[0,3].set_title("Left Foot Heel RF Des")
 
+fig, axes = plt.subplots(6, 2)
+for i in range(6):
+    axes[i,0].plot(t, rfoot_ati[:,i], color='k', linewidth=3)
+    plot_phase(axes[i, 0])
+    axes[i,0].grid(True)
+    axes[i,1].plot(t, lfoot_ati[:,i], color='k', linewidth=3)
+    plot_phase(axes[i, 1])
+    axes[i,1].grid(True)
+axes[0,0].set_title("Right Foot ATI")
+axes[0,1].set_title("Left Foot ATI")
 plt.show()

@@ -20,6 +20,7 @@ jvel_cmd = np.genfromtxt(file_path+"jvel_des.txt", delimiter=None, dtype=(float)
 trq_cmd = np.genfromtxt(file_path+"command.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
 q = np.genfromtxt(file_path+'config.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 qdot = np.genfromtxt(file_path+'qdot.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
+qddot_des = np.genfromtxt(file_path+'qddot_des.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 
 jpos_max = np.array([0.6  , 0.4  , 0.5   , 1.9   , 2.33 , 0.6  , 0.4  , 0.5   , 1.9   , 2.33])
 jpos_min = np.array([-0.6 , -0.4 , -1.15 , -0.2  , 0.64 , -0.6 , -0.4 , -1.15 , -0.2  , 0.64])
@@ -87,6 +88,16 @@ for i in range(5):
     axes[i,1].grid(True)
     plot_phase(axes[i,0])
     plot_phase(axes[i,1])
-fig.suptitle("Joint Trq")
+fig.suptitle("Joint Trq Des")
+
+fig, axes = plt.subplots(5, 2)
+for i in range(5):
+    axes[i,0].plot(t, qddot_des[:,i], color='r', linestyle='solid', linewidth=3)
+    axes[i,1].plot(t, qddot_des[:,i+5], color='r', linestyle='solid', linewidth=3)
+    axes[i,0].grid(True)
+    axes[i,1].grid(True)
+    plot_phase(axes[i,0])
+    plot_phase(axes[i,1])
+fig.suptitle("Joint Acc Des")
 
 plt.show()

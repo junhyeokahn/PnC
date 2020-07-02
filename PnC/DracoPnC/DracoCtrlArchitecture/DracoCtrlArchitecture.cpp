@@ -134,18 +134,21 @@ void DracoControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
 
-  static bool b_initialize_joint_integrator = true;
-  if ((prev_state_ == DRACO_STATES::STAND || state_ == DRACO_STATES::BALANCE) &&
-      b_initialize_joint_integrator) {
-    std::cout << "[Joint Integrator] Start" << std::endl;
-    main_controller_->initializeJointIntegrator();
-    b_initialize_joint_integrator = false;
-  }
+  // static bool b_integrator_init = true;
+  // if ((prev_state_ == DRACO_STATES::STAND || state_ == DRACO_STATES::BALANCE)
+  // &&
+  // b_integrator_init) {
+  // std::cout << "[Joint Integrator] Start" << std::endl;
+  // main_controller_->initializeJointIntegrator();
+  // b_integrator_init = false;
+  //}
 
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
+  // TEST
+  // TEST END
   // Save Data
   saveData();
 

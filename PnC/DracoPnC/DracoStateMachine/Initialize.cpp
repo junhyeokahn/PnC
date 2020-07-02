@@ -47,7 +47,6 @@ void Initialize::oneStep() {
 void Initialize::lastVisit() {}
 
 bool Initialize::endOfState() {
-  // Also check if footstep list is non-zero
   if (state_machine_time_ > end_time_) {
     return true;
   }

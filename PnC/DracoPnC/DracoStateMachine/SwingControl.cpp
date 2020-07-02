@@ -92,34 +92,6 @@ void SwingControl::lastVisit() {
   ctrl_arch_->dcm_trajectory_manager_->incrementStepIndex();
 }
 
-// bool SwingControl::endOfState() {
-// if (state_machine_time_ >= end_time_) {
-// return true;
-//} else {
-// if (state_machine_time_ >=
-// swing_time_percent_early_contact_check_ * end_time_) {
-// if (leg_side_ == (LEFT_ROBOT_SIDE)) {
-// if (fabs(sp_->l_rf[5]) >= early_contact_force_threshold_) {
-// std::cout << "early left foot contact" << std::endl;
-// std::cout << "state_machine_time_ :" << state_machine_time_
-//<< std::endl;
-// myUtils::pretty_print(sp_->l_rf, std::cout, "Left Wrench");
-// return true;
-//}
-//} else {
-// if (fabs(sp_->r_rf[5]) >= early_contact_force_threshold_) {
-// std::cout << "state_machine_time_ :" << state_machine_time_
-//<< std::endl;
-// std::cout << "early right foot contact" << std::endl;
-// myUtils::pretty_print(sp_->r_rf, std::cout, "Right Wrench");
-// return true;
-//}
-//}
-//}
-// return false;
-//}
-//}
-
 bool SwingControl::endOfState() {
   if (state_machine_time_ >= end_time_) {
     return true;
@@ -127,17 +99,19 @@ bool SwingControl::endOfState() {
     if (state_machine_time_ >=
         swing_time_percent_early_contact_check_ * end_time_) {
       if (leg_side_ == (LEFT_ROBOT_SIDE)) {
-        if (sp_->b_lfoot_contact == 1) {
+        if (fabs(sp_->l_rf[5]) >= early_contact_force_threshold_) {
           std::cout << "early left foot contact" << std::endl;
           std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
                     << end_time_ << std::endl;
+          myUtils::pretty_print(sp_->l_rf, std::cout, "Left Wrench");
           return true;
         }
       } else {
-        if (sp_->b_rfoot_contact == 1) {
+        if (fabs(sp_->r_rf[5]) >= early_contact_force_threshold_) {
+          std::cout << "early right foot contact" << std::endl;
           std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
                     << end_time_ << std::endl;
-          std::cout << "early right foot contact" << std::endl;
+          myUtils::pretty_print(sp_->r_rf, std::cout, "Right Wrench");
           return true;
         }
       }
@@ -145,6 +119,32 @@ bool SwingControl::endOfState() {
     return false;
   }
 }
+
+// bool SwingControl::endOfState() {
+// if (state_machine_time_ >= end_time_) {
+// return true;
+//} else {
+// if (state_machine_time_ >=
+// swing_time_percent_early_contact_check_ * end_time_) {
+// if (leg_side_ == (LEFT_ROBOT_SIDE)) {
+// if (sp_->b_lfoot_contact == 1) {
+// std::cout << "early left foot contact" << std::endl;
+// std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
+//<< end_time_ << std::endl;
+// return true;
+//}
+//} else {
+// if (sp_->b_rfoot_contact == 1) {
+// std::cout << "state_machine_time_ :" << state_machine_time_ << " / "
+//<< end_time_ << std::endl;
+// std::cout << "early right foot contact" << std::endl;
+// return true;
+//}
+//}
+//}
+// return false;
+//}
+//}
 
 StateIdentifier SwingControl::getNextState() {
   int next_footstep_robot_side;
