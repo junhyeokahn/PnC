@@ -305,12 +305,6 @@ void WBC::solve(const std::vector<Task*>& task_list,
     tau_cmd = Sa_ * (A_ * qddot_result_ + cori_ + grav_);
   }
 
-  Eigen::VectorXd tau_mpc = Sa_ * (-Jc_.transpose() * Fd);
-
-  // myUtils::pretty_print(tau_cmd, std::cout, "ihwbc tau_cmd");
-  // myUtils::pretty_print(tau_mpc, std::cout, "tau_mpc");
-  // tau_cmd = tau_mpc;
-
   qddot_cmd = Sa_ * qddot_result_;
 
   // for(int i = 0; i < task_list.size(); i++){
@@ -336,6 +330,14 @@ void WBC::solve(const std::vector<Task*>& task_list,
   // Jc_.transpose()*Fr_result_);
   // myUtils::pretty_print(qddot_res_test, std::cout, "qddot_res_test");
   // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
+
+  // TEST
+  // myUtils::saveVector(w_task_hierarchy, "debug_wbc_task_weight");
+  // myUtils::saveVector(uf_ieq_vec_, "debug_wbc_uf_ieq");
+  // myUtils::saveVector(Fr_result_, "debug_wbc_rf");
+  // myUtils::saveVector(qddot_result_, "debug_wbc_qddot");
+  // myUtils::saveVector(tau_cmd, "debug_wbc_tau_cmd");
+  // TEST
 }
 
 // Creates a stack of contact jacobians that are weighted by w_rf_contacts

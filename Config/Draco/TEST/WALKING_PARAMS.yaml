@@ -55,7 +55,7 @@ task_parameters:
     ini_w_task_foot_pos: 0.0
     ini_w_task_foot_ori: 0.0
     #ini_w_task_joint: 20.0
-    ini_w_task_joint: 1e-3
+    ini_w_task_joint: 1e-1
 
     #max_w_task_com: 20.
     #max_w_task_base_ori: 20.
@@ -73,7 +73,7 @@ task_parameters:
     max_w_task_base_ori: 1e-1
     max_w_task_foot_pos: 1.0
     max_w_task_foot_ori: 1.0
-    max_w_task_joint: 1e-3
+    max_w_task_joint: 1e-1
 
     min_w_task_com: 0.0
     min_w_task_base_ori: 0.0
