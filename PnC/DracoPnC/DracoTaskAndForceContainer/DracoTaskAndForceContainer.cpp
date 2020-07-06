@@ -34,7 +34,6 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
       new FootLocalRyRzTask(robot_, DracoBodyNode::lFootCenter);
 
   // Add all tasks initially. Remove later as needed.
-  task_list_.push_back(joint_task_);
   task_list_.push_back(dcm_task_);
   task_list_.push_back(base_ori_task_);
 
@@ -109,7 +108,6 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "kd_foot_ori", kd_foot_ori_);
 
     // Load Task Hierarchies
-    myUtils::readParameter(node, "ini_w_task_joint", w_task_joint_);
     myUtils::readParameter(node, "ini_w_task_com", w_task_com_);
     myUtils::readParameter(node, "ini_w_task_base_ori", w_task_base_ori_);
     myUtils::readParameter(node, "ini_w_task_foot_pos", w_task_foot_pos_);
@@ -132,7 +130,6 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   lfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
 
   // Set Task Hierarchies
-  joint_task_->setHierarchyWeight(w_task_joint_);
   dcm_task_->setHierarchyWeight(w_task_com_);
   base_ori_task_->setHierarchyWeight(w_task_base_ori_);
   rfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);

@@ -1,6 +1,7 @@
 state_initialize_params:
     target_pos_duration: 2.0
-    target_pos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+    target_pos: [0., 0., -0.9, 1.7, 0.71, 0., 0., -0.9, 1.7, 0.71]
+
 
 state_stand_params:
     target_pos_duration: 2.0 # duration to reach target com position
@@ -50,36 +51,30 @@ task_parameters:
     max_z_force: 500
 
     # Task hierarchy weights
-    ini_w_task_com: 0.0
-    ini_w_task_base_ori: 0.0
+    ini_w_task_com: 1e-1
+    ini_w_task_base_ori: 1e-1
     ini_w_task_foot_pos: 0.0
     ini_w_task_foot_ori: 0.0
-    #ini_w_task_joint: 20.0
-    ini_w_task_joint: 1e-1
 
     #max_w_task_com: 20.
     #max_w_task_base_ori: 20.
     #max_w_task_foot_pos: 200.0
     #max_w_task_foot_ori: 20.0
-    #max_w_task_joint: 20.0
 
     #min_w_task_com: 0.0
     #min_w_task_base_ori: 0.0
     #min_w_task_foot_pos: 200.0
     #min_w_task_foot_ori: 20.0
-    #min_w_task_joint: 0.0
 
     max_w_task_com: 1e-1
     max_w_task_base_ori: 1e-1
     max_w_task_foot_pos: 1.0
     max_w_task_foot_ori: 1.0
-    max_w_task_joint: 1e-1
 
-    min_w_task_com: 0.0
-    min_w_task_base_ori: 0.0
+    min_w_task_com: 1e-1
+    min_w_task_base_ori: 1e-1
     min_w_task_foot_pos: 1.0
     min_w_task_foot_ori: 1.0
-    min_w_task_joint: 0.0
 
     # Task Gains
     # COM

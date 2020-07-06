@@ -54,7 +54,6 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   double w_task_base_ori_;
   double w_task_foot_pos_;
   double w_task_foot_ori_;
-  double w_task_joint_;
 
   // Task Gains
   Eigen::VectorXd kp_joint_;

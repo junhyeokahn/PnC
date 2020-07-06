@@ -75,11 +75,6 @@ void SwingControl::_taskUpdate() {
   // Floating Base
   // =========================================================================
   ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
-
-  // =========================================================================
-  // Joint
-  // =========================================================================
-  ctrl_arch_->joint_trajectory_manager_->useCurrent();
 }
 
 void SwingControl::oneStep() {

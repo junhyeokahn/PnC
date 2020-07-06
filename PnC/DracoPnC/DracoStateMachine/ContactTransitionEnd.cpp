@@ -59,11 +59,10 @@ void ContactTransitionEnd::_taskUpdate() {
   ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
 
   // =========================================================================
-  // Foot, Joint
+  // Foot
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->joint_trajectory_manager_->useCurrent();
 }
 
 void ContactTransitionEnd::oneStep() {

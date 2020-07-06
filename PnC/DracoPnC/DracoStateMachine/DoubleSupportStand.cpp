@@ -61,20 +61,6 @@ void DoubleSupportStand::firstVisit() {
       0.0, time_to_max_normal_force_);
   ctrl_arch_->base_ori_hierarchy_manager_->initializeRampToMax(
       0.0, time_to_max_normal_force_);
-  // =========================================================================
-  // Initialize Task Gain Ramp to Miny
-  // =========================================================================
-  ctrl_arch_->jpos_hierarchy_manager_->initializeRampToMin(
-      0.0, time_to_max_normal_force_);
-
-  // std::cout << "jpos" << std::endl;
-  // std::cout << ctrl_arch_->jpos_hierarchy_manager_->starting_w_ << std::endl;
-  // std::cout << "rfoot_pos" << std::endl;
-  // std::cout << ctrl_arch_->rfoot_pos_hierarchy_manager_->starting_w_
-  //<< std::endl;
-  // std::cout << "rfoot_ori" << std::endl;
-  // std::cout << ctrl_arch_->rfoot_ori_hierarchy_manager_->starting_w_
-  //<< std::endl;
 }
 
 void DoubleSupportStand::_taskUpdate() {
@@ -89,11 +75,6 @@ void DoubleSupportStand::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
-
-  // =========================================================================
-  // Joint
-  // =========================================================================
-  // ctrl_arch_->joint_trajectory_manager_->ignoreTask();
 }
 
 void DoubleSupportStand::oneStep() {
@@ -122,19 +103,7 @@ void DoubleSupportStand::oneStep() {
       state_machine_time_);
   ctrl_arch_->base_ori_hierarchy_manager_->updateRampToMaxDesired(
       state_machine_time_);
-  ctrl_arch_->jpos_hierarchy_manager_->updateRampToMinDesired(
-      state_machine_time_);
   _taskUpdate();
-
-  // std::cout << "jpos" << std::endl;
-  // std::cout << ctrl_arch_->jpos_hierarchy_manager_->current_w_ << std::endl;
-  // std::cout << "rfoot_pos" << std::endl;
-  // std::cout << ctrl_arch_->rfoot_pos_hierarchy_manager_->current_w_
-  //<< std::endl;
-  // std::cout << "rfoot_ori" << std::endl;
-  // std::cout << ctrl_arch_->rfoot_ori_hierarchy_manager_->current_w_
-  //<< std::endl;
-  // exit(0);
 }
 
 void DoubleSupportStand::lastVisit() {}

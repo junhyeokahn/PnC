@@ -41,6 +41,7 @@ class DracoControlArchitecture : public ControlArchitecture {
   virtual void ControlArchitectureInitialization();
   virtual void getCommand(void* _command);
   void saveData();
+  void getIVDCommand(void* _command);
 
  protected:
   DracoStateProvider* sp_;
@@ -73,5 +74,4 @@ class DracoControlArchitecture : public ControlArchitecture {
   TaskWeightTrajectoryManager* rfoot_ori_hierarchy_manager_;
   TaskWeightTrajectoryManager* com_hierarchy_manager_;
   TaskWeightTrajectoryManager* base_ori_hierarchy_manager_;
-  TaskWeightTrajectoryManager* jpos_hierarchy_manager_;
 };

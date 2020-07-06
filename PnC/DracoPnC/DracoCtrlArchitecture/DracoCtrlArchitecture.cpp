@@ -45,8 +45,6 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
       taf_container_->lfoot_center_pos_task_, robot_);
   lfoot_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->lfoot_center_ori_task_, robot_);
-  jpos_hierarchy_manager_ =
-      new TaskWeightTrajectoryManager(taf_container_->joint_task_, robot_);
   com_hierarchy_manager_ =
       new TaskWeightTrajectoryManager(taf_container_->dcm_task_, robot_);
   base_ori_hierarchy_manager_ =
@@ -109,7 +107,6 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete rfoot_ori_hierarchy_manager_;
   delete lfoot_pos_hierarchy_manager_;
   delete lfoot_ori_hierarchy_manager_;
-  delete jpos_hierarchy_manager_;
   delete com_hierarchy_manager_;
   delete base_ori_hierarchy_manager_;
 
@@ -146,7 +143,11 @@ void DracoControlArchitecture::getCommand(void* _command) {
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
-  main_controller_->getCommand(_command);
+  if (state_ == DRACO_STATES::INITIALIZE) {
+    getIVDCommand(_command);
+  } else {
+    main_controller_->getCommand(_command);
+  }
   // Save Data
   saveData();
 
@@ -158,6 +159,34 @@ void DracoControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = true;
   }
 };
+
+void DracoControlArchitecture::getIVDCommand(void* _cmd) {
+  Eigen::VectorXd tau_cmd = Eigen::VectorXd::Zero(Draco::n_adof);
+  Eigen::VectorXd des_jpos = Eigen::VectorXd::Zero(Draco::n_adof);
+  Eigen::VectorXd des_jvel = Eigen::VectorXd::Zero(Draco::n_adof);
+
+  Eigen::MatrixXd A = robot_->getMassMatrix();
+  Eigen::VectorXd grav = robot_->getGravity();
+  Eigen::VectorXd cori = robot_->getCoriolis();
+
+  Eigen::VectorXd xddot_des = Eigen::VectorXd::Zero(Draco::n_adof);
+  taf_container_->joint_task_->updateJacobians();
+  taf_container_->joint_task_->computeCommands();
+  taf_container_->joint_task_->getCommand(xddot_des);
+
+  Eigen::VectorXd qddot_des = Eigen::VectorXd::Zero(Draco::n_dof);
+  qddot_des.tail(Draco::n_adof) = xddot_des;
+
+  des_jpos = sp_->q.tail(Draco::n_adof);
+  des_jvel = sp_->qdot.tail(Draco::n_adof);
+  tau_cmd = (A * qddot_des + cori + grav).tail(Draco::n_adof);
+
+  for (int i(0); i < Draco::n_adof; ++i) {
+    ((DracoCommand*)_cmd)->jtrq[i] = tau_cmd[i];
+    ((DracoCommand*)_cmd)->q[i] = des_jpos[i];
+    ((DracoCommand*)_cmd)->qdot[i] = des_jvel[i];
+  }
+}
 
 void DracoControlArchitecture::_InitializeParameters() {
   // Controller initialization
@@ -188,12 +217,6 @@ void DracoControlArchitecture::_InitializeParameters() {
                            min_gain);
     base_ori_hierarchy_manager_->setMaxGain(max_gain);
     base_ori_hierarchy_manager_->setMinGain(min_gain);
-    myUtils::readParameter(cfg_["task_parameters"], "max_w_task_joint",
-                           max_gain);
-    myUtils::readParameter(cfg_["task_parameters"], "min_w_task_joint",
-                           min_gain);
-    jpos_hierarchy_manager_->setMaxGain(max_gain);
-    jpos_hierarchy_manager_->setMinGain(min_gain);
     double max_foot_pos_gain, min_foot_pos_gain, max_foot_ori_gain,
         min_foot_ori_gain;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_foot_pos",
@@ -237,7 +260,6 @@ void DracoControlArchitecture::saveData() {
   sp_->w_lfoot_ori = lfoot_ori_hierarchy_manager_->current_w_;
   sp_->w_com = com_hierarchy_manager_->current_w_;
   sp_->w_base_ori = base_ori_hierarchy_manager_->current_w_;
-  sp_->w_joint = jpos_hierarchy_manager_->current_w_;
   sp_->w_rf_rffront =
       rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
   sp_->w_rf_rfback =

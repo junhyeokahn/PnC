@@ -28,7 +28,7 @@ void DoubleSupportBalance::firstVisit() {
 
 void DoubleSupportBalance::_taskUpdate() {
   // =========================================================================
-  // Foot, Floating Base, Joint
+  // Foot, Floating Base
   // =========================================================================
   ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
   ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
