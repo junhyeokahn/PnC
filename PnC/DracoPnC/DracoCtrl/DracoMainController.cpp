@@ -76,7 +76,7 @@ void DracoMainController::getCommand(void* _cmd) {
     b_first_visit_ = false;
   }
 
-  // Update Dynamic Terms, Task Jacobians, and Contact Jacobians
+  // Update Dynamic Properties, Task Jacobians, and Contact Jacobians
   _PreProcessing_Command();
 
   // Update Task Hierarchy

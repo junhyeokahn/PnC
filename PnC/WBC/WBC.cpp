@@ -121,7 +121,7 @@ void WBC::solve(const std::vector<Task*>& task_list,
 
   if (!b_weights_set_) {
     printf(
-        "[Warning] Weights for IHBWC has not been set. Setting 1.0 to all "
+        "[Warning] Weights for WBC has not been set. Setting 1.0 to all "
         "weights \n");
     w_task_hierarchy = Eigen::VectorXd::Zero(task_list.size());
     w_rf_contacts = Eigen::VectorXd::Zero(contact_list.size());

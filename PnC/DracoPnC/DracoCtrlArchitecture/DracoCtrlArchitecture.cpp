@@ -147,8 +147,6 @@ void DracoControlArchitecture::getCommand(void* _command) {
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
-  // TEST
-  // TEST END
   // Save Data
   saveData();
 

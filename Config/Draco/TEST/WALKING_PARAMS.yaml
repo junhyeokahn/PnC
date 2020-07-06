@@ -54,7 +54,8 @@ task_parameters:
     ini_w_task_base_ori: 0.0
     ini_w_task_foot_pos: 0.0
     ini_w_task_foot_ori: 0.0
-    ini_w_task_joint: 20.0
+    #ini_w_task_joint: 20.0
+    ini_w_task_joint: 1e-3
 
     #max_w_task_com: 20.
     #max_w_task_base_ori: 20.
@@ -70,22 +71,20 @@ task_parameters:
 
     max_w_task_com: 1e-1
     max_w_task_base_ori: 1e-1
-    max_w_task_foot_pos: 10.0
-    max_w_task_foot_ori: 10.0
+    max_w_task_foot_pos: 1.0
+    max_w_task_foot_ori: 1.0
     max_w_task_joint: 1e-3
 
     min_w_task_com: 0.0
     min_w_task_base_ori: 0.0
-    min_w_task_foot_pos: 10.0
-    min_w_task_foot_ori: 10.0
+    min_w_task_foot_pos: 1.0
+    min_w_task_foot_ori: 1.0
     min_w_task_joint: 0.0
-
-
 
     # Task Gains
     # COM
-    kp_com: [20, 20, 200]
-    kd_com: [5, 5, 15]
+    kp_com: [20, 20, 100]
+    kd_com: [5, 5, 10]
     # Pelvis
     kp_base_ori: [5, 5, 5]
     kd_base_ori: [20, 20, 20]
