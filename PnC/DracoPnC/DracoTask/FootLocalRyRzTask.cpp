@@ -33,7 +33,7 @@ bool FootLocalRyRzTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   }
 
   Eigen::VectorXd vel_act =
-      robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(2);
+      robot_->getBodyNodeSpatialVelocity(link_idx_).head(3).tail(2);
 
   for (int i(0); i < 2; ++i) {
     op_cmd[i] =

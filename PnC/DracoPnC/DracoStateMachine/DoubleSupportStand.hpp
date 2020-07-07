@@ -18,6 +18,7 @@ class DoubleSupportStand : public StateMachine {
   void lastVisit();
   bool endOfState();
   void initialization(const YAML::Node& node);
+  double progression_variable() { return state_machine_time_ / smoothing_dur_; }
   StateIdentifier getNextState();
 
  protected:
@@ -26,6 +27,7 @@ class DoubleSupportStand : public StateMachine {
   DracoTaskAndForceContainer* taf_container_;
 
   double ctrl_start_time_;
+  double smoothing_dur_;
   double end_time_;
   double time_to_max_normal_force_;
   double target_height_;

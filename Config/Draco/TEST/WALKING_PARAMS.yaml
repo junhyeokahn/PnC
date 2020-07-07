@@ -1,11 +1,13 @@
 state_initialize_params:
     target_pos_duration: 2.0
-    target_pos: [0., 0., -0.9, 1.7, 0.71, 0., 0., -0.9, 1.7, 0.71]
-
+    smoothing_duration: 1.0
+    #target_pos: [0., 0., -0.9, 1.7, 0.71, 0., 0., -0.9, 1.7, 0.71]
+    target_pos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
 
 state_stand_params:
-    target_pos_duration: 2.0 # duration to reach target com position
-    time_to_max_normal_force: 1.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    target_pos_duration: 4.0 # duration to reach target com position
+    smoothing_duration: 1.0
+    time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.7
 
 state_swing:
@@ -35,8 +37,8 @@ controller_parameters:
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
     # Regularization terms
-    lambda_qddot: 1e-8
-    lambda_Fr: 1e-16
+    lambda_qddot: 1e-4
+    lambda_Fr: 1e-8
     # Enable limits
     enable_torque_limits: true
 
@@ -51,43 +53,33 @@ task_parameters:
     max_z_force: 500
 
     # Task hierarchy weights
-    ini_w_task_com: 1e-1
-    ini_w_task_base_ori: 1e-1
-    ini_w_task_foot_pos: 0.0
-    ini_w_task_foot_ori: 0.0
-
-    #max_w_task_com: 20.
-    #max_w_task_base_ori: 20.
-    #max_w_task_foot_pos: 200.0
-    #max_w_task_foot_ori: 20.0
-
-    #min_w_task_com: 0.0
-    #min_w_task_base_ori: 0.0
-    #min_w_task_foot_pos: 200.0
-    #min_w_task_foot_ori: 20.0
+    ini_w_task_com: 0.
+    ini_w_task_base_ori: 0.
+    ini_w_task_foot_pos: 0.
+    ini_w_task_foot_ori: 0.
 
     max_w_task_com: 1e-1
     max_w_task_base_ori: 1e-1
-    max_w_task_foot_pos: 1.0
-    max_w_task_foot_ori: 1.0
+    max_w_task_foot_pos: 1.
+    max_w_task_foot_ori: 1.
 
-    min_w_task_com: 1e-1
-    min_w_task_base_ori: 1e-1
-    min_w_task_foot_pos: 1.0
-    min_w_task_foot_ori: 1.0
+    min_w_task_com: 0.
+    min_w_task_base_ori: 0.
+    min_w_task_foot_pos: 1.
+    min_w_task_foot_ori: 1.
 
     # Task Gains
     # COM
-    kp_com: [20, 20, 100]
-    kd_com: [5, 5, 10]
+    kp_com: [20, 20, 50]
+    kd_com: [5, 5, 8]
     # Pelvis
-    kp_base_ori: [5, 5, 5]
-    kd_base_ori: [20, 20, 20]
+    kp_base_ori: [20, 20, 20]
+    kd_base_ori: [5, 5, 5]
     # Foot Linear and orientation gains
     kp_foot_pos: [500, 500, 500]
     kd_foot_pos: [50, 50, 50]
     kp_foot_ori: [200, 200]
     kd_foot_ori: [20, 20]
     # Joint
-    kp_joint: [200., 200., 200., 200., 10., 200., 200., 200., 200., 10.]
-    kd_joint: [20., 20., 20., 20., 20., 1., 20., 20., 20., 1.]
+    kp_joint: [100. , 100. , 100. , 100. , 10. , 100. , 100. , 100. , 100. , 10.]
+    kd_joint: [20.  , 20.  , 20.  , 20.  , 20. , 1.   , 20.  , 20.  , 20.  , 1.]

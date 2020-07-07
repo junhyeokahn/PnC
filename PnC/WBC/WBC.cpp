@@ -332,11 +332,15 @@ void WBC::solve(const std::vector<Task*>& task_list,
   // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
 
   // TEST
-  // myUtils::saveVector(w_task_hierarchy, "debug_wbc_task_weight");
-  // myUtils::saveVector(uf_ieq_vec_, "debug_wbc_uf_ieq");
-  // myUtils::saveVector(Fr_result_, "debug_wbc_rf");
-  // myUtils::saveVector(qddot_result_, "debug_wbc_qddot");
-  // myUtils::saveVector(tau_cmd, "debug_wbc_tau_cmd");
+  for (int i = 0; i < task_list.size(); ++i) {
+    task_list[i]->getCommand(xddot);
+    myUtils::saveVector(xddot, "debug_wbc_task_" + std::to_string(i));
+  }
+  myUtils::saveVector(w_task_hierarchy, "debug_wbc_task_weight");
+  myUtils::saveVector(uf_ieq_vec_, "debug_wbc_uf_ieq");
+  myUtils::saveVector(Fr_result_, "debug_wbc_rf");
+  myUtils::saveVector(qddot_result_, "debug_wbc_qddot");
+  myUtils::saveVector(tau_cmd, "debug_wbc_tau_cmd");
   // TEST
 }
 

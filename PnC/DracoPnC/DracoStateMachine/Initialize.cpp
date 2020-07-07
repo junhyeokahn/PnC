@@ -51,6 +51,7 @@ StateIdentifier Initialize::getNextState() { return DRACO_STATES::STAND; }
 void Initialize::initialization(const YAML::Node& node) {
   try {
     myUtils::readParameter(node, "target_pos_duration", end_time_);
+    myUtils::readParameter(node, "smoothing_duration", smoothing_dur_);
     myUtils::readParameter(node, "target_pos", target_pos_);
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["

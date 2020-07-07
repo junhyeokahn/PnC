@@ -30,6 +30,7 @@ void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
                            const Eigen::VectorXd& freq_, double evalTime_,
                            Eigen::VectorXd& p_, Eigen::VectorXd& v_,
                            Eigen::VectorXd& a_);
+double smoothing(double ini, double fin, double rat);
 
 // =============================================================================
 // ETC
@@ -73,23 +74,29 @@ Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p);
 
 double QuatToYaw(const Eigen::Quaternion<double> q);
 
-// Euler ZYX 
+// Euler ZYX
 //     Represents either:
-//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then fixed-frame yaw.
-//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then body-frame roll 
+//     extrinsic XYZ rotations: Fixed-frame roll, then fixed-frame pitch, then
+//     fixed-frame yaw.
+//     or intrinsic ZYX rotations: Body-frame yaw, body-frame pitch, then
+//     body-frame roll
 //
-//     The equation is similar, but the values for fixed and body frame rotations are different.
+//     The equation is similar, but the values for fixed and body frame
+//     rotations are different.
 // World Orientation is R = Rz*Ry*Rx
-Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch, const double yaw);
+Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch,
+                                  const double yaw);
 
-// Quaternion to Euler ZYX 
-Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond & quat_in);
-
+// Quaternion to Euler ZYX
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond& quat_in);
 
 // ZYX extrinsic rotation rates to world angular velocity
 // angular vel = [wx, wy, wz]
-Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch, const double yaw,
-                                      const double roll_rate, const double pitch_rate, const double yaw_rate);
+Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch,
+                                      const double yaw, const double roll_rate,
+                                      const double pitch_rate,
+                                      const double yaw_rate);
 
-void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori, Eigen::Quaternion<double> &act_ori);
+void avoid_quat_jump(const Eigen::Quaternion<double>& des_ori,
+                     Eigen::Quaternion<double>& act_ori);
 }  // namespace myUtils

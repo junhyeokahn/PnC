@@ -14,8 +14,8 @@ st_idx = 5
 end_idx = len(t) - 10
 t = t[st_idx:end_idx]
 
-task_names = ['w_com', 'w_joint', 'w_lfoot_pos', 'w_lfoot_ori', 'w_rfoot_pos', 'w_rfoot_ori']
-task_labels = ['com', 'joint', 'lfoot pos', 'lfoot ori', 'rfoot pos', 'rfoot ori']
+task_names = ['w_com', 'w_lfoot_pos', 'w_lfoot_ori', 'w_rfoot_pos', 'w_rfoot_ori']
+task_labels = ['com', 'lfoot pos', 'lfoot ori', 'rfoot pos', 'rfoot ori']
 task_weights = dict()
 for label, task_name in zip(task_labels, task_names):
     task_weights[label] = np.genfromtxt(file_path+task_name+".txt", delimiter='\n', dtype=(float))[st_idx:end_idx]

@@ -31,9 +31,9 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
   angular_velocity_filter_freq_ = 200.0;  // Hz
 
   ori_est_ = new BasicAccumulation();
-  x_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.01, 1.0);
-  y_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.01, 1.5);
-  z_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.01, 1.5);
+  x_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.0);
+  y_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
+  z_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
 }
 
 DracoStateEstimator::~DracoStateEstimator() {
@@ -66,7 +66,7 @@ void DracoStateEstimator::_UpdateDCM() {
   sp_->com_vel = robot_->getCoMVelocity();
   sp_->dcm_omega = sqrt(9.81 / sp_->com_pos[2]);
   sp_->prev_dcm = sp_->dcm;
-  sp_->dcm = robot_->getCoMPosition() + sp_->com_vel / sp_->dcm_omega;
+  sp_->dcm = robot_->getCoMPosition() + sp_->est_com_vel / sp_->dcm_omega;
   double alpha_vel = 0.1;
   sp_->dcm_vel =
       alpha_vel * ((sp_->dcm - sp_->prev_dcm) / DracoAux::servo_rate) +

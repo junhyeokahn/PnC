@@ -42,6 +42,7 @@ class DracoControlArchitecture : public ControlArchitecture {
   virtual void getCommand(void* _command);
   void saveData();
   void getIVDCommand(void* _command);
+  void smoothing_torque(void* _cmd);
 
  protected:
   DracoStateProvider* sp_;

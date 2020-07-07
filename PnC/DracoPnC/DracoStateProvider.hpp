@@ -24,6 +24,7 @@ class DracoStateProvider {
   Eigen::VectorXd qdot_task_des;
   Eigen::VectorXd q_task;
   Eigen::VectorXd qdot_task;
+  Eigen::VectorXd prev_trq_cmd;
 
   Eigen::Vector3d com_pos_des;
   Eigen::Vector3d com_vel_des;
@@ -74,7 +75,6 @@ class DracoStateProvider {
   double w_lfoot_ori;
   double w_com;
   double w_base_ori;
-  double w_joint;
   double w_rf_rffront;
   double w_rf_rfback;
   double w_rf_lffront;

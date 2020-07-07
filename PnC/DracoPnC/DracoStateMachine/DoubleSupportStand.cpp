@@ -122,6 +122,7 @@ StateIdentifier DoubleSupportStand::getNextState() {
 void DoubleSupportStand::initialization(const YAML::Node& node) {
   try {
     myUtils::readParameter(node, "target_pos_duration", end_time_);
+    myUtils::readParameter(node, "smoothing_duration", smoothing_dur_);
     myUtils::readParameter(node, "time_to_max_normal_force",
                            time_to_max_normal_force_);
     myUtils::readParameter(node, "target_height", target_height_);

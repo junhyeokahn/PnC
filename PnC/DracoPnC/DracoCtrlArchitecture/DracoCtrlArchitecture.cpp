@@ -148,6 +148,8 @@ void DracoControlArchitecture::getCommand(void* _command) {
   } else {
     main_controller_->getCommand(_command);
   }
+  // Smoothing trq for initial state
+  smoothing_torque(_command);
   // Save Data
   saveData();
 
@@ -159,6 +161,25 @@ void DracoControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = true;
   }
 };
+
+void DracoControlArchitecture::smoothing_torque(void* _cmd) {
+  if (state_ == DRACO_STATES::INITIALIZE) {
+    double rat = ((Initialize*)state_machines_[state_])->progression_variable();
+    for (int i = 0; i < Draco::n_adof; ++i) {
+      ((DracoCommand*)_cmd)->jtrq[i] =
+          myUtils::smoothing(0, ((DracoCommand*)_cmd)->jtrq[i], rat);
+      sp_->prev_trq_cmd[i] = ((DracoCommand*)_cmd)->jtrq[i];
+    }
+  }
+  if (state_ == DRACO_STATES::STAND) {
+    double rat =
+        ((DoubleSupportStand*)state_machines_[state_])->progression_variable();
+    for (int i = 0; i < Draco::n_adof; ++i) {
+      ((DracoCommand*)_cmd)->jtrq[i] = myUtils::smoothing(
+          sp_->prev_trq_cmd[i], ((DracoCommand*)_cmd)->jtrq[i], rat);
+    }
+  }
+}
 
 void DracoControlArchitecture::getIVDCommand(void* _cmd) {
   Eigen::VectorXd tau_cmd = Eigen::VectorXd::Zero(Draco::n_adof);
