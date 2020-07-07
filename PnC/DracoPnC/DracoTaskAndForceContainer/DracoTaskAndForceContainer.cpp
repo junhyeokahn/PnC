@@ -26,8 +26,6 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
       robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, DracoBodyNode::rFootCenter);
   lfoot_center_pos_task_ = new BasicTask(
       robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, DracoBodyNode::lFootCenter);
-  // rfoot_center_pos_task_ = new Footxyz(robot_, DracoBodyNode::rFootCenter);
-  // lfoot_center_pos_task_ = new Footxyz(robot_, DracoBodyNode::lFootCenter);
   rfoot_center_ori_task_ =
       new FootLocalRyRzTask(robot_, DracoBodyNode::rFootCenter);
   lfoot_center_ori_task_ =
