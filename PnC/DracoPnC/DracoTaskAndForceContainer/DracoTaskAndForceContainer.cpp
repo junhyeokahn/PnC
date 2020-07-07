@@ -42,28 +42,37 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
 }
 
 void DracoTaskAndForceContainer::_InitializeContacts() {
-  rfoot_front_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
-  rfoot_back_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
-  lfoot_front_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);
-  lfoot_back_contact_ =
-      new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);
+  // rfoot_front_contact_ =
+  // new PointContactSpec(robot_, DracoBodyNode::rFootFront, 0.7);
+  // rfoot_back_contact_ =
+  // new PointContactSpec(robot_, DracoBodyNode::rFootBack, 0.7);
+  // lfoot_front_contact_ =
+  // new PointContactSpec(robot_, DracoBodyNode::lFootFront, 0.7);
+  // lfoot_back_contact_ =
+  // new PointContactSpec(robot_, DracoBodyNode::lFootBack, 0.7);
 
-  dim_contact_ = rfoot_front_contact_->getDim() +
-                 rfoot_back_contact_->getDim() +
-                 lfoot_front_contact_->getDim() + lfoot_back_contact_->getDim();
+  // dim_contact_ = rfoot_front_contact_->getDim() +
+  // rfoot_back_contact_->getDim() +
+  // lfoot_front_contact_->getDim() + lfoot_back_contact_->getDim();
+
+  rfoot_contact_ = new SurfaceContactSpec(robot_, DracoBodyNode::rFootCenter,
+                                          0.07, 0.01, 0.9 / sqrt(2.0));
+  lfoot_contact_ = new SurfaceContactSpec(robot_, DracoBodyNode::lFootCenter,
+                                          0.07, 0.01, 0.9 / sqrt(2.0));
+  dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
+
   max_z_ = 500.;
 
   // Set desired reaction forces
   Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
 
   // Add all contacts initially. Remove later as needed.
-  contact_list_.push_back(rfoot_front_contact_);
-  contact_list_.push_back(rfoot_back_contact_);
-  contact_list_.push_back(lfoot_front_contact_);
-  contact_list_.push_back(lfoot_back_contact_);
+  // contact_list_.push_back(rfoot_front_contact_);
+  // contact_list_.push_back(rfoot_back_contact_);
+  // contact_list_.push_back(lfoot_front_contact_);
+  // contact_list_.push_back(lfoot_back_contact_);
+  contact_list_.push_back(rfoot_contact_);
+  contact_list_.push_back(lfoot_contact_);
 }
 
 void DracoTaskAndForceContainer::_DeleteTasks() {
@@ -78,10 +87,12 @@ void DracoTaskAndForceContainer::_DeleteTasks() {
 }
 
 void DracoTaskAndForceContainer::_DeleteContacts() {
-  delete rfoot_front_contact_;
-  delete rfoot_back_contact_;
-  delete lfoot_front_contact_;
-  delete lfoot_back_contact_;
+  // delete rfoot_front_contact_;
+  // delete rfoot_back_contact_;
+  // delete lfoot_front_contact_;
+  // delete lfoot_back_contact_;
+  delete rfoot_contact_;
+  delete lfoot_contact_;
   contact_list_.clear();
 }
 
@@ -136,8 +147,10 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   lfoot_center_ori_task_->setHierarchyWeight(w_task_foot_ori_);
 
   // Set Maximum Forces
-  ((PointContactSpec*)rfoot_front_contact_)->setMaxFz(max_z_);
-  ((PointContactSpec*)rfoot_back_contact_)->setMaxFz(max_z_);
-  ((PointContactSpec*)lfoot_front_contact_)->setMaxFz(max_z_);
-  ((PointContactSpec*)lfoot_back_contact_)->setMaxFz(max_z_);
+  //((PointContactSpec*)rfoot_front_contact_)->setMaxFz(max_z_);
+  //((PointContactSpec*)rfoot_back_contact_)->setMaxFz(max_z_);
+  //((PointContactSpec*)lfoot_front_contact_)->setMaxFz(max_z_);
+  //((PointContactSpec*)lfoot_back_contact_)->setMaxFz(max_z_);
+  ((SurfaceContactSpec*)rfoot_contact_)->setMaxFz(max_z_);
+  ((SurfaceContactSpec*)lfoot_contact_)->setMaxFz(max_z_);
 }

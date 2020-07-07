@@ -49,10 +49,12 @@ class DracoStateProvider {
   Eigen::Vector3d r_vrp;
   Eigen::Vector3d r_vrp_des;
 
-  Eigen::Vector3d r_rf_front_des;
-  Eigen::Vector3d r_rf_back_des;
-  Eigen::Vector3d l_rf_front_des;
-  Eigen::Vector3d l_rf_back_des;
+  /*  Eigen::Vector3d r_rf_front_des;*/
+  // Eigen::Vector3d r_rf_back_des;
+  // Eigen::Vector3d l_rf_front_des;
+  /*Eigen::Vector3d l_rf_back_des;*/
+  Eigen::VectorXd r_rf_des;
+  Eigen::VectorXd l_rf_des;
   Eigen::VectorXd r_rf;
   Eigen::VectorXd l_rf;
 
@@ -75,10 +77,12 @@ class DracoStateProvider {
   double w_lfoot_ori;
   double w_com;
   double w_base_ori;
-  double w_rf_rffront;
-  double w_rf_rfback;
-  double w_rf_lffront;
-  double w_rf_lfback;
+  /*  double w_rf_rffront;*/
+  // double w_rf_rfback;
+  // double w_rf_lffront;
+  /*double w_rf_lfback;*/
+  double w_rfoot_fr;
+  double w_lfoot_fr;
 
   // ---------------------------------------------------------------------------
   // Variables set here

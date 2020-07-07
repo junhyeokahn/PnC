@@ -37,10 +37,12 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Contact Member variables
   // -------------------------------------------------------
-  ContactSpec* rfoot_front_contact_;
-  ContactSpec* rfoot_back_contact_;
-  ContactSpec* lfoot_front_contact_;
-  ContactSpec* lfoot_back_contact_;
+  // ContactSpec* rfoot_front_contact_;
+  // ContactSpec* rfoot_back_contact_;
+  // ContactSpec* lfoot_front_contact_;
+  // ContactSpec* lfoot_back_contact_;
+  ContactSpec* rfoot_contact_;
+  ContactSpec* lfoot_contact_;
   int dim_contact_;
   double max_z_;
   Eigen::VectorXd Fd_des_;

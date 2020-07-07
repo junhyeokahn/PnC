@@ -37,13 +37,17 @@ void DoubleSupportStand::firstVisit() {
   // =========================================================================
   // Initialize Reaction Force Ramp to Max
   // =========================================================================
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
+  /*  ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(*/
+  // 0.0, time_to_max_normal_force_);
+  // ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
+  // 0.0, time_to_max_normal_force_);
+  // ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
+  // 0.0, time_to_max_normal_force_);
+  // ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+  /*0.0, time_to_max_normal_force_);*/
+  ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(
       0.0, time_to_max_normal_force_);
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(
       0.0, time_to_max_normal_force_);
 
   // =========================================================================
@@ -81,13 +85,17 @@ void DoubleSupportStand::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Compute and update new maximum reaction forces
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+  /*  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(*/
+  // state_machine_time_);
+  // ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  // state_machine_time_);
+  // ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+  // state_machine_time_);
+  // ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  /*state_machine_time_);*/
+  ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
 
   // Compute and update new hierarchy weights

@@ -29,13 +29,17 @@ void ContactTransitionStart::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   // For all contact transitions, initially ramp up the reaction forces to max
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
+  /*  ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(*/
+  // 0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
+  // ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+  // 0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
+  // ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
+  // 0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
+  // ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
+  /*0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());*/
+  ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
-      0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
+  ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(
       0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampUpTime());
 
   // Ramp to max the contact hierarchy weight
@@ -105,13 +109,17 @@ void ContactTransitionStart::oneStep() {
   // =========================================================================
   // Compute and update new maximum reaction forces
   // =========================================================================
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+  /*  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(*/
+  // state_machine_time_);
+  // ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  // state_machine_time_);
+  // ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+  // state_machine_time_);
+  // ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  /*state_machine_time_);*/
+  ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+  ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
 
   // =========================================================================

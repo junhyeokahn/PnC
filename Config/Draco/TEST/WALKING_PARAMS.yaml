@@ -21,7 +21,7 @@ dcm_planner_parameters:
     t_contact_transition: 0.04 # seconds. The transition time used to change reaction forces and stance leg
     t_swing: 0.35 # seconds. The single support swing time.
     percentage_settle: 0.9 # percent to converge at the end of the trajectory
-    alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation    
+    alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation
 
     # Primitive Walking parameters
     nominal_footwidth: 0.35 # meters. Distance between feet
