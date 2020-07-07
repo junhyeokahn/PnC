@@ -9,6 +9,7 @@ state_stand_params:
     smoothing_duration: 1.0
     time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.7
+    #target_height: 0.8
 
 state_swing:
     swing_time_percent_early_contact_check: 0.5 # Percent of end_time to check if there are early contacts 
@@ -16,6 +17,7 @@ state_swing:
 
 dcm_planner_parameters:
     nominal_com_height: 0.7 # m from the ground
+    #nominal_com_height: 0.8 # m from the ground
 
     t_additional_init_transfer: 0.2 # seconds. The additional initial transfer time to switch the stance leg
     t_contact_transition: 0.04 # seconds. The transition time used to change reaction forces and stance leg
@@ -37,8 +39,10 @@ controller_parameters:
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
     # Regularization terms
-    lambda_qddot: 1e-4
-    lambda_Fr: 1e-8
+    #lambda_qddot: 1e-4
+    #lambda_Fr: 1e-8
+    lambda_qddot: 1e-8
+    lambda_Fr: 1e-16
     # Enable limits
     enable_torque_limits: true
 
@@ -58,8 +62,8 @@ task_parameters:
     ini_w_task_foot_pos: 0.
     ini_w_task_foot_ori: 0.
 
-    max_w_task_com: 1e-1
-    max_w_task_base_ori: 1e-1
+    max_w_task_com: 5e-2
+    max_w_task_base_ori: 5e-2
     max_w_task_foot_pos: 1.
     max_w_task_foot_ori: 1.
 
@@ -70,11 +74,12 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [20, 20, 50]
-    kd_com: [5, 5, 8]
+    kp_com: [15, 15, 100]
+    #kp_com: [0, 0, 30]
+    kd_com: [0, 0, 20]
     # Pelvis
-    kp_base_ori: [20, 20, 20]
-    kd_base_ori: [5, 5, 5]
+    kp_base_ori: [20, 20, 10]
+    kd_base_ori: [8, 8, 4]
     # Foot Linear and orientation gains
     kp_foot_pos: [200, 200, 200]
     kd_foot_pos: [20, 20, 20]
