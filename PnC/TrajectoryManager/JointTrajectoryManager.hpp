@@ -9,10 +9,6 @@ class JointTrajectoryManager : public TrajectoryManagerBase {
   JointTrajectoryManager(Task* _joint_task, RobotSystem* _robot);
   ~JointTrajectoryManager(){};
 
-  // Use current pose to set the task.
-  void useCurrent();
-  void ignoreTask();
-
   Task* joint_task_;
 
   Eigen::VectorXd joint_pos_des_;

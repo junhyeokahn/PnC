@@ -40,7 +40,7 @@ ValkyrieControlArchitecture::ValkyrieControlArchitecture(RobotSystem* _robot)
       taf_container_->lfoot_center_ori_task_, robot_);
 
   dcm_trajectory_manger_ = new DCMTrajectoryManager(
-      dcm_planner_, taf_container_->dcm_task_, taf_container_->pelvis_ori_task_,
+      dcm_planner_, taf_container_->com_task_, taf_container_->pelvis_ori_task_,
       robot_, ValkyrieBodyNode::leftCOP_Frame,
       ValkyrieBodyNode::rightCOP_Frame);
 

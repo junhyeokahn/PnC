@@ -17,7 +17,8 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
   // CoM and Pelvis Tasks
   joint_task_ =
       new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
-  dcm_task_ = new DCMTask(robot_);
+  // dcm_task_ = new DCMTask(robot_);
+  com_task_ = new CoMxyz(robot_);
   base_ori_task_ =
       new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
 
@@ -32,7 +33,8 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
       new FootLocalRyRzTask(robot_, DracoBodyNode::lFootCenter);
 
   // Add all tasks initially. Remove later as needed.
-  task_list_.push_back(dcm_task_);
+  // task_list_.push_back(dcm_task_);
+  task_list_.push_back(com_task_);
   task_list_.push_back(base_ori_task_);
 
   task_list_.push_back(rfoot_center_pos_task_);
@@ -77,7 +79,8 @@ void DracoTaskAndForceContainer::_InitializeContacts() {
 
 void DracoTaskAndForceContainer::_DeleteTasks() {
   delete joint_task_;
-  delete dcm_task_;
+  // delete dcm_task_;
+  delete com_task_;
   delete base_ori_task_;
   delete rfoot_center_pos_task_;
   delete lfoot_center_pos_task_;
@@ -131,7 +134,8 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
 
   // Set Task Gains
   joint_task_->setGain(kp_joint_, kd_joint_);
-  dcm_task_->setGain(kp_com_, kd_com_);
+  // dcm_task_->setGain(kp_com_, kd_com_);
+  com_task_->setGain(kp_com_, kd_com_);
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
   rfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   lfoot_center_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
@@ -139,7 +143,8 @@ void DracoTaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   lfoot_center_ori_task_->setGain(kp_foot_ori_, kd_foot_ori_);
 
   // Set Task Hierarchies
-  dcm_task_->setHierarchyWeight(w_task_com_);
+  // dcm_task_->setHierarchyWeight(w_task_com_);
+  com_task_->setHierarchyWeight(w_task_com_);
   base_ori_task_->setHierarchyWeight(w_task_base_ori_);
   rfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);
   rfoot_center_ori_task_->setHierarchyWeight(w_task_foot_ori_);

@@ -27,7 +27,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   joint_trajectory_manager_ =
       new JointTrajectoryManager(taf_container_->joint_task_, robot_);
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
-      taf_container_->dcm_task_, taf_container_->base_ori_task_, robot_);
+      taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
 
   // rfoot_front_max_normal_force_manager_ = new
   // MaxNormalForceTrajectoryManager(
@@ -52,12 +52,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   lfoot_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->lfoot_center_ori_task_, robot_);
   com_hierarchy_manager_ =
-      new TaskWeightTrajectoryManager(taf_container_->dcm_task_, robot_);
+      new TaskWeightTrajectoryManager(taf_container_->com_task_, robot_);
   base_ori_hierarchy_manager_ =
       new TaskWeightTrajectoryManager(taf_container_->base_ori_task_, robot_);
 
   dcm_trajectory_manager_ = new DCMTrajectoryManager(
-      dcm_planner_, taf_container_->dcm_task_, taf_container_->base_ori_task_,
+      dcm_planner_, taf_container_->com_task_, taf_container_->base_ori_task_,
       robot_, DracoBodyNode::lFootCenter, DracoBodyNode::rFootCenter);
 
   // Initialize states: add all states to the state machine map

@@ -15,7 +15,6 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
                                         const Eigen::VectorXd& _target_com_pos);
   void updateFloatingBaseDesired(const double current_time);
   void paramInitialization(const YAML::Node& node){};
-  void ignoreTask();
 
   Task* com_task_;
   Task* base_ori_task_;

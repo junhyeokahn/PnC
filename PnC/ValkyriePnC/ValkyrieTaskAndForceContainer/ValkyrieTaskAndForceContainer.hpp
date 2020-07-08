@@ -26,7 +26,8 @@ class ValkyrieTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Task Member variables
   // -------------------------------------------------------
-  Task* dcm_task_;
+  // Task* dcm_task_;
+  Task* com_task_;
   Task* pelvis_ori_task_;
   Task* ang_momentum_task_;
   Task* upper_body_task_;

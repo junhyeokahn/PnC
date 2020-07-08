@@ -103,8 +103,8 @@ void DoubleSupportStand::_taskUpdate() {
   dcm_vel_des_[2] = sp_->com_vel_des[2];
   Eigen::VectorXd dcm_acc_des_ = Eigen::VectorXd::Zero(3);
   dcm_acc_des_[2] = des_com_acc_[2];
-  taf_container_->dcm_task_->updateDesired(dcm_pos_des_, dcm_vel_des_,
-                                           dcm_acc_des_);
+  taf_container_->com_task_->updateDesired(sp_->com_pos_des, sp_->com_vel_des,
+                                           des_com_acc_);
 
   // =========================================================================
   // Set Foot Motion Tasks

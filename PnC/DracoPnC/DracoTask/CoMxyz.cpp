@@ -16,15 +16,15 @@ CoMxyz::~CoMxyz() {}
 bool CoMxyz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
                             const Eigen::VectorXd& _vel_des,
                             const Eigen::VectorXd& _acc_des) {
+  Eigen::Vector3d com_pos = robot_->getCoMPosition();
   for (int i = 0; i < 3; ++i) {
-    pos_err[i] = _pos_des[i] - robot_->getCoMPosition()[i];
+    pos_err[i] = _pos_des[i] - com_pos[i];
     vel_des[i] = _vel_des[i];
     acc_des[i] = _acc_des[i];
   }
-  Eigen::Vector3d com_vel_act = robot_->getCoMVelocity();
   for (int i(0); i < 3; ++i) {
     op_cmd[i] = acc_des[i] + kp_[i] * pos_err[i] +
-                kd_[i] * (vel_des[i] - com_vel_act[i]);
+                kd_[i] * (vel_des[i] - sp_->est_com_vel[i]);
   }
 
   return true;
