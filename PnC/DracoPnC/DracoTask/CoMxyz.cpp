@@ -45,6 +45,8 @@ bool CoMxyz::_UpdateTaskJacobian() {
 }
 
 bool CoMxyz::_UpdateTaskJDotQdot() {
-  JtDotQdot_.setZero();
+  JtDotQdot_ = robot_->getCoMJacobianDot() * robot_->getQdot();
+
+  // JtDotQdot_.setZero();
   return true;
 }

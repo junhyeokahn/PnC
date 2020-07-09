@@ -77,6 +77,8 @@ class DracoInterface : public EnvInterface {
   Eigen::VectorXd data_motor_current_;
   Eigen::VectorXd rfoot_ati_;
   Eigen::VectorXd lfoot_ati_;
+  // Eigen::VectorXd imu_acc_;
+  // Eigen::VectorXd imu_angvel_;
 
   // safety
   Eigen::VectorXd jpos_max_;

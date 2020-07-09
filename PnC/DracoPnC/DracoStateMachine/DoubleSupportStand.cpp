@@ -53,18 +53,12 @@ void DoubleSupportStand::firstVisit() {
   // =========================================================================
   // Initialize Task Gain Ramp to Max
   // =========================================================================
-  ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->com_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
-  ctrl_arch_->base_ori_hierarchy_manager_->initializeRampToMax(
-      0.0, time_to_max_normal_force_);
+  ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->com_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->base_ori_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
 }
 
 void DoubleSupportStand::_taskUpdate() {

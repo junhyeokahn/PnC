@@ -2,9 +2,10 @@
 
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
+#include <PnC/DracoPnC/DracoTask/CoMz.hpp>
 #include <PnC/DracoPnC/DracoTask/DCMTask.hpp>
 #include <PnC/DracoPnC/DracoTask/FootLocalRyRzTask.hpp>
-#include <PnC/DracoPnC/DracoTask/Footxyz.hpp>
+#include <PnC/DracoPnC/DracoTask/TorsoRxRy.hpp>
 #include <PnC/TaskAndForceContainer.hpp>
 #include <PnC/WBC/BasicContactSpec.hpp>
 #include <PnC/WBC/BasicTask.hpp>

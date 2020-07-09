@@ -91,6 +91,7 @@ class RobotSystem {
       dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
   Eigen::MatrixXd getCoMJacobian(
       dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
+  Eigen::MatrixXd getCoMJacobianDot();
   void updateSystem(const Eigen::VectorXd& q_, const Eigen::VectorXd& qdot_,
                     bool isUpdatingCentroid_ = true);
   void updateCentroidFrame();

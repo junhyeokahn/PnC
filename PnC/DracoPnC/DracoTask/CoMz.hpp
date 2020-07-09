@@ -5,10 +5,10 @@
 class RobotSystem;
 class DracoStateProvider;
 
-class CoMxyz : public Task {
+class CoMz : public Task {
  public:
-  CoMxyz(RobotSystem*);
-  virtual ~CoMxyz();
+  CoMz(RobotSystem*);
+  virtual ~CoMz();
 
  protected:
   virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,

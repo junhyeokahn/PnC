@@ -38,9 +38,8 @@ foot_trajectory_parameters:
 controller_parameters:
     # Contact weight relative to tasks
     w_contact_weight: 1e-3
+    #w_contact_weight: 1e-16
     # Regularization terms
-    #lambda_qddot: 1e-4
-    #lambda_Fr: 1e-8
     lambda_qddot: 1e-8
     lambda_Fr: 1e-16
     # Enable limits
@@ -74,16 +73,20 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [200, 200, 100]
-    kd_com: [40, 40, 20]
+    kp_com: [7, 7, 100]
+    kd_com: [0, 0, 20]
+    #kp_com: [100]
+    #kd_com: [20]
     # Pelvis
-    kp_base_ori: [20, 20, 10]
-    kd_base_ori: [8, 8, 4]
+    #kp_base_ori: [20, 20, 10]
+    #kd_base_ori: [8, 8, 4]
+    kp_base_ori: [20, 20]
+    kd_base_ori: [8, 8]
     # Foot Linear and orientation gains
     kp_foot_pos: [200, 200, 200]
     kd_foot_pos: [20, 20, 20]
     kp_foot_ori: [200, 200]
     kd_foot_ori: [20, 20]
     # Joint
-    kp_joint: [100. , 100. , 100. , 100. , 10. , 100. , 100. , 100. , 100. , 10.]
-    kd_joint: [20.  , 20.  , 20.  , 20.  , 20. , 1.   , 20.  , 20.  , 20.  , 1.]
+    kp_joint: [100. , 100. , 100. , 100. , 50. , 100. , 100. , 100. , 100. , 50.]
+    kd_joint: [20.  , 20.  , 20.  , 20.  , 10. , 20.  , 20.  , 20.  , 20.  , 10.]

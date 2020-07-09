@@ -40,6 +40,8 @@ DracoInterface::DracoInterface() : EnvInterface() {
   data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   rfoot_ati_ = Eigen::VectorXd::Zero(6);
   lfoot_ati_ = Eigen::VectorXd::Zero(6);
+  // imu_acc_ = Eigen::VectorXd::Zero(3);
+  // imu_angvel_ = Eigen::VectorXd::Zero(3);
 
   stop_test_ = false;
 
@@ -62,6 +64,10 @@ DracoInterface::DracoInterface() : EnvInterface() {
                                               6);
   DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
                                               6);
+  // DataManager::GetDataManager()->RegisterData(&imu_acc_, VECT, "imu_acc", 3);
+  // DataManager::GetDataManager()->RegisterData(&imu_angvel_, VECT,
+  // "imu_angvel",
+  // 3);
 
   _ParameterSetting();
 
@@ -103,6 +109,8 @@ void DracoInterface::getCommand(void* _data, void* _command) {
   }
   rfoot_ati_ = data->rf_wrench;
   lfoot_ati_ = data->lf_wrench;
+  // imu_acc_ = data->imu_acc;
+  // imu_angvel_ = data->imu_ang_vel;
 
   running_time_ = (double)(count_)*DracoAux::servo_rate;
   sp_->curr_time = running_time_;
@@ -124,19 +132,19 @@ bool DracoInterface::_UpdateTestCommand(DracoCommand* cmd) {
 
     // Velocity limit
     if (cmd->qdot[i] > jvel_max_[i]) {
-      over_limit = true;
+      // over_limit = true;
     } else if (cmd->qdot[i] < jvel_min_[i]) {
-      over_limit = true;
+      // over_limit = true;
     } else
       cmd_jvel_[i] = cmd->qdot[i];
 
     // Torque limit
     if (cmd->jtrq[i] > jtrq_max_[i]) {
-      over_limit = true;
+      // over_limit = true;
       cmd->jtrq[i] = jtrq_max_[i];
       cmd_jtrq_[i] = cmd->jtrq[i];
     } else if (cmd->jtrq[i] < jtrq_min_[i]) {
-      over_limit = true;
+      // over_limit = true;
       cmd->jtrq[i] = jtrq_min_[i];
       cmd_jtrq_[i] = cmd->jtrq[i];
     } else {

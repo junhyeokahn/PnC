@@ -90,12 +90,16 @@ for i in range(5):
     plot_phase(axes[i,1])
 fig.suptitle("Joint Trq Des")
 
-fig, axes = plt.subplots(5, 2)
-for i in range(5):
+fig, axes = plt.subplots(6, 3)
+for i in range(6):
     axes[i,0].plot(t, qddot_des[:,i], color='r', linestyle='solid', linewidth=3)
-    axes[i,1].plot(t, qddot_des[:,i+5], color='r', linestyle='solid', linewidth=3)
+    plot_phase(axes[i,0])
     axes[i,0].grid(True)
+for i in range(5):
+    axes[i,1].plot(t, qddot_des[:,i+6], color='r', linestyle='solid', linewidth=3)
+    axes[i,2].plot(t, qddot_des[:,i+11], color='r', linestyle='solid', linewidth=3)
     axes[i,1].grid(True)
+    axes[i,2].grid(True)
     plot_phase(axes[i,0])
     plot_phase(axes[i,1])
 fig.suptitle("Joint Acc Des")

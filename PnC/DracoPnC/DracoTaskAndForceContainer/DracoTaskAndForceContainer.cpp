@@ -19,8 +19,10 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
       new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
   // dcm_task_ = new DCMTask(robot_);
   com_task_ = new CoMxyz(robot_);
-  base_ori_task_ =
-      new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+  // com_task_ = new CoMz(robot_);
+  // base_ori_task_ =
+  // new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+  base_ori_task_ = new TorsoRxRy(robot_, DracoBodyNode::Torso);
 
   // Set Foot Motion Tasks
   rfoot_center_pos_task_ = new BasicTask(
@@ -58,9 +60,9 @@ void DracoTaskAndForceContainer::_InitializeContacts() {
   // lfoot_front_contact_->getDim() + lfoot_back_contact_->getDim();
 
   rfoot_contact_ = new SurfaceContactSpec(robot_, DracoBodyNode::rFootCenter,
-                                          0.07, 0.01, 0.9 / sqrt(2.0));
+                                          0.07, 0.01, 0.3 / sqrt(2.0));
   lfoot_contact_ = new SurfaceContactSpec(robot_, DracoBodyNode::lFootCenter,
-                                          0.07, 0.01, 0.9 / sqrt(2.0));
+                                          0.07, 0.01, 0.3 / sqrt(2.0));
   dim_contact_ = rfoot_contact_->getDim() + lfoot_contact_->getDim();
 
   max_z_ = 500.;

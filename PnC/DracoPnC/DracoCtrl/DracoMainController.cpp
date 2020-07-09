@@ -146,7 +146,9 @@ void DracoMainController::initializeJointIntegrator() {
                                       jpos_ini);
 }
 
-void DracoMainController::firstVisit() { initializeJointIntegrator(); }
+void DracoMainController::firstVisit() {
+  // initializeJointIntegrator();
+}
 
 void DracoMainController::ctrlInitialization(const YAML::Node& node) {
   // WBC Defaults

@@ -11,8 +11,7 @@ file_path = os.getcwd() + "/../../../ExperimentDataCheck/"
 
 st_idx_offset = 5
 end_idx_offset = 10
-file_name = ['debug_wbc_rf', 'debug_wbc_task_weight', 'debug_wbc_uf_ieq', \
-        'debug_wbc_qddot', 'debug_wbc_tau_cmd', 'debug_wbc_task_0', \
+file_name = ['debug_wbc_rf', 'debug_wbc_qddot', 'debug_wbc_tau_cmd', 'debug_wbc_task_0', \
         'debug_wbc_task_1', 'debug_wbc_task_2', 'debug_wbc_task_3',
         'debug_wbc_task_4', 'debug_wbc_task_5']
 data = list()
@@ -24,10 +23,17 @@ for i in file_name:
 ## -----------------------------------------------------------------------------
 
 for j in range(len(data)):
-    fig, axes = plt.subplots(data[j].shape[1])
-    for i in range(data[j].shape[1]):
-        axes[i].plot(data[j][:,i], color='k', linewidth=3)
-        axes[i].grid(True)
+    if len(data[j].shape) == 2:
+        n = data[j].shape[1]
+        fig, axes = plt.subplots(n)
+        for i in range(n):
+            axes[i].plot(data[j][:,i], color='k', linewidth=3)
+            axes[i].grid(True)
+    else:
+        n = 1
+        fig, ax = plt.subplots()
+        ax.plot(data[j], color='k', linewidth=3)
+        ax.grid(True)
     fig.suptitle(file_name[j])
 
 plt.show()

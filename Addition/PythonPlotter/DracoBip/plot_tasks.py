@@ -17,8 +17,8 @@ t = t[st_idx:end_idx]
 
 task_names = ['q_task', 'qdot_task', 'rfoot_pos', 'rfoot_vel', 'rfoot_quat', \
         'rfoot_so3', 'lfoot_pos', 'lfoot_vel', 'lfoot_quat', 'lfoot_so3', \
-        'com_pos', 'com_vel', 'dcm', 'dcm_vel', 'base_quat', 'base_ang_vel']
-task_labels = ['joint', 'rfoot lin', 'rfoot ori', 'lfoot lin', 'lfoot ori', 'com lin', 'dcm', 'base ori']
+        'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
+task_labels = ['joint', 'rfoot lin', 'rfoot ori', 'lfoot lin', 'lfoot ori', 'com lin', 'base ori']
 tasks = dict()
 tasks_des = dict()
 for i, label in enumerate(task_labels):
