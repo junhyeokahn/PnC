@@ -20,9 +20,9 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
   // dcm_task_ = new DCMTask(robot_);
   com_task_ = new CoMxyz(robot_);
   // com_task_ = new CoMz(robot_);
-  // base_ori_task_ =
-  // new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
-  base_ori_task_ = new TorsoRxRy(robot_, DracoBodyNode::Torso);
+  base_ori_task_ =
+      new BasicTask(robot_, BasicTaskType::LINKORI, 3, DracoBodyNode::Torso);
+  // base_ori_task_ = new TorsoRxRy(robot_, DracoBodyNode::Torso);
 
   // Set Foot Motion Tasks
   rfoot_center_pos_task_ = new BasicTask(
