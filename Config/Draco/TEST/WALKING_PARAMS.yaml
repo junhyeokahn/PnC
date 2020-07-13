@@ -73,10 +73,10 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [13, 13, 80]
-    kd_com: [2, 2, 10]
-    #kp_com: [100]
-    #kd_com: [20]
+    #kp_com: [13, 13, 80]
+    #kd_com: [2, 2, 10]
+    kp_com: [53, 53, 80]
+    kd_com: [5, 5, 10]
     # Pelvis
     kp_base_ori: [10, 10, 10]
     kd_base_ori: [4, 4, 4]

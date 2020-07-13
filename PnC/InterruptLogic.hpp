@@ -22,6 +22,8 @@ class InterruptLogic {
     b_interrupt_button_x = false;
     b_interrupt_button_j = false;
     b_interrupt_button_k = false;
+    b_interrupt_button_h = false;
+    b_interrupt_button_l = false;
   }
 
   bool b_interrupt_button_p;
@@ -36,4 +38,6 @@ class InterruptLogic {
   bool b_interrupt_button_x;
   bool b_interrupt_button_j;
   bool b_interrupt_button_k;
+  bool b_interrupt_button_h;
+  bool b_interrupt_button_l;
 };

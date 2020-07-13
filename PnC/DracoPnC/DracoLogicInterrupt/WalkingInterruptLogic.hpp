@@ -4,6 +4,7 @@
 
 // Forward Declare Control Architecture
 class DracoControlArchitecture;
+class DracoStateProvider;
 
 class WalkingInterruptLogic : public InterruptLogic {
  public:
@@ -13,4 +14,5 @@ class WalkingInterruptLogic : public InterruptLogic {
   void processInterrupts();
 
   DracoControlArchitecture* ctrl_arch_;
+  DracoStateProvider* sp_;
 };

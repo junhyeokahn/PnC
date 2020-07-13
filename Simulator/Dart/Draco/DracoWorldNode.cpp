@@ -72,6 +72,10 @@ void DracoWorldNode::customPreStep() {
   if (b_button_q) interface_->interrupt->b_interrupt_button_q = true;
   if (b_button_e) interface_->interrupt->b_interrupt_button_e = true;
   if (b_button_x) interface_->interrupt->b_interrupt_button_x = true;
+  if (b_button_j) interface_->interrupt->b_interrupt_button_j = true;
+  if (b_button_k) interface_->interrupt->b_interrupt_button_k = true;
+  if (b_button_h) interface_->interrupt->b_interrupt_button_h = true;
+  if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;
 
   interface_->getCommand(sensor_data_, command_);
 

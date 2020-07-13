@@ -32,7 +32,8 @@ void DoubleSupportStand::firstVisit() {
   Eigen::VectorXd target_com_pos = (lfoot_pos + rfoot_pos) / 2.0;
   target_com_pos[2] = target_height_;
   ctrl_arch_->floating_base_lifting_up_manager_
-      ->initializeFloatingBaseTrajectory(0., end_time_, target_com_pos);
+      ->initializeFloatingBaseTrajectory(sp_->curr_time, end_time_,
+                                         target_com_pos);
 
   // =========================================================================
   // Initialize Reaction Force Ramp to Max
@@ -66,7 +67,7 @@ void DoubleSupportStand::_taskUpdate() {
   // Floating Base
   // =========================================================================
   ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseDesired(
-      state_machine_time_);
+      sp_->curr_time);
 
   // =========================================================================
   // Foot

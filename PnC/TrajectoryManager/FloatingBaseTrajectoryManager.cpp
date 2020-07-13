@@ -24,6 +24,8 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   ini_com_pos_ = Eigen::VectorXd::Zero(3);
   ini_base_quat_ = Eigen::VectorXd::Zero(4);
   target_com_pos_ = Eigen::VectorXd::Zero(3);
+
+  is_swaying = false;
 }
 
 void FloatingBaseTrajectoryManager::updateDesired() {
@@ -54,15 +56,34 @@ void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
   target_com_pos_ = _target_com_pos;
 }
 
+void FloatingBaseTrajectoryManager::initializeCoMSwaying(double _start_time,
+                                                         double _duration,
+                                                         Eigen::VectorXd _dis) {
+  is_swaying = true;
+  start_time_ = _start_time;
+  duration_ = _duration;
+  // ini_com_pos_ = ((Eigen::VectorXd)robot_->getCoMPosition());
+  ini_com_pos_ = target_com_pos_;
+  base_ori_quat_des_ =
+      Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
+  // ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
+  // base_ori_quat_des_.y(), base_ori_quat_des_.z();
+  ini_base_quat_ << 1., 0., 0., 0.;
+  target_com_pos_ = ini_com_pos_ + _dis;
+}
+
 void FloatingBaseTrajectoryManager::updateFloatingBaseDesired(
     const double current_time) {
   for (int i = 0; i < 3; ++i) {
-    com_pos_des_[i] = myUtils::smooth_changing(
-        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
-    com_vel_des_[i] = myUtils::smooth_changing_vel(
-        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
-    com_acc_des_[i] = myUtils::smooth_changing_acc(
-        ini_com_pos_[i], target_com_pos_[i], duration_, current_time);
+    com_pos_des_[i] =
+        myUtils::smooth_changing(ini_com_pos_[i], target_com_pos_[i], duration_,
+                                 current_time - start_time_);
+    com_vel_des_[i] =
+        myUtils::smooth_changing_vel(ini_com_pos_[i], target_com_pos_[i],
+                                     duration_, current_time - start_time_);
+    com_acc_des_[i] =
+        myUtils::smooth_changing_acc(ini_com_pos_[i], target_com_pos_[i],
+                                     duration_, current_time - start_time_);
   }
 
   base_ori_des_ = ini_base_quat_;

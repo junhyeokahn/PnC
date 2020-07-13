@@ -24,12 +24,11 @@ class ControlArchitecture {
 
   int getState() { return state_; }
   int getPrevState() { return prev_state_; }
+  RobotSystem* robot_;
 
   std::map<StateIdentifier, StateMachine*> state_machines_;
 
  protected:
   int state_;
   int prev_state_;
-
-  RobotSystem* robot_;
 };

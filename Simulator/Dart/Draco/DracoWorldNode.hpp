@@ -54,6 +54,10 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
   bool b_button_q;
   bool b_button_e;
   bool b_button_x;
+  bool b_button_j;
+  bool b_button_k;
+  bool b_button_h;
+  bool b_button_l;
 
   void enableButtonPFlag() { b_button_p = true; }
   void enableButtonRFlag() { b_button_r = true; }
@@ -64,6 +68,10 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
   void enableButtonQFlag() { b_button_q = true; }
   void enableButtonEFlag() { b_button_e = true; }
   void enableButtonXFlag() { b_button_x = true; }
+  void enableButtonJFlag() { b_button_j = true; }
+  void enableButtonKFlag() { b_button_k = true; }
+  void enableButtonHFlag() { b_button_h = true; }
+  void enableButtonLFlag() { b_button_l = true; }
 
   void resetButtonFlags() {
     b_button_p = false;
@@ -75,5 +83,9 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     b_button_q = false;
     b_button_e = false;
     b_button_x = false;
+    b_button_j = false;
+    b_button_k = false;
+    b_button_h = false;
+    b_button_l = false;
   }
 };
