@@ -15,6 +15,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
                                         const Eigen::VectorXd& _target_com_pos);
   void initializeCoMSwaying(double _start_time, double _duration,
                             Eigen::VectorXd _dis);
+  void initializeCoMSinusoid(double _start_time, double _amp, double _freq);
   void updateFloatingBaseDesired(const double current_time);
   void paramInitialization(const YAML::Node& node){};
 
@@ -44,4 +45,8 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd target_com_pos_;
   int base_id_;
   bool is_swaying;
+  bool is_sinusoid;
+  Eigen::VectorXd amp;
+  Eigen::VectorXd freq;
+  Eigen::VectorXd mid_point;
 };

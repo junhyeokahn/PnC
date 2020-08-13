@@ -154,12 +154,16 @@ void DracoControlArchitecture::getCommand(void* _command) {
     getIVDCommand(_command);
   } else {
     if (state_ == DRACO_STATES::BALANCE &&
-        floating_base_lifting_up_manager_->is_swaying) {
+        (floating_base_lifting_up_manager_->is_swaying ||
+         floating_base_lifting_up_manager_->is_sinusoid)) {
       floating_base_lifting_up_manager_->updateFloatingBaseDesired(
           sp_->curr_time);
-      if (sp_->curr_time >= floating_base_lifting_up_manager_->start_time_ +
-                                floating_base_lifting_up_manager_->duration_) {
+      if ((sp_->curr_time >=
+           floating_base_lifting_up_manager_->start_time_ +
+               floating_base_lifting_up_manager_->duration_) &&
+          (!floating_base_lifting_up_manager_->is_sinusoid)) {
         floating_base_lifting_up_manager_->is_swaying = false;
+        std::cout << "Swaying Done" << std::endl;
       }
     }
     main_controller_->getCommand(_command);

@@ -15,4 +15,6 @@ class WalkingInterruptLogic : public InterruptLogic {
 
   DracoControlArchitecture* ctrl_arch_;
   DracoStateProvider* sp_;
+
+  double swaying_dis_;
 };

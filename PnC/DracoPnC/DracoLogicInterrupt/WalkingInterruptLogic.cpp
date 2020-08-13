@@ -7,6 +7,7 @@ WalkingInterruptLogic::WalkingInterruptLogic(
   myUtils::pretty_constructor(1, "Draco Walking Interrupt Logic");
   ctrl_arch_ = _ctrl_arch;
   sp_ = DracoStateProvider::getStateProvider(ctrl_arch_->robot_);
+  swaying_dis_ = 0.05;
 }
 
 WalkingInterruptLogic::~WalkingInterruptLogic() {}
@@ -15,6 +16,16 @@ WalkingInterruptLogic::~WalkingInterruptLogic() {}
 void WalkingInterruptLogic::processInterrupts() {
   if (b_interrupt_button_p) {
     std::cout << "[Walking Interrupt Logic] button P pressed" << std::endl;
+    std::cout << "---------                          ---------" << std::endl;
+    std::cout << "---------     Swing CoM     ---------" << std::endl;
+    if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
+      double amp(0.02);
+      double freq(0.5);
+      ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSinusoid(
+          sp_->curr_time, amp, freq);
+    } else {
+      // Do Nothing
+    }
   }
 
   if (b_interrupt_button_r) {
@@ -129,7 +140,7 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "---------     Raise CoM     ---------" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
       Eigen::VectorXd dis = Eigen::VectorXd::Zero(3);
-      dis[2] = 0.02;
+      dis[2] = swaying_dis_;
       ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSwaying(
           sp_->curr_time, 4.0, dis);
     } else {
@@ -143,7 +154,7 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "---------     Lowering CoM     ---------" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
       Eigen::VectorXd dis = Eigen::VectorXd::Zero(3);
-      dis[2] = -0.02;
+      dis[2] = -swaying_dis_;
       ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSwaying(
           sp_->curr_time, 4.0, dis);
     } else {
@@ -157,7 +168,7 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "---------     Move CoM Left     ---------" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
       Eigen::VectorXd dis = Eigen::VectorXd::Zero(3);
-      dis[1] = 0.02;
+      dis[1] = swaying_dis_;
       ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSwaying(
           sp_->curr_time, 4.0, dis);
     } else {
@@ -171,7 +182,7 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "---------     Move CoM Right     ---------" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
       Eigen::VectorXd dis = Eigen::VectorXd::Zero(3);
-      dis[1] = -0.02;
+      dis[1] = -swaying_dis_;
       ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSwaying(
           sp_->curr_time, 4.0, dis);
     } else {
