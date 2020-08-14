@@ -1,7 +1,7 @@
 #include <PnC/WBC/JointIntegrator.hpp>
 
 JointIntegrator::JointIntegrator(const int num_joints_in, const double dt_in) {
-  myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
+  myUtils::pretty_constructor(3, "WBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);
@@ -35,7 +35,10 @@ void JointIntegrator::integrate(const Eigen::VectorXd acc_in,
   // Use IHMC's integration scheme
   // Velocity Integration
   // Decay desired velocity to 0.0
-  vel_ = (1.0 - alpha_vel_) * vel_;
+  // default alpha_vel_=0.0124
+  // default alpha_pos_=0.006
+  // vel_ = (1.0 - alpha_vel_) * vel_;
+  vel_ = (1.0 - alpha_vel_) * vel_ + alpha_vel_ * vel_in;
   // Integrate Joint Acceleration
   vel_ += (acc_in * dt_);
   // Clamp and Store Value

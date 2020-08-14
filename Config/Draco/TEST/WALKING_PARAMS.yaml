@@ -75,8 +75,8 @@ task_parameters:
     # COM
     #kp_com: [13, 40, 80] ## Max gain
     #kd_com: [2, 3, 10]
-    #kp_com: [13, 40, 80] ## Exp gain
-    #kd_com: [1, 1, 10]
+    #kp_com: [13, 40, 40] ## Exp gain
+    #kd_com: [1, 2, 3]
     kp_com: [100, 100, 100] ## Works in sim
     kd_com: [15, 15, 15]
     # Pelvis

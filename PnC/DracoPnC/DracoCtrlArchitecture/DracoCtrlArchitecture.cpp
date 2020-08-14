@@ -139,13 +139,14 @@ void DracoControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
 
-  static bool b_integrator_init = true;
-  if ((prev_state_ == DRACO_STATES::STAND || state_ == DRACO_STATES::BALANCE) &&
-      b_integrator_init) {
-    std::cout << "[Joint Integrator] Start" << std::endl;
-    main_controller_->initializeJointIntegrator();
-    b_integrator_init = false;
-  }
+  // static bool b_integrator_init = true;
+  // if ((prev_state_ == DRACO_STATES::STAND || state_ == DRACO_STATES::BALANCE)
+  // &&
+  // b_integrator_init) {
+  // std::cout << "[Joint Integrator] Start" << std::endl;
+  // main_controller_->initializeJointIntegrator();
+  // b_integrator_init = false;
+  //}
 
   // Update State Machine
   state_machines_[state_]->oneStep();
