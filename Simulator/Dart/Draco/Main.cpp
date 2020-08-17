@@ -101,6 +101,18 @@ void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
   }
 }
 
+void setDampingCoef(dart::dynamics::SkeletonPtr robot) {
+  for (int i = 6; i < robot->getNumDofs(); ++i) {
+    dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+    std::cout << i << "th" << std::endl;
+    std::cout << dof->getName() << std::endl;
+    std::cout << "child body node name : " << dof->getChildBodyNode()->getName()
+              << std::endl;
+    std::cout << dof->getCoulombFriction() << std::endl;
+    std::cout << dof->getDampingCoefficient() << std::endl;
+  }
+}
+
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
   // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
   // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
@@ -244,9 +256,23 @@ int main(int argc, char** argv) {
   robot->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
   robot->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
 
+  robot->getBodyNode("rFootFront")->setFrictionCoeff(friction);
+  robot->getBodyNode("rFootBack")->setFrictionCoeff(friction);
+  robot->getBodyNode("lFootFront")->setFrictionCoeff(friction);
+  robot->getBodyNode("lFootBack")->setFrictionCoeff(friction);
+  robot->getBodyNode("rFootFront")->setRestitutionCoeff(restit);
+  robot->getBodyNode("rFootBack")->setRestitutionCoeff(restit);
+  robot->getBodyNode("lFootFront")->setRestitutionCoeff(restit);
+  robot->getBodyNode("lFootBack")->setRestitutionCoeff(restit);
+
   Eigen::Vector3d gravity(0.0, 0.0, -9.81);
   world->setGravity(gravity);
   world->setTimeStep(servo_rate);
+
+  // =========================================================================
+  // Set Damping
+  // =========================================================================
+  // setDampingCoef(robot);
 
   // =========================================================================
   // Display Joints Frame

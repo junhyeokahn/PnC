@@ -54,7 +54,7 @@ void DracoWorldNode::customPreStep() {
   sensor_data_->qdot = skel_->getVelocities().tail(10);
   sensor_data_->jtrq = skel_->getForces().tail(10);
 
-  get_force_torque_data_();
+  // get_force_torque_data_(); // TODO
   get_imu_data_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc,
                 sensor_data_->imu_mag);
   check_foot_contact_by_pos_(sensor_data_->rfoot_contact,
@@ -203,10 +203,8 @@ void DracoWorldNode::hold_rot_() {
 void DracoWorldNode::hold_xy_() {
   static double des_x = (skel_->getPositions())[0];
   static double des_y = (skel_->getPositions())[1];
-  static double des_z = (skel_->getPositions())[2];
   static double des_xdot(0.);
   static double des_ydot(0.);
-  static double des_zdot(0.);
 
   Eigen::VectorXd q = skel_->getPositions();
   Eigen::VectorXd v = skel_->getVelocities();
@@ -216,7 +214,6 @@ void DracoWorldNode::hold_xy_() {
 
   trq_cmd_[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);
   trq_cmd_[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
-  // trq_cmd_[2] = kp * (des_z - q[2]) + kd * (des_zdot - v[2]);
 }
 
 void DracoWorldNode::get_force_torque_data_() {

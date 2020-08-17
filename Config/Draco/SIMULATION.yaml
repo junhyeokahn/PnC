@@ -1,10 +1,8 @@
 is_record: false
 servo_rate: 0.001 # !!this should be match with controller servo rate!!
 num_steps_per_cycle: 30
-#hanging_height: 0.83
-#initial_configuration: [-0., -0.03, -0.4, 1.5, 0.75, 0., 0.03, -0.4, 1.5, 0.75]
 hanging_height: 0.8929
-initial_configuration: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+initial_configuration: [0., 0., -0.87, 1.4565, 1.0, 0., 0, -0.87, 1.4565, 1.0]
 display_joint_frame: false
 joint_limit_enforced: true
 release_time: 6.0
