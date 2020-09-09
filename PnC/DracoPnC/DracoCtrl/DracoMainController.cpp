@@ -40,6 +40,11 @@ DracoMainController::~DracoMainController() {
 void DracoMainController::_PreProcessing_Command() {
   // Update Dynamic Terms
   A_ = robot_->getMassMatrix();
+  A_rotor_ = A_;
+  for (int i = 0; i < Draco::n_adof; ++i) {
+    A_rotor_(i + Draco::n_vdof, i + Draco::n_vdof) += sp_->rotor_inertia[i];
+  }
+  Ainv_rotor_ = A_rotor_.inverse();
   Ainv_ = robot_->getInvMassMatrix();
   grav_ = robot_->getGravity();
   coriolis_ = robot_->getCoriolis();
@@ -97,6 +102,7 @@ void DracoMainController::getCommand(void* _cmd) {
 
   // Update QP and solve
   wbc_->updateSetting(A_, Ainv_, coriolis_, grav_);
+  // wbc_->updateSetting(A_rotor_, Ainv_rotor_, coriolis_, grav_);  // TODO
   wbc_->solve(task_list_, contact_list_, Fd_des_, tau_cmd_, qddot_cmd_);
 
   // Get Results

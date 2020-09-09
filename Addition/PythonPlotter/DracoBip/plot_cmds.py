@@ -100,8 +100,8 @@ for i in range(5):
     axes[i,2].plot(t, qddot_des[:,i+11], color='r', linestyle='solid', linewidth=3)
     axes[i,1].grid(True)
     axes[i,2].grid(True)
-    plot_phase(axes[i,0])
     plot_phase(axes[i,1])
+    plot_phase(axes[i,2])
 fig.suptitle("Joint Acc Des")
 
 plt.show()

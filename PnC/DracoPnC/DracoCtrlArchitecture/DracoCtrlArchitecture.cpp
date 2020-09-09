@@ -181,6 +181,13 @@ void DracoControlArchitecture::getCommand(void* _command) {
     state_ = state_machines_[state_]->getNextState();
     b_state_first_visit_ = true;
   }
+  // TEST : Foot damping
+  if (state_ != DRACO_STATES::INITIALIZE) {
+    //((DracoCommand*)_command)->qdot[4] = 0.;
+    //((DracoCommand*)_command)->qdot[9] = 0.;
+    //((DracoCommand*)_command)->qdot = Eigen::VectorXd::Zero(10);
+  }
+  // TEST END
 };
 
 void DracoControlArchitecture::smoothing_torque(void* _cmd) {

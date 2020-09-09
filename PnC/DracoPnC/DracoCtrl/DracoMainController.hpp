@@ -60,6 +60,8 @@ class DracoMainController {
 
   Eigen::MatrixXd A_;
   Eigen::MatrixXd Ainv_;
+  Eigen::MatrixXd A_rotor_;
+  Eigen::MatrixXd Ainv_rotor_;
   Eigen::MatrixXd grav_;
   Eigen::MatrixXd coriolis_;
   std::vector<Task*> task_list_;

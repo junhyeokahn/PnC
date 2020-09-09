@@ -106,6 +106,14 @@ void DracoWorldNode::customPreStep() {
   // std::cout << skel_->getPositions().transpose() << std::endl;
 
   // myUtils::pretty_print(trq_cmd_, std::cout, "torques");
+  //
+
+  // TEST
+  // if (t_ > 6. && t_ < 10.) {
+  // std::cout << "giving dist" << std::endl;
+  // trq_cmd_[1] = -10.;
+  //}
+  // TEST
 
   skel_->setForces(trq_cmd_);
 

@@ -27,13 +27,17 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem* robot) {
   prev_qdot_ = curr_qdot_;
   prev_body_euler_zyx_dot_ = global_body_euler_zyx_dot_;
 
-  joint_velocity_filter_freq_ = 200.0;    // Hz
-  angular_velocity_filter_freq_ = 200.0;  // Hz
+  joint_velocity_filter_freq_ = 100.0;    // Hz
+  angular_velocity_filter_freq_ = 100.0;  // Hz
 
   ori_est_ = new BasicAccumulation();
-  x_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.0);
-  y_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
-  z_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
+  // x_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.0);
+  // y_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
+  // z_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.015, 1.5);
+  // TODO
+  x_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 0.15);
+  y_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 0.4);
+  z_vel_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 0.2);
 }
 
 DracoStateEstimator::~DracoStateEstimator() {
@@ -56,7 +60,8 @@ double DracoStateEstimator::clamp_value(double in, double min, double max) {
 double DracoStateEstimator::computeAlphaGivenBreakFrequency(double hz,
                                                             double dt) {
   double omega = 2.0 * M_PI * hz;
-  double alpha = (omega * dt / 2.0) / (1.0 + (omega * dt / 2.0));
+  // double alpha = (omega * dt / 2.0) / (1.0 + (omega * dt / 2.0));
+  double alpha = (omega * dt) / (1.0 + (omega * dt));
   alpha = clamp_value(alpha, 0.0, 1.0);
   return alpha;
 }
@@ -144,6 +149,14 @@ void DracoStateEstimator::update(DracoSensorData* data) {
   ori_est_->getEstimatedState(global_body_euler_zyx_,
                               global_body_euler_zyx_dot_);
 
+  // Apply alpha filter to angular velocity estimate
+  double alphaAngularVelocity = computeAlphaGivenBreakFrequency(
+      angular_velocity_filter_freq_, DracoAux::servo_rate);
+  global_body_euler_zyx_dot_ =
+      global_body_euler_zyx_dot_ * alphaAngularVelocity +
+      (1.0 - alphaAngularVelocity) * prev_body_euler_zyx_dot_;
+  prev_body_euler_zyx_dot_ = global_body_euler_zyx_dot_;
+
   global_body_quat_ = Eigen::Quaternion<double>(
       dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
@@ -154,6 +167,7 @@ void DracoStateEstimator::update(DracoSensorData* data) {
   if ((sp_->phase_copy == 2) && (!visit_once)) {
     ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
     ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
+    ((AverageFilter*)z_vel_est_)->initialization(sp_->com_vel[2]);
     visit_once = true;
   }
 
@@ -187,6 +201,7 @@ void DracoStateEstimator::_JointUpdate(DracoSensorData* data) {
   prev_qdot_ = curr_qdot_;
   sp_->l_rf = data->lf_wrench;
   sp_->r_rf = data->rf_wrench;
+  sp_->rotor_inertia = data->rotor_inertia;
 }
 
 void DracoStateEstimator::_ConfigurationAndModelUpdate() {

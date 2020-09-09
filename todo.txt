@@ -1,16 +1,11 @@
-Todo List
-- LineFootTask --> Using local error, local jacobian to eliminate,
-  eliminate standing leg parts in jacobian
-- Swing foot trajectory
-- Swing foot orientation goal
-- Torso orientation goal
-
-Debugging List
-Fall down in one step
- - [] Save dcm
-
-
-Problem I am suspecting:
-0) Footstep tracking is very bad
-1) replanning at double support phase
-2) repopulating footstep
+Check List
+- Not be able to use high gains in CoM
+    - Not stiff in x
+      o Increase ankle gain, increase com x gain
+        + This helps a lot but needs to damp out some oscillation
+        + Foot damping control
+          - Zero velocity cmds for Ankles
+          - Using ATI sensors
+    - Not good enough tracking
+    - Start vibrating when using high gains
+      o QP regularization

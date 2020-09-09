@@ -18,6 +18,7 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   planning_id = 0;
   prev_trq_cmd = Eigen::VectorXd::Zero(10);
 
+  rotor_inertia = Eigen::VectorXd::Zero(10);
   q = Eigen::VectorXd::Zero(robot_->getNumDofs());
   qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
   q_task_des = Eigen::VectorXd::Zero(10);

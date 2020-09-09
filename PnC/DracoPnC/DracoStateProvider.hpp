@@ -18,6 +18,7 @@ class DracoStateProvider {
   int stance_foot;
   int prev_stance_foot;
 
+  Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
   Eigen::VectorXd q_task_des;

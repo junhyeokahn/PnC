@@ -19,8 +19,8 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "---------                          ---------" << std::endl;
     std::cout << "---------     Swing CoM     ---------" << std::endl;
     if (ctrl_arch_->getState() == DRACO_STATES::BALANCE) {
-      double amp(0.02);
-      double freq(0.3);
+      double amp(0.03);
+      double freq(0.5);
       ctrl_arch_->floating_base_lifting_up_manager_->initializeCoMSinusoid(
           sp_->curr_time, amp, freq);
     } else {

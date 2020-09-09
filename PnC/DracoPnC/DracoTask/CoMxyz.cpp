@@ -3,6 +3,8 @@
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <climits>
+#include <cstdlib>
 
 CoMxyz::CoMxyz(RobotSystem* robot) : Task(robot, 3) {
   myUtils::pretty_constructor(3, "CoM xyz Task");
@@ -22,6 +24,7 @@ bool CoMxyz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
     vel_des[i] = _vel_des[i];
     acc_des[i] = _acc_des[i];
   }
+
   for (int i(0); i < 3; ++i) {
     op_cmd[i] = acc_des[i] + kp_[i] * pos_err[i] +
                 kd_[i] * (vel_des[i] - sp_->est_com_vel[i]);
