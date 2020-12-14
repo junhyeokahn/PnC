@@ -78,6 +78,14 @@ void DracoWBCController::_PreProcessing_Command() {
   for (int i = 0; i < contact_list_.size(); i++) {
     contact_list_[i]->updateContactSpec();
   }
+
+  int dim_contact_ptr = 0;
+  for (int i = 0; i < contact_list_.size(); i++) {
+    int fz_idx = dim_contact_ptr + contact_list_[i]->getFzIndex();
+    dim_contact_ptr = contact_list_[i]->getDim();
+      wblc_data_->W_rf_[fz_idx] = 0.01;
+  }
+
 }
 
 void DracoWBCController::getCommand(void* _cmd) {
@@ -154,13 +162,6 @@ void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   wblc_data_->W_qddot_ = Eigen::VectorXd::Constant(Draco::n_dof, lambda_qddot_);
   wblc_data_->W_rf_ = Eigen::VectorXd::Constant(dim_contact_, lambda_rf_);
   wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, lambda_xddot_);
-
-  int dim_contact_ptr = 0;
-  for (int i = 0; i < contact_list_.size(); i++) {
-    int fz_idx = dim_contact_ptr + contact_list_[i]->getFzIndex();
-    dim_contact_ptr = contact_list_[i]->getDim();
-      wblc_data_->W_rf_[fz_idx] = 0.01;
-  }
 
   // torque limit default setting
   wblc_data_->tau_min_ = robot_->GetTorqueLowerLimits().segment(Draco::n_vdof, Draco::n_adof);
