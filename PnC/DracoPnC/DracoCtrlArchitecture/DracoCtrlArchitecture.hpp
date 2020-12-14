@@ -4,6 +4,7 @@
 
 #include <PnC/ControlArchitecture.hpp>
 #include <PnC/DracoPnC/DracoCtrl/DracoMainController.hpp>
+#include <PnC/DracoPnC/DracoCtrl/DracoWBCController.hpp>
 #include <PnC/DracoPnC/DracoDefinition.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/ContactTransitionEnd.hpp>
 #include <PnC/DracoPnC/DracoStateMachine/ContactTransitionStart.hpp>
@@ -51,11 +52,14 @@ class DracoControlArchitecture : public ControlArchitecture {
   void _InitializeParameters();
   bool b_state_first_visit_;
 
+  int wbc_type_; // 1: IHWBC, 2: WBLC, 3: WBMPC
+
  public:
   // Task and Force Containers
   DracoTaskAndForceContainer* taf_container_;
   // Controller Object
   DracoMainController* main_controller_;
+  DracoWBCController* wbc_controller_;
   // Add Planner
   DCMPlanner* dcm_planner_;
 

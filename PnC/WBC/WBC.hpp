@@ -66,7 +66,7 @@ class WBC {
   double lambda_qddot;
   double lambda_Fr;
 
- private:
+ protected:
   int num_qdot_;                 // Number of degrees of freedom
   int num_act_joint_;            // Actuated Joints
   int num_passive_;              // Passive Joints

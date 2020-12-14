@@ -23,7 +23,7 @@ class DCMPlanner {
 
   std::vector<int> rvrp_type_list;  // List of type of virtual repelant point
   std::vector<Footstep> footstep_list;     // Footstep list to generate pattern
-  std::vector<Eigen::Vector3d> rvrp_list;  // List of virtual repelant points.
+  std::vector<Eigen::Vector3d> rvrp_list;  // List of virtual repelant points
   std::vector<Eigen::Vector3d> dcm_ini_list;  // List of initial DCM states
   std::vector<Eigen::Vector3d> dcm_eos_list;  // List of end-of-step DCM states
 
@@ -45,8 +45,7 @@ class DCMPlanner {
   std::vector<Eigen::Vector3d> dcm_end_DS_list;
   std::vector<Eigen::Vector3d> dcm_vel_end_DS_list;
   std::vector<Eigen::Vector3d> dcm_acc_end_DS_list;
-  std::vector<Eigen::MatrixXd>
-      dcm_P;  // polynomial matrices for polynomial interpolation
+  std::vector<Eigen::MatrixXd> dcm_P;  // polynomial matrices for polynomial interpolation
   std::vector<MinJerkCurveVec> dcm_minjerk;  // minjerk curves for interpolation
 
   // DCM walking parameters

@@ -12,7 +12,27 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   // Initialize Main Controller
   taf_container_ = new DracoTaskAndForceContainer(robot_);
   taf_container_->paramInitialization(cfg_["task_parameters"]);
-  main_controller_ = new DracoMainController(taf_container_, robot_);
+  
+  try {
+    myUtils::readParameter(cfg_, "wbc_type", wbc_type_);   
+  } catch (std::runtime_error& e) {
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+    exit(0);
+  }
+
+  switch (wbc_type_)
+  {
+  case 1:
+    main_controller_ = new DracoMainController(taf_container_, robot_); break;
+  case 2:
+    wbc_controller_ = new DracoWBCController(taf_container_, robot_); break;
+  case 3: 
+    break;
+  default:
+    main_controller_ = new DracoMainController(taf_container_, robot_); break;
+  }    
 
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();
@@ -96,6 +116,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
 DracoControlArchitecture::~DracoControlArchitecture() {
   delete taf_container_;
   delete main_controller_;
+  delete wbc_controller_;
   delete dcm_planner_;
 
   // Delete the trajectory managers
@@ -167,7 +188,18 @@ void DracoControlArchitecture::getCommand(void* _command) {
         std::cout << "Swaying Done" << std::endl;
       }
     }
-    main_controller_->getCommand(_command);
+  
+    switch (wbc_type_)
+    {
+    case 1:
+      main_controller_->getCommand(_command); break;
+    case 2:
+      wbc_controller_->getCommand(_command); break;
+    case 3: 
+      break;
+    default:
+      main_controller_->getCommand(_command); break;
+    }    
   }
   // Smoothing trq for initial state
   smoothing_torque(_command);
@@ -239,7 +271,17 @@ void DracoControlArchitecture::getIVDCommand(void* _cmd) {
 
 void DracoControlArchitecture::_InitializeParameters() {
   // Controller initialization
-  main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+    switch (wbc_type_)
+    {
+    case 1:
+      main_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
+    case 2:
+      wbc_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
+    case 3: 
+      break;
+    default:
+      main_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
+    }   
 
   // Trajectory Managers initialization
   rfoot_trajectory_manager_->paramInitialization(

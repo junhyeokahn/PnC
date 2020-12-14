@@ -1,3 +1,5 @@
+wbc_type: 2 # 1: IHWBC, 2: WBLC, 3:WBMPC
+
 state_initialize_params:
     target_pos_duration: 2.0
     smoothing_duration: 1.0
@@ -43,12 +45,21 @@ controller_parameters:
     lambda_qddot: 1e-8
     lambda_Fr: 1e-16
     # Enable limits
-    enable_torque_limits: true
-
+    enable_torque_limits: true		
     # Integration_parameters
     velocity_freq_cutoff: 2.0 #Hz
     position_freq_cutoff: 1.0 #Hz
     max_position_error: 0.2 # radians
+    # WBLC parameters
+    lambda_xddot: 1000.0
+    lambda_qddot: 100.0
+    lambda_rf: 0.01
+    # Enable limits
+    enable_torque_limits: true
+    # Kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
+    # Kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
+    Kp: [ 100 , 100 , 100 , 100 , 5 , 100 , 100 , 100 , 100 , 5 ]
+    Kd: [ 4   , 4   , 4   , 4   , 0 , 4   , 4   , 4   , 4   , 0 ]
 
 task_parameters:
     # Maximum normal force
