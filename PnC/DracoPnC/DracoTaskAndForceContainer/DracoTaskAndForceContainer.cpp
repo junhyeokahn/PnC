@@ -41,6 +41,9 @@ void DracoTaskAndForceContainer::_InitializeTasks() {
   task_list_.push_back(lfoot_center_pos_task_);
   task_list_.push_back(rfoot_center_ori_task_);
   task_list_.push_back(lfoot_center_ori_task_);
+
+  // task for joint config
+  task_list_.push_back(joint_task_);
 }
 
 void DracoTaskAndForceContainer::_InitializeContacts() {

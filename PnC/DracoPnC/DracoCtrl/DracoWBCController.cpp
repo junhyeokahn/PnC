@@ -60,16 +60,30 @@ void DracoWBCController::_PreProcessing_Command() {
 
   // Grab Variables from the container.
   // Update task and contact list pointers from container object
-  for (int i = 0; i < taf_container_->task_list_.size(); i++) {
-    task_list_.push_back(taf_container_->task_list_[i]);
+  // change the tasks for the simulation
+  // com, base_ori, rfoot_pos, lfoot_pos, rfoot_ori, lfoot_ori, jpos  
+  
+  // original
+  // for (int i = 0; i < taf_container_->task_list_.size(); i++) {
+  //   task_list_.push_back(taf_container_->task_list_[i]);
+  // }
+  // modified
+  Eigen::VectorXi modified_task_idx(3);
+  modified_task_idx[0] = 0;
+  modified_task_idx[1] = 1;
+  modified_task_idx[2] = 6;
+  for (int i = 0; i < modified_task_idx.size(); i++) {
+    task_list_.push_back(taf_container_->task_list_[modified_task_idx[i]]);
   }
+
   for (int i = 0; i < taf_container_->contact_list_.size(); i++) {
     contact_list_.push_back(taf_container_->contact_list_[i]);
   }
   Fd_des_ = taf_container_->Fd_des_;
 
+
   // Update Task Jacobians and commands
-  for (int i = 0; i < task_list_.size(); i++) {
+  for (int i = 0; i < modified_task_idx.size(); i++) {
     task_list_[i]->updateJacobians();
     task_list_[i]->computeCommands();
   }
@@ -83,7 +97,7 @@ void DracoWBCController::_PreProcessing_Command() {
   for (int i = 0; i < contact_list_.size(); i++) {
     int fz_idx = dim_contact_ptr + contact_list_[i]->getFzIndex();
     dim_contact_ptr = contact_list_[i]->getDim();
-      wblc_data_->W_rf_[fz_idx] = 0.01;
+    wblc_data_->W_rf_[fz_idx] = 0.01;
   }
 
 }
@@ -101,7 +115,10 @@ void DracoWBCController::getCommand(void* _cmd) {
   // solve kinWBC 
   kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
                               des_jvel_, des_jacc_);
-
+ 
+  std::cout << "des_pos:"<<des_jpos_ <<std::endl;
+  std::cout << "des_vel:"<<des_jvel_ <<std::endl;
+  std::cout << "des_acc:"<<des_jacc_ <<std::endl;
 
   // Update settings and qddot_des
   wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
@@ -164,7 +181,6 @@ void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, lambda_xddot_);
 
   // torque limit default setting
-  wblc_data_->tau_min_ = robot_->GetTorqueLowerLimits().segment(Draco::n_vdof, Draco::n_adof);
-  wblc_data_->tau_max_ = robot_->GetTorqueUpperLimits().segment(Draco::n_vdof, Draco::n_adof);
-   
+  wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
+  wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 2500.);
 }
