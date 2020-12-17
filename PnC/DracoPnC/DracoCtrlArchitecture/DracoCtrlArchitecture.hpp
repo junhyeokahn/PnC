@@ -52,7 +52,7 @@ class DracoControlArchitecture : public ControlArchitecture {
   void _InitializeParameters();
   bool b_state_first_visit_;
 
-  int wbc_type_; // 1: IHWBC, 2: WBLC, 3: WBMPC
+  int wbc_type_;  // 1: IHWBC, 2: WBLC, 3: WBMPC
 
  public:
   // Task and Force Containers
@@ -69,12 +69,12 @@ class DracoControlArchitecture : public ControlArchitecture {
   DCMTrajectoryManager* dcm_trajectory_manager_;
   JointTrajectoryManager* joint_trajectory_manager_;
   FloatingBaseTrajectoryManager* floating_base_lifting_up_manager_;
-  // MaxNormalForceTrajectoryManager* rfoot_front_max_normal_force_manager_;
-  // MaxNormalForceTrajectoryManager* rfoot_back_max_normal_force_manager_;
-  // MaxNormalForceTrajectoryManager* lfoot_front_max_normal_force_manager_;
-  // MaxNormalForceTrajectoryManager* lfoot_back_max_normal_force_manager_;
-  MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
-  MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* rfoot_front_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* rfoot_back_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* lfoot_front_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* lfoot_back_max_normal_force_manager_;
+  // MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
+  // MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
   TaskWeightTrajectoryManager* lfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* lfoot_ori_hierarchy_manager_;
   TaskWeightTrajectoryManager* rfoot_pos_hierarchy_manager_;

@@ -8,6 +8,8 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
  public:
   FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task,
                                 RobotSystem* _robot);
+  FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task, Task*,
+                                RobotSystem* _robot);
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
@@ -20,6 +22,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   void paramInitialization(const YAML::Node& node){};
 
   Task* com_task_;
+  Task* body_rpz_task_;
   Task* base_ori_task_;
 
   Eigen::VectorXd com_pos_des_;

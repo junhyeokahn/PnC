@@ -32,10 +32,58 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   is_sinusoid = false;
 }
 
+FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
+    Task* _com_task, Task* _base_ori_task, Task* rpz, RobotSystem* _robot)
+    : TrajectoryManagerBase(_robot) {
+  myUtils::pretty_constructor(2, "TrajectoryManager: Floating Base");
+
+  com_task_ = _com_task;
+  base_ori_task_ = _base_ori_task;
+  base_id_ = base_ori_task_->getLinkID();
+  body_rpz_task_ = rpz;
+
+  com_pos_des_ = Eigen::VectorXd::Zero(3);
+  com_vel_des_ = Eigen::VectorXd::Zero(3);
+  com_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  dcm_pos_des_ = Eigen::VectorXd::Zero(3);
+  dcm_vel_des_ = Eigen::VectorXd::Zero(3);
+  dcm_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  base_ori_des_ = Eigen::VectorXd::Zero(4);
+  base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
+  base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
+
+  ini_com_pos_ = Eigen::VectorXd::Zero(3);
+  ini_base_quat_ = Eigen::VectorXd::Zero(4);
+  target_com_pos_ = Eigen::VectorXd::Zero(3);
+
+  amp = Eigen::VectorXd::Zero(3);
+  freq = Eigen::VectorXd::Zero(3);
+  mid_point = Eigen::VectorXd::Zero(3);
+  is_swaying = false;
+  is_sinusoid = false;
+}
+
 void FloatingBaseTrajectoryManager::updateDesired() {
   com_task_->updateDesired(com_pos_des_, com_vel_des_, com_acc_des_);
   base_ori_task_->updateDesired(base_ori_des_, base_ang_vel_des_,
                                 base_ang_acc_des_);
+  Eigen::VectorXd pos_des(7);
+  Eigen::VectorXd vel_des(6);
+  Eigen::VectorXd acc_des(6);
+  for (int i = 0; i < 4; ++i) {
+    pos_des[i] = base_ori_des_[i];
+  }
+  for (int i = 0; i < 3; ++i) {
+    vel_des[i] = base_ang_vel_des_[i];
+    acc_des[i] = base_ang_acc_des_[i];
+    pos_des[i + 4] = com_pos_des_[i];
+    vel_des[i + 3] = com_vel_des_[i];
+    acc_des[i + 3] = com_acc_des_[i];
+  }
+  body_rpz_task_->updateDesired(pos_des, vel_des, acc_des);
+
   // TEST
   double dcm_omega = sqrt(9.81 / robot_->getCoMPosition()[2]);
   dcm_pos_des_ = com_pos_des_ + com_vel_des_ / dcm_omega;

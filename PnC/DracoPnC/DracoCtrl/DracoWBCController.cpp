@@ -32,7 +32,7 @@ DracoWBCController::DracoWBCController(
   des_jvel_ = Eigen::VectorXd::Zero(Draco::n_adof);
   des_jacc_ = Eigen::VectorXd::Zero(Draco::n_adof);
 
-  //contact dimension
+  // contact dimension
   dim_contact_ = taf_container_->dim_contact_;
 }
 
@@ -61,17 +61,20 @@ void DracoWBCController::_PreProcessing_Command() {
   // Grab Variables from the container.
   // Update task and contact list pointers from container object
   // change the tasks for the simulation
-  // com, base_ori, rfoot_pos, lfoot_pos, rfoot_ori, lfoot_ori, jpos  
-  
+  // com, base_ori, rfoot_pos, lfoot_pos, rfoot_ori, lfoot_ori, jpos
+
   // original
   // for (int i = 0; i < taf_container_->task_list_.size(); i++) {
   //   task_list_.push_back(taf_container_->task_list_[i]);
   // }
   // modified
-  Eigen::VectorXi modified_task_idx(3);
-  modified_task_idx[0] = 0;
-  modified_task_idx[1] = 1;
-  modified_task_idx[2] = 6;
+  Eigen::VectorXi modified_task_idx(2);
+  modified_task_idx[0] = 8;
+  modified_task_idx[1] = 7;
+  taf_container_->task_list_[8]->updateDesired(Eigen::VectorXd::Zero(2),
+                                               Eigen::VectorXd::Zero(2),
+                                               Eigen::VectorXd::Zero(2));
+  // modified_task_idx[2] = 6;
   for (int i = 0; i < modified_task_idx.size(); i++) {
     task_list_.push_back(taf_container_->task_list_[modified_task_idx[i]]);
   }
@@ -80,7 +83,6 @@ void DracoWBCController::_PreProcessing_Command() {
     contact_list_.push_back(taf_container_->contact_list_[i]);
   }
   Fd_des_ = taf_container_->Fd_des_;
-
 
   // Update Task Jacobians and commands
   for (int i = 0; i < modified_task_idx.size(); i++) {
@@ -96,10 +98,9 @@ void DracoWBCController::_PreProcessing_Command() {
   int dim_contact_ptr = 0;
   for (int i = 0; i < contact_list_.size(); i++) {
     int fz_idx = dim_contact_ptr + contact_list_[i]->getFzIndex();
-    dim_contact_ptr = contact_list_[i]->getDim();
+    dim_contact_ptr += contact_list_[i]->getDim();
     wblc_data_->W_rf_[fz_idx] = 0.01;
   }
-
 }
 
 void DracoWBCController::getCommand(void* _cmd) {
@@ -112,21 +113,20 @@ void DracoWBCController::getCommand(void* _cmd) {
   // Update Dynamic Properties, Task Jacobians, and Contact Jacobians
   _PreProcessing_Command();
 
-  // solve kinWBC 
+  // solve kinWBC
   kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
                               des_jvel_, des_jacc_);
- 
-  std::cout << "des_pos:"<<des_jpos_ <<std::endl;
-  std::cout << "des_vel:"<<des_jvel_ <<std::endl;
-  std::cout << "des_acc:"<<des_jacc_ <<std::endl;
 
   // Update settings and qddot_des
   wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
-  Eigen::VectorXd des_jacc_cmd = des_jacc_ +
-        Kp_.cwiseProduct(des_jpos_ - sp_->q.segment(Draco::n_vdof, Draco::n_adof)) +
-        Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Draco::n_adof));
+  Eigen::VectorXd des_jacc_cmd =
+      des_jacc_ +
+      Kp_.cwiseProduct(des_jpos_ -
+                       sp_->q.segment(Draco::n_vdof, Draco::n_adof)) +
+      Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Draco::n_adof));
 
   // solve WBLC for obtaining the torque
+  myUtils::pretty_print(des_jacc_cmd, std::cout, "des_jacc");
   wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, tau_cmd_, wblc_data_);
 
   // myUtils::pretty_print(gamma, std::cout, "gamma");
@@ -143,15 +143,14 @@ void DracoWBCController::getCommand(void* _cmd) {
   // myUtils::pretty_print(((DracoCommand*)_cmd)->qdot, std::cout, "qdot");
 }
 
-
-void DracoWBCController::firstVisit() { }
+void DracoWBCController::firstVisit() {}
 
 void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   // WBC Defaults
   lambda_xddot_ = 1000.0;
-  lambda_qddot_ = 100.0;            // Generalized Coord Acceleration
-  lambda_rf_ = 0.1;                 // Reaction Force Regularization
-  b_enable_torque_limits_ = true;   // Enable WBC torque limits
+  lambda_qddot_ = 100.0;           // Generalized Coord Acceleration
+  lambda_rf_ = 0.1;                // Reaction Force Regularization
+  b_enable_torque_limits_ = true;  // Enable WBC torque limits
 
   Kp_ = Eigen::VectorXd::Constant(Draco::n_dof, 300);
   Kd_ = Eigen::VectorXd::Constant(Draco::n_dof, 15);

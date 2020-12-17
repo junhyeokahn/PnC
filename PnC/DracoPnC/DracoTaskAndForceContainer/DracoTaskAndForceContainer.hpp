@@ -1,10 +1,12 @@
 #pragma once
 
 #include <PnC/DracoPnC/DracoDefinition.hpp>
+#include <PnC/DracoPnC/DracoTask/BodyRxRyZTask.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMxyz.hpp>
 #include <PnC/DracoPnC/DracoTask/CoMz.hpp>
 #include <PnC/DracoPnC/DracoTask/DCMTask.hpp>
 #include <PnC/DracoPnC/DracoTask/FootLocalRyRzTask.hpp>
+#include <PnC/DracoPnC/DracoTask/SelectedJointTask.hpp>
 #include <PnC/DracoPnC/DracoTask/TorsoRxRy.hpp>
 #include <PnC/TaskAndForceContainer.hpp>
 #include <PnC/WBC/BasicContactSpec.hpp>
@@ -28,6 +30,8 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // Task Member variables
   // -------------------------------------------------------
   Task* com_task_;
+  Task* body_rxryz_task_;
+  Task* selected_joint_task_;
   // Task* dcm_task_;
   Task* joint_task_;
   Task* base_ori_task_;
@@ -39,12 +43,12 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Contact Member variables
   // -------------------------------------------------------
-  // ContactSpec* rfoot_front_contact_;
-  // ContactSpec* rfoot_back_contact_;
-  // ContactSpec* lfoot_front_contact_;
-  // ContactSpec* lfoot_back_contact_;
-  ContactSpec* rfoot_contact_;
-  ContactSpec* lfoot_contact_;
+  ContactSpec* rfoot_front_contact_;
+  ContactSpec* rfoot_back_contact_;
+  ContactSpec* lfoot_front_contact_;
+  ContactSpec* lfoot_back_contact_;
+  // ContactSpec* rfoot_contact_;
+  // ContactSpec* lfoot_contact_;
   int dim_contact_;
   double max_z_;
   Eigen::VectorXd Fd_des_;

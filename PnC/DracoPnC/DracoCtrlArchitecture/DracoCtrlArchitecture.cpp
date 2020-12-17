@@ -12,9 +12,9 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   // Initialize Main Controller
   taf_container_ = new DracoTaskAndForceContainer(robot_);
   taf_container_->paramInitialization(cfg_["task_parameters"]);
-  
+
   try {
-    myUtils::readParameter(cfg_, "wbc_type", wbc_type_);   
+    myUtils::readParameter(cfg_, "wbc_type", wbc_type_);
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
@@ -22,17 +22,19 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
     exit(0);
   }
 
-  switch (wbc_type_)
-  {
-  case 1:
-    main_controller_ = new DracoMainController(taf_container_, robot_); break;
-  case 2:
-    wbc_controller_ = new DracoWBCController(taf_container_, robot_); break;
-  case 3: 
-    break;
-  default:
-    main_controller_ = new DracoMainController(taf_container_, robot_); break;
-  }    
+  switch (wbc_type_) {
+    case 1:
+      main_controller_ = new DracoMainController(taf_container_, robot_);
+      break;
+    case 2:
+      wbc_controller_ = new DracoWBCController(taf_container_, robot_);
+      break;
+    case 3:
+      break;
+    default:
+      main_controller_ = new DracoMainController(taf_container_, robot_);
+      break;
+  }
 
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();
@@ -46,23 +48,24 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
       taf_container_->lfoot_center_ori_task_, robot_);
   joint_trajectory_manager_ =
       new JointTrajectoryManager(taf_container_->joint_task_, robot_);
+  // floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
+  // taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
-      taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
+      taf_container_->com_task_, taf_container_->base_ori_task_,
+      taf_container_->body_rxryz_task_, robot_);
 
-  // rfoot_front_max_normal_force_manager_ = new
-  // MaxNormalForceTrajectoryManager(
-  // taf_container_->rfoot_front_contact_, robot_);
-  // rfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-  // taf_container_->rfoot_back_contact_, robot_);
-  // lfoot_front_max_normal_force_manager_ = new
-  // MaxNormalForceTrajectoryManager(
-  // taf_container_->lfoot_front_contact_, robot_);
-  // lfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-  // taf_container_->lfoot_back_contact_, robot_);
-  rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-      taf_container_->rfoot_contact_, robot_);
-  lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-      taf_container_->lfoot_contact_, robot_);
+  rfoot_front_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+      taf_container_->rfoot_front_contact_, robot_);
+  rfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+      taf_container_->rfoot_back_contact_, robot_);
+  lfoot_front_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+      taf_container_->lfoot_front_contact_, robot_);
+  lfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+      taf_container_->lfoot_back_contact_, robot_);
+  // rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  // taf_container_->rfoot_contact_, robot_);
+  // lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  // taf_container_->lfoot_contact_, robot_);
   rfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->rfoot_center_pos_task_, robot_);
   rfoot_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
@@ -122,12 +125,12 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   // Delete the trajectory managers
   delete rfoot_trajectory_manager_;
   delete lfoot_trajectory_manager_;
-  // delete rfoot_front_max_normal_force_manager_;
-  // delete rfoot_back_max_normal_force_manager_;
-  // delete lfoot_front_max_normal_force_manager_;
-  // delete lfoot_back_max_normal_force_manager_;
-  delete rfoot_max_normal_force_manager_;
-  delete lfoot_max_normal_force_manager_;
+  delete rfoot_front_max_normal_force_manager_;
+  delete rfoot_back_max_normal_force_manager_;
+  delete lfoot_front_max_normal_force_manager_;
+  delete lfoot_back_max_normal_force_manager_;
+  // delete rfoot_max_normal_force_manager_;
+  // delete lfoot_max_normal_force_manager_;
   delete dcm_trajectory_manager_;
   delete joint_trajectory_manager_;
   delete floating_base_lifting_up_manager_;
@@ -188,18 +191,20 @@ void DracoControlArchitecture::getCommand(void* _command) {
         std::cout << "Swaying Done" << std::endl;
       }
     }
-  
-    switch (wbc_type_)
-    {
-    case 1:
-      main_controller_->getCommand(_command); break;
-    case 2:
-      wbc_controller_->getCommand(_command); break;
-    case 3: 
-      break;
-    default:
-      main_controller_->getCommand(_command); break;
-    }    
+
+    switch (wbc_type_) {
+      case 1:
+        main_controller_->getCommand(_command);
+        break;
+      case 2:
+        wbc_controller_->getCommand(_command);
+        break;
+      case 3:
+        break;
+      default:
+        main_controller_->getCommand(_command);
+        break;
+    }
   }
   // Smoothing trq for initial state
   smoothing_torque(_command);
@@ -271,17 +276,19 @@ void DracoControlArchitecture::getIVDCommand(void* _cmd) {
 
 void DracoControlArchitecture::_InitializeParameters() {
   // Controller initialization
-    switch (wbc_type_)
-    {
+  switch (wbc_type_) {
     case 1:
-      main_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
+      main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+      break;
     case 2:
-      wbc_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
-    case 3: 
+      wbc_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+      break;
+    case 3:
       break;
     default:
-      main_controller_->ctrlInitialization(cfg_["controller_parameters"]); break;
-    }   
+      main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+      break;
+  }
 
   // Trajectory Managers initialization
   rfoot_trajectory_manager_->paramInitialization(
@@ -293,12 +300,12 @@ void DracoControlArchitecture::_InitializeParameters() {
   try {
     double max_z_force;
     myUtils::readParameter(cfg_["task_parameters"], "max_z_force", max_z_force);
-    // rfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
-    // rfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
-    // lfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
-    // lfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
-    rfoot_max_normal_force_manager_->setMaxFz(max_z_force);
-    lfoot_max_normal_force_manager_->setMaxFz(max_z_force);
+    rfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
+    rfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
+    lfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
+    lfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
+    // rfoot_max_normal_force_manager_->setMaxFz(max_z_force);
+    // lfoot_max_normal_force_manager_->setMaxFz(max_z_force);
     double max_gain, min_gain;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
     myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com", min_gain);
@@ -353,18 +360,18 @@ void DracoControlArchitecture::saveData() {
   sp_->w_lfoot_ori = lfoot_ori_hierarchy_manager_->current_w_;
   sp_->w_com = com_hierarchy_manager_->current_w_;
   sp_->w_base_ori = base_ori_hierarchy_manager_->current_w_;
-  /*  sp_->w_rf_rffront =*/
-  // rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_rfback =
-  // rfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_lffront =
-  // lfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_lfback =
-  /*lfoot_back_max_normal_force_manager_->current_max_normal_force_z_;*/
-  sp_->w_rfoot_fr =
-      rfoot_max_normal_force_manager_->current_max_normal_force_z_;
-  sp_->w_lfoot_fr =
-      lfoot_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_rffront =
+      rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_rfback =
+      rfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lffront =
+      lfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lfback =
+      lfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+  // sp_->w_rfoot_fr =
+  // rfoot_max_normal_force_manager_->current_max_normal_force_z_;
+  // sp_->w_lfoot_fr =
+  // lfoot_max_normal_force_manager_->current_max_normal_force_z_;
 
   // Task desired
   sp_->rfoot_center_pos_des = rfoot_trajectory_manager_->foot_pos_des_;

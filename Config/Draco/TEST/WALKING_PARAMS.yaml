@@ -51,8 +51,8 @@ controller_parameters:
     position_freq_cutoff: 1.0 #Hz
     max_position_error: 0.2 # radians
     # WBLC parameters
-    lambda_xddot: 100.0
-    lambda_qddot: 10.0
+    lambda_xddot: 1000.0
+    lambda_qddot: 100.0
     lambda_rf: 0.1
     # Enable limits
     enable_torque_limits: true
