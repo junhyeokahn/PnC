@@ -180,6 +180,6 @@ void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   wblc_data_->W_xddot_ = Eigen::VectorXd::Constant(dim_contact_, lambda_xddot_);
 
   // torque limit default setting
-  wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
-  wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 2500.);
+  wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -100.);
+  wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 100.);
 }

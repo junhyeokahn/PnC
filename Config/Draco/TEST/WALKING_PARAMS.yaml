@@ -9,7 +9,7 @@ state_initialize_params:
 state_stand_params:
     target_pos_duration: 4.0 # duration to reach target com position
     smoothing_duration: 1.0
-    time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    time_to_max_normal_force: 0.2 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.7
     #target_height: 0.8
 
@@ -42,7 +42,7 @@ controller_parameters:
     w_contact_weight: 1e-3
     #w_contact_weight: 1e-16
     # Regularization terms
-    lambda_qddot: 1e-8
+    #lambda_qddot: 1e-8
     lambda_Fr: 1e-16
     # Enable limits
     enable_torque_limits: true		

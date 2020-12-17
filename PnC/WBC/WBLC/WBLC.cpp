@@ -19,7 +19,6 @@ WBLC::WBLC(const std::vector<bool>& act_list, const Eigen::MatrixXd* Jci)
   b_internal_constraint_ = false;
 
   if (b_internal_constraint_) Jci_ = *Jci;
-  // dynacore::pretty_print(Sv_, std::cout, "Sv");
 }
 
 void WBLC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
@@ -31,9 +30,9 @@ void WBLC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
   grav_ = grav;
   b_updatesetting_ = true;
 
-  // dynacore::pretty_print(grav_, std::cout, "grav");
-  // dynacore::pretty_print(cori_, std::cout, "cori");
-  // dynacore::pretty_print(A_, std::cout, "A");
+  // myUtils::pretty_print(grav_, std::cout, "grav");
+  // myUtils::pretty_print(cori_, std::cout, "cori");
+  // myUtils::pretty_print(A_, std::cout, "A");
 }
 
 void WBLC::makeWBLC_Torque(const Eigen::VectorXd& des_jacc_cmd,
@@ -204,14 +203,17 @@ void WBLC::_OptimizationPreparation(const Eigen::MatrixXd& Aeq,
   // Set Cost
   for (int i(0); i < num_qdot_; ++i) {
     G[i][i] = data_->W_qddot_[i];
+    std::cout << data_->W_qddot_[i] << std::endl;
   }
   int idx_offset = num_qdot_;
   for (int i(0); i < dim_rf_; ++i) {
     G[i + idx_offset][i + idx_offset] = data_->W_rf_[i];
+    std::cout << data_->W_rf_[i] << std::endl;
   }
   idx_offset += dim_rf_;
   for (int i(0); i < dim_rf_; ++i) {
     G[i + idx_offset][i + idx_offset] = data_->W_xddot_[i];
+    std::cout << data_->W_xddot_[i] << std::endl;
   }
 
   for (int i(0); i < dim_eq_cstr_; ++i) {
@@ -227,6 +229,7 @@ void WBLC::_OptimizationPreparation(const Eigen::MatrixXd& Aeq,
     }
     ci0[i] = -dieq[i];
   }
+  // exit(0);
   // printf("G:\n");
   // std::cout << G << std::endl;
   // printf("g0:\n");
@@ -259,11 +262,15 @@ void WBLC::_GetSolution(Eigen::VectorXd& cmd) {
   data_->qddot_ = qddot_ + delta_qddot;
   cmd = Sa_ * tau;
 
-  std::cout << "++++++++++++++++++++++" << std::endl;
-  myUtils::pretty_print(qddot_, std::cout, "qddot_");
-  myUtils::pretty_print(delta_qddot, std::cout, "delta_qddot");
-  myUtils::pretty_print(data_->Fr_, std::cout, "Fr");
-  myUtils::pretty_print(tau, std::cout, "total tau");
-  Eigen::VectorXd x_check = Jc_ * (qddot_ + delta_qddot) + JcDotQdot_;
-  myUtils::pretty_print(x_check, std::cout, "x check");
+  // std::cout << "++++++++++++++++++++++" << std::endl;
+  // myUtils::pretty_print(qddot_, std::cout, "qddot_");
+  // myUtils::pretty_print(delta_qddot, std::cout, "delta_qddot");
+  // myUtils::pretty_print(data_->qddot_, std::cout, "resulting qddot");
+  // myUtils::pretty_print(
+  // Eigen::VectorXd(A_ * (qddot_ + delta_qddot) + cori_ + grav_), std::cout,
+  //"lhs");
+  // myUtils::pretty_print(data_->Fr_, std::cout, "Fr");
+  // myUtils::pretty_print(tau, std::cout, "total tau");
+  // Eigen::VectorXd x_check = Jc_ * (qddot_ + delta_qddot) + JcDotQdot_;
+  // myUtils::pretty_print(x_check, std::cout, "x check");
 }
