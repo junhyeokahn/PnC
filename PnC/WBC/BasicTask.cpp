@@ -15,8 +15,8 @@ BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
       assert(dim_task_ = robot_->getNumActuatedDofs());
       task_type_string_ = "Joint";
       for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
+        kp_[i] = 10.;
+        kd_[i] = 1.;
       }
       break;
     case BasicTaskType::LINKXYZ:

@@ -52,10 +52,13 @@ void WBLC::makeWBLC_Torque(const Eigen::VectorXd& des_jacc_cmd,
         myUtils::weightedInverse(Jci_, Ainv_, JciBar);
         Nci_ -= JciBar * Jci_;
     }
+
+    // why only actuated joints?
     for (int i(0); i < num_act_joint_; ++i) {
         qddot_[act_list_[i]] = des_jacc_cmd[i];
     }
 
+    // qddot_ = des_jacc_cmd;
     // Contact Jacobian & Uf & Fr_ieq
     _BuildContactMtxVect(contact_list);
 

@@ -135,6 +135,10 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
         jvel_cmd[i] = qdot[act_jidx_[i]];
         jacc_cmd[i] = qddot[act_jidx_[i]];
     }
+    // jpos_cmd = curr_config + delta_q;
+    // jvel_cmd = qdot;
+    // jacc_cmd = qddot;
+
     return true;
 }
 

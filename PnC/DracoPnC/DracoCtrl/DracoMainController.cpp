@@ -84,6 +84,20 @@ void DracoMainController::getCommand(void* _cmd) {
   // Update Dynamic Properties, Task Jacobians, and Contact Jacobians
   _PreProcessing_Command();
 
+  Eigen::VectorXd pos_err;
+  Eigen::VectorXd vel_des;
+  Eigen::VectorXd acc_des;
+
+  Task* task = task_list_[0]; 
+  pos_err = task->pos_err;
+  vel_des = task->vel_des;
+  acc_des = task->acc_des;
+
+  std::cout<<"task pos err: " << pos_err << std::endl;
+  std::cout<<"task vel des: " << vel_des << std::endl;
+  std::cout<<"task acc des: " << acc_des << std::endl;
+
+
   // Update Task Hierarchy
   Eigen::VectorXd w_task_hierarchy_ = Eigen::VectorXd::Zero(task_list_.size());
   for (int i = 0; i < task_list_.size(); i++) {

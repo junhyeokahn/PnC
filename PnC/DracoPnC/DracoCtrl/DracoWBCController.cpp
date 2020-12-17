@@ -58,6 +58,14 @@ void DracoWBCController::_PreProcessing_Command() {
   task_list_.clear();
   contact_list_.clear();
 
+  // joint pos task update
+  Eigen::VectorXd jpos_des = sp_->jpos_ini;
+  Eigen::VectorXd jvel_des(Draco::n_adof);
+  jvel_des.setZero();
+  Eigen::VectorXd jacc_des(Draco::n_adof);
+  jacc_des.setZero();
+  taf_container_->joint_task_->updateDesired(jpos_des,jvel_des,jacc_des);
+
   // Grab Variables from the container.
   // Update task and contact list pointers from container object
   // change the tasks for the simulation
@@ -68,22 +76,22 @@ void DracoWBCController::_PreProcessing_Command() {
   //   task_list_.push_back(taf_container_->task_list_[i]);
   // }
   // modified
+
   Eigen::VectorXi modified_task_idx(3);
   modified_task_idx[0] = 0;
   modified_task_idx[1] = 1;
   modified_task_idx[2] = 6;
   for (int i = 0; i < modified_task_idx.size(); i++) {
     task_list_.push_back(taf_container_->task_list_[modified_task_idx[i]]);
-  }
+  } 
 
   for (int i = 0; i < taf_container_->contact_list_.size(); i++) {
     contact_list_.push_back(taf_container_->contact_list_[i]);
   }
   Fd_des_ = taf_container_->Fd_des_;
 
-
   // Update Task Jacobians and commands
-  for (int i = 0; i < modified_task_idx.size(); i++) {
+  for (int i = 0; i < task_list_.size(); i++) {
     task_list_[i]->updateJacobians();
     task_list_[i]->computeCommands();
   }
@@ -96,9 +104,11 @@ void DracoWBCController::_PreProcessing_Command() {
   int dim_contact_ptr = 0;
   for (int i = 0; i < contact_list_.size(); i++) {
     int fz_idx = dim_contact_ptr + contact_list_[i]->getFzIndex();
-    dim_contact_ptr = contact_list_[i]->getDim();
-    wblc_data_->W_rf_[fz_idx] = 0.01;
+    dim_contact_ptr += contact_list_[i]->getDim();
+    wblc_data_->W_rf_[fz_idx] = 0.001;
   }
+  // std::cout<<"num contact: "<< contact_list_.size() << std::endl;
+  // std::cout<<"W_rf_" << wblc_data_->W_rf_ <<std::endl;
 
 }
 
@@ -112,17 +122,27 @@ void DracoWBCController::getCommand(void* _cmd) {
   // Update Dynamic Properties, Task Jacobians, and Contact Jacobians
   _PreProcessing_Command();
 
+  Eigen::VectorXd pos_err;
+  Eigen::VectorXd vel_des;
+  Eigen::VectorXd acc_des;
+
+  Task* task = task_list_[0]; 
+  pos_err = task->pos_err;
+  vel_des = task->vel_des;
+  acc_des = task->acc_des;
+
+  std::cout<<"task pos err: " << pos_err << std::endl;
+  std::cout<<"task vel des: " << vel_des << std::endl;
+  std::cout<<"task acc des: " << acc_des << std::endl;
+
   // solve kinWBC 
   kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
                               des_jvel_, des_jacc_);
- 
-  std::cout << "des_pos:"<<des_jpos_ <<std::endl;
-  std::cout << "des_vel:"<<des_jvel_ <<std::endl;
-  std::cout << "des_acc:"<<des_jacc_ <<std::endl;
+
 
   // Update settings and qddot_des
   wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
-  Eigen::VectorXd des_jacc_cmd = des_jacc_ +
+  Eigen::VectorXd des_jacc_cmd = des_jacc_ + 
         Kp_.cwiseProduct(des_jpos_ - sp_->q.segment(Draco::n_vdof, Draco::n_adof)) +
         Kd_.cwiseProduct(des_jvel_ - sp_->qdot.tail(Draco::n_adof));
 

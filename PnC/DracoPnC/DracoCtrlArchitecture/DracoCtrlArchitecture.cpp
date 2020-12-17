@@ -49,20 +49,20 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem* _robot)
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
       taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
 
-  // rfoot_front_max_normal_force_manager_ = new
-  // MaxNormalForceTrajectoryManager(
-  // taf_container_->rfoot_front_contact_, robot_);
-  // rfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-  // taf_container_->rfoot_back_contact_, robot_);
-  // lfoot_front_max_normal_force_manager_ = new
-  // MaxNormalForceTrajectoryManager(
-  // taf_container_->lfoot_front_contact_, robot_);
-  // lfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-  // taf_container_->lfoot_back_contact_, robot_);
-  rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-      taf_container_->rfoot_contact_, robot_);
-  lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-      taf_container_->lfoot_contact_, robot_);
+  rfoot_front_max_normal_force_manager_ = new
+  MaxNormalForceTrajectoryManager(
+  taf_container_->rfoot_front_contact_, robot_);
+  rfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  taf_container_->rfoot_back_contact_, robot_);
+  lfoot_front_max_normal_force_manager_ = new
+  MaxNormalForceTrajectoryManager(
+  taf_container_->lfoot_front_contact_, robot_);
+  lfoot_back_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  taf_container_->lfoot_back_contact_, robot_);
+  // rfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  //     taf_container_->rfoot_contact_, robot_);
+  // lfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
+  //     taf_container_->lfoot_contact_, robot_);
   rfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
       taf_container_->rfoot_center_pos_task_, robot_);
   rfoot_ori_hierarchy_manager_ = new TaskWeightTrajectoryManager(
@@ -122,12 +122,12 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   // Delete the trajectory managers
   delete rfoot_trajectory_manager_;
   delete lfoot_trajectory_manager_;
-  // delete rfoot_front_max_normal_force_manager_;
-  // delete rfoot_back_max_normal_force_manager_;
-  // delete lfoot_front_max_normal_force_manager_;
-  // delete lfoot_back_max_normal_force_manager_;
-  delete rfoot_max_normal_force_manager_;
-  delete lfoot_max_normal_force_manager_;
+  delete rfoot_front_max_normal_force_manager_;
+  delete rfoot_back_max_normal_force_manager_;
+  delete lfoot_front_max_normal_force_manager_;
+  delete lfoot_back_max_normal_force_manager_;
+  // delete rfoot_max_normal_force_manager_;
+  // delete lfoot_max_normal_force_manager_;
   delete dcm_trajectory_manager_;
   delete joint_trajectory_manager_;
   delete floating_base_lifting_up_manager_;
@@ -293,12 +293,12 @@ void DracoControlArchitecture::_InitializeParameters() {
   try {
     double max_z_force;
     myUtils::readParameter(cfg_["task_parameters"], "max_z_force", max_z_force);
-    // rfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
-    // rfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
-    // lfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
-    // lfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
-    rfoot_max_normal_force_manager_->setMaxFz(max_z_force);
-    lfoot_max_normal_force_manager_->setMaxFz(max_z_force);
+    rfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
+    rfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
+    lfoot_front_max_normal_force_manager_->setMaxFz(max_z_force);
+    lfoot_back_max_normal_force_manager_->setMaxFz(max_z_force);
+    // rfoot_max_normal_force_manager_->setMaxFz(max_z_force);
+    // lfoot_max_normal_force_manager_->setMaxFz(max_z_force);
     double max_gain, min_gain;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
     myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com", min_gain);
@@ -353,18 +353,18 @@ void DracoControlArchitecture::saveData() {
   sp_->w_lfoot_ori = lfoot_ori_hierarchy_manager_->current_w_;
   sp_->w_com = com_hierarchy_manager_->current_w_;
   sp_->w_base_ori = base_ori_hierarchy_manager_->current_w_;
-  /*  sp_->w_rf_rffront =*/
-  // rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_rfback =
-  // rfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_lffront =
-  // lfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
-  // sp_->w_rf_lfback =
-  /*lfoot_back_max_normal_force_manager_->current_max_normal_force_z_;*/
-  sp_->w_rfoot_fr =
-      rfoot_max_normal_force_manager_->current_max_normal_force_z_;
-  sp_->w_lfoot_fr =
-      lfoot_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_rffront =
+  rfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_rfback =
+  rfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lffront =
+  lfoot_front_max_normal_force_manager_->current_max_normal_force_z_;
+  sp_->w_rf_lfback =
+  lfoot_back_max_normal_force_manager_->current_max_normal_force_z_;
+  // sp_->w_rfoot_fr =
+  //     rfoot_max_normal_force_manager_->current_max_normal_force_z_;
+  // sp_->w_lfoot_fr =
+  //     lfoot_max_normal_force_manager_->current_max_normal_force_z_;
 
   // Task desired
   sp_->rfoot_center_pos_des = rfoot_trajectory_manager_->foot_pos_des_;

@@ -66,10 +66,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   l_rf = Eigen::VectorXd::Zero(6);
   r_rf_des = Eigen::VectorXd::Zero(6);
   l_rf_des = Eigen::VectorXd::Zero(6);
-  /*  r_rf_front_des.setZero();*/
-  // r_rf_back_des.setZero();
-  // l_rf_front_des.setZero();
-  /*l_rf_back_des.setZero();*/
+  r_rf_front_des.setZero();
+  r_rf_back_des.setZero();
+  l_rf_front_des.setZero();
+  l_rf_back_des.setZero();
 
   DataManager* data_manager = DataManager::GetDataManager();
 
@@ -88,10 +88,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&l_rf, VECT, "l_rf", 6);
   data_manager->RegisterData(&r_rf_des, VECT, "r_rf_des", 6);
   data_manager->RegisterData(&l_rf_des, VECT, "l_rf_des", 6);
-  /*  data_manager->RegisterData(&r_rf_front_des, VECT3, "r_rf_front_des", 3);*/
-  // data_manager->RegisterData(&r_rf_back_des, VECT3, "r_rf_back_des", 3);
-  // data_manager->RegisterData(&l_rf_front_des, VECT3, "l_rf_front_des", 3);
-  /*data_manager->RegisterData(&l_rf_back_des, VECT3, "l_rf_back_des", 3);*/
+  data_manager->RegisterData(&r_rf_front_des, VECT3, "r_rf_front_des", 3);
+  data_manager->RegisterData(&r_rf_back_des, VECT3, "r_rf_back_des", 3);
+  data_manager->RegisterData(&l_rf_front_des, VECT3, "l_rf_front_des", 3);
+  data_manager->RegisterData(&l_rf_back_des, VECT3, "l_rf_back_des", 3);
 
   // ---------------------------------------------------------------------------
   // WBC
@@ -103,10 +103,10 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&w_lfoot_ori, DOUBLE, "w_lfoot_ori", 1);
   data_manager->RegisterData(&w_com, DOUBLE, "w_com", 1);
   data_manager->RegisterData(&w_base_ori, DOUBLE, "w_base_ori", 1);
-  // data_manager->RegisterData(&w_rf_rffront, DOUBLE, "w_rf_rffront", 1);
-  // data_manager->RegisterData(&w_rf_rfback, DOUBLE, "w_rf_rfback", 1);
-  // data_manager->RegisterData(&w_rf_lffront, DOUBLE, "w_rf_lffront", 1);
-  // data_manager->RegisterData(&w_rf_lfback, DOUBLE, "w_rf_lfback", 1);
+  data_manager->RegisterData(&w_rf_rffront, DOUBLE, "w_rf_rffront", 1);
+  data_manager->RegisterData(&w_rf_rfback, DOUBLE, "w_rf_rfback", 1);
+  data_manager->RegisterData(&w_rf_lffront, DOUBLE, "w_rf_lffront", 1);
+  data_manager->RegisterData(&w_rf_lfback, DOUBLE, "w_rf_lfback", 1);
   data_manager->RegisterData(&w_rfoot_fr, DOUBLE, "w_rfoot_fr", 1);
   data_manager->RegisterData(&w_lfoot_fr, DOUBLE, "w_lfoot_fr", 1);
 

@@ -8,7 +8,7 @@ state_initialize_params:
 
 state_stand_params:
     target_pos_duration: 4.0 # duration to reach target com position
-    smoothing_duration: 1.0
+    smoothing_duration: 2.0
     time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.7
     #target_height: 0.8
@@ -51,20 +51,20 @@ controller_parameters:
     position_freq_cutoff: 1.0 #Hz
     max_position_error: 0.2 # radians
     # WBLC parameters
-    lambda_xddot: 100.0
-    lambda_qddot: 10.0
+    lambda_xddot: 1000.0
+    lambda_qddot: 100.0
     lambda_rf: 0.1
     # Enable limits
     enable_torque_limits: true
-    # Kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
-    # Kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
-    Kp: [ 100, 100, 100, 100, 70, 100, 100, 100, 100, 70]
-    Kd: [ 10, 10, 10, 10, 3,10, 10, 10, 10, 3]
+    Kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
+    Kd: [ 8   , 8   , 8   , 8   , 0 , 8   , 8   , 8   , 8   , 0 ]
+    # Kp: [ 100, 100, 100, 100, 70, 100, 100, 100, 100, 70]
+    # Kd: [ 10, 10, 10, 10, 3, 10, 10, 10, 10, 3]
 
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 500
+    max_z_force: 1000
 
     # Task hierarchy weights
     ini_w_task_com: 0.
@@ -89,7 +89,7 @@ task_parameters:
     #kp_com: [30 , 50., 50.] # OSCILATION
     #kd_com: [1., 1., 2.5]
     kp_com: [100 , 100 , 100] # SIM
-    kd_com: [30.  , 30.  , 30.]
+    kd_com: [10.  , 10.  , 10.]
     #kp_com: [1000.,1000.,100.] # SIM2
     #kd_com: [100., 100., 10.]
     # Pelvis
@@ -98,7 +98,7 @@ task_parameters:
     #kp_base_ori: [70. , 70. , 70.]
     #kd_base_ori: [3.5, 3.5, 3.5]
     kp_base_ori: [100  , 100  , 100] # SIM
-    kd_base_ori: [30   , 30   , 30]
+    kd_base_ori: [10   , 10   , 10]
     # Foot Linear and orientation gains
     #kp_foot_pos: [200. , 200. , 200.]
     #kd_foot_pos: [20.  , 20.  , 20.]
@@ -110,4 +110,4 @@ task_parameters:
     kd_foot_ori: [3.5  , 3.5]
     # Joint
     kp_joint: [100. , 100. , 100. , 100. , 50. , 100. , 100. , 100. , 100. , 50.]
-    kd_joint: [20.  , 20.  , 20.  , 20.  , 10. , 20.  , 20.  , 20.  , 20.  , 10.]
+    kd_joint: [10.  , 10.  , 10.  , 10.  , 5. , 10.  , 10.  , 10.  , 10.  , 5.]

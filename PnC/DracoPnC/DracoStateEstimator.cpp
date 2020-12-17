@@ -81,7 +81,6 @@ void DracoStateEstimator::_UpdateDCM() {
 
 void DracoStateEstimator::initialization(DracoSensorData* data) {
   _JointUpdate(data);
-
   std::vector<double> torso_acc(3);
   std::vector<double> torso_ang_vel(3);
   MapToTorso_(data->imu_acc, data->imu_ang_vel, torso_acc, torso_ang_vel);
@@ -103,6 +102,8 @@ void DracoStateEstimator::initialization(DracoSensorData* data) {
 
   _ConfigurationAndModelUpdate();
   _UpdateDCM();
+
+  sp_->jpos_ini = curr_config_.segment(Draco::n_vdof, Draco::n_adof);
 
   ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
   ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
