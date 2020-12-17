@@ -70,7 +70,8 @@ void DracoWBCController::_PreProcessing_Command() {
   // modified
   Eigen::VectorXi modified_task_idx(2);
   modified_task_idx[0] = 8;
-  modified_task_idx[1] = 7;
+  modified_task_idx[1] = 0;
+  // modified_task_idx[2] = 1;
   taf_container_->task_list_[8]->updateDesired(Eigen::VectorXd::Zero(2),
                                                Eigen::VectorXd::Zero(2),
                                                Eigen::VectorXd::Zero(2));

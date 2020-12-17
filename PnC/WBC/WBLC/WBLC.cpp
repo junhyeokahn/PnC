@@ -177,10 +177,10 @@ void WBLC::_BuildContactMtxVect(const std::vector<ContactSpec*>& contact_list) {
     dim_rf_ += Jc_i.rows();
     num_rows_Uf += Uf_i.rows();
   }
-  myUtils::pretty_print(Jc_, std::cout, "Jc");
-  myUtils::pretty_print(Uf_, std::cout, "Uf");
+  // myUtils::pretty_print(Jc_, std::cout, "Jc");
+  // myUtils::pretty_print(Uf_, std::cout, "Uf");
   // myUtils::pretty_print(JcDotQdot_, std::cout, "JcDotQdot");
-  myUtils::pretty_print(Fr_ieq_, std::cout, "Fr_ieq");
+  // myUtils::pretty_print(Fr_ieq_, std::cout, "Fr_ieq");
 }
 
 void WBLC::_OptimizationPreparation(const Eigen::MatrixXd& Aeq,
@@ -203,17 +203,14 @@ void WBLC::_OptimizationPreparation(const Eigen::MatrixXd& Aeq,
   // Set Cost
   for (int i(0); i < num_qdot_; ++i) {
     G[i][i] = data_->W_qddot_[i];
-    std::cout << data_->W_qddot_[i] << std::endl;
   }
   int idx_offset = num_qdot_;
   for (int i(0); i < dim_rf_; ++i) {
     G[i + idx_offset][i + idx_offset] = data_->W_rf_[i];
-    std::cout << data_->W_rf_[i] << std::endl;
   }
   idx_offset += dim_rf_;
   for (int i(0); i < dim_rf_; ++i) {
     G[i + idx_offset][i + idx_offset] = data_->W_xddot_[i];
-    std::cout << data_->W_xddot_[i] << std::endl;
   }
 
   for (int i(0); i < dim_eq_cstr_; ++i) {
