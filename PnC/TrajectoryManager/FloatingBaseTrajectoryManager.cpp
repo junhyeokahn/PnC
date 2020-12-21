@@ -45,7 +45,7 @@ void FloatingBaseTrajectoryManager::updateDesired() {
   dcm_acc_des_.setZero();
   // com_task_->updateDesired(dcm_pos_des_, dcm_vel_des_, dcm_acc_des_);
   // TEST
-  std::cout<<"com_des: "<<com_pos_des_ <<std::endl;
+  // std::cout<<"com_des: "<<com_pos_des_ <<std::endl;
 }
 
 void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(

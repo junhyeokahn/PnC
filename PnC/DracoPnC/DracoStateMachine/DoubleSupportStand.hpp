@@ -32,5 +32,7 @@ class DoubleSupportStand : public StateMachine {
   double time_to_max_normal_force_;
   double target_height_;
 
+  int contact_type_;
+
   void _taskUpdate();
 };

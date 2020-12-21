@@ -33,6 +33,7 @@ class ContactTransitionEnd : public StateMachine {
 
   double ctrl_start_time_;
   double end_time_;
+  int contact_type_;
 
   void _taskUpdate();
 };

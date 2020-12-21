@@ -73,12 +73,14 @@ class DracoControlArchitecture : public ControlArchitecture {
   MaxNormalForceTrajectoryManager* rfoot_back_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* lfoot_front_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* lfoot_back_max_normal_force_manager_;
-  // MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
-  // MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* lfoot_max_normal_force_manager_;
+  MaxNormalForceTrajectoryManager* rfoot_max_normal_force_manager_;
   TaskWeightTrajectoryManager* lfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* lfoot_ori_hierarchy_manager_;
   TaskWeightTrajectoryManager* rfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* rfoot_ori_hierarchy_manager_;
   TaskWeightTrajectoryManager* com_hierarchy_manager_;
   TaskWeightTrajectoryManager* base_ori_hierarchy_manager_;
+
+  int contact_type_;
 };

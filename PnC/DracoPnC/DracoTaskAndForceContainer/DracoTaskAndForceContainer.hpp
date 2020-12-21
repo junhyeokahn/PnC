@@ -43,8 +43,8 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   ContactSpec* rfoot_back_contact_;
   ContactSpec* lfoot_front_contact_;
   ContactSpec* lfoot_back_contact_;
-  // ContactSpec* rfoot_contact_;
-  // ContactSpec* lfoot_contact_;
+  ContactSpec* rfoot_contact_;
+  ContactSpec* lfoot_contact_;
   int dim_contact_;
   double max_z_;
   Eigen::VectorXd Fd_des_;
@@ -52,6 +52,8 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   // -------------------------------------------------------
   // Parameters
   // -------------------------------------------------------
+  YAML::Node cfg_;
+
   // Task Hierarchy Weights
   Eigen::VectorXd w_task_hierarchy_;
   double w_task_com_;
@@ -70,4 +72,6 @@ class DracoTaskAndForceContainer : public TaskAndForceContainer {
   Eigen::VectorXd kd_foot_pos_;
   Eigen::VectorXd kp_foot_ori_;
   Eigen::VectorXd kd_foot_ori_;
+
+  int contact_type_;
 };

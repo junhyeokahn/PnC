@@ -20,6 +20,7 @@ DoubleSupportStand::~DoubleSupportStand() {}
 void DoubleSupportStand::firstVisit() {
   std::cout << "[Double Support Stand]" << std::endl;
 
+  contact_type_ = taf_container_->contact_type_;
   ctrl_start_time_ = sp_->curr_time;
 
   // =========================================================================
@@ -41,18 +42,35 @@ void DoubleSupportStand::firstVisit() {
   // =========================================================================
   // Initialize Reaction Force Ramp to Max
   // =========================================================================
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
-  0.0, time_to_max_normal_force_);
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
-  0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
-  0.0, time_to_max_normal_force_);
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
-  0.0, time_to_max_normal_force_);
-  // ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(
-  //     0.0, time_to_max_normal_force_);
-  // ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(
-  //     0.0, time_to_max_normal_force_);
+  switch(contact_type_)
+  {
+    case 1: // point contacts
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+    break;
+    case 2: //surface contact
+      ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToMax(
+          0.0, time_to_max_normal_force_);
+      ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToMax(
+          0.0, time_to_max_normal_force_);
+    break;
+    default:
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToMax(
+      0.0, time_to_max_normal_force_);
+    break;
+  }
 
   // =========================================================================
   // Initialize Task Gain Ramp to Max
@@ -83,18 +101,35 @@ void DoubleSupportStand::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Compute and update new maximum reaction forces
-  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
-  state_machine_time_);
-  ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-  state_machine_time_);
-  ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
-  state_machine_time_);
-  ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-  state_machine_time_);
-  // ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(
-  //     state_machine_time_);
-  // ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(
-  //     state_machine_time_);
+  switch(contact_type_)
+  {
+    case 1:
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_); 
+    break;
+    case 2:
+      ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(
+          state_machine_time_);
+      ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(
+          state_machine_time_);
+    break;
+    default:
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_); 
+    break;
+  }
 
   // Compute and update new hierarchy weights
   ctrl_arch_->rfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
@@ -132,7 +167,6 @@ void DoubleSupportStand::initialization(const YAML::Node& node) {
     myUtils::readParameter(node, "time_to_max_normal_force",
                            time_to_max_normal_force_);
     myUtils::readParameter(node, "target_height", target_height_);
-
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl

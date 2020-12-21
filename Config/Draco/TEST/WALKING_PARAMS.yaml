@@ -42,7 +42,7 @@ controller_parameters:
     w_contact_weight: 1e-3
     #w_contact_weight: 1e-16
     # Regularization terms
-    lambda_qddot: 1e-8
+    #lambda_qddot: 1e-8
     lambda_Fr: 1e-16
     # Enable limits
     enable_torque_limits: true		
@@ -51,9 +51,9 @@ controller_parameters:
     position_freq_cutoff: 1.0 #Hz
     max_position_error: 0.2 # radians
     # WBLC parameters
-    lambda_xddot: 1000.0
-    lambda_qddot: 100.0
-    lambda_rf: 0.1
+    lambda_xddot: 100.0
+    lambda_qddot: 10.0
+    lambda_rf: 1.0
     # Enable limits
     enable_torque_limits: true
     Kp: [ 150 , 150 , 150 , 150 , 5 , 150 , 150 , 150 , 150 , 5 ]
@@ -62,6 +62,9 @@ controller_parameters:
     # Kd: [ 10, 10, 10, 10, 3, 10, 10, 10, 10, 3]
 
 task_parameters:
+    # contact type 	
+    contact_type: 2 # 1: point contact, 2: surface contact
+
     # Maximum normal force
     ini_z_force: 0.0
     max_z_force: 1000

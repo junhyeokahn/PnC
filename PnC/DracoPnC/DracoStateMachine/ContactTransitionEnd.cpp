@@ -20,6 +20,7 @@ ContactTransitionEnd::ContactTransitionEnd(
 ContactTransitionEnd::~ContactTransitionEnd() {}
 
 void ContactTransitionEnd::firstVisit() {
+  contact_type_ = taf_container_->contact_type_;
   // Set control Starting time
   if (state_identity_ == DRACO_STATES::RL_CONTACT_TRANSITION_END) {
     std::cout << "[Right Foot Contact Transition End]" << std::endl;
@@ -32,23 +33,32 @@ void ContactTransitionEnd::firstVisit() {
   // Ramp to minimum the foot task hierarchy weight in prep for swing
   end_time_ = ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime();
   if (leg_side_ == LEFT_ROBOT_SIDE) {
-    ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToZero(
-    0.0, end_time_);
-    ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToZero(
-    0.0, end_time_);
-    // ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToZero(
-    //     0.0, end_time_);
+    if(contact_type_ == 2){
+      ctrl_arch_->lfoot_max_normal_force_manager_->initializeRampToZero(
+          0.0, end_time_);
+    }
+    else{
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->initializeRampToZero(
+      0.0, end_time_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->initializeRampToZero(
+      0.0, end_time_);
+    }
+
     ctrl_arch_->lfoot_pos_hierarchy_manager_->initializeRampToMin(
         0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
     ctrl_arch_->lfoot_ori_hierarchy_manager_->initializeRampToMin(
         0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
   } else {
-    ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToZero(
-    0.0, end_time_);
-    ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToZero(
-    0.0, end_time_);
-    // ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToZero(
-    //     0.0, end_time_);
+    if (contact_type_ == 2){
+      ctrl_arch_->rfoot_max_normal_force_manager_->initializeRampToZero(
+          0.0, end_time_);
+    }
+    else{
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->initializeRampToZero(
+      0.0, end_time_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->initializeRampToZero(
+      0.0, end_time_);
+    }
     ctrl_arch_->rfoot_pos_hierarchy_manager_->initializeRampToMin(
         0.0, ctrl_arch_->dcm_trajectory_manager_->getNormalForceRampDownTime());
     ctrl_arch_->rfoot_ori_hierarchy_manager_->initializeRampToMin(
@@ -77,23 +87,31 @@ void ContactTransitionEnd::oneStep() {
   // - Ramp to minimum the foot task hierarchy weight in prep for swing
   // =========================================================================
   if (leg_side_ == LEFT_ROBOT_SIDE) {
-    ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
-    state_machine_time_);
-    ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
-    state_machine_time_);
-    // ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(
-    //     state_machine_time_);
+    if(contact_type_ == 2){
+      ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+    }
+    else{
+      ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+      ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+    }
     ctrl_arch_->lfoot_pos_hierarchy_manager_->updateRampToMinDesired(
         state_machine_time_);
     ctrl_arch_->lfoot_ori_hierarchy_manager_->updateRampToMinDesired(
         state_machine_time_);
   } else {
-    ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
-    state_machine_time_);
-    ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
-    state_machine_time_);
-    // ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(
-    //     state_machine_time_);
+    if(contact_type_ == 2){
+      ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+    }
+    else{
+      ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+      ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToZeroDesired(
+      state_machine_time_);
+    }
     ctrl_arch_->rfoot_pos_hierarchy_manager_->updateRampToMinDesired(
         state_machine_time_);
     ctrl_arch_->rfoot_ori_hierarchy_manager_->updateRampToMinDesired(
