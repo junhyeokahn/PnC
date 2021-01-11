@@ -61,8 +61,12 @@ task_parameters:
     ini_w_task_foot_pos: 0.
     ini_w_task_foot_ori: 0.
 
-    max_w_task_com: 5e-2
-    max_w_task_base_ori: 1e-2
+    #max_w_task_com: 5e-2
+    #max_w_task_base_ori: 1e-2
+    #
+    max_w_task_com: 3e-2
+    max_w_task_base_ori: 7e-3
+
     max_w_task_foot_pos: 1.
     max_w_task_foot_ori: 1.
 
