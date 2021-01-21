@@ -114,31 +114,31 @@ void setDampingCoef(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
-  // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
-  // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << bn->getName() << std::endl;
-  // std::cout << bn->getMass() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+    dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+    std::cout << i << "th" << std::endl;
+    std::cout << bn->getName() << std::endl;
+    std::cout << bn->getMass() << std::endl;
+  }
 
-  // for (int i = 0; i < robot->getNumJoints(); ++i) {
-  // dart::dynamics::Joint* joint = robot->getJoint(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << joint->getNumDofs() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumJoints(); ++i) {
+    dart::dynamics::Joint* joint = robot->getJoint(i);
+    std::cout << i << "th" << std::endl;
+    std::cout << joint->getNumDofs() << std::endl;
+  }
 
-  // for (int i = 0; i < robot->getNumDofs(); ++i) {
-  // dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << dof->getName() << std::endl;
-  // std::cout << "child body node name : " <<
-  // dof->getChildBodyNode()->getName() << std::endl; std::cout <<
-  // dof->getCoulombFriction() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumDofs(); ++i) {
+    dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+    std::cout << i << "th" << std::endl;
+    std::cout << dof->getName() << std::endl;
+    std::cout << "child body node name : " <<
+    dof->getChildBodyNode()->getName() << std::endl; std::cout <<
+    dof->getCoulombFriction() << std::endl;
+  }
 
-  // std::cout << "num dof" << std::endl;
-  // std::cout << robot->getNumDofs() << std::endl;
-  // std::cout << robot->getNumJoints() << std::endl;
+  std::cout << "num dof" << std::endl;
+  std::cout << robot->getNumDofs() << std::endl;
+  std::cout << robot->getNumJoints() << std::endl;
   // std::cout << "mass mat row" << std::endl;
   // std::cout << robot->getMassMatrix().rows() << std::endl;
   // std::cout << robot->getMassMatrix().cols() << std::endl;
@@ -171,17 +171,17 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
   switch (initPos) {
     case 0: {
-      q[2] = 0.4;//Torso Height
+      q[5] = 0.8;//Torso Height
 
       q[frHipIdx] = 0.;
       q[flHipIdx] = 0.;
       q[rrHipIdx] = 0.;
       q[rlHipIdx] = 0.;
 
-      q[frThighIdx] = M_PI/2.;
-      q[flThighIdx] = M_PI/2.;
-      q[rrThighIdx] = M_PI/2.;
-      q[rlThighIdx] = M_PI/2.;
+      q[frThighIdx] = M_PI/4.;
+      q[flThighIdx] = M_PI/4.;
+      q[rrThighIdx] = M_PI/4.;
+      q[rlThighIdx] = M_PI/4.;
 
       q[frKneeIdx] = -M_PI/2.;
       q[flKneeIdx] = -M_PI/2.;
@@ -230,6 +230,7 @@ int main(int argc, char** argv) {
   bool b_joint_limit_enforced;
   int num_steps_per_cycle;
   double servo_rate;
+
   try {
     YAML::Node simulation_cfg =
         YAML::LoadFile(THIS_COM "Config/A1/SIMULATION.yaml");
@@ -283,6 +284,7 @@ int main(int argc, char** argv) {
   world->setGravity(gravity);
   world->setTimeStep(servo_rate);
 
+
   // =========================================================================
   // Set Damping
   // =========================================================================
@@ -292,16 +294,15 @@ int main(int argc, char** argv) {
   // Display Joints Frame
   // =========================================================================
   if (b_display_joint_frame) displayJointFrames(world, robot);
-
   // =========================================================================
   // Initial configuration
   // =========================================================================
   _setInitialConfiguration(robot);
-
   // =========================================================================
   // Enabel Joit Limits
   // =========================================================================
   if (b_joint_limit_enforced) _setJointLimitConstraint(robot);
+
 
   // =========================================================================
   // Print Model Info
@@ -318,7 +319,7 @@ int main(int argc, char** argv) {
   // Wrap a worldnode
   // =========================================================================
   osg::ref_ptr<A1WorldNode> node;
-  node = new A1WorldNode(world);
+  node = new A1WorldNode(world); // The error is in A1WorldNode
   node->setNumStepsPerCycle(num_steps_per_cycle);
 
   // =========================================================================
@@ -341,7 +342,7 @@ int main(int argc, char** argv) {
     viewer.record(THIS_COM "/ExperimentVideo");
   }
 
-  // viewer.setUpViewInWindow(0, 0, 2880, 1800);
+// viewer.setUpViewInWindow(0, 0, 2880, 1800);
   viewer.setUpViewInWindow(1440, 0, 500, 500);
   viewer.getCameraManipulator()->setHomePosition(
       ::osg::Vec3(5.14, 2.28, 3.0) * 0.8, ::osg::Vec3(0.0, 0.2, 0.5),

@@ -10,7 +10,7 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
       t_(0.0),
       servo_rate_(0.001) {
   world_ = _world;
-  skel_ = world_->getSkeleton("A1");
+  skel_ = world_->getSkeleton("a1");
   trq_lb_ = skel_->getForceLowerLimits();
   trq_ub_ = skel_->getForceUpperLimits();
   ground_ = world_->getSkeleton("ground_skeleton");
