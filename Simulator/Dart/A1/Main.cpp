@@ -114,12 +114,12 @@ void setDampingCoef(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
-  for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
-    dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
-    std::cout << i << "th" << std::endl;
-    std::cout << bn->getName() << std::endl;
-    std::cout << bn->getMass() << std::endl;
-  }
+  // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+  //   dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+  //   std::cout << i << "th" << std::endl;
+  //   std::cout << bn->getName() << std::endl;
+  //   std::cout << bn->getMass() << std::endl;
+  // }
 
   for (int i = 0; i < robot->getNumJoints(); ++i) {
     dart::dynamics::Joint* joint = robot->getJoint(i);
@@ -171,7 +171,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
   switch (initPos) {
     case 0: {
-      q[5] = 0.8;//Torso Height
+      q[2] = 0.8;//Torso Height
 
       q[frHipIdx] = 0.;
       q[flHipIdx] = 0.;
@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Print Model Info
   // =========================================================================
-  //_printRobotModel(robot);
+  _printRobotModel(robot);
 
   float minLightMargin = 10.f;
   float maxFarPlane = 0;

@@ -114,31 +114,31 @@ void setDampingCoef(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
-  // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
-  // dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << bn->getName() << std::endl;
-  // std::cout << bn->getMass() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+  dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+  std::cout << i << "th" << std::endl;
+  std::cout << bn->getName() << std::endl;
+  std::cout << bn->getMass() << std::endl;
+  }
 
-  // for (int i = 0; i < robot->getNumJoints(); ++i) {
-  // dart::dynamics::Joint* joint = robot->getJoint(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << joint->getNumDofs() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumJoints(); ++i) {
+  dart::dynamics::Joint* joint = robot->getJoint(i);
+  std::cout << i << "th" << std::endl;
+  std::cout << joint->getNumDofs() << std::endl;
+  }
 
-  // for (int i = 0; i < robot->getNumDofs(); ++i) {
-  // dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
-  // std::cout << i << "th" << std::endl;
-  // std::cout << dof->getName() << std::endl;
-  // std::cout << "child body node name : " <<
-  // dof->getChildBodyNode()->getName() << std::endl; std::cout <<
-  // dof->getCoulombFriction() << std::endl;
-  //}
+  for (int i = 0; i < robot->getNumDofs(); ++i) {
+  dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+  std::cout << i << "th" << std::endl;
+  std::cout << dof->getName() << std::endl;
+  std::cout << "child body node name : " <<
+  dof->getChildBodyNode()->getName() << std::endl; std::cout <<
+  dof->getCoulombFriction() << std::endl;
+  }
 
-  // std::cout << "num dof" << std::endl;
-  // std::cout << robot->getNumDofs() << std::endl;
-  // std::cout << robot->getNumJoints() << std::endl;
+  std::cout << "num dof" << std::endl;
+  std::cout << robot->getNumDofs() << std::endl;
+  std::cout << robot->getNumJoints() << std::endl;
   // std::cout << "mass mat row" << std::endl;
   // std::cout << robot->getMassMatrix().rows() << std::endl;
   // std::cout << robot->getMassMatrix().cols() << std::endl;
@@ -292,7 +292,7 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Print Model Info
   // =========================================================================
-  //_printRobotModel(robot);
+  _printRobotModel(robot);
 
   float minLightMargin = 10.f;
   float maxFarPlane = 0;
