@@ -19,10 +19,8 @@ class A1SensorData{
         q = Eigen::VectorXd::Zero(12);
         qdot = Eigen::VectorXd::Zero(12);
         jtrq = Eigen::VectorXd::Zero(12);
-        // q_act = Eigen::VectorXd::Zero(A1::n_adof);
-        // qdot_act = Eigen::VectorXd::Zero(A1::n_adof);
-        virtual_q = Eigen::VectorXd::Zero(A1::n_vdof);
-        virtual_qdot = Eigen::VectorXd::Zero(A1::n_vdof);
+        virtual_q = Eigen::VectorXd::Zero(6);
+        virtual_qdot = Eigen::VectorXd::Zero(6);
 
         flf_wrench = Eigen::VectorXd::Zero(6);
         frf_wrench = Eigen::VectorXd::Zero(6);
@@ -42,8 +40,6 @@ class A1SensorData{
       Eigen::VectorXd q;
       Eigen::VectorXd qdot;
       Eigen::VectorXd jtrq;
-      // Eigen::VectorXd q_act;
-      // Eigen::VectorXd qdot_act;
       Eigen::VectorXd virtual_q;
       Eigen::VectorXd virtual_qdot;
 
@@ -74,23 +70,33 @@ class A1Command{
 };
 
 
-/*
+
 class A1Interface : public EnvInterface{
     protected:
+      int waiting_count_;
+
       void _ParameterSetting();
+      bool _Initialization(DracoSensorData*, DracoCommand*);
+      bool _UpdateTestCommand(DracoCommand* test_cmd);
+      void _SetStopCommand(DracoSensorData*, DracoCommand* cmd);
+      void _CopyCommand(DracoCommand* cmd);
 
       A1StateProvider* sp_;
       // A1StateEstimator* state_estimator_;
 
-      bool Initialization_(A1SensorData*, A1Command*);
-
-      int count_;
-      int waiting_count;
-      bool test_initialized;
       Eigen::VectorXd cmd_jpos_;
       Eigen::VectorXd cmd_jvel_;
       Eigen::VectorXd cmd_jtrq_;
+      Eigen::VectorXd data_torque_;
 
+      // safety
+      Eigen::VectorXd jpos_max_;
+      Eigen::VectorXd jpos_min_;
+      Eigen::VectorXd jvel_max_;
+      Eigen::VectorXd jvel_min_;
+      Eigen::VectorXd jtrq_max_;
+      Eigen::VectorXd jtrq_max_;
+      bool stop_test_;
 
     public:
       A1Interface();
@@ -102,4 +108,4 @@ class A1Interface : public EnvInterface{
 
 
 
-*/
+

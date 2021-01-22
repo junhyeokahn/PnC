@@ -261,7 +261,7 @@ int main(int argc, char** argv) {
   world->addSkeleton(robot);
 
   // =========================================================================
-  // Friction & Restitution Coefficient
+  // Friction & Restitution Coefficient (for collision objects)
   // =========================================================================
   double friction(10.);
   double restit(0.0);
@@ -270,11 +270,47 @@ int main(int argc, char** argv) {
   ground->getBodyNode("ground_link")->setRestitutionCoeff(restit);
   robot->getBodyNode("trunk")->setRestitutionCoeff(restit);
 
-  // robot->getBodyNode("rAnkle")->setFrictionCoeff(friction);
-  // robot->getBodyNode("lAnkle")->setFrictionCoeff(friction);
-  // robot->getBodyNode("lAnkle")->setRestitutionCoeff(restit);
-  // robot->getBodyNode("rAnkle")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FR_hip")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FL_hip")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RR_hip")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RL_hip")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FR_hip")->setFrictionCoeff(friction);
+  robot->getBodyNode("FL_hip")->setFrictionCoeff(friction);
+  robot->getBodyNode("RR_hip")->setFrictionCoeff(friction);
+  robot->getBodyNode("RL_hip")->setFrictionCoeff(friction);
 
+  robot->getBodyNode("FR_thigh_shoulder")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FL_thigh_shoulder")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RR_thigh_shoulder")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RL_thigh_shoulder")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FR_thigh_shoulder")->setFrictionCoeff(friction);
+  robot->getBodyNode("FL_thigh_shoulder")->setFrictionCoeff(friction);
+  robot->getBodyNode("RR_thigh_shoulder")->setFrictionCoeff(friction);
+  robot->getBodyNode("RL_thigh_shoulder")->setFrictionCoeff(friction);
+  
+  robot->getBodyNode("FR_thigh")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FL_thigh")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RR_thigh")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RL_thigh")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FR_thigh")->setFrictionCoeff(friction);
+  robot->getBodyNode("FL_thigh")->setFrictionCoeff(friction);
+  robot->getBodyNode("RR_thigh")->setFrictionCoeff(friction);
+  robot->getBodyNode("RL_thigh")->setFrictionCoeff(friction);
+
+  robot->getBodyNode("FR_calf")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FL_calf")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RR_calf")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RL_calf")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FR_calf")->setFrictionCoeff(friction);
+  robot->getBodyNode("FL_calf")->setFrictionCoeff(friction);
+  robot->getBodyNode("RR_calf")->setFrictionCoeff(friction);
+  robot->getBodyNode("RL_calf")->setFrictionCoeff(friction);
+ 
+
+  robot->getBodyNode("FR_foot")->setRestitutionCoeff(restit);
+  robot->getBodyNode("FL_foot")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RR_foot")->setRestitutionCoeff(restit);
+  robot->getBodyNode("RL_foot")->setRestitutionCoeff(restit);
   robot->getBodyNode("FR_foot")->setFrictionCoeff(friction);
   robot->getBodyNode("FL_foot")->setFrictionCoeff(friction);
   robot->getBodyNode("RR_foot")->setFrictionCoeff(friction);
@@ -307,7 +343,7 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Print Model Info
   // =========================================================================
-  _printRobotModel(robot);
+  // _printRobotModel(robot);
 
   float minLightMargin = 10.f;
   float maxFarPlane = 0;

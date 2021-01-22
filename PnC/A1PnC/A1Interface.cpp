@@ -1,13 +1,19 @@
 #include <math.h>
 #include <stdio.h>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/A1PnC/A1Interface.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
+#include <Utils/IO/DataManager.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 // #include <PnC/A1PnC/A1StateProvider.hpp>
+// #include <PnC/A1PnC/A1StateEstimator.hpp>
+#include <PnC/A1PnC/A1Interface.hpp>
+#include <PnC/A1PnC/A1Definition.hpp>
+// #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <string>
 
-/*
+
 A1Interface::A1Interface() : EnvInterface() {
     std::string border = "=";
     for (int i = 0; i < 79; ++i) {
@@ -16,27 +22,35 @@ A1Interface::A1Interface() : EnvInterface() {
     myUtils::color_print(myColor::BoldCyan, border);
     myUtils::pretty_constructor(0, "A1 Interface");
 
-    robot_ = new RobotSystem(
-        4, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
-     //robot_->printRobotInfo();
+    robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
+    //robot_->printRobotInfo();
+
     // sp_ = A1StateProvider::getStateProvider(robot_);
+    // state_estimator_ = new A1StateEstimator(robot_);
 
-    count_ = 0;
-    //waiting_count_ = 2;
-    test_initialized = false;
-    cmd_jpos_ = Eigen::VectorXd::Zero(A1::n_adof);
-    cmd_jvel_ = Eigen::VectorXd::Zero(A1::n_adof);
-    cmd_jtrq_ = Eigen::VectorXd::Zero(A1::n_adof);
+    waiting_count_ = 10;
 
-    _ParameterSetting();
+    cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
+    data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    stop_test_ = false;
 
     myUtils::color_print(myColor::BoldCyan, border);
 
-    DataManager* data_manager = DataManager::GetDataManager();
-    data_manager->RegisterData(&running_time_,DOUBLE,"time",1);
-    data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", A1::n_adof);
-    data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", A1::n_adof);
-    data_manager->RegisterData(&cmd_jtrq_, VECT, "jtrq_des", A1::n_adof);
+    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
+                                                "running_time",1);
+    DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT,"jpos_des",
+                                                robot_->getNumActuatedDofs());
+    DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT,"jvel_des",
+                                                robot_->getNumActuatedDofs());
+    DataManager::GetDataManager()->RegisterData(&cmd_jtrq__, VECT,"command",
+                                                robot_->getNumActuatedDofs());
+    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"torque",
+                                                robot_->getNumActuatedDofs());
+
+    _ParameterSetting();
 }
 
 A1Interface::~A1Interface() {
@@ -99,4 +113,4 @@ bool A1Interface::Initialization_(A1SensorData* _sensor_data, A1Command* _Comman
     }
     return false;
 }
-*/
+

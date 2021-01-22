@@ -8,7 +8,7 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
     : dart::gui::osg::WorldNode(_world),
       count_(0),
       t_(0.0),
-      servo_rate_(0.001) {
+      servo_rate_(0.002) {
   world_ = _world;
   skel_ = world_->getSkeleton("a1");
   trq_lb_ = skel_->getForceLowerLimits();
@@ -275,7 +275,7 @@ void A1WorldNode::get_force_torque_data_() {
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        // T_wc.translation() = contact.point; Since A1 force sensor in foot
+        T_wc.translation() = contact.point; // Since A1 force sensor in foot
         Eigen::Isometry3d T_wa = skel_->getBodyNode("FR_foot")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
@@ -300,7 +300,7 @@ void A1WorldNode::get_force_torque_data_() {
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        // T_wc.translation() = contact.point; Since A1 force sensor in foot
+        T_wc.translation() = contact.point; // Since A1 force sensor in foot
         Eigen::Isometry3d T_wa = skel_->getBodyNode("FL_foot")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
@@ -325,7 +325,7 @@ void A1WorldNode::get_force_torque_data_() {
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        // T_wc.translation() = contact.point; Since A1 force sensor in foot
+        T_wc.translation() = contact.point; // Since A1 force sensor in foot
         Eigen::Isometry3d T_wa = skel_->getBodyNode("RR_foot")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
@@ -350,7 +350,7 @@ void A1WorldNode::get_force_torque_data_() {
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
         Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        // T_wc.translation() = contact.point; Since A1 force sensor in foot
+        T_wc.translation() = contact.point; // Since A1 force sensor in foot
         Eigen::Isometry3d T_wa = skel_->getBodyNode("RL_foot")->getTransform(
             dart::dynamics::Frame::World());
         Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity

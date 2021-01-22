@@ -4,7 +4,7 @@ constexpr int n_bodynode = 27;
 constexpr int n_dof = 18;
 constexpr int n_vdof = 6;
 constexpr int n_adof = 12; 
-
+constexpr int num_leg_joint = 3;
 }  // namespace Valkyrie
 
 namespace A1BodyNode {
@@ -59,5 +59,5 @@ constexpr int RL_calf_joint = 17;
 }  // namespace A1DoF
 
 namespace A1Aux {
-constexpr double ServoRate = 0.4; // Todo
+constexpr double servo_rate = 2.0 / 1000.0; //A1 runs at 500 Hz
 }
