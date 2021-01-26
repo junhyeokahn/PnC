@@ -76,10 +76,10 @@ class A1Interface : public EnvInterface{
       int waiting_count_;
 
       void _ParameterSetting();
-      bool _Initialization(DracoSensorData*, DracoCommand*);
-      bool _UpdateTestCommand(DracoCommand* test_cmd);
-      void _SetStopCommand(DracoSensorData*, DracoCommand* cmd);
-      void _CopyCommand(DracoCommand* cmd);
+      bool _Initialization(A1SensorData*, A1Command*);
+      bool _UpdateTestCommand(A1Command* test_cmd);
+      void _SetStopCommand(A1SensorData*, A1Command* cmd);
+      void _CopyCommand(A1Command* cmd);
 
       A1StateProvider* sp_;
       // A1StateEstimator* state_estimator_;
@@ -95,7 +95,7 @@ class A1Interface : public EnvInterface{
       Eigen::VectorXd jvel_max_;
       Eigen::VectorXd jvel_min_;
       Eigen::VectorXd jtrq_max_;
-      Eigen::VectorXd jtrq_max_;
+      Eigen::VectorXd jtrq_min_;
       bool stop_test_;
 
     public:

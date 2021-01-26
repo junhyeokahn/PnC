@@ -5,7 +5,7 @@
 #include <Utils/Math/MathUtilities.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
-// #include <PnC/A1PnC/A1StateProvider.hpp>
+#include <PnC/A1PnC/A1StateProvider.hpp>
 // #include <PnC/A1PnC/A1StateEstimator.hpp>
 #include <PnC/A1PnC/A1Interface.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
@@ -25,7 +25,7 @@ A1Interface::A1Interface() : EnvInterface() {
     robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
     //robot_->printRobotInfo();
 
-    // sp_ = A1StateProvider::getStateProvider(robot_);
+    sp_ = A1StateProvider::getStateProvider(robot_);
     // state_estimator_ = new A1StateEstimator(robot_);
 
     waiting_count_ = 10;
@@ -45,7 +45,7 @@ A1Interface::A1Interface() : EnvInterface() {
                                                 robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT,"jvel_des",
                                                 robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq__, VECT,"command",
+    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command",
                                                 robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"torque",
                                                 robot_->getNumActuatedDofs());
@@ -63,54 +63,116 @@ void A1Interface::getCommand(void* _data, void* _command){
     A1Command* cmd = ((A1Command*)_command);
     A1SensorData* data = ((A1SensorData*)_data);
 
-    if(!Initialization_(data,cmd)){
+    if(!(_Initialization(data,cmd))){
         // state_estimator_->Update(data);
-        sp_->saveCurrentData();
-        // data->q_act = sp_->act_q_;
-        // data->qdot_act = sp_->act_qdot_;
-        robot_->updateSystem(data->q, data->qdot, true);
+        // sp_->saveCurrentData();
+        // data->q = sp_->q; // TODO THIS MAY BE WRONG
+        // data->qdot = sp_->qdot;
+        // robot_->updateSystem(data->q, data->qdot, true);
         // test_->getCommand(cmd);
         //CropTorque_(cmd);
     }
-
-    ++count_;
-    running_time_ = (double)(count_)*A1Aux::ServoRate;
+    // Save Data
+    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+        data_torque_[i] = data->jtrq[i];
+    }
+    
+    running_time_ = (double)(count_)*A1Aux::servo_rate;
     sp_->curr_time = running_time_;
-    // sp_->phase_copy = test_->getPhase();
+    // sp_->phase_copy = control_architecture_->getState();
+    ++count_;
 }
 
-void A1Interface::_ParameterSetting(){
+bool A1Interface::_UpdateTestCommand(A1Command* cmd) {
+  bool over_limit(false);
 
-    try{
-        YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/A1/INTERFACE.yaml");
+  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    // JPos limit check
+    if (cmd->q[i] > jpos_max_[i])
+      cmd_jpos_[i] = jpos_max_[i];
+    else if (cmd->q[i] < jpos_min_[i])
+      cmd_jpos_[i] = jpos_min_[i];
+    else
+      cmd_jpos_[i] = cmd->q[i];
 
-        std::string test_name = myUtils::readParameter<std::string>(cfg, "test_name");
+    // Velocity limit
+    if (cmd->qdot[i] > jvel_max_[i]) {
+      // over_limit = true;
+    } else if (cmd->qdot[i] < jvel_min_[i]) {
+      // over_limit = true;
+    } else
+      cmd_jvel_[i] = cmd->qdot[i];
 
-        if(test_name == "move_test") {
-            //test_ = new MoveTest(robot_);
-        }
-        else{
-            printf(
-                "[A1 Interface] There is no test matching test with " 
-                "the name\n");
-            exit(0);
-        } 
+    // Torque limit
+    if (cmd->jtrq[i] > jtrq_max_[i]) {
+      // over_limit = true;
+      cmd->jtrq[i] = jtrq_max_[i];
+      cmd_jtrq_[i] = cmd->jtrq[i];
+    } else if (cmd->jtrq[i] < jtrq_min_[i]) {
+      // over_limit = true;
+      cmd->jtrq[i] = jtrq_min_[i];
+      cmd_jtrq_[i] = cmd->jtrq[i];
+    } else {
+      cmd_jtrq_[i] = cmd->jtrq[i];
     }
-    catch(std::runtime_error& e) {
-        std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-            << __FILE__ << "]" << std::endl
-            << std::endl;
-        exit(0);
-    }
+  }
+  return over_limit;
 }
 
-
-bool A1Interface::Initialization_(A1SensorData* _sensor_data, A1Command* _Command){
-    if(!test_initialized){
-        // test_->TestInitialization();
-        test_initialized=true;
-        DataManager::GetDataManager()->start();
-    }
-    return false;
+void A1Interface::_SetStopCommand(A1SensorData* data, A1Command* cmd) {
+  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    cmd->jtrq[i] = 0.;
+    cmd->q[i] = data->q[i];
+    cmd->qdot[i] = 0.;
+  }
 }
 
+void A1Interface::_CopyCommand(A1Command* cmd) {
+  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    cmd->jtrq[i] = cmd_jtrq_[i];
+    cmd->q[i] = cmd_jpos_[i];
+    cmd->qdot[i] = cmd_jvel_[i];
+  }
+}
+
+bool A1Interface::_Initialization(A1SensorData* data, A1Command* cmd) {
+  // static bool test_initialized(false);
+  // if (!test_initialized) {
+  //   control_architecture_->ControlArchitectureInitialization();
+  //   test_initialized = true;
+  // }
+  if (count_ < waiting_count_) {
+    _SetStopCommand(data, cmd);
+    // state_estimator_->initialization(data);
+    DataManager::GetDataManager()->start();
+    return true;
+  }
+  return false;
+}
+
+void A1Interface::_ParameterSetting() {
+  try {
+    YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/A1/INTERFACE.yaml");
+    std::string test_name =
+        myUtils::readParameter<std::string>(cfg, "test_name");
+    if (test_name == "balancing") {
+      // control_architecture_ = new A1ControlArchitecture(robot_);     
+    } else {
+      printf(
+          "[A1 Interface] There is no matching test with the "
+          "name\n");
+      exit(0);
+    }
+    myUtils::readParameter(cfg, "jpos_max", jpos_max_);
+    myUtils::readParameter(cfg, "jpos_min", jpos_min_);
+    myUtils::readParameter(cfg, "jvel_max", jvel_max_);
+    myUtils::readParameter(cfg, "jvel_min", jvel_min_);
+    myUtils::readParameter(cfg, "jtrq_max", jtrq_max_);
+    myUtils::readParameter(cfg, "jtrq_min", jtrq_min_);
+  } catch (std::runtime_error& e) {
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+    exit(0);
+  }
+}

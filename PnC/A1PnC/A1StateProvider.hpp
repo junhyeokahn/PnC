@@ -1,0 +1,105 @@
+#pragma once
+
+#include <Configuration.h>
+#include <Utils/IO/IOUtilities.hpp>
+
+class RobotSystem;
+
+class A1StateProvider {
+ public:
+  static A1StateProvider* getStateProvider(RobotSystem* _robot);
+  ~A1StateProvider() {}
+
+  // ---------------------------------------------------------------------------
+  // Variables set outside
+  // ---------------------------------------------------------------------------
+  double curr_time;
+
+  Eigen::Vector2i stance_feet;
+  Eigen::Vector2i prev_stance_feet;
+
+  Eigen::VectorXd rotor_inertia;
+  Eigen::VectorXd q;
+  Eigen::VectorXd qdot;
+  Eigen::VectorXd q_task_des;
+  Eigen::VectorXd qdot_task_des;
+  Eigen::VectorXd q_task;
+  Eigen::VectorXd qdot_task;
+  Eigen::VectorXd prev_trq_cmd;
+
+  Eigen::Vector3d com_pos_des;
+  Eigen::Vector3d com_vel_des;
+  Eigen::Vector3d com_pos;
+  Eigen::Vector3d com_vel;
+  // Eigen::Vector3d est_com_vel;
+  Eigen::Quaternion<double> base_quat_des;
+  Eigen::Vector3d base_ang_vel_des;
+  Eigen::Quaternion<double> base_quat;
+  Eigen::Vector3d base_ang_vel;
+
+  int b_frfoot_contact;
+  int b_flfoot_contact;
+  int b_rrfoot_contact;
+  int b_rlfoot_contact;
+
+  Eigen::VectorXd qddot_cmd;
+
+  // Eigen::Vector3d r_vrp;
+  // Eigen::Vector3d r_vrp_des;
+
+  // Previously these were Eigen::VectorXd but our sensors only give us an integer value
+  int fr_rf_des;
+  int fl_rf_des;
+  int rr_rf_des;
+  int rl_rf_des;
+  int fr_rf;
+  int fl_rf;
+  int rr_rf;
+  int rl_rf; 
+
+  int phase_copy;
+
+  int planning_id;
+
+  Eigen::Vector3d frfoot_pos_des;
+  Eigen::Vector3d flfoot_pos_des;
+  Eigen::Vector3d rrfoot_pos_des;
+  Eigen::Vector3d rlfoot_pos_des; 
+  Eigen::Vector3d frfoot_vel_des;
+  Eigen::Vector3d flfoot_vel_des;
+  Eigen::Vector3d rfoot_center_so3_des;
+  Eigen::Vector3d lfoot_center_so3_des;
+
+  double w_frfoot_pos;
+  double w_flfoot_pos;
+  double w_rrfoot_pos;
+  double w_rlfoot_pos;
+  double w_com;
+  double w_base_ori;
+  double w_frfoot_fr;
+  double w_flfoot_fr;
+  double w_rrfoot_fr;
+  double w_rlfoot_fr;
+
+  // ---------------------------------------------------------------------------
+  // Variables set here
+  // ---------------------------------------------------------------------------
+  Eigen::Vector3d frfoot_pos;
+  Eigen::Vector3d flfoot_pos;
+  Eigen::Vector3d rrfoot_pos;
+  Eigen::Vector3d rlfoot_pos;
+  Eigen::Vector3d frfoot_vel;
+  Eigen::Vector3d flfoot_vel;
+  Eigen::Vector3d rrfoot_vel;
+  Eigen::Vector3d rlfoot_vel;
+  Eigen::Vector3d frfoot_so3;
+  Eigen::Vector3d flfoot_so3;
+  Eigen::Vector3d rrfoot_so3;
+  Eigen::Vector3d rlfoot_so3;
+
+  void saveCurrentData();
+
+ private:
+  A1StateProvider(RobotSystem* _robot);
+  RobotSystem* robot_;
+};
