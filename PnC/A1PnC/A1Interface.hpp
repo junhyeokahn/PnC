@@ -22,11 +22,6 @@ class A1SensorData{
         virtual_q = Eigen::VectorXd::Zero(6);
         virtual_qdot = Eigen::VectorXd::Zero(6);
 
-        flf_wrench = Eigen::VectorXd::Zero(6);
-        frf_wrench = Eigen::VectorXd::Zero(6);
-        rlf_wrench = Eigen::VectorXd::Zero(6);
-        rrf_wrench = Eigen::VectorXd::Zero(6);
-
         flfoot_contact = false;
         frfoot_contact = false;
         rlfoot_contact = false;
@@ -43,10 +38,14 @@ class A1SensorData{
       Eigen::VectorXd virtual_q;
       Eigen::VectorXd virtual_qdot;
 
-      Eigen::VectorXd flf_wrench;
-      Eigen::VectorXd frf_wrench;
-      Eigen::VectorXd rlf_wrench;
-      Eigen::VectorXd rrf_wrench;
+      //int flf_wrench;
+      //int frf_wrench;
+      //int rlf_wrench;
+      //int rrf_wrench;
+      // Eigen::VectorXd flf_wrench;
+      // Eigen::VectorXd frf_wrench;
+      // Eigen::VectorXd rlf_wrench;
+      // Eigen::VectorXd rrf_wrench;
 
       bool flfoot_contact;
       bool frfoot_contact;
@@ -82,7 +81,7 @@ class A1Interface : public EnvInterface{
       void _CopyCommand(A1Command* cmd);
 
       A1StateProvider* sp_;
-      // A1StateEstimator* state_estimator_;
+      A1StateEstimator* state_estimator_;
 
       Eigen::VectorXd cmd_jpos_;
       Eigen::VectorXd cmd_jvel_;

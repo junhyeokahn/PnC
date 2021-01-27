@@ -15,9 +15,6 @@ class A1StateProvider {
   // ---------------------------------------------------------------------------
   double curr_time;
 
-  Eigen::Vector2i stance_feet;
-  Eigen::Vector2i prev_stance_feet;
-
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
@@ -26,6 +23,8 @@ class A1StateProvider {
   Eigen::VectorXd q_task;
   Eigen::VectorXd qdot_task;
   Eigen::VectorXd prev_trq_cmd;
+
+  Eigen::VectorXd jpos_ini;
 
   Eigen::Vector3d com_pos_des;
   Eigen::Vector3d com_vel_des;
@@ -36,26 +35,13 @@ class A1StateProvider {
   Eigen::Vector3d base_ang_vel_des;
   Eigen::Quaternion<double> base_quat;
   Eigen::Vector3d base_ang_vel;
-
+ 
   int b_frfoot_contact;
   int b_flfoot_contact;
   int b_rrfoot_contact;
   int b_rlfoot_contact;
 
   Eigen::VectorXd qddot_cmd;
-
-  // Eigen::Vector3d r_vrp;
-  // Eigen::Vector3d r_vrp_des;
-
-  // Previously these were Eigen::VectorXd but our sensors only give us an integer value
-  int fr_rf_des;
-  int fl_rf_des;
-  int rr_rf_des;
-  int rl_rf_des;
-  int fr_rf;
-  int fl_rf;
-  int rr_rf;
-  int rl_rf; 
 
   int phase_copy;
 
@@ -67,8 +53,6 @@ class A1StateProvider {
   Eigen::Vector3d rlfoot_pos_des; 
   Eigen::Vector3d frfoot_vel_des;
   Eigen::Vector3d flfoot_vel_des;
-  Eigen::Vector3d rfoot_center_so3_des;
-  Eigen::Vector3d lfoot_center_so3_des;
 
   double w_frfoot_pos;
   double w_flfoot_pos;

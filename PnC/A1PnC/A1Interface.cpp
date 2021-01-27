@@ -30,9 +30,9 @@ A1Interface::A1Interface() : EnvInterface() {
 
     waiting_count_ = 10;
 
-    cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    cmd_jtrq_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    cmd_jpos_ = Eigen::VectorXd::Zero(12);
+    cmd_jvel_ = Eigen::VectorXd::Zero(12);
+    cmd_jtrq_ = Eigen::VectorXd::Zero(12);
 
     data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
     stop_test_ = false;
@@ -64,19 +64,14 @@ void A1Interface::getCommand(void* _data, void* _command){
     A1SensorData* data = ((A1SensorData*)_data);
 
     if(!(_Initialization(data,cmd))){
-        // state_estimator_->Update(data);
-        // sp_->saveCurrentData();
-        // data->q = sp_->q; // TODO THIS MAY BE WRONG
-        // data->qdot = sp_->qdot;
-        // robot_->updateSystem(data->q, data->qdot, true);
-        // test_->getCommand(cmd);
-        //CropTorque_(cmd);
+        state_estimator_->Update(data);
+        // control_architecture_->getCommand(cmd);
     }
     // Save Data
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
         data_torque_[i] = data->jtrq[i];
     }
-    
+
     running_time_ = (double)(count_)*A1Aux::servo_rate;
     sp_->curr_time = running_time_;
     // sp_->phase_copy = control_architecture_->getState();

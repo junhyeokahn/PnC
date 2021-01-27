@@ -51,7 +51,9 @@ void A1WorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
 
   sensor_data_->q = skel_->getPositions().tail(12);
+  sensor_data_->virtual_q = skel_->getPositions().head(6)
   sensor_data_->qdot = skel_->getVelocities().tail(12);
+  sensor_data_->virtual_qdot = skel_->getVelocities().head(6);
   sensor_data_->jtrq = skel_->getForces().tail(12);
 
   // get_force_torque_data_(); // TODO
@@ -60,8 +62,6 @@ void A1WorldNode::customPreStep() {
                              sensor_data_->flfoot_contact,
                              sensor_data_->rrfoot_contact,
                              sensor_data_->rlfoot_contact);
-  // check_foot_contact_by_ft_(sensor_data_->rfoot_contact,
-  // sensor_data_->lfoot_contact);
 
   // Check for user button presses
   if (b_button_p) interface_->interrupt->b_interrupt_button_p = true;
@@ -145,7 +145,7 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
 
 }
 
-void A1WorldNode::check_foot_contact_by_ft_(bool& frfoot_contact,
+/*void A1WorldNode::check_foot_contact_by_ft_(bool& frfoot_contact,
                                             bool& flfoot_contact,
                                             bool& rrfoot_contact,
                                             bool& rlfoot_contact) {
@@ -182,7 +182,7 @@ void A1WorldNode::check_foot_contact_by_ft_(bool& frfoot_contact,
     rlfoot_contact = false;
   }
 }
-
+*/
 void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
                                              bool& flfoot_contact,
                                              bool& rrfoot_contact,
@@ -245,7 +245,7 @@ void A1WorldNode::hold_xy_() {
   trq_cmd_[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
 }
 
-void A1WorldNode::get_force_torque_data_() {
+/*void A1WorldNode::get_force_torque_data_() {
   Eigen::VectorXd frf_wrench = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd flf_wrench = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd rrf_wrench = Eigen::VectorXd::Zero(6);
@@ -368,4 +368,4 @@ void A1WorldNode::get_force_torque_data_() {
   sensor_data_->rlf_wrench = rlf_wrench;
   sensor_data_->rrf_wrench = rrf_wrench;
 
-}
+}*/

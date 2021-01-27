@@ -12,17 +12,13 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   myUtils::pretty_constructor(1, "State Provider");
 
   robot_ = _robot;
-  stance_feet(0) = A1BodyNode::FL_foot;
-  stance_feet(1) = A1BodyNode::RR_foot;
-  prev_stance_feet(0) = stance_feet(0);
-  prev_stance_feet(1) = stance_feet(1)
   curr_time = 0.;
   planning_id = 0;
   prev_trq_cmd = Eigen::VectorXd::Zero(12);
 
   rotor_inertia = Eigen::VectorXd::Zero(12);
-  q = Eigen::VectorXd::Zero(robot_->getNumDofs());
-  qdot = Eigen::VectorXd::Zero(robot_->getNumDofs());
+  q = Eigen::VectorXd::Zero(18);
+  qdot = Eigen::VectorXd::Zero(18);
   q_task_des = Eigen::VectorXd::Zero(12);
   qdot_task_des = Eigen::VectorXd::Zero(12);
   q_task = Eigen::VectorXd::Zero(12);
@@ -65,14 +61,14 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   com_vel_des.setZero();
   // est_com_vel.setZero();
 
-  fr_rf = 0; // Eigen::VectorXd::Zero(6);
+  /*fr_rf = 0; // Eigen::VectorXd::Zero(6);
   fl_rf = 0; // Eigen::VectorXd::Zero(6);
   rr_rf = 0; // Eigen::VectorXd::Zero(6);
   rl_rf = 0; // Eigen::VectorXd::Zero(6);
   fr_rf_des = 0; // Eigen::VectorXd::Zero(6);
   fl_rf_des = 0; // Eigen::VectorXd::Zero(6);
   rr_rf_des = 0; // Eigen::VectorXd::Zero(6);
-  rl_rf_des = 0; // Eigen::VectorXd::Zero(6);
+  rl_rf_des = 0; // Eigen::VectorXd::Zero(6);*/
 
   DataManager* data_manager = DataManager::GetDataManager();
 
@@ -87,7 +83,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   data_manager->RegisterData(&b_frfoot_contact, INT, "frfoot_contact", 1);
   data_manager->RegisterData(&b_flfoot_contact, INT, "flfoot_contact", 1);
-  data_manager->RegisterData(&fr_rf, INT, "fr_rf", 1);
+  /*data_manager->RegisterData(&fr_rf, INT, "fr_rf", 1);
   data_manager->RegisterData(&fl_rf, INT, "fl_rf", 1);
   data_manager->RegisterData(&fr_rf_des, INT, "fr_rf_des", 1);
   data_manager->RegisterData(&fl_rf_des, INT, "fl_rf_des", 1);
@@ -96,7 +92,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&rr_rf, INT, "rr_rf", 1);
   data_manager->RegisterData(&rl_rf, INT, "rl_rf", 1);
   data_manager->RegisterData(&rr_rf_des, INT, "rr_rf_des", 1);
-  data_manager->RegisterData(&rl_rf_des, INT, "rl_rf_des", 1);
+  data_manager->RegisterData(&rl_rf_des, INT, "rl_rf_des", 1);*/
 
   // ---------------------------------------------------------------------------
   // WBC
@@ -120,22 +116,16 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&flfoot_pos, VECT3, "flfoot_pos", 3);
   data_manager->RegisterData(&frfoot_vel, VECT3, "frfoot_vel", 3);
   data_manager->RegisterData(&flfoot_vel, VECT3, "flfoot_vel", 3);
-  data_manager->RegisterData(&frfoot_so3, VECT3, "frfoot_so3", 3);
-  data_manager->RegisterData(&flfoot_so3, VECT3, "flfoot_so3", 3);
 
   data_manager->RegisterData(&rrfoot_pos, VECT3, "rrfoot_pos", 3);
   data_manager->RegisterData(&rlfoot_pos, VECT3, "rlfoot_pos", 3);
   data_manager->RegisterData(&rrfoot_vel, VECT3, "rrfoot_vel", 3);
   data_manager->RegisterData(&rlfoot_vel, VECT3, "rlfoot_vel", 3);
-  data_manager->RegisterData(&rrfoot_so3, VECT3, "rrfoot_so3", 3);
-  data_manager->RegisterData(&rlfoot_so3, VECT3, "rlfoot_so3", 3);
 
   data_manager->RegisterData(&frfoot_pos_des, VECT3, "frfoot_pos_des", 3);
   data_manager->RegisterData(&flfoot_pos_des, VECT3, "flfoot_pos_des", 3);
   data_manager->RegisterData(&frfoot_vel_des, VECT3, "frfoot_vel_des", 3);
   data_manager->RegisterData(&flfoot_vel_des, VECT3, "flfoot_vel_des", 3);
-  data_manager->RegisterData(&frfoot_so3_des, VECT3, "frfoot_so3_des", 3);
-  data_manager->RegisterData(&flfoot_so3_des, VECT3, "flfoot_so3_des", 3);
 
   data_manager->RegisterData(&rrfoot_pos_des, VECT3, "rrfoot_pos_des", 3);
   data_manager->RegisterData(&rlfoot_pos_des, VECT3, "rlfoot_pos_des", 3);
@@ -184,15 +174,6 @@ void A1StateProvider::saveCurrentData() {
       robot_->getBodyNodeSpatialVelocity(A1BodyNode::RR_foot).tail(3);
   rlfoot_vel =
       robot_->getBodyNodeSpatialVelocity(A1BodyNode::RL_foot).tail(3);
-
-  frfoot_so3 =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::FR_foot).head(3);
-  flfoot_so3 =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::FL_foot).head(3);
-  rrfoot_so3 =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::RR_foot).head(3);
-  rlfoot_so3 =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::RL_foot).head(3);
 
   base_quat = Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());

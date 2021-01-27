@@ -166,7 +166,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
   int rlThighIdx = robot->getDof("RL_thigh_joint")->getIndexInSkeleton();
   int rlKneeIdx = robot->getDof("RL_calf_joint")->getIndexInSkeleton();
 
-  int initPos(0);  // 0 : Home, 1 : Simulation, 2 : Experiment
+  int initPos(1);  // 0 : Home, 1 : Simulation, 2 : Experiment
   Eigen::VectorXd q = robot->getPositions();
 
   switch (initPos) {
@@ -191,15 +191,23 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
       break;
     }
     case 1: {
-      /*q[2] = 0.8729;  // 0.893;
-      double alpha(-M_PI / 4.);
-      double beta(M_PI / 5.5);
-      q[lHipPitchIdx] = alpha;
-      q[lKneeIdx] = beta - alpha;
-      q[rHipPitchIdx] = alpha;
-      q[rKneeIdx] = beta - alpha;
-      q[lAnkleIdx] = M_PI / 2 - beta;
-      q[rAnkleIdx] = M_PI / 2 - beta;*/
+      q[2] = 0.8;//Torso Height
+
+      q[frHipIdx] = 0.;
+      q[flHipIdx] = 0.;
+      q[rrHipIdx] = 0.;
+      q[rlHipIdx] = 0.;
+
+      q[frThighIdx] = M_PI/4.;
+      q[flThighIdx] = M_PI/4.;
+      q[rrThighIdx] = M_PI/4.;
+      q[rlThighIdx] = M_PI/4.;
+
+      q[frKneeIdx] = -M_PI/2.;
+      q[flKneeIdx] = -M_PI/2.;
+      q[rrKneeIdx] = -M_PI/2.;
+      q[rlKneeIdx] = -M_PI/2.;
+
       break;
     }
     case 2: {
