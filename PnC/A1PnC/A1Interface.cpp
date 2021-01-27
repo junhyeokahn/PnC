@@ -9,6 +9,7 @@
 #include <PnC/A1PnC/A1StateEstimator.hpp>
 #include <PnC/A1PnC/A1Interface.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
+#include <PnC/A1PnC/A1LogicInterrupt/WalkingInterruptLogic.hpp>
 // #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <string>
@@ -24,6 +25,7 @@ A1Interface::A1Interface() : EnvInterface() {
 
     robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
     //robot_->printRobotInfo();
+    interrupt = new InterruptLogic();
 
     sp_ = A1StateProvider::getStateProvider(robot_);
     state_estimator_ = new A1StateEstimator(robot_);
@@ -55,6 +57,7 @@ A1Interface::A1Interface() : EnvInterface() {
 
 A1Interface::~A1Interface() {
     delete robot_;
+    delete interrupt;
     // delete test_;
 }
 
@@ -65,6 +68,7 @@ void A1Interface::getCommand(void* _data, void* _command){
 
     if(!(_Initialization(data,cmd))){
         state_estimator_->Update(data);
+        interrupt->processInterrupts();
         // control_architecture_->getCommand(cmd);
     }
     // Save Data
@@ -151,7 +155,10 @@ void A1Interface::_ParameterSetting() {
     std::string test_name =
         myUtils::readParameter<std::string>(cfg, "test_name");
     if (test_name == "balancing") {
-      // control_architecture_ = new A1ControlArchitecture(robot_);     
+      // control_architecture_ = new A1ControlArchitecture(robot_);
+      delete interrupt;
+      interrupt = new WalkingInterruptLogic(
+                static_cast<A1ControlArchitecture*>(control_architecture_));
     } else {
       printf(
           "[A1 Interface] There is no matching test with the "
