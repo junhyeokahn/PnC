@@ -5,9 +5,8 @@
 #include "PnC/A1PnC/A1Definition.hpp"
 
 
-
-
 class A1StateProvider;
+class A1StateEstimator;
 
 class A1SensorData{
     public:

@@ -51,7 +51,7 @@ void A1WorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
 
   sensor_data_->q = skel_->getPositions().tail(12);
-  sensor_data_->virtual_q = skel_->getPositions().head(6)
+  sensor_data_->virtual_q = skel_->getPositions().head(6);
   sensor_data_->qdot = skel_->getVelocities().tail(12);
   sensor_data_->virtual_qdot = skel_->getVelocities().head(6);
   sensor_data_->jtrq = skel_->getForces().tail(12);

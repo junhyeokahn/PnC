@@ -6,7 +6,7 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
 #include <PnC/A1PnC/A1StateProvider.hpp>
-// #include <PnC/A1PnC/A1StateEstimator.hpp>
+#include <PnC/A1PnC/A1StateEstimator.hpp>
 #include <PnC/A1PnC/A1Interface.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
 // #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
@@ -26,7 +26,7 @@ A1Interface::A1Interface() : EnvInterface() {
     //robot_->printRobotInfo();
 
     sp_ = A1StateProvider::getStateProvider(robot_);
-    // state_estimator_ = new A1StateEstimator(robot_);
+    state_estimator_ = new A1StateEstimator(robot_);
 
     waiting_count_ = 10;
 
