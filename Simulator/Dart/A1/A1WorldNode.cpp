@@ -17,7 +17,7 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
   dof_ = skel_->getNumDofs();
   trq_cmd_ = Eigen::VectorXd::Zero(dof_);
 
-  // interface_ = new A1Interface();
+  interface_ = new A1Interface();
   sensor_data_ = new A1SensorData();
   command_ = new A1Command();
 
@@ -63,7 +63,7 @@ void A1WorldNode::customPreStep() {
                              sensor_data_->rrfoot_contact,
                              sensor_data_->rlfoot_contact);
 
-  // Check for user button presses
+  /*// Check for user button presses
   if (b_button_p) interface_->interrupt->b_interrupt_button_p = true;
   if (b_button_r) interface_->interrupt->b_interrupt_button_r = true;
   if (b_button_w) interface_->interrupt->b_interrupt_button_w = true;
@@ -76,7 +76,7 @@ void A1WorldNode::customPreStep() {
   if (b_button_j) interface_->interrupt->b_interrupt_button_j = true;
   if (b_button_k) interface_->interrupt->b_interrupt_button_k = true;
   if (b_button_h) interface_->interrupt->b_interrupt_button_h = true;
-  if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;
+  if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;*/
 
   interface_->getCommand(sensor_data_, command_);
 

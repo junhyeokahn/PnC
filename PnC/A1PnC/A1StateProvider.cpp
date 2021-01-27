@@ -37,10 +37,6 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   flfoot_vel_des.setZero();
   rrfoot_vel_des.setZero();
   rlfoot_vel_des.setZero();
-  frfoot_so3_des.setZero();
-  flfoot_so3_des.setZero();
-  rrfoot_so3_des.setZero();
-  rlfoot_so3_des.setZero();
 
   frfoot_pos.setZero();
   flfoot_pos.setZero();
@@ -50,10 +46,6 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   flfoot_vel.setZero();
   rrfoot_vel.setZero();
   rlfoot_vel.setZero();
-  frfoot_so3.setZero();
-  flfoot_so3.setZero();
-  rrfoot_so3.setZero();
-  rlfoot_so3.setZero();
 
   com_pos.setZero();
   com_vel.setZero();
@@ -131,8 +123,6 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&rlfoot_pos_des, VECT3, "rlfoot_pos_des", 3);
   data_manager->RegisterData(&rrfoot_vel_des, VECT3, "rrfoot_vel_des", 3);
   data_manager->RegisterData(&rlfoot_vel_des, VECT3, "rlfoot_vel_des", 3);
-  data_manager->RegisterData(&rrfoot_so3_des, VECT3, "rrfoot_so3_des", 3);
-  data_manager->RegisterData(&rlfoot_so3_des, VECT3, "rlfoot_so3_des", 3);
 
   // ---------------------------------------------------------------------------
   // COM

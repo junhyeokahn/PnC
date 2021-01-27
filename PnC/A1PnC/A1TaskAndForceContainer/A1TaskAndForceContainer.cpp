@@ -6,7 +6,7 @@ A1TaskAndForceContainer::A1TaskAndForceContainer(RobotSystem* _robot)
   _InitializeContacts();
 }
 
-A1askAndForceContainer::~A1TaskAndForceContainer() {
+A1TaskAndForceContainer::~A1TaskAndForceContainer() {
   _DeleteTasks();
   _DeleteContacts();
 }
@@ -117,16 +117,16 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
   frfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   flfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
-  rrfoot_pos_task_->setGain(kp_foot_ori_, kd_foot_ori_);
-  rlfoot_pos_task_->setGain(kp_foot_ori_, kd_foot_ori_);
+  rrfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
+  rlfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
 
   // Set Task Hierarchies
   com_task_->setHierarchyWeight(w_task_com_);
   base_ori_task_->setHierarchyWeight(w_task_base_ori_);
-  frfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);
-  flfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);
-  rrfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);
-  rlfoot_center_pos_task_->setHierarchyWeight(w_task_foot_pos_);
+  frfoot_pos_task_->setHierarchyWeight(w_task_foot_pos_);
+  flfoot_pos_task_->setHierarchyWeight(w_task_foot_pos_);
+  rrfoot_pos_task_->setHierarchyWeight(w_task_foot_pos_);
+  rlfoot_pos_task_->setHierarchyWeight(w_task_foot_pos_);
 
   // Set Maximum Forces
   ((PointContactSpec*)frfoot_contact_)->setMaxFz(max_z_);

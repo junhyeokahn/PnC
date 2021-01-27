@@ -53,6 +53,8 @@ class A1StateProvider {
   Eigen::Vector3d rlfoot_pos_des; 
   Eigen::Vector3d frfoot_vel_des;
   Eigen::Vector3d flfoot_vel_des;
+  Eigen::Vector3d rrfoot_vel_des;
+  Eigen::Vector3d rlfoot_vel_des;
 
   double w_frfoot_pos;
   double w_flfoot_pos;
@@ -76,10 +78,6 @@ class A1StateProvider {
   Eigen::Vector3d flfoot_vel;
   Eigen::Vector3d rrfoot_vel;
   Eigen::Vector3d rlfoot_vel;
-  Eigen::Vector3d frfoot_so3;
-  Eigen::Vector3d flfoot_so3;
-  Eigen::Vector3d rrfoot_so3;
-  Eigen::Vector3d rlfoot_so3;
 
   void saveCurrentData();
 

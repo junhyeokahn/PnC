@@ -1,6 +1,8 @@
 #pragma once
 
-#include <PnC/DracoPnC/A1Definition.hpp>
+#include <PnC/A1PnC/A1Definition.hpp>
+#include <PnC/A1PnC/A1Task/CoMxyz.hpp>
+#include <PnC/A1PnC/A1Task/CoMz.hpp>
 #include <PnC/TaskAndForceContainer.hpp>
 #include <PnC/WBC/BasicContactSpec.hpp>
 #include <PnC/WBC/BasicTask.hpp>

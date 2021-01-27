@@ -28,6 +28,7 @@ void A1StateEstimator::Update(A1SensorData* data) {
   _JointUpdate(data);
   _ConfigurationAndModelUpdate();
   _FootContactUpdate(data);
+  sp_->com_vel = robot_->getCoMVelocity();
   sp_->saveCurrentData();
 }
 
