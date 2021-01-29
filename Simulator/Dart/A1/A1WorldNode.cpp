@@ -49,13 +49,9 @@ void A1WorldNode::set_parameters_() {
 
 void A1WorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
-  std::cout << "s0" << std::endl;
   sensor_data_->q = skel_->getPositions().tail(12);
-  std::cout << "s0.1" << std::endl;
   sensor_data_->virtual_q = skel_->getPositions().head(6);
-  std::cout << "s0.2" << std::endl;
   sensor_data_->qdot = skel_->getVelocities().tail(12);
-  std::cout << "s0.3" << std::endl;
   sensor_data_->virtual_qdot = skel_->getVelocities().head(6);
   sensor_data_->jtrq = skel_->getForces().tail(12);
   // get_force_torque_data_(); // TODO
@@ -81,16 +77,19 @@ void A1WorldNode::customPreStep() {
   interface_->getCommand(sensor_data_, command_);
   trq_cmd_.setZero();
 
-  // Low level FeedForward and Position Control
   trq_cmd_.tail(12) = command_->jtrq;
-  std::cout << "s1" << std::endl;
+  // Low level FeedForward and Position Control
   // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques");
   for (int i = 0; i < 12; ++i) {
-    trq_cmd_[i + 6] += kp_[i] * (command_->q[i] - sensor_data_->q[i]) +
-                       kd_[i] * (command_->qdot[i] - sensor_data_->qdot[i]);
+    // std::cout << "sensor_data_->q[" << i << "] = " << sensor_data_->q[i] << std::endl;
+    // std::cout << "sensor_data_->qdot[" << i << "] = " << sensor_data_->qdot[i] << std::endl;
+    // std::cout << "command_->q[" << i << "] = " << command_->q[i] << std::endl;
+    // std::cout << "command_->qdot[" << i << "] = " << command_->qdot[i] << std::endl;
+    // trq_cmd_[i + 6] += kp_[i] * (command_->q[i] - sensor_data_->q[i]) +
+    //                    kd_[i] * (command_->qdot[i] - sensor_data_->qdot[i]);
+    // if(trq_cmd_[i+6] <= 0.000001) trq_cmd_[i+6] = 0.;
   }
   trq_cmd_.head(6).setZero();
-  std::cout << "s2" << std::endl;
 
   // hold robot at the initial phase
   if (t_ < release_time_) {
@@ -103,32 +102,16 @@ void A1WorldNode::customPreStep() {
       first__ = false;
     }
   }
-  std::cout << "s3" << std::endl;
 
-  // std::cout << "q" << std::endl;
-  // std::cout << skel_->getPositions().transpose() << std::endl;
-
-  // myUtils::pretty_print(trq_cmd_, std::cout, "torques");
-  //
-
-  // TEST
-  // if (t_ > 6. && t_ < 10.) {
-  // std::cout << "giving dist" << std::endl;
-  // trq_cmd_[1] = -10.;
-  //}
-  for(int i=0; i<12; ++i){
-      trq_cmd_[i] = 0.;
+  for (int i = 0; i < 18; ++i) {
+      std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
   }
-  // TEST
-
   skel_->setForces(trq_cmd_);
-  std::cout << "s4" << std::endl;
 
   count_++;
 
   // reset flags
   resetButtonFlags();
-  std::cout << "s5" << std::endl;
 }
 
 void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,

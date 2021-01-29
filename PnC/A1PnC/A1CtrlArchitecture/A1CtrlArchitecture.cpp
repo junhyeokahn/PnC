@@ -140,9 +140,10 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }*/
 
   /*// Smoothing trq for initial state
-  smoothing_torque(_command);
+  smoothing_torque(_command);*/
+
   // Save Data
-  saveData();*/
+  saveData();
 
   // Check for State Transitions
   if (state_machines_[state_]->endOfState()) {

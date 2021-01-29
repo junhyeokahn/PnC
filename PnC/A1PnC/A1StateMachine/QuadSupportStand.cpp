@@ -68,7 +68,6 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseDesired(
       sp_->curr_time);
-
   // =========================================================================
   // Foot
   // =========================================================================
@@ -78,7 +77,6 @@ void QuadSupportStand::_taskUpdate() {
 
 void QuadSupportStand::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
-
   ctrl_arch_->flfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
   ctrl_arch_->frfoot_max_normal_force_manager_->updateRampToMaxDesired(
@@ -104,7 +102,7 @@ void QuadSupportStand::oneStep() {
   _taskUpdate();
 }
 
-void QuadSupportStand::lastVisit() {}
+void QuadSupportStand::lastVisit() {std::cout << "[lastVisit Quad Support Stand]" << std::endl;}
 
 bool QuadSupportStand::endOfState() {
   if (state_machine_time_ > end_time_) {
@@ -131,4 +129,5 @@ void QuadSupportStand::initialization(const YAML::Node& node) {
               << std::endl;
     exit(0);
   }
+  std::cout << "QuadSupportStand initialization" << std::endl;
 }

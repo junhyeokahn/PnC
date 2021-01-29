@@ -69,7 +69,7 @@ void A1Interface::getCommand(void* _data, void* _command){
     if(!(_Initialization(data,cmd))){
         state_estimator_->Update(data);
         interrupt->processInterrupts();
-        // control_architecture_->getCommand(cmd);
+        control_architecture_->getCommand(cmd);
     }
     // Save Data
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
@@ -78,7 +78,7 @@ void A1Interface::getCommand(void* _data, void* _command){
 
     running_time_ = (double)(count_)*A1Aux::servo_rate;
     sp_->curr_time = running_time_;
-    // sp_->phase_copy = control_architecture_->getState();
+    sp_->phase_copy = control_architecture_->getState();
     ++count_;
 }
 
