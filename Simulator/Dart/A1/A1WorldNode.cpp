@@ -103,9 +103,9 @@ void A1WorldNode::customPreStep() {
     }
   }
 
-  for (int i = 0; i < 18; ++i) {
-      std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
-  }
+  // for (int i = 0; i < 18; ++i) {
+  //     std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
+  // }
   skel_->setForces(trq_cmd_);
 
   count_++;
