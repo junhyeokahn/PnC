@@ -5,13 +5,17 @@ file(GLOB a1_state_estimator_headers "A1StateEstimator/*.hpp")
 file(GLOB a1_taf_headers "A1TaskAndForceContainer/*.hpp")
 file(GLOB a1_ctrl_arch_headers "A1CtrlArchitecture/*.hpp")
 file(GLOB a1_task_headers "A1Task/*.hpp")
-# missing A1StateMachine, A1Ctrl
+file(GLOB a1_state_machine_headers "A1StateMachine/*.hpp")
+# missing A1Ctrl
 
 add_library(A1PnC SHARED ${sources})
 target_link_libraries(A1PnC ${DART_LIBRARIES}
                                myRobotSystem
                                myUtils
-                               myWBC)
+                               myWBC
+                               myTrajectoryManager
+                               myFilters
+                               myPlanner)
 
 install(TARGETS A1PnC DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${a1_pnc_headers} DESTINATION
@@ -28,3 +32,5 @@ install(FILES ${a1_state_estimator_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1StateEstimator")
 install(FILES ${a1_ctrl_arch_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1CtrlArchitecture")
+install(FILES ${a1_state_machine_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1StateMachine")

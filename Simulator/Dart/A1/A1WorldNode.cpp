@@ -49,20 +49,21 @@ void A1WorldNode::set_parameters_() {
 
 void A1WorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
-
+  std::cout << "s0" << std::endl;
   sensor_data_->q = skel_->getPositions().tail(12);
+  std::cout << "s0.1" << std::endl;
   sensor_data_->virtual_q = skel_->getPositions().head(6);
+  std::cout << "s0.2" << std::endl;
   sensor_data_->qdot = skel_->getVelocities().tail(12);
+  std::cout << "s0.3" << std::endl;
   sensor_data_->virtual_qdot = skel_->getVelocities().head(6);
   sensor_data_->jtrq = skel_->getForces().tail(12);
-
   // get_force_torque_data_(); // TODO
   get_imu_data_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc);
   check_foot_contact_by_pos_(sensor_data_->frfoot_contact,
                              sensor_data_->flfoot_contact,
                              sensor_data_->rrfoot_contact,
                              sensor_data_->rlfoot_contact);
-
   // Check for user button presses
   if (b_button_p) interface_->interrupt->b_interrupt_button_p = true;
   if (b_button_r) interface_->interrupt->b_interrupt_button_r = true;
@@ -77,19 +78,19 @@ void A1WorldNode::customPreStep() {
   if (b_button_k) interface_->interrupt->b_interrupt_button_k = true;
   if (b_button_h) interface_->interrupt->b_interrupt_button_h = true;
   if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;
-
   interface_->getCommand(sensor_data_, command_);
-
   trq_cmd_.setZero();
 
   // Low level FeedForward and Position Control
   trq_cmd_.tail(12) = command_->jtrq;
+  std::cout << "s1" << std::endl;
   // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques");
   for (int i = 0; i < 12; ++i) {
     trq_cmd_[i + 6] += kp_[i] * (command_->q[i] - sensor_data_->q[i]) +
                        kd_[i] * (command_->qdot[i] - sensor_data_->qdot[i]);
   }
   trq_cmd_.head(6).setZero();
+  std::cout << "s2" << std::endl;
 
   // hold robot at the initial phase
   if (t_ < release_time_) {
@@ -102,6 +103,7 @@ void A1WorldNode::customPreStep() {
       first__ = false;
     }
   }
+  std::cout << "s3" << std::endl;
 
   // std::cout << "q" << std::endl;
   // std::cout << skel_->getPositions().transpose() << std::endl;
@@ -114,31 +116,34 @@ void A1WorldNode::customPreStep() {
   // std::cout << "giving dist" << std::endl;
   // trq_cmd_[1] = -10.;
   //}
+  for(int i=0; i<12; ++i){
+      trq_cmd_[i] = 0.;
+  }
   // TEST
 
   skel_->setForces(trq_cmd_);
+  std::cout << "s4" << std::endl;
 
   count_++;
 
   // reset flags
   resetButtonFlags();
+  std::cout << "s5" << std::endl;
 }
 
 void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
                                    Eigen::VectorXd& acc) {
   // angvel
   Eigen::VectorXd ang_vel_local =
-      skel_->getBodyNode("IMU")
+      skel_->getBodyNode("imu_link")
           ->getSpatialVelocity(dart::dynamics::Frame::World(),
-                               skel_->getBodyNode("IMU"))
-          .head(3);
-
+                               skel_->getBodyNode("imu_link")).head(3);
   ang_vel = ang_vel_local;
   Eigen::MatrixXd R_world_imu(3, 3);
-  R_world_imu = skel_->getBodyNode("IMU")->getWorldTransform().linear();
+  R_world_imu = skel_->getBodyNode("imu_link")->getWorldTransform().linear();
   // acc
   Eigen::Vector3d linear_imu_acc =
-      skel_->getBodyNode("IMU")->getCOMLinearAcceleration();
+      skel_->getBodyNode("imu_link")->getCOMLinearAcceleration();
   Eigen::Vector3d global_grav(0, 0, 9.81);
   // acc = R_world_imu.transpose() * (global_grav + linear_imu_acc);
   acc = R_world_imu.transpose() * (global_grav);

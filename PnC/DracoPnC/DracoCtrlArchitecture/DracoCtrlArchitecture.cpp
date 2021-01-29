@@ -295,7 +295,7 @@ void DracoControlArchitecture::_InitializeParameters() {
   }
 
   // States Initialization:
-  state_machines_[A1_STATES::INITIALIZE]->initialization(
+  state_machines_[DRACO_STATES::INITIALIZE]->initialization(
       cfg_["state_initialize_params"]);
   // state_machines_[DRACO_STATES::STAND]->initialization(
   //     cfg_["state_stand_params"]);

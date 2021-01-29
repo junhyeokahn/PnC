@@ -1,7 +1,8 @@
-state_initialize_params:
-    target_pos_duration: 1.0 # duration to reach target com position
-    time_to_max_normal_force: 0.5 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
-    com_pos_target: [0, 0, 0.3] # target com position from the midfoot position in world frame
+state_stand_params:
+    target_pos_duration: 4.0 # duration to reach target com position
+    smoothing_duration: 1.0
+    time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    target_height: 0.3 # target com position from the midfoot position in world frame
 
 state_swing:
     swing_time_percent_early_contact_check: 0.5 # Percent of end_time to check if there are early contacts 
@@ -26,13 +27,13 @@ controller_parameters:
 
 task_parameters:
     # Maximum normal force
+    ini_z_force: 0.0
     max_z_force: 1500
 
     # Task hierarchy weights
-    w_task_com: 10.0
-    w_task_base_ori: 10.0
-    w_task_foot_contact: 40.0
-    w_task_foot_swing: 20.0 
+    ini_w_task_base_ori: 0.0
+    ini_w_task_com: 0.
+    ini_w_task_foot_pos: 0.
     max_w_task_com: 40.
     min_w_task_com: 10.
 
@@ -46,4 +47,7 @@ task_parameters:
     # Foot Linear and orientation gains
     kp_foot_pos: [400, 400, 400]
     kd_foot_pos: [40, 40, 40]
+    # Joint
+    kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
+    kd_joint: [20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.]
 

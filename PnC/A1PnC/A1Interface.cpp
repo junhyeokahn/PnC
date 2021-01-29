@@ -10,7 +10,7 @@
 #include <PnC/A1PnC/A1Interface.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
 #include <PnC/A1PnC/A1LogicInterrupt/WalkingInterruptLogic.hpp>
-// #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
+#include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <string>
 
@@ -135,14 +135,14 @@ void A1Interface::_CopyCommand(A1Command* cmd) {
 }
 
 bool A1Interface::_Initialization(A1SensorData* data, A1Command* cmd) {
-  // static bool test_initialized(false);
-  // if (!test_initialized) {
-  //   control_architecture_->ControlArchitectureInitialization();
-  //   test_initialized = true;
-  // }
+  static bool test_initialized(false);
+  if (!test_initialized) {
+    control_architecture_->ControlArchitectureInitialization();
+    test_initialized = true;
+  }
   if (count_ < waiting_count_) {
     _SetStopCommand(data, cmd);
-    // state_estimator_->initialization(data);
+    state_estimator_->Initialization(data);
     DataManager::GetDataManager()->start();
     return true;
   }
@@ -155,7 +155,7 @@ void A1Interface::_ParameterSetting() {
     std::string test_name =
         myUtils::readParameter<std::string>(cfg, "test_name");
     if (test_name == "balancing") {
-      // control_architecture_ = new A1ControlArchitecture(robot_);
+      control_architecture_ = new A1ControlArchitecture(robot_);
       delete interrupt;
       interrupt = new WalkingInterruptLogic(
                 static_cast<A1ControlArchitecture*>(control_architecture_));
