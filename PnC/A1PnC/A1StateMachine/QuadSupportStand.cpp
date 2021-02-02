@@ -129,5 +129,4 @@ void QuadSupportStand::initialization(const YAML::Node& node) {
               << std::endl;
     exit(0);
   }
-  std::cout << "QuadSupportStand initialization" << std::endl;
 }

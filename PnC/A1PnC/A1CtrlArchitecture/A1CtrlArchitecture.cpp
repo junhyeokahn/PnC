@@ -51,8 +51,8 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   state_machines_[A1_STATES::BALANCE] =
       new QuadSupportBalance(A1_STATES::BALANCE, this, robot_);
 
-  /*state_machines_[DRACO_STATES::RL_CONTACT_TRANSITION_START] =
-      new ContactTransitionStart(DRACO_STATES::RL_CONTACT_TRANSITION_START,
+  /*state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_START] =
+      new ContactTransitionStart(A1_STATES::FR_RL_CONTACT_TRANSITION_START,
                                  RIGHT_ROBOT_SIDE, this, robot_);
   state_machines_[DRACO_STATES::RL_CONTACT_TRANSITION_END] =
       new ContactTransitionEnd(DRACO_STATES::RL_CONTACT_TRANSITION_END,
@@ -99,12 +99,12 @@ A1ControlArchitecture::~A1ControlArchitecture() {
   // delete state_machines_[A1_STATES::INITIALIZE];
   delete state_machines_[A1_STATES::STAND];
   delete state_machines_[A1_STATES::BALANCE];
-  // delete state_machines_[DRACO_STATES::RL_CONTACT_TRANSITION_START];
-  // delete state_machines_[DRACO_STATES::RL_CONTACT_TRANSITION_END];
-  // delete state_machines_[DRACO_STATES::RL_SWING];
-  // delete state_machines_[DRACO_STATES::LL_CONTACT_TRANSITION_START];
-  // delete state_machines_[DRACO_STATES::LL_CONTACT_TRANSITION_END];
-  // delete state_machines_[DRACO_STATES::LL_SWING];
+  // delete state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_START];
+  // delete state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_END];
+  // delete state_machines_[A1_STATES::FR_RL_SWING];
+  // delete state_machines_[A1_STATES::FL_RR_CONTACT_TRANSITION_START];
+  // delete state_machines_[A1_STATES::FL_RR_CONTACT_TRANSITION_END];
+  // delete state_machines_[A1_STATES::FL_RR_SWING];
 }
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
@@ -120,24 +120,6 @@ void A1ControlArchitecture::getCommand(void* _command) {
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
   // main_controller_->getCommand(_command);
-  /*if (state_ == A1_STATES::INITIALIZE) {
-    getIVDCommand(_command);
-  } else {
-    if (state_ == DRACO_STATES::BALANCE &&
-        (floating_base_lifting_up_manager_->is_swaying ||
-         floating_base_lifting_up_manager_->is_sinusoid)) {
-      floating_base_lifting_up_manager_->updateFloatingBaseDesired(
-          sp_->curr_time);
-      if ((sp_->curr_time >=
-           floating_base_lifting_up_manager_->start_time_ +
-               floating_base_lifting_up_manager_->duration_) &&
-          (!floating_base_lifting_up_manager_->is_sinusoid)) {
-        floating_base_lifting_up_manager_->is_swaying = false;
-        std::cout << "Swaying Done" << std::endl;
-      }
-    }
-    main_controller_->getCommand(_command); 
-  }*/
 
   /*// Smoothing trq for initial state
   smoothing_torque(_command);*/
@@ -206,8 +188,6 @@ void A1ControlArchitecture::_InitializeParameters() {
   // main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
 
   // Trajectory Managers initialization
-  // Draco pulls these values from the yaml file in Config/A1/TEST
-  // Here we just define following Valkyrie for simplicity
   try { 
     double max_gain, min_gain, max_fz;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
@@ -238,8 +218,6 @@ void A1ControlArchitecture::_InitializeParameters() {
   }
  
   // States Initialization:
-  // state_machines_[A1_STATES::INITIALIZE]->initialization(
-  //     cfg_["state_initialize_params"]);
   state_machines_[A1_STATES::STAND]->initialization(
       cfg_["state_stand_params"]);
   // state_machines_[DRACO_STATES::RL_SWING]->initialization(cfg_["state_swing"]);

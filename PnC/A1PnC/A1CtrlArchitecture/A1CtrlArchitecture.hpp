@@ -10,12 +10,10 @@
 #include <PnC/A1PnC/A1StateMachine/QuadSupportBalance.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportStand.hpp>
 // #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
-// #include <PnC/A1PnC/A1StateMachine/Initialize.hpp>
 #include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/A1PnC/A1TaskAndForceContainer/A1TaskAndForceContainer.hpp>
 // #include <PnC/Planner/Footstep.hpp>
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
-#include <PnC/TrajectoryManager/FootSE3TrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>

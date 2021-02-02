@@ -80,28 +80,20 @@ void A1WorldNode::customPreStep() {
   trq_cmd_.tail(12) = command_->jtrq;
   // Low level FeedForward and Position Control
   // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques");
-  for (int i = 0; i < 12; ++i) {
-    // std::cout << "sensor_data_->q[" << i << "] = " << sensor_data_->q[i] << std::endl;
-    // std::cout << "sensor_data_->qdot[" << i << "] = " << sensor_data_->qdot[i] << std::endl;
-    // std::cout << "command_->q[" << i << "] = " << command_->q[i] << std::endl;
-    // std::cout << "command_->qdot[" << i << "] = " << command_->qdot[i] << std::endl;
-    // trq_cmd_[i + 6] += kp_[i] * (command_->q[i] - sensor_data_->q[i]) +
-    //                    kd_[i] * (command_->qdot[i] - sensor_data_->qdot[i]);
-    // if(trq_cmd_[i+6] <= 0.000001) trq_cmd_[i+6] = 0.;
-  }
+
   trq_cmd_.head(6).setZero();
 
   // hold robot at the initial phase
-  if (t_ < release_time_) {
-    hold_xy_();
-    hold_rot_();
-  } else {
-    static bool first__ = true;
-    if (first__) {
-      std::cout << "[Release]" << std::endl;
-      first__ = false;
-    }
-  }
+  // if (t_ < release_time_) {
+  //   hold_xy_();
+  //   hold_rot_();
+  // } else {
+  //   static bool first__ = true;
+  //   if (first__) {
+  //     std::cout << "[Release]" << std::endl;
+  //     first__ = false;
+  //   }
+  // }
 
   // for (int i = 0; i < 18; ++i) {
   //     std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
@@ -133,44 +125,6 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
 
 }
 
-/*void A1WorldNode::check_foot_contact_by_ft_(bool& frfoot_contact,
-                                            bool& flfoot_contact,
-                                            bool& rrfoot_contact,
-                                            bool& rlfoot_contact) {
-  // Get Sensor Wrench Data
-  Eigen::VectorXd frf_wrench = sensor_data_->frf_wrench;
-  Eigen::VectorXd flf_wrench = sensor_data_->flf_wrench;
-  Eigen::VectorXd rrf_wrench = sensor_data_->rrf_wrench;
-  Eigen::VectorXd rlf_wrench = sensor_data_->rlf_wrench;
-
-  // Local Z-Force Threshold
-  double force_threshold = 10;  // 10 Newtons ~ 1kg. If sensor detects this
-                                // force, then we are in contact
-
-  if (fabs(frf_wrench[5]) >= force_threshold) {
-    frfoot_contact = true;
-  } else {
-    frfoot_contact = false;
-  }
-
-  if (fabs(flf_wrench[5]) >= force_threshold) {
-    flfoot_contact = true;
-  } else {
-    flfoot_contact = false;
-  }
-  if (fabs(rrf_wrench[5]) >= force_threshold) {
-    rrfoot_contact = true;
-  } else {
-    rrfoot_contact = false;
-  }
-
-  if (fabs(rlf_wrench[5]) >= force_threshold) {
-    rlfoot_contact = true;
-  } else {
-    rlfoot_contact = false;
-  }
-}
-*/
 void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
                                              bool& flfoot_contact,
                                              bool& rrfoot_contact,
@@ -207,153 +161,4 @@ void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
   }
 }
 
-void A1WorldNode::hold_rot_() {
-  Eigen::VectorXd q = skel_->getPositions();
-  Eigen::VectorXd v = skel_->getVelocities();
-  double kp(200);
-  double kd(5);
-  trq_cmd_[3] = kp * (-q[3]) + kd * (-v[3]);
-  trq_cmd_[4] = kp * (-q[4]) + kd * (-v[4]);
-  trq_cmd_[5] = kp * (-q[5]) + kd * (-v[5]);
-}
 
-void A1WorldNode::hold_xy_() {
-  static double des_x = (skel_->getPositions())[0];
-  static double des_y = (skel_->getPositions())[1];
-  static double des_xdot(0.);
-  static double des_ydot(0.);
-
-  Eigen::VectorXd q = skel_->getPositions();
-  Eigen::VectorXd v = skel_->getVelocities();
-
-  double kp(500);
-  double kd(100);
-
-  trq_cmd_[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);
-  trq_cmd_[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
-}
-
-/*void A1WorldNode::get_force_torque_data_() {
-  Eigen::VectorXd frf_wrench = Eigen::VectorXd::Zero(6);
-  Eigen::VectorXd flf_wrench = Eigen::VectorXd::Zero(6);
-  Eigen::VectorXd rrf_wrench = Eigen::VectorXd::Zero(6);
-  Eigen::VectorXd rlf_wrench = Eigen::VectorXd::Zero(6);
-
-  dart::dynamics::BodyNode* flfoot_bn = skel_->getBodyNode("FL_foot");
-  dart::dynamics::BodyNode* frfoot_bn = skel_->getBodyNode("FR_foot");
-  dart::dynamics::BodyNode* rlfoot_bn = skel_->getBodyNode("RL_foot");
-  dart::dynamics::BodyNode* rrfoot_bn = skel_->getBodyNode("RR_foot");
-
-  const dart::collision::CollisionResult& _result =
-      world_->getLastCollisionResult();
-/////////////////////////////////////////////////////////////////////////////
-  for (const auto& contact : _result.getContacts()) {
-    for (const auto& shapeNode :
-         frfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
-      double sgn = 1.0;
-      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
-        sgn = 1.0;
-      }
-      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
-        sgn = -1.0;
-      }
-      // Perform Adjoint Map to local frame wrench
-      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
-          shapeNode == contact.collisionObject2->getShapeFrame()) {
-        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-        w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point; // Since A1 force sensor in foot
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("FR_foot")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        frf_wrench += w_a;
-      }
-    }
-    for (const auto& shapeNode :
-         flfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
-      double sgn = 1.0;
-      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
-        sgn = 1.0;
-      }
-      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
-        sgn = -1.0;
-      }
-      // Perform Adjoint Map to local frame wrench
-      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
-          shapeNode == contact.collisionObject2->getShapeFrame()) {
-        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-        w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point; // Since A1 force sensor in foot
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("FL_foot")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        flf_wrench += w_a;
-      }
-    }
-    for (const auto& shapeNode :
-         rrfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
-      double sgn = 1.0;
-      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
-        sgn = 1.0;
-      }
-      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
-        sgn = -1.0;
-      }
-      // Perform Adjoint Map to local frame wrench
-      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
-          shapeNode == contact.collisionObject2->getShapeFrame()) {
-        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-        w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point; // Since A1 force sensor in foot
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("RR_foot")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        rrf_wrench += w_a;
-      }
-    }
-    for (const auto& shapeNode :
-         rlfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
-      double sgn = 1.0;
-      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
-        sgn = 1.0;
-      }
-      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
-        sgn = -1.0;
-      }
-      // Perform Adjoint Map to local frame wrench
-      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
-          shapeNode == contact.collisionObject2->getShapeFrame()) {
-        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
-        w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point; // Since A1 force sensor in foot
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("RL_foot")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa; // T_wc = Identity
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        rlf_wrench += w_a;
-      }
-    } 
-  }
-
-////////////////////////////////////////////////////////////////////////////
-  sensor_data_->flf_wrench = flf_wrench;
-  sensor_data_->frf_wrench = frf_wrench;
-  sensor_data_->rlf_wrench = rlf_wrench;
-  sensor_data_->rrf_wrench = rrf_wrench;
-
-}*/

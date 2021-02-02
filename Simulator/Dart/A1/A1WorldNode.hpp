@@ -16,12 +16,8 @@ class A1WorldNode : public dart::gui::osg::WorldNode {
   A1SensorData* sensor_data_;
   A1Command* command_;
 
-  void get_force_torque_data_();
   void get_imu_data_(Eigen::VectorXd& ang_vel, Eigen::VectorXd& acc);
   void check_foot_contact_by_pos_(bool& frfoot_contact, bool& flfoot_contact, bool& rrfoot_contact, bool& rlfoot_contact );
-  void check_foot_contact_by_ft_(bool& frfoot_contact, bool& flfoot_contact, bool& rrfoot_contact, bool& rlfoot_contact );
-  void hold_xy_();
-  void hold_rot_();
   void set_parameters_();
 
   dart::dynamics::SkeletonPtr skel_;
