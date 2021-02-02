@@ -16,7 +16,7 @@ class RobotSystem {
   int num_actuated_dof_;
   Eigen::MatrixXd I_cent_;
   Eigen::MatrixXd J_cent_;
-  Eigen::MatrixXd A_cent_;
+
 
   /*
    * Update I_cent_, A_cent_, J_cent_
@@ -51,6 +51,8 @@ class RobotSystem {
   int getJointIdx(const std::string& jointName_);
   int getDofIdx(const std::string& dofName_);
 
+  Eigen::MatrixXd A_cent_;
+
   // Position Limits
   Eigen::VectorXd getPositionLowerLimits() {
     return skel_ptr_->getPositionLowerLimits();
@@ -84,6 +86,8 @@ class RobotSystem {
   Eigen::MatrixXd getCentroidInertia();
   Eigen::VectorXd getCentroidVelocity();
   Eigen::VectorXd getCentroidMomentum();
+  Eigen::MatrixXd getDervCentroidMomentum(const double threshold);
+
   Eigen::Vector3d getCoMPosition(
       dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
   Eigen::Vector3d getCoMVelocity(

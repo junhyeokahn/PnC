@@ -54,7 +54,7 @@ void DracoWorldNode::customPreStep() {
   sensor_data_->qdot = skel_->getVelocities().tail(10);
   sensor_data_->jtrq = skel_->getForces().tail(10);
 
-  // get_force_torque_data_(); // TODO
+  get_force_torque_data_(); // TODO
   get_imu_data_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc,
                 sensor_data_->imu_mag);
   check_foot_contact_by_pos_(sensor_data_->rfoot_contact,
@@ -102,17 +102,17 @@ void DracoWorldNode::customPreStep() {
     }
   }
 
-  // std::cout << "q" << std::endl;
+  std::cout << "time: " << t_ << std::endl;
   // std::cout << skel_->getPositions().transpose() << std::endl;
 
   // myUtils::pretty_print(trq_cmd_, std::cout, "torques");
   //
 
   // TEST
-  // if (t_ > 6. && t_ < 10.) {
-  // std::cout << "giving dist" << std::endl;
-  // trq_cmd_[1] = -10.;
-  //}
+  if (t_ > 10. && t_ < 15.) {
+  std::cout << "giving dist" << std::endl;
+  trq_cmd_[1] = -7.;
+  }
   // TEST
 
   skel_->setForces(trq_cmd_);
@@ -152,8 +152,11 @@ void DracoWorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
 void DracoWorldNode::check_foot_contact_by_ft_(bool& rfoot_contact,
                                                bool& lfoot_contact) {
   // Get Sensor Wrench Data
-  Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
-  Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
+  // Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
+  // Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
+
+  Eigen::VectorXd rf_wrench = sensor_data_->rf_front_wrench;
+  Eigen::VectorXd lf_wrench = sensor_data_->lf_front_wrench;
 
   // Local Z-Force Threshold
   double force_threshold = 10;  // 10 Newtons ~ 1kg. If sensor detects this
@@ -225,17 +228,23 @@ void DracoWorldNode::hold_xy_() {
 }
 
 void DracoWorldNode::get_force_torque_data_() {
-  Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
-  Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
+  Eigen::VectorXd rf_front_wrench = Eigen::VectorXd::Zero(6);
+  Eigen::VectorXd rf_back_wrench = Eigen::VectorXd::Zero(6);
+  Eigen::VectorXd lf_front_wrench = Eigen::VectorXd::Zero(6);
+  Eigen::VectorXd lf_back_wrench = Eigen::VectorXd::Zero(6);
 
-  dart::dynamics::BodyNode* lfoot_bn = skel_->getBodyNode("lAnkle");
-  dart::dynamics::BodyNode* rfoot_bn = skel_->getBodyNode("rAnkle");
+  dart::dynamics::BodyNode* lfootfront_bn = skel_->getBodyNode("lFootFront");
+  dart::dynamics::BodyNode* lfootback_bn = skel_->getBodyNode("lFootBack");
+
+  dart::dynamics::BodyNode* rfootfront_bn = skel_->getBodyNode("rFootFront");
+  dart::dynamics::BodyNode* rfootback_bn = skel_->getBodyNode("rFootBack");
+
   const dart::collision::CollisionResult& _result =
       world_->getLastCollisionResult();
 
   for (const auto& contact : _result.getContacts()) {
     for (const auto& shapeNode :
-         lfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+         lfootfront_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
       double sgn = 1.0;
       if (shapeNode == contact.collisionObject1->getShapeFrame()) {
         sgn = 1.0;
@@ -248,19 +257,24 @@ void DracoWorldNode::get_force_torque_data_() {
           shapeNode == contact.collisionObject2->getShapeFrame()) {
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point;
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        lf_wrench += w_a;
+        // Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+        // T_wc.translation() = contact.point;
+        // Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
+        //     dart::dynamics::Frame::World());
+        // Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+        // Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+        // Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+        // w_a = AdT_ca.transpose() * w_c;
+        lf_front_wrench += w_c;
       }
     }
+  }
+  
+  // myUtils::pretty_print(lf_front_wrench, std::cout, "lf_front_wrench");
+
+  for (const auto& contact : _result.getContacts()) {
     for (const auto& shapeNode :
-         rfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+         lfootback_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
       double sgn = 1.0;
       if (shapeNode == contact.collisionObject1->getShapeFrame()) {
         sgn = 1.0;
@@ -271,22 +285,115 @@ void DracoWorldNode::get_force_torque_data_() {
       // Perform Adjoint Map to local frame wrench
       if (shapeNode == contact.collisionObject1->getShapeFrame() ||
           shapeNode == contact.collisionObject2->getShapeFrame()) {
-        double normal(contact.normal(2));
         Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
         w_c.tail(3) = (contact.force * sgn);
-        Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
-        T_wc.translation() = contact.point;
-        Eigen::Isometry3d T_wa = skel_->getBodyNode("rAnkle")->getTransform(
-            dart::dynamics::Frame::World());
-        Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
-        Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
-        Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
-        w_a = AdT_ca.transpose() * w_c;
-        rf_wrench += w_a;
+        // Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+        // T_wc.translation() = contact.point;
+        // Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
+        //     dart::dynamics::Frame::World());
+        // Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+        // Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+        // Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+        // w_a = AdT_ca.transpose() * w_c;
+        lf_back_wrench += w_c;
       }
     }
   }
 
-  sensor_data_->lf_wrench = lf_wrench;
-  sensor_data_->rf_wrench = rf_wrench;
+  // myUtils::pretty_print(lf_back_wrench, std::cout, "lf_back_wrench");
+
+for (const auto& contact : _result.getContacts()) {
+    for (const auto& shapeNode :
+         rfootfront_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+      double sgn = 1.0;
+      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
+        sgn = 1.0;
+      }
+      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
+        sgn = -1.0;
+      }
+      // Perform Adjoint Map to local frame wrench
+      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+          shapeNode == contact.collisionObject2->getShapeFrame()) {
+        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+        w_c.tail(3) = (contact.force * sgn);
+        // Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+        // T_wc.translation() = contact.point;
+        // Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
+        //     dart::dynamics::Frame::World());
+        // Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+        // Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+        // Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+        // w_a = AdT_ca.transpose() * w_c;
+        rf_front_wrench += w_c;
+      }
+      }
+    }
+
+  // myUtils::pretty_print(rf_front_wrench, std::cout, "rf_front_wrench");
+
+  for (const auto& contact : _result.getContacts()) {
+    for (const auto& shapeNode :
+         rfootback_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+      double sgn = 1.0;
+      if (shapeNode == contact.collisionObject1->getShapeFrame()) {
+        sgn = 1.0;
+      }
+      if (shapeNode == contact.collisionObject2->getShapeFrame()) {
+        sgn = -1.0;
+      }
+      // Perform Adjoint Map to local frame wrench
+      if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+          shapeNode == contact.collisionObject2->getShapeFrame()) {
+        Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+        w_c.tail(3) = (contact.force * sgn);
+        // Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+        // T_wc.translation() = contact.point;
+        // Eigen::Isometry3d T_wa = skel_->getBodyNode("lAnkle")->getTransform(
+        //     dart::dynamics::Frame::World());
+        // Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+        // Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+        // Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+        // w_a = AdT_ca.transpose() * w_c;
+        rf_back_wrench += w_c;
+        // myUtils::pretty_print(w_c, std::cout, "w_c(rf_back_wrench)");
+      }
+     }
+    }
+
+    // myUtils::pretty_print(rf_back_wrench, std::cout, "rf_back_wrench");
+
+    // for (const auto& shapeNode :
+    //      rfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
+    //   double sgn = 1.0;
+    //   if (shapeNode == contact.collisionObject1->getShapeFrame()) {
+    //     sgn = 1.0;
+    //   }
+    //   if (shapeNode == contact.collisionObject2->getShapeFrame()) {
+    //     sgn = -1.0;
+    //   }
+    //   // Perform Adjoint Map to local frame wrench
+    //   if (shapeNode == contact.collisionObject1->getShapeFrame() ||
+    //       shapeNode == contact.collisionObject2->getShapeFrame()) {
+    //     double normal(contact.normal(2));
+    //     Eigen::VectorXd w_c = Eigen::VectorXd::Zero(6);
+    //     w_c.tail(3) = (contact.force * sgn);
+    //     Eigen::Isometry3d T_wc = Eigen::Isometry3d::Identity();
+    //     T_wc.translation() = contact.point;
+    //     Eigen::Isometry3d T_wa = skel_->getBodyNode("rAnkle")->getTransform(
+    //         dart::dynamics::Frame::World());
+    //     Eigen::Isometry3d T_ca = T_wc.inverse() * T_wa;
+    //     Eigen::MatrixXd AdT_ca = dart::math::getAdTMatrix(T_ca);
+    //     Eigen::VectorXd w_a = Eigen::VectorXd::Zero(6);
+    //     w_a = AdT_ca.transpose() * w_c;
+    //     rf_wrench += w_a;
+    //   }
+    // }
+  // }
+
+  sensor_data_->lf_front_wrench = lf_front_wrench;
+  sensor_data_->lf_back_wrench = lf_back_wrench;
+  sensor_data_->rf_front_wrench = rf_front_wrench;
+  sensor_data_->rf_back_wrench = rf_back_wrench;
+
 }

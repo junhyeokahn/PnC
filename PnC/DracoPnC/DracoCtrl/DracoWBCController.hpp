@@ -8,8 +8,11 @@
 #include <PnC/WBC/WBC.hpp>
 #include <PnC/WBC/WBLC/KinWBC.hpp>
 #include <PnC/WBC/WBLC/WBLC.hpp>
+#include <PnC/WBC/WBLC/AWBC.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 // #include <PnC/WBC/WBDC/WBDC.hpp>
 
+class filter;
 
 class DracoWBCController {
  public:
@@ -38,6 +41,7 @@ class DracoWBCController {
   KinWBC* kin_wbc_;
   WBLC* wblc_;
   WBLC_ExtraData* wblc_data_;
+  AWBC* awbc_;
 
   bool b_enable_torque_limits_;
 
@@ -49,6 +53,24 @@ class DracoWBCController {
   Eigen::VectorXd des_jpos_;
   Eigen::VectorXd des_jvel_;
 
+  Eigen::VectorXd q_prev_;
+  Eigen::VectorXd dq_prev_;
+
+  Eigen::MatrixXd A_prev_;
+  Eigen::MatrixXd H_prev_;
+  Eigen::Vector3d pos_com_prev_;
+  Eigen::Vector3d vel_com_prev_;
+  Eigen::MatrixXd J_com_prev_;
+  Eigen::MatrixXd AM_prev_;
+
+  Eigen::MatrixXd H_;
+  Eigen::Vector3d pos_com_;
+  Eigen::Vector3d vel_com_;
+  Eigen::MatrixXd J_com_;
+  Eigen::MatrixXd AM_;
+
+  Eigen::VectorXd hat_f_;
+
   // -------------------------------------------------------
   // Parameters
   // -------------------------------------------------------
@@ -57,6 +79,8 @@ class DracoWBCController {
   double lambda_qddot_;          // weight for the qddot
   double lambda_rf_;             // weight for the reaction force
   int dim_contact_;
+
+  double total_mass_;
 
   Eigen::MatrixXd A_;
   Eigen::MatrixXd Ainv_;
@@ -69,4 +93,15 @@ class DracoWBCController {
 
   Eigen::VectorXd Kp_;
   Eigen::VectorXd Kd_; 
+
+  Eigen::VectorXd kp_;
+  Eigen::VectorXd kd_;
+
+  filter* x_force_ext_;
+  filter* y_force_ext_;
+  filter* z_force_ext_;
+
+  filter* x_tau_ext_;
+  filter* y_tau_ext_;
+  filter* z_tau_ext_;
 };

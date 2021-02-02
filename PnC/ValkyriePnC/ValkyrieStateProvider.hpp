@@ -90,6 +90,15 @@ class ValkyrieStateProvider {
   Eigen::VectorXd r_rf;
   Eigen::VectorXd l_rf;
 
+  Eigen::VectorXd r_front_rf_des;
+  Eigen::VectorXd l_front_rf_des;
+  Eigen::VectorXd r_front_rf;
+  Eigen::VectorXd l_front_rf;
+  Eigen::VectorXd r_back_rf_des;
+  Eigen::VectorXd l_back_rf_des;
+  Eigen::VectorXd r_back_rf;
+  Eigen::VectorXd l_back_rf;
+
   Eigen::VectorXd des_jacc_cmd;
 
  private:

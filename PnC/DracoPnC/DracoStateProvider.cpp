@@ -66,10 +66,16 @@ DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   l_rf = Eigen::VectorXd::Zero(6);
   r_rf_des = Eigen::VectorXd::Zero(6);
   l_rf_des = Eigen::VectorXd::Zero(6);
-  r_rf_front_des.setZero();
-  r_rf_back_des.setZero();
-  l_rf_front_des.setZero();
-  l_rf_back_des.setZero();
+
+//   r_rf_front_des.setZero();
+//   r_rf_back_des.setZero();
+//   l_rf_front_des.setZero();
+//   l_rf_back_des.setZero();
+
+    r_front_rf  = Eigen::VectorXd::Zero(6);
+    l_front_rf  = Eigen::VectorXd::Zero(6);
+    r_back_rf  = Eigen::VectorXd::Zero(6);
+    l_back_rf  = Eigen::VectorXd::Zero(6);
 
   DataManager* data_manager = DataManager::GetDataManager();
 

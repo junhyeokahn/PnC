@@ -10,6 +10,7 @@
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
+#include <PnC/Filter/Basic/filter.hpp>
 #include <string>
 
 DracoInterface::DracoInterface() : EnvInterface() {
@@ -40,6 +41,52 @@ DracoInterface::DracoInterface() : EnvInterface() {
   data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   rfoot_ati_ = Eigen::VectorXd::Zero(6);
   lfoot_ati_ = Eigen::VectorXd::Zero(6);
+
+  rfoot_front_ati_ = Eigen::VectorXd::Zero(6);
+  rfoot_back_ati_ =  Eigen::VectorXd::Zero(6);
+  lfoot_front_ati_ =  Eigen::VectorXd::Zero(6);
+  lfoot_back_ati_ =  Eigen::VectorXd::Zero(6);
+
+  rfoot_front_est_ = Eigen::VectorXd::Zero(6);
+  rfoot_back_est_ =  Eigen::VectorXd::Zero(6);
+  lfoot_front_est_ =  Eigen::VectorXd::Zero(6);
+  lfoot_back_est_ =  Eigen::VectorXd::Zero(6);
+
+  Fr_ext_ = Eigen::VectorXd::Zero(6);
+
+  x_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 2.0);
+  y_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 7.5);
+  z_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 250);
+
+  x1_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 2.0);
+  y1_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 7.5);
+  z1_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 250);
+
+  x2_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 2.0);
+  y2_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 7.5);
+  z2_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 250);
+
+  x3_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 2.0);
+  y3_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 7.5);
+  z3_force_est_ = new AverageFilter(DracoAux::servo_rate, 0.030, 250);
+
+  ((AverageFilter*)x_force_est_)->initialization(rfoot_front_ati_[3]);
+  ((AverageFilter*)y_force_est_)->initialization(rfoot_front_ati_[4]);
+  ((AverageFilter*)z_force_est_)->initialization(rfoot_front_ati_[5]);
+
+  ((AverageFilter*)x1_force_est_)->initialization(rfoot_back_ati_[3]);
+  ((AverageFilter*)y1_force_est_)->initialization(rfoot_back_ati_[4]);
+  ((AverageFilter*)z1_force_est_)->initialization(rfoot_back_ati_[5]);
+
+  ((AverageFilter*)x2_force_est_)->initialization(lfoot_front_ati_[3]);
+  ((AverageFilter*)y2_force_est_)->initialization(lfoot_front_ati_[4]);
+  ((AverageFilter*)z2_force_est_)->initialization(lfoot_front_ati_[5]);
+
+  ((AverageFilter*)x3_force_est_)->initialization(lfoot_back_ati_[3]);
+  ((AverageFilter*)y3_force_est_)->initialization(lfoot_back_ati_[4]);
+  ((AverageFilter*)z3_force_est_)->initialization(lfoot_back_ati_[5]);
+
+
   // imu_acc_ = Eigen::VectorXd::Zero(3);
   // imu_angvel_ = Eigen::VectorXd::Zero(3);
 
@@ -60,10 +107,32 @@ DracoInterface::DracoInterface() : EnvInterface() {
   DataManager::GetDataManager()->RegisterData(&data_motor_current_, VECT,
                                               "motor_current",
                                               robot_->getNumActuatedDofs());
-  DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati",
+  // DataManager::GetDataManager()->RegisterData(&rfoot_ati_, VECT, "rfoot_ati",
+  //                                             6);
+  // DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
+  //                                             6);
+
+  DataManager::GetDataManager()->RegisterData(&rfoot_front_ati_, VECT, "rfoot_front_ati",
                                               6);
-  DataManager::GetDataManager()->RegisterData(&lfoot_ati_, VECT, "lfoot_ati",
+  DataManager::GetDataManager()->RegisterData(&rfoot_back_ati_, VECT, "rfoot_back_ati",
                                               6);
+  DataManager::GetDataManager()->RegisterData(&lfoot_front_ati_, VECT, "lfoot_front_ati",
+                                              6);
+  DataManager::GetDataManager()->RegisterData(&lfoot_back_ati_, VECT, "lfoot_back_ati",
+                                              6);
+
+  DataManager::GetDataManager()->RegisterData(&rfoot_front_est_, VECT, "rfoot_front_est",
+                                              6);
+  DataManager::GetDataManager()->RegisterData(&rfoot_back_est_, VECT, "rfoot_back_est",
+                                              6);
+  DataManager::GetDataManager()->RegisterData(&lfoot_front_est_, VECT, "lfoot_front_est",
+                                              6);
+  DataManager::GetDataManager()->RegisterData(&lfoot_back_est_, VECT, "lfoot_back_est",
+                                              6);
+
+  DataManager::GetDataManager()->RegisterData(&Fr_ext_, VECT, "Fr_ext",
+                                              6);
+
   // DataManager::GetDataManager()->RegisterData(&imu_acc_, VECT, "imu_acc", 3);
   // DataManager::GetDataManager()->RegisterData(&imu_angvel_, VECT,
   // "imu_angvel",
@@ -79,6 +148,19 @@ DracoInterface::~DracoInterface() {
   delete interrupt;
   delete control_architecture_;
   delete robot_;
+  delete x_force_est_;
+  delete y_force_est_;
+  delete z_force_est_;
+  delete x1_force_est_;
+  delete y1_force_est_;
+  delete z1_force_est_;
+  delete x2_force_est_;
+  delete y2_force_est_;
+  delete z2_force_est_;
+  delete x3_force_est_;
+  delete y3_force_est_;
+  delete z3_force_est_;
+
 }
 
 void DracoInterface::getCommand(void* _data, void* _command) {
@@ -107,8 +189,47 @@ void DracoInterface::getCommand(void* _data, void* _command) {
     data_temperature_[i] = data->temperature[i];
     data_motor_current_[i] = data->motor_current[i];
   }
-  rfoot_ati_ = data->rf_wrench;
-  lfoot_ati_ = data->lf_wrench;
+  // rfoot_ati_ = data->rf_wrench;
+  // lfoot_ati_ = data->lf_wrench;
+  rfoot_front_ati_ = data->rf_front_wrench;
+  x_force_est_->input(data->rf_front_wrench[3]);
+  rfoot_front_ati_[3] = x_force_est_->output();
+  y_force_est_->input(data->rf_front_wrench[4]);
+  rfoot_front_ati_[4] = y_force_est_->output();
+  z_force_est_->input(data->rf_front_wrench[5]);
+  rfoot_front_ati_[5] = z_force_est_->output();  
+  sp_->r_front_rf = rfoot_front_ati_;  
+
+  rfoot_back_ati_ = data->rf_back_wrench;
+  x1_force_est_->input(data->rf_back_wrench[3]);
+  rfoot_back_ati_[3] = x1_force_est_->output();
+  y1_force_est_->input(data->rf_back_wrench[4]);
+  rfoot_back_ati_[4] = y1_force_est_->output();
+  z1_force_est_->input(data->rf_back_wrench[5]);
+  rfoot_back_ati_[5] = z1_force_est_->output();
+  sp_->r_back_rf = rfoot_back_ati_;
+
+  lfoot_front_ati_ = data->lf_front_wrench;
+  x2_force_est_->input(data->lf_front_wrench[3]);
+  lfoot_front_ati_[3] = x2_force_est_->output();
+  y2_force_est_->input(data->lf_front_wrench[4]);
+  lfoot_front_ati_[4] = y2_force_est_->output();
+  z2_force_est_->input(data->lf_front_wrench[5]);
+  lfoot_front_ati_[5] = z2_force_est_->output();  
+  sp_->l_front_rf = lfoot_front_ati_;
+  
+  lfoot_back_ati_ = data->lf_back_wrench;
+  x3_force_est_->input(data->lf_back_wrench[3]);
+  lfoot_back_ati_[3] = x3_force_est_->output();
+  y3_force_est_->input(data->lf_back_wrench[4]);
+  lfoot_back_ati_[4] = y3_force_est_->output();
+  z3_force_est_->input(data->lf_back_wrench[5]);
+  lfoot_back_ati_[5] = z3_force_est_->output();
+  sp_->l_back_rf = lfoot_back_ati_;
+
+  // myUtils::pretty_print(sp_->r_front_rf, std::cout, "sp_r_front_rf");
+
+
   // imu_acc_ = data->imu_acc;
   // imu_angvel_ = data->imu_ang_vel;
 
@@ -168,6 +289,14 @@ void DracoInterface::_CopyCommand(DracoCommand* cmd) {
     cmd->q[i] = cmd_jpos_[i];
     cmd->qdot[i] = cmd_jvel_[i];
   }
+
+  Eigen::VectorXd temp = cmd->Fr_estimated;
+  rfoot_front_est_ = temp.segment(0,6);
+  rfoot_back_est_ = temp.segment(6,6);
+  lfoot_front_est_ = temp.segment(12,6);
+  lfoot_back_est_ = temp.segment(18,6);
+
+  Fr_ext_= cmd->Fr_ext;
 }
 
 bool DracoInterface::_Initialization(DracoSensorData* data, DracoCommand* cmd) {

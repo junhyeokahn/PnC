@@ -63,7 +63,7 @@ controller_parameters:
 
 task_parameters:
     # contact type 	
-    contact_type: 2 # 1: point contact, 2: surface contact
+    contact_type: 1 # 1: point contact, 2: surface contact
 
     # Maximum normal force
     ini_z_force: 0.0

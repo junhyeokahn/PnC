@@ -46,8 +46,6 @@ class WBLC: public WBC{
                 Eigen::VectorXd & cmd,
                 void* extra_input = NULL);
 
-
-
     private:
         std::vector<int> act_list_;
 

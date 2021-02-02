@@ -56,6 +56,12 @@ class DracoStateProvider {
   Eigen::Vector3d r_rf_back_des;
   Eigen::Vector3d l_rf_front_des;
   Eigen::Vector3d l_rf_back_des;
+  Eigen::VectorXd r_front_rf;
+  Eigen::VectorXd l_front_rf;
+  Eigen::VectorXd r_back_rf;
+  Eigen::VectorXd l_back_rf;
+
+
   Eigen::VectorXd r_rf_des;
   Eigen::VectorXd l_rf_des;
   Eigen::VectorXd r_rf;

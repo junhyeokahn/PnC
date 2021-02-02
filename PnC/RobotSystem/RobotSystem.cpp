@@ -110,6 +110,37 @@ Eigen::VectorXd RobotSystem::getCentroidMomentum() {
   return A_cent_ * skel_ptr_->getVelocities();
 }
 
+Eigen::MatrixXd RobotSystem::getDervCentroidMomentum(const double threshold){
+  Eigen::VectorXd q_init = getQ();
+  Eigen::VectorXd q_updated = q_init;
+  Eigen::VectorXd dq_init = getQdot();
+  Eigen::MatrixXd A_prev = Eigen::MatrixXd::Zero(3,q_init.size());
+  Eigen::MatrixXd A_next = Eigen::MatrixXd::Zero(3,q_init.size());
+  Eigen::MatrixXd DervA = Eigen::MatrixXd::Zero(3,q_init.size());
+
+  double h = threshold;
+
+  for(int i(0);i< q_init.size(); ++i){
+    q_updated[i] = q_init[i] + h;
+    updateSystem(q_updated, dq_init, true);
+    A_next = A_cent_;
+    q_updated = q_init;
+    q_updated[i] = q_init[i] - h;
+    updateSystem(q_updated, dq_init, true);
+    A_prev = A_cent_;
+
+    for(int j(0); j<3; ++j){
+      for(int k(0); k<q_init.size();++k){
+        DervA(i,j) += (A_next(k,j) - A_prev(k,j))/(2*h)*dq_init[k]; 
+      }
+    }
+  }
+
+  // reset the system to the original configuration and velocity
+  updateSystem(q_init, dq_init, true);
+  return DervA;
+}
+
 Eigen::MatrixXd RobotSystem::getCoMJacobian(dart::dynamics::Frame* wrt_) {
   return skel_ptr_->getCOMJacobian(wrt_);
 }

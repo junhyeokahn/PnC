@@ -5,6 +5,7 @@
 
 class DracoStateEstimator;
 class DracoStateProvider;
+class filter;
 
 class DracoSensorData {
  public:
@@ -20,8 +21,14 @@ class DracoSensorData {
     bus_voltage = Eigen::VectorXd::Zero(10);
     bus_current = Eigen::VectorXd::Zero(10);
     rotor_inertia = Eigen::VectorXd::Zero(10);
-    rf_wrench = Eigen::VectorXd::Zero(6);
-    lf_wrench = Eigen::VectorXd::Zero(6);
+    // rf_wrench = Eigen::VectorXd::Zero(6); 
+    // lf_wrench = Eigen::VectorXd::Zero(6);
+
+    rf_front_wrench = Eigen::VectorXd::Zero(6);
+    rf_back_wrench = Eigen::VectorXd::Zero(6);
+    lf_front_wrench = Eigen::VectorXd::Zero(6);
+    lf_back_wrench = Eigen::VectorXd::Zero(6);
+    
     rfoot_contact = false;
     lfoot_contact = false;
   }
@@ -38,8 +45,12 @@ class DracoSensorData {
   Eigen::VectorXd bus_voltage;
   Eigen::VectorXd bus_current;
   Eigen::VectorXd rotor_inertia;
-  Eigen::VectorXd rf_wrench;
-  Eigen::VectorXd lf_wrench;
+  // Eigen::VectorXd rf_wrench;
+  // Eigen::VectorXd lf_wrench;
+  Eigen::VectorXd rf_front_wrench;
+  Eigen::VectorXd rf_back_wrench;
+  Eigen::VectorXd lf_front_wrench;
+  Eigen::VectorXd lf_back_wrench;
   bool rfoot_contact;
   bool lfoot_contact;
 };
@@ -50,10 +61,15 @@ class DracoCommand {
     q = Eigen::VectorXd::Zero(10);
     qdot = Eigen::VectorXd::Zero(10);
     jtrq = Eigen::VectorXd::Zero(10);
+    Fr_estimated = Eigen::VectorXd::Zero(6*4);
+    Fr_ext = Eigen::VectorXd::Zero(6);
   }
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
   Eigen::VectorXd jtrq;
+
+  Eigen::VectorXd Fr_estimated;
+  Eigen::VectorXd Fr_ext;
 };
 
 class DracoInterface : public EnvInterface {
@@ -77,6 +93,18 @@ class DracoInterface : public EnvInterface {
   Eigen::VectorXd data_motor_current_;
   Eigen::VectorXd rfoot_ati_;
   Eigen::VectorXd lfoot_ati_;
+  Eigen::VectorXd rfoot_front_ati_;
+  Eigen::VectorXd rfoot_back_ati_;
+  Eigen::VectorXd lfoot_front_ati_;
+  Eigen::VectorXd lfoot_back_ati_;
+
+  Eigen::VectorXd rfoot_front_est_;
+  Eigen::VectorXd rfoot_back_est_;
+  Eigen::VectorXd lfoot_front_est_;
+  Eigen::VectorXd lfoot_back_est_;
+
+  Eigen::VectorXd Fr_ext_;
+
   // Eigen::VectorXd imu_acc_;
   // Eigen::VectorXd imu_angvel_;
 
@@ -88,6 +116,22 @@ class DracoInterface : public EnvInterface {
   Eigen::VectorXd jtrq_max_;
   Eigen::VectorXd jtrq_min_;
   bool stop_test_;
+
+  filter* x_force_est_;
+  filter* y_force_est_;
+  filter* z_force_est_;
+
+  filter* x1_force_est_;
+  filter* y1_force_est_;
+  filter* z1_force_est_;
+
+  filter* x2_force_est_;
+  filter* y2_force_est_;
+  filter* z2_force_est_;
+
+  filter* x3_force_est_;
+  filter* y3_force_est_;
+  filter* z3_force_est_;
 
  public:
   DracoInterface();

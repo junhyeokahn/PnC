@@ -200,8 +200,14 @@ void DracoStateEstimator::_JointUpdate(DracoSensorData* data) {
         (1.0 - alphaVelocity) * prev_qdot_[robot_->getNumVirtualDofs() + i];
   }
   prev_qdot_ = curr_qdot_;
-  sp_->l_rf = data->lf_wrench;
-  sp_->r_rf = data->rf_wrench;
+  // sp_->l_rf = data->lf_wrench;
+  // sp_->r_rf = data->rf_wrench;
+
+  sp_->r_front_rf = data->rf_front_wrench;
+  sp_->l_front_rf = data->lf_front_wrench;
+  sp_->r_back_rf = data->rf_back_wrench;
+  sp_->l_back_rf = data->lf_back_wrench;
+
   sp_->rotor_inertia = data->rotor_inertia;
 }
 

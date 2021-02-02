@@ -1,4 +1,5 @@
 #include <PnC/DracoPnC/DracoCtrl/DracoWBCController.hpp>
+#include <PnC/Filter/Basic/filter.hpp>
 
 DracoWBCController::DracoWBCController(
     DracoTaskAndForceContainer* _taf_container, RobotSystem* _robot) {
@@ -21,6 +22,7 @@ DracoWBCController::DracoWBCController(
   // KinWBC and WBLC
   kin_wbc_ = new KinWBC(act_list);
   wblc_ = new WBLC(act_list);
+  awbc_ = new AWBC(act_list);
   wblc_data_ = new WBLC_ExtraData();
 
   // Initialize torque and qddot des
@@ -32,14 +34,39 @@ DracoWBCController::DracoWBCController(
   des_jvel_ = Eigen::VectorXd::Zero(Draco::n_adof);
   des_jacc_ = Eigen::VectorXd::Zero(Draco::n_adof);
 
+  q_prev_ = Eigen::VectorXd::Zero(Draco::n_dof);
+  dq_prev_ = Eigen::VectorXd::Zero(Draco::n_dof);
+
+  hat_f_ =  Eigen::VectorXd::Zero(6);
+
   //contact dimension
   dim_contact_ = taf_container_->dim_contact_;
+
+  // robot total mass
+  total_mass_ = robot_->getRobotMass();
+
+  x_force_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 20.0);
+  y_force_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 20.0);
+  z_force_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 100.0);
+
+  x_tau_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 50.0);
+  y_tau_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 50.0);
+  z_tau_ext_ = new AverageFilter(DracoAux::servo_rate, 0.030, 50.0);
+
 }
 
 DracoWBCController::~DracoWBCController() {
   delete kin_wbc_;
   delete wblc_;
   delete wblc_data_;
+
+  delete x_force_ext_;
+  delete y_force_ext_;
+  delete z_force_ext_;
+  
+  delete x_tau_ext_;
+  delete y_tau_ext_;
+  delete z_tau_ext_;
 }
 
 void DracoWBCController::_PreProcessing_Command() {
@@ -109,7 +136,13 @@ void DracoWBCController::_PreProcessing_Command() {
   }
   // std::cout<<"num contact: "<< contact_list_.size() << std::endl;
   // std::cout<<"W_rf_" << wblc_data_->W_rf_ <<std::endl;
-
+  
+  pos_com_ = robot_->getCoMPosition();
+  vel_com_ = robot_->getCoMVelocity();
+  J_com_ = robot_->getCoMJacobian();
+  AM_ = robot_->A_cent_.block(0,0,3,Draco::n_dof);
+  H_ = robot_->getDervCentroidMomentum(0.0001);
+ 
 }
 
 void DracoWBCController::getCommand(void* _cmd) {
@@ -117,6 +150,7 @@ void DracoWBCController::getCommand(void* _cmd) {
   if (b_first_visit_) {
     firstVisit();
     b_first_visit_ = false;
+    awbc_->setGains(kp_, kd_, Kp_, Kd_);
   }
 
   // Update Dynamic Properties, Task Jacobians, and Contact Jacobians
@@ -131,9 +165,9 @@ void DracoWBCController::getCommand(void* _cmd) {
   vel_des = task->vel_des;
   acc_des = task->acc_des;
 
-  std::cout<<"task pos err: " << pos_err << std::endl;
-  std::cout<<"task vel des: " << vel_des << std::endl;
-  std::cout<<"task acc des: " << acc_des << std::endl;
+  // std::cout<<"task pos err: " << pos_err << std::endl;
+  // std::cout<<"task vel des: " << vel_des << std::endl;
+  // std::cout<<"task acc des: " << acc_des << std::endl;
 
   // solve kinWBC 
   kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
@@ -149,7 +183,122 @@ void DracoWBCController::getCommand(void* _cmd) {
   // solve WBLC for obtaining the torque
   wblc_->makeWBLC_Torque(des_jacc_cmd, contact_list_, tau_cmd_, wblc_data_);
 
-  // myUtils::pretty_print(gamma, std::cout, "gamma");
+  std::vector<Eigen::Vector3d> contact_pos; 
+  Eigen::Vector3d temp_pos;
+  int num_contact = taf_container_->contact_list_.size();
+  Eigen::VectorXd Fr_transformed = Eigen::VectorXd::Zero(6*num_contact);
+  Eigen::VectorXd Fr_temp = Eigen::VectorXd::Zero(6);
+  Eigen::Isometry3d T1_temp = Eigen::Isometry3d::Identity();
+  Eigen::Isometry3d T_com = Eigen::Isometry3d::Identity(); 
+  Eigen::Isometry3d T1_com = Eigen::Isometry3d::Identity();
+  Eigen::MatrixXd AdT1_com; 
+
+  T_com.translation() = pos_com_;
+  
+  if(taf_container_->contact_type_ == 1) // point contact
+  {
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::rFootFront).translation() - pos_com_);
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::rFootBack).translation() - pos_com_);
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::lFootFront).translation() - pos_com_);
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::lFootBack).translation() - pos_com_);
+  
+      // Fr_temp.segment(3,3) = wblc_data_->Fr_.segment(0,3);
+      // T1_temp.translation() = robot_->getBodyNodeIsometry(DracoBodyNode::rFootFront).translation();
+      // T1_com = T1_temp.inverse()*T_com;
+      // AdT1_com = dart::math::getAdTMatrix(T1_com);
+      // Fr_transformed.segment(0,6) = AdT1_com.transpose()*Fr_temp;
+      
+      // Fr_temp.segment(3,3) = wblc_data_->Fr_.segment(3,3);
+      // T1_temp.translation() = robot_->getBodyNodeIsometry(DracoBodyNode::rFootBack).translation();
+      // T1_com = T1_temp.inverse()*T_com;
+      // AdT1_com = dart::math::getAdTMatrix(T1_com);
+      // Fr_transformed.segment(6,6) =  AdT1_com.transpose()*Fr_temp;
+      
+      // Fr_temp.segment(3,3) = wblc_data_->Fr_.segment(6,3);
+      // T1_temp.translation() = robot_->getBodyNodeIsometry(DracoBodyNode::lFootFront).translation();
+      // T1_com = T1_temp.inverse()*T_com;
+      // AdT1_com = dart::math::getAdTMatrix(T1_com);
+      // Fr_transformed.segment(12,3) = AdT1_com.transpose()*Fr_temp;
+
+      // Fr_temp.segment(3,3) = wblc_data_->Fr_.segment(9,3);
+      // T1_temp.translation() = robot_->getBodyNodeIsometry(DracoBodyNode::lFootBack).translation();
+      // T1_com = T1_temp.inverse()*T_com;
+      // AdT1_com = dart::math::getAdTMatrix(T1_com);
+      // Fr_transformed.segment(18,3) = AdT1_com.transpose()*Fr_temp;
+      
+      // whlc contact forces
+      Fr_transformed.segment(3,3) = wblc_data_->Fr_.segment(0,3);
+      Fr_transformed.segment(9,3) = wblc_data_->Fr_.segment(3,3);
+      Fr_transformed.segment(15,3) = wblc_data_->Fr_.segment(6,3);
+      Fr_transformed.segment(21,3) = wblc_data_->Fr_.segment(9,3);
+
+      // measured contact forces
+      // Fr_transformed.segment(3,3) = sp_->r_front_rf.segment(3,3);
+      // Fr_transformed.segment(9,3) = sp_->r_back_rf.segment(3,3);
+      // Fr_transformed.segment(15,3) = sp_->l_front_rf.segment(3,3);
+      // Fr_transformed.segment(21,3) = sp_->l_back_rf.segment(3,3);
+
+      // myUtils::pretty_print(wblc_data_->Fr_, std::cout, "wblc_data_->Fr_");
+      // myUtils::pretty_print(Fr_temp, std::cout, "Fr_temp");
+      // myUtils::pretty_print(Fr_transformed, std::cout, "Fr_transformed");
+  }
+
+  else if (taf_container_->contact_type_ == 2)  //surface contact
+  {
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::rFootCenter).translation() - pos_com_);
+      contact_pos.push_back(robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation() - pos_com_);
+  } 
+
+  Eigen::Vector3d ext_pos = robot_->getBodyNodeIsometry(DracoBodyNode::Torso).translation() - pos_com_;
+  Eigen::MatrixXd ext_Jacobian = robot_->getBodyNodeJacobian(DracoBodyNode::Torso);
+
+  // Cordinate transform 
+  
+  // setting for adaptation of WBC
+  awbc_->updateJointSetting(sp_->q, q_prev_, sp_->qdot, dq_prev_);
+  awbc_->updateMassSetting(A_, A_prev_, total_mass_);
+  awbc_->updateContactSetting(Fr_transformed, contact_pos, ext_pos, ext_Jacobian);
+  awbc_->updateCDSetting(pos_com_, pos_com_prev_, J_com_, J_com_prev_, AM_, AM_prev_, H_, H_prev_);
+
+  // myUtils::pretty_print(H_, std::cout, "H");
+
+  // Estimate External force 
+  // awbc_->EstimateExtforce();
+
+  Eigen::VectorXd Kp_a;
+  Eigen::VectorXd Kd_a;
+
+  awbc_->AdaptGains( contact_list_, Kp_a, Kd_a);
+
+  // myUtils::pretty_print(Kp_, std::cout, "Kp_");
+  // myUtils::pretty_print(Kd_, std::cout, "Kd_");
+  // myUtils::pretty_print(Kp_a, std::cout, "Kp_a");
+  // myUtils::pretty_print(Kd_a, std::cout, "Kd_a");
+
+  hat_f_.segment(3,3) = awbc_->hat_f_t_;
+  hat_f_.segment(0,3) = awbc_->hat_tau_t_;
+
+  x_tau_ext_->input(hat_f_[0]);
+  hat_f_[0] = x_tau_ext_->output();
+  y_tau_ext_->input(hat_f_[1]);
+  hat_f_[1] = y_tau_ext_->output();
+  z_tau_ext_->input(hat_f_[2]);
+  hat_f_[2] = z_tau_ext_->output();
+
+  x_force_ext_->input(hat_f_[3]);
+  hat_f_[3] = x_force_ext_->output();
+  y_force_ext_->input(hat_f_[4]);
+  hat_f_[4] = y_force_ext_->output();
+  z_force_ext_->input(hat_f_[5]);
+  hat_f_[5] = z_force_ext_->output();
+
+  // myUtils::pretty_print(wblc_data_->Fr_, std::cout, "ground reaction force");
+  // myUtils::pretty_print(hat_f, std::cout, "ext_force");
+
+  Eigen::MatrixXd ext_Jacobian_inv;
+  myUtils::weightedInverse(ext_Jacobian, Ainv_, ext_Jacobian_inv);
+
+  Eigen::VectorXd F_cmd = ext_Jacobian_inv.transpose()*tau_cmd_;
 
   // Set Command
   for (int i(0); i < Draco::n_adof; ++i) {
@@ -158,13 +307,44 @@ void DracoWBCController::getCommand(void* _cmd) {
     ((DracoCommand*)_cmd)->qdot[i] = des_jvel_[i];
   }
 
+  ((DracoCommand*)_cmd)->Fr_estimated = Fr_transformed;
+  ((DracoCommand*)_cmd)->Fr_ext = hat_f_;
+  // ((DracoCommand*)_cmd)->Fr_ext = hat_f - F_cmd;
+  
+  // update previous joint configuration and velocity
+  q_prev_ = sp_->q;
+  dq_prev_ = sp_->qdot;
+  A_prev_ = A_;
+  pos_com_prev_ = pos_com_;
+  vel_com_prev_ = vel_com_;
+  J_com_prev_ = J_com_;
+  AM_prev_ = AM_;
+  H_prev_ = H_;
   // myUtils::pretty_print(((DracoCommand*)_cmd)->jtrq, std::cout, "jtrq");
   // myUtils::pretty_print(((DracoCommand*)_cmd)->q, std::cout, "q");
   // myUtils::pretty_print(((DracoCommand*)_cmd)->qdot, std::cout, "qdot");
 }
 
 
-void DracoWBCController::firstVisit() { }
+void DracoWBCController::firstVisit() {
+  q_prev_ = sp_->q;
+  dq_prev_ = sp_->qdot;
+  A_prev_ = robot_->getMassMatrix();
+  pos_com_prev_ = robot_->getCoMPosition();
+  vel_com_prev_ = robot_->getCoMVelocity();
+  J_com_prev_ = robot_->getCoMJacobian();
+  AM_prev_ = robot_->A_cent_.block(0,0,3,Draco::n_dof);
+  H_prev_ = robot_->getDervCentroidMomentum(0.0001);
+
+  ((AverageFilter*)x_tau_ext_)->initialization(hat_f_[0]);
+  ((AverageFilter*)y_tau_ext_)->initialization(hat_f_[1]);
+  ((AverageFilter*)z_tau_ext_)->initialization(hat_f_[2]);
+
+  ((AverageFilter*)x_force_ext_)->initialization(hat_f_[3]);
+  ((AverageFilter*)y_force_ext_)->initialization(hat_f_[4]);
+  ((AverageFilter*)z_force_ext_)->initialization(hat_f_[5]);
+
+ }
 
 void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   // WBC Defaults
@@ -203,4 +383,17 @@ void DracoWBCController::ctrlInitialization(const YAML::Node& node) {
   // torque limit default setting
   wblc_data_->tau_min_ = Eigen::VectorXd::Constant(Draco::n_adof, -2500.);
   wblc_data_->tau_max_ = Eigen::VectorXd::Constant(Draco::n_adof, 2500.);
+ 
+  try {
+    YAML::Node simulation_cfg =
+        YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+    YAML::Node control_cfg = simulation_cfg["control_configuration"];
+    myUtils::readParameter(control_cfg, "kp", kp_);
+    myUtils::readParameter(control_cfg, "kd", kd_);
+  } catch (std::runtime_error& e) {
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+  }
+
 }
