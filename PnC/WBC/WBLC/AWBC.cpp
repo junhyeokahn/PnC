@@ -30,12 +30,16 @@ AWBC::AWBC(const std::vector<bool>& act_list): WBC(act_list) {
 }
 
 void AWBC::updateJointSetting(const Eigen::VectorXd & q_cur, const Eigen::VectorXd & q_prev,
-                              const Eigen::VectorXd & dq_cur, const Eigen::VectorXd & dq_prev)
+                              const Eigen::VectorXd & dq_cur, const Eigen::VectorXd & dq_prev,
+                              const Eigen::VectorXd & q_des, const Eigen::VectorXd & dq_des)
 {
     q_cur_ = q_cur;
     q_prev_ = q_prev;
     dq_cur_ = dq_cur;
     dq_prev_ = dq_prev;
+    q_des_ = q_des;
+    dq_des_ = dq_des;
+
     b_Joint_ = true;
 }
 
@@ -102,8 +106,6 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     for(int i(0); i< num_contact ; ++i)
         sum_force += Fr_.segment(6*i+3,3);
 
-
-    Eigen::MatrixXd Coef_q = total_m_*J_com_prev_.block(3,0,3,n);
     f_hat_q = 2*total_m_/(delta_t_*delta_t_)*J_com_prev_.block(3,0,3,n)*q_cur_;
 
     c1 =  - 2*total_m_/(delta_t_*delta_t_)*J_com_prev_.block(3,0,3,n)*q_prev_ - sum_force 
@@ -111,12 +113,21 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
 
     hat_f_t_ = f_hat_q + c1;
 
-    // std::cout<<"J_com: " << total_m_*J_com_prev_.block(3,6,3,n-6) <<std::endl; 
-    // std::cout<<"total Mass: "<< total_m_<<std::endl;
-    
-    myUtils::pretty_print(Coef_q, std::cout, "Coef_q");
-    // myUtils::pretty_print(Fr_, std::cout, "Fr_");
-    // myUtils::pretty_print(sum_force, std::cout, "sum_force");
+    Eigen::MatrixXd Kp_tilde = Eigen::MatrixXd::Zero(n,n);
+    Eigen::MatrixXd Kd_tilde = Eigen::MatrixXd::Zero(n,n);
+
+    for(int i(0); i< n; ++i){
+        // Kp_tilde(i,i) = (q_cur_[i] - q_prev_[i])/((delta_t_*delta_t_)*(q_des_[i] - q_cur_[i]));
+        // Kd_tilde(i,i) = (dq_cur_[i] - 2*dq_prev_[i])/(delta_t_*(dq_des_[i] - dq_cur_[i]));
+        Kp_tilde(i,i) = (q_cur_[i] - q_prev_[i])/delta_t_;
+        Kd_tilde(i,i) = (dq_cur_[i] - 2*dq_prev_[i])/delta_t_;
+    }
+
+    myUtils::pretty_print(Kp_tilde, std::cout, "Kp_tilde");
+    myUtils::pretty_print(Kd_tilde, std::cout, "Kd_tilde");
+    myUtils::pretty_print(q_cur_, std::cout, "q_cur_");
+    myUtils::pretty_print(q_prev_, std::cout, "q_prev_");
+    myUtils::pretty_print(q_des_, std::cout, "q_des_");
 
     // compute external torque
     Eigen::VectorXd tau_hat_q = Eigen::VectorXd::Zero(3);
@@ -170,7 +181,7 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     for(int i(0); i< num_contact ; ++i)
         sum_fc_coef += fc_coef.block(3*i ,0, 3, num_qdot_);
 
-    myUtils::pretty_print(sum_fc_coef, std::cout, "sum_fc_coef");
+    // myUtils::pretty_print(sum_fc_coef, std::cout, "sum_fc_coef");
 
     for(int i(0); i<3; ++i)
         temp[i] = c1[i];

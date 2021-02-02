@@ -35,9 +35,9 @@ include_directories(${DART_INCLUDE_DIRS})
 
 # Eigen
 if(NOT EIGEN_FOUND)
-  find_package(Eigen)
+  find_package(Eigen3)
 endif()
-include_directories(${EIGEN_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIRS})
 
 # Gurobi
 find_package(Gurobi)

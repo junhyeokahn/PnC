@@ -169,10 +169,17 @@ void DracoWBCController::getCommand(void* _cmd) {
   // std::cout<<"task vel des: " << vel_des << std::endl;
   // std::cout<<"task acc des: " << acc_des << std::endl;
 
-  // solve kinWBC 
-  kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_,
-                              des_jvel_, des_jacc_);
+  Eigen::VectorXd des_jpos_full;
+  Eigen::VectorXd des_jvel_full;
+  Eigen::VectorXd des_jacc_full;
 
+  // solve kinWBC 
+  kin_wbc_->FindConfiguration(sp_->q, task_list_, contact_list_, des_jpos_full,
+                              des_jvel_full, des_jacc_full);
+
+  des_jpos_ = des_jpos_full.tail(Draco::n_adof);
+  des_jvel_ = des_jvel_full.tail(Draco::n_adof);
+  des_jacc_ = des_jacc_full.tail(Draco::n_adof);
 
   // Update settings and qddot_des
   wblc_->updateSetting(A_, Ainv_, coriolis_, grav_);
@@ -255,7 +262,7 @@ void DracoWBCController::getCommand(void* _cmd) {
   // Cordinate transform 
   
   // setting for adaptation of WBC
-  awbc_->updateJointSetting(sp_->q, q_prev_, sp_->qdot, dq_prev_);
+  awbc_->updateJointSetting(sp_->q, q_prev_, sp_->qdot, dq_prev_, des_jpos_full , des_jvel_full);
   awbc_->updateMassSetting(A_, A_prev_, total_mass_);
   awbc_->updateContactSetting(Fr_transformed, contact_pos, ext_pos, ext_Jacobian);
   awbc_->updateCDSetting(pos_com_, pos_com_prev_, J_com_, J_com_prev_, AM_, AM_prev_, H_, H_prev_);

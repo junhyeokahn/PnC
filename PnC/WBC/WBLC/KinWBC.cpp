@@ -130,14 +130,14 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
     // xdot_c = Jc * delta_q;
     // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
     //myUtils::pretty_print(delta_q, std::cout, "delta_q");
-    for (int i(0); i < num_act_joint_; ++i) {
-        jpos_cmd[i] = curr_config[act_jidx_[i]] + delta_q[act_jidx_[i]];
-        jvel_cmd[i] = qdot[act_jidx_[i]];
-        jacc_cmd[i] = qddot[act_jidx_[i]];
-    }
-    // jpos_cmd = curr_config + delta_q;
-    // jvel_cmd = qdot;
-    // jacc_cmd = qddot;
+    // for (int i(0); i < num_act_joint_; ++i) {
+    //     jpos_cmd[i] = curr_config[act_jidx_[i]] + delta_q[act_jidx_[i]];
+    //     jvel_cmd[i] = qdot[act_jidx_[i]];
+    //     jacc_cmd[i] = qddot[act_jidx_[i]];
+    // }
+    jpos_cmd = curr_config + delta_q;
+    jvel_cmd = qdot;
+    jacc_cmd = qddot;
 
     return true;
 }

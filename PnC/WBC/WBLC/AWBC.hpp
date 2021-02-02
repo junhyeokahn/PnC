@@ -11,7 +11,8 @@ class AWBC: public WBC{
         virtual ~AWBC(){}
 
         virtual void updateJointSetting(const Eigen::VectorXd & q_cur, const Eigen::VectorXd & q_prev,
-                                        const Eigen::VectorXd & dq_cur, const Eigen::VectorXd & dq_prev);
+                                        const Eigen::VectorXd & dq_cur, const Eigen::VectorXd & dq_prev,
+                                        const Eigen::VectorXd & q_des, const Eigen::VectorXd & dq_des);
 
         virtual void updateMassSetting(const Eigen::MatrixXd & A_cur,
                                        const Eigen::MatrixXd & A_prev, double & total_mass);
@@ -51,6 +52,8 @@ class AWBC: public WBC{
         Eigen::VectorXd q_prev_;
         Eigen::VectorXd dq_cur_;
         Eigen::VectorXd dq_prev_;
+        Eigen::VectorXd q_des_;
+        Eigen::VectorXd dq_des_;
 
         Eigen::MatrixXd A_cur_;
         Eigen::MatrixXd A_prev_;
