@@ -117,18 +117,19 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     Eigen::MatrixXd Kd_tilde = Eigen::MatrixXd::Zero(n,n);
 
     for(int i(0); i< n; ++i){
-        // Kp_tilde(i,i) = (q_cur_[i] - q_prev_[i])/((delta_t_*delta_t_)*(q_des_[i] - q_cur_[i]));
-        // Kd_tilde(i,i) = (dq_cur_[i] - 2*dq_prev_[i])/(delta_t_*(dq_des_[i] - dq_cur_[i]));
-        Kp_tilde(i,i) = (q_cur_[i] - q_prev_[i])/delta_t_;
-        Kd_tilde(i,i) = (dq_cur_[i] - 2*dq_prev_[i])/delta_t_;
+        Kp_tilde(i,i) = (q_cur_[i] - q_prev_[i])/((delta_t_*delta_t_)*(q_des_[i] - q_cur_[i]));
+        Kd_tilde(i,i) = (dq_cur_[i] - 2*dq_prev_[i])/(delta_t_*(dq_des_[i] - dq_cur_[i]));
     }
 
     myUtils::pretty_print(Kp_tilde, std::cout, "Kp_tilde");
     myUtils::pretty_print(Kd_tilde, std::cout, "Kd_tilde");
-    myUtils::pretty_print(q_cur_, std::cout, "q_cur_");
-    myUtils::pretty_print(q_prev_, std::cout, "q_prev_");
-    myUtils::pretty_print(q_des_, std::cout, "q_des_");
 
+    Eigen::MatrixXd Mp = total_m_*J_com_prev_.block(3,0,3,n)*Kp_tilde;
+    Eigen::MatrixXd Md = total_m_*J_com_prev_.block(3,0,3,n)*Kd_tilde;
+
+    myUtils::pretty_print(Mp, std::cout, "Mp");
+    myUtils::pretty_print(Md, std::cout, "Md");
+    
     // compute external torque
     Eigen::VectorXd tau_hat_q = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd tau_hat_dq = Eigen::VectorXd::Zero(3);
@@ -181,7 +182,7 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     for(int i(0); i< num_contact ; ++i)
         sum_fc_coef += fc_coef.block(3*i ,0, 3, num_qdot_);
 
-    // myUtils::pretty_print(sum_fc_coef, std::cout, "sum_fc_coef");
+    myUtils::pretty_print(sum_fc_coef, std::cout, "sum_fc_coef");
 
     for(int i(0); i<3; ++i)
         temp[i] = c1[i];
