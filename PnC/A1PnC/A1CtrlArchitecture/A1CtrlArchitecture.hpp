@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <PnC/ControlArchitecture.hpp>
-// #include <PnC/A1PnC/A1Ctrl/A1MainController.hpp>
+#include <PnC/A1PnC/A1Ctrl/A1MainController.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
 // #include <PnC/A1PnC/A1StateMachine/ContactTransitionEnd.hpp>
 // #include <PnC/A1PnC/A1StateMachine/ContactTransitionStart.hpp>
@@ -37,8 +37,6 @@ class A1ControlArchitecture : public ControlArchitecture {
   virtual void ControlArchitectureInitialization();
   virtual void getCommand(void* _command);
   void saveData();
-  // void getIVDCommand(void* _command);
-  // void smoothing_torque(void* _cmd);
 
  protected:
   A1StateProvider* sp_;
@@ -51,7 +49,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   // Task and Force Containers
   A1TaskAndForceContainer* taf_container_;
   // Controller Object
-  // A1MainController* main_controller_;
+  A1MainController* main_controller_;
   // Add Planner
 
   // Trajectory Managers

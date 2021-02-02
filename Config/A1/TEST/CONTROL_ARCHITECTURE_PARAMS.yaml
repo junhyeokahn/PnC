@@ -28,7 +28,7 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 1500
+    max_z_force: 123
 
     # Task hierarchy weights
     ini_w_task_base_ori: 0.0
@@ -48,6 +48,6 @@ task_parameters:
     kp_foot_pos: [400, 400, 400]
     kd_foot_pos: [40, 40, 40]
     # Joint
-    kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
-    kd_joint: [20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.]
+    kp_joint: [10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10.]
+    kd_joint: [2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.]
 

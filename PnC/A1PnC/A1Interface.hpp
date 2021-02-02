@@ -86,6 +86,8 @@ class A1Interface : public EnvInterface{
       Eigen::VectorXd cmd_jvel_;
       Eigen::VectorXd cmd_jtrq_;
       Eigen::VectorXd data_torque_;
+      Eigen::VectorXd data_com_pos_;
+      Eigen::VectorXd data_com_vel_;
 
       // safety
       Eigen::VectorXd jpos_max_;

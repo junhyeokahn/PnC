@@ -79,7 +79,7 @@ void A1WorldNode::customPreStep() {
 
   trq_cmd_.tail(12) = command_->jtrq;
   // Low level FeedForward and Position Control
-  // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques");
+  // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques (worldnode)");
 
   trq_cmd_.head(6).setZero();
 

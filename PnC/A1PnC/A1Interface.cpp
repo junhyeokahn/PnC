@@ -37,6 +37,9 @@ A1Interface::A1Interface() : EnvInterface() {
     cmd_jtrq_ = Eigen::VectorXd::Zero(12);
 
     data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+    data_com_pos_ = Eigen::VectorXd::Zero(6);
+    data_com_vel_ = Eigen::VectorXd::Zero(6);
+
     stop_test_ = false;
 
     myUtils::color_print(myColor::BoldCyan, border);
@@ -47,10 +50,12 @@ A1Interface::A1Interface() : EnvInterface() {
                                                 robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT,"jvel_des",
                                                 robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command",
+    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command torque",
                                                 robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"torque",
+    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"actual torque",
                                                 robot_->getNumActuatedDofs());
+    DataManager::GetDataManager()->RegisterData(&data_com_pos_, VECT,"com_pos", 6);
+    DataManager::GetDataManager()->RegisterData(&data_com_vel_, VECT,"com_vel", 6);
 
     _ParameterSetting();
 }
@@ -73,7 +78,11 @@ void A1Interface::getCommand(void* _data, void* _command){
     }
     // Save Data
     for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-        data_torque_[i] = data->jtrq[i];
+      data_torque_[i] = data->jtrq[i];
+    }
+    for(int i(0); i < 6; ++i){
+      data_com_pos_[i] = data->virtual_q[i];
+      data_com_vel_[i] = data->virtual_qdot[i];
     }
 
     running_time_ = (double)(count_)*A1Aux::servo_rate;

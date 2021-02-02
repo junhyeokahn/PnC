@@ -6,7 +6,8 @@ file(GLOB a1_taf_headers "A1TaskAndForceContainer/*.hpp")
 file(GLOB a1_ctrl_arch_headers "A1CtrlArchitecture/*.hpp")
 file(GLOB a1_task_headers "A1Task/*.hpp")
 file(GLOB a1_state_machine_headers "A1StateMachine/*.hpp")
-# missing A1Ctrl
+file(GLOB a1_ctrl_headers "A1Ctrl/*.hpp")
+
 
 add_library(A1PnC SHARED ${sources})
 target_link_libraries(A1PnC ${DART_LIBRARIES}
@@ -34,3 +35,5 @@ install(FILES ${a1_ctrl_arch_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1CtrlArchitecture")
 install(FILES ${a1_state_machine_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1StateMachine")
+install(FILES ${a1_ctrl_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1Ctrl")

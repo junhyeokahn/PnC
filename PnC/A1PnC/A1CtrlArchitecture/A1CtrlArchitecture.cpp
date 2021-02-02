@@ -12,7 +12,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Initialize Main Controller
   taf_container_ = new A1TaskAndForceContainer(robot_);
   taf_container_->paramInitialization(cfg_["task_parameters"]);
-  // main_controller_ = new A1MainController(taf_container_, robot_);
+  main_controller_ = new A1MainController(taf_container_, robot_);
 
   // Initialize Planner
 
@@ -78,7 +78,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
 
 A1ControlArchitecture::~A1ControlArchitecture() {
   delete taf_container_;
-  // delete main_controller_;
+  delete main_controller_;
 
   // Delete the trajectory managers
   delete frfoot_max_normal_force_manager_;
@@ -119,7 +119,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Get Wholebody control commands
-  // main_controller_->getCommand(_command);
+  main_controller_->getCommand(_command);
 
   /*// Smoothing trq for initial state
   smoothing_torque(_command);*/
@@ -185,7 +185,7 @@ void DracoControlArchitecture::getIVDCommand(void* _cmd) {
 
 void A1ControlArchitecture::_InitializeParameters() {
   // Controller initialization
-  // main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
+  main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
 
   // Trajectory Managers initialization
   try { 
