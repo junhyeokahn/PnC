@@ -51,6 +51,8 @@ void A1StateEstimator::_ConfigurationAndModelUpdate() {
 
   sp_->q = curr_config_;
   sp_->qdot = curr_qdot_;
+  sp_->com_pos = robot_->getCoMPosition();
+  sp_->com_vel = robot_->getCoMVelocity();
 }
 
 void A1StateEstimator::_FootContactUpdate(A1SensorData* data) {

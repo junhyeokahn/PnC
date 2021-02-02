@@ -37,15 +37,6 @@ class A1SensorData{
       Eigen::VectorXd virtual_q;
       Eigen::VectorXd virtual_qdot;
 
-      //int flf_wrench;
-      //int frf_wrench;
-      //int rlf_wrench;
-      //int rrf_wrench;
-      // Eigen::VectorXd flf_wrench;
-      // Eigen::VectorXd frf_wrench;
-      // Eigen::VectorXd rlf_wrench;
-      // Eigen::VectorXd rrf_wrench;
-
       bool flfoot_contact;
       bool frfoot_contact;
       bool rlfoot_contact;
@@ -86,8 +77,6 @@ class A1Interface : public EnvInterface{
       Eigen::VectorXd cmd_jvel_;
       Eigen::VectorXd cmd_jtrq_;
       Eigen::VectorXd data_torque_;
-      Eigen::VectorXd data_com_pos_;
-      Eigen::VectorXd data_com_vel_;
 
       // safety
       Eigen::VectorXd jpos_max_;
