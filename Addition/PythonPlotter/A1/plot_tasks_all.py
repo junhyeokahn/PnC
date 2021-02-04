@@ -15,22 +15,18 @@ st_idx = 40
 end_idx = len(t) - 10
 t = t[st_idx:end_idx]
 
-task_names = ['com_pos', 'com_vel']
-task_labels = ['com lin']
+task_names = [ 'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
+task_labels = ['com lin', 'base ori']
 tasks = dict()
 tasks_des = dict()
 for i, label in enumerate(task_labels):
     p_d = np.genfromtxt(file_path+task_names[2*i]+"_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
-    # p_d = np.genfromtxt(file_path+"com_pos_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
-    # v_d = np.genfromtxt(file_path+"com_vel_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
     v_d = np.genfromtxt(file_path+task_names[2*i+1]+"_des.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
     p = np.genfromtxt(file_path+task_names[2*i]+".txt", delimiter=None, dtype=(float))[st_idx:end_idx]
-    # p = np.genfromtxt(file_path+"com_pos.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
-    # v = np.genfromtxt(file_path+"com_vel.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
     v = np.genfromtxt(file_path+task_names[2*i+1]+".txt", delimiter=None, dtype=(float))[st_idx:end_idx]
     tasks_des[label] = [p_d, v_d]
     tasks[label] = [p, v]
-com_vel = np.genfromtxt(file_path+"com_vel.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
+est_com_vel = np.genfromtxt(file_path+"com_vel.txt", delimiter=None, dtype=(float))[st_idx:end_idx]
 
 data_phse = np.genfromtxt(file_path+'phase.txt', delimiter=None, dtype=(float))[st_idx:end_idx]
 phseChange = []
@@ -68,7 +64,7 @@ for (k_des, v_des), (k, v) in zip(tasks_des.items(), tasks.items()):
             for j in range(2):
                 axes[i,j].plot(t, v[j][:,i], color='b', linestyle='solid', linewidth=2)
                 if k=='com lin':
-                    axes[i,1].plot(t, com_vel[:,i], color='g', linestyle='solid', linewidth=2)
+                    axes[i,1].plot(t, est_com_vel[:,i], color='g', linestyle='solid', linewidth=2)
                 axes[i,j].plot(t, v_des[j][:,i], color='r', linestyle='dashed', linewidth=4)
                 plot_phase(axes[i,j])
                 axes[i,j].grid(True)

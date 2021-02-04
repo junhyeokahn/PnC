@@ -28,12 +28,12 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 123
+    max_z_force: 123.
 
     # Task hierarchy weights
-    ini_w_task_base_ori: 0.0
-    ini_w_task_com: 0.
-    ini_w_task_foot_pos: 0.
+    w_task_base_ori: 0.0
+    w_task_com: 10.
+    w_task_foot_pos: 0.
     max_w_task_com: 40.
     min_w_task_com: 10.
 

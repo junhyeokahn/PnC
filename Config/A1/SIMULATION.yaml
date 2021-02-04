@@ -5,7 +5,7 @@ hanging_height: 0.1 # 0.8929
 initial_configuration: [0, 0.7854, -1.57, 0, 0.7854, -1.57, 0, 0.7854, -1.57, 0, 0.7854, -1.57] #12DOF not 10DOF [0., 0., -0.87, 1.4565, 1.0, 0., 0, -0.87, 1.4565, 1.0]
 display_joint_frame: false
 joint_limit_enforced: true
-release_time: 10.0 # hold in initial phase for 10 seconds
+release_time: .0 # hold in initial phase for 10 seconds
 
 control_configuration:
   kp: [10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10 , 10]

@@ -15,8 +15,8 @@ void A1TaskAndForceContainer::_InitializeTasks() {
   myUtils::pretty_constructor(2, "A1 Task And Force Container");
 
   // CoM and Pelvis Tasks
-  joint_task_ =
-      new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
+  // joint_task_ =
+  //     new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
   com_task_ = new CoMxyz(robot_);
   base_ori_task_ =
       new BasicTask(robot_, BasicTaskType::LINKORI, 3, A1BodyNode::trunk);
@@ -50,7 +50,7 @@ void A1TaskAndForceContainer::_InitializeContacts() {
   dim_contact_ = frfoot_contact_->getDim() + flfoot_contact_->getDim() +
                     rrfoot_contact_->getDim() + rlfoot_contact_->getDim();
 
-  max_z_ = 500.;
+  max_z_ = 123.;
 
   // Set desired reaction forces
   Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
@@ -63,7 +63,7 @@ void A1TaskAndForceContainer::_InitializeContacts() {
 }
 
 void A1TaskAndForceContainer::_DeleteTasks() {
-  delete joint_task_;
+  // delete joint_task_;
   delete com_task_;
   delete base_ori_task_;
   delete frfoot_pos_task_;
@@ -90,8 +90,8 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "ini_z_force", max_z_);
 
     // Load Task Gains
-    myUtils::readParameter(node, "kp_joint", kp_joint_);
-    myUtils::readParameter(node, "kd_joint", kd_joint_);
+    // myUtils::readParameter(node, "kp_joint", kp_joint_);
+    // myUtils::readParameter(node, "kd_joint", kd_joint_);
     myUtils::readParameter(node, "kp_com", kp_com_);
     myUtils::readParameter(node, "kd_com", kd_com_);
     myUtils::readParameter(node, "kp_base_ori", kp_base_ori_);
@@ -100,9 +100,9 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "kd_foot_pos", kd_foot_pos_);
 
     // Load Task Hierarchies
-    myUtils::readParameter(node, "ini_w_task_com", w_task_com_);
-    myUtils::readParameter(node, "ini_w_task_base_ori", w_task_base_ori_);
-    myUtils::readParameter(node, "ini_w_task_foot_pos", w_task_foot_pos_);
+    myUtils::readParameter(node, "w_task_com", w_task_com_);
+    myUtils::readParameter(node, "w_task_base_ori", w_task_base_ori_);
+    myUtils::readParameter(node, "w_task_foot_pos", w_task_foot_pos_);
 
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -112,7 +112,7 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   }
 
   // Set Task Gains
-  joint_task_->setGain(kp_joint_, kd_joint_);
+  // joint_task_->setGain(kp_joint_, kd_joint_);
   com_task_->setGain(kp_com_, kd_com_);
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
   frfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);

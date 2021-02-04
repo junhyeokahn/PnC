@@ -47,9 +47,9 @@ A1Interface::A1Interface() : EnvInterface() {
                                                 robot_->getNumActuatedDofs());
     DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT,"jvel_des",
                                                 robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command torque",
+    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command_torque",
                                                 robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"actual torque",
+    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"actual_torque",
                                                 robot_->getNumActuatedDofs());
 
     _ParameterSetting();

@@ -193,6 +193,7 @@ void A1ControlArchitecture::_InitializeParameters() {
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
     myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com", min_gain);
     myUtils::readParameter(cfg_["task_parameters"], "max_z_force", max_fz);
+    std::cout << "max_fz = " << max_fz << std::endl;
 
     flfoot_max_normal_force_manager_->setMaxFz(max_fz);
     rlfoot_max_normal_force_manager_->setMaxFz(max_fz);
