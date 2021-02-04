@@ -15,8 +15,10 @@ st_idx = 40
 end_idx = len(t) - 10
 t = t[st_idx:end_idx]
 
-task_names = [ 'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
-task_labels = ['com lin', 'base ori']
+task_names = ['frfoot_pos', 'frfoot_vel', 'flfoot_pos', 'flfoot_vel', 'rrfoot_pos', 'rrfoot_vel', \
+              'rlfoot_pos', 'rlfoot_vel', \
+              'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
+task_labels = ['frfoot lin', 'flfoot lin', 'rrfoot lin', 'rlfoot lin','com lin', 'base ori']
 tasks = dict()
 tasks_des = dict()
 for i, label in enumerate(task_labels):

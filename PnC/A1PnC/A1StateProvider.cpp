@@ -105,7 +105,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // Foot
   // ---------------------------------------------------------------------------
     // NOT YET USING
-  /*data_manager->RegisterData(&frfoot_pos, VECT3, "frfoot_pos", 3);
+  data_manager->RegisterData(&frfoot_pos, VECT3, "frfoot_pos", 3);
   data_manager->RegisterData(&flfoot_pos, VECT3, "flfoot_pos", 3);
   data_manager->RegisterData(&frfoot_vel, VECT3, "frfoot_vel", 3);
   data_manager->RegisterData(&flfoot_vel, VECT3, "flfoot_vel", 3);
@@ -123,7 +123,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&rrfoot_pos_des, VECT3, "rrfoot_pos_des", 3);
   data_manager->RegisterData(&rlfoot_pos_des, VECT3, "rlfoot_pos_des", 3);
   data_manager->RegisterData(&rrfoot_vel_des, VECT3, "rrfoot_vel_des", 3);
-  data_manager->RegisterData(&rlfoot_vel_des, VECT3, "rlfoot_vel_des", 3);*/
+  data_manager->RegisterData(&rlfoot_vel_des, VECT3, "rlfoot_vel_des", 3);
 
   // ---------------------------------------------------------------------------
   // COM

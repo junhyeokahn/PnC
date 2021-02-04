@@ -35,6 +35,7 @@ void QuadSupportStand::firstVisit() {
       robot_->getBodyNodeCoMIsometry(A1BodyNode::RR_foot).translation();
   Eigen::VectorXd target_com_pos = (flfoot_pos + frfoot_pos + rlfoot_pos + rrfoot_pos) / 4.0;
   target_com_pos[2] = target_height_;
+  std::cout << "Double Support Stand target com pos: " << target_com_pos[0] << " " << target_com_pos[1] << " " << target_com_pos[2] << std::endl;
   ctrl_arch_->floating_base_lifting_up_manager_
       ->initializeFloatingBaseTrajectory(sp_->curr_time, end_time_,
                                          target_com_pos);
@@ -71,8 +72,10 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   // Foot
   // =========================================================================
-  // ctrl_arch_->rfoot_trajectory_manager_->useCurrent();
-  // ctrl_arch_->lfoot_trajectory_manager_->useCurrent();
+  // ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
+  // ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
+  // ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
+  // ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
 }
 
 void QuadSupportStand::oneStep() {
