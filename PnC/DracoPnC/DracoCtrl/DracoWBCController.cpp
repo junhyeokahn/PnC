@@ -277,10 +277,10 @@ void DracoWBCController::getCommand(void* _cmd) {
 
   awbc_->AdaptGains( contact_list_, Kp_a, Kd_a);
 
-  // myUtils::pretty_print(Kp_, std::cout, "Kp_");
-  // myUtils::pretty_print(Kd_, std::cout, "Kd_");
-  // myUtils::pretty_print(Kp_a, std::cout, "Kp_a");
-  // myUtils::pretty_print(Kd_a, std::cout, "Kd_a");
+  myUtils::pretty_print(Kp_, std::cout, "Kp_");
+  myUtils::pretty_print(Kd_, std::cout, "Kd_");
+  myUtils::pretty_print(Kp_a, std::cout, "Kp_a");
+  myUtils::pretty_print(Kd_a, std::cout, "Kd_a");
 
   hat_f_.segment(3,3) = awbc_->hat_f_t_;
   hat_f_.segment(0,3) = awbc_->hat_tau_t_;
