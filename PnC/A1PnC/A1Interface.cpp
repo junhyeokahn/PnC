@@ -1,85 +1,82 @@
 #include <math.h>
 #include <stdio.h>
+#include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
+#include <PnC/A1PnC/A1Definition.hpp>
+#include <PnC/A1PnC/A1Interface.hpp>
+#include <PnC/A1PnC/A1LogicInterrupt/WalkingInterruptLogic.hpp>
+#include <PnC/A1PnC/A1StateEstimator.hpp>
+#include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
+#include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
-#include <Utils/IO/DataManager.hpp>
 #include <Utils/Math/pseudo_inverse.hpp>
-#include <PnC/A1PnC/A1StateProvider.hpp>
-#include <PnC/A1PnC/A1StateEstimator.hpp>
-#include <PnC/A1PnC/A1Interface.hpp>
-#include <PnC/A1PnC/A1Definition.hpp>
-#include <PnC/A1PnC/A1LogicInterrupt/WalkingInterruptLogic.hpp>
-#include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
-#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <string>
 
-
 A1Interface::A1Interface() : EnvInterface() {
-    std::string border = "=";
-    for (int i = 0; i < 79; ++i) {
-        border += "=";
-    }
-    myUtils::color_print(myColor::BoldCyan, border);
-    myUtils::pretty_constructor(0, "A1 Interface");
+  std::string border = "=";
+  for (int i = 0; i < 79; ++i) {
+    border += "=";
+  }
+  myUtils::color_print(myColor::BoldCyan, border);
+  myUtils::pretty_constructor(0, "A1 Interface");
 
-    robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
-    //robot_->printRobotInfo();
-    interrupt = new InterruptLogic();
+  robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
+  // robot_->printRobotInfo();
+  interrupt = new InterruptLogic();
 
-    sp_ = A1StateProvider::getStateProvider(robot_);
-    state_estimator_ = new A1StateEstimator(robot_);
+  sp_ = A1StateProvider::getStateProvider(robot_);
+  state_estimator_ = new A1StateEstimator(robot_);
 
-    waiting_count_ = 10;
+  waiting_count_ = 1;
 
-    cmd_jpos_ = Eigen::VectorXd::Zero(12);
-    cmd_jvel_ = Eigen::VectorXd::Zero(12);
-    cmd_jtrq_ = Eigen::VectorXd::Zero(12);
+  cmd_jpos_ = Eigen::VectorXd::Zero(12);
+  cmd_jvel_ = Eigen::VectorXd::Zero(12);
+  cmd_jtrq_ = Eigen::VectorXd::Zero(12);
 
-    data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
-    stop_test_ = false;
+  data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+  stop_test_ = false;
 
-    myUtils::color_print(myColor::BoldCyan, border);
+  myUtils::color_print(myColor::BoldCyan, border);
 
-    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
-                                                "running_time",1);
-    DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT,"jpos_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT,"jvel_des",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&cmd_jtrq_, VECT,"command_torque",
-                                                robot_->getNumActuatedDofs());
-    DataManager::GetDataManager()->RegisterData(&data_torque_, VECT,"actual_torque",
-                                                robot_->getNumActuatedDofs());
+  DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
+                                              "running_time", 1);
+  DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT, "jpos_des",
+                                              robot_->getNumActuatedDofs());
+  DataManager::GetDataManager()->RegisterData(&cmd_jvel_, VECT, "jvel_des",
+                                              robot_->getNumActuatedDofs());
+  DataManager::GetDataManager()->RegisterData(
+      &cmd_jtrq_, VECT, "command_torque", robot_->getNumActuatedDofs());
+  DataManager::GetDataManager()->RegisterData(
+      &data_torque_, VECT, "actual_torque", robot_->getNumActuatedDofs());
 
-    _ParameterSetting();
+  _ParameterSetting();
 }
 
 A1Interface::~A1Interface() {
-    delete robot_;
-    delete interrupt;
-    // delete test_;
+  delete robot_;
+  delete interrupt;
+  // delete test_;
 }
 
+void A1Interface::getCommand(void* _data, void* _command) {
+  A1Command* cmd = ((A1Command*)_command);
+  A1SensorData* data = ((A1SensorData*)_data);
 
-void A1Interface::getCommand(void* _data, void* _command){
-    A1Command* cmd = ((A1Command*)_command);
-    A1SensorData* data = ((A1SensorData*)_data);
+  if (!(_Initialization(data, cmd))) {
+    state_estimator_->Update(data);
+    interrupt->processInterrupts();
+    control_architecture_->getCommand(cmd);
+  }
+  // Save Data
+  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    data_torque_[i] = data->jtrq[i];
+  }
 
-    if(!(_Initialization(data,cmd))){
-        state_estimator_->Update(data);
-        interrupt->processInterrupts();
-        control_architecture_->getCommand(cmd);
-    }
-    // Save Data
-    for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-      data_torque_[i] = data->jtrq[i];
-    }
-
-    running_time_ = (double)(count_)*A1Aux::servo_rate;
-    sp_->curr_time = running_time_;
-    sp_->phase_copy = control_architecture_->getState();
-    ++count_;
+  running_time_ = (double)(count_)*A1Aux::servo_rate;
+  sp_->curr_time = running_time_;
+  sp_->phase_copy = control_architecture_->getState();
+  ++count_;
 }
 
 bool A1Interface::_UpdateTestCommand(A1Command* cmd) {
@@ -158,7 +155,7 @@ void A1Interface::_ParameterSetting() {
       control_architecture_ = new A1ControlArchitecture(robot_);
       delete interrupt;
       interrupt = new WalkingInterruptLogic(
-                static_cast<A1ControlArchitecture*>(control_architecture_));
+          static_cast<A1ControlArchitecture*>(control_architecture_));
     } else {
       printf(
           "[A1 Interface] There is no matching test with the "

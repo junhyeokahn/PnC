@@ -30,6 +30,10 @@ void QuadSupportBalance::_taskUpdate() {
   // =========================================================================
   // Foot, Floating Base
   // =========================================================================
+  ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
 }
 
 void QuadSupportBalance::oneStep() {
@@ -41,9 +45,9 @@ void QuadSupportBalance::lastVisit() {}
 
 bool QuadSupportBalance::endOfState() {
   // Also check if footstep list is non-zero
-  if (state_switch_button_trigger_) {//  &&
-  //     (ctrl_arch_->dcm_trajectory_manager_->footstep_list_.size() > 0) &&
-  //     (!ctrl_arch_->dcm_trajectory_manager_->noRemainingSteps())) {
+  if (state_switch_button_trigger_) {  //  &&
+    //     (ctrl_arch_->dcm_trajectory_manager_->footstep_list_.size() > 0) &&
+    //     (!ctrl_arch_->dcm_trajectory_manager_->noRemainingSteps())) {
     return true;
   }
   return false;

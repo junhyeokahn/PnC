@@ -16,20 +16,21 @@ void A1TaskAndForceContainer::_InitializeTasks() {
 
   // CoM and Pelvis Tasks
   // joint_task_ =
-  //     new BasicTask(robot_, BasicTaskType::JOINT, robot_->getNumActuatedDofs());
+  //     new BasicTask(robot_, BasicTaskType::JOINT,
+  //     robot_->getNumActuatedDofs());
   com_task_ = new CoMxyz(robot_);
   base_ori_task_ =
       new BasicTask(robot_, BasicTaskType::LINKORI, 3, A1BodyNode::trunk);
 
   // Set Foot Motion Tasks
-  frfoot_pos_task_ = new BasicTask(
-      robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, A1BodyNode::FR_foot);
-  flfoot_pos_task_ = new BasicTask(
-      robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, A1BodyNode::FL_foot);
-  rrfoot_pos_task_ = new BasicTask(
-      robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, A1BodyNode::RR_foot);
-  rlfoot_pos_task_ = new BasicTask(
-      robot_, BasicTaskType::ISOLATED_LINKXYZ, 3, A1BodyNode::RL_foot);
+  frfoot_pos_task_ = new BasicTask(robot_, BasicTaskType::ISOLATED_LINKXYZ, 3,
+                                   A1BodyNode::FR_foot);
+  flfoot_pos_task_ = new BasicTask(robot_, BasicTaskType::ISOLATED_LINKXYZ, 3,
+                                   A1BodyNode::FL_foot);
+  rrfoot_pos_task_ = new BasicTask(robot_, BasicTaskType::ISOLATED_LINKXYZ, 3,
+                                   A1BodyNode::RR_foot);
+  rlfoot_pos_task_ = new BasicTask(robot_, BasicTaskType::ISOLATED_LINKXYZ, 3,
+                                   A1BodyNode::RL_foot);
 
   // Add all tasks initially. Remove later as needed.
   task_list_.push_back(com_task_);
@@ -42,13 +43,13 @@ void A1TaskAndForceContainer::_InitializeTasks() {
 }
 
 void A1TaskAndForceContainer::_InitializeContacts() {
-  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.9);
-  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.9);
-  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.9);
-  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.9);
+  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.3);
+  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.3);
+  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.3);
+  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.3);
 
   dim_contact_ = frfoot_contact_->getDim() + flfoot_contact_->getDim() +
-                    rrfoot_contact_->getDim() + rlfoot_contact_->getDim();
+                 rrfoot_contact_->getDim() + rlfoot_contact_->getDim();
 
   max_z_ = 123.;
 

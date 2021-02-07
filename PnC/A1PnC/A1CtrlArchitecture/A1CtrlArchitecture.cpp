@@ -5,7 +5,8 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   b_state_first_visit_ = true;
 
   myUtils::pretty_constructor(1, "A1 Control Architecture");
-  cfg_ = YAML::LoadFile(THIS_COM "Config/A1/TEST/CONTROL_ARCHITECTURE_PARAMS.yaml");
+  cfg_ = YAML::LoadFile(THIS_COM
+                        "Config/A1/TEST/CONTROL_ARCHITECTURE_PARAMS.yaml");
 
   sp_ = A1StateProvider::getStateProvider(robot_);
 
@@ -19,24 +20,32 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Initialize Trajectory managers
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
       taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
+  frfoot_trajectory_manager_ =
+      new PointFootTrajectoryManager(taf_container_->frfoot_pos_task_, robot_);
+  flfoot_trajectory_manager_ =
+      new PointFootTrajectoryManager(taf_container_->flfoot_pos_task_, robot_);
+  rrfoot_trajectory_manager_ =
+      new PointFootTrajectoryManager(taf_container_->rrfoot_pos_task_, robot_);
+  rlfoot_trajectory_manager_ =
+      new PointFootTrajectoryManager(taf_container_->rlfoot_pos_task_, robot_);
 
   frfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-            taf_container_->frfoot_contact_, robot_);
+      taf_container_->frfoot_contact_, robot_);
   rrfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-            taf_container_->rrfoot_contact_, robot_);
+      taf_container_->rrfoot_contact_, robot_);
   flfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-            taf_container_->flfoot_contact_, robot_);
+      taf_container_->flfoot_contact_, robot_);
   rlfoot_max_normal_force_manager_ = new MaxNormalForceTrajectoryManager(
-            taf_container_->rlfoot_contact_, robot_);
+      taf_container_->rlfoot_contact_, robot_);
 
-  frfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
-      taf_container_->frfoot_pos_task_, robot_);
-  rrfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
-      taf_container_->rrfoot_pos_task_, robot_);
-  flfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
-      taf_container_->flfoot_pos_task_, robot_);
-  rlfoot_pos_hierarchy_manager_ = new TaskWeightTrajectoryManager(
-      taf_container_->rlfoot_pos_task_, robot_);
+  frfoot_pos_hierarchy_manager_ =
+      new TaskWeightTrajectoryManager(taf_container_->frfoot_pos_task_, robot_);
+  rrfoot_pos_hierarchy_manager_ =
+      new TaskWeightTrajectoryManager(taf_container_->rrfoot_pos_task_, robot_);
+  flfoot_pos_hierarchy_manager_ =
+      new TaskWeightTrajectoryManager(taf_container_->flfoot_pos_task_, robot_);
+  rlfoot_pos_hierarchy_manager_ =
+      new TaskWeightTrajectoryManager(taf_container_->rlfoot_pos_task_, robot_);
 
   com_hierarchy_manager_ =
       new TaskWeightTrajectoryManager(taf_container_->com_task_, robot_);
@@ -45,7 +54,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
 
   // Initialize states: add all states to the state machine map
   // state_machines_[A1_STATES::INITIALIZE] =
-      // new Initialize(A1_STATES::INITIALIZE, this, robot_);
+  // new Initialize(A1_STATES::INITIALIZE, this, robot_);
   state_machines_[A1_STATES::STAND] =
       new QuadSupportStand(A1_STATES::STAND, this, robot_);
   state_machines_[A1_STATES::BALANCE] =
@@ -87,6 +96,11 @@ A1ControlArchitecture::~A1ControlArchitecture() {
   delete rlfoot_max_normal_force_manager_;
   // delete joint_trajectory_manager_;
   delete floating_base_lifting_up_manager_;
+
+  delete frfoot_trajectory_manager_;
+  delete flfoot_trajectory_manager_;
+  delete rrfoot_trajectory_manager_;
+  delete rlfoot_trajectory_manager_;
 
   delete frfoot_pos_hierarchy_manager_;
   delete rrfoot_pos_hierarchy_manager_;
@@ -188,12 +202,11 @@ void A1ControlArchitecture::_InitializeParameters() {
   main_controller_->ctrlInitialization(cfg_["controller_parameters"]);
 
   // Trajectory Managers initialization
-  try { 
+  try {
     double max_gain, min_gain, max_fz;
     myUtils::readParameter(cfg_["task_parameters"], "max_w_task_com", max_gain);
     myUtils::readParameter(cfg_["task_parameters"], "min_w_task_com", min_gain);
     myUtils::readParameter(cfg_["task_parameters"], "max_z_force", max_fz);
-    std::cout << "max_fz = " << max_fz << std::endl;
 
     flfoot_max_normal_force_manager_->setMaxFz(max_fz);
     rlfoot_max_normal_force_manager_->setMaxFz(max_fz);
@@ -207,20 +220,19 @@ void A1ControlArchitecture::_InitializeParameters() {
     rlfoot_pos_hierarchy_manager_->setMinGain(20.0);
     rrfoot_pos_hierarchy_manager_->setMaxGain(40.0);
     rrfoot_pos_hierarchy_manager_->setMinGain(20.0);
-    com_hierarchy_manager_->setMaxGain(max_gain);
-    com_hierarchy_manager_->setMinGain(min_gain);
-    base_ori_hierarchy_manager_->setMaxGain(max_gain);
-    base_ori_hierarchy_manager_->setMinGain(min_gain);
+    com_hierarchy_manager_->setMaxGain(20.);
+    com_hierarchy_manager_->setMinGain(20.);
+    base_ori_hierarchy_manager_->setMaxGain(20.);
+    base_ori_hierarchy_manager_->setMinGain(20.);
   } catch (std::runtime_error& e) {
-      std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-                << __FILE__ << "]" << std::endl
-                << std::endl;
-      exit(0);
+    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
+              << __FILE__ << "]" << std::endl
+              << std::endl;
+    exit(0);
   }
- 
+
   // States Initialization:
-  state_machines_[A1_STATES::STAND]->initialization(
-      cfg_["state_stand_params"]);
+  state_machines_[A1_STATES::STAND]->initialization(cfg_["state_stand_params"]);
   // state_machines_[DRACO_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
   // state_machines_[DRACO_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
 }
@@ -251,7 +263,15 @@ void A1ControlArchitecture::saveData() {
   sp_->com_pos_des = floating_base_lifting_up_manager_->com_pos_des_;
   sp_->com_vel_des = floating_base_lifting_up_manager_->com_vel_des_;
   sp_->base_quat_des = floating_base_lifting_up_manager_->base_ori_quat_des_;
-  sp_->base_ang_vel_des =
-    floating_base_lifting_up_manager_->base_ang_vel_des_;
+  sp_->base_ang_vel_des = floating_base_lifting_up_manager_->base_ang_vel_des_;
 
+  sp_->frfoot_pos_des = frfoot_trajectory_manager_->foot_pos_des_;
+  sp_->flfoot_pos_des = flfoot_trajectory_manager_->foot_pos_des_;
+  sp_->rrfoot_pos_des = rrfoot_trajectory_manager_->foot_pos_des_;
+  sp_->rlfoot_pos_des = rlfoot_trajectory_manager_->foot_pos_des_;
+
+  sp_->frfoot_vel_des = frfoot_trajectory_manager_->foot_vel_des_;
+  sp_->flfoot_vel_des = flfoot_trajectory_manager_->foot_vel_des_;
+  sp_->rrfoot_vel_des = rrfoot_trajectory_manager_->foot_vel_des_;
+  sp_->rlfoot_vel_des = rlfoot_trajectory_manager_->foot_vel_des_;
 }

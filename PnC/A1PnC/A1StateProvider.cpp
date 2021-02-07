@@ -104,7 +104,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   // Foot
   // ---------------------------------------------------------------------------
-    // NOT YET USING
+  // NOT YET USING
   data_manager->RegisterData(&frfoot_pos, VECT3, "frfoot_pos", 3);
   data_manager->RegisterData(&flfoot_pos, VECT3, "flfoot_pos", 3);
   data_manager->RegisterData(&frfoot_vel, VECT3, "frfoot_vel", 3);
@@ -130,7 +130,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3);
   data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3);
-  //data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
+  // data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
   data_manager->RegisterData(&com_pos_des, VECT3, "com_pos_des", 3);
   data_manager->RegisterData(&com_vel_des, VECT3, "com_vel_des", 3);
   data_manager->RegisterData(&base_quat, QUATERNION, "base_quat", 4);
@@ -149,22 +149,18 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
 
 void A1StateProvider::saveCurrentData() {
   frfoot_pos =
-      robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+      robot_->getBodyNodeCoMIsometry(A1BodyNode::FR_foot).translation();
   flfoot_pos =
-      robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+      robot_->getBodyNodeCoMIsometry(A1BodyNode::FL_foot).translation();
   rrfoot_pos =
-      robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
+      robot_->getBodyNodeCoMIsometry(A1BodyNode::RR_foot).translation();
   rlfoot_pos =
-      robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
+      robot_->getBodyNodeCoMIsometry(A1BodyNode::RL_foot).translation();
 
-  frfoot_vel =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::FR_foot).tail(3);
-  flfoot_vel =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::FL_foot).tail(3);
-  rrfoot_vel =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::RR_foot).tail(3);
-  rlfoot_vel =
-      robot_->getBodyNodeSpatialVelocity(A1BodyNode::RL_foot).tail(3);
+  frfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::FR_foot).tail(3);
+  flfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::FL_foot).tail(3);
+  rrfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::RR_foot).tail(3);
+  rlfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::RL_foot).tail(3);
 
   base_quat = Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());

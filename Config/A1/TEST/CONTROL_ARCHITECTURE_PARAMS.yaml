@@ -1,7 +1,6 @@
 state_stand_params:
     target_pos_duration: 4.0 # duration to reach target com position
-    smoothing_duration: 1.0
-    time_to_max_normal_force: 2.0 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
+    time_to_max_normal_force: 0.2 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
     target_height: 0.25 # target com position from the midfoot position in world frame
 
 state_swing:
@@ -31,10 +30,10 @@ task_parameters:
     max_z_force: 123.
 
     # Task hierarchy weights
-    w_task_base_ori: 0.0
+    w_task_base_ori: 10
     w_task_com: 10.
-    w_task_foot_pos: 0.
-    max_w_task_com: 40.
+    w_task_foot_pos: 20.
+    max_w_task_com: 20.
     min_w_task_com: 10.
 
     # Task Gains

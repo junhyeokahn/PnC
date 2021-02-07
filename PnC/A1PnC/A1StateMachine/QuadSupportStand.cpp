@@ -1,9 +1,9 @@
 #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportStand.hpp>
 
-QuadSupportStand::QuadSupportStand(
-    const StateIdentifier state_identifier_in,
-    A1ControlArchitecture* _ctrl_arch, RobotSystem* _robot)
+QuadSupportStand::QuadSupportStand(const StateIdentifier state_identifier_in,
+                                   A1ControlArchitecture* _ctrl_arch,
+                                   RobotSystem* _robot)
     : StateMachine(state_identifier_in, _robot) {
   myUtils::pretty_constructor(2, "SM: Quad Support Stand");
 
@@ -33,9 +33,12 @@ void QuadSupportStand::firstVisit() {
       robot_->getBodyNodeCoMIsometry(A1BodyNode::RL_foot).translation();
   Eigen::VectorXd rrfoot_pos =
       robot_->getBodyNodeCoMIsometry(A1BodyNode::RR_foot).translation();
-  Eigen::VectorXd target_com_pos = (flfoot_pos + frfoot_pos + rlfoot_pos + rrfoot_pos) / 4.0;
+  Eigen::VectorXd target_com_pos =
+      (flfoot_pos + frfoot_pos + rlfoot_pos + rrfoot_pos) / 4.0;
   target_com_pos[2] = target_height_;
-  std::cout << "Double Support Stand target com pos: " << target_com_pos[0] << " " << target_com_pos[1] << " " << target_com_pos[2] << std::endl;
+  std::cout << "Double Support Stand target com pos: " << target_com_pos[0]
+            << " " << target_com_pos[1] << " " << target_com_pos[2]
+            << std::endl;
   ctrl_arch_->floating_base_lifting_up_manager_
       ->initializeFloatingBaseTrajectory(sp_->curr_time, end_time_,
                                          target_com_pos);
@@ -55,12 +58,14 @@ void QuadSupportStand::firstVisit() {
   // =========================================================================
   // Initialize Task Gain Ramp to Max
   // =========================================================================
-  ctrl_arch_->frfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
-  ctrl_arch_->rrfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
-  ctrl_arch_->flfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
-  ctrl_arch_->rlfoot_pos_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
-  ctrl_arch_->com_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
-  ctrl_arch_->base_ori_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->frfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
+                                                                 end_time_);
+  ctrl_arch_->rrfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
+                                                                 end_time_);
+  ctrl_arch_->flfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
+                                                                 end_time_);
+  ctrl_arch_->rlfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
+                                                                 end_time_);
 }
 
 void QuadSupportStand::_taskUpdate() {
@@ -72,10 +77,10 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   // Foot
   // =========================================================================
-  // ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
-  // ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
-  // ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
-  // ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
 }
 
 void QuadSupportStand::oneStep() {
@@ -98,14 +103,12 @@ void QuadSupportStand::oneStep() {
       state_machine_time_);
   ctrl_arch_->rlfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
       state_machine_time_);
-  ctrl_arch_->com_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->base_ori_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
   _taskUpdate();
 }
 
-void QuadSupportStand::lastVisit() {std::cout << "[lastVisit Quad Support Stand]" << std::endl;}
+void QuadSupportStand::lastVisit() {
+  std::cout << "[lastVisit Quad Support Stand]" << std::endl;
+}
 
 bool QuadSupportStand::endOfState() {
   if (state_machine_time_ > end_time_) {
@@ -114,14 +117,11 @@ bool QuadSupportStand::endOfState() {
   return false;
 }
 
-StateIdentifier QuadSupportStand::getNextState() {
-  return A1_STATES::BALANCE;
-}
+StateIdentifier QuadSupportStand::getNextState() { return A1_STATES::BALANCE; }
 
 void QuadSupportStand::initialization(const YAML::Node& node) {
   try {
     myUtils::readParameter(node, "target_pos_duration", end_time_);
-    myUtils::readParameter(node, "smoothing_duration", smoothing_dur_);
     myUtils::readParameter(node, "time_to_max_normal_force",
                            time_to_max_normal_force_);
     myUtils::readParameter(node, "target_height", target_height_);

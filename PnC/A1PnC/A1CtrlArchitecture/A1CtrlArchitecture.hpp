@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include <PnC/ControlArchitecture.hpp>
 #include <PnC/A1PnC/A1Ctrl/A1MainController.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
+#include <PnC/ControlArchitecture.hpp>
 // #include <PnC/A1PnC/A1StateMachine/ContactTransitionEnd.hpp>
 // #include <PnC/A1PnC/A1StateMachine/ContactTransitionStart.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportBalance.hpp>
@@ -16,6 +16,7 @@
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/PointFootTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
 
 namespace A1_STATES {
@@ -53,8 +54,16 @@ class A1ControlArchitecture : public ControlArchitecture {
   // Add Planner
 
   // Trajectory Managers
-  // JointTrajectoryManager* joint_trajectory_manager_; // If we want to keep joint positions
-  FloatingBaseTrajectoryManager* floating_base_lifting_up_manager_; // if we want to manage COM height
+  // JointTrajectoryManager* joint_trajectory_manager_; // If we want to keep
+  // joint positions
+  FloatingBaseTrajectoryManager*
+      floating_base_lifting_up_manager_;  // if we want to manage COM height
+
+  PointFootTrajectoryManager* frfoot_trajectory_manager_;
+  PointFootTrajectoryManager* flfoot_trajectory_manager_;
+  PointFootTrajectoryManager* rrfoot_trajectory_manager_;
+  PointFootTrajectoryManager* rlfoot_trajectory_manager_;
+
   MaxNormalForceTrajectoryManager* flfoot_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* frfoot_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* rrfoot_max_normal_force_manager_;
