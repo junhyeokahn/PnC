@@ -5,7 +5,8 @@
 #include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/A1PnC/A1TaskAndForceContainer/A1TaskAndForceContainer.hpp>
 #include <PnC/WBC/JointIntegrator.hpp>
-#include <PnC/WBC/WBC.hpp>
+#include <PnC/WBC/WBIC.hpp>
+#include <PnC/WBC/KinWBC.hpp>
 
 class A1MainController {
  public:
@@ -31,6 +32,7 @@ class A1MainController {
   // Controller Objects
   // -------------------------------------------------------
   WBC* wbc_;
+  IK* ik_;
   Eigen::VectorXd Fd_des_;
   Eigen::VectorXd tau_cmd_;
   Eigen::VectorXd qddot_cmd_;
