@@ -363,13 +363,13 @@ void WBC::buildContactStacks(const std::vector<ContactSpec*>& contact_list,
   Jc_ = Jc;
 
   int dim_rf = contact_list[0]->getDim();
-  int dim_rf_cstr = contact_list[0]->getDimRFConstratint();
+  int dim_rf_cstr = contact_list[0]->getDimRFConstraint();
   int dim_new_rf, dim_new_rf_cstr;
 
   for (int i(1); i < contact_list.size(); ++i) {
     contact_list[i]->getContactJacobian(Jc);
     dim_new_rf = contact_list[i]->getDim();
-    dim_new_rf_cstr = contact_list[i]->getDimRFConstratint();
+    dim_new_rf_cstr = contact_list[i]->getDimRFConstraint();
 
     // Stack Jc normally
     Jc_.conservativeResize(dim_rf + dim_new_rf, num_qdot_);

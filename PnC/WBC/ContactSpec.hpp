@@ -38,7 +38,8 @@ class ContactSpec {
     return true;
   }
 
-  virtual int getDimRFConstratint() { return Uf_.rows(); }
+  virtual int getDimRFConstraint() { return Uf_.rows(); }
+  const Eigen::VectorXd& getRFDesired() { return Fr_des_; }
   void getRFConstraintMtx(Eigen::MatrixXd& Uf) { Uf = Uf_; }
   void getRFConstraintVec(Eigen::VectorXd& ieq_vec) { ieq_vec = ieq_vec_; }
 
@@ -53,6 +54,7 @@ class ContactSpec {
   RobotSystem* robot_;
   Eigen::MatrixXd Jc_;
   Eigen::VectorXd JcDotQdot_;
+  Eigen::VectorXd Fr_des_;
   int dim_contact_;
   int idx_Fz_;
   bool b_set_contact_;

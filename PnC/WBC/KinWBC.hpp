@@ -1,30 +1,33 @@
-// #ifndef KINEMATICS_WHOLE_BODY_CONTROL
-// #define KINEMATICS_WHOLE_BODY_CONTROL
+#pragma once
 
-#include <WBC/ContactSpec.hpp>
-#include <WBC/Task.hpp>
 #include <vector>
 
+#include <PnC/WBC/ContactSpec.hpp>
+#include <PnC/WBC/Task.hpp>
 
 class KinWBC {
- public:
-  KinWBC(size_t num_qdot);
-  ~KinWBC() {}
+    public:
+        KinWBC(const std::vector<bool> & act_joint);
+        ~KinWBC(){}
 
-  bool FindConfiguration(const Eigen::VectorXd & curr_config,
-                         const std::vector<Task*> & task_list,
-                         const std::vector<ContactSpec*> & contact_list,
-                         Eigen::VectorXd & jpos_cmd, Eigen::VectorXd & jvel_cmd);
+        bool FindConfiguration(
+                const Eigen::VectorXd & curr_config,
+                const std::vector<Task*> & task_list,
+                const std::vector<ContactSpec*> & contact_list,
+                Eigen::VectorXd & jpos_cmd,
+                Eigen::VectorXd & jvel_cmd,
+                Eigen::VectorXd & jacc_cmd);
+        Eigen::MatrixXd Ainv_;
 
-  Eigen::MatrixXd Ainv_;
+    private:
+        void _PseudoInverse(const Eigen::MatrixXd J, Eigen::MatrixXd & Jinv);
+        void _BuildProjectionMatrix(
+                const Eigen::MatrixXd & J,
+                Eigen::MatrixXd & N);
 
- private:
-  void _PseudoInverse(const Eigen::MatrixXd J, Eigen::MatrixXd & Jinv);
-  void _BuildProjectionMatrix(const Eigen::MatrixXd & J, Eigen::MatrixXd & N);
-
-  double threshold_;
-  size_t num_qdot_;
-  size_t num_act_joint_;
-  Eigen::MatrixXd I_mtx;
+        double threshold_;
+        int num_qdot_;
+        int num_act_joint_;
+        std::vector<int> act_jidx_;
+        Eigen::MatrixXd I_mtx;
 };
-#endif

@@ -1,20 +1,22 @@
 #pragma once
 
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/pseudo_inverse.hpp>
 #include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
 #include <PnC/WBC/ContactSpec.hpp>
+#include <PnC/WBC/Task.hpp>
 
 class WBIC_ExtraData{
     public:
         // Output
-        Eigen::VectorXd opt_result_;
-        Eigen::VectorXd qddot_;
-        Eigen::VectorXd Fr_;
+        Eigen::VectorXd _opt_result;
+        Eigen::VectorXd _qddot;
+        Eigen::VectorXd _Fr;
 
         // Input
-        Eigen::VectorXd W_qddot_;
-        Eigen::VectorXd W_rf_;
-        Eigen::VectorXd W_xddot_;
+        Eigen::VectorXd _W_floating;
+        Eigen::VectorXd _W_rf;
+        //Eigen::VectorXd W_xddot_;
 
         WBIC_ExtraData(){}
         ~WBIC_ExtraData(){}
@@ -37,7 +39,7 @@ class WBIC{
                 Eigen::VectorXd & cmd,
                 void* extra_input = NULL);
 
-        Eigen::MatrixXd Sa_ // Actuated Joint Selection
+        Eigen::MatrixXd Sa_; // Actuated Joint Selection
         Eigen::MatrixXd Sv_; // Virtual Joint Selection
 
         Eigen::MatrixXd A_;
@@ -48,15 +50,6 @@ class WBIC{
         bool b_updatesetting_;
         bool b_internal_constraint_;
 
-    protected:
-        void _WeightedInverse(const Eigen::MatrixXd & J, const Eigen::MatrixXd * Winv, Eigen::MatrixXd & Jinv,
-                              double threshold = 0.0001) {
-            Eigen::MatrixXd lambda = J*Winv*J.transpose();
-            Eigen::MatrixXd lambda_inv;
-            pseudoInverse(lambda, threshold, lambda_inv);
-            Jinv = Winv * J.transpose() * lambda_inv;
-        }
-
     private:
         std::vector<Task*> _task_list;
         std::vector<ContactSpec*> _contact_list;
@@ -65,9 +58,14 @@ class WBIC{
         void _SetInequalityConstraint();
         void _ContactBuilding();
 
-        void _GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd & cmd)
+        void _GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd & cmd);
         void _SetCost();
         void _SetOptimizationSize();
+
+        int num_qdot_;
+        int num_act_joint_;
+        int num_passive_;
+        int _dim_floating;
 
         int _dim_opt; // Contact pt delta, first task delta, rxn force
         int _dim_eq_cstr; // equality constraints
@@ -89,7 +87,7 @@ class WBIC{
 
         Eigen::MatrixXd _dyn_CE;
         Eigen::VectorXd _dyn_ce0;
-        Eigen::MatrxXd _dyn_CI;
+        Eigen::MatrixXd _dyn_CI;
         Eigen::VectorXd _dyn_ci0;
 
         Eigen::MatrixXd _eye;
