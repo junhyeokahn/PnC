@@ -68,6 +68,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   MaxNormalForceTrajectoryManager* frfoot_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* rrfoot_max_normal_force_manager_;
   MaxNormalForceTrajectoryManager* rlfoot_max_normal_force_manager_;
+
   TaskWeightTrajectoryManager* flfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* frfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* rrfoot_pos_hierarchy_manager_;

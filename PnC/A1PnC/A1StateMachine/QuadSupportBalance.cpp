@@ -27,13 +27,7 @@ void QuadSupportBalance::firstVisit() {
 }
 
 void QuadSupportBalance::_taskUpdate() {
-  // =========================================================================
-  // Foot, Floating Base
-  // =========================================================================
-  ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
+
 }
 
 void QuadSupportBalance::oneStep() {

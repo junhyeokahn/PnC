@@ -130,8 +130,10 @@ void A1ControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
 
+  std::cout << "Ctrl Arch 1" << std::endl;
   // Update State Machine
   state_machines_[state_]->oneStep();
+  std::cout << "Ctrl Arch 2" << std::endl;
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
 
@@ -220,9 +222,9 @@ void A1ControlArchitecture::_InitializeParameters() {
     rlfoot_pos_hierarchy_manager_->setMinGain(20.0);
     rrfoot_pos_hierarchy_manager_->setMaxGain(40.0);
     rrfoot_pos_hierarchy_manager_->setMinGain(20.0);
-    com_hierarchy_manager_->setMaxGain(20.);
+    com_hierarchy_manager_->setMaxGain(400.);
     com_hierarchy_manager_->setMinGain(20.);
-    base_ori_hierarchy_manager_->setMaxGain(20.);
+    base_ori_hierarchy_manager_->setMaxGain(200.);
     base_ori_hierarchy_manager_->setMinGain(20.);
   } catch (std::runtime_error& e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["

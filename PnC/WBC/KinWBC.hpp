@@ -15,8 +15,7 @@ class KinWBC {
                 const std::vector<Task*> & task_list,
                 const std::vector<ContactSpec*> & contact_list,
                 Eigen::VectorXd & jpos_cmd,
-                Eigen::VectorXd & jvel_cmd,
-                Eigen::VectorXd & jacc_cmd);
+                Eigen::VectorXd & jvel_cmd);
         Eigen::MatrixXd Ainv_;
 
     private:

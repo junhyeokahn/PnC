@@ -34,8 +34,6 @@ class WBIC{
                                    void* extra_setting = NULL);
 
         virtual void makeTorque(
-                const std::vector<Task*> & task_list,
-                const std::vector<ContactSpec*> & contact_list,
                 Eigen::VectorXd & cmd,
                 void* extra_input = NULL);
 

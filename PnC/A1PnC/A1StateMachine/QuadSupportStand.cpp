@@ -20,6 +20,19 @@ QuadSupportStand::~QuadSupportStand() {}
 void QuadSupportStand::firstVisit() {
   std::cout << "[Quad Support Stand]" << std::endl;
 
+  // =========================================================================
+  // Manage Task and Contact Lists
+  // =========================================================================
+  taf_container_->task_list_.clear();
+  taf_container_->task_list_.push_back(taf_container_->com_task_);
+  taf_container_->task_list_.push_back(taf_container_->base_ori_task_);
+  if(taf_container_->contact_list_.size() < 4){
+      taf_container_->contact_list_.clear();
+      taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
+      taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
+      taf_container_->contact_list_.push_back(taf_container_->rrfoot_contact_);
+      taf_container_->contact_list_.push_back(taf_container_->rlfoot_contact_);
+  }
   ctrl_start_time_ = sp_->curr_time;
 
   // =========================================================================
@@ -36,9 +49,6 @@ void QuadSupportStand::firstVisit() {
   Eigen::VectorXd target_com_pos =
       (flfoot_pos + frfoot_pos + rlfoot_pos + rrfoot_pos) / 4.0;
   target_com_pos[2] = target_height_;
-  std::cout << "Double Support Stand target com pos: " << target_com_pos[0]
-            << " " << target_com_pos[1] << " " << target_com_pos[2]
-            << std::endl;
   ctrl_arch_->floating_base_lifting_up_manager_
       ->initializeFloatingBaseTrajectory(sp_->curr_time, end_time_,
                                          target_com_pos);
@@ -58,14 +68,8 @@ void QuadSupportStand::firstVisit() {
   // =========================================================================
   // Initialize Task Gain Ramp to Max
   // =========================================================================
-  ctrl_arch_->frfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
-                                                                 end_time_);
-  ctrl_arch_->rrfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
-                                                                 end_time_);
-  ctrl_arch_->flfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
-                                                                 end_time_);
-  ctrl_arch_->rlfoot_pos_hierarchy_manager_->initializeRampToMax(0.0,
-                                                                 end_time_);
+  ctrl_arch_->com_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
+  ctrl_arch_->base_ori_hierarchy_manager_->initializeRampToMax(0.0, end_time_);
 }
 
 void QuadSupportStand::_taskUpdate() {
@@ -74,13 +78,6 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseDesired(
       sp_->curr_time);
-  // =========================================================================
-  // Foot
-  // =========================================================================
-  ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
-  ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
 }
 
 void QuadSupportStand::oneStep() {
@@ -95,14 +92,10 @@ void QuadSupportStand::oneStep() {
       state_machine_time_);
 
   // Compute and update new hierarchy weights
-  ctrl_arch_->frfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rrfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->flfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
-  ctrl_arch_->rlfoot_pos_hierarchy_manager_->updateRampToMaxDesired(
-      state_machine_time_);
+  ctrl_arch_->com_hierarchy_manager_->updateRampToMaxDesired(
+        state_machine_time_);
+  ctrl_arch_->base_ori_hierarchy_manager_->updateRampToMaxDesired(
+        state_machine_time_);
   _taskUpdate();
 }
 

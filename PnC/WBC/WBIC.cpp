@@ -41,9 +41,7 @@ void WBIC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
     // dynacore::pretty_print(A_, std::cout, "A");
 }
 
-void WBIC::makeTorque(const std::vector<Task*> & task_list,
-                      const std::vector<ContactSpec*> & contact_list,
-                      Eigen::VectorXd& cmd, void* extra_input) {
+void WBIC::makeTorque(Eigen::VectorXd& cmd, void* extra_input) {
     if(!b_updatesetting_){
         printf("[Warning] WBIC setting is not done\n");
     }
@@ -103,7 +101,7 @@ void WBIC::makeTorque(const std::vector<Task*> & task_list,
     double f = solve_quadprog(G, g0, CE, ce0, CI, ci0, z);
 
     for (int i(0); i < 6; ++i) {qddot_pre[i] += z[i];}
-    
+
     _GetSolution(qddot_pre, cmd);
 
     _data->_opt_result = Eigen::VectorXd(_dim_opt);
