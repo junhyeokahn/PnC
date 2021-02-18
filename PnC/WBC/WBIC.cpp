@@ -9,6 +9,7 @@ WBIC::WBIC(const std::vector<bool> & act_list, const std::vector<Task*> task_lis
     myUtils::pretty_constructor(3, "WBIC");
 
     // Set number of active and passive joints
+    num_qdot_ = 18;
     num_act_joint_ = 12;
     num_passive_ = 6;
     _dim_floating = 6;
@@ -69,7 +70,9 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
         _SetInequalityConstraint();
         std::cout << "t3" << std::endl;
         myUtils::weightedInverse(_Jc, Ainv_, JcBar);
+        std::cout << "t3.1" << std::endl;
         qddot_pre = JcBar * (-_JcDotQdot);
+        std::cout << "t3.2" << std::endl;
         Npre = _eye - JcBar * _Jc;
         std::cout << "t4" << std::endl;
         myUtils::pretty_print(JcBar, std::cout, "JcBar");
@@ -199,19 +202,12 @@ void WBIC::_ContactBuilding() {
 
   dim_accumul_rf = _contact_list[0]->getDim();
   dim_accumul_uf = _contact_list[0]->getDimRFConstraint();
-  std::cout << "ContactBuilding3" << std::endl;
   _Jc.block(0, 0, dim_accumul_rf, num_qdot_) = Jc;
-  std::cout << "ContactBuilding3.1" << std::endl;
   _JcDotQdot.head(dim_accumul_rf) = JcDotQdot;
-  std::cout << "ContactBuilding3.2" << std::endl;
   _Uf.block(0, 0, dim_accumul_uf, dim_accumul_rf) = Uf;
-  std::cout << "ContactBuilding3.3" << std::endl;
   _Uf_ieq_vec.head(dim_accumul_uf) = Uf_ieq_vec;
-  std::cout << "ContactBuilding3.4" << std::endl;
-  std::cout << "dim_accumul_rf = " << dim_accumul_rf << std::endl;
   myUtils::pretty_print(_contact_list[0]->getRFDesired(), std::cout, "[WBIC] Fr des");
   _Fr_des.head(dim_accumul_rf) = _contact_list[0]->getRFDesired();
-  std::cout << "ContactBuilding4" << std::endl;
   int dim_new_rf, dim_new_uf;
 
   for (int i(1); i < _contact_list.size(); ++i) {
@@ -245,7 +241,6 @@ void WBIC::_ContactBuilding() {
   // myUtils::pretty_print(_Jc, std::cout, "[WBIC] Jc");
   // myUtils::pretty_print(_JcDotQdot, std::cout, "[WBIC] JcDot Qdot");
   // myUtils::pretty_print(_Uf, std::cout, "[WBIC] Uf");
-
 }
 
 void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
