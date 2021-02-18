@@ -69,6 +69,7 @@ class A1Interface : public EnvInterface{
       bool _UpdateTestCommand(A1Command* test_cmd);
       void _SetStopCommand(A1SensorData*, A1Command* cmd);
       void _CopyCommand(A1Command* cmd);
+      void _SaveData(A1SensorData* data, A1Command* cmd);
 
       A1StateProvider* sp_;
       A1StateEstimator* state_estimator_;

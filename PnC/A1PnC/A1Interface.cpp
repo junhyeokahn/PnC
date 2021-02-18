@@ -69,9 +69,7 @@ void A1Interface::getCommand(void* _data, void* _command) {
     control_architecture_->getCommand(cmd);
   }
   // Save Data
-  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
-    data_torque_[i] = data->jtrq[i];
-  }
+  _SaveData(data, cmd);
 
   running_time_ = (double)(count_)*A1Aux::servo_rate;
   sp_->curr_time = running_time_;
@@ -79,6 +77,15 @@ void A1Interface::getCommand(void* _data, void* _command) {
   ++count_;
 }
 
+void A1Interface::_SaveData(A1SensorData* data, A1Command* cmd) {
+  for (int i(0); i < robot_->getNumActuatedDofs(); ++i) {
+    data_torque_[i] = data->jtrq[i];
+    cmd_jtrq_[i] = cmd->jtrq[i];
+    cmd_jvel_[i] = cmd->qdot[i];
+    cmd_jpos_[i] = cmd->q[i];
+  }
+
+}
 bool A1Interface::_UpdateTestCommand(A1Command* cmd) {
   bool over_limit(false);
 
