@@ -41,7 +41,7 @@ class A1TaskAndForceContainer : public TaskAndForceContainer {
   ContactSpec* rlfoot_contact_;
   int dim_contact_;
   double max_z_;
-  Eigen::VectorXd Fd_des_;
+  Eigen::VectorXd Fr_des_;
 
   // -------------------------------------------------------
   // Parameters

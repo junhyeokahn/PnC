@@ -53,8 +53,12 @@ void A1TaskAndForceContainer::_InitializeContacts() {
 
   max_z_ = 123.;
 
-  // Set desired reaction forces
-  Fd_des_ = Eigen::VectorXd::Zero(dim_contact_);
+  // Set desired reaction force vector for each foot
+  Fr_des_ = Eigen::Vector3d(0., 0., max_z_/4.);
+  frfoot_contact_->setRFDesired(Fr_des_);
+  flfoot_contact_->setRFDesired(Fr_des_);
+  rrfoot_contact_->setRFDesired(Fr_des_);
+  rlfoot_contact_->setRFDesired(Fr_des_);
 
   // Add all contacts initially. Remove later as needed.
   contact_list_.push_back(frfoot_contact_);

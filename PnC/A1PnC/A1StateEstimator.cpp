@@ -28,7 +28,6 @@ void A1StateEstimator::Update(A1SensorData* data) {
   _JointUpdate(data);
   _ConfigurationAndModelUpdate();
   _FootContactUpdate(data);
-  sp_->com_vel = robot_->getCoMVelocity();
   sp_->frfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
   sp_->flfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation(); 
   sp_->rrfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation(); 

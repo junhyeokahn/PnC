@@ -11,6 +11,7 @@ WBIC::WBIC(const std::vector<bool> & act_list, const std::vector<Task*> task_lis
     // Set number of active and passive joints
     num_act_joint_ = 12;
     num_passive_ = 6;
+    _dim_floating = 6;
 
     Sa_ = Eigen::MatrixXd::Zero(num_act_joint_, num_qdot_);
     Sv_ = Eigen::MatrixXd::Zero(num_passive_, num_qdot_);
@@ -36,17 +37,22 @@ void WBIC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
 
     (void)extra_setting;
 
-    // dynacore::pretty_print(grav_, std::cout, "grav");
-    // dynacore::pretty_print(cori_, std::cout, "cori");
-    // dynacore::pretty_print(A_, std::cout, "A");
+    // myUtils::pretty_print(grav_, std::cout, "grav");
+    // myUtils::pretty_print(cori_, std::cout, "cori");
+    // myUtils::pretty_print(A_, std::cout, "A");
+    // myUtils::pretty_print(Ainv_, std::cout, "Ainv");
 }
 
-void WBIC::makeTorque(Eigen::VectorXd& cmd, void* extra_input) {
+void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
+                      const std::vector<Task*>& task_list_,
+                      Eigen::VectorXd& cmd, void* extra_input) {
     if(!b_updatesetting_){
         printf("[Warning] WBIC setting is not done\n");
     }
     if(extra_input) _data = static_cast<WBIC_ExtraData*>(extra_input);
 
+    _contact_list = contact_list_;
+    _task_list = task_list_;
     _SetOptimizationSize();
     _SetCost();
 
@@ -55,21 +61,24 @@ void WBIC::makeTorque(Eigen::VectorXd& cmd, void* extra_input) {
     Eigen::MatrixXd Npre;
 
     if (_dim_rf > 0) {
-    // Contact Setting
-    _ContactBuilding();
-
-    // Set inequality constraints
-    _SetInequalityConstraint();
-    myUtils::weightedInverse(_Jc, Ainv_, JcBar);
-    qddot_pre = JcBar * (-_JcDotQdot);
-    Npre = _eye - JcBar * _Jc;
-    // myUtils::pretty_print(JcBar, std::cout, "JcBar");
-    // myUtils::pretty_print(_JcDotQdot, std::cout, "JcDotQdot");
-    // myUtils::pretty_print(qddot_pre, std::cout, "qddot 1");
-  } else {
-    qddot_pre = Eigen::VectorXd::Zero(num_qdot_);
-    Npre = _eye;
-  }
+        std::cout << "t1" << std::endl;
+        // Contact Setting
+        _ContactBuilding();
+        std::cout << "t2" << std::endl;
+        // Set inequality constraints
+        _SetInequalityConstraint();
+        std::cout << "t3" << std::endl;
+        myUtils::weightedInverse(_Jc, Ainv_, JcBar);
+        qddot_pre = JcBar * (-_JcDotQdot);
+        Npre = _eye - JcBar * _Jc;
+        std::cout << "t4" << std::endl;
+        myUtils::pretty_print(JcBar, std::cout, "JcBar");
+        myUtils::pretty_print(_JcDotQdot, std::cout, "JcDotQdot");
+        myUtils::pretty_print(qddot_pre, std::cout, "qddot 1");
+    } else {
+        qddot_pre = Eigen::VectorXd::Zero(num_qdot_);
+        Npre = _eye;
+    }
 
     Task* task;
     Eigen::MatrixXd Jt, JtBar, JtPre;
@@ -138,17 +147,17 @@ void WBIC::makeTorque(Eigen::VectorXd& cmd, void* extra_input) {
 }
 
 void WBIC::_SetEqualityConstraint(const Eigen::VectorXd & qddot) {
-	if (_dim_rf > 0) {
-    	_dyn_CE.block(0, 0, _dim_eq_cstr, 6) =
-      		A_.block(0, 0, 6, 6);
-    	_dyn_CE.block(0, 6, _dim_eq_cstr, _dim_rf) =
-      		-Sv_ * _Jc.transpose();
-    	_dyn_ce0 = -Sv_ * (A_ * qddot + cori_ + grav_ -
-        	_Jc.transpose() * _Fr_des);
+    if (_dim_rf > 0) {
+        _dyn_CE.block(0, 0, _dim_eq_cstr, 6) =
+        A_.block(0, 0, 6, 6);
+        _dyn_CE.block(0, 6, _dim_eq_cstr, _dim_rf) =
+        -Sv_ * _Jc.transpose();
+        _dyn_ce0 = -Sv_ * (A_ * qddot + cori_ + grav_ -
+            _Jc.transpose() * _Fr_des);
   } else {
-    	_dyn_CE.block(0, 0, _dim_eq_cstr, 6) =
-      		A_.block(0, 0, 6, 6);
-    	_dyn_ce0 = -Sv_ * (A_ * qddot + cori_ + grav_);
+        _dyn_CE.block(0, 0, _dim_eq_cstr, 6) =
+            A_.block(0, 0, 6, 6);
+        _dyn_ce0 = -Sv_ * (A_ * qddot + cori_ + grav_);
   }
 
   for (int i(0); i < _dim_eq_cstr; ++i) {
@@ -162,15 +171,15 @@ void WBIC::_SetEqualityConstraint(const Eigen::VectorXd & qddot) {
 }
 
 void WBIC::_SetInequalityConstraint() {
-	_dyn_CI.block(0, num_passive_, _dim_Uf, _dim_rf) = _Uf;
-  	_dyn_ci0 = _Uf_ieq_vec - _Uf * _Fr_des;
+    _dyn_CI.block(0, _dim_floating, _dim_Uf, _dim_rf) = _Uf;
+    _dyn_ci0 = _Uf_ieq_vec - _Uf * _Fr_des;
 
-  	for (int i(0); i < _dim_Uf; ++i) {
-    	for (int j(0); j < _dim_opt; ++j) {
-      		CI[j][i] = _dyn_CI(i, j);
-    	}
-    	ci0[i] = -_dyn_ci0[i];
-  	}
+    for (int i(0); i < _dim_Uf; ++i) {
+      for (int j(0); j < _dim_opt; ++j) {
+        CI[j][i] = _dyn_CI(i, j);
+      }
+      ci0[i] = -_dyn_ci0[i];
+    }
   // myUtils::pretty_print(_dyn_CI, std::cout, "WBIC: CI");
   // myUtils::pretty_print(_dyn_ci0, std::cout, "WBIC: ci0");
 
@@ -190,13 +199,19 @@ void WBIC::_ContactBuilding() {
 
   dim_accumul_rf = _contact_list[0]->getDim();
   dim_accumul_uf = _contact_list[0]->getDimRFConstraint();
-
+  std::cout << "ContactBuilding3" << std::endl;
   _Jc.block(0, 0, dim_accumul_rf, num_qdot_) = Jc;
+  std::cout << "ContactBuilding3.1" << std::endl;
   _JcDotQdot.head(dim_accumul_rf) = JcDotQdot;
+  std::cout << "ContactBuilding3.2" << std::endl;
   _Uf.block(0, 0, dim_accumul_uf, dim_accumul_rf) = Uf;
+  std::cout << "ContactBuilding3.3" << std::endl;
   _Uf_ieq_vec.head(dim_accumul_uf) = Uf_ieq_vec;
+  std::cout << "ContactBuilding3.4" << std::endl;
+  std::cout << "dim_accumul_rf = " << dim_accumul_rf << std::endl;
+  myUtils::pretty_print(_contact_list[0]->getRFDesired(), std::cout, "[WBIC] Fr des");
   _Fr_des.head(dim_accumul_rf) = _contact_list[0]->getRFDesired();
-
+  std::cout << "ContactBuilding4" << std::endl;
   int dim_new_rf, dim_new_uf;
 
   for (int i(1); i < _contact_list.size(); ++i) {
@@ -239,7 +254,7 @@ void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
     _data->_Fr = Eigen::VectorXd(_dim_rf);
     // get Reaction forces
     for (int i(0); i < _dim_rf; ++i)
-      _data->_Fr[i] = z[i + 6] + _Fr_des[i];
+      _data->_Fr[i] = z[i + _dim_floating] + _Fr_des[i];
     tot_tau =
       A_ * qddot + cori_ + grav_ - _Jc.transpose() * _data->_Fr;
 
@@ -280,11 +295,10 @@ void WBIC::_SetOptimizationSize() {
   // Dimension
   _dim_rf = 0;
   _dim_Uf = 0;  // Dimension of inequality constraint
-  for (size_t i(0); i < _contact_list.size(); ++i) {
+  for (int i(0); i < _contact_list.size(); ++i) {
     _dim_rf += _contact_list[i]->getDim();
     _dim_Uf += _contact_list[i]->getDimRFConstraint();
   }
-
   _dim_opt = 6 + _dim_rf;
   _dim_eq_cstr = 6;
 
@@ -313,5 +327,5 @@ void WBIC::_SetOptimizationSize() {
   } else {
     CI.resize(0., _dim_opt, 1);
     ci0.resize(0., 1);
-  }	
+  }
 }

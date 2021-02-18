@@ -130,10 +130,8 @@ void A1ControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
 
-  std::cout << "Ctrl Arch 1" << std::endl;
   // Update State Machine
   state_machines_[state_]->oneStep();
-  std::cout << "Ctrl Arch 2" << std::endl;
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
 

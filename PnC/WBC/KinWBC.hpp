@@ -10,12 +10,12 @@ class KinWBC {
         KinWBC(const std::vector<bool> & act_joint);
         ~KinWBC(){}
 
-        bool FindConfiguration(
-                const Eigen::VectorXd & curr_config,
+        bool FindConfiguration(const Eigen::VectorXd & curr_config,
                 const std::vector<Task*> & task_list,
                 const std::vector<ContactSpec*> & contact_list,
-                Eigen::VectorXd & jpos_cmd,
+                Eigen::VectorXd & jpos_cmd, 
                 Eigen::VectorXd & jvel_cmd);
+        
         Eigen::MatrixXd Ainv_;
 
     private:

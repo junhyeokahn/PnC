@@ -44,6 +44,7 @@ A1MainController::~A1MainController() {
 void A1MainController::_PreProcessing_Command() {
   // Update Dynamic Terms
   A_ = robot_->getMassMatrix();
+  // myUtils::pretty_print(A_, std::cout, "A");
   Ainv_ = robot_->getInvMassMatrix();
   grav_ = robot_->getGravity();
   coriolis_ = robot_->getCoriolis();
@@ -60,7 +61,7 @@ void A1MainController::_PreProcessing_Command() {
   for (int i = 0; i < taf_container_->contact_list_.size(); i++) {
     contact_list_.push_back(taf_container_->contact_list_[i]);
   }
-  Fd_des_ = taf_container_->Fd_des_;
+  // Fd_des_ = taf_container_->Fd_des_;
 
   // Update Task Jacobians and commands
   for (int i = 0; i < task_list_.size(); i++) {
@@ -74,7 +75,6 @@ void A1MainController::_PreProcessing_Command() {
 }
 
 void A1MainController::getCommand(void* _cmd) {
-  std::cout << "A1MainController 1" << std::endl;
   // Update Dynamic Terms, Task Jacobians, and Contact Jacobians
   _PreProcessing_Command();
 
@@ -87,16 +87,19 @@ void A1MainController::getCommand(void* _cmd) {
   // IK Module
   kin_wbc_->FindConfiguration(robot_->getQ(), task_list_, contact_list_,
                               des_jpos_, des_jvel_);
-  std::cout << "A1MainController 2" << std::endl;
+  myUtils::pretty_print(des_jpos_, std::cout, "des_jpos_ (main_controller)");
+  myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_ (main_controller)");
   // WBIC
   wbic_->updateSetting(A_, Ainv_, coriolis_, grav_);
-  wbic_->makeTorque(tau_cmd_, wbic_data_);
-  std::cout << "A1MainController 3" << std::endl;
-  // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ (main_controller)");
+  wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, wbic_data_);
+  myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ (main_controller)");
   // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 
   // Set Command
   for (int i(0); i < A1::n_adof; ++i) {
+    if(tau_cmd_[i] < 0.0001) tau_cmd_[i] = 0.;
+    if(des_jpos_[i] < 0.0001) des_jpos_[i] = 0.;
+    if(des_jvel_[i] < 0.0001) des_jvel_[i] = 0.;
     ((A1Command*)_cmd)->jtrq[i] = tau_cmd_[i];
     ((A1Command*)_cmd)->q[i] = des_jpos_[i];
     ((A1Command*)_cmd)->qdot[i] = des_jvel_[i];

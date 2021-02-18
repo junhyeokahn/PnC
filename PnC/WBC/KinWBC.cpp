@@ -3,22 +3,10 @@
 #include <Utils/Math/pseudo_inverse.hpp>
 
 KinWBC::KinWBC(const std::vector<bool>& act_joint)
-    : num_act_joint_(0),
-      //threshold_(0.001)
- //threshold_(0.005)
- threshold_(0.003)
+    : num_act_joint_(12), threshold_(0.001), num_qdot_(18)
 {
     myUtils::pretty_constructor(3, "Kin WBC");
-    num_qdot_ = act_joint.size();
 
-    act_jidx_.clear();
-    for (int i(0); i < num_qdot_; ++i) {
-        if (act_joint[i]) {
-            act_jidx_.push_back(i);
-            ++num_act_joint_;
-        }
-    }
-    // myUtils::pretty_print(act_jidx_, "act jidx");
     I_mtx = Eigen::MatrixXd::Identity(num_qdot_, num_qdot_);
 }
 
@@ -27,66 +15,65 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
                                const std::vector<ContactSpec*>& contact_list,
                                Eigen::VectorXd& jpos_cmd,
                                Eigen::VectorXd& jvel_cmd) {
-    Eigen::MatrixXd Nc;
-    if(contact_list.size() > 0){
-        // Contact Jacobian Setup
-        Eigen::MatrixXd Jc, Jc_i;
-        contact_list[0]->getContactJacobian(Jc);
-        int num_rows = Jc.rows();
-        for (int i(1); i < contact_list.size(); ++i) {
-            contact_list[i]->getContactJacobian(Jc_i);
-            int num_new_rows = Jc_i.rows();
-            Jc.conservativeResize(num_rows + num_new_rows, num_qdot_);
-            Jc.block(num_rows, 0, num_new_rows, num_qdot_) = Jc_i;
-            num_rows += num_new_rows;
-        }
-        // Pmx
-        _BuildProjectionMatrix(Jc, Nc);
+    // Contact Jacobian Setup
+  Eigen::MatrixXd Nc(num_qdot_, num_qdot_); Nc.setIdentity();
+  if(contact_list.size() > 0){
+    Eigen::MatrixXd Jc, Jc_i;
+    contact_list[0]->getContactJacobian(Jc);
+    int num_rows = Jc.rows();
+
+    for (int i(1); i < contact_list.size(); ++i) {
+      contact_list[i]->getContactJacobian(Jc_i);
+      int num_new_rows = Jc_i.rows();
+      Jc.conservativeResize(num_rows + num_new_rows, num_qdot_);
+      Jc.block(num_rows, 0, num_new_rows, num_qdot_) = Jc_i;
+      num_rows += num_new_rows;
     }
 
-    Eigen::VectorXd delta_q, qdot, qddot, JtDotQdot;
-    Eigen::MatrixXd Jt, JtPre, JtPre_pinv, N_nx, N_pre;
+    // Projection Matrix
+    _BuildProjectionMatrix(Jc, Nc);
+  }
 
-    // First Task
-    Task* task = task_list[0];
-    task->getTaskJacobian(Jt);
-    task->getTaskJacobianDotQdot(JtDotQdot);
-    JtPre = Jt * Nc;
-    _PseudoInverse(JtPre, JtPre_pinv);
+  // First Task
+  Eigen::VectorXd delta_q, qdot;
+  Eigen::MatrixXd Jt, JtPre, JtPre_pinv, N_nx, N_pre;
 
-    delta_q = JtPre_pinv * (task->pos_err);
-    qdot = JtPre_pinv * (task->vel_des);
+  Task* task = task_list[0];
+  task->getTaskJacobian(Jt);
+  JtPre = Jt * Nc;
+  _PseudoInverse(JtPre, JtPre_pinv);
 
-    qddot = JtPre_pinv * (task->op_cmd - JtDotQdot);
+  delta_q = JtPre_pinv * (task->pos_err);
+  qdot = JtPre_pinv * (task->vel_des);
 
-    Eigen::VectorXd prev_delta_q = delta_q;
-    Eigen::VectorXd prev_qdot = qdot;
+  Eigen::VectorXd prev_delta_q = delta_q;
+  Eigen::VectorXd prev_qdot = qdot;
 
-    _BuildProjectionMatrix(JtPre, N_nx);
-    N_pre = Nc * N_nx;
+  _BuildProjectionMatrix(JtPre, N_nx);
+  N_pre = Nc * N_nx;
 
-    for (int i(1); i < task_list.size(); ++i) {
-        task = task_list[i];
+  for (int i(1); i < task_list.size(); ++i) {
+      task = task_list[i];
 
-        task->getTaskJacobian(Jt);
-        task->getTaskJacobianDotQdot(JtDotQdot);
-        JtPre = Jt * N_pre;
+      task->getTaskJacobian(Jt);
+      JtPre = Jt * N_pre;
 
-        _PseudoInverse(JtPre, JtPre_pinv);
-        delta_q =
-            prev_delta_q + JtPre_pinv * (task->pos_err - Jt * prev_delta_q);
-        qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt * prev_qdot);
+      _PseudoInverse(JtPre, JtPre_pinv);
+      delta_q =
+          prev_delta_q + JtPre_pinv * (task->pos_err - Jt * prev_delta_q);
+      qdot = prev_qdot + JtPre_pinv * (task->vel_des - Jt * prev_qdot);
 
+      // For the next task
+      _BuildProjectionMatrix(JtPre, N_nx);
+      N_pre *= N_nx;
+      prev_delta_q = delta_q;
+      prev_qdot = qdot;
+  }
 
-        // For the next task
-        _BuildProjectionMatrix(JtPre, N_nx);
-        N_pre *= N_nx;
-        prev_delta_q = delta_q;
-        prev_qdot = qdot;
-        }
-
-    jpos_cmd = curr_config + delta_q;
-    jvel_cmd = qdot;
+  for (size_t i(0); i < num_act_joint_; ++i) {
+    jpos_cmd[i] = curr_config[i + 6] + delta_q[i + 6];
+    jvel_cmd[i] = qdot[i + 6];
+  }
 
     return true;
 }
