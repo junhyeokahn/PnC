@@ -23,6 +23,8 @@ class A1WorldNode : public dart::gui::osg::WorldNode {
   dart::dynamics::SkeletonPtr skel_;
   dart::dynamics::SkeletonPtr ground_;
   Eigen::VectorXd trq_cmd_;
+  Eigen::VectorXd pos_cmd_;
+  Eigen::VectorXd vel_cmd_;
   int dof_;
   double release_time_;
   Eigen::VectorXd kp_;

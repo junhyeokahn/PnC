@@ -16,6 +16,8 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
   ground_ = world_->getSkeleton("ground_skeleton");
   dof_ = skel_->getNumDofs();
   trq_cmd_ = Eigen::VectorXd::Zero(dof_);
+  pos_cmd_ = Eigen::VectorXd::Zero(12);
+  vel_cmd_ = Eigen::VectorXd::Zero(12);
 
   interface_ = new A1Interface();
   sensor_data_ = new A1SensorData();
@@ -76,12 +78,15 @@ void A1WorldNode::customPreStep() {
   if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;
   interface_->getCommand(sensor_data_, command_);
   trq_cmd_.setZero();
+  pos_cmd_.setZero();
+  vel_cmd_.setZero();
 
   trq_cmd_.tail(12) = command_->jtrq;
+  pos_cmd_ = command_->q;
+  vel_cmd_ = command_->qdot;
+
   // Low level FeedForward and Position Control
   // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques (worldnode)");
-
-  trq_cmd_.head(6).setZero();
 
   // hold robot at the initial phase
   // if (t_ < release_time_) {
@@ -98,7 +103,12 @@ void A1WorldNode::customPreStep() {
   // for (int i = 0; i < 18; ++i) {
   //     std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
   // }
-  skel_->setForces(trq_cmd_);
+  std::vector<size_t> indices;
+  for(int i=0; i<12; ++i){
+      indices.push_back(i+6);
+  }
+  skel_->setPositions(indices, pos_cmd_);// setForces(trq_cmd_);
+  // skel_->setVelocities(vel_cmd_);
 
   count_++;
 

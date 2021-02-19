@@ -191,7 +191,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
       break;
     }
     case 1: {
-      q[2] = 0.3;//Torso Height
+      q[2] = 0.35;//Torso Height
 
       q[frHipIdx] = 0.;
       q[flHipIdx] = 0.;

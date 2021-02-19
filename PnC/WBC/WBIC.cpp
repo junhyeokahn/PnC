@@ -62,22 +62,16 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
     Eigen::MatrixXd Npre;
 
     if (_dim_rf > 0) {
-        std::cout << "t1" << std::endl;
         // Contact Setting
         _ContactBuilding();
-        std::cout << "t2" << std::endl;
         // Set inequality constraints
         _SetInequalityConstraint();
-        std::cout << "t3" << std::endl;
         myUtils::weightedInverse(_Jc, Ainv_, JcBar);
-        std::cout << "t3.1" << std::endl;
         qddot_pre = JcBar * (-_JcDotQdot);
-        std::cout << "t3.2" << std::endl;
         Npre = _eye - JcBar * _Jc;
-        std::cout << "t4" << std::endl;
-        myUtils::pretty_print(JcBar, std::cout, "JcBar");
-        myUtils::pretty_print(_JcDotQdot, std::cout, "JcDotQdot");
-        myUtils::pretty_print(qddot_pre, std::cout, "qddot 1");
+        // myUtils::pretty_print(JcBar, std::cout, "JcBar");
+        // myUtils::pretty_print(_JcDotQdot, std::cout, "JcDotQdot");
+        // myUtils::pretty_print(qddot_pre, std::cout, "qddot 1");
     } else {
         qddot_pre = Eigen::VectorXd::Zero(num_qdot_);
         Npre = _eye;
@@ -99,12 +93,12 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
         qddot_pre += JtBar * (xddot - JtDotQdot - Jt * qddot_pre);
         Npre = Npre * (_eye - JtBar * JtPre);
 
-        myUtils::pretty_print(xddot, std::cout, "xddot");
-        myUtils::pretty_print(JtDotQdot, std::cout, "JtDotQdot");
-        myUtils::pretty_print(qddot_pre, std::cout, "qddot 2");
-        myUtils::pretty_print(Jt, std::cout, "Jt");
-        myUtils::pretty_print(JtPre, std::cout, "JtPre");
-        myUtils::pretty_print(JtBar, std::cout, "JtBar");
+        // myUtils::pretty_print(xddot, std::cout, "xddot");
+        // myUtils::pretty_print(JtDotQdot, std::cout, "JtDotQdot");
+        // myUtils::pretty_print(qddot_pre, std::cout, "qddot 2");
+        // myUtils::pretty_print(Jt, std::cout, "Jt");
+        // myUtils::pretty_print(JtPre, std::cout, "JtPre");
+        // myUtils::pretty_print(JtBar, std::cout, "JtBar");
     }
 
     // Set Eq Constraints
@@ -206,7 +200,7 @@ void WBIC::_ContactBuilding() {
   _JcDotQdot.head(dim_accumul_rf) = JcDotQdot;
   _Uf.block(0, 0, dim_accumul_uf, dim_accumul_rf) = Uf;
   _Uf_ieq_vec.head(dim_accumul_uf) = Uf_ieq_vec;
-  myUtils::pretty_print(_contact_list[0]->getRFDesired(), std::cout, "[WBIC] Fr des");
+  // myUtils::pretty_print(_contact_list[0]->getRFDesired(), std::cout, "[WBIC] Fr des");
   _Fr_des.head(dim_accumul_rf) = _contact_list[0]->getRFDesired();
   int dim_new_rf, dim_new_uf;
 
