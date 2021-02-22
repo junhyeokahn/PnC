@@ -49,6 +49,7 @@ void QuadSupportStand::firstVisit() {
   Eigen::VectorXd target_com_pos =
       (flfoot_pos + frfoot_pos + rlfoot_pos + rrfoot_pos) / 4.0;
   target_com_pos[2] = target_height_;
+  std::cout << "Target Height: " << target_height_ << std::endl;
   ctrl_arch_->floating_base_lifting_up_manager_
       ->initializeFloatingBaseTrajectory(sp_->curr_time, end_time_,
                                          target_com_pos);

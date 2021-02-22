@@ -28,7 +28,7 @@ A1Interface::A1Interface() : EnvInterface() {
   sp_ = A1StateProvider::getStateProvider(robot_);
   state_estimator_ = new A1StateEstimator(robot_);
 
-  waiting_count_ = 1;
+  waiting_count_ = 10;
 
   cmd_jpos_ = Eigen::VectorXd::Zero(12);
   cmd_jvel_ = Eigen::VectorXd::Zero(12);

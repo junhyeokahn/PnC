@@ -15,9 +15,9 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
                                const std::vector<ContactSpec*>& contact_list,
                                Eigen::VectorXd& jpos_cmd,
                                Eigen::VectorXd& jvel_cmd) {
-    // Contact Jacobian Setup
+  // Contact Jacobian Setup
   Eigen::MatrixXd Nc(num_qdot_, num_qdot_); Nc.setIdentity();
-  if(contact_list.size() > 0){
+  // if(contact_list.size() > 0){
     Eigen::MatrixXd Jc, Jc_i;
     contact_list[0]->getContactJacobian(Jc);
     int num_rows = Jc.rows();
@@ -29,10 +29,10 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
       Jc.block(num_rows, 0, num_new_rows, num_qdot_) = Jc_i;
       num_rows += num_new_rows;
     }
-
+    // myUtils::pretty_print(Jc, std::cout, "Jc");
     // Projection Matrix
     _BuildProjectionMatrix(Jc, Nc);
-  }
+  // }
 
   // First Task
   Eigen::VectorXd delta_q, qdot;
@@ -52,6 +52,19 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
   _BuildProjectionMatrix(JtPre, N_nx);
   N_pre = Nc * N_nx;
 
+  // std::cout << "Task list size = " << task_list.size() << std::endl;
+  // myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 1 Position Error");
+  // myUtils::pretty_print(task->vel_des, std::cout, "[KinWBC] Task 1 Vel Des");
+    // myUtils::pretty_print(Jt, std::cout, "task Jt");
+  // myUtils::pretty_print(Jc, std::cout, "Jc");
+  // myUtils::pretty_print(Nc, std::cout, "Nc");
+  // myUtils::pretty_print(JtPre, std::cout, "JtNc");
+  // Eigen::JacobiSVD<Eigen::MatrixXd> svd(JtPre_pinv, Eigen::ComputeThinU | Eigen::ComputeThinV);
+  // std::cout << "singular values: " << svd.singularValues() << std::endl;
+  // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
+  // myUtils::pretty_print(delta_q, std::cout, "Task 1 delta q");
+  // myUtils::pretty_print(qdot, std::cout, "qdot");
+
   for (int i(1); i < task_list.size(); ++i) {
       task = task_list[i];
 
@@ -68,14 +81,21 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
       N_pre *= N_nx;
       prev_delta_q = delta_q;
       prev_qdot = qdot;
+
+      // myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 2 Position Error");
+      // myUtils::pretty_print(delta_q, std::cout, "Task 2 delta q");
   }
 
   for (size_t i(0); i < num_act_joint_; ++i) {
     jpos_cmd[i] = curr_config[i + 6] + delta_q[i + 6];
     jvel_cmd[i] = qdot[i + 6];
   }
-
-    return true;
+  Eigen::VectorXd temp; temp = Jc * qdot;
+  // myUtils::pretty_print(temp, std::cout, "Jc * qdot_sol");
+  // myUtils::pretty_print(jpos_cmd, std::cout, "jpos_cmd");
+  // Eigen::VectorXd xdot_c = Jc * delta_q;
+  // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
+     return true;
 }
 
 void KinWBC::_BuildProjectionMatrix(const Eigen::MatrixXd& J,

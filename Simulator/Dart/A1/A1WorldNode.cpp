@@ -16,13 +16,14 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
   ground_ = world_->getSkeleton("ground_skeleton");
   dof_ = skel_->getNumDofs();
   trq_cmd_ = Eigen::VectorXd::Zero(dof_);
-  pos_cmd_ = Eigen::VectorXd::Zero(12);
-  vel_cmd_ = Eigen::VectorXd::Zero(12);
+  pos_cmd_ = Eigen::VectorXd::Zero(dof_);
+  vel_cmd_ = Eigen::VectorXd::Zero(dof_);
 
   interface_ = new A1Interface();
   sensor_data_ = new A1SensorData();
   command_ = new A1Command();
 
+  initial_jpos = Eigen::VectorXd::Zero(12);
   resetButtonFlags();
   set_parameters_();
 }
@@ -82,33 +83,28 @@ void A1WorldNode::customPreStep() {
   vel_cmd_.setZero();
 
   trq_cmd_.tail(12) = command_->jtrq;
-  pos_cmd_ = command_->q;
-  vel_cmd_ = command_->qdot;
+  pos_cmd_.tail(12) = command_->q;
+  vel_cmd_.tail(12) = command_->qdot;
 
-  // Low level FeedForward and Position Control
-  // myUtils::pretty_print(trq_cmd_, std::cout, "ff_torques (worldnode)");
+  Eigen::VectorXd kp(12), kd(12);
+  kp << 80., 80., 120., 80., 80., 120., 80., 80., 120, 80., 80., 120.;
+  kd << 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5.;
 
-  // hold robot at the initial phase
-  // if (t_ < release_time_) {
-  //   hold_xy_();
-  //   hold_rot_();
-  // } else {
-  //   static bool first__ = true;
-  //   if (first__) {
-  //     std::cout << "[Release]" << std::endl;
-  //     first__ = false;
-  //   }
-  // }
-
-  // for (int i = 0; i < 18; ++i) {
-  //     std::cout << "trq_cmd_ = " << trq_cmd_[i] << std::endl;
-  // }
-  std::vector<size_t> indices;
-  for(int i=0; i<12; ++i){
-      indices.push_back(i+6);
+  static bool temp = true;
+  if(temp){
+      initial_jpos = sensor_data_->q;
+      temp = false;
   }
-  skel_->setPositions(indices, pos_cmd_);// setForces(trq_cmd_);
-  // skel_->setVelocities(vel_cmd_);
+
+  for(int i=0; i<12; ++i){
+    trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + trq_cmd_[6+i];
+    // trq_cmd_[i+6] = kp * (initial_jpos[i] - sensor_data_->q[i]) + kd * (0 - sensor_data_->qdot[i]);
+  }
+  std::cout << "--------------------------------------------------------" << std::endl;
+  // myUtils::pretty_print(sensor_data_->virtual_q, std::cout, "Floating Base Pos");
+  myUtils::pretty_print(trq_cmd_, std::cout, "trq_cmd_");
+  skel_->setForces(trq_cmd_);
+
 
   count_++;
 
@@ -143,7 +139,10 @@ void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
   Eigen::VectorXd fl_ = skel_->getBodyNode("FL_foot")->getCOM();
   Eigen::VectorXd rr_ = skel_->getBodyNode("RR_foot")->getCOM();
   Eigen::VectorXd rl_ = skel_->getBodyNode("RL_foot")->getCOM();
- 
+  // myUtils::pretty_print(fr_, std::cout, "FR pos");
+  // myUtils::pretty_print(fl_, std::cout, "FL pos");
+  // myUtils::pretty_print(rr_, std::cout, "RR pos");
+  // myUtils::pretty_print(rl_, std::cout, "RL pos");
 
   if ((fabs(fl_[2]) < 0.002)) {
     flfoot_contact = true;

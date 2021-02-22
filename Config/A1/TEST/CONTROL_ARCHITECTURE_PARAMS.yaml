@@ -1,7 +1,7 @@
 state_stand_params:
-    target_pos_duration: 4.0 # duration to reach target com position
+    target_pos_duration: 1.0 # duration to reach target com position
     time_to_max_normal_force: 0.2 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
-    target_height: 0.2 # target com position from the midfoot position in world frame
+    target_height: 0.3 # target com position from the midfoot position in world frame
 
 state_swing:
     swing_time_percent_early_contact_check: 0.5 # Percent of end_time to check if there are early contacts 

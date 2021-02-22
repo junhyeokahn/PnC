@@ -78,7 +78,7 @@ class OneStepProgress : public osgGA::GUIEventHandler {
         worldnode_->enableButtonLFlag();
       }
       if (ea.getKey() == 'f') {
-        int numStepProgress(50);
+        int numStepProgress(5);
         for (int i = 0; i < numStepProgress; ++i) {
           worldnode_->customPreStep();
           worldnode_->getWorld()->step();
@@ -191,7 +191,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
       break;
     }
     case 1: {
-      q[2] = 0.35;//Torso Height
+      q[2] = 0.31;//Torso Height
 
       q[frHipIdx] = 0.;
       q[flHipIdx] = 0.;

@@ -37,6 +37,8 @@ class A1WorldNode : public dart::gui::osg::WorldNode {
   dart::simulation::WorldPtr world_;
 
  public:
+  Eigen::VectorXd initial_jpos;
+
   A1WorldNode(const dart::simulation::WorldPtr& world);
   virtual ~A1WorldNode();
   void customPreStep() override;
