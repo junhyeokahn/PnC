@@ -23,7 +23,7 @@ A1MainController::A1MainController(
   tau_cmd_ = Eigen::VectorXd::Zero(A1::n_adof);
   qddot_cmd_ = Eigen::VectorXd::Zero(A1::n_adof);
 
-  wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, 0.1);
+  wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, .1);
   wbic_data_->_W_rf = Eigen::VectorXd::Constant(12, 1.);
 
   _Kp_joint.resize(3, 5.); // num_leg_joint, value
@@ -92,8 +92,10 @@ void A1MainController::getCommand(void* _cmd) {
   // WBIC
   wbic_->updateSetting(A_, Ainv_, coriolis_, grav_);
   wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, wbic_data_);
-  // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ (main_controller)");
+  // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ [Main Controller]");
   // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+
+  // std::cout << "Robot Mass = " << robot_->getRobotMass() << std::endl;
 
   // Set Command
   for (int i(0); i < A1::n_adof; ++i) {

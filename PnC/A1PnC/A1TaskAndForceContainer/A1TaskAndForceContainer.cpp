@@ -43,18 +43,19 @@ void A1TaskAndForceContainer::_InitializeTasks() {
 }
 
 void A1TaskAndForceContainer::_InitializeContacts() {
-  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.3);
-  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.3);
-  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.3);
-  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.3);
+  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 1.);// 0.3);
+  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 1.);// 0.3);
+  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 1.);// 0.3);
+  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 1.);// 0.3);
 
   dim_contact_ = frfoot_contact_->getDim() + flfoot_contact_->getDim() +
                  rrfoot_contact_->getDim() + rlfoot_contact_->getDim();
 
-  max_z_ = 123.;
-
+  // max_z_ = 300.;
+  // std::cout << "Max fz = " << max_z_ << std::endl;
+  double z_init_des = 165.;
   // Set desired reaction force vector for each foot
-  Fr_des_ = Eigen::Vector3d(0., 0., max_z_/4.);
+  Fr_des_ = Eigen::Vector3d(0., 0., z_init_des/4.);
   frfoot_contact_->setRFDesired(Fr_des_);
   flfoot_contact_->setRFDesired(Fr_des_);
   rrfoot_contact_->setRFDesired(Fr_des_);
@@ -92,7 +93,7 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
     Eigen::VectorXd temp_vec;
 
     // Load Maximum normal force
-    myUtils::readParameter(node, "ini_z_force", max_z_);
+    myUtils::readParameter(node, "max_z_force", max_z_);
 
     // Load Task Gains
     // myUtils::readParameter(node, "kp_joint", kp_joint_);
@@ -119,6 +120,7 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   // Set Task Gains
   // joint_task_->setGain(kp_joint_, kd_joint_);
   com_task_->setGain(kp_com_, kd_com_);
+  myUtils::pretty_print(kp_com_, std::cout, "Kp COM Task");
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
   frfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   flfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);

@@ -71,7 +71,7 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
         Npre = _eye - JcBar * _Jc;
         // myUtils::pretty_print(JcBar, std::cout, "JcBar");
         // myUtils::pretty_print(_JcDotQdot, std::cout, "JcDotQdot");
-        // myUtils::pretty_print(qddot_pre, std::cout, "qddot 1");
+        // myUtils::pretty_print(qddot_pre, std::cout, "qddot 1 we have contact");
     } else {
         qddot_pre = Eigen::VectorXd::Zero(num_qdot_);
         Npre = _eye;
@@ -81,7 +81,7 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
     Eigen::MatrixXd Jt, JtBar, JtPre;
     Eigen::VectorXd JtDotQdot, xddot;
 
-    for(int i=0; i< _task_list.size(); ++i){
+    for(int i=0; i< 1; ++i){// TODO _task_list.size()
         task = _task_list[i];
         task->getTaskJacobian(Jt);
         task->getTaskJacobianDotQdot(JtDotQdot);
@@ -191,6 +191,7 @@ void WBIC::_ContactBuilding() {
   int dim_accumul_rf, dim_accumul_uf;
   _contact_list[0]->getContactJacobian(Jc);
   _contact_list[0]->getJcDotQdot(JcDotQdot);
+  // myUtils::pretty_print(_JcDotQdot, std::cout, "[WBIC] JcDot Qdot Contact 1");
   _contact_list[0]->getRFConstraintMtx(Uf);
   _contact_list[0]->getRFConstraintVec(Uf_ieq_vec);
 
@@ -207,6 +208,7 @@ void WBIC::_ContactBuilding() {
   for (int i(1); i < _contact_list.size(); ++i) {
     _contact_list[i]->getContactJacobian(Jc);
     _contact_list[i]->getJcDotQdot(JcDotQdot);
+    // myUtils::pretty_print(_JcDotQdot, std::cout, "[WBIC] JcDot Qdot Contact i");
 
     dim_new_rf = _contact_list[i]->getDim();
     dim_new_uf = _contact_list[i]->getDimRFConstraint();
@@ -253,16 +255,18 @@ void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
   _data->_qddot = qddot;
   cmd = tot_tau.tail(12);
 
+  // myUtils::pretty_print(cmd, std::cout, "cmd [WBIC]");
   // Torque check
-  // DVec<T> delta_tau = DVec<T>::Zero(WB::num_qdot_);
-  // for(int i(0); i<_dim_floating; ++i) delta_tau[i] = z[i];
+  Eigen::VectorXd delta_tau = Eigen::VectorXd::Zero(num_qdot_);
+  for(int i(0); i<_dim_floating; ++i) delta_tau[i] = z[i];
+  myUtils::pretty_print(delta_tau, std::cout, "Delta tau [WBIC]");
   // myUtils::pretty_print(tot_tau, std::cout, "tot tau original");
   // tot_tau += delta_tau;
   // myUtils::pretty_print(tot_tau, std::cout, "tot tau result");
-  // myUtils::pretty_print(qddot, std::cout, "qddot");
-  // myUtils::pretty_print(_data->_Fr, std::cout, "Fr");
-  // myUtils::pretty_print(_Fr_des, std::cout, "Fr des");t_;
-    // myUtils::pretty_print(x_check, std::cout, "x check");
+  myUtils::pretty_print(qddot, std::cout, "qddot");
+  myUtils::pretty_print(_data->_Fr, std::cout, "Fr");
+  myUtils::pretty_print(_Fr_des, std::cout, "Fr des");
+  // myUtils::pretty_print(x_check, std::cout, "x check");
 }
 
 

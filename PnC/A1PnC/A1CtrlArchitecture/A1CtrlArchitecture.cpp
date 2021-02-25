@@ -132,11 +132,21 @@ void A1ControlArchitecture::getCommand(void* _command) {
 
   // Update State Machine
   state_machines_[state_]->oneStep();
+  // Swaying
+  if(state_ == A1_STATES::BALANCE && 
+      (floating_base_lifting_up_manager_->is_swaying ||
+      floating_base_lifting_up_manager_->is_sinusoid)){
+    floating_base_lifting_up_manager_->updateFloatingBaseDesired(sp_->curr_time);
+    if((sp_->curr_time >= floating_base_lifting_up_manager_->start_time_ +
+                floating_base_lifting_up_manager_->duration_) && 
+                (!floating_base_lifting_up_manager_->is_sinusoid)) {
+        floating_base_lifting_up_manager_->is_swaying = false;
+        std::cout << "Swaying Done" << std::endl;
+    }
+  }
+
   // Get Wholebody control commands
   main_controller_->getCommand(_command);
-
-  /*// Smoothing trq for initial state
-  smoothing_torque(_command);*/
 
   // Save Data
   saveData();
@@ -150,52 +160,6 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }
 }
 
-/*void DracoControlArchitecture::smoothing_torque(void* _cmd) {
-  if (state_ == DRACO_STATES::INITIALIZE) {
-    double rat = ((Initialize*)state_machines_[state_])->progression_variable();
-    for (int i = 0; i < Draco::n_adof; ++i) {
-      ((DracoCommand*)_cmd)->jtrq[i] =
-          myUtils::smoothing(0, ((DracoCommand*)_cmd)->jtrq[i], rat);
-      sp_->prev_trq_cmd[i] = ((DracoCommand*)_cmd)->jtrq[i];
-    }
-  }
-  if (state_ == DRACO_STATES::STAND) {
-    double rat =
-        ((DoubleSupportStand*)state_machines_[state_])->progression_variable();
-    for (int i = 0; i < Draco::n_adof; ++i) {
-      ((DracoCommand*)_cmd)->jtrq[i] = myUtils::smoothing(
-          sp_->prev_trq_cmd[i], ((DracoCommand*)_cmd)->jtrq[i], rat);
-    }
-  }
-}
-
-void DracoControlArchitecture::getIVDCommand(void* _cmd) {
-  Eigen::VectorXd tau_cmd = Eigen::VectorXd::Zero(Draco::n_adof);
-  Eigen::VectorXd des_jpos = Eigen::VectorXd::Zero(Draco::n_adof);
-  Eigen::VectorXd des_jvel = Eigen::VectorXd::Zero(Draco::n_adof);
-
-  Eigen::MatrixXd A = robot_->getMassMatrix();
-  Eigen::VectorXd grav = robot_->getGravity();
-  Eigen::VectorXd cori = robot_->getCoriolis();
-
-  Eigen::VectorXd xddot_des = Eigen::VectorXd::Zero(Draco::n_adof);
-  taf_container_->joint_task_->updateJacobians();
-  taf_container_->joint_task_->computeCommands();
-  taf_container_->joint_task_->getCommand(xddot_des);
-
-  Eigen::VectorXd qddot_des = Eigen::VectorXd::Zero(Draco::n_dof);
-  qddot_des.tail(Draco::n_adof) = xddot_des;
-
-  des_jpos = sp_->q.tail(Draco::n_adof);
-  des_jvel = sp_->qdot.tail(Draco::n_adof);
-  tau_cmd = (A * qddot_des + cori + grav).tail(Draco::n_adof);
-
-  for (int i(0); i < Draco::n_adof; ++i) {
-    ((DracoCommand*)_cmd)->jtrq[i] = tau_cmd[i];
-    ((DracoCommand*)_cmd)->q[i] = des_jpos[i];
-    ((DracoCommand*)_cmd)->qdot[i] = des_jvel[i];
-  }
-}*/
 
 void A1ControlArchitecture::_InitializeParameters() {
   // Controller initialization
