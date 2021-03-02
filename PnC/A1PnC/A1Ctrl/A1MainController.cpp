@@ -23,7 +23,7 @@ A1MainController::A1MainController(
   tau_cmd_ = Eigen::VectorXd::Zero(A1::n_adof);
   qddot_cmd_ = Eigen::VectorXd::Zero(A1::n_adof);
 
-  wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, .1);
+  wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, 1000.);
   wbic_data_->_W_rf = Eigen::VectorXd::Constant(12, 1.);
 
   _Kp_joint.resize(3, 5.); // num_leg_joint, value

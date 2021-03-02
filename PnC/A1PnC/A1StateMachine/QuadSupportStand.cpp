@@ -26,7 +26,7 @@ void QuadSupportStand::firstVisit() {
   taf_container_->task_list_.clear();
   taf_container_->task_list_.push_back(taf_container_->com_task_);
   taf_container_->task_list_.push_back(taf_container_->base_ori_task_);
-  if(taf_container_->contact_list_.size() < 4){
+    if(taf_container_->contact_list_.size() < 4){
       taf_container_->contact_list_.clear();
       taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
       taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
@@ -79,6 +79,7 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseDesired(
       sp_->curr_time);
+  myUtils::pretty_print(ctrl_arch_->floating_base_lifting_up_manager_->com_acc_des_, std::cout, "com acc des");
 }
 
 void QuadSupportStand::oneStep() {

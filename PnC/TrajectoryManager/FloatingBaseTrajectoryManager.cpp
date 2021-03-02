@@ -109,6 +109,7 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseDesired(
                                        duration_, current_time - start_time_);
     }
   }
+  // com_acc_des_ = Eigen::VectorXd::Zero(3);
 
   base_ori_des_ = ini_base_quat_;
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);

@@ -41,8 +41,8 @@ bool CoMxyz::_UpdateTaskJacobian() {
 
   // Replace Z Jacobian with pelvis.
   Jtmp = robot_->getBodyNodeCoMJacobian(A1BodyNode::trunk);
-  Jt_.block(2, 0, 1, robot_->getNumDofs()) =
-      Jtmp.block(5, 0, 1, robot_->getNumDofs());
+  // Jt_.block(2, 0, 1, robot_->getNumDofs()) =
+      // Jtmp.block(5, 0, 1, robot_->getNumDofs());
 
   return true;
 }

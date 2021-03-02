@@ -43,10 +43,10 @@ void A1TaskAndForceContainer::_InitializeTasks() {
 }
 
 void A1TaskAndForceContainer::_InitializeContacts() {
-  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 1.);// 0.3);
-  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 1.);// 0.3);
-  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 1.);// 0.3);
-  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 1.);// 0.3);
+  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.6);
+  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.6);
+  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.6);
+  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.6);
 
   dim_contact_ = frfoot_contact_->getDim() + flfoot_contact_->getDim() +
                  rrfoot_contact_->getDim() + rlfoot_contact_->getDim();
@@ -122,6 +122,7 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   com_task_->setGain(kp_com_, kd_com_);
   myUtils::pretty_print(kp_com_, std::cout, "Kp COM Task");
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
+  myUtils::pretty_print(kp_base_ori_, std::cout, "Kp Base Ori Task");
   frfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   flfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   rrfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
