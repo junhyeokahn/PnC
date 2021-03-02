@@ -106,16 +106,16 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
     // myUtils::pretty_print(G, std::cout, "G");
     // std::cout << "G" << std::endl;
     // std::cout << G << std::endl;
-    std::cout << "g0" << std::endl;
-    std::cout << g0 << std::endl;
-    std::cout << "CE" << std::endl;
-    std::cout << CE << std::endl;
-    std::cout << "ce0" << std::endl;
-    std::cout << ce0 << std::endl;
-    std::cout << "CI" << std::endl;
-    std::cout << CI << std::endl;
-    std::cout << "ci0" << std::endl;
-    std::cout << ci0 << std::endl;
+    // std::cout << "g0" << std::endl;
+    // std::cout << g0 << std::endl;
+    // std::cout << "CE" << std::endl;
+    // std::cout << CE << std::endl;
+    // std::cout << "ce0" << std::endl;
+    // std::cout << ce0 << std::endl;
+    // std::cout << "CI" << std::endl;
+    // std::cout << CI << std::endl;
+    // std::cout << "ci0" << std::endl;
+    // std::cout << ci0 << std::endl;
     // std::cout << "z" << std::endl;
     // std::cout << z << std::endl;
 
@@ -131,11 +131,11 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
         _data->_opt_result[i] = z[i];
     }
 
-    std::cout << "f: " << f << std::endl;
-    std::cout << "x: " << z << std::endl;
+    // std::cout << "f: " << f << std::endl;
+    // std::cout << "x: " << z << std::endl;
 
-    Eigen::VectorXd check_eq = _dyn_CE * _data->_opt_result - _dyn_ce0;
-    myUtils::pretty_print(check_eq, std::cout, "equality constr");
+    // Eigen::VectorXd check_eq = _dyn_CE * _data->_opt_result - _dyn_ce0;
+    // myUtils::pretty_print(check_eq, std::cout, "equality constr");
     // std::cout << "cmd: "<<cmd<<std::endl;
     // myUtils::pretty_print(qddot_pre, std::cout, "qddot_pre");
     // myUtils::pretty_print(JcN, std::cout, "JcN");
@@ -178,7 +178,7 @@ void WBIC::_SetEqualityConstraint(const Eigen::VectorXd & qddot) {
     }
     ce0[i] = -_dyn_ce0[i];
   }
-  myUtils::pretty_print(grav_, std::cout, "WBIC: grav");
+  // myUtils::pretty_print(grav_, std::cout, "WBIC: grav");
   // myUtils::pretty_print(_dyn_CE, std::cout, "WBIC: CE");
   // myUtils::pretty_print(_dyn_ce0, std::cout, "WBIC: ce0");
 }
@@ -223,7 +223,7 @@ void WBIC::_ContactBuilding() {
 
   for (int i(1); i < _contact_list.size(); ++i) {
     _contact_list[i]->getContactJacobian(Jc);
-    _contact_list[i]->getJcDotQdot(JcDotQdot);
+  _contact_list[i]->getJcDotQdot(JcDotQdot);
     // myUtils::pretty_print(_JcDotQdot, std::cout, "[WBIC] JcDot Qdot Contact i");
 
     dim_new_rf = _contact_list[i]->getDim();
@@ -275,13 +275,13 @@ void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
   // Torque check
   Eigen::VectorXd delta_tau = Eigen::VectorXd::Zero(num_qdot_);
   for(int i(0); i<_dim_floating; ++i) delta_tau[i] = z[i];
-  myUtils::pretty_print(delta_tau, std::cout, "Delta tau [WBIC]");
-  myUtils::pretty_print(tot_tau, std::cout, "tot tau original");
-  tot_tau += delta_tau;
-  myUtils::pretty_print(tot_tau, std::cout, "tot tau result");
-  myUtils::pretty_print(qddot, std::cout, "qddot");
-  myUtils::pretty_print(_data->_Fr, std::cout, "Fr");
-  myUtils::pretty_print(_Fr_des, std::cout, "Fr des");
+  // myUtils::pretty_print(delta_tau, std::cout, "Delta tau [WBIC]");
+  // myUtils::pretty_print(tot_tau, std::cout, "tot tau original");
+  // tot_tau += delta_tau;
+  // myUtils::pretty_print(tot_tau, std::cout, "tot tau result");
+  // myUtils::pretty_print(qddot, std::cout, "qddot");
+  // myUtils::pretty_print(_data->_Fr, std::cout, "Fr");
+  // myUtils::pretty_print(_Fr_des, std::cout, "Fr des");
   // myUtils::pretty_print(x_check, std::cout, "x check");
 }
 
@@ -296,8 +296,8 @@ void WBIC::_SetCost() {
   for (int i(0); i < _dim_rf; ++i) {
     G[i + idx_offset][i + idx_offset] = _data->_W_rf[i];
   }
-  myUtils::pretty_print(_data->_W_floating, std::cout, "W floating");
-  myUtils::pretty_print(_data->_W_rf, std::cout, "W rf");
+  // myUtils::pretty_print(_data->_W_floating, std::cout, "W floating");
+  // myUtils::pretty_print(_data->_W_rf, std::cout, "W rf");
 }
 
 void WBIC::_SetOptimizationSize() {

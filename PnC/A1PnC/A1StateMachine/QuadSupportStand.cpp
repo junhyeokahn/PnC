@@ -79,7 +79,6 @@ void QuadSupportStand::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseDesired(
       sp_->curr_time);
-  myUtils::pretty_print(ctrl_arch_->floating_base_lifting_up_manager_->com_acc_des_, std::cout, "com acc des");
 }
 
 void QuadSupportStand::oneStep() {

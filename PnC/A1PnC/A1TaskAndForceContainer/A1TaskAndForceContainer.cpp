@@ -120,9 +120,9 @@ void A1TaskAndForceContainer::paramInitialization(const YAML::Node& node) {
   // Set Task Gains
   // joint_task_->setGain(kp_joint_, kd_joint_);
   com_task_->setGain(kp_com_, kd_com_);
-  myUtils::pretty_print(kp_com_, std::cout, "Kp COM Task");
+  // myUtils::pretty_print(kp_com_, std::cout, "Kp COM Task");
   base_ori_task_->setGain(kp_base_ori_, kd_base_ori_);
-  myUtils::pretty_print(kp_base_ori_, std::cout, "Kp Base Ori Task");
+  // myUtils::pretty_print(kp_base_ori_, std::cout, "Kp Base Ori Task");
   frfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   flfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);
   rrfoot_pos_task_->setGain(kp_foot_pos_, kd_foot_pos_);

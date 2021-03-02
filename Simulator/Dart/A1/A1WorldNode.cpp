@@ -97,14 +97,14 @@ void A1WorldNode::customPreStep() {
   }
 
   for(int i=0; i<12; ++i){
-    trq_cmd_[i+6] = command_->jtrq[i];
-    // trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + trq_cmd_[6+i];
+    // trq_cmd_[i+6] = command_->jtrq[i];
+    trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + trq_cmd_[6+i];
     // trq_cmd_[i+6] = kp * (initial_jpos[i] - sensor_data_->q[i]) + kd * (0 - sensor_data_->qdot[i]);
   }
   // myUtils::pretty_print(sensor_data_->virtual_q, std::cout, "Floating Base Pos");
   Eigen::VectorXd temp_vec(12); temp_vec = trq_cmd_.tail(12);
   // myUtils::pretty_print(temp_vec, std::cout, "trq_cmd_ [World Node]");
-  std::cout << "--------------------------------------------------------" << std::endl;
+  // std::cout << "--------------------------------------------------------" << std::endl;
   skel_->setForces(trq_cmd_);
 
 
