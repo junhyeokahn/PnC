@@ -178,17 +178,18 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
 
     Eigen::MatrixXd Kpf_tilde = Eigen::MatrixXd::Zero(n,n);
     Eigen::MatrixXd Kdf_tilde = Eigen::MatrixXd::Zero(n,n);
-
-    double eta = 1/(delta_t_);
+    
+    double eta = 2/(delta_t_);
+    double zeta = 200.0;
 
     for(int i(6); i< n; ++i){
         Kpf_tilde(i,i) = eta*(q_des_[i] - q_prev_[i]);
         // Kd_tilde(i,i) = ((2-delta_t_)*dq_cur_[i] - 2*dq_prev_[i])/(delta_t_*(dq_des_[i] - dq_cur_[i]));
-        Kdf_tilde(i,i) =  - delta_t_*Kpf_tilde(i,i);
+        Kdf_tilde(i,i) =  zeta*delta_t_*Kpf_tilde(i,i) ;
     }
 
-    // myUtils::pretty_print(Kp_tilde, std::cout, "Kp_tilde");
-    // myUtils::pretty_print(Kd_tilde, std::cout, "Kd_tilde");
+    // myUtils::pretty_print(Kpf_tilde, std::cout, "Kp_tilde");
+    // myUtils::pretty_print(Kdf_tilde, std::cout, "Kd_tilde");
 
     Eigen::MatrixXd Mp =  total_m_*J_com_prev_.block(3,0,3,n)*Kpf_tilde;
     Eigen::MatrixXd Md =  total_m_*J_com_prev_.block(3,0,3,n)*Kdf_tilde;
@@ -200,19 +201,19 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     Eigen::MatrixXd Kdt_tilde = Eigen::MatrixXd::Zero(n,n);
 
     for(int i(6); i< n; ++i){
-        Kpt_tilde(i,i) = eta*(q_des_[i] - q_prev_[i]);
+        Kpt_tilde(i,i) = (eta*(q_des_[i] - q_prev_[i]));
         // Kd_tilde(i,i) = ((2-delta_t_)*dq_cur_[i] - 2*dq_prev_[i])/(delta_t_*(dq_des_[i] - dq_cur_[i]));
-        Kdt_tilde(i,i) =  - delta_t_*Kpt_tilde(i,i);
+        Kdt_tilde(i,i) =   (zeta*delta_t_*Kpt_tilde(i,i));
     }
 
     Eigen::Matrix3d rt_skew = _Skew(ext_pos_);
     Eigen::MatrixXd Np = H_prev_*Kpt_tilde - total_m_*rt_skew*J_com_prev_.block(3,0,3,n)*Kpf_tilde;
-    Eigen::MatrixXd Nd = AM_prev_*Kdt_tilde - total_m_*rt_skew*J_com_prev_.block(3,0,3,n)*Kdf_tilde;
+    Eigen::MatrixXd Nd = H_prev_*Kdt_tilde  - total_m_*rt_skew*J_com_prev_.block(3,0,3,n)*Kdf_tilde;
 
-    myUtils::pretty_print(Np, std::cout, "Np");
-    myUtils::pretty_print(Nd, std::cout, "Nd");
-    myUtils::pretty_print(Np, std::cout, "H_prev_");
-    myUtils::pretty_print(Nd, std::cout, "AM_prev_");
+    // myUtils::pretty_print(Np, std::cout, "Np");
+    // myUtils::pretty_print(Nd, std::cout, "Nd");
+    // myUtils::pretty_print(Np, std::cout, "H_prev_");
+    // myUtils::pretty_print(Nd, std::cout, "AM_prev_");
 
     Eigen::MatrixXd Zq_n = A_prev_.inverse()*J_ext_prev_.transpose()*(Sf_*Mp + St_*Np);
     Eigen::MatrixXd Zdq_n = A_prev_.inverse()*J_ext_prev_.transpose()*(Sf_*Md  + St_*Nd);
@@ -262,34 +263,46 @@ void AWBC::AdaptGains(const std::vector<ContactSpec*> & contact_list, Eigen::Vec
     Eigen::VectorXd Fs;
     Eigen::VectorXd damping;
 
-    CheckDampingRatio(Kp_h_, Kd_h_, Fs, damping);
+    CheckDampingRatio(hat_Kp_, hat_Kd_, Fs, damping);
     // myUtils::pretty_print(Fs, std::cout, "Fs");
+    // myUtils::pretty_print(damping, std::cout, "damping");
     EstimateExtforce(contact_list);
 
     Eigen::VectorXd epsilon_p = Eigen::VectorXd::Zero(Kp_.size());
     Eigen::VectorXd epsilon_d = Eigen::VectorXd::Zero(Kp_.size());
     Eigen::VectorXd zeta = Eigen::VectorXd::Zero(Kp_.size());
     
-    double epsilon_limit = 100.;
+    double epsilon_p_upperlimit = 500.;
+    double epsilon_p_lowerlimit = -100.;
+
+    double epsilon_d_upperlimit = 60.;
+    double epsilon_d_lowerlimit = -5.;
 
     for(int i(0); i< Kp_.size(); ++i){
-        epsilon_p[i] = - hZq_[6+i];
+        epsilon_p[i] = hZq_[6+i];
 
-        if(epsilon_p[i] > epsilon_limit)
-            epsilon_p[i] = epsilon_limit;
-        else if(epsilon_p[i] < - epsilon_limit)
-            epsilon_p[i] = - epsilon_limit;
+        if(epsilon_p[i] > epsilon_p_upperlimit)
+            epsilon_p[i] = epsilon_p_upperlimit;
+        else if(epsilon_p[i] < epsilon_p_lowerlimit)
+            epsilon_p[i] = epsilon_p_lowerlimit;
 
-        zeta[i] = hat_Kd_[i] / (2*sqrt(hat_Kp_[i]));
-        epsilon_d[i] =  2*zeta[i]*sqrt(hat_Kp_[i] - hZq_[6+i] + epsilon_p[i]) - hat_Kd_[i] + hZdq_[6+i] ;
+        zeta[i] = sqrt(hat_Kp_[i] - hZq_[6+i] + epsilon_p[i]);
+        epsilon_d[i] =  3*sqrt(hat_Kp_[i] - hZq_[6+i] + epsilon_p[i]) - hat_Kd_[i] + hZdq_[6+i] ;
 
-        if(Kd_h_[i] + epsilon_d[i] < 0.)
-            epsilon_d[i] = -Kd_h_[i];
-            
+        if(epsilon_d[i] > epsilon_d_upperlimit)
+            epsilon_d[i] = epsilon_d_upperlimit;
+        else if(epsilon_d[i] < epsilon_d_lowerlimit)
+            epsilon_d[i] = epsilon_d_lowerlimit;
+
     }
 
-    myUtils::pretty_print(epsilon_p, std::cout, "epsilon_p");
-    myUtils::pretty_print(epsilon_d, std::cout, "epsilon_d");
+    epsilon_d[4] = 0.0;
+    epsilon_d[9] = 0.0;
+
+    // myUtils::pretty_print(zeta, std::cout, "zeta");
+    // myUtils::pretty_print(Kd_h_, std::cout, "Kd_h");
+    // myUtils::pretty_print(epsilon_p, std::cout, "epsilon_p");
+    // myUtils::pretty_print(epsilon_d, std::cout, "epsilon_d");
 
     // check condition 3
     Eigen::VectorXd temp_vec = hat_Kp_ + epsilon_p - hZq_.segment(6, Kp_.size());
@@ -305,5 +318,8 @@ void AWBC::AdaptGains(const std::vector<ContactSpec*> & contact_list, Eigen::Vec
 
     Kp_a = Kp_h_ + epsilon_p;
     Kd_a = Kd_h_ + epsilon_d;
+
+    // Kp_a = Kp_ + epsilon_p;
+    // Kd_a = Kd_ + epsilon_d;
 
 }

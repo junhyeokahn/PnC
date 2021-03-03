@@ -111,7 +111,7 @@ void DracoWorldNode::customPreStep() {
   // TEST
   if (t_ > 10. && t_ < 15.) {
   std::cout << "giving dist" << std::endl;
-  trq_cmd_[1] = -7.;
+  trq_cmd_[1] = -12.;
   }
   // TEST
 
