@@ -2,7 +2,7 @@ state_initialize_params:
     target_pos_duration: 2.0
     smoothing_duration: 1.0
     #target_pos: [0., 0., -0.9, 1.7, 0.71, 0., 0., -0.9, 1.7, 0.71]
-    target_pos: [0., 0., -0.785, 1.3565, 1.0, 0., 0, -0.785, 1.3565, 1.0]
+    target_pos: [0., 0.1, -0.785, 1.3565, 1.0, 0., -0.1, -0.785, 1.3565, 1.0]
 
 state_stand_params:
     target_pos_duration: 4.0 # duration to reach target com position
@@ -19,9 +19,12 @@ dcm_planner_parameters:
     nominal_com_height: 0.7 # m from the ground
     #nominal_com_height: 0.8 # m from the ground
 
-    t_additional_init_transfer: 0.2 # seconds. The additional initial transfer time to switch the stance leg
-    t_contact_transition: 0.04 # seconds. The transition time used to change reaction forces and stance leg
-    t_swing: 0.35 # seconds. The single support swing time.
+    #t_additional_init_transfer: 0.2 # seconds. The additional initial transfer time to switch the stance leg
+    #t_contact_transition: 0.04 # seconds. The transition time used to change reaction forces and stance leg
+    #t_swing: 0.35 # seconds. The single support swing time.
+    t_additional_init_transfer: 0.4 # seconds. The additional initial transfer time to switch the stance leg
+    t_contact_transition: 0.1 # seconds. The transition time used to change reaction forces and stance leg
+    t_swing: 0.15 # seconds. The single support swing time.
     percentage_settle: 0.9 # percent to converge at the end of the trajectory
     alpha_ds: 0.5 # value between 0.0 and 1.0 for double support DCM interpolation
 
@@ -33,7 +36,7 @@ dcm_planner_parameters:
     nominal_strafe_distance: 0.02 # meters
 
 foot_trajectory_parameters:
-    swing_height: 0.05 # cm off the ground
+    swing_height: 0.03 # cm off the ground
 
 controller_parameters:
     # Contact weight relative to tasks
@@ -65,7 +68,13 @@ task_parameters:
     #max_w_task_base_ori: 1e-2
     #
     max_w_task_com: 3e-2
-    max_w_task_base_ori: 7e-3
+    #max_w_task_base_ori: 7e-3
+    max_w_task_base_ori: 1e-3
+
+    #max_w_task_foot_pos: 3e-2
+    #max_w_task_foot_ori: 7e-3
+    #min_w_task_foot_pos: 3e-2
+    #min_w_task_foot_ori: 7e-3
 
     max_w_task_foot_pos: 1.
     max_w_task_foot_ori: 1.
@@ -79,8 +88,6 @@ task_parameters:
     # COM
     kp_com: [30 , 50., 50.] # EXP
     kd_com: [3.3, 2.5, 2.5]
-    #kp_com: [30 , 50., 50.] # OSCILATION
-    #kd_com: [1., 1., 2.5]
     #kp_com: [100 , 100 , 100] # SIM
     #kd_com: [30.  , 30.  , 30.]
     # Pelvis
@@ -95,10 +102,17 @@ task_parameters:
     #kd_foot_pos: [20.  , 20.  , 20.]
     #kp_foot_ori: [200. , 200.]
     #kd_foot_ori: [20.  , 20.]
-    kp_foot_pos: [100. , 100. , 100.]
-    kd_foot_pos: [3.5 , 3.5 , 3.5]
-    kp_foot_ori: [100. , 100.]
-    kd_foot_ori: [3.5  , 3.5]
+
+    #kp_foot_pos: [100. , 100. , 100.]
+    #kd_foot_pos: [3.5 , 3.5 , 3.5]
+    #kp_foot_ori: [100. , 100.]
+    #kd_foot_ori: [3.5  , 3.5]
+
+    kp_foot_pos: [30. , 30. , 30.]
+    kd_foot_pos: [2.5 , 2.5 , 2.5]
+    kp_foot_ori: [30. , 30.]
+    kd_foot_ori: [2.5  , 2.5]
+
     # Joint
     kp_joint: [100. , 100. , 100. , 100. , 50. , 100. , 100. , 100. , 100. , 50.]
     kd_joint: [20.  , 20.  , 20.  , 20.  , 10. , 20.  , 20.  , 20.  , 20.  , 10.]
