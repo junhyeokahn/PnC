@@ -36,6 +36,9 @@ DracoInterface::DracoInterface() : EnvInterface() {
   cmd_jpos_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   cmd_jvel_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
 
+  K_p_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+  K_d_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
+
   data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   data_temperature_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   data_motor_current_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
@@ -132,6 +135,11 @@ DracoInterface::DracoInterface() : EnvInterface() {
 
   DataManager::GetDataManager()->RegisterData(&Fr_ext_, VECT, "Fr_ext",
                                               6);
+  
+  DataManager::GetDataManager()->RegisterData(&K_p_, VECT, "K_p",
+                                              10);
+  DataManager::GetDataManager()->RegisterData(&K_d_, VECT, "K_d",
+                                              10);
 
   // DataManager::GetDataManager()->RegisterData(&imu_acc_, VECT, "imu_acc", 3);
   // DataManager::GetDataManager()->RegisterData(&imu_angvel_, VECT,
@@ -297,6 +305,9 @@ void DracoInterface::_CopyCommand(DracoCommand* cmd) {
   lfoot_back_est_ = temp.segment(18,6);
 
   Fr_ext_= cmd->Fr_ext;
+
+  K_p_ = cmd->K_p;
+  K_d_ = cmd->K_d;
 }
 
 bool DracoInterface::_Initialization(DracoSensorData* data, DracoCommand* cmd) {

@@ -63,6 +63,9 @@ class DracoCommand {
     jtrq = Eigen::VectorXd::Zero(10);
     Fr_estimated = Eigen::VectorXd::Zero(6*4);
     Fr_ext = Eigen::VectorXd::Zero(6);
+
+    K_p = Eigen::VectorXd::Zero(10);
+    K_d = Eigen::VectorXd::Zero(10);
   }
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
@@ -70,6 +73,9 @@ class DracoCommand {
 
   Eigen::VectorXd Fr_estimated;
   Eigen::VectorXd Fr_ext;
+
+  Eigen::VectorXd K_p;
+  Eigen::VectorXd K_d;
 };
 
 class DracoInterface : public EnvInterface {
@@ -104,6 +110,9 @@ class DracoInterface : public EnvInterface {
   Eigen::VectorXd lfoot_back_est_;
 
   Eigen::VectorXd Fr_ext_;
+
+  Eigen::VectorXd K_p_;
+  Eigen::VectorXd K_d_;
 
   // Eigen::VectorXd imu_acc_;
   // Eigen::VectorXd imu_angvel_;

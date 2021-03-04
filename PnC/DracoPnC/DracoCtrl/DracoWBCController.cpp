@@ -324,6 +324,9 @@ void DracoWBCController::getCommand(void* _cmd) {
 
   ((DracoCommand*)_cmd)->Fr_estimated = Fr_transformed;
   ((DracoCommand*)_cmd)->Fr_ext = hat_f_;
+  ((DracoCommand*)_cmd)->K_p = Kp_;
+  ((DracoCommand*)_cmd)->K_d = Kd_;
+
   // ((DracoCommand*)_cmd)->Fr_ext = hat_f - F_cmd;
   
   // update previous joint configuration and velocity
