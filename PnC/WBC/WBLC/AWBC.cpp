@@ -180,7 +180,7 @@ void AWBC::EstimateExtforce(const std::vector<ContactSpec*> & contact_list)
     Eigen::MatrixXd Kdf_tilde = Eigen::MatrixXd::Zero(n,n);
     
     double eta = 2/(delta_t_);
-    double zeta = 200.0;
+    double zeta = 100.0;
 
     for(int i(6); i< n; ++i){
         Kpf_tilde(i,i) = eta*(q_des_[i] - q_prev_[i]);
