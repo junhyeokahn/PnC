@@ -1,5 +1,6 @@
 #include "PnC/ConvexMPC/ConvexMPC.hpp"
-
+#include "PnC/ConvexMPC/GaitScheduler.hpp"
+#include <PnC/RobotSystem/RobotSystem.hpp>
 
 constexpr double desired_body_height = 0.3;
 constexpr double desired_vx = 0.0;
@@ -21,7 +22,11 @@ int main(int argc, char** argv){
     Eigen::VectorXd friction_coeffs(4);
     friction_coeffs << 0.45, 0.45, 0.45, 0.45;
     ConvexMPC* mpc_;
+    RobotSystem* robot_;
+    GaitScheduler* gait_;
 
+    robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
+    gait_ = new GaitScheduler(0.002);
     mpc_ = new ConvexMPC(
         mass,
         body_inertia,

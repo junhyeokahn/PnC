@@ -1,10 +1,10 @@
-FILE(GLOB sources *.cpp)
+FILE(GLOB mpc_sources *.cpp)
 FILE(GLOB mpc_headers "*.hpp")
 
 find_package(osqp REQUIRED)
 include_directories(/usr/local/include/osqp/)
 
-add_library(myMPC SHARED ${sources})
+add_library(myMPC SHARED ${mpc_sources})
 
 target_link_libraries(myMPC myUtils
                             # myGaitCycle
@@ -19,7 +19,6 @@ target_link_libraries(test_cmpc  myMPC
                                  myGoldfarb
                                  myRobotSystem
                                  osqp::osqp)
-
 # add_executable(run_test_mpc test_mpc.cpp)
 # target_link_libraries(run_test_mpc myUtils
 #                                    myGaitCycle
