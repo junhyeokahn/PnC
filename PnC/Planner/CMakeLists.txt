@@ -1,3 +1,5 @@
+# add_subdirectory(convexMPC)
+
 file(GLOB sources "*.cpp")
 file(GLOB planner_headers "*.hpp")
 

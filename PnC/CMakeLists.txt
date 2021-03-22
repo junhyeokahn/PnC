@@ -1,3 +1,4 @@
+add_subdirectory(ConvexMPC)
 add_subdirectory(WBC)
 add_subdirectory(Planner)
 add_subdirectory(TrajectoryManager)
