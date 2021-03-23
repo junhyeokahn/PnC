@@ -26,7 +26,7 @@ int main(int argc, char** argv){
     GaitScheduler* gait_;
 
     robot_ = new RobotSystem(6, THIS_COM "RobotModel/Robot/A1/a1_sim.urdf");
-    gait_ = new GaitScheduler(0.002);
+    gait_ = new GaitScheduler(robot_);
     mpc_ = new ConvexMPC(
         mass,
         body_inertia,

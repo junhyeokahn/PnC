@@ -3,7 +3,7 @@
 PointFootTrajectoryManager::PointFootTrajectoryManager(Task* _foot_pos_task,
                                                        RobotSystem* _robot)
     : TrajectoryManagerBase(_robot) {
-  myUtils::pretty_constructor(2, "TrajectoryManager: FootSE3");
+  myUtils::pretty_constructor(2, "TrajectoryManager: PointFoot");
   // Set Linear and Orientation Foot task
   foot_pos_task_ = _foot_pos_task;
 
@@ -15,7 +15,7 @@ PointFootTrajectoryManager::PointFootTrajectoryManager(Task* _foot_pos_task,
   foot_vel_des_.setZero();
   foot_acc_des_.setZero();
 
-  swing_height_ = 0.04;  // 4cm default
+  swing_height_ = 0.05;  // 5cm default
 }
 
 PointFootTrajectoryManager::~PointFootTrajectoryManager() {}

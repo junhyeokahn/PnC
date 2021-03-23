@@ -3,6 +3,7 @@ FILE(GLOB mpc_headers "*.hpp")
 
 find_package(osqp REQUIRED)
 include_directories(/usr/local/include/osqp/)
+include_directories(/home/knapsack/project/locomotion/src/PnC_june/PnC/A1PnC/)
 
 add_library(myMPC SHARED ${mpc_sources})
 
