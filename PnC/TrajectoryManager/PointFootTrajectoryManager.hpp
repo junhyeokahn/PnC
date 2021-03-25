@@ -29,13 +29,20 @@ class PointFootTrajectoryManager : public TrajectoryManagerBase {
 
   // Initialize the swing foot trajectory
   void initializeSwingFootTrajectory(const double _start_time,
-                                     const double _swing_duration,
-                                     const Footstep& _landing_foot);
+                                     const double _swing_duration);
   // Computes the swing foot
   void computeSwingFoot(const double current_time);
   // computes the swing foot and updates the desired swing foot task
   void updateSwingFootDesired(const double current_time);
 
- protected:
+  double swing_start_time_;
+  double swing_duration_;
   double swing_height_;
+
+  // Hermite Curve containers
+  HermiteCurveVec pos_traj_init_to_mid_;
+  HermiteCurveVec pos_traj_mid_to_end_;
+  HermiteQuaternionCurve quat_hermite_curve_;
+ protected:
+
 };

@@ -114,7 +114,7 @@ public:
     Eigen::VectorXd ComputeContactForces(
         Eigen::VectorXd com_position,
         Eigen::VectorXd com_velocity,
-        Eigen::VectorXd com_roll_pitch_yaw,
+        Eigen::Quaternion<double> com_quat,
         Eigen::VectorXd com_angular_velocity,
         Eigen::VectorXi foot_contact_states,
         Eigen::VectorXd foot_positions_body_frame,

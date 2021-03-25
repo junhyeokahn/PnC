@@ -7,7 +7,8 @@
 class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
  public:
   FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task,
-                                RobotSystem* _robot);
+                                RobotSystem* _robot, ConvexMPC* _mpc_planner,
+                                GaitScheduler* _gait_scheduler);
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
@@ -26,14 +27,25 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd com_vel_des_;
   Eigen::VectorXd com_acc_des_;
 
-  Eigen::VectorXd dcm_pos_des_;
-  Eigen::VectorXd dcm_vel_des_;
-  Eigen::VectorXd dcm_acc_des_;
+  // Inputs to MPC ComputeContactForces
+  Eigen::VectorXd mpc_pos_des_;
+  Eigen::VectorXd mpc_vel_des_;
+  Eigen::VectorXd mpc_rpy_des_;
+  Eigen::VectorXd mpc_rpydot_des;
+  Eigen::VectorXd foot_contact_states;
+  Eigen::VectorXd foot_pos_body_frame;
+  Eigen::VectorXd foot_friction_coeffs;
+
+  Eigen::Vector3d frfoot_body_frame, flfoot_body_frame,
+                  rrfoot_body_frame, rlfoot_body_frame;
 
   Eigen::Quaternion<double> base_ori_quat_des_;
   Eigen::VectorXd base_ori_des_;
   Eigen::VectorXd base_ang_vel_des_;
   Eigen::VectorXd base_ang_acc_des_;
+
+  ConvexMPC* mpc_planner_;
+  GaitScheduler* gait_scheduler_;
 
   // Updates the task desired values
   void updateDesired();
@@ -49,4 +61,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd amp;
   Eigen::VectorXd freq;
   Eigen::VectorXd mid_point;
+
+  protected:
+  Eigen::Vector3d toRPY(Eigen::Quaterion<double> quat)
 };

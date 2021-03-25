@@ -9,9 +9,11 @@
 // #include <PnC/A1PnC/A1StateMachine/ContactTransitionStart.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportBalance.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportStand.hpp>
-// #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
+#include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
 #include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/A1PnC/A1TaskAndForceContainer/A1TaskAndForceContainer.hpp>
+#include <PnC/ConvexMPC/ConvexMPC.hpp>
+#include <PnC/ConvexMPC/GaitScheduler.hpp>
 // #include <PnC/Planner/Footstep.hpp>
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
@@ -23,12 +25,12 @@ namespace A1_STATES {
 // constexpr int INITIALIZE = 0;
 constexpr int STAND = 0;
 constexpr int BALANCE = 1;
-// constexpr int RL_CONTACT_TRANSITION_START = 3;
-// constexpr int RL_CONTACT_TRANSITION_END = 4;
-// constexpr int RL_SWING = 5;
-// constexpr int LL_CONTACT_TRANSITION_START = 6;
-// constexpr int LL_CONTACT_TRANSITION_END = 7;
-// constexpr int LL_SWING = 8;
+constexpr int FR_CONTACT_TRANSITION_START = 2;
+constexpr int FR_CONTACT_TRANSITION_END = 3;
+constexpr int FR_SWING = 4;
+constexpr int FL_CONTACT_TRANSITION_START = 5;
+constexpr int FL_CONTACT_TRANSITION_END = 6;
+constexpr int FL_SWING = 7;
 };  // namespace A1_STATES
 
 class A1ControlArchitecture : public ControlArchitecture {
@@ -52,6 +54,8 @@ class A1ControlArchitecture : public ControlArchitecture {
   // Controller Object
   A1MainController* main_controller_;
   // Add Planner
+  ConvexMPC* mpc_planner_;
+  GaitScheduler* gait_scheduler_;
 
   // Trajectory Managers
   // JointTrajectoryManager* joint_trajectory_manager_; // If we want to keep
@@ -75,4 +79,12 @@ class A1ControlArchitecture : public ControlArchitecture {
   TaskWeightTrajectoryManager* rlfoot_pos_hierarchy_manager_;
   TaskWeightTrajectoryManager* com_hierarchy_manager_;
   TaskWeightTrajectoryManager* base_ori_hierarchy_manager_;
+
+  private:
+  double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4;
+  int num_legs = 4;
+  int _PLANNING_HORIZON_STEPS = 10;
+  int _PLANNING_TIMESTEP = 0.025;
+  Eigen::VectorXd body_inertia(9);
+  Eigen::VectorXd _MPC_WEIGHTS(13);
 };

@@ -18,7 +18,7 @@ void A1TaskAndForceContainer::_InitializeTasks() {
   // joint_task_ =
   //     new BasicTask(robot_, BasicTaskType::JOINT,
   //     robot_->getNumActuatedDofs());
-  com_task_ = new CoMxyz(robot_);
+  com_task_ = new CoMz(robot_);
   base_ori_task_ =
       new BasicTask(robot_, BasicTaskType::LINKORI, 3, A1BodyNode::trunk);
 
@@ -43,10 +43,10 @@ void A1TaskAndForceContainer::_InitializeTasks() {
 }
 
 void A1TaskAndForceContainer::_InitializeContacts() {
-  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.6);
-  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.6);
-  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.6);
-  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.6);
+  frfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FR_foot, 0.3);
+  flfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::FL_foot, 0.3);
+  rrfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RR_foot, 0.3);
+  rlfoot_contact_ = new PointContactSpec(robot_, A1BodyNode::RL_foot, 0.3);
 
   dim_contact_ = frfoot_contact_->getDim() + flfoot_contact_->getDim() +
                  rrfoot_contact_->getDim() + rlfoot_contact_->getDim();

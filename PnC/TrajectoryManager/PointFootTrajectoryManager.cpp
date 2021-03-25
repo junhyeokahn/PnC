@@ -4,7 +4,7 @@ PointFootTrajectoryManager::PointFootTrajectoryManager(Task* _foot_pos_task,
                                                        RobotSystem* _robot)
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: PointFoot");
-  // Set Linear and Orientation Foot task
+  // Set Linear Foot task
   foot_pos_task_ = _foot_pos_task;
 
   // Assume that both tasks use the same link id.
@@ -47,11 +47,55 @@ void PointFootTrajectoryManager::updateDesired() {
 
 // Initialize the swing foot trajectory
 void PointFootTrajectoryManager::initializeSwingFootTrajectory(
-    const double _start_time, const double _swing_duration,
-    const Footstep& _landing_foot) {}
+    const double _start_time, const double _swing_duration) {
+  swing_start_time_ = _start_time;
+  swing_duration_ = _swing_duration;
+
+  Eigen::Vector3d start_foot_pos =
+    robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+  Eigen::Vector3d end_foot_pos =
+    robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+  Eigen::Vector3d midfoot_pos =
+    robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+  midfoot_pos[2] = swing_height_;
+
+  Eigen::Vector3d mid_swing_velocity =
+      (end_foot_pos - start_foot_pos) / swing_duration_;
+
+  // Construct Position trajectories
+  pos_traj_init_to_mid_.initialize(start_foot_pos,
+                                   Eigen::Vector3d::Zero(3), midfoot_pos,
+                                   mid_swing_velocity);
+  pos_traj_mid_to_end_.initialize(midfoot_pos, mid_swing_velocity,
+                                  end_foot_pos,
+                                  Eigen::Vector3d::Zero(3));
+
+}
 
 // Computes the swing foot
-void PointFootTrajectoryManager::computeSwingFoot(const double current_time) {}
+void PointFootTrajectoryManager::computeSwingFoot(const double current_time) {
+  // Compute progression variable
+  double s = (current_time - swing_start_time_) / swing_duration_;
+  // Get foot position and its derivatives
+  if (s <= 0.5) {  // 0.0 <= s < 0.5 use the first trajectory
+    // scale back to 1.0
+    s = 2.0 * s;
+    foot_pos_des_ = pos_traj_init_to_mid_.evaluate(s);
+    foot_vel_des_ = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
+    foot_acc_des_ = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
+  } else {  // 0.5 <= s < 1.0 use the second trajectory
+    // scale back to 1.0 after the offset
+    s = 2.0 * (s - 0.5);
+    foot_pos_des_ = pos_traj_mid_to_end_.evaluate(s);
+    foot_vel_des_ = pos_traj_mid_to_end_.evaluateFirstDerivative(s);
+    foot_acc_des_ = pos_traj_mid_to_end_.evaluateSecondDerivative(s);
+  }
+
+
+}
 
 void PointFootTrajectoryManager::updateSwingFootDesired(
-    const double current_time) {}
+    const double current_time) {
+  computeSwingFoot(current_time);
+  updateDesired();
+}

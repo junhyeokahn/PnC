@@ -16,10 +16,16 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   main_controller_ = new A1MainController(taf_container_, robot_);
 
   // Initialize Planner
+  mpc_planner_ = new ConvexMPC(mass, body_interia, num_legs,
+                               _PLANNING_HORIZON_STEPS,
+                               _PLANNING_TIMESTEP,
+                               _MPC_WEIGHTS);
+  gait_scheduler_ = new GaitScheduler(robot_);
 
   // Initialize Trajectory managers
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
-      taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
+      taf_container_->com_task_, taf_container_->base_ori_task_, robot_,
+      mpc_planner_, gait_scheduler_);
   frfoot_trajectory_manager_ =
       new PointFootTrajectoryManager(taf_container_->frfoot_pos_task_, robot_);
   flfoot_trajectory_manager_ =
@@ -81,6 +87,9 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Set Starting State
   state_ = A1_STATES::STAND;
   prev_state_ = state_;
+
+  body_inertia << 0.02, 0, 0, 0, 0.06, 0, 0, 0, 0.07;
+  _MPC_WEIGHTS << 5, 5, 0.2, 0, 0, 10, 0.5, 0.5, 0.2, 0.2, 0.2, 0.1, 0;
 
   _InitializeParameters();
 }

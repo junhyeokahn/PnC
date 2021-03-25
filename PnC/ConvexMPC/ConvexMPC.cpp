@@ -330,7 +330,7 @@ void ConvexMPC::ResetSolver() { initial_run_ = true; }
 Eigen::VectorXd ConvexMPC::ComputeContactForces(
     Eigen::VectorXd com_position,
     Eigen::VectorXd com_velocity,
-    Eigen::VectorXd com_roll_pitch_yaw,
+    Eigen::Quaternion<double> com_quat,
     Eigen::VectorXd com_angular_velocity,
     Eigen::VectorXi foot_contact_states,
     Eigen::VectorXd foot_positions_body_frame,
@@ -344,11 +344,11 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
     
 
     // First we compute the foot positions in the world frame.
-    DCHECK_EQ(com_roll_pitch_yaw.size(), k3Dim);
-    const Quaterniond com_rotation =
-        AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
-        AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
-        AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
+    // DCHECK_EQ(com_roll_pitch_yaw.size(), k3Dim);
+    const Quaterniond com_rotation = com_quat;
+        // AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
+        // AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
+        // AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
 
     DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
     foot_positions_base_ = Eigen::Map<const MatrixXd>(
