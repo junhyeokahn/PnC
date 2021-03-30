@@ -20,6 +20,7 @@ class DCMTask : public Task {
   virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,
                               const Eigen::VectorXd& vel_des,
                               const Eigen::VectorXd& acc_des);
+  virtual bool _UpdateCurrent();                                 
   virtual bool _UpdateTaskJacobian();
   virtual bool _UpdateTaskJDotQdot();
 

@@ -22,6 +22,15 @@ bool CoMz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool CoMz::_UpdateCurrent(){
+  // pos_cur
+  pos_cur_ = robot_->getCoMPosition();
+  // vel_cur
+  vel_cur_ = robot_->getCoMVelocity();
+ 
+  return true;
+}
+
 bool CoMz::_UpdateTaskJacobian() {
   // Replace Z Jacobian with pelvis.
   Eigen::MatrixXd Jtmp = robot_->getBodyNodeCoMJacobian(DracoBodyNode::Torso);

@@ -33,6 +33,15 @@ bool CoMxyz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool CoMxyz::_UpdateCurrent(){
+  // pos_cur
+  pos_cur_ = robot_->getCoMPosition();
+  // vel_cur
+  vel_cur_ = robot_->getCoMVelocity();
+
+  return true;
+}
+
 bool CoMxyz::_UpdateTaskJacobian() {
   Eigen::MatrixXd Jtmp = robot_->getCoMJacobian();
   // (X, Y, Z)

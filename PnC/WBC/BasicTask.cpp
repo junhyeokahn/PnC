@@ -183,6 +183,85 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool BasicTask::_UpdateCurrent() {
+
+  switch (task_type_) {
+    case BasicTaskType::LINKORI: {
+      // orientation quaternion -> vector
+      Eigen::Quaternion<double> ori_zero(0.0, 0.0, 0.0, 1.0);
+      Eigen::Quaternion<double> ori_act(
+          robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+      myUtils::avoid_quat_jump(ori_zero, ori_act);
+
+      Eigen::Vector3d ori_cur;
+      ori_cur = dart::math::quatToExp(ori_act);
+      pos_cur_ = ori_cur;
+
+      // vel_cur_
+      vel_cur_ = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKORI: {
+      // orientation quaternion -> vector
+      Eigen::Quaternion<double> ori_zero(0.0, 0.0, 0.0, 1.0);
+      Eigen::Quaternion<double> ori_act(
+          robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+      myUtils::avoid_quat_jump(ori_zero, ori_act);
+
+      Eigen::Vector3d ori_cur;
+      ori_cur = dart::math::quatToExp(ori_act);
+      pos_cur_ = ori_cur;
+
+      // vel_cur_
+      vel_cur_ = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
+      break;
+    }
+    case BasicTaskType::JOINT: {
+      // pos_cur_
+      pos_cur_ = robot_->getQ().tail(dim_task_);
+      // vel_cur_
+      vel_cur_ = robot_->getQdot().tail(dim_task_);
+      break;
+    }
+    case BasicTaskType::LINKXYZ: {
+      // pos_cur_
+      pos_cur_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+      // vel_cur_
+      vel_cur_ = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
+      break;
+    }
+    case BasicTaskType::ISOLATED_LINKXYZ: {
+      // pos_cur_
+      pos_cur_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
+      // vel_cur_
+      vel_cur_ = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
+      break;
+    }
+    case BasicTaskType::CENTROID: {
+      // pos_cur_
+      pos_cur_.head(3) = Eigen::VectorXd::Zero(3);
+      pos_cur_.tail(3) = robot_->getCoMPosition();
+      // vel_cur_
+      vel_cur_ = robot_->getCentroidMomentum();
+      break;
+    }
+    case BasicTaskType::COM: {
+      // pos_cur_
+      pos_cur_ = robot_->getCoMPosition();
+      // vel_cur_
+      vel_cur_ = robot_->getCoMVelocity();
+      break;
+    }
+    default:
+      std::cout << "[BasicTask] Type is not Specified" << std::endl;
+  }
+
+  return true;
+}
+
+
 bool BasicTask::_UpdateTaskJacobian() {
   switch (task_type_) {
     case BasicTaskType::JOINT: {

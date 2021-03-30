@@ -40,6 +40,15 @@ bool SelectedJointTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool SelectedJointTask::_UpdateCurrent(){
+
+  for (int i = 0; i < dim_task_; i++) {
+    pos_cur_[i] = robot_->getQ()[joint_indices_[i]];
+    vel_cur_[i] = robot_->getQdot()[joint_indices_[i]];
+  }
+
+}
+
 bool SelectedJointTask::_UpdateTaskJacobian() { return true; }
 
 bool SelectedJointTask::_UpdateTaskJDotQdot() { return true; }

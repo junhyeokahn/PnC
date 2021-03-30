@@ -40,6 +40,15 @@ bool Footxyz::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool Footxyz::_UpdateCurrent(){
+  // pos_cur
+  pos_cur_ = robot_->getBodyNodeIsometry(link_idx_).translation();
+  // vel_cur
+  vel_cur_ = robot_->getBodyNodeSpatialVelocity(link_idx_).tail(3);
+
+  return true;
+}
+
 bool Footxyz::_UpdateTaskJacobian() {
   Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(link_idx_);
   Jt_.block(0, 0, 3, robot_->getNumDofs()) =

@@ -21,4 +21,6 @@ class CoMxyz : public Task {
                               const Eigen::VectorXd& acc_des);
   virtual bool _UpdateTaskJacobian();
   virtual bool _UpdateTaskJDotQdot();
+  virtual bool _UpdateCurrent();
+
 };

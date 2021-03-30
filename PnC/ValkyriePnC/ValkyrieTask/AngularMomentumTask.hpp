@@ -21,6 +21,7 @@ class AngularMomentumTask : public Task {
                               const Eigen::VectorXd& acc_des);
   virtual bool _UpdateTaskJacobian();
   virtual bool _UpdateTaskJDotQdot();
+  virtual bool _UpdateCurrent();
 
   Eigen::MatrixXd Ag_cur_;   // Current centroidal inertia matrix
   Eigen::MatrixXd Ag_prev_;  // Previous centroidal inertia matrix

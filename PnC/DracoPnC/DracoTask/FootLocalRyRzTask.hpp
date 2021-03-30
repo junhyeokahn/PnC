@@ -22,6 +22,6 @@ class FootLocalRyRzTask : public Task {
                               const Eigen::VectorXd& acc_des);
   virtual bool _UpdateTaskJacobian();
   virtual bool _UpdateTaskJDotQdot();
-
+  virtual bool _UpdateCurrent();   
   int link_idx_;
 };

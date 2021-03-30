@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include <Utils/Math/MathUtilities.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
 
 class Task {
@@ -22,6 +23,10 @@ class Task {
     pos_err = Eigen::VectorXd::Zero(_dim);
     vel_des = Eigen::VectorXd::Zero(_dim);
     acc_des = Eigen::VectorXd::Zero(_dim);
+
+    pos_cur_ = Eigen::VectorXd::Zero(_dim);
+    vel_cur_ = Eigen::VectorXd::Zero(_dim);
+    acc_cur_ = Eigen::VectorXd::Zero(_dim);
 
     pos_des_ = Eigen::VectorXd::Zero(_dim);
     vel_des_ = Eigen::VectorXd::Zero(_dim);
@@ -65,7 +70,10 @@ class Task {
     acc_des_ = acc_des;
   }
 
-  void computeCommands() { _UpdateCommand(pos_des_, vel_des_, acc_des_); }
+  void computeCommands() {
+     _UpdateCommand(pos_des_, vel_des_, acc_des_);
+     _UpdateCurrent();
+      }
 
   bool updateTask(const Eigen::VectorXd& pos_des,
                   const Eigen::VectorXd& vel_des,
@@ -93,10 +101,17 @@ class Task {
   Eigen::VectorXd vel_des_;
   Eigen::VectorXd acc_des_;
 
+  // Store for current values
+  Eigen::VectorXd pos_cur_;
+  Eigen::VectorXd vel_cur_;
+  Eigen::VectorXd acc_cur_;
+
  protected:
   virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,
                               const Eigen::VectorXd& vel_des,
                               const Eigen::VectorXd& acc_des) = 0;
+  
+  virtual bool _UpdateCurrent() = 0;                           
   virtual bool _UpdateTaskJacobian() = 0;
   virtual bool _UpdateTaskJDotQdot() = 0;
 

@@ -43,6 +43,11 @@ bool AngularMomentumTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool AngularMomentumTask::_UpdateCurrent() {
+  pos_cur_ = Eigen::VectorXd::Zero(3);
+  vel_cur_ = robot_->getCentroidMomentum().head(3);
+}
+
 bool AngularMomentumTask::_UpdateTaskJacobian() {
   Eigen::MatrixXd Jtmp = robot_->getCentroidInertiaTimesJacobian();
   Jt_ = Jtmp.block(0, 0, dim_task_, robot_->getNumDofs());

@@ -57,6 +57,22 @@ bool CoMxyzRxRyRzTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool CoMxyzRxRyRzTask::_UpdateCurrent() {
+  Eigen::Quaternion<double> ori_zero(0.0, 0.0, 0.0, 1.0);
+  Eigen::Quaternion<double> ori_act(
+      robot_->getBodyNodeCoMIsometry(ValkyrieBodyNode::pelvis).linear());
+
+  myUtils::avoid_quat_jump(ori_zero, ori_act);
+
+  Eigen::Vector3d ori_cur;
+  ori_cur = dart::math::quatToExp(ori_act);
+  pos_cur_.head(3) = ori_cur;
+  pos_cur_.tail(3) = robot_->getCoMPosition();
+
+  vel_cur_.head(3) = robot_->getBodyNodeCoMSpatialVelocity(ValkyrieBodyNode::pelvis).head(3);
+  vel_cur_.tail(3) = robot_->getCoMVelocity();
+}
+
 bool CoMxyzRxRyRzTask::_UpdateTaskJacobian() {
   Eigen::MatrixXd Jtmp =
       robot_->getBodyNodeCoMJacobian(ValkyrieBodyNode::pelvis);

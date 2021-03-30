@@ -41,6 +41,24 @@ bool TorsoRxRy::_UpdateCommand(const Eigen::VectorXd& _pos_des,
   return true;
 }
 
+bool TorsoRxRy::_UpdateCurrent(){
+  Eigen::Quaternion<double> ori_zero(0.0, 0.0, 0.0, 1.0);
+  Eigen::Quaternion<double> ori_act(
+      robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+
+  myUtils::avoid_quat_jump(ori_zero, ori_act);
+
+  Eigen::Vector3d ori_cur;
+  ori_cur = dart::math::quatToExp(ori_act);
+  pos_cur_ = ori_cur;
+
+  // vel_cur_
+  vel_cur_ = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
+
+  return true;
+
+}
+
 bool TorsoRxRy::_UpdateTaskJacobian() {
   Eigen::MatrixXd Jtmp = robot_->getBodyNodeJacobian(link_idx_);
   // (Rx, Ry)

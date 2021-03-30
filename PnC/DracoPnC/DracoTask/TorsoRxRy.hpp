@@ -22,6 +22,7 @@ class TorsoRxRy : public Task {
                               const Eigen::VectorXd& acc_des);
   virtual bool _UpdateTaskJacobian();
   virtual bool _UpdateTaskJDotQdot();
+  virtual bool _UpdateCurrent();   
   int getLinkID() { return link_idx_; }
 
   int link_idx_;
