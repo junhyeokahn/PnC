@@ -52,7 +52,7 @@ if(MOSEK_FOUND)
 endif()
 
 # For TOWR+
-find_package(ifopt 2.0.1 REQUIRED)
+#find_package(ifopt 2.0.1 REQUIRED)
 
 ##=============================================================================
 ## Include Directory

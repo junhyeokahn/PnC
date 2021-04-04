@@ -9,10 +9,14 @@ class RobotSystem;
 class DracoStateProvider {
  public:
   static DracoStateProvider* getStateProvider(RobotSystem* _robot);
-  ~DracoStateProvider() { delete one_step_sol; }
+  ~DracoStateProvider() {
+    // For TOWR+
+    // delete one_step_sol;
+  }
 
-  LocomotionSolution* one_step_sol;
-  double planning_time;
+  // For TOWR+
+  // LocomotionSolution* one_step_sol;
+  // double planning_time;
 
   // ---------------------------------------------------------------------------
   // Variables set outside
