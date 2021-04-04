@@ -136,6 +136,13 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   bool noRemainingSteps();
 
   void updateDCMTasksDesired(double current_time);
+
+  // For TOWR+
+  // void updateDCMTasksDesired(const Eigen::Vector3d& des_com_pos,
+  // const Eigen::Vector3d& des_com_vel,
+  // const Eigen::Quaternion<double>& des_quat,
+  // const Eigen::Vector3d& des_ang_vel);
+
   Task* com_task_;
   Task* base_ori_task_;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Configuration.h>
+#include <PnC/Planner/towr_plus/include/towr_plus/locomotion_solution.h>
 #include <Utils/IO/IOUtilities.hpp>
 
 class RobotSystem;
@@ -8,7 +9,10 @@ class RobotSystem;
 class DracoStateProvider {
  public:
   static DracoStateProvider* getStateProvider(RobotSystem* _robot);
-  ~DracoStateProvider() {}
+  ~DracoStateProvider() { delete one_step_sol; }
+
+  LocomotionSolution* one_step_sol;
+  double planning_time;
 
   // ---------------------------------------------------------------------------
   // Variables set outside

@@ -51,6 +51,9 @@ if(MOSEK_FOUND)
   include_directories(${MOSEK_INCLUDE_DIRS})
 endif()
 
+# For TOWR+
+find_package(ifopt 2.0.1 REQUIRED)
+
 ##=============================================================================
 ## Include Directory
 ##=============================================================================

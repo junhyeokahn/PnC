@@ -11,6 +11,13 @@ DracoStateProvider* DracoStateProvider::getStateProvider(RobotSystem* _robot) {
 DracoStateProvider::DracoStateProvider(RobotSystem* _robot) {
   myUtils::pretty_constructor(1, "State Provider");
 
+  // For TOWR+
+  // YAML::Node cfg =
+  // YAML::LoadFile(THIS_COM "Config/Draco/TEST/draco_one_step_config.yaml");
+  // one_step_sol =
+  // new LocomotionSolution("draco_one_step", cfg["locomotion_param"]);
+  // planning_time = 0.;
+
   robot_ = _robot;
   stance_foot = DracoBodyNode::lFootCenter;
   prev_stance_foot = stance_foot;

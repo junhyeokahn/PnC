@@ -166,3 +166,15 @@ void FootSE3TrajectoryManager::updateSwingFootDesired(
   computeSwingFoot(current_time);
   updateDesired();
 }
+
+// For TOWR+
+// void FootSE3TrajectoryManager::updateSwingFootDesired(
+// const Eigen::Vector3d pos, const Eigen::Vector3d vel,
+// const Eigen::Quaternion<double> quat, const Eigen::Vector3d ang_vel) {
+// Eigen::Vector3d zero3;
+// zero3.setZero();
+// foot_pos_task_->updateDesired(pos, vel, zero3);
+// Eigen::VectorXd quat_vec(4);
+// quat_vec << quat.w(), quat.x(), quat.y(), quat.z();
+// foot_ori_task_->updateDesired(quat_vec, ang_vel, zero3);
+//}

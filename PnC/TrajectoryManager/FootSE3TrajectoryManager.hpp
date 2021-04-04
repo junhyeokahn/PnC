@@ -44,6 +44,12 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
   // computes the swing foot and updates the desired swing foot task
   void updateSwingFootDesired(const double current_time);
 
+  // For TOWR+
+  // void updateSwingFootDesired(const Eigen::Vector3d pos,
+  // const Eigen::Vector3d vel,
+  // const Eigen::Quaternion<double> quat,
+  // const Eigen::Vector3d ang_vel);
+
   double swing_start_time_;
   double swing_duration_;
   double swing_height_;

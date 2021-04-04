@@ -62,6 +62,18 @@ void ContactTransitionEnd::_taskUpdate() {
   // =========================================================================
   ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
 
+  // For TOWR+
+  // Eigen::Vector3d des_com_pos =
+  // sp_->one_step_sol->get_des_com_pos(sp_->curr_time - sp_->planning_time);
+  // Eigen::Vector3d des_com_vel =
+  // sp_->one_step_sol->get_des_com_pos(sp_->curr_time - sp_->planning_time);
+  // Eigen::Quaternion<double> des_quat =
+  // sp_->one_step_sol->get_des_base_quat(sp_->curr_time - sp_->planning_time);
+  // Eigen::Vector3d des_base_ang_vel = sp_->one_step_sol->get_des_base_ang_vel(
+  // sp_->curr_time - sp_->planning_time);
+  // ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(
+  // des_com_pos, des_com_vel, des_quat, des_base_ang_vel);
+
   // =========================================================================
   // Foot
   // =========================================================================
