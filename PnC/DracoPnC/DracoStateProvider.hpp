@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Configuration.h>
-#include <PnC/Planner/towr_plus/include/towr_plus/locomotion_solution.h>
+// For TOWR+
+//#include <PnC/Planner/towr_plus/include/towr_plus/locomotion_solution.h>
 #include <Utils/IO/IOUtilities.hpp>
 
 class RobotSystem;
