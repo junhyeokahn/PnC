@@ -35,16 +35,16 @@ void SwingControl::firstVisit() {
   taf_container_->task_list_.push_back(taf_container_->base_ori_task_);
   if (state_identity_ == A1_STATES::FR_SWING) {
     std::cout << "[Front Right Foot Swing]" << std::endl;
-    taf_container_->task_list_.push_back(taf_container_->frfoot_pos_task);
-    taf_container_->task_list_.push_back(taf_container_->rlfoot_pos_task);
-    taf_container_->contact_list_.push_back(taf_container->flfoot_contact_);
-    taf_container_->contact_list_.push_back(taf_container->rrfoot_contact_);
+    taf_container_->task_list_.push_back(taf_container_->frfoot_pos_task_);
+    taf_container_->task_list_.push_back(taf_container_->rlfoot_pos_task_);
+    taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
+    taf_container_->contact_list_.push_back(taf_container_->rrfoot_contact_);
   } else {
     std::cout << "[Front Left Foot Swing]" << std::endl;
-    taf_container_->task_list_.push_back(taf_container_->flfoot_pos_task);
-    taf_container_->task_list_.push_back(taf_container_->rrfoot_pos_task);
-    taf_container_->contact_list_.push_back(taf_container->frfoot_contact_);
-    taf_container_->contact_list_.push_back(taf_container->rlfoot_contact_);
+    taf_container_->task_list_.push_back(taf_container_->flfoot_pos_task_);
+    taf_container_->task_list_.push_back(taf_container_->rrfoot_pos_task_);
+    taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
+    taf_container_->contact_list_.push_back(taf_container_->rlfoot_contact_);
   }
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time; 
@@ -73,15 +73,15 @@ void SwingControl::_taskUpdate() {
   // =========================================================================
   if (state_identity_ == A1_STATES::FL_SWING) {
     // Set Front Left Swing Foot Trajectory
-    ctrl_arch_->flfoot_trajectory_manager_->updateswingfootdesired(
+    ctrl_arch_->flfoot_trajectory_manager_->updateSwingFootDesired(
         state_machine_time_);
-    ctrl_arch_->rrfoot_trajectory_manager_->updateswingfootdesired(
+    ctrl_arch_->rrfoot_trajectory_manager_->updateSwingFootDesired(
         state_machine_time_);
   } else {
     // Set Right Swing FOot Trajectory. Hold Other foot in place.
-    ctrl_arch_->frfoot_trajectory_manager_->updateswingfootdesired(
+    ctrl_arch_->frfoot_trajectory_manager_->updateSwingFootDesired(
         state_machine_time_);
-    ctrl_arch_->rlfoot_trajectory_manager_->updateswingfootdesired(
+    ctrl_arch_->rlfoot_trajectory_manager_->updateSwingFootDesired(
         state_machine_time_);
   }
 

@@ -22,7 +22,7 @@ ContactTransitionEnd::~ContactTransitionEnd() {}
 void ContactTransitionEnd::firstVisit() {
   // Coming from ContactTransitionStart, do not need to alter task/contact lists
   // Set control Starting time
-  if (state_identity_ == DRACO_STATES::RL_CONTACT_TRANSITION_END) {
+  if (state_identity_ == A1_STATES::FR_CONTACT_TRANSITION_END) {
     std::cout << "[Right Foot Contact Transition End]" << std::endl;
   } else {
     std::cout << "[Left Foot Contact Transition End]" << std::endl;
@@ -30,7 +30,7 @@ void ContactTransitionEnd::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   // Ramp Down Reaction force for the upcoming swing foot
-  if (leg_side_ == LEFT_ROBOT_SIDE) {
+  if (state_identity_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
     ctrl_arch_->flfoot_max_normal_force_manager_->initializeRampToZero(
         0.0, ramp_time_);
     ctrl_arch_->rrfoot_max_normal_force_manager_->initializeRampToZero(

@@ -12,8 +12,8 @@
 #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
 #include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/A1PnC/A1TaskAndForceContainer/A1TaskAndForceContainer.hpp>
-#include <PnC/ConvexMPC/ConvexMPC.hpp>
-#include <PnC/ConvexMPC/GaitScheduler.hpp>
+// #include <PnC/ConvexMPC/ConvexMPC.hpp>
+// #include <PnC/ConvexMPC/GaitScheduler.hpp>
 // #include <PnC/Planner/Footstep.hpp>
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
@@ -85,6 +85,6 @@ class A1ControlArchitecture : public ControlArchitecture {
   int num_legs = 4;
   int _PLANNING_HORIZON_STEPS = 10;
   int _PLANNING_TIMESTEP = 0.025;
-  Eigen::VectorXd body_inertia(9);
-  Eigen::VectorXd _MPC_WEIGHTS(13);
+  Eigen::VectorXd body_inertia;
+  Eigen::VectorXd _MPC_WEIGHTS;
 };

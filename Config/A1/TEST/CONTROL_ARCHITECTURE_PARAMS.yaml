@@ -30,7 +30,7 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 400.
+    max_z_force: 120.
 
     # Task hierarchy weights
     w_task_base_ori: 100

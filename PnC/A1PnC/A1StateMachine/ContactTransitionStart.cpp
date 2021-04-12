@@ -14,7 +14,7 @@ ContactTransitionStart::ContactTransitionStart(
   sp_ = A1StateProvider::getStateProvider(robot_);
 
   // Set Leg Side
-  front_leg_side_ = _front_leg_side;
+  leg_side_ = _front_leg_side;
 }
 
 ContactTransitionStart::~ContactTransitionStart() {}
@@ -23,7 +23,7 @@ void ContactTransitionStart::firstVisit() {
   // Manage task and contact list
   taf_container_->task_list_.clear();
   taf_container_->task_list_.push_back(taf_container_->com_task_);
-  taf_container_->task_list_.push_back(taf_container_->base_ori_task);
+  taf_container_->task_list_.push_back(taf_container_->base_ori_task_);
   taf_container_->contact_list_.clear();
   taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
   taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
@@ -48,7 +48,7 @@ void ContactTransitionStart::firstVisit() {
       0.0, ramp_time_);
 
   sp_->planning_id += 1;
-  }
+
 }
 
 void ContactTransitionStart::_taskUpdate() {
@@ -73,9 +73,13 @@ void ContactTransitionStart::oneStep() {
   // state_machine_time_);
   // ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
   /*state_machine_time_);*/
-  ctrl_arch_->rfoot_max_normal_force_manager_->updateRampToMaxDesired(
+  ctrl_arch_->frfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
-  ctrl_arch_->lfoot_max_normal_force_manager_->updateRampToMaxDesired(
+  ctrl_arch_->flfoot_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->rrfoot_max_normal_force_manager_->updateRampToMaxDesired(
+      state_machine_time_);
+  ctrl_arch_->rlfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
 
   _taskUpdate();

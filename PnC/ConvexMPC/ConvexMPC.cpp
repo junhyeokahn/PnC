@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <PnC/ConvexMPC/ConvexMPC.hpp>
+#include <iostream>
 
 #define DCHECK_GT(a,b) assert((a)>(b))
 #define DCHECK_EQ(a,b) assert((a)==(b))

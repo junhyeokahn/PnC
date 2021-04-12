@@ -1,6 +1,6 @@
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
-#include <PnC/ConvexMPC/ConvexMPC.hpp>
-#include <PnC/ConvexMPC/GaitScheduler.hpp>
+// #include <PnC/ConvexMPC/ConvexMPC.hpp>
+// #include <PnC/ConvexMPC/GaitScheduler.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
 #include <cmath>
 #include <Eigen/Dense>
@@ -26,7 +26,7 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   mpc_vel_des_ = Eigen::VectorXd::Zero(3);
   mpc_rpy_des_ = Eigen::VectorXd::Zero(3);// TODO
   mpc_rpydot_des_ = Eigen::VectorXd::Zero(3);// TODO
-  foot_contact_states = Eigen::VectorXd::Zero(3);
+  foot_contact_states = Eigen::VectorXi::Zero(3);
   foot_pos_body_frame = Eigen::VectorXd::Zero(12);
   foot_friction_coeffs = Eigen::VectorXd::Zero(4);
   foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
@@ -156,8 +156,10 @@ double FloatingBaseTrajectoryManager::getSwingTime(){
 
 void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
     const double _start_time,
+    const double _end_time,
     const Eigen::VectorXd& _target_com_pos) {
   start_time_ = _start_time;
+  duration_ = _end_time - _start_time;
   ini_com_pos_ = ((Eigen::VectorXd)robot_->getCoMPosition());
   // base_ori_quat_des_ =
   // Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());

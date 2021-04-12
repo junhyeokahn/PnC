@@ -16,6 +16,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
+                                        const double _end_time,
                                         const Eigen::VectorXd& _target_com_pos);
   void initializeCoMSwaying(double _start_time, double _duration,
                             Eigen::VectorXd _dis);
@@ -44,7 +45,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd mpc_vel_des_;
   Eigen::VectorXd mpc_rpy_des_;
   Eigen::VectorXd mpc_rpydot_des_;
-  Eigen::VectorXd foot_contact_states;
+  Eigen::VectorXi foot_contact_states;
   Eigen::VectorXd foot_pos_body_frame;
   Eigen::VectorXd foot_friction_coeffs;
 

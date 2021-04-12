@@ -18,6 +18,8 @@ class A1StateProvider {
   int front_stance_foot;
   int rear_stance_foot;
 
+  Eigen::VectorXd mpc_rxn_forces;
+
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;
@@ -38,7 +40,7 @@ class A1StateProvider {
   Eigen::Vector3d base_ang_vel_des;
   Eigen::Quaternion<double> base_quat;
   Eigen::Vector3d base_ang_vel;
- 
+
   int b_frfoot_contact;
   int b_flfoot_contact;
   int b_rrfoot_contact;

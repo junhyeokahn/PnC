@@ -9,14 +9,20 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
                         "Config/A1/TEST/CONTROL_ARCHITECTURE_PARAMS.yaml");
 
   sp_ = A1StateProvider::getStateProvider(robot_);
-
   // Initialize Main Controller
   taf_container_ = new A1TaskAndForceContainer(robot_);
   taf_container_->paramInitialization(cfg_["task_parameters"]);
   main_controller_ = new A1MainController(taf_container_, robot_);
 
   // Initialize Planner
-  mpc_planner_ = new ConvexMPC(mass, body_interia, num_legs,
+  body_inertia = Eigen::VectorXd::Zero(9);
+  _MPC_WEIGHTS = Eigen::VectorXd::Zero(13);
+  body_inertia[0] = 0.02; body_inertia[4] = 0.06; body_inertia[8] = 0.07;
+  _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
+  _MPC_WEIGHTS[5] = 10.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 0.2; _MPC_WEIGHTS[10] = 0.2;
+  _MPC_WEIGHTS[11] = 0.1;
+  mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
                                _PLANNING_TIMESTEP,
                                _MPC_WEIGHTS);
@@ -78,14 +84,11 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
       new ContactTransitionEnd(A1_STATES::FR_CONTACT_TRANSITION_END,
                                RIGHT_ROBOT_SIDE, this, robot_);
   state_machines_[A1_STATES::FR_SWING] =
-      new SwingControl(A1_STATES::LL_SWING, RIGHT_ROBOT_SIDE, this, robot_);
+      new SwingControl(A1_STATES::FR_SWING, RIGHT_ROBOT_SIDE, this, robot_);
 
   // Set Starting State
   state_ = A1_STATES::STAND;
   prev_state_ = state_;
-
-  body_inertia << 0.02, 0, 0, 0, 0.06, 0, 0, 0, 0.07;
-  _MPC_WEIGHTS << 5, 5, 0.2, 0, 0, 10, 0.5, 0.5, 0.2, 0.2, 0.2, 0.1, 0;
 
   _InitializeParameters();
 }
@@ -201,8 +204,8 @@ void A1ControlArchitecture::_InitializeParameters() {
 
   // States Initialization:
   state_machines_[A1_STATES::STAND]->initialization(cfg_["state_stand_params"]);
-  state_machines_[A1_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
-  state_machines_[A1_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FR_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FL_SWING]->initialization(cfg_["state_swing"]);
   state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
   state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END]->initialization(cfg_["state_contact_transition"]);
   state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
