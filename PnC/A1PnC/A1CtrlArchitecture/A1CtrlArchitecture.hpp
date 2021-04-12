@@ -5,8 +5,8 @@
 #include <PnC/A1PnC/A1Ctrl/A1MainController.hpp>
 #include <PnC/A1PnC/A1Definition.hpp>
 #include <PnC/ControlArchitecture.hpp>
-// #include <PnC/A1PnC/A1StateMachine/ContactTransitionEnd.hpp>
-// #include <PnC/A1PnC/A1StateMachine/ContactTransitionStart.hpp>
+#include <PnC/A1PnC/A1StateMachine/ContactTransitionEnd.hpp>
+#include <PnC/A1PnC/A1StateMachine/ContactTransitionStart.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportBalance.hpp>
 #include <PnC/A1PnC/A1StateMachine/QuadSupportStand.hpp>
 #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
@@ -25,12 +25,12 @@ namespace A1_STATES {
 // constexpr int INITIALIZE = 0;
 constexpr int STAND = 0;
 constexpr int BALANCE = 1;
-constexpr int FR_CONTACT_TRANSITION_START = 2;
-constexpr int FR_CONTACT_TRANSITION_END = 3;
-constexpr int FR_SWING = 4;
-constexpr int FL_CONTACT_TRANSITION_START = 5;
-constexpr int FL_CONTACT_TRANSITION_END = 6;
-constexpr int FL_SWING = 7;
+constexpr int FL_CONTACT_TRANSITION_START = 2;
+constexpr int FL_CONTACT_TRANSITION_END = 3;
+constexpr int FL_SWING = 4;
+constexpr int FR_CONTACT_TRANSITION_START = 5;
+constexpr int FR_CONTACT_TRANSITION_END = 6;
+constexpr int FR_SWING = 7;
 };  // namespace A1_STATES
 
 class A1ControlArchitecture : public ControlArchitecture {

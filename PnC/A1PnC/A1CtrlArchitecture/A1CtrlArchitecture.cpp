@@ -59,30 +59,26 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
       new TaskWeightTrajectoryManager(taf_container_->base_ori_task_, robot_);
 
   // Initialize states: add all states to the state machine map
-  // state_machines_[A1_STATES::INITIALIZE] =
-  // new Initialize(A1_STATES::INITIALIZE, this, robot_);
   state_machines_[A1_STATES::STAND] =
       new QuadSupportStand(A1_STATES::STAND, this, robot_);
   state_machines_[A1_STATES::BALANCE] =
       new QuadSupportBalance(A1_STATES::BALANCE, this, robot_);
-
-  /*state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_START] =
-      new ContactTransitionStart(A1_STATES::FR_RL_CONTACT_TRANSITION_START,
-                                 RIGHT_ROBOT_SIDE, this, robot_);
-  state_machines_[DRACO_STATES::RL_CONTACT_TRANSITION_END] =
-      new ContactTransitionEnd(DRACO_STATES::RL_CONTACT_TRANSITION_END,
-                               RIGHT_ROBOT_SIDE, this, robot_);
-  state_machines_[DRACO_STATES::RL_SWING] =
-      new SwingControl(DRACO_STATES::RL_SWING, RIGHT_ROBOT_SIDE, this, robot_);
-
-  state_machines_[DRACO_STATES::LL_CONTACT_TRANSITION_START] =
-      new ContactTransitionStart(DRACO_STATES::LL_CONTACT_TRANSITION_START,
+  state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START] =
+      new ContactTransitionStart(A1_STATES::FL_CONTACT_TRANSITION_START,
                                  LEFT_ROBOT_SIDE, this, robot_);
-  state_machines_[DRACO_STATES::LL_CONTACT_TRANSITION_END] =
-      new ContactTransitionEnd(DRACO_STATES::LL_CONTACT_TRANSITION_END,
+  state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END] =
+      new ContactTransitionEnd(A1_STATES::FL_CONTACT_TRANSITION_END,
                                LEFT_ROBOT_SIDE, this, robot_);
-  state_machines_[DRACO_STATES::LL_SWING] =
-      new SwingControl(DRACO_STATES::LL_SWING, LEFT_ROBOT_SIDE, this, robot_);*/
+  state_machines_[A1_STATES::FL_SWING] =
+      new SwingControl(A1_STATES::FL_SWING, LEFT_ROBOT_SIDE, this, robot_);
+  state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START] =
+      new ContactTransitionStart(A1_STATES::FR_CONTACT_TRANSITION_START,
+                                 RIGHT_ROBOT_SIDE, this, robot_);
+  state_machines_[A1_STATES::FR_CONTACT_TRANSITION_END] =
+      new ContactTransitionEnd(A1_STATES::FR_CONTACT_TRANSITION_END,
+                               RIGHT_ROBOT_SIDE, this, robot_);
+  state_machines_[A1_STATES::FR_SWING] =
+      new SwingControl(A1_STATES::LL_SWING, RIGHT_ROBOT_SIDE, this, robot_);
 
   // Set Starting State
   state_ = A1_STATES::STAND;
@@ -119,15 +115,14 @@ A1ControlArchitecture::~A1ControlArchitecture() {
   delete base_ori_hierarchy_manager_;
 
   // Delete the state machines
-  // delete state_machines_[A1_STATES::INITIALIZE];
   delete state_machines_[A1_STATES::STAND];
   delete state_machines_[A1_STATES::BALANCE];
-  // delete state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_START];
-  // delete state_machines_[A1_STATES::FR_RL_CONTACT_TRANSITION_END];
-  // delete state_machines_[A1_STATES::FR_RL_SWING];
-  // delete state_machines_[A1_STATES::FL_RR_CONTACT_TRANSITION_START];
-  // delete state_machines_[A1_STATES::FL_RR_CONTACT_TRANSITION_END];
-  // delete state_machines_[A1_STATES::FL_RR_SWING];
+  delete state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START];
+  delete state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END];
+  delete state_machines_[A1_STATES::FL_SWING];
+  delete state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START];
+  delete state_machines_[A1_STATES::FR_CONTACT_TRANSITION_END];
+  delete state_machines_[A1_STATES::FR_SWING];
 }
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
@@ -206,8 +201,12 @@ void A1ControlArchitecture::_InitializeParameters() {
 
   // States Initialization:
   state_machines_[A1_STATES::STAND]->initialization(cfg_["state_stand_params"]);
-  // state_machines_[DRACO_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
-  // state_machines_[DRACO_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::RL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::LL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
+  state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END]->initialization(cfg_["state_contact_transition"]);
+  state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
+  state_machines_[A1_STATES::FR_CONTACT_TRANSITION_END]->initialization(cfg_["state_contact_transition"]);
 }
 
 void A1ControlArchitecture::saveData() {

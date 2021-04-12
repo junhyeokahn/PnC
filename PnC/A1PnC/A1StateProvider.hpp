@@ -15,6 +15,9 @@ class A1StateProvider {
   // ---------------------------------------------------------------------------
   double curr_time;
 
+  int front_stance_foot;
+  int rear_stance_foot;
+
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;
   Eigen::VectorXd qdot;

@@ -29,7 +29,8 @@ class PointFootTrajectoryManager : public TrajectoryManagerBase {
 
   // Initialize the swing foot trajectory
   void initializeSwingFootTrajectory(const double _start_time,
-                                     const double _swing_duration);
+                                     const double _swing_duration,
+                                     Eigen::VectorXd com_vel_des);
   // Computes the swing foot
   void computeSwingFoot(const double current_time);
   // computes the swing foot and updates the desired swing foot task

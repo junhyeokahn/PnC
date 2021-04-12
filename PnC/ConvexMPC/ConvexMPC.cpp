@@ -327,6 +327,23 @@ ConvexMPC::ConvexMPC(double mass, const Eigen::VectorXd& inertia,
 
 void ConvexMPC::ResetSolver() { initial_run_ = true; }
 
+Eigen::Vector3d ConvexMPC::toRPY(Eigen::Quaternion<double> quat){
+  Eigen::Vector3d rpy;
+  double sinr_cosp = 2 * (quat.w() * quat.x() + quat.y() * quat.z());
+  double cosr_cosp = 1 - 2 * (quat.x() * quat.x() + quat.y() * quat.y());
+  rpy [0] = std::atan2(sinr_cosp, cosr_cosp);
+
+  double sinp = 2 * (quat.w() * quat.y() - quat.z() * quat.x());
+  if(std::abs(sinp) >- 1) rpy[1] = std::copysign(M_PI / 2, sinp);
+  else rpy[1] = std::asin(sinp);
+
+  double siny_cosp = 2 * (quat.w() * quat.z() + quat.x() * quat.y());
+  double cosy_cosp = 1 - 2 * (quat.y() * quat.y() + quat.z() * quat.z());
+  rpy[2] = std::atan2(siny_cosp, cosy_cosp);
+
+  return rpy;
+}
+
 Eigen::VectorXd ConvexMPC::ComputeContactForces(
     Eigen::VectorXd com_position,
     Eigen::VectorXd com_velocity,
@@ -341,7 +358,7 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
     Eigen::VectorXd desired_com_angular_velocity) {
 
     Eigen::VectorXd error_result;
-    
+
 
     // First we compute the foot positions in the world frame.
     // DCHECK_EQ(com_roll_pitch_yaw.size(), k3Dim);
@@ -349,6 +366,8 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
         // AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
         // AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
         // AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
+    Eigen::Vector3d com_roll_pitch_yaw;
+    com_roll_pitch_yaw = toRPY(com_quat);
 
     DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
     foot_positions_base_ = Eigen::Map<const MatrixXd>(

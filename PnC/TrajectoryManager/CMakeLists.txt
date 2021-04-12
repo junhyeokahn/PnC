@@ -3,7 +3,7 @@ file(GLOB tm_headers "*.hpp")
 
 add_library(myTrajectoryManager SHARED ${sources})
 
-target_link_libraries(myTrajectoryManager myUtils myRobotSystem)
+target_link_libraries(myTrajectoryManager myUtils myRobotSystem myMPC)
 
 install(TARGETS myTrajectoryManager DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${tm_headers} DESTINATION

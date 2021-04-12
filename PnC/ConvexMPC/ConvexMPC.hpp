@@ -129,6 +129,8 @@ public:
     void ResetSolver();
 
 private:
+    Eigen::Vector3d toRPY(Eigen::Quaternion<double> quat);
+
     const double mass_;
     const double inv_mass_;
     const Eigen::Matrix3d inertia_;

@@ -48,9 +48,6 @@ void GaitScheduler::reset(){
 
 
 void GaitScheduler::step(double current_time){
-    current_contact_state << 1, 1, 1, 1;
-    // current_contact_state << sp_->b_flfoot_contact, sp_->b_frfoot_contact,
-    //                          sp_->b_rlfoot_contact, sp_->b_rrfoot_contact;
 
     double full_cycle_period = 0.;
     double augmented_time = 0.;

@@ -47,7 +47,7 @@ void PointFootTrajectoryManager::updateDesired() {
 
 // Initialize the swing foot trajectory
 void PointFootTrajectoryManager::initializeSwingFootTrajectory(
-    const double _start_time, const double _swing_duration) {
+    const double _start_time, const double _swing_duration, Eigen::VectorXd com_vel_des) {
   swing_start_time_ = _start_time;
   swing_duration_ = _swing_duration;
 

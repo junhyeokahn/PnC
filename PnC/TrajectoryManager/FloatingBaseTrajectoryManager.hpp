@@ -2,6 +2,10 @@
 
 #include <PnC/TrajectoryManager/TrajectoryManagerBase.hpp>
 #include <PnC/WBC/BasicTask.hpp>
+#include <PnC/ConvexMPC/ConvexMPC.hpp>
+#include <PnC/ConvexMPC/GaitScheduler.hpp>
+#include <Eigen/Dense>
+
 
 // Object to manage common trajectory primitives
 class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
@@ -12,13 +16,21 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
-                                        const double _duration,
                                         const Eigen::VectorXd& _target_com_pos);
   void initializeCoMSwaying(double _start_time, double _duration,
                             Eigen::VectorXd _dis);
   void initializeCoMSinusoid(double _start_time, double _amp, double _freq);
   void updateFloatingBaseDesired(const double current_time);
   void paramInitialization(const YAML::Node& node){};
+
+  void solveMPC(bool b_fl_contact, bool b_fr_contact,
+                bool b_rl_contact, bool b_rr_contact,
+                Eigen::VectorXd com_vel_des,
+                double target_height,
+                Eigen::VectorXd& rxn_forces,
+                double current_time);
+
+  double getSwingTime();
 
   Task* com_task_;
   Task* base_ori_task_;
@@ -31,7 +43,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd mpc_pos_des_;
   Eigen::VectorXd mpc_vel_des_;
   Eigen::VectorXd mpc_rpy_des_;
-  Eigen::VectorXd mpc_rpydot_des;
+  Eigen::VectorXd mpc_rpydot_des_;
   Eigen::VectorXd foot_contact_states;
   Eigen::VectorXd foot_pos_body_frame;
   Eigen::VectorXd foot_friction_coeffs;
@@ -62,6 +74,6 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd freq;
   Eigen::VectorXd mid_point;
 
-  protected:
-  Eigen::Vector3d toRPY(Eigen::Quaterion<double> quat)
+  private:
+  Eigen::Vector3d toRPY(Eigen::Quaternion<double> quat);
 };

@@ -1,4 +1,4 @@
-
+#include <cmath>
 #include <Utils/Math/hermite_curve.hpp>
 
 // Constructor
