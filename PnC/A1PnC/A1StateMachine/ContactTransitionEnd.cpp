@@ -78,6 +78,7 @@ void ContactTransitionEnd::lastVisit() {}
 bool ContactTransitionEnd::endOfState() {
   // if time exceeds transition time, switch state
   if (state_machine_time_ >= end_time_) {
+    std::cout << "End of Contact Transition End Reachedf" << std::endl;
     return true;
   } else {
     return false;

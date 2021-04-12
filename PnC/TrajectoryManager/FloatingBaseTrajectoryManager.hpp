@@ -26,7 +26,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
 
   void solveMPC(bool b_fl_contact, bool b_fr_contact,
                 bool b_rl_contact, bool b_rr_contact,
-                Eigen::VectorXd com_vel_des,
+                Eigen::VectorXd _com_vel_des,
                 double target_height,
                 Eigen::VectorXd& rxn_forces,
                 double current_time);

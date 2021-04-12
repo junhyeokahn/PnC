@@ -51,6 +51,20 @@ void SwingControl::firstVisit() {
   // Set swing foot trajectory time
   end_time_ = ctrl_arch_->floating_base_lifting_up_manager_->getSwingTime();
 
+  Eigen::VectorXd mpc_rxn_forces;
+  // Get the MPC Rxn Forces
+  ctrl_arch_->floating_base_lifting_up_manager_->solveMPC(
+                sp_->b_flfoot_contact, sp_->b_frfoot_contact,
+                sp_->b_rlfoot_contact, sp_->b_rrfoot_contact,
+                sp_->com_vel_des,
+                sp_->com_pos_des[2],
+                mpc_rxn_forces,
+                ctrl_start_time_);
+  // Save the MPC Rxn Forces to SP
+  sp_->mpc_rxn_forces = mpc_rxn_forces;
+  myUtils::pretty_print(mpc_rxn_forces, std::cout, "MPC Reaction Forces");
+  // TODO if structure setting taf_container->contact->setRF
+  // frfoot_contact_->setRFDesired(Fr_des_);
   // Initialize the swing foot trajectory
   if (state_identity_ == A1_STATES::FL_SWING) {
     // Set Front Left Swing Foot Trajectory
@@ -94,6 +108,18 @@ void SwingControl::_taskUpdate() {
 
 void SwingControl::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
+  Eigen::VectorXd mpc_rxn_forces;
+  // Get the MPC Rxn Forces
+  ctrl_arch_->floating_base_lifting_up_manager_->solveMPC(
+                sp_->b_flfoot_contact, sp_->b_frfoot_contact,
+                sp_->b_rlfoot_contact, sp_->b_rrfoot_contact,
+                sp_->com_vel_des,
+                sp_->com_pos_des[2],
+                mpc_rxn_forces,
+                ctrl_start_time_);
+  // Save the MPC Rxn Forces to SP
+  sp_->mpc_rxn_forces = mpc_rxn_forces;
+
   _taskUpdate();
 }
 

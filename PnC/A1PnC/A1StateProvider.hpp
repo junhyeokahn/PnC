@@ -46,6 +46,8 @@ class A1StateProvider {
   int b_rrfoot_contact;
   int b_rlfoot_contact;
 
+  Eigen::VectorXd mpc_rxn_forces_;
+
   Eigen::VectorXd qddot_cmd;
 
   int phase_copy;

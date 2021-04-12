@@ -48,7 +48,8 @@ bool QuadSupportBalance::endOfState() {
 }
 
 StateIdentifier QuadSupportBalance::getNextState() {
-  int robot_side;
+  return A1_STATES::FL_CONTACT_TRANSITION_START;
+  // int robot_side;
   // Check if there's a valid step
   // if (ctrl_arch_->dcm_trajectory_manager_->nextStepRobotSide(robot_side)) {
   //   // Check which side is the next footstep

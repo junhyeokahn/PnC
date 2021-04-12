@@ -69,7 +69,7 @@ Eigen::Vector3d FloatingBaseTrajectoryManager::toRPY(Eigen::Quaternion<double> q
 
 void FloatingBaseTrajectoryManager::solveMPC(bool b_fl_contact, bool b_fr_contact,
                                              bool b_rl_contact, bool b_rr_contact,
-                                             Eigen::VectorXd com_vel_des,
+                                             Eigen::VectorXd _com_vel_des,
                                              double target_height,
                                              Eigen::VectorXd& rxn_forces,
                                              double current_time){
@@ -112,7 +112,7 @@ void FloatingBaseTrajectoryManager::solveMPC(bool b_fl_contact, bool b_fr_contac
   mpc_pos_des_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
   mpc_pos_des_[2] = target_height;
   // this is our controlled var
-  mpc_vel_des_ = com_vel_des_;
+  mpc_vel_des_ = _com_vel_des;
   // get the robot base frame rpy
   Eigen::Quaternion<double> mpc_quat = Eigen::Quaternion<double>(
     robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
