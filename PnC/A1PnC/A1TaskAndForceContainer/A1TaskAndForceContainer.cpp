@@ -18,7 +18,7 @@ void A1TaskAndForceContainer::_InitializeTasks() {
   // joint_task_ =
   //     new BasicTask(robot_, BasicTaskType::JOINT,
   //     robot_->getNumActuatedDofs());
-  com_task_ = new CoMz(robot_);
+  com_task_ = new CoMxyz(robot_);
   base_ori_task_ =
       new BasicTask(robot_, BasicTaskType::LINKORI, 3, A1BodyNode::trunk);
 
