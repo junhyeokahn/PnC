@@ -56,7 +56,7 @@ void SwingControl::firstVisit() {
   ctrl_arch_->floating_base_lifting_up_manager_->solveMPC(
                 sp_->b_flfoot_contact, sp_->b_frfoot_contact,
                 sp_->b_rlfoot_contact, sp_->b_rrfoot_contact,
-                sp_->com_vel_des,
+                sp_->x_y_yaw_vel_des,
                 sp_->com_pos_des[2],
                 mpc_rxn_forces,
                 ctrl_start_time_);

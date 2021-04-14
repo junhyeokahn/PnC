@@ -130,13 +130,17 @@ A1ControlArchitecture::~A1ControlArchitecture() {
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
+void A1ControlArchitecture::solveMPC(){}
+
 void A1ControlArchitecture::getCommand(void* _command) {
   // Initialize State
   if (b_state_first_visit_) {
     state_machines_[state_]->firstVisit();
     b_state_first_visit_ = false;
   }
-
+  if (state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
+    // TODO call solveMPC
+  }
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Swaying
@@ -153,7 +157,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }
 
   // Get Wholebody control commands
-  main_controller_->getCommand(_command);
+  main_controller_->getCommand(_command);// Feed it sp_mpc_rxn_forces
 
   // Save Data
   saveData();

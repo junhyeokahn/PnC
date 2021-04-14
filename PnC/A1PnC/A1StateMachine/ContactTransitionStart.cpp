@@ -65,14 +65,6 @@ void ContactTransitionStart::oneStep() {
   // =========================================================================
   // Compute and update new maximum reaction forces
   // =========================================================================
-  /*  ctrl_arch_->lfoot_front_max_normal_force_manager_->updateRampToMaxDesired(*/
-  // state_machine_time_);
-  // ctrl_arch_->lfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-  // state_machine_time_);
-  // ctrl_arch_->rfoot_front_max_normal_force_manager_->updateRampToMaxDesired(
-  // state_machine_time_);
-  // ctrl_arch_->rfoot_back_max_normal_force_manager_->updateRampToMaxDesired(
-  /*state_machine_time_);*/
   ctrl_arch_->frfoot_max_normal_force_manager_->updateRampToMaxDesired(
       state_machine_time_);
   ctrl_arch_->flfoot_max_normal_force_manager_->updateRampToMaxDesired(

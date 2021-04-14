@@ -19,6 +19,7 @@ class A1StateProvider {
   int rear_stance_foot;
 
   Eigen::VectorXd mpc_rxn_forces;
+  Eigen::VectorXd x_y_yaw_vel_des;
 
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;

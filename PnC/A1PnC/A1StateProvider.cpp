@@ -29,6 +29,8 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   b_rlfoot_contact = 0;
   qddot_cmd = Eigen::VectorXd::Zero(18);
 
+  x_y_yaw_vel_des = Eigen::VectorXd::Zero(3);
+
   frfoot_pos_des.setZero();
   flfoot_pos_des.setZero();
   rrfoot_pos_des.setZero();
