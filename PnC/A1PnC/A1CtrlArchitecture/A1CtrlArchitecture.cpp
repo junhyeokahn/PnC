@@ -30,8 +30,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
 
   // Initialize Trajectory managers
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
-      taf_container_->com_task_, taf_container_->base_ori_task_, robot_,
-      mpc_planner_, gait_scheduler_);
+      taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
   frfoot_trajectory_manager_ =
       new PointFootTrajectoryManager(taf_container_->frfoot_pos_task_, robot_);
   flfoot_trajectory_manager_ =
@@ -86,6 +85,17 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   state_machines_[A1_STATES::FR_SWING] =
       new SwingControl(A1_STATES::FR_SWING, RIGHT_ROBOT_SIDE, this, robot_);
 
+  // Initialize MPC Variables
+  foot_contact_states = Eigen::VectorXi::Zero(4);
+  foot_pos_body_frame = Eigen::VectorXd::Zero(12);
+  foot_friction_coeffs = Eigen::VectorXd::Zero(4);
+  foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
+  flfoot_body_frame << 0., 0., 0.;
+  frfoot_body_frame << 0., 0., 0.;
+  rlfoot_body_frame << 0., 0., 0.;
+  rrfoot_body_frame << 0., 0., 0.;
+  mpc_counter = 6;
+
   // Set Starting State
   state_ = A1_STATES::STAND;
   prev_state_ = state_;
@@ -130,7 +140,65 @@ A1ControlArchitecture::~A1ControlArchitecture() {
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
-void A1ControlArchitecture::solveMPC(){}
+
+
+void A1ControlArchitecture::solveMPC(){
+    // Set contact state of gait scheduler from State Provider
+    if(sp_->b_flfoot_contact) gait_scheduler_->current_contact_state[0] = 1;
+    else gait_scheduler_->current_contact_state[0] = 0;
+    if(sp_->b_frfoot_contact) gait_scheduler_->current_contact_state[1] = 1;
+    else gait_scheduler_->current_contact_state[1] = 0;
+    if(sp_->b_rlfoot_contact) gait_scheduler_->current_contact_state[2] = 1;
+    else gait_scheduler_->current_contact_state[2] = 0;
+    if(sp_->b_rrfoot_contact) gait_scheduler_->current_contact_state[3] = 1;
+    else gait_scheduler_->current_contact_state[3] = 0;
+    // Call Gait Scheduler, get leg state
+    gait_scheduler_->step(sp_->curr_time);
+    for(int i=0; i<4; ++i){
+        foot_contact_states[i] = gait_scheduler_->leg_state[i];
+    }
+    // Get Foot Positions Body Frame
+    Eigen::Vector3d base_in_world =
+        robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+    Eigen::Vector3d temp_foot_world =
+        robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+    flfoot_body_frame = temp_foot_world - base_in_world;
+    temp_foot_world =
+        robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+    frfoot_body_frame = temp_foot_world - base_in_world;
+    temp_foot_world =
+        robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
+    rlfoot_body_frame = temp_foot_world - base_in_world;
+    temp_foot_world =
+        robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
+    rrfoot_body_frame = temp_foot_world - base_in_world;
+    foot_pos_body_frame << 
+        flfoot_body_frame[0], flfoot_body_frame[1], flfoot_body_frame[2],
+        frfoot_body_frame[0], frfoot_body_frame[1], frfoot_body_frame[2],
+        rlfoot_body_frame[0], rlfoot_body_frame[1], rlfoot_body_frame[2],
+        rrfoot_body_frame[0], rrfoot_body_frame[1], rrfoot_body_frame[2];
+    Eigen::Vector3d mpc_pos_des_;
+    mpc_pos_des_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+    mpc_pos_des_[2] = sp_->com_pos_des[2];
+    Eigen::VectorXd mpc_rpy_des_; mpc_rpy_des_ = Eigen::VectorXd::Zero(3);
+    sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
+        robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation(), // com pos
+        robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).tail(3), // com vel
+        Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()), //com rpy
+        robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3), // com rpydot
+        foot_contact_states,
+        foot_pos_body_frame,
+        foot_friction_coeffs,
+        mpc_pos_des_,
+        sp_->x_y_yaw_vel_des,// Only x,y vel used from this variable
+        mpc_rpy_des_,
+        sp_->x_y_yaw_vel_des);// Only yaw vel used from this variable
+    myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Reaction Forces");
+}
+
+double A1ControlArchitecture::getSwingTime(){
+    return gait_scheduler_->swing_duration[0];
+}
 
 void A1ControlArchitecture::getCommand(void* _command) {
   // Initialize State
@@ -138,8 +206,55 @@ void A1ControlArchitecture::getCommand(void* _command) {
     state_machines_[state_]->firstVisit();
     b_state_first_visit_ = false;
   }
-  if (state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
-    // TODO call solveMPC
+  if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
+    if(mpc_counter >= 6){// Call the MPC at 80 Hz
+        solveMPC();
+        mpc_counter = 0;
+    } else {++mpc_counter;}
+    // If we have dual contact, rxn force vector will be length 6
+    if(sp_->mpc_rxn_forces.size() == 6){
+      if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FL_CONTACT_TRANSITION_START || state_ == A1_STATES::FL_CONTACT_TRANSITION_END){
+        Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
+        taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
+        taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
+      }
+      if(state_ == A1_STATES::FR_SWING || state_ == A1_STATES::FR_CONTACT_TRANSITION_START || state_ == A1_STATES::FR_CONTACT_TRANSITION_END){
+        Eigen::Vector3d tmp_rxn_forces;
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
+        taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
+        taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
+      }
+    } else { // Quad contact reactn force vector will be length 12
+        Eigen::Vector3d tmp_rxn_forces;
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
+        taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
+        taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[6];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[7];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[8];
+        taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
+        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[9];
+        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[10];
+        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[11];
+        taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
+
+    }
   }
   // Update State Machine
   state_machines_[state_]->oneStep();

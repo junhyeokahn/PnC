@@ -11,8 +11,7 @@
 class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
  public:
   FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task,
-                                RobotSystem* _robot, ConvexMPC* _mpc_planner,
-                                GaitScheduler* _gait_scheduler);
+                                RobotSystem* _robot);
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
@@ -22,16 +21,10 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
                             Eigen::VectorXd _dis);
   void initializeCoMSinusoid(double _start_time, double _amp, double _freq);
   void updateFloatingBaseDesired(const double current_time);
+  void updateFloatingBaseWalkingDesired(Eigen::VectorXd curr_com_pos,
+                                        Eigen::VectorXd x_y_yaw_vel_des);
   void paramInitialization(const YAML::Node& node){};
 
-  void solveMPC(bool b_fl_contact, bool b_fr_contact,
-                bool b_rl_contact, bool b_rr_contact,
-                Eigen::VectorXd _com_vel_des,
-                double target_height,
-                Eigen::VectorXd& rxn_forces,
-                double current_time);
-
-  double getSwingTime();
 
   Task* com_task_;
   Task* base_ori_task_;
@@ -40,25 +33,10 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd com_vel_des_;
   Eigen::VectorXd com_acc_des_;
 
-  // Inputs to MPC ComputeContactForces
-  Eigen::VectorXd mpc_pos_des_;
-  Eigen::VectorXd mpc_vel_des_;
-  Eigen::VectorXd mpc_rpy_des_;
-  Eigen::VectorXd mpc_rpydot_des_;
-  Eigen::VectorXi foot_contact_states;
-  Eigen::VectorXd foot_pos_body_frame;
-  Eigen::VectorXd foot_friction_coeffs;
-
-  Eigen::Vector3d frfoot_body_frame, flfoot_body_frame,
-                  rrfoot_body_frame, rlfoot_body_frame;
-
   Eigen::Quaternion<double> base_ori_quat_des_;
   Eigen::VectorXd base_ori_des_;
   Eigen::VectorXd base_ang_vel_des_;
   Eigen::VectorXd base_ang_acc_des_;
-
-  ConvexMPC* mpc_planner_;
-  GaitScheduler* gait_scheduler_;
 
   // Updates the task desired values
   void updateDesired();

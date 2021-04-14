@@ -40,7 +40,7 @@ class ContactSpec {
 
   virtual int getDimRFConstraint() { return Uf_.rows(); }
   const Eigen::VectorXd& getRFDesired() { return Fr_des_; }
-  void setRFDesired(Eigen::VectorXd & Fr_des_in) {Fr_des_ = Fr_des_in;}
+  void setRFDesired(Eigen::VectorXd Fr_des_in) {Fr_des_ = Fr_des_in;}
   void getRFConstraintMtx(Eigen::MatrixXd& Uf) { Uf = Uf_; }
   void getRFConstraintVec(Eigen::VectorXd& ieq_vec) { ieq_vec = ieq_vec_; }
 

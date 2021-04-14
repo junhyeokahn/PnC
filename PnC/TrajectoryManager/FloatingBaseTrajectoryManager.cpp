@@ -1,3 +1,4 @@
+
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
 // #include <PnC/ConvexMPC/ConvexMPC.hpp>
 // #include <PnC/ConvexMPC/GaitScheduler.hpp>
@@ -6,13 +7,9 @@
 #include <Eigen/Dense>
 
 FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
-    Task* _com_task, Task* _base_ori_task, RobotSystem* _robot,
-    ConvexMPC* _mpc_planner, GaitScheduler* _gait_scheduler)
+    Task* _com_task, Task* _base_ori_task, RobotSystem* _robot)
     : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: Floating Base");
-
-  gait_scheduler_ = _gait_scheduler;
-  mpc_planner_ = _mpc_planner;
 
   com_task_ = _com_task;
   base_ori_task_ = _base_ori_task;
@@ -21,15 +18,6 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   com_pos_des_ = Eigen::VectorXd::Zero(3);
   com_vel_des_ = Eigen::VectorXd::Zero(3);
   com_acc_des_ = Eigen::VectorXd::Zero(3);
-
-  mpc_pos_des_ = Eigen::VectorXd::Zero(3);
-  mpc_vel_des_ = Eigen::VectorXd::Zero(3);
-  mpc_rpy_des_ = Eigen::VectorXd::Zero(3);// TODO
-  mpc_rpydot_des_ = Eigen::VectorXd::Zero(3);// TODO
-  foot_contact_states = Eigen::VectorXi::Zero(3);
-  foot_pos_body_frame = Eigen::VectorXd::Zero(12);
-  foot_friction_coeffs = Eigen::VectorXd::Zero(4);
-  foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
 
   base_ori_des_ = Eigen::VectorXd::Zero(4);
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
@@ -44,6 +32,19 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   mid_point = Eigen::VectorXd::Zero(3);
   is_swaying = false;
   is_sinusoid = false;
+}
+
+void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
+                    Eigen::VectorXd curr_com_pos,
+                    Eigen::VectorXd x_y_yaw_vel_des){
+  Eigen::Vector3d tmp_com_vel_des; tmp_com_vel_des[0] = x_y_yaw_vel_des[0];
+  tmp_com_vel_des[1] = x_y_yaw_vel_des[1]; tmp_com_vel_des[2] = 0.;
+  // TODO: how to update com_acc_des?
+  // com_task_->updateDesired(curr_com_pos, tmp_com_vel_des, com_acc_des);
+  Eigen::Vector3d curr_rpy;
+  curr_rpy = toRPY(Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()));
+  // TODO How to get the correct values here for updating base_ori_task
+  //base_ori_task_->updateDesired(curr_rpy)
 }
 
 Eigen::Vector3d FloatingBaseTrajectoryManager::toRPY(Eigen::Quaternion<double> quat){
@@ -64,75 +65,6 @@ Eigen::Vector3d FloatingBaseTrajectoryManager::toRPY(Eigen::Quaternion<double> q
   rpy[2] = std::atan2(siny_cosp, cosy_cosp);
 
   return rpy;
-
-}
-
-void FloatingBaseTrajectoryManager::solveMPC(bool b_fl_contact, bool b_fr_contact,
-                                             bool b_rl_contact, bool b_rr_contact,
-                                             Eigen::VectorXd _com_vel_des,
-                                             double target_height,
-                                             Eigen::VectorXd& rxn_forces,
-                                             double current_time){
-  // Set the contact state in gait scheduler from SP values
-  if(b_fl_contact) gait_scheduler_->current_contact_state[0] = 1;
-  else gait_scheduler_->current_contact_state[0] = 0;
-  if(b_fr_contact) gait_scheduler_->current_contact_state[1] = 1;
-  else gait_scheduler_->current_contact_state[1] = 0;
-  if(b_rl_contact) gait_scheduler_->current_contact_state[2] = 1;
-  else gait_scheduler_->current_contact_state[2] = 0;
-  if(b_rr_contact) gait_scheduler_->current_contact_state[3] = 1;
-  else gait_scheduler_->current_contact_state[3] = 0;
-  // Call the gait scheduler to get leg states for next planning step
-  gait_scheduler_->step(current_time);
-  for(int i=0; i<4; ++i){
-    foot_contact_states[i] = gait_scheduler_->leg_state[i];
-  }
-  // Get Foot position in body frame
-  Eigen::Vector3d base_in_world =
-       robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-  Eigen::Vector3d temp_foot_world =
-       robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
-  flfoot_body_frame = temp_foot_world - base_in_world;
-  temp_foot_world =
-       robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
-  frfoot_body_frame = temp_foot_world - base_in_world;
-  temp_foot_world =
-       robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
-  rlfoot_body_frame = temp_foot_world - base_in_world;
-  temp_foot_world =
-       robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
-  rrfoot_body_frame = temp_foot_world - base_in_world;
-  foot_pos_body_frame <<
-      flfoot_body_frame[0], flfoot_body_frame[1], flfoot_body_frame[2],
-      frfoot_body_frame[0], frfoot_body_frame[1], frfoot_body_frame[2],
-      rlfoot_body_frame[0], rlfoot_body_frame[1], rlfoot_body_frame[2],
-      rrfoot_body_frame[0], rrfoot_body_frame[1], rrfoot_body_frame[2];
-  // Set the desired vars for MPC
-  // desired position is current position with robot height
-  mpc_pos_des_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-  mpc_pos_des_[2] = target_height;
-  // this is our controlled var
-  mpc_vel_des_ = _com_vel_des;
-  // get the robot base frame rpy
-  Eigen::Quaternion<double> mpc_quat = Eigen::Quaternion<double>(
-    robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
-  mpc_rpy_des_ = toRPY(mpc_quat);
-  // our other controlled var
-  mpc_rpydot_des_[0] = 0.; mpc_rpydot_des_[1] = 0.;
-  mpc_rpydot_des_[2] = base_ang_vel_des_[2];
-
-  rxn_forces = mpc_planner_->ComputeContactForces(
-    robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation(), // com pos
-    robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).tail(3), // com vel
-    Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()), //com rpy
-    robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3), // com rpydot
-    foot_contact_states, // foot contact states
-    foot_pos_body_frame, // foot pos in body frame
-    foot_friction_coeffs, // friction
-    mpc_pos_des_, // val set above
-    mpc_vel_des_, // val set abovbe (control var)
-    mpc_rpy_des_, // val set above
-    mpc_rpydot_des_); // val set above (Control var)
 }
 
 void FloatingBaseTrajectoryManager::updateDesired() {
@@ -148,10 +80,6 @@ void FloatingBaseTrajectoryManager::updateDesired() {
   dcm_acc_des_.setZero();
   // com_task_->updateDesired(dcm_pos_des_, dcm_vel_des_, dcm_acc_des_);
   // TEST*/
-}
-
-double FloatingBaseTrajectoryManager::getSwingTime(){
-    return gait_scheduler_->swing_duration[0];
 }
 
 void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(

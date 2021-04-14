@@ -55,7 +55,9 @@ void ContactTransitionStart::_taskUpdate() {
   // =========================================================================
   // Floating Base
   // =========================================================================
-  // ctrl_arch_->dcm_trajectory_manager_->updateDCMTasksDesired(sp_->curr_time);
+  ctrl_arch_->floating_base_lifting_up_manager_->updateFloatingBaseWalkingDesired(
+                            sp_->com_pos,
+                            sp_->x_y_yaw_vel_des);
 
 }
 

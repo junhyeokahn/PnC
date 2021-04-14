@@ -40,6 +40,8 @@ class A1ControlArchitecture : public ControlArchitecture {
   virtual void ControlArchitectureInitialization();
   virtual void getCommand(void* _command);
   void saveData();
+  double getSwingTime();
+  void solveMPC();
 
  protected:
   A1StateProvider* sp_;
@@ -87,4 +89,11 @@ class A1ControlArchitecture : public ControlArchitecture {
   int _PLANNING_TIMESTEP = 0.025;
   Eigen::VectorXd body_inertia;
   Eigen::VectorXd _MPC_WEIGHTS;
+  Eigen::VectorXi foot_contact_states;
+  Eigen::VectorXd foot_pos_body_frame;
+  Eigen::VectorXd foot_friction_coeffs;
+  Eigen::Vector3d frfoot_body_frame, flfoot_body_frame,
+                  rlfoot_body_frame, rrfoot_body_frame;
+  int mpc_counter;
+
 };
