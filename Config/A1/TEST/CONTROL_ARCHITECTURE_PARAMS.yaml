@@ -4,6 +4,7 @@ state_stand_params:
     target_height: 0.25 # target com position from the midfoot position in world frame
 
 state_swing:
+    swing_duration: 0.3
     swing_time_percent_early_contact_check: 0.75 # Percent of end_time to check if there are early contacts 
     early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
 

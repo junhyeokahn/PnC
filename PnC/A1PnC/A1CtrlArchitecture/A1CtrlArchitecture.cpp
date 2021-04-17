@@ -26,8 +26,6 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
                                _PLANNING_HORIZON_STEPS,
                                _PLANNING_TIMESTEP,
                                _MPC_WEIGHTS);
-  gait_scheduler_ = new GaitScheduler(robot_);
-
   // Initialize Trajectory managers
   floating_base_lifting_up_manager_ = new FloatingBaseTrajectoryManager(
       taf_container_->com_task_, taf_container_->base_ori_task_, robot_);
@@ -143,19 +141,22 @@ void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
 
 void A1ControlArchitecture::solveMPC(){
-    // Set contact state of gait scheduler from State Provider
-    if(sp_->b_flfoot_contact) gait_scheduler_->current_contact_state[0] = 1;
-    else gait_scheduler_->current_contact_state[0] = 0;
-    if(sp_->b_frfoot_contact) gait_scheduler_->current_contact_state[1] = 1;
-    else gait_scheduler_->current_contact_state[1] = 0;
-    if(sp_->b_rlfoot_contact) gait_scheduler_->current_contact_state[2] = 1;
-    else gait_scheduler_->current_contact_state[2] = 0;
-    if(sp_->b_rrfoot_contact) gait_scheduler_->current_contact_state[3] = 1;
-    else gait_scheduler_->current_contact_state[3] = 0;
-    // Call Gait Scheduler, get leg state
-    gait_scheduler_->step(sp_->curr_time);
-    for(int i=0; i<4; ++i){
-        foot_contact_states[i] = gait_scheduler_->leg_state[i];
+    // Set contact state
+    if(state_ == A1_STATES::FL_CONTACT_TRANSITION_START ||
+       state_ == A1_STATES::FL_CONTACT_TRANSITION_END ||
+       state_ == A1_STATES::FR_CONTACT_TRANSITION_START ||
+       state_ == A1_STATES::FR_CONTACT_TRANSITION_END){
+        for(int i=0; i<4; ++i){
+            foot_contact_states[i] = 1;
+        }
+    }
+    if(state_ == A1_STATES::FL_SWING) {
+        foot_contact_states[0] = 0; foot_contact_states[2] = 1;
+        foot_contact_states[1] = 1; foot_contact_states[3] = 0;
+    }
+    if(state_ == A1_STATES::FR_SWING) {
+        foot_contact_states[0] = 1; foot_contact_states[2] = 0;
+        foot_contact_states[1] = 0; foot_contact_states[3] = 1;
     }
     // Get Foot Positions Body Frame
     Eigen::Vector3d base_in_world =
@@ -196,10 +197,6 @@ void A1ControlArchitecture::solveMPC(){
     myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Reaction Forces");
 }
 
-double A1ControlArchitecture::getSwingTime(){
-    return gait_scheduler_->swing_duration[0];
-}
-
 void A1ControlArchitecture::getCommand(void* _command) {
   // Initialize State
   if (b_state_first_visit_) {
@@ -209,8 +206,10 @@ void A1ControlArchitecture::getCommand(void* _command) {
   if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
     if(mpc_counter >= 6){// Call the MPC at 80 Hz
         solveMPC();
+        // TODO rxnforceTM->updateSolution(curr_time)
         mpc_counter = 0;
     } else {++mpc_counter;}
+    // TODO: rxnforceTM->getSolution(curr_time)
     // If we have dual contact, rxn force vector will be length 6
     if(sp_->mpc_rxn_forces.size() == 6){
       if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FL_CONTACT_TRANSITION_START || state_ == A1_STATES::FL_CONTACT_TRANSITION_END){

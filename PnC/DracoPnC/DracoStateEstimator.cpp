@@ -211,7 +211,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
 
   for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
 
-  robot_->updateSystem(curr_config_, curr_qdot_, false);
+  robot_->updateSystem(curr_config_, curr_qdot_, false); // update robot as is correct ori but 0,0,0 floating base
   Eigen::VectorXd foot_pos;
   Eigen::VectorXd foot_vel;
   if (sp_->stance_foot == DracoBodyNode::rFootCenter) {
@@ -224,7 +224,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
         robot_->getBodyNodeIsometry(DracoBodyNode::lFootCenter).translation();
     foot_vel =
         robot_->getBodyNodeSpatialVelocity(DracoBodyNode::lFootCenter).tail(3);
-  }
+  }// Foot pos will be under the ground
 
   // check if stance foot changes. If so, find the new linear offset
   if (sp_->stance_foot != sp_->prev_stance_foot) {
@@ -264,8 +264,8 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
   }
 
   // Perform Base update using kinematics
-  curr_config_[0] = global_linear_offset_[0] - foot_pos[0];
-  curr_config_[1] = global_linear_offset_[1] - foot_pos[1];
+  curr_config_[0] = global_linear_offset_[0] - foot_pos[0];// pushing the base upwards to put our contact feet on the ground
+  curr_config_[1] = global_linear_offset_[1] - foot_pos[1];// i.e contact foot position is on ground
   curr_config_[2] = global_linear_offset_[2] - foot_pos[2];
 
   // Update qdot using the difference between the curr_config_ now and previous
@@ -285,7 +285,7 @@ void DracoStateEstimator::_ConfigurationAndModelUpdate() {
   // myUtils::pretty_print(config_dot_xyz_estimate, std::cout,
   // "config_dot_xyz_estimate");
 
-  robot_->updateSystem(curr_config_, curr_qdot_, false);
+  robot_->updateSystem(curr_config_, curr_qdot_, false);// Again call updateSystem to include linear and orientation 
 
   sp_->q = curr_config_;
   sp_->qdot = curr_qdot_;

@@ -17,10 +17,12 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 
   com_pos_des_ = Eigen::VectorXd::Zero(3);
   com_vel_des_ = Eigen::VectorXd::Zero(3);
+  prev_com_vel_des_ = Eigen::VectorXd::Zero(3);
   com_acc_des_ = Eigen::VectorXd::Zero(3);
 
   base_ori_des_ = Eigen::VectorXd::Zero(4);
   base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
+  prev_base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
   base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
 
   ini_com_pos_ = Eigen::VectorXd::Zero(3);
@@ -37,14 +39,29 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
                     Eigen::VectorXd curr_com_pos,
                     Eigen::VectorXd x_y_yaw_vel_des){
-  Eigen::Vector3d tmp_com_vel_des; tmp_com_vel_des[0] = x_y_yaw_vel_des[0];
-  tmp_com_vel_des[1] = x_y_yaw_vel_des[1]; tmp_com_vel_des[2] = 0.;
-  // TODO: how to update com_acc_des?
-  // com_task_->updateDesired(curr_com_pos, tmp_com_vel_des, com_acc_des);
-  Eigen::Vector3d curr_rpy;
+  Eigen::Vector3d tmp_com_vel_des, tmp_com_acc_des;
+  // Set new com_vel_des from input
+  tmp_com_vel_des[0] = x_y_yaw_vel_des[0];
+  tmp_com_vel_des[1] = x_y_yaw_vel_des[1];
+  tmp_com_vel_des[2] = 0.;
+  // Numerical integration to get com_acc_des
+  tmp_com_acc_des = (tmp_com_vel_des - prev_com_vel_des_) / 0.002;
+  // Update com_task given current position (because we are velocity controlled)
+  com_task_->updateDesired(curr_com_pos, tmp_com_vel_des, tmp_com_acc_des);
+  // Variables to feed base_ori_task update
+  Eigen::Vector3d curr_rpy, tmp_base_ang_vel_des, tmp_base_ang_acc_des;
+  // Set rpydot from the input
+  tmp_base_ang_vel_des[0] = 0.; tmp_base_ang_vel_des[1] = 0;
+  tmp_base_ang_vel_des[2] = x_y_yaw_vel_des[2];
+  // Get base rpy current from robot current quat
   curr_rpy = toRPY(Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()));
-  // TODO How to get the correct values here for updating base_ori_task
-  //base_ori_task_->updateDesired(curr_rpy)
+  // Numerically integrate to get base_ang_acc_des
+  tmp_base_ang_acc_des = (tmp_base_ang_vel_des - prev_base_ang_vel_des_) / 0.002;
+  // Update the base_ori_task
+  base_ori_task_->updateDesired(curr_rpy, tmp_base_ang_vel_des, tmp_base_ang_acc_des);
+  // Update the placeholders for prev velocity commands
+  prev_com_vel_des_ = tmp_com_vel_des;
+  prev_base_ang_vel_des_ = tmp_base_ang_vel_des;
 }
 
 Eigen::Vector3d FloatingBaseTrajectoryManager::toRPY(Eigen::Quaternion<double> quat){

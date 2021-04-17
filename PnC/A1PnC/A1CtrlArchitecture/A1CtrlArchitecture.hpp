@@ -40,7 +40,6 @@ class A1ControlArchitecture : public ControlArchitecture {
   virtual void ControlArchitectureInitialization();
   virtual void getCommand(void* _command);
   void saveData();
-  double getSwingTime();
   void solveMPC();
 
  protected:
@@ -57,7 +56,6 @@ class A1ControlArchitecture : public ControlArchitecture {
   A1MainController* main_controller_;
   // Add Planner
   ConvexMPC* mpc_planner_;
-  GaitScheduler* gait_scheduler_;
 
   // Trajectory Managers
   // JointTrajectoryManager* joint_trajectory_manager_; // If we want to keep
@@ -86,7 +84,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4;
   int num_legs = 4;
   int _PLANNING_HORIZON_STEPS = 10;
-  int _PLANNING_TIMESTEP = 0.025;
+  int _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
   Eigen::VectorXd body_inertia;
   Eigen::VectorXd _MPC_WEIGHTS;
   Eigen::VectorXi foot_contact_states;

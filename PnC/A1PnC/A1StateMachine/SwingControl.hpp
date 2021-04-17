@@ -28,6 +28,7 @@ class SwingControl : public StateMachine {
   int leg_side_;
 
   double ctrl_start_time_;
+  double swing_duration_;
   double end_time_;
 
   double swing_time_percent_early_contact_check_;

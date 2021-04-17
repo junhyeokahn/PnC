@@ -48,22 +48,22 @@ void SwingControl::firstVisit() {
   }
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time; 
-  // Set swing foot trajectory time
-  end_time_ = ctrl_arch_->getSwingTime();
+
+  // TODO: FOOTSTEP PLANNING --> pass to initializeSwingFootTrajectory
 
   // Initialize the swing foot trajectory
   if (state_identity_ == A1_STATES::FL_SWING) {
     // Set Front Left Swing Foot Trajectory
     ctrl_arch_->flfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, end_time_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des);
     ctrl_arch_->rrfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, end_time_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des);
   } else {
     // Set Front Right Swing Foot Trajectory
     ctrl_arch_->frfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, end_time_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des);
     ctrl_arch_->rlfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, end_time_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des);
   }
 }
 
@@ -164,6 +164,7 @@ StateIdentifier SwingControl::getNextState() {
 
 void SwingControl::initialization(const YAML::Node& node) {
   try {
+    myUtils::readParameter(node, "swing_duration", swing_duration_);
     myUtils::readParameter(node, "swing_time_percent_early_contact_check",
                            swing_time_percent_early_contact_check_);
     myUtils::readParameter(node, "early_contact_force_threshold",
