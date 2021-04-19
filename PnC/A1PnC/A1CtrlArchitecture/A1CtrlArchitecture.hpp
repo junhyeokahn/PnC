@@ -13,8 +13,6 @@
 #include <PnC/A1PnC/A1StateProvider.hpp>
 #include <PnC/A1PnC/A1TaskAndForceContainer/A1TaskAndForceContainer.hpp>
 // #include <PnC/ConvexMPC/ConvexMPC.hpp>
-// #include <PnC/ConvexMPC/GaitScheduler.hpp>
-// #include <PnC/Planner/Footstep.hpp>
 #include <PnC/TrajectoryManager/FloatingBaseTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/JointTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>

@@ -3,7 +3,6 @@
 #include <PnC/TrajectoryManager/TrajectoryManagerBase.hpp>
 #include <PnC/WBC/BasicTask.hpp>
 #include <PnC/ConvexMPC/ConvexMPC.hpp>
-#include <PnC/ConvexMPC/GaitScheduler.hpp>
 #include <Eigen/Dense>
 
 
