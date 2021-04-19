@@ -117,7 +117,7 @@ public:
         Eigen::Quaternion<double> com_quat,
         Eigen::VectorXd com_angular_velocity,
         Eigen::VectorXi foot_contact_states,
-        Eigen::VectorXd foot_positions_body_frame,
+        Eigen::MatrixXd foot_positions_world_frame,
         Eigen::VectorXd foot_friction_coeffs,
         Eigen::VectorXd desired_com_position,
         Eigen::VectorXd desired_com_velocity,
@@ -128,8 +128,9 @@ public:
     // re-initialized.
     void ResetSolver();
 
-private:
     Eigen::Vector3d toRPY(Eigen::Quaternion<double> quat);
+
+private:
 
     const double mass_;
     const double inv_mass_;

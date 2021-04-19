@@ -61,6 +61,9 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   base_ori_hierarchy_manager_ =
       new TaskWeightTrajectoryManager(taf_container_->base_ori_task_, robot_);
 
+  rxn_force_manager_ =
+      new ReactionForceTrajectoryManager(_PLANNING_TIMESTEP, _PLANNING_HORIZON_STEPS, robot_);
+
   // Initialize states: add all states to the state machine map
   state_machines_[A1_STATES::STAND] =
       new QuadSupportStand(A1_STATES::STAND, this, robot_);
@@ -87,12 +90,12 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   foot_contact_states = Eigen::VectorXi::Zero(4);
   foot_pos_body_frame = Eigen::VectorXd::Zero(12);
   foot_friction_coeffs = Eigen::VectorXd::Zero(4);
+  // double temp = taf_container_->frfoot_contact_->mu_;
   foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
-  flfoot_body_frame << 0., 0., 0.;
-  frfoot_body_frame << 0., 0., 0.;
-  rlfoot_body_frame << 0., 0., 0.;
-  rrfoot_body_frame << 0., 0., 0.;
   mpc_counter = 6;
+
+  // Initialize variable for setting contact forces
+  command_rxn_forces = Eigen::VectorXd::Zero(12);
 
   // Set Starting State
   state_ = A1_STATES::STAND;
@@ -104,6 +107,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
 A1ControlArchitecture::~A1ControlArchitecture() {
   delete taf_container_;
   delete main_controller_;
+  delete rxn_force_manager_;
 
   // Delete the trajectory managers
   delete frfoot_max_normal_force_manager_;
@@ -138,9 +142,7 @@ A1ControlArchitecture::~A1ControlArchitecture() {
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
-
-
-void A1ControlArchitecture::solveMPC(){
+void A1ControlArchitecture::solveMPC() {
     // Set contact state
     if(state_ == A1_STATES::FL_CONTACT_TRANSITION_START ||
        state_ == A1_STATES::FL_CONTACT_TRANSITION_END ||
@@ -158,43 +160,76 @@ void A1ControlArchitecture::solveMPC(){
         foot_contact_states[0] = 1; foot_contact_states[2] = 0;
         foot_contact_states[1] = 0; foot_contact_states[3] = 1;
     }
-    // Get Foot Positions Body Frame
-    Eigen::Vector3d base_in_world =
-        robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-    Eigen::Vector3d temp_foot_world =
-        robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
-    flfoot_body_frame = temp_foot_world - base_in_world;
-    temp_foot_world =
-        robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
-    frfoot_body_frame = temp_foot_world - base_in_world;
-    temp_foot_world =
-        robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
-    rlfoot_body_frame = temp_foot_world - base_in_world;
-    temp_foot_world =
-        robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
-    rrfoot_body_frame = temp_foot_world - base_in_world;
-    foot_pos_body_frame << 
-        flfoot_body_frame[0], flfoot_body_frame[1], flfoot_body_frame[2],
-        frfoot_body_frame[0], frfoot_body_frame[1], frfoot_body_frame[2],
-        rlfoot_body_frame[0], rlfoot_body_frame[1], rlfoot_body_frame[2],
-        rrfoot_body_frame[0], rrfoot_body_frame[1], rrfoot_body_frame[2];
-    Eigen::Vector3d mpc_pos_des_;
-    mpc_pos_des_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-    mpc_pos_des_[2] = sp_->com_pos_des[2];
-    Eigen::VectorXd mpc_rpy_des_; mpc_rpy_des_ = Eigen::VectorXd::Zero(3);
+    Eigen::Vector3d com_pos, com_pos_des;
+    // CoM Position (x,y plane not necessary)
+    com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = 0.25;
+    // CoM Desired Position (x,y plane not necessary)
+    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.25;
+    // Current quaternion of robot CoM
+    Eigen::Quaternion<double> com_quat;
+    com_quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
+    // Current CoM Angular Velocity
+    Eigen::Vector3d rpy_dot;
+    rpy_dot = robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3);
+    // Desired rpy_dot
+    Eigen::Vector3d rpy_des;
+    rpy_des = Eigen::VectorXd::Zero(3);
+    // Obtain Foot positions world frame as a MatrxXd<double,4,3>
+    Eigen::MatrixXd foot_pos_world(4,3);
+    Eigen::Vector3d flfoot_world =
+            robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+    Eigen::Vector3d frfoot_world =
+            robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+    Eigen::Vector3d rlfoot_world =
+            robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
+    Eigen::Vector3d rrfoot_world =
+            robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
+    // Fill the matrix row by row
+    foot_pos_world.row(0)[0] = flfoot_world[0];
+    foot_pos_world.row(0)[1] = flfoot_world[1];
+    foot_pos_world.row(0)[2] = flfoot_world[2];
+
+    foot_pos_world.row(1)[0] = frfoot_world[0];
+    foot_pos_world.row(1)[1] = frfoot_world[1];
+    foot_pos_world.row(1)[2] = frfoot_world[2];
+
+    foot_pos_world.row(2)[0] = rlfoot_world[0];
+    foot_pos_world.row(2)[1] = rlfoot_world[1];
+    foot_pos_world.row(2)[2] = rlfoot_world[2];
+
+    foot_pos_world.row(3)[0] = rrfoot_world[0];
+    foot_pos_world.row(3)[1] = rrfoot_world[1];
+    foot_pos_world.row(3)[2] = rrfoot_world[2];
+
+    // Get com_vel_body_frame
+    Eigen::VectorXd com_vel_body_frame, com_vel_world_frame; 
+    Eigen::MatrixXd rot; rot.resize(3,3);
+    com_vel_body_frame = Eigen::VectorXd::Zero(3);
+    com_vel_world_frame = Eigen::VectorXd::Zero(3);
+    com_vel_world_frame = robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).tail(3);
+    double q0, q1, q2, q3;
+    q0 = com_quat.w(); q1 = com_quat.x();
+    q2 = com_quat.y(); q3 = com_quat.z();
+    rot << (2 * (q0 * q0 + q1 * q1) - 1), (2 * (q1 * q2 - q0 * q3)), (2 * (q1 * q3 + q0 * q2)),
+           (2 * (q1 * q2 + q0 * q3)), (2 * (q0 * q0 + q2 * q2) - 1), (2 * (q2 * q3 - q0 * q1)),
+           (2 * (q1 * q3 - q0 * q2)), (2 * (q2 * q3 + q0 * q1)), (2 * (q0 * q0 + q3 * q3) - 1);
+    //myUtils::pretty_print(rot, std::cout, "Rotation from world to body frame");
+    myUtils::pretty_print(rot, std::cout, "world to body Rotation");
+    com_vel_body_frame = rot * com_vel_world_frame;
+
     sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
-        robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation(), // com pos
-        robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).tail(3), // com vel
-        Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()), //com rpy
-        robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3), // com rpydot
-        foot_contact_states,
-        foot_pos_body_frame,
-        foot_friction_coeffs,
-        mpc_pos_des_,
-        sp_->x_y_yaw_vel_des,// Only x,y vel used from this variable
-        mpc_rpy_des_,
-        sp_->x_y_yaw_vel_des);// Only yaw vel used from this variable
-    myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Reaction Forces");
+        com_pos, // com_pos
+        com_vel_body_frame, // com_vel_body_frame
+        com_quat, // com quat
+        rpy_dot, //com_ang_vel
+        foot_contact_states, // foot contact_states
+        foot_pos_world, //foot_pos_world_frame
+        foot_friction_coeffs, //foot_friction_coeffs
+        com_pos_des, // com_pos_des
+        sp_->x_y_yaw_vel_des, //com_vel_des
+        rpy_des, // rpy_des
+        sp_->x_y_yaw_vel_des); // com ang vel des
+
 }
 
 void A1ControlArchitecture::getCommand(void* _command) {
@@ -204,61 +239,40 @@ void A1ControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
   if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
-    if(mpc_counter >= 6){// Call the MPC at 80 Hz
+    if(mpc_counter >= 6){// Call the MPC at 83.3 Hz
+        std::cout << "Before MPC call" << std::endl;
         solveMPC();
-        // TODO rxnforceTM->updateSolution(curr_time)
+        std::cout << "After MPC Call" << std::endl;
+        rxn_force_manager_->updateSolution(
+                        sp_->curr_time,
+                        sp_->mpc_rxn_forces);
         mpc_counter = 0;
     } else {++mpc_counter;}
-    // TODO: rxnforceTM->getSolution(curr_time)
-    // If we have dual contact, rxn force vector will be length 6
-    if(sp_->mpc_rxn_forces.size() == 6){
-      if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FL_CONTACT_TRANSITION_START || state_ == A1_STATES::FL_CONTACT_TRANSITION_END){
-        Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
-        taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
-        taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
-      }
-      if(state_ == A1_STATES::FR_SWING || state_ == A1_STATES::FR_CONTACT_TRANSITION_START || state_ == A1_STATES::FR_CONTACT_TRANSITION_END){
-        Eigen::Vector3d tmp_rxn_forces;
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
-        taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
-        taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
-      }
-    } else { // Quad contact reactn force vector will be length 12
-        Eigen::Vector3d tmp_rxn_forces;
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[0];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[1];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[2];
-        taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[3];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[4];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[5];
-        taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[6];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[7];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[8];
-        taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
-        tmp_rxn_forces[0] = sp_->mpc_rxn_forces[9];
-        tmp_rxn_forces[1] = sp_->mpc_rxn_forces[10];
-        tmp_rxn_forces[2] = sp_->mpc_rxn_forces[11];
-        taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
-
-    }
+    // Get the interpolated value for reaction forces from previous MPC call
+    command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
+    // Set the Contact Level Rxn Forces
+    Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
+    tmp_rxn_forces[0] = command_rxn_forces[0];
+    tmp_rxn_forces[1] = command_rxn_forces[1];
+    tmp_rxn_forces[2] = command_rxn_forces[2];
+    taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
+    tmp_rxn_forces[0] = command_rxn_forces[3];
+    tmp_rxn_forces[1] = command_rxn_forces[4];
+    tmp_rxn_forces[2] = command_rxn_forces[5];
+    taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
+    tmp_rxn_forces[0] = command_rxn_forces[6];
+    tmp_rxn_forces[1] = command_rxn_forces[7];
+    tmp_rxn_forces[2] = command_rxn_forces[8];
+    taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
+    tmp_rxn_forces[0] = command_rxn_forces[9];
+    tmp_rxn_forces[1] = command_rxn_forces[10];
+    tmp_rxn_forces[2] = command_rxn_forces[11];
+    taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   }
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Swaying
-  if(state_ == A1_STATES::BALANCE && 
+  if(state_ == A1_STATES::BALANCE &&
       (floating_base_lifting_up_manager_->is_swaying ||
       floating_base_lifting_up_manager_->is_sinusoid)){
     floating_base_lifting_up_manager_->updateFloatingBaseDesired(sp_->curr_time);

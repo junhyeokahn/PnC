@@ -14,6 +14,7 @@
 
 #include <PnC/ConvexMPC/ConvexMPC.hpp>
 #include <iostream>
+#include <Utils/IO/IOUtilities.hpp>
 
 #define DCHECK_GT(a,b) assert((a)>(b))
 #define DCHECK_EQ(a,b) assert((a)==(b))
@@ -351,7 +352,7 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
     Eigen::Quaternion<double> com_quat,
     Eigen::VectorXd com_angular_velocity,
     Eigen::VectorXi foot_contact_states,
-    Eigen::VectorXd foot_positions_body_frame,
+    Eigen::MatrixXd foot_positions_world_frame,
     Eigen::VectorXd foot_friction_coeffs,
     Eigen::VectorXd desired_com_position,
     Eigen::VectorXd desired_com_velocity,
@@ -369,14 +370,18 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
         // AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
     Eigen::Vector3d com_roll_pitch_yaw;
     com_roll_pitch_yaw = toRPY(com_quat);
+    // TEST
+    com_roll_pitch_yaw[2] = 0.;
 
-    DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
-    foot_positions_base_ = Eigen::Map<const MatrixXd>(
-        foot_positions_body_frame.data(), k3Dim, num_legs_)
-        .transpose();
-    for (int i = 0; i < num_legs_; ++i) {
-        foot_positions_world_.row(i) = com_rotation * foot_positions_base_.row(i);
-    }
+    // DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
+    // foot_positions_base_ = Eigen::Map<const MatrixXd>(
+    //     foot_positions_body_frame.data(), k3Dim, num_legs_)
+    //     .transpose();
+    // for (int i = 0; i < num_legs_; ++i) {
+    //     foot_positions_world_.row(i) = com_rotation * foot_positions_base_.row(i);
+    // }
+    // Will now send foot positions in the world frames
+    foot_positions_world_ = foot_positions_world_frame;
 
     // Now we can estimate the body height using the world frame foot positions
     // and contact states. We use simple averges leg height here.
@@ -462,9 +467,8 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
         mass_ * kGravity * kMinScale,
         foot_friction_coeffs[0], planning_horizon_,
         &constraint_lb_, &constraint_ub_);
-    
 
-    
+
     UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_, num_legs_,
         &constraint_);
     foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
@@ -486,7 +490,7 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
     settings.adaptive_rho_interval = 25;
     settings.eps_abs = 1e-3;
     settings.eps_rel = 1e-3;
-    
+
     assert(p_mat_.cols()== num_variables);
     assert(p_mat_.rows()== num_variables);
     assert(q_vec_.size()== num_variables);
@@ -559,6 +563,7 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
 
     if (osqp_solve(workspace_) != 0) {
         if (osqp_is_interrupted()) {
+            std::cout << "error result 1 in MPC" <<std::endl;
             return error_result;
         }
     }
@@ -570,8 +575,9 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
     }
     else {
         //LOG(WARNING) << "QP does not converge";
+        std::cout << "MPC QP Does not Converge" <<std::endl;
         return error_result;
     }
-    
+    myUtils::pretty_print(qp_solution_, std::cout, "MPC Solution before return");
     return qp_solution_;
 }

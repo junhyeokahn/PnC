@@ -123,6 +123,7 @@ void WalkingInterruptLogic::processInterrupts() {
     std::cout << "[Walking Interrupt Logic] button X pressed" << std::endl;
     if (ctrl_arch_->getState() == A1_STATES::BALANCE) {
       // ctrl_arch_->dcm_trajectory_manager_->walkInPlace();
+      sp_->x_y_yaw_vel_des[0] = 0.; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = 0.;
       std::cout << "---------                        ---------" << std::endl;
       std::cout << "---------     Walk In Place      ---------" << std::endl;
       static_cast<QuadSupportBalance*>(

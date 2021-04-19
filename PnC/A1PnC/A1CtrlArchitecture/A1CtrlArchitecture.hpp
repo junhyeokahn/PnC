@@ -18,6 +18,7 @@
 #include <PnC/TrajectoryManager/MaxNormalForceTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/PointFootTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
+#include <PnC/TrajectoryManager/ReactionForceTrajectoryManager.hpp>
 
 namespace A1_STATES {
 // constexpr int INITIALIZE = 0;
@@ -39,6 +40,8 @@ class A1ControlArchitecture : public ControlArchitecture {
   virtual void getCommand(void* _command);
   void saveData();
   void solveMPC();
+
+  Eigen::VectorXd command_rxn_forces;
 
  protected:
   A1StateProvider* sp_;
@@ -78,18 +81,18 @@ class A1ControlArchitecture : public ControlArchitecture {
   TaskWeightTrajectoryManager* com_hierarchy_manager_;
   TaskWeightTrajectoryManager* base_ori_hierarchy_manager_;
 
+  ReactionForceTrajectoryManager* rxn_force_manager_;
+
   private:
   double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4;
   int num_legs = 4;
   int _PLANNING_HORIZON_STEPS = 10;
-  int _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
+  double _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
   Eigen::VectorXd body_inertia;
   Eigen::VectorXd _MPC_WEIGHTS;
   Eigen::VectorXi foot_contact_states;
   Eigen::VectorXd foot_pos_body_frame;
   Eigen::VectorXd foot_friction_coeffs;
-  Eigen::Vector3d frfoot_body_frame, flfoot_body_frame,
-                  rlfoot_body_frame, rrfoot_body_frame;
   int mpc_counter;
 
 };
