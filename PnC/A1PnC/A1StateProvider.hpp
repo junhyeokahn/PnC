@@ -18,8 +18,11 @@ class A1StateProvider {
   int front_stance_foot;
   int rear_stance_foot;
 
+  // Added by Ryan, MPC related
   Eigen::VectorXd mpc_rxn_forces;
   Eigen::VectorXd x_y_yaw_vel_des;
+  Eigen::VectorXd interpolated_mpc_forces;
+  Eigen::VectorXd final_reaction_forces;
 
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;
@@ -46,8 +49,6 @@ class A1StateProvider {
   int b_flfoot_contact;
   int b_rrfoot_contact;
   int b_rlfoot_contact;
-
-  Eigen::VectorXd mpc_rxn_forces_;
 
   Eigen::VectorXd qddot_cmd;
 

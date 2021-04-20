@@ -21,7 +21,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
   _MPC_WEIGHTS[5] = 10.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
   _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 0.2; _MPC_WEIGHTS[10] = 0.2;
-  _MPC_WEIGHTS[11] = 0.1;
+  _MPC_WEIGHTS[11] = 0.1; 
   mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
                                _PLANNING_TIMESTEP,
@@ -144,27 +144,20 @@ void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
 void A1ControlArchitecture::solveMPC() {
     // Set contact state
-    if(state_ == A1_STATES::FL_CONTACT_TRANSITION_START ||
-       state_ == A1_STATES::FL_CONTACT_TRANSITION_END ||
-       state_ == A1_STATES::FR_CONTACT_TRANSITION_START ||
-       state_ == A1_STATES::FR_CONTACT_TRANSITION_END){
-        for(int i=0; i<4; ++i){
-            foot_contact_states[i] = 1;
-        }
-    }
-    if(state_ == A1_STATES::FL_SWING) {
-        foot_contact_states[0] = 0; foot_contact_states[2] = 1;
-        foot_contact_states[1] = 1; foot_contact_states[3] = 0;
-    }
-    if(state_ == A1_STATES::FR_SWING) {
-        foot_contact_states[0] = 1; foot_contact_states[2] = 0;
-        foot_contact_states[1] = 0; foot_contact_states[3] = 1;
-    }
+    if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
+    else foot_contact_states[0] = 0;
+    if(sp_->b_frfoot_contact) foot_contact_states[1] = 1;
+    else foot_contact_states[1] = 0;
+    if(sp_->b_rlfoot_contact) foot_contact_states[2] = 1;
+    else foot_contact_states[2] = 0;
+    if(sp_->b_rrfoot_contact) foot_contact_states[3] = 1;
+    else foot_contact_states[3] = 0;
+
     Eigen::Vector3d com_pos, com_pos_des;
     // CoM Position (x,y plane not necessary)
-    com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = 0.25;
+    com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = 0.3;
     // CoM Desired Position (x,y plane not necessary)
-    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.25;
+    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.3;
     // Current quaternion of robot CoM
     Eigen::Quaternion<double> com_quat;
     com_quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
@@ -213,16 +206,18 @@ void A1ControlArchitecture::solveMPC() {
     rot << (2 * (q0 * q0 + q1 * q1) - 1), (2 * (q1 * q2 - q0 * q3)), (2 * (q1 * q3 + q0 * q2)),
            (2 * (q1 * q2 + q0 * q3)), (2 * (q0 * q0 + q2 * q2) - 1), (2 * (q2 * q3 - q0 * q1)),
            (2 * (q1 * q3 - q0 * q2)), (2 * (q2 * q3 + q0 * q1)), (2 * (q0 * q0 + q3 * q3) - 1);
-    //myUtils::pretty_print(rot, std::cout, "Rotation from world to body frame");
-    myUtils::pretty_print(rot, std::cout, "world to body Rotation");
+    // myUtils::pretty_print(rot, std::cout, "Rotation from world to body frame");
+    // myUtils::pretty_print(rot, std::cout, "world to body Rotation");
     com_vel_body_frame = rot * com_vel_world_frame;
 
+    Eigen::VectorXd tmp; tmp = Eigen::VectorXd::Zero(1);
+
     sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
-        com_pos, // com_pos
+        tmp,// com_pos, // com_pos
         com_vel_body_frame, // com_vel_body_frame
         com_quat, // com quat
         rpy_dot, //com_ang_vel
-        foot_contact_states, // foot contact_states
+        foot_contact_states,  // foot contact_states
         foot_pos_world, //foot_pos_world_frame
         foot_friction_coeffs, //foot_friction_coeffs
         com_pos_des, // com_pos_des
@@ -240,13 +235,13 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }
   if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
     if(mpc_counter >= 6){// Call the MPC at 83.3 Hz
-        std::cout << "Before MPC call" << std::endl;
         solveMPC();
-        std::cout << "After MPC Call" << std::endl;
-        rxn_force_manager_->updateSolution(
+        if(sp_->mpc_rxn_forces.size() > 10){
+          rxn_force_manager_->updateSolution(
                         sp_->curr_time,
                         sp_->mpc_rxn_forces);
-        mpc_counter = 0;
+          mpc_counter = 0;
+        }
     } else {++mpc_counter;}
     // Get the interpolated value for reaction forces from previous MPC call
     command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
@@ -285,8 +280,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }
 
   // Get Wholebody control commands
-  main_controller_->getCommand(_command);// Feed it sp_mpc_rxn_forces
-
+  main_controller_->getCommand(_command);
   // Save Data
   saveData();
 
@@ -360,6 +354,8 @@ void A1ControlArchitecture::saveData() {
       rrfoot_max_normal_force_manager_->current_max_normal_force_z_;
   sp_->w_rlfoot_fr =
       rlfoot_max_normal_force_manager_->current_max_normal_force_z_;
+
+  sp_->interpolated_mpc_forces = command_rxn_forces;
 
   // Task desired
   // sp_->q_task_des = joint_trajectory_manager_->joint_pos_des_;

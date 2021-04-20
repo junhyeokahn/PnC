@@ -37,6 +37,7 @@ class WBIC{
                 const std::vector<ContactSpec*>& contact_list_,
                 const std::vector<Task*>& task_list_,
                 Eigen::VectorXd & cmd,
+                Eigen::VectorXd &Fr_result_,
                 void* extra_input = NULL);
 
         Eigen::MatrixXd Sa_; // Actuated Joint Selection
@@ -58,7 +59,8 @@ class WBIC{
         void _SetInequalityConstraint();
         void _ContactBuilding();
 
-        void _GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd & cmd);
+        void _GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd & cmd,
+                          Eigen::VectorXd &Fr_result_);
         void _SetCost();
         void _SetOptimizationSize();
 

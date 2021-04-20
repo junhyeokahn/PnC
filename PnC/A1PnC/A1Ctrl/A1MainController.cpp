@@ -91,7 +91,9 @@ void A1MainController::getCommand(void* _cmd) {
   // myUtils::pretty_print(des_jvel_, std::cout, "des_jvel_ (main_controller)");
   // WBIC
   wbic_->updateSetting(A_, Ainv_, coriolis_, grav_);
-  wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, wbic_data_);
+  Eigen::VectorXd Fr_result_;
+  wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, Fr_result_, wbic_data_);
+  sp_->final_reaction_forces = Fr_result_;
   // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ [Main Controller]");
   // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
 

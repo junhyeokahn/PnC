@@ -306,7 +306,7 @@ ConvexMPC::ConvexMPC(double mass, const Eigen::VectorXd& inertia,
 
 {
     assert(qp_weights.size() == kStateDim);
-    // We assume the input inertia is a 3x3 matrix.
+    // We assume the input inertia  is a 3x3 matrix.
     assert(inertia.size() == k3Dim * k3Dim);
     state_.setZero();
     desired_states_.setZero();
@@ -561,7 +561,7 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
             workspace_, clipped_lower_bounds.data(), clipped_upper_bounds.data());
     }
 
-    if (osqp_solve(workspace_) != 0) {
+    if (osqp_solve(workspace_) != 0)  {
         if (osqp_is_interrupted()) {
             std::cout << "error result 1 in MPC" <<std::endl;
             return error_result;
@@ -578,6 +578,6 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
         std::cout << "MPC QP Does not Converge" <<std::endl;
         return error_result;
     }
-    myUtils::pretty_print(qp_solution_, std::cout, "MPC Solution before return");
+    // myUtils::pretty_print(qp_solution_, std::cout, "MPC Solution before return");
     return qp_solution_;
 }

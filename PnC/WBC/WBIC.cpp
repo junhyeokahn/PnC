@@ -46,7 +46,8 @@ void WBIC::updateSetting(const Eigen::MatrixXd& A, const Eigen::MatrixXd& Ainv,
 
 void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
                       const std::vector<Task*>& task_list_,
-                      Eigen::VectorXd& cmd, void* extra_input) {
+                      Eigen::VectorXd& cmd, Eigen::VectorXd & Fr_result_,
+                      void* extra_input) {
     if(!b_updatesetting_){
         printf("[Warning] WBIC setting is not done\n");
     }
@@ -123,7 +124,8 @@ void WBIC::makeTorque(const std::vector<ContactSpec*>& contact_list_,
 
     for (int i(0); i < 6; ++i) {qddot_pre[i] += z[i];}
 
-    _GetSolution(qddot_pre, cmd);
+
+    _GetSolution(qddot_pre, cmd, Fr_result_);
 
     _data->_opt_result = Eigen::VectorXd(_dim_opt);
 
@@ -255,7 +257,8 @@ void WBIC::_ContactBuilding() {
   // myUtils::pretty_print(_Uf, std::cout, "[WBIC] Uf");
 }
 
-void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
+void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd,
+                        Eigen::VectorXd & Fr_result_) {
   Eigen::VectorXd tot_tau;
   if (_dim_rf > 0) {
     _data->_Fr = Eigen::VectorXd(_dim_rf);
@@ -270,6 +273,7 @@ void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd) {
   }
   _data->_qddot = qddot;
   cmd = tot_tau.tail(12);
+  Fr_result_ = _data->_Fr;
 
   // myUtils::pretty_print(cmd, std::cout, "cmd [WBIC]");
   // Torque check
