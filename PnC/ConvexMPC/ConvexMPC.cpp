@@ -16,9 +16,6 @@
 #include <iostream>
 #include <Utils/IO/IOUtilities.hpp>
 
-#define DCHECK_GT(a,b) assert((a)>(b))
-#define DCHECK_EQ(a,b) assert((a)==(b))
-
 using Eigen::AngleAxisd;
 using Eigen::Map;
 using Eigen::Matrix3d;
@@ -26,17 +23,22 @@ using Eigen::MatrixXd;
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
 using Eigen::VectorXd;
+using Eigen::VectorXi;
 
+#ifdef _WIN32
+typedef __int64 qp_int64;
+#else
 typedef long long qp_int64;
+#endif //_WIN32
 
 constexpr int k3Dim = 3;
 constexpr double kGravity = 9.8;
 constexpr double kMaxScale = 10;
 constexpr double kMinScale = 0.1;
-
-
-
 constexpr int ConvexMPC::kStateDim;
+
+#define DCHECK_GT(a,b) assert((a)>(b))
+#define DCHECK_EQ(a,b) assert((a)==(b))
 
 Matrix3d ConvertRpyToRot(const Vector3d& rpy) {
     assert(rpy.size() == k3Dim);
@@ -189,7 +191,7 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
     }
 }
 
-void UpdateConstraintsMatrix(Eigen::VectorXd& friction_coeff,
+void UpdateConstraintsMatrix(VectorXd& friction_coeff,
     int horizon, int num_legs,
     MatrixXd* constraint_ptr) {
     const int constraint_dim = ConvexMPC::kConstraintDim;
@@ -234,7 +236,7 @@ void CalculateConstraintBounds(const MatrixXd& contact_state, double fz_max,
 
 double EstimateCoMHeightSimple(
     const MatrixXd& foot_positions_world,
-    const Eigen::VectorXi foot_contact_states) {
+    const VectorXi foot_contact_states) {
     int legs_in_contact = 0;
     double com_height = 0;
     const int z_dim = 2;
@@ -250,7 +252,7 @@ double EstimateCoMHeightSimple(
     return abs(com_height / legs_in_contact);
 }
 
-MatrixXd AsBlockDiagonalMat(const Eigen::VectorXd& qp_weights,
+MatrixXd AsBlockDiagonalMat(const VectorXd& qp_weights,
     int planning_horizon) {
     const Eigen::Map<const VectorXd> qp_weights_vec(qp_weights.data(),
         qp_weights.size());
@@ -303,212 +305,182 @@ ConvexMPC::ConvexMPC(double mass, const Eigen::VectorXd& inertia,
     qp_solution_(k3Dim* num_legs* planning_horizon),
     workspace_(0),
     initial_run_(true)
-
 {
-    assert(qp_weights.size() == kStateDim);
-    // We assume the input inertia  is a 3x3 matrix.
-    assert(inertia.size() == k3Dim * k3Dim);
-    state_.setZero();
-    desired_states_.setZero();
-    contact_states_.setZero();
-    foot_positions_base_.setZero();
-    foot_positions_world_.setZero();
-    foot_friction_coeff_.setZero();
-    a_mat_.setZero();
-    b_mat_.setZero();
-    ab_concatenated_.setZero();
-    a_exp_.setZero();
-    b_exp_.setZero();
-    a_qp_.setZero();
-    b_qp_.setZero();
-    b_qp_transpose_.setZero();
-    constraint_.setZero();
-    constraint_lb_.setZero();
-    constraint_ub_.setZero();
+  assert(qp_weights.size() == kStateDim);
+  // We assume the input inertia is a 3x3 matrix.
+  assert(inertia.size() == k3Dim * k3Dim);
+  state_.setZero();
+  desired_states_.setZero();
+  contact_states_.setZero();
+  foot_positions_base_.setZero();
+  foot_positions_world_.setZero();
+  foot_friction_coeff_.setZero();
+  a_mat_.setZero();
+  b_mat_.setZero();
+  ab_concatenated_.setZero();
+  a_exp_.setZero();
+  b_exp_.setZero();
+  a_qp_.setZero();
+  b_qp_.setZero();
+  b_qp_transpose_.setZero();
+  constraint_.setZero();
+  constraint_lb_.setZero();
+  constraint_ub_.setZero();
 }
 
 void ConvexMPC::ResetSolver() { initial_run_ = true; }
 
-Eigen::Vector3d ConvexMPC::toRPY(Eigen::Quaternion<double> quat){
-  Eigen::Vector3d rpy;
-  double sinr_cosp = 2 * (quat.w() * quat.x() + quat.y() * quat.z());
-  double cosr_cosp = 1 - 2 * (quat.x() * quat.x() + quat.y() * quat.y());
-  rpy [0] = std::atan2(sinr_cosp, cosr_cosp);
+VectorXd ConvexMPC::ComputeContactForces(
+      VectorXd com_position,
+      VectorXd com_velocity,
+      VectorXd com_roll_pitch_yaw,
+      VectorXd com_angular_velocity,
+      VectorXi foot_contact_states,
+      VectorXd foot_positions_body_frame,
+      VectorXd foot_friction_coeffs,
+      VectorXd desired_com_position,
+      VectorXd desired_com_velocity,
+      VectorXd desired_com_roll_pitch_yaw,
+      VectorXd desired_com_angular_velocity) {
 
-  double sinp = 2 * (quat.w() * quat.y() - quat.z() * quat.x());
-  if(std::abs(sinp) >- 1) rpy[1] = std::copysign(M_PI / 2, sinp);
-  else rpy[1] = std::asin(sinp);
+  VectorXd error_result;
 
-  double siny_cosp = 2 * (quat.w() * quat.z() + quat.x() * quat.y());
-  double cosy_cosp = 1 - 2 * (quat.y() * quat.y() + quat.z() * quat.z());
-  rpy[2] = std::atan2(siny_cosp, cosy_cosp);
+  // First we compute the foot positions in the world frame.
+  DCHECK_EQ(com_roll_pitch_yaw.size(), k3Dim);
+  const Quaterniond com_rotation =
+      AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
+      AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
+      AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
 
-  return rpy;
-}
+  DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
+  foot_positions_base_ = Eigen::Map<const MatrixXd>(
+      foot_positions_body_frame.data(), k3Dim, num_legs_).transpose();
+  for (int i = 0; i < num_legs_; ++i) {
+      foot_positions_world_.row(i) = com_rotation * foot_positions_base_.row(i);
+  }
 
-Eigen::VectorXd ConvexMPC::ComputeContactForces(
-    Eigen::VectorXd com_position,
-    Eigen::VectorXd com_velocity,
-    Eigen::Quaternion<double> com_quat,
-    Eigen::VectorXd com_angular_velocity,
-    Eigen::VectorXi foot_contact_states,
-    Eigen::MatrixXd foot_positions_world_frame,
-    Eigen::VectorXd foot_friction_coeffs,
-    Eigen::VectorXd desired_com_position,
-    Eigen::VectorXd desired_com_velocity,
-    Eigen::VectorXd desired_com_roll_pitch_yaw,
-    Eigen::VectorXd desired_com_angular_velocity) {
+  // Now we can estimate the body height using the world frame foot positions
+  // and contact states. We use simple averges leg height here.
+  DCHECK_EQ(foot_contact_states.size(), num_legs_);
+  const double com_z =
+      com_position.size() == k3Dim ? com_position[2] : EstimateCoMHeightSimple(foot_positions_world_, foot_contact_states);
 
-    Eigen::VectorXd error_result;
+  // In MPC planning we don't care about absolute position in the horizontal
+  // plane.
+  const double com_x = 0;
+  const double com_y = 0;
 
-
-    // First we compute the foot positions in the world frame.
-    // DCHECK_EQ(com_roll_pitch_yaw.size(), k3Dim);
-    const Quaterniond com_rotation = com_quat;
-        // AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
-        // AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
-        // AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
-    Eigen::Vector3d com_roll_pitch_yaw;
-    com_roll_pitch_yaw = toRPY(com_quat);
-    // TEST
-    com_roll_pitch_yaw[2] = 0.;
-
-    // DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
-    // foot_positions_base_ = Eigen::Map<const MatrixXd>(
-    //     foot_positions_body_frame.data(), k3Dim, num_legs_)
-    //     .transpose();
-    // for (int i = 0; i < num_legs_; ++i) {
-    //     foot_positions_world_.row(i) = com_rotation * foot_positions_base_.row(i);
-    // }
-    // Will now send foot positions in the world frames
-    foot_positions_world_ = foot_positions_world_frame;
-
-    // Now we can estimate the body height using the world frame foot positions
-    // and contact states. We use simple averges leg height here.
-    DCHECK_EQ(foot_contact_states.size(), num_legs_);
-    const double com_z =
-        com_position.size() == k3Dim
-        ? com_position[2]
-        : EstimateCoMHeightSimple(foot_positions_world_, foot_contact_states);
-
-    // In MPC planning we don't care about absolute position in the horizontal
-    // plane.
-    const double com_x = 0;
-    const double com_y = 0;
-
-    // Prepare the current and desired state vectors of length kStateDim *
-    // planning_horizon.
-    DCHECK_EQ(com_velocity.size(), k3Dim);
-    DCHECK_EQ(com_angular_velocity.size(), k3Dim);
-    state_ << com_roll_pitch_yaw[0], com_roll_pitch_yaw[1], com_roll_pitch_yaw[2],
-        com_x, com_y, com_z, com_angular_velocity[0], com_angular_velocity[1],
-        com_angular_velocity[2], com_velocity[0], com_velocity[1],
-        com_velocity[2], -kGravity;
-
-    for (int i = 0; i < planning_horizon_; ++i) {
-        desired_states_[i * kStateDim + 0] = desired_com_roll_pitch_yaw[0];
-        desired_states_[i * kStateDim + 1] = desired_com_roll_pitch_yaw[1];
-        desired_states_[i * kStateDim + 2] =
+  // Prepare the current and desired state vectors of length kStateDim *
+  // planning_horizon.
+  DCHECK_EQ(com_velocity.size(), k3Dim);
+  DCHECK_EQ(com_angular_velocity.size(), k3Dim);
+  state_ << com_roll_pitch_yaw[0], com_roll_pitch_yaw[1], com_roll_pitch_yaw[2],
+            com_x, com_y, com_z, com_angular_velocity[0], com_angular_velocity[1],
+            com_angular_velocity[2], com_velocity[0], com_velocity[1],
+            com_velocity[2], -kGravity;
+  for (int i = 0; i < planning_horizon_; ++i) {
+    desired_states_[i * kStateDim + 0] = desired_com_roll_pitch_yaw[0];
+    desired_states_[i * kStateDim + 1] = desired_com_roll_pitch_yaw[1];
+    desired_states_[i * kStateDim + 2] = 
             com_roll_pitch_yaw[2] +
             timestep_ * (i + 1) * desired_com_angular_velocity[2];
 
-        desired_states_[i * kStateDim + 3] =
+    desired_states_[i * kStateDim + 3] =
             timestep_ * (i + 1) * desired_com_velocity[0];
-        desired_states_[i * kStateDim + 4] =
+    desired_states_[i * kStateDim + 4] =
             timestep_ * (i + 1) * desired_com_velocity[1];
-        desired_states_[i * kStateDim + 5] = desired_com_position[2];
+    desired_states_[i * kStateDim + 5] = desired_com_position[2];
 
-        // Prefer to stablize roll and pitch.
-        desired_states_[i * kStateDim + 6] = 0;
-        desired_states_[i * kStateDim + 7] = 0;
-        desired_states_[i * kStateDim + 8] = desired_com_angular_velocity[2];
+    // Prefer to stablize roll and pitch.
+    desired_states_[i * kStateDim + 6] = 0;
+    desired_states_[i * kStateDim + 7] = 0;
+    desired_states_[i * kStateDim + 8] = desired_com_angular_velocity[2];
 
-        desired_states_[i * kStateDim + 9] = desired_com_velocity[0];
-        desired_states_[i * kStateDim + 10] = desired_com_velocity[1];
-        // Prefer to stablize the body height.
-        desired_states_[i * kStateDim + 11] = 0;
+    desired_states_[i * kStateDim + 9] = desired_com_velocity[0];
+    desired_states_[i * kStateDim + 10] = desired_com_velocity[1];
+    // Prefer to stablize the body height.
+    desired_states_[i * kStateDim + 11] = 0;
 
-        desired_states_[i * kStateDim + 12] = -kGravity;
+    desired_states_[i * kStateDim + 12] = -kGravity;
+  }
+
+  const Vector3d rpy(com_roll_pitch_yaw[0], com_roll_pitch_yaw[1],
+                     com_roll_pitch_yaw[2]);
+
+  CalculateAMat(rpy, &a_mat_);
+
+  rotation_ = ConvertRpyToRot(rpy);
+  const Matrix3d inv_inertia_world = rotation_ * inv_inertia_ * rotation_.transpose();
+
+  CalculateBMat(inv_mass_, inv_inertia_world, foot_positions_world_, &b_mat_);
+
+  CalculateExponentials(a_mat_, b_mat_, timestep_, &ab_concatenated_, &a_exp_,
+                        &b_exp_);
+
+  CalculateQpMats(a_exp_, b_exp_, qp_weights_single_, alpha_single_,
+                  planning_horizon_, &a_qp_, &anb_aux_, &b_qp_, &p_mat_);
+
+  const MatrixXd state_diff = a_qp_ * state_ - desired_states_;
+
+  q_vec_ = 2 * b_qp_.transpose() * (qp_weights_ * state_diff);
+
+  const VectorXd one_vec = VectorXd::Constant(planning_horizon_, 1.0);
+  const VectorXd zero_vec = VectorXd::Zero(planning_horizon_);
+  for (int j = 0; j < foot_contact_states.size(); ++j) {
+    if (foot_contact_states[j]) {
+        contact_states_.col(j) = one_vec;
+    } else {
+        contact_states_.col(j) = zero_vec;
     }
+  }
 
-    const Vector3d rpy(com_roll_pitch_yaw[0], com_roll_pitch_yaw[1],
-        com_roll_pitch_yaw[2]);
+  CalculateConstraintBounds(contact_states_, mass_ * kGravity * kMaxScale,
+                            mass_ * kGravity * kMinScale,
+                            foot_friction_coeffs[0], planning_horizon_,
+                            &constraint_lb_, &constraint_ub_);
+    
 
-    CalculateAMat(rpy, &a_mat_);
-
-    rotation_ = ConvertRpyToRot(rpy);
-    const Matrix3d inv_inertia_world =
-        rotation_ * inv_inertia_ * rotation_.transpose();
-
-    CalculateBMat(inv_mass_, inv_inertia_world, foot_positions_world_, &b_mat_);
-
-    CalculateExponentials(a_mat_, b_mat_, timestep_, &ab_concatenated_, &a_exp_,
-        &b_exp_);
-
-    CalculateQpMats(a_exp_, b_exp_, qp_weights_single_, alpha_single_,
-        planning_horizon_, &a_qp_, &anb_aux_, &b_qp_, &p_mat_);
-
-    const MatrixXd state_diff = a_qp_ * state_ - desired_states_;
-
-    q_vec_ = 2 * b_qp_.transpose() * (qp_weights_ * state_diff);
-
-    const VectorXd one_vec = VectorXd::Constant(planning_horizon_, 1.0);
-    const VectorXd zero_vec = VectorXd::Zero(planning_horizon_);
-    for (int j = 0; j < foot_contact_states.size(); ++j) {
-        if (foot_contact_states[j]) {
-            contact_states_.col(j) = one_vec;
-        }
-        else {
-            contact_states_.col(j) = zero_vec;
-        }
-    }
-
-    CalculateConstraintBounds(contact_states_, mass_ * kGravity * kMaxScale,
-        mass_ * kGravity * kMinScale,
-        foot_friction_coeffs[0], planning_horizon_,
-        &constraint_lb_, &constraint_ub_);
+    
+  UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_, num_legs_,
+                          &constraint_);
+  foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
+                          foot_friction_coeffs[2], foot_friction_coeffs[3];
 
 
-    UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_, num_legs_,
-        &constraint_);
-    foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
-        foot_friction_coeffs[2], foot_friction_coeffs[3];
+  Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> objective_matrix = p_mat_.sparseView();
+  Eigen::VectorXd objective_vector = q_vec_;
+  Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> constraint_matrix = constraint_.sparseView();
 
+  int num_variables = constraint_.cols();
+  int num_constraints = constraint_.rows();
 
-    Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> objective_matrix = p_mat_.sparseView();
-    Eigen::VectorXd objective_vector = q_vec_;
-    Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> constraint_matrix = constraint_.sparseView();
+  ::OSQPSettings settings;
+  osqp_set_default_settings(&settings);
+  settings.verbose = false;
+  settings.warm_start = true;
+  settings.polish = true;
+  settings.adaptive_rho_interval = 25;
+  settings.eps_abs = 1e-3;
+  settings.eps_rel = 1e-3;
+    
+  assert(p_mat_.cols()== num_variables);
+  assert(p_mat_.rows()== num_variables);
+  assert(q_vec_.size()== num_variables);
+  assert(constraint_lb_.size() == num_constraints);
+  assert(constraint_ub_.size() == num_constraints);
 
-    int num_variables = constraint_.cols();
-    int num_constraints = constraint_.rows();
+  VectorXd clipped_lower_bounds = constraint_lb_.cwiseMax(-OSQP_INFTY);
+  VectorXd clipped_upper_bounds = constraint_ub_.cwiseMin(OSQP_INFTY);
 
-    ::OSQPSettings settings;
-    osqp_set_default_settings(&settings);
-    settings.verbose = false;
-    settings.warm_start = true;
-    settings.polish = true;
-    settings.adaptive_rho_interval = 25;
-    settings.eps_abs = 1e-3;
-    settings.eps_rel = 1e-3;
+  ::OSQPData data;
+  data.n = num_variables;
+  data.m = num_constraints;
 
-    assert(p_mat_.cols()== num_variables);
-    assert(p_mat_.rows()== num_variables);
-    assert(q_vec_.size()== num_variables);
-    assert(constraint_lb_.size() == num_constraints);
-    assert(constraint_ub_.size() == num_constraints);
-
-    VectorXd clipped_lower_bounds = constraint_lb_.cwiseMax(-OSQP_INFTY);
-    VectorXd clipped_upper_bounds = constraint_ub_.cwiseMin(OSQP_INFTY);
-
-    ::OSQPData data;
-    data.n = num_variables;
-    data.m = num_constraints;
-
-    Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64>
+  Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64>
         objective_matrix_upper_triangle =
         objective_matrix.triangularView<Eigen::Upper>();
 
-    ::csc osqp_objective_matrix = {
+  ::csc osqp_objective_matrix = {
         objective_matrix_upper_triangle.outerIndexPtr()[num_variables],
         num_variables,
         num_variables,
@@ -516,68 +488,66 @@ Eigen::VectorXd ConvexMPC::ComputeContactForces(
         const_cast<qp_int64*>(objective_matrix_upper_triangle.innerIndexPtr()),
         const_cast<double*>(objective_matrix_upper_triangle.valuePtr()),
         -1 };
-    data.P = &osqp_objective_matrix;
+  data.P = &osqp_objective_matrix;
 
-    ::csc osqp_constraint_matrix = {
-        constraint_matrix.outerIndexPtr()[num_variables],
-        num_constraints,
-        num_variables,
-        const_cast<qp_int64*>(constraint_matrix.outerIndexPtr()),
-        const_cast<qp_int64*>(constraint_matrix.innerIndexPtr()),
-        const_cast<double*>(constraint_matrix.valuePtr()),
-        -1 };
-    data.A = &osqp_constraint_matrix;
+  ::csc osqp_constraint_matrix = {
+      constraint_matrix.outerIndexPtr()[num_variables],
+      num_constraints,
+      num_variables,
+      const_cast<qp_int64*>(constraint_matrix.outerIndexPtr()),
+      const_cast<qp_int64*>(constraint_matrix.innerIndexPtr()),
+      const_cast<double*>(constraint_matrix.valuePtr()),
+      -1 };
+  data.A = &osqp_constraint_matrix;
 
-    data.q = const_cast<double*>(objective_vector.data());
-    data.l = clipped_lower_bounds.data();
-    data.u = clipped_upper_bounds.data();
+  data.q = const_cast<double*>(objective_vector.data());
+  data.l = clipped_lower_bounds.data();
+  data.u = clipped_upper_bounds.data();
 
-    const int return_code = 0;
+  const int return_code = 0;
     
-    if (workspace_==0) {
-        osqp_setup(&workspace_, &data, &settings);
-        initial_run_ = false;
-    }
-    else {
+  if (workspace_==0) {
+      osqp_setup(&workspace_, &data, &settings);
+      initial_run_ = false;
+  } else {
 
-        UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_,
-            num_legs_, &constraint_);
-        foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
-            foot_friction_coeffs[2], foot_friction_coeffs[3];
+      UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_,
+                              num_legs_, &constraint_);
+      foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
+                              foot_friction_coeffs[2], foot_friction_coeffs[3];
             
-        c_int nnzP = objective_matrix_upper_triangle.nonZeros();
+      c_int nnzP = objective_matrix_upper_triangle.nonZeros();
 
-        c_int nnzA = constraint_matrix.nonZeros();
+      c_int nnzA = constraint_matrix.nonZeros();
 
-        int return_code = osqp_update_P_A(
+      int return_code = osqp_update_P_A(
             workspace_, objective_matrix_upper_triangle.valuePtr(), OSQP_NULL, nnzP,
             constraint_matrix.valuePtr(), OSQP_NULL, nnzA);
         
-        return_code =
+      return_code =
             osqp_update_lin_cost(workspace_, objective_vector.data());
 
 
-        return_code = osqp_update_bounds(
+      return_code = osqp_update_bounds(
             workspace_, clipped_lower_bounds.data(), clipped_upper_bounds.data());
-    }
+  }
 
-    if (osqp_solve(workspace_) != 0)  {
-        if (osqp_is_interrupted()) {
-            std::cout << "error result 1 in MPC" <<std::endl;
-            return error_result;
-        }
-    }
-    
-    Map<VectorXd> solution(qp_solution_.data(), qp_solution_.size());
-    
-    if (workspace_->info->status_val== OSQP_SOLVED) {
-        solution = -Map<const VectorXd>(workspace_->solution->x, workspace_->data->n);
-    }
-    else {
-        //LOG(WARNING) << "QP does not converge";
-        std::cout << "MPC QP Does not Converge" <<std::endl;
+  if (osqp_solve(workspace_) != 0) {
+    if (osqp_is_interrupted()) {
         return error_result;
     }
-    // myUtils::pretty_print(qp_solution_, std::cout, "MPC Solution before return");
-    return qp_solution_;
+  }
+    
+  Map<VectorXd> solution(qp_solution_.data(), qp_solution_.size());
+    
+  if (workspace_->info->status_val== OSQP_SOLVED) {
+      solution = -Map<const VectorXd>(workspace_->solution->x, workspace_->data->n);
+  } else {
+      //LOG(WARNING) << "QP does not converge";
+      std::cout << "QP Does not Converge" << std::endl;
+      return error_result;
+  }
+    
+  return qp_solution_;
+
 }

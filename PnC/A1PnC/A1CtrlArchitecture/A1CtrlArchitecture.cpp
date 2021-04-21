@@ -153,6 +153,8 @@ void A1ControlArchitecture::solveMPC() {
     if(sp_->b_rrfoot_contact) foot_contact_states[3] = 1;
     else foot_contact_states[3] = 0;
 
+    std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
+
     Eigen::Vector3d com_pos, com_pos_des;
     // CoM Position (x,y plane not necessary)
     com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = 0.3;
@@ -181,18 +183,22 @@ void A1ControlArchitecture::solveMPC() {
     foot_pos_world.row(0)[0] = flfoot_world[0];
     foot_pos_world.row(0)[1] = flfoot_world[1];
     foot_pos_world.row(0)[2] = flfoot_world[2];
+    if(foot_contact_states[0]) foot_pos_world.row(0)[2] = 0.;
 
     foot_pos_world.row(1)[0] = frfoot_world[0];
     foot_pos_world.row(1)[1] = frfoot_world[1];
     foot_pos_world.row(1)[2] = frfoot_world[2];
+    if(foot_contact_states[1]) foot_pos_world.row(1)[2] = 0.;
 
     foot_pos_world.row(2)[0] = rlfoot_world[0];
     foot_pos_world.row(2)[1] = rlfoot_world[1];
     foot_pos_world.row(2)[2] = rlfoot_world[2];
+    if(foot_contact_states[2]) foot_pos_world.row(2)[2] = 0.;
 
     foot_pos_world.row(3)[0] = rrfoot_world[0];
     foot_pos_world.row(3)[1] = rrfoot_world[1];
     foot_pos_world.row(3)[2] = rrfoot_world[2];
+    if(foot_contact_states[3]) foot_pos_world.row(3)[2] = 0.;
 
     // Get com_vel_body_frame
     Eigen::VectorXd com_vel_body_frame, com_vel_world_frame; 
