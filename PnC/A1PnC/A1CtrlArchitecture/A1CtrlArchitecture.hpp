@@ -19,6 +19,7 @@
 #include <PnC/TrajectoryManager/PointFootTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/TaskWeightTrajectoryManager.hpp>
 #include <PnC/TrajectoryManager/ReactionForceTrajectoryManager.hpp>
+#include <math.h>
 
 namespace A1_STATES {
 // constexpr int INITIALIZE = 0;
@@ -94,5 +95,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   Eigen::VectorXd foot_pos_body_frame;
   Eigen::VectorXd foot_friction_coeffs;
   int mpc_counter;
+  Eigen::Vector3d frfoot_body_frame, flfoot_body_frame,
+                  rlfoot_body_frame, rrfoot_body_frame;
 
 };

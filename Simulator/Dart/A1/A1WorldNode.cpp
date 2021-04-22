@@ -139,10 +139,10 @@ void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
   Eigen::VectorXd fl_ = skel_->getBodyNode("FL_foot")->getCOM();
   Eigen::VectorXd rr_ = skel_->getBodyNode("RR_foot")->getCOM();
   Eigen::VectorXd rl_ = skel_->getBodyNode("RL_foot")->getCOM();
-  myUtils::pretty_print(fr_, std::cout, "FR pos");
-  myUtils::pretty_print(fl_, std::cout, "FL pos");
-  myUtils::pretty_print(rr_, std::cout, "RR pos");
-  myUtils::pretty_print(rl_, std::cout, "RL pos");
+  // myUtils::pretty_print(fr_, std::cout, "FR pos");
+  // myUtils::pretty_print(fl_, std::cout, "FL pos");
+  // myUtils::pretty_print(rr_, std::cout, "RR pos");
+  // myUtils::pretty_print(rl_, std::cout, "RL pos");
 
   if ((fabs(fl_[2]) < 0.02)) {
     flfoot_contact = true;

@@ -331,17 +331,17 @@ ConvexMPC::ConvexMPC(double mass, const Eigen::VectorXd& inertia,
 void ConvexMPC::ResetSolver() { initial_run_ = true; }
 
 VectorXd ConvexMPC::ComputeContactForces(
-      VectorXd com_position,
-      VectorXd com_velocity,
-      VectorXd com_roll_pitch_yaw,
-      VectorXd com_angular_velocity,
-      VectorXi foot_contact_states,
+      VectorXd com_position, // Eigen::VectorXd::Zero(1)
+      VectorXd com_velocity, // Body Frame
+      VectorXd com_roll_pitch_yaw, // 
+      VectorXd com_angular_velocity, // World Frame
+      VectorXi foot_contact_states, 
       VectorXd foot_positions_body_frame,
       VectorXd foot_friction_coeffs,
-      VectorXd desired_com_position,
-      VectorXd desired_com_velocity,
-      VectorXd desired_com_roll_pitch_yaw,
-      VectorXd desired_com_angular_velocity) {
+      VectorXd desired_com_position, // (0, 0, target_height)
+      VectorXd desired_com_velocity, // input
+      VectorXd desired_com_roll_pitch_yaw, // (0, 0, 0)
+      VectorXd desired_com_angular_velocity) { // input
 
   VectorXd error_result;
 
