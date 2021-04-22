@@ -281,9 +281,14 @@ void A1ControlArchitecture::getCommand(void* _command) {
         std::cout << "Swaying Done" << std::endl;
     }
   }
+  // Set boolean to determine if we want to change QP weights
+  bool change_qp_weights_for_walking;
+  if(state_ != A1_STATES::BALANCE || state_ != A1_STATES::STAND) {
+    change_qp_weights_for_walking = true;
+  } else { change_qp_weights_for_walking = false; }
 
   // Get Wholebody control commands
-  main_controller_->getCommand(_command);
+  main_controller_->getCommand(_command, change_qp_weights_for_walking);
   // Save Data
   saveData();
 
