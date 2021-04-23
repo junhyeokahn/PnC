@@ -25,9 +25,10 @@
 #include "Eigen/SparseCore"
 #include <unsupported/Eigen/MatrixFunctions>
 // PnC myOptimizer
-#include <ExternalSource/myOptimizer/osqp/include/osqp.h>
-#include <ExternalSource/myOptimizer/osqp/include/ctrlc.h>
-
+// #include <ExternalSource/myOptimizer/osqp/include/osqp.h>
+// #include <ExternalSource/myOptimizer/osqp/include/ctrlc.h>
+#include <ctrlc.h>
+#include <osqp.h>
 
 // Converts the roll pitchh yaw angle vector to the corresponding rotation
 // matrix.

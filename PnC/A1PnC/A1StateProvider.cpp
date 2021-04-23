@@ -107,7 +107,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   // MPC
   // ---------------------------------------------------------------------------
-  data_manager->RegisterData(&interpolated_mpc_forces, VECT, "MPC Reaction Forces", 12);
+  data_manager->RegisterData(&interpolated_mpc_forces, VECT, "interpolated_mpc_forces", 12);
   // data_manager->RegisterData(&final_reaction_forces, VECT, "WBC Reaction Force Result", 12);
 
   // ---------------------------------------------------------------------------

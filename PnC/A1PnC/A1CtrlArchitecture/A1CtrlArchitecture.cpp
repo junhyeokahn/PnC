@@ -160,11 +160,11 @@ void A1ControlArchitecture::solveMPC() {
 
     // std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
 
-    Eigen::Vector3d com_pos_des; // com_pos;
-    // CoM Position (x,y plane not necessary)
-    // com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = 0.3;
+    Eigen::Vector3d com_pos_des, com_pos;
+    // CoM Position // TODO STATE ESTIMATOR
+    com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = sp_->com_pos[2];
     // CoM Desired Position (x,y plane not necessary)
-    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.3;    
+    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.3;
     // Current CoM Angular Velocity
     Eigen::Vector3d rpy_dot;
     rpy_dot = robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3);
@@ -217,7 +217,7 @@ void A1ControlArchitecture::solveMPC() {
     Eigen::VectorXd tmp; tmp = Eigen::VectorXd::Zero(1);
 
     sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
-        tmp,// com_pos, // com_pos
+        com_pos,//tmp,// com_pos, // com_pos
         com_vel_body_frame, // com_vel_body_frame
         com_rpy_zyx, // RPY in the ZYX sense
         rpy_dot, //com_ang_vel
@@ -228,6 +228,8 @@ void A1ControlArchitecture::solveMPC() {
         sp_->x_y_yaw_vel_des, //com_vel_des
         rpy_des, // rpy_des
         sp_->x_y_yaw_vel_des); // com ang vel des
+
+    // myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Rxn Forces");
 }
 
 void A1ControlArchitecture::getCommand(void* _command) {
@@ -236,7 +238,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
     state_machines_[state_]->firstVisit();
     b_state_first_visit_ = false;
   }
-  if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
+  //if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
     if(mpc_counter >= 6){// Call the MPC at 83.3 Hz
         solveMPC();
         if(sp_->mpc_rxn_forces.size() > 10){
@@ -248,25 +250,26 @@ void A1ControlArchitecture::getCommand(void* _command) {
     } else {++mpc_counter;}
     // Get the interpolated value for reaction forces from previous MPC call
     command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
+    myUtils::pretty_print(command_rxn_forces,std::cout, "interpolated RXN forces");
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
     tmp_rxn_forces[0] = command_rxn_forces[0];
     tmp_rxn_forces[1] = command_rxn_forces[1];
-    tmp_rxn_forces[2] = command_rxn_forces[2];
+    tmp_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[3];
     tmp_rxn_forces[1] = command_rxn_forces[4];
-    tmp_rxn_forces[2] = command_rxn_forces[5];
+    tmp_rxn_forces[2] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[6];
     tmp_rxn_forces[1] = command_rxn_forces[7];
-    tmp_rxn_forces[2] = command_rxn_forces[8];
+    tmp_rxn_forces[2] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[9];
     tmp_rxn_forces[1] = command_rxn_forces[10];
-    tmp_rxn_forces[2] = command_rxn_forces[11];
+    tmp_rxn_forces[2] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
-  }
+  // }
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Swaying
@@ -282,11 +285,11 @@ void A1ControlArchitecture::getCommand(void* _command) {
     }
   }
   // Set boolean to determine if we want to change QP weights
-  bool change_qp_weights_for_walking;
-  if(state_ != A1_STATES::BALANCE || state_ != A1_STATES::STAND) {
+  bool change_qp_weights_for_walking = true;
+  /*if(state_ != A1_STATES::BALANCE || state_ != A1_STATES::STAND) {
     change_qp_weights_for_walking = true;
-  } else { change_qp_weights_for_walking = false; }
-
+  } else { change_qp_weights_for_walking = false; }*/
+  std::cout << "change_qp_weights_for_walking = " << change_qp_weights_for_walking << std::endl;
   // Get Wholebody control commands
   main_controller_->getCommand(_command, change_qp_weights_for_walking);
   // Save Data

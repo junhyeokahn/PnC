@@ -97,8 +97,8 @@ void A1WorldNode::customPreStep() {
   }
 
   for(int i=0; i<12; ++i){
-    trq_cmd_[i+6] = command_->jtrq[i];
-    // trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + command_->jtrq[i];
+    // trq_cmd_[i+6] = command_->jtrq[i];
+    trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + command_->jtrq[i];
     // trq_cmd_[i+6] = kp * (initial_jpos[i] - sensor_data_->q[i]) + kd * (0 - sensor_data_->qdot[i]);
   }
   // myUtils::pretty_print(trq_cmd_, std::cout, "trq_cmd_ [World Node]");
@@ -168,7 +168,7 @@ void A1WorldNode::check_foot_contact_by_pos_(bool& frfoot_contact,
   } else {
     rrfoot_contact = false;
   }
-  std::cout << "A1WorldNode Contact: " << flfoot_contact << ", " << frfoot_contact << ", " << rlfoot_contact << ", " << rrfoot_contact << std::endl;
+  // std::cout << "A1WorldNode Contact: " << flfoot_contact << ", " << frfoot_contact << ", " << rlfoot_contact << ", " << rrfoot_contact << std::endl;
 }
 
 

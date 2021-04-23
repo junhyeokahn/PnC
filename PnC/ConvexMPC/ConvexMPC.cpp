@@ -333,15 +333,28 @@ void ConvexMPC::ResetSolver() { initial_run_ = true; }
 VectorXd ConvexMPC::ComputeContactForces(
       VectorXd com_position, // Eigen::VectorXd::Zero(1)
       VectorXd com_velocity, // Body Frame
-      VectorXd com_roll_pitch_yaw, // 
+      VectorXd com_roll_pitch_yaw, //
       VectorXd com_angular_velocity, // World Frame
-      VectorXi foot_contact_states, 
+      VectorXi foot_contact_states,
       VectorXd foot_positions_body_frame,
       VectorXd foot_friction_coeffs,
       VectorXd desired_com_position, // (0, 0, target_height)
       VectorXd desired_com_velocity, // input
       VectorXd desired_com_roll_pitch_yaw, // (0, 0, 0)
       VectorXd desired_com_angular_velocity) { // input
+
+  // Test the inputs
+  // myUtils::pretty_print(com_position, std::cout, "com_position");
+  // myUtils::pretty_print(com_velocity, std::cout, "com_velocity");
+  // myUtils::pretty_print(com_roll_pitch_yaw, std::cout, "com_roll_pitch_yaw");
+  // myUtils::pretty_print(com_angular_velocity, std::cout, "com_angular_velocity");
+  // myUtils::pretty_print(foot_positions_body_frame, std::cout, "foot_positions_body_frame");
+  // myUtils::pretty_print(foot_friction_coeffs, std::cout, "foot_friction_coeffs");
+  // myUtils::pretty_print(desired_com_position, std::cout, "desired_com_position");
+  // myUtils::pretty_print(desired_com_velocity, std::cout, "desired_com_velocity");
+  // myUtils::pretty_print(desired_com_roll_pitch_yaw, std::cout, "desired_com_roll_pitch_yaw");
+  // myUtils::pretty_print(desired_com_angular_velocity, std::cout, "desired_com_angular_velocity");
+
 
   VectorXd error_result;
 
@@ -351,6 +364,7 @@ VectorXd ConvexMPC::ComputeContactForces(
       AngleAxisd(com_roll_pitch_yaw[0], Vector3d::UnitX()) *
       AngleAxisd(com_roll_pitch_yaw[1], Vector3d::UnitY()) *
       AngleAxisd(com_roll_pitch_yaw[2], Vector3d::UnitZ());
+  // myUtils::pretty_print(com_rotation, std::cout, "com rotation quaternion");
 
   DCHECK_EQ(foot_positions_body_frame.size(), k3Dim * num_legs_);
   foot_positions_base_ = Eigen::Map<const MatrixXd>(
@@ -358,6 +372,8 @@ VectorXd ConvexMPC::ComputeContactForces(
   for (int i = 0; i < num_legs_; ++i) {
       foot_positions_world_.row(i) = com_rotation * foot_positions_base_.row(i);
   }
+  // myUtils::pretty_print(foot_positions_base_, std::cout, "foot_positions_base_");
+  // myUtils::pretty_print(foot_positions_world_, std::cout, "foot_positions_world_");
 
   // Now we can estimate the body height using the world frame foot positions
   // and contact states. We use simple averges leg height here.
@@ -378,6 +394,7 @@ VectorXd ConvexMPC::ComputeContactForces(
             com_x, com_y, com_z, com_angular_velocity[0], com_angular_velocity[1],
             com_angular_velocity[2], com_velocity[0], com_velocity[1],
             com_velocity[2], -kGravity;
+  // myUtils::pretty_print(state_, std::cout, "MPC state_");
   for (int i = 0; i < planning_horizon_; ++i) {
     desired_states_[i * kStateDim + 0] = desired_com_roll_pitch_yaw[0];
     desired_states_[i * kStateDim + 1] = desired_com_roll_pitch_yaw[1];
@@ -403,26 +420,38 @@ VectorXd ConvexMPC::ComputeContactForces(
 
     desired_states_[i * kStateDim + 12] = -kGravity;
   }
+  // myUtils::pretty_print(desired_states_, std::cout, "MPC desired_states_");
+  // std::cout << "desired_states_.size() = " << desired_states_.size() << std::endl;
 
   const Vector3d rpy(com_roll_pitch_yaw[0], com_roll_pitch_yaw[1],
                      com_roll_pitch_yaw[2]);
+  // myUtils::pretty_print(rpy, std::cout, "rpy");
 
   CalculateAMat(rpy, &a_mat_);
+  // myUtils::pretty_print(a_mat_, std::cout, "a_mat_");
 
   rotation_ = ConvertRpyToRot(rpy);
   const Matrix3d inv_inertia_world = rotation_ * inv_inertia_ * rotation_.transpose();
 
   CalculateBMat(inv_mass_, inv_inertia_world, foot_positions_world_, &b_mat_);
+  // myUtils::pretty_print(b_mat_, std::cout, "b_mat_");
 
   CalculateExponentials(a_mat_, b_mat_, timestep_, &ab_concatenated_, &a_exp_,
                         &b_exp_);
+  // myUtils::pretty_print(b_exp_, std::cout, "b_exp_");
 
   CalculateQpMats(a_exp_, b_exp_, qp_weights_single_, alpha_single_,
                   planning_horizon_, &a_qp_, &anb_aux_, &b_qp_, &p_mat_);
+  // myUtils::pretty_print(a_qp_, std::cout, "a_qp_");
+  // myUtils::pretty_print(anb_aux_, std::cout, "anb_aux_");
+  // myUtils::pretty_print(b_qp_, std::cout, "b_qp_");
+  // myUtils::pretty_print(p_mat_, std::cout, "p_mat_");
 
   const MatrixXd state_diff = a_qp_ * state_ - desired_states_;
+  // myUtils::pretty_print(state_diff, std::cout, "state_diff");
 
   q_vec_ = 2 * b_qp_.transpose() * (qp_weights_ * state_diff);
+  // myUtils::pretty_print(q_vec_, std::cout, "q_vec_");
 
   const VectorXd one_vec = VectorXd::Constant(planning_horizon_, 1.0);
   const VectorXd zero_vec = VectorXd::Zero(planning_horizon_);
@@ -438,11 +467,11 @@ VectorXd ConvexMPC::ComputeContactForces(
                             mass_ * kGravity * kMinScale,
                             foot_friction_coeffs[0], planning_horizon_,
                             &constraint_lb_, &constraint_ub_);
-    
+  // myUtils::pretty_print(constraint_ub_, std::cout, "constraint bounds");
 
-    
   UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_, num_legs_,
                           &constraint_);
+  // myUtils::pretty_print(constraint_, std::cout, "constraint matrix");
   foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
                           foot_friction_coeffs[2], foot_friction_coeffs[3];
 
@@ -450,6 +479,10 @@ VectorXd ConvexMPC::ComputeContactForces(
   Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> objective_matrix = p_mat_.sparseView();
   Eigen::VectorXd objective_vector = q_vec_;
   Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> constraint_matrix = constraint_.sparseView();
+
+  // AMBIGUOUS myUtils::pretty_print(objective_matrix, std::cout, "objective_matrix");
+  // myUtils::pretty_print(objective_vector, std::cout, "objective vector");
+  // AMBIGUOUS myUtils::pretty_print(constraint_matrix, std::cout, "constraint_matrix");
 
   int num_variables = constraint_.cols();
   int num_constraints = constraint_.rows();
@@ -462,7 +495,7 @@ VectorXd ConvexMPC::ComputeContactForces(
   settings.adaptive_rho_interval = 25;
   settings.eps_abs = 1e-3;
   settings.eps_rel = 1e-3;
-    
+
   assert(p_mat_.cols()== num_variables);
   assert(p_mat_.rows()== num_variables);
   assert(q_vec_.size()== num_variables);
@@ -489,6 +522,10 @@ VectorXd ConvexMPC::ComputeContactForces(
         const_cast<double*>(objective_matrix_upper_triangle.valuePtr()),
         -1 };
   data.P = &osqp_objective_matrix;
+  for(int i=0; i<objective_matrix_upper_triangle.size(); ++i){}
+  // std::cout << "objective_matrix_upper_triangle.size() = " << objective_matrix_upper_triangle.size() << std::endl;
+  // std::cout << "rows = " << num_constraints << std::endl;
+  // std::cout << "columns = " << num_variables << std::endl;
 
   ::csc osqp_constraint_matrix = {
       constraint_matrix.outerIndexPtr()[num_variables],
@@ -505,7 +542,7 @@ VectorXd ConvexMPC::ComputeContactForces(
   data.u = clipped_upper_bounds.data();
 
   const int return_code = 0;
-    
+
   if (workspace_==0) {
       osqp_setup(&workspace_, &data, &settings);
       initial_run_ = false;
@@ -515,7 +552,7 @@ VectorXd ConvexMPC::ComputeContactForces(
                               num_legs_, &constraint_);
       foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
                               foot_friction_coeffs[2], foot_friction_coeffs[3];
-            
+
       c_int nnzP = objective_matrix_upper_triangle.nonZeros();
 
       c_int nnzA = constraint_matrix.nonZeros();
@@ -523,7 +560,7 @@ VectorXd ConvexMPC::ComputeContactForces(
       int return_code = osqp_update_P_A(
             workspace_, objective_matrix_upper_triangle.valuePtr(), OSQP_NULL, nnzP,
             constraint_matrix.valuePtr(), OSQP_NULL, nnzA);
-        
+
       return_code =
             osqp_update_lin_cost(workspace_, objective_vector.data());
 
@@ -537,9 +574,9 @@ VectorXd ConvexMPC::ComputeContactForces(
         return error_result;
     }
   }
-    
+
   Map<VectorXd> solution(qp_solution_.data(), qp_solution_.size());
-    
+
   if (workspace_->info->status_val== OSQP_SOLVED) {
       solution = -Map<const VectorXd>(workspace_->solution->x, workspace_->data->n);
   } else {
@@ -547,7 +584,7 @@ VectorXd ConvexMPC::ComputeContactForces(
       std::cout << "QP Does not Converge" << std::endl;
       return error_result;
   }
-    
+  // myUtils::pretty_print(qp_solution_, std::cout, "qp solution");
   return qp_solution_;
 
 }
