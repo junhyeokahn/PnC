@@ -31,6 +31,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
 
   x_y_yaw_vel_des = Eigen::VectorXd::Zero(3);
   interpolated_mpc_forces = Eigen::VectorXd::Zero(12);
+  final_reaction_forces = Eigen::VectorXd::Zero(12);
 
   frfoot_pos_des.setZero();
   flfoot_pos_des.setZero();
@@ -78,6 +79,8 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   data_manager->RegisterData(&b_frfoot_contact, INT, "frfoot_contact", 1);
   data_manager->RegisterData(&b_flfoot_contact, INT, "flfoot_contact", 1);
+  data_manager->RegisterData(&b_rlfoot_contact, INT, "rlfoot_contact", 1);
+  data_manager->RegisterData(&b_rrfoot_contact, INT, "rrfoot_contact", 1);
   /*data_manager->RegisterData(&fr_rf, INT, "fr_rf", 1);
   data_manager->RegisterData(&fl_rf, INT, "fl_rf", 1);
   data_manager->RegisterData(&fr_rf_des, INT, "fr_rf_des", 1);
@@ -107,8 +110,8 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   // MPC
   // ---------------------------------------------------------------------------
-  data_manager->RegisterData(&interpolated_mpc_forces, VECT, "interpolated_mpc_forces", 12);
-  // data_manager->RegisterData(&final_reaction_forces, VECT, "WBC Reaction Force Result", 12);
+  data_manager->RegisterData(&interpolated_mpc_forces, VECT, "mpc_rxn_forces", 12);
+   data_manager->RegisterData(&final_reaction_forces, VECT, "wbc_rxn_forces", 12);
 
   // ---------------------------------------------------------------------------
   // Foot

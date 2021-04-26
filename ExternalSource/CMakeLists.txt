@@ -1,6 +1,7 @@
 add_subdirectory(myYaml)
 add_subdirectory(myCDD)
 add_subdirectory(myOptimizer)
+add_subdirectory(myOdometry)
 if(USE_PYBIND11)
   add_subdirectory(pybind11)
 endif()

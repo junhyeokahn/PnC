@@ -250,7 +250,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
     } else {++mpc_counter;}
     // Get the interpolated value for reaction forces from previous MPC call
     command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
-    myUtils::pretty_print(command_rxn_forces,std::cout, "interpolated RXN forces");
+    // myUtils::pretty_print(command_rxn_forces,std::cout, "interpolated RXN forces");
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
     tmp_rxn_forces[0] = command_rxn_forces[0];
@@ -289,7 +289,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   /*if(state_ != A1_STATES::BALANCE || state_ != A1_STATES::STAND) {
     change_qp_weights_for_walking = true;
   } else { change_qp_weights_for_walking = false; }*/
-  std::cout << "change_qp_weights_for_walking = " << change_qp_weights_for_walking << std::endl;
+  // std::cout << "change_qp_weights_for_walking = " << change_qp_weights_for_walking << std::endl;
   // Get Wholebody control commands
   main_controller_->getCommand(_command, change_qp_weights_for_walking);
   // Save Data

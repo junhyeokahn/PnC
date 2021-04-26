@@ -97,9 +97,13 @@ void A1MainController::getCommand(void* _cmd, bool change_weights) {
   wbic_->updateSetting(A_, Ainv_, coriolis_, grav_);
   Eigen::VectorXd Fr_result_;
   wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, Fr_result_, wbic_data_);
-  sp_->final_reaction_forces = Fr_result_;
+  if(Fr_result_.size() < 12){
+      std::cout << "Fr_result_ size wrong" << std::endl;
+  } else {
+      sp_->final_reaction_forces = Fr_result_;
+  }
   // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ [Main Controller]");
-  // myUtils::pretty_print(Fr_res, std::cout, "Fr_res");
+  // myUtils::pretty_print(Fr_result_, std::cout, "Fr_res");
 
   // std::cout << "Robot Mass = " << robot_->getRobotMass() << std::endl;
 
