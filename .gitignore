@@ -37,6 +37,7 @@ ExperimentDataCheck
 ExperimentVideo
 Configuration.h
 drake_binary
+ExternalSource/myOdometry/pronto/pronto_folders/
 *_RESULTS.yaml
 *.pyc
 __pycache__

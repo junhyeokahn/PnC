@@ -17,7 +17,8 @@ target_link_libraries(A1PnC ${DART_LIBRARIES}
                                myTrajectoryManager
                                myFilters
                                myPlanner
-                               myMPC)
+                               myMPC
+                               myOdometry)
 
 install(TARGETS A1PnC DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${a1_pnc_headers} DESTINATION
