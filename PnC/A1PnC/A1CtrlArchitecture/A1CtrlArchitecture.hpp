@@ -48,6 +48,12 @@ class A1ControlArchitecture : public ControlArchitecture {
   A1StateProvider* sp_;
   YAML::Node cfg_;
 
+  void saveMPCSolution(const Eigen::VectorXd com_pos,
+                       const Eigen::VectorXd com_vel_body_frame,
+                       const Eigen::VectorXd com_rpy_zyx,
+                       const Eigen::VectorXd ang_vel,
+                       const Eigen::VectorXd foot_pos_body_frame);
+
   void _InitializeParameters();
   bool b_state_first_visit_;
 
@@ -56,7 +62,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   A1TaskAndForceContainer* taf_container_;
   // Controller Object
   A1MainController* main_controller_;
-  // Add Planner
+  // MPC Planner
   ConvexMPC* mpc_planner_;
 
   // Trajectory Managers
@@ -85,6 +91,7 @@ class A1ControlArchitecture : public ControlArchitecture {
   ReactionForceTrajectoryManager* rxn_force_manager_;
 
   private:
+  int num_mpc_calls;
   double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4;
   int num_legs = 4;
   int _PLANNING_HORIZON_STEPS = 10;

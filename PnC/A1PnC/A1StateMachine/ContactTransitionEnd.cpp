@@ -28,6 +28,7 @@ void ContactTransitionEnd::firstVisit() {
     std::cout << "[Front Left Foot Contact Transition End]" << std::endl;
   }
   ctrl_start_time_ = sp_->curr_time;
+  end_time_ = ramp_time_;
 
   // Ramp Down Reaction force for the upcoming swing foot
   if (state_identity_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
@@ -78,9 +79,11 @@ void ContactTransitionEnd::oneStep() {
 void ContactTransitionEnd::lastVisit() {}
 
 bool ContactTransitionEnd::endOfState() {
+  /*std::cout << "state machine time = " << state_machine_time_ << std::endl;
+  std::cout << "end time = " << end_time_ << std::endl;*/
   // if time exceeds transition time, switch state
   if (state_machine_time_ >= end_time_) {
-    std::cout << "End of Contact Transition End Reachedf" << std::endl;
+    std::cout << "End of Contact Transition End Reached" << std::endl;
     return true;
   } else {
     return false;

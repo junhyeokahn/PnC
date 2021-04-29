@@ -57,7 +57,7 @@ void PointFootTrajectoryManager::initializeSwingFootTrajectory(
     robot_->getBodyNodeCoMIsometry(link_idx_).translation(); // TODO
   Eigen::Vector3d midfoot_pos =
     robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-  midfoot_pos[2] = swing_height_;
+  midfoot_pos[2] = swing_height_ + midfoot_pos[2];
 
   Eigen::Vector3d mid_swing_velocity =
       (end_foot_pos - start_foot_pos) / swing_duration_;

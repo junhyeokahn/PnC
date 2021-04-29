@@ -6,7 +6,7 @@ PointContactSpec::PointContactSpec(RobotSystem* robot, int _link_idx,
     myUtils::pretty_constructor(3, "Point Contact Spec");
 
     link_idx_ = _link_idx;
-    max_Fz_ = 500.;
+    max_Fz_ = 80.;
     mu_ = _mu;
 }
 

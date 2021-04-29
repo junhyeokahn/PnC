@@ -97,6 +97,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // double temp = taf_container_->frfoot_contact_->mu_;
   foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
   mpc_counter = 6;
+  num_mpc_calls = 0;
 
   // Initialize variable for setting contact forces
   command_rxn_forces = Eigen::VectorXd::Zero(12);
@@ -149,15 +150,34 @@ void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
 void A1ControlArchitecture::solveMPC() {
     // Set contact state
-    if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
+    /*if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
     else foot_contact_states[0] = 0;
     if(sp_->b_frfoot_contact) foot_contact_states[1] = 1;
     else foot_contact_states[1] = 0;
     if(sp_->b_rlfoot_contact) foot_contact_states[2] = 1;
     else foot_contact_states[2] = 0;
     if(sp_->b_rrfoot_contact) foot_contact_states[3] = 1;
-    else foot_contact_states[3] = 0;
-
+    else foot_contact_states[3] = 0;*/
+    if(state_ == A1_STATES::BALANCE || state_ == A1_STATES::STAND ||
+       state_ == A1_STATES::FR_CONTACT_TRANSITION_START ||
+       state_ == A1_STATES::FL_CONTACT_TRANSITION_START) {
+        foot_contact_states[0] = 1;
+        foot_contact_states[1] = 1;
+        foot_contact_states[2] = 1;
+        foot_contact_states[3] = 1;
+    }
+    if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
+        foot_contact_states[0] = 0;
+        foot_contact_states[1] = 1;
+        foot_contact_states[2] = 1;
+        foot_contact_states[3] = 0;
+    }
+    if(state_ == A1_STATES::FR_SWING || state_ == A1_STATES::FR_CONTACT_TRANSITION_END) {
+        foot_contact_states[0] = 1;
+        foot_contact_states[1] = 0;
+        foot_contact_states[2] = 0;
+        foot_contact_states[3] = 1;
+    }
     // std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
 
     Eigen::Vector3d com_pos_des, com_pos;
@@ -166,11 +186,11 @@ void A1ControlArchitecture::solveMPC() {
     // CoM Desired Position (x,y plane not necessary)
     com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.3;
     // Current CoM Angular Velocity
-    Eigen::Vector3d rpy_dot;
-    rpy_dot = robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3);
+    Eigen::Vector3d ang_vel;
+    ang_vel = robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3);
     // Desired rpy_dot
-    Eigen::Vector3d rpy_des;
-    rpy_des = Eigen::VectorXd::Zero(3);
+    Eigen::Vector3d ang_vel_des;
+    ang_vel_des = Eigen::VectorXd::Zero(3);
     // Get Foot Positions Body Frame
     Eigen::Vector3d base_in_world =
         robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
@@ -186,7 +206,7 @@ void A1ControlArchitecture::solveMPC() {
     temp_foot_world =
         robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
     rrfoot_body_frame = temp_foot_world - base_in_world;
-    foot_pos_body_frame << 
+    foot_pos_body_frame <<
         flfoot_body_frame[0], flfoot_body_frame[1], flfoot_body_frame[2],
         frfoot_body_frame[0], frfoot_body_frame[1], frfoot_body_frame[2],
         rlfoot_body_frame[0], rlfoot_body_frame[1], rlfoot_body_frame[2],
@@ -213,23 +233,162 @@ void A1ControlArchitecture::solveMPC() {
       com_rpy_zyx[0] = rx; com_rpy_zyx[1] = ry; com_rpy_zyx[2] = rz;
     }
 
-    // Feed a zero vector as com_pos --> use height estimator inside MPC
-    Eigen::VectorXd tmp; tmp = Eigen::VectorXd::Zero(1);
-
     sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
         com_pos,//tmp,// com_pos, // com_pos
         com_vel_body_frame, // com_vel_body_frame
         com_rpy_zyx, // RPY in the ZYX sense
-        rpy_dot, //com_ang_vel
+        ang_vel, //com_ang_vel
         foot_contact_states,  // foot contact_states
         foot_pos_body_frame, //foot_pos_body_frame
         foot_friction_coeffs, //foot_friction_coeffs
         com_pos_des, // com_pos_des
         sp_->x_y_yaw_vel_des, //com_vel_des
-        rpy_des, // rpy_des
+        ang_vel_des, // ang_vel_des
         sp_->x_y_yaw_vel_des); // com ang vel des
 
+    saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame);
+    ++num_mpc_calls;
     // myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Rxn Forces");
+}
+
+void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd com_pos,
+                                            const Eigen::VectorXd com_vel_body_frame,
+                                            const Eigen::VectorXd com_rpy_zyx,
+                                            const Eigen::VectorXd ang_vel,
+                                            const Eigen::VectorXd foot_pos_body_frame) {
+  try {
+    double t_start = sp_->curr_time;
+    double t_end = t_start + _PLANNING_HORIZON_STEPS * _PLANNING_TIMESTEP;
+    double t_step = _PLANNING_TIMESTEP;
+
+    YAML::Node cfg;
+
+    // =====================================================================
+    // Temporal Parameters
+    // =====================================================================
+
+    cfg["temporal_parameters"]["initial_time"] = t_start;
+    cfg["temporal_parameters"]["final_time"] = t_end;
+    cfg["temporal_parameters"]["time_step"] = t_step;
+
+    // =====================================================================
+    // Input Information
+    // =====================================================================
+
+    cfg["input"]["com_pos"] = com_pos;
+    cfg["input"]["com_vel_body_frame"] = com_vel_body_frame;
+    cfg["input"]["com_rpy_zyx"] = com_rpy_zyx;
+    cfg["input"]["ang_vel"] = ang_vel;
+
+    Eigen::VectorXd tmp;
+    tmp = Eigen::VectorXd::Zero(3);
+
+    // x_y_yaw_vel_des
+    tmp[0] = sp_->x_y_yaw_vel_des[0]; tmp[1] = sp_->x_y_yaw_vel_des[1];
+    cfg["input"]["com_vel_des"] = tmp;
+    tmp = Eigen::VectorXd::Zero(3);
+    tmp[2] = sp_->x_y_yaw_vel_des[2];
+    cfg["input"]["yaw_vel_des"] = tmp;
+    // foot pos body frame
+    tmp[0] = foot_pos_body_frame[0]; tmp[1] = foot_pos_body_frame[1]; tmp[2] = foot_pos_body_frame[2];
+    cfg["input"]["flfoot_pos_body_frame"] = tmp;
+    tmp[0] = foot_pos_body_frame[3]; tmp[1] = foot_pos_body_frame[4]; tmp[2] = foot_pos_body_frame[5];
+    cfg["input"]["frfoot_pos_body_frame"] = tmp;
+    tmp[0] = foot_pos_body_frame[6]; tmp[1] = foot_pos_body_frame[7]; tmp[2] = foot_pos_body_frame[8];
+    cfg["input"]["rlfoot_pos_body_frame"] = tmp;
+    tmp[0] = foot_pos_body_frame[9]; tmp[1] = foot_pos_body_frame[10]; tmp[2] = foot_pos_body_frame[11];
+    cfg["input"]["rrfoot_pos_body_frame"] = tmp;
+
+    // =====================================================================
+    // Output Reaction Forces
+    // =====================================================================
+
+    Eigen::VectorXd flfoot_forces; flfoot_forces = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd frfoot_forces; frfoot_forces = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd rlfoot_forces; rlfoot_forces = Eigen::VectorXd::Zero(3);
+    Eigen::VectorXd rrfoot_forces; rrfoot_forces = Eigen::VectorXd::Zero(3);
+
+    // Timestep 1
+    flfoot_forces[0] = sp_->mpc_rxn_forces[0]; flfoot_forces[1] = sp_->mpc_rxn_forces[1]; flfoot_forces[2] = sp_->mpc_rxn_forces[2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[3]; frfoot_forces[1] = sp_->mpc_rxn_forces[4]; frfoot_forces[2] = sp_->mpc_rxn_forces[5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[10];rrfoot_forces[2] = sp_->mpc_rxn_forces[11];
+    cfg["output"]["plan_time_1"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_1"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_1"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_1"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 2
+    flfoot_forces[0] = sp_->mpc_rxn_forces[12+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[12+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[12+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[12+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[12+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[12+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[12+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[12+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[12+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[12+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[12+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[12+11];
+    cfg["output"]["plan_time_2"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_2"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_2"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_2"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 3
+    flfoot_forces[0] = sp_->mpc_rxn_forces[24+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[24+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[24+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[24+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[24+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[24+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[24+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[24+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[24+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[24+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[24+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[24+11];
+    cfg["output"]["plan_time_3"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_3"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_3"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_3"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 4
+    flfoot_forces[0] = sp_->mpc_rxn_forces[36+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[36+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[36+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[36+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[36+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[36+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[36+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[36+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[36+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[36+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[36+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[36+11];
+    cfg["output"]["plan_time_4"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_4"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_4"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_4"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 5
+    flfoot_forces[0] = sp_->mpc_rxn_forces[48+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[48+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[48+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[48+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[48+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[48+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[48+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[48+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[48+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[48+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[48+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[48+11];
+    cfg["output"]["plan_time_5"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_5"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_5"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_5"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 6
+    flfoot_forces[0] = sp_->mpc_rxn_forces[60+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[60+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[60+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[60+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[60+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[60+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[60+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[60+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[60+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[60+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[60+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[60+11];
+    cfg["output"]["plan_time_6"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_6"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_6"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_6"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 7
+    flfoot_forces[0] = sp_->mpc_rxn_forces[72+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[72+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[72+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[72+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[72+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[72+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[72+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[72+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[72+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[72+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[72+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[72+11];
+    cfg["output"]["plan_time_7"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_7"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_7"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_7"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 8
+    flfoot_forces[0] = sp_->mpc_rxn_forces[84+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[84+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[84+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[84+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[84+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[84+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[84+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[84+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[84+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[84+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[84+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[84+11];
+    cfg["output"]["plan_time_8"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_8"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_8"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_8"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 9
+    flfoot_forces[0] = sp_->mpc_rxn_forces[96+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[96+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[96+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[96+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[96+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[96+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[96+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[96+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[96+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[96+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[96+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[96+11];
+    cfg["output"]["plan_time_9"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_9"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_9"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_9"]["rrfoot_forces"] = rrfoot_forces;
+    // Timestep 10
+    flfoot_forces[0] = sp_->mpc_rxn_forces[108+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[108+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[108+2];
+    frfoot_forces[0] = sp_->mpc_rxn_forces[108+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[108+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[108+5];
+    rlfoot_forces[0] = sp_->mpc_rxn_forces[108+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[108+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[108+8];
+    rrfoot_forces[0] = sp_->mpc_rxn_forces[108+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[108+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[108+11];
+    cfg["output"]["plan_time_10"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_10"]["frfoot_forces"] = frfoot_forces;
+    cfg["output"]["plan_time_10"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_10"]["rrfoot_forces"] = rrfoot_forces;
+
+    int plan_step = t_start;
+    std::string full_path = THIS_COM + std::string("ExperimentData/mpc_io/mpc_io_") +
+                            std::to_string(num_mpc_calls) + std::string(".yaml");
+    std::ofstream file_out(full_path);
+    file_out << cfg;
+  } catch (YAML::ParserException& e) {
+      std::cout << e.what() << std::endl;
+  }
+
+
 }
 
 void A1ControlArchitecture::getCommand(void* _command) {
