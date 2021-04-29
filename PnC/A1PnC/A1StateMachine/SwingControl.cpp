@@ -47,7 +47,8 @@ void SwingControl::firstVisit() {
     taf_container_->contact_list_.push_back(taf_container_->rlfoot_contact_);
   }
   // Set control Starting time
-  ctrl_start_time_ = sp_->curr_time; 
+  ctrl_start_time_ = sp_->curr_time;
+  end_time_ = swing_duration_;
 
   // TODO: FOOTSTEP PLANNING --> pass to initializeSwingFootTrajectory
 
@@ -101,6 +102,8 @@ void SwingControl::oneStep() {
 void SwingControl::lastVisit() {}
 
 bool SwingControl::endOfState() {
+  std::cout << "swing state machine time = " << state_machine_time_ << std::endl;
+  std::cout << "swing end time = " << end_time_ << std::endl;
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {

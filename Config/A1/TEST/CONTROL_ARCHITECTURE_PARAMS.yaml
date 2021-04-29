@@ -4,12 +4,12 @@ state_stand_params:
     target_height: 0.3 # target com position from the midfoot position in world frame
 
 state_swing:
-    swing_duration: 0.3
+    swing_duration: 0.20
     swing_time_percent_early_contact_check: 0.75 # Percent of end_time to check if there are early contacts 
     early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
 
 state_contact_transition:
-    ramp_time: 0.15 # time to ramp to max or reduce to 0 normal force
+    ramp_time: 0.025 # time to ramp to max or reduce to 0 normal force
 
 foot_trajectory_parameters:
     swing_height: 0.05 # cm off the ground
@@ -31,7 +31,7 @@ controller_parameters:
 task_parameters:
     # Maximum normal force
     ini_z_force: 0.0
-    max_z_force: 80.
+    max_z_force: 500.
 
     # Task hierarchy weights
     w_task_base_ori: 100

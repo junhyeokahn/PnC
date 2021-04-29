@@ -36,6 +36,7 @@ void ContactTransitionStart::firstVisit() {
     std::cout << "[Front Right Contact Transition Start]" << std::endl;
   }
   ctrl_start_time_ = sp_->curr_time;
+  end_time_ = ramp_time_;
 
   // For all contact transitions, initially ramp up the reaction forces to max
   ctrl_arch_->frfoot_max_normal_force_manager_->initializeRampToMax(
@@ -82,6 +83,8 @@ void ContactTransitionStart::oneStep() {
 void ContactTransitionStart::lastVisit() {}
 
 bool ContactTransitionStart::endOfState() {
+  std::cout << "ctstart state machine time = " << state_machine_time_ << std::endl;
+  std::cout << "ctstart end time = " << end_time_ << std::endl;
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {
