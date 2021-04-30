@@ -102,8 +102,8 @@ void SwingControl::oneStep() {
 void SwingControl::lastVisit() {}
 
 bool SwingControl::endOfState() {
-  std::cout << "swing state machine time = " << state_machine_time_ << std::endl;
-  std::cout << "swing end time = " << end_time_ << std::endl;
+  // std::cout << "swing state machine time = " << state_machine_time_ << std::endl;
+  // std::cout << "swing end time = " << end_time_ << std::endl;
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {

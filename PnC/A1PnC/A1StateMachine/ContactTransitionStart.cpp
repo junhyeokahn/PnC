@@ -83,8 +83,8 @@ void ContactTransitionStart::oneStep() {
 void ContactTransitionStart::lastVisit() {}
 
 bool ContactTransitionStart::endOfState() {
-  std::cout << "ctstart state machine time = " << state_machine_time_ << std::endl;
-  std::cout << "ctstart end time = " << end_time_ << std::endl;
+  // std::cout << "ctstart state machine time = " << state_machine_time_ << std::endl;
+  // std::cout << "ctstart end time = " << end_time_ << std::endl;
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {

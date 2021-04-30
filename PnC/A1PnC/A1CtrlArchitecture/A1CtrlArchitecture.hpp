@@ -56,6 +56,7 @@ class A1ControlArchitecture : public ControlArchitecture {
 
   void _InitializeParameters();
   bool b_state_first_visit_;
+  int state_holder_for_mpc_;
 
  public:
   // Task and Force Containers

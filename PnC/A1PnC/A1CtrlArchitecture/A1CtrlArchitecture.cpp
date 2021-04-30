@@ -1,4 +1,5 @@
 #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
+#include <sys/time.h>
 
 A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
     : ControlArchitecture(_robot) {
@@ -105,6 +106,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Set Starting State
   state_ = A1_STATES::STAND;
   prev_state_ = state_;
+  state_holder_for_mpc_ = state_;
 
   _InitializeParameters();
 }
@@ -398,13 +400,22 @@ void A1ControlArchitecture::getCommand(void* _command) {
     b_state_first_visit_ = false;
   }
   //if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
-    if(mpc_counter >= 6){// Call the MPC at 83.3 Hz
+    if(mpc_counter >= 6 || state_holder_for_mpc_ != state_){// Call the MPC at 83.3 Hz
+        // Start measuring time
+        struct timeval begin, end;
+        gettimeofday(&begin, 0);
         solveMPC();
+        gettimeofday(&end, 0);
+        long seconds = end.tv_sec - begin.tv_sec;
+        long microseconds = end.tv_usec - begin.tv_usec;
+        double elapsed = seconds + microseconds*1e-6;
+        printf("Time measured: %.3f seconds.\n", elapsed);
         if(sp_->mpc_rxn_forces.size() > 10){
           rxn_force_manager_->updateSolution(
                         sp_->curr_time,
                         sp_->mpc_rxn_forces);
           mpc_counter = 0;
+          state_holder_for_mpc_ = state_;
         }
     } else {++mpc_counter;}
     // Get the interpolated value for reaction forces from previous MPC call
