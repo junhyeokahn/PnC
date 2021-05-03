@@ -402,14 +402,14 @@ void A1ControlArchitecture::getCommand(void* _command) {
   //if(state_ != A1_STATES::BALANCE && state_ != A1_STATES::STAND){
     if(mpc_counter >= 6 || state_holder_for_mpc_ != state_){// Call the MPC at 83.3 Hz
         // Start measuring time
-        struct timeval begin, end;
-        gettimeofday(&begin, 0);
+        // struct timeval begin, end;
+        // gettimeofday(&begin, 0);
         solveMPC();
-        gettimeofday(&end, 0);
-        long seconds = end.tv_sec - begin.tv_sec;
-        long microseconds = end.tv_usec - begin.tv_usec;
-        double elapsed = seconds + microseconds*1e-6;
-        printf("Time measured: %.3f seconds.\n", elapsed);
+        // gettimeofday(&end, 0);
+        // long seconds = end.tv_sec - begin.tv_sec;
+        // long microseconds = end.tv_usec - begin.tv_usec;
+        // double elapsed = seconds + microseconds*1e-6;
+        // printf("Time measured: %.3f seconds.\n", elapsed);
         if(sp_->mpc_rxn_forces.size() > 10){
           rxn_force_manager_->updateSolution(
                         sp_->curr_time,
@@ -465,7 +465,31 @@ void A1ControlArchitecture::getCommand(void* _command) {
   } else { change_qp_weights_for_walking = false; }*/
   // std::cout << "change_qp_weights_for_walking = " << change_qp_weights_for_walking << std::endl;
   // Get Wholebody control commands
-  main_controller_->getCommand(_command, change_qp_weights_for_walking);
+  Eigen::VectorXd Fr_result_, Fr_correct_length_result_;
+  Fr_correct_length_result_ = Eigen::VectorXd::Zero(12);
+  Fr_result_ = main_controller_->getCommand(_command, change_qp_weights_for_walking);
+  if(Fr_result_.size() < 12) {
+    // std::cout << "Fr_result_.size() = " << Fr_result_.size() << std::endl;
+    if(state_ == A1_STATES::FL_SWING) {
+        Fr_correct_length_result_[3] = Fr_result_[0];
+        Fr_correct_length_result_[4] = Fr_result_[1];
+        Fr_correct_length_result_[5] = Fr_result_[2];
+        Fr_correct_length_result_[6] = Fr_result_[3];
+        Fr_correct_length_result_[7] = Fr_result_[4];
+        Fr_correct_length_result_[8] = Fr_result_[5];
+    }
+    if(state_ == A1_STATES::FR_SWING) {
+        Fr_correct_length_result_[0] = Fr_result_[0];
+        Fr_correct_length_result_[1] = Fr_result_[1];
+        Fr_correct_length_result_[2] = Fr_result_[2];
+        Fr_correct_length_result_[9] = Fr_result_[3];
+        Fr_correct_length_result_[10] = Fr_result_[4];
+        Fr_correct_length_result_[11] = Fr_result_[5];
+    }
+    sp_->final_reaction_forces = Fr_correct_length_result_;
+  } else {
+    sp_->final_reaction_forces = Fr_result_;
+  }
   // Save Data
   saveData();
 

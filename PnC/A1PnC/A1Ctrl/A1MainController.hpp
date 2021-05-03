@@ -15,7 +15,7 @@ class A1MainController {
                          RobotSystem* _robot);
   virtual ~A1MainController();
 
-  void getCommand(void* _cmd, bool change_weights);
+  Eigen::VectorXd getCommand(void* _cmd, bool change_weights);
   virtual void ctrlInitialization(const YAML::Node& node);
 
  protected:

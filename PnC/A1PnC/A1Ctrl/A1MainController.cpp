@@ -74,7 +74,7 @@ void A1MainController::_PreProcessing_Command() {
   }
 }
 
-void A1MainController::getCommand(void* _cmd, bool change_weights) {
+Eigen::VectorXd A1MainController::getCommand(void* _cmd, bool change_weights) {
   if(change_weights) {
     wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, 0.1);
     wbic_data_->_W_rf = Eigen::VectorXd::Constant(12, 1.);
@@ -97,11 +97,11 @@ void A1MainController::getCommand(void* _cmd, bool change_weights) {
   wbic_->updateSetting(A_, Ainv_, coriolis_, grav_);
   Eigen::VectorXd Fr_result_;
   wbic_->makeTorque(contact_list_, task_list_, tau_cmd_, Fr_result_, wbic_data_);
-  if(Fr_result_.size() < 12){
-      std::cout << "Fr_result_ size wrong" << std::endl;
-  } else {
-      sp_->final_reaction_forces = Fr_result_;
-  }
+  // if(Fr_result_.size() < 12){
+  //     std::cout << "Fr_result_ size wrong" << std::endl;
+  // } else {
+  //     sp_->final_reaction_forces = Fr_result_;
+  // }
   // myUtils::pretty_print(tau_cmd_, std::cout, "tau_cmd_ [Main Controller]");
   // myUtils::pretty_print(Fr_result_, std::cout, "Fr_res");
 
@@ -113,6 +113,8 @@ void A1MainController::getCommand(void* _cmd, bool change_weights) {
     ((A1Command*)_cmd)->q[i] = des_jpos_[i];
     ((A1Command*)_cmd)->qdot[i] = des_jvel_[i];
   }
+
+  return Fr_result_;
 }
 
 void A1MainController::ctrlInitialization(const YAML::Node& node) {
