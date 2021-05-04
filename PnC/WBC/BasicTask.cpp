@@ -93,15 +93,23 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
       Eigen::Quaternion<double> ori_act(
           robot_->getBodyNodeCoMIsometry(link_idx_).linear());
 
-      // myUtils::avoid_quat_jump(ori_des, ori_act);
+      // std::cout << "======================================" << std::endl;
+      // myUtils::pretty_print(_pos_des, std::cout, "pos_des");
+      // myUtils::pretty_print(ori_des, std::cout, "ori_des before");
+      // myUtils::pretty_print(ori_act, std::cout, "ori_act before");
+      myUtils::avoid_quat_jump(ori_des, ori_act);
+      // myUtils::pretty_print(ori_des, std::cout, "ori_des after");
+      // myUtils::pretty_print(ori_act, std::cout, "ori_act after");
 
       Eigen::Quaternion<double> quat_ori_err;
       quat_ori_err = ori_des * (ori_act.inverse());
+      // myUtils::pretty_print(quat_ori_err, std::cout, "quat_ori_err");
       Eigen::Vector3d ori_err;
 
       ori_err = dart::math::quatToExp(quat_ori_err);
+      // myUtils::pretty_print(ori_err, std::cout, "ori_err");
       for (int i = 0; i < 3; ++i) {
-        ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+        // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
       }
       pos_err = ori_err;
 

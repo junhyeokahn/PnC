@@ -84,7 +84,6 @@ void A1Interface::_SaveData(A1SensorData* data, A1Command* cmd) {
     cmd_jvel_[i] = cmd->qdot[i];
     cmd_jpos_[i] = cmd->q[i];
   }
-
 }
 bool A1Interface::_UpdateTestCommand(A1Command* cmd) {
   bool over_limit(false);
