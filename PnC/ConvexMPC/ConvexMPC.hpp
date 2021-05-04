@@ -127,7 +127,8 @@ public:
       Eigen::VectorXd desired_com_position,
       Eigen::VectorXd desired_com_velocity,
       Eigen::VectorXd desired_com_roll_pitch_yaw,
-      Eigen::VectorXd desired_com_angular_velocity);
+      Eigen::VectorXd desired_com_angular_velocity,
+      Eigen::VectorXd &state_progression_);
 
   // Reset the solver so that for the next optimization run the solver is
   // re-initialized.

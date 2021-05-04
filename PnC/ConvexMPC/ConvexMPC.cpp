@@ -341,7 +341,8 @@ VectorXd ConvexMPC::ComputeContactForces(
       VectorXd desired_com_position, // (0, 0, target_height)
       VectorXd desired_com_velocity, // input
       VectorXd desired_com_roll_pitch_yaw, // (0, 0, 0)
-      VectorXd desired_com_angular_velocity) { // input
+      VectorXd desired_com_angular_velocity, // input
+      VectorXd &state_progression_) {
 
   // Test the inputs
   // myUtils::pretty_print(com_position, std::cout, "com_position");
@@ -585,6 +586,10 @@ VectorXd ConvexMPC::ComputeContactForces(
       return error_result;
   }
   // myUtils::pretty_print(qp_solution_, std::cout, "qp solution");
+  // std::cout << "a_qp_ rows, cols = " << a_qp_.rows() << ", " << a_qp_.cols() << std::endl;
+  // std::cout << "b_qp_ rows, cols = " << b_qp_.rows() << ", " << b_qp_.cols() << std::endl;
+  state_progression_ = a_qp_ * state_ + b_qp_ * qp_solution_;
+  // myUtils::pretty_print(state_progression_, std::cout, "state progression");
   return qp_solution_;
 
 }

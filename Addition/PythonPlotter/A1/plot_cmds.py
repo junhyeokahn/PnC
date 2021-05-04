@@ -67,8 +67,11 @@ for i in range(3):
     axes[i, 1].grid(True)
     axes[i, 2].grid(True)
     axes[i, 3].grid(True)
-    # plot_phase(axes[i,0])
-    # plot_phase(axes[i,1])
+    plot_phase(axes[i,0])
+    plot_phase(axes[i,1])
+    plot_phase(axes[i,2])
+    plot_phase(axes[i,3])
+
 fig.suptitle("Joint Pos")
 
 
@@ -106,8 +109,10 @@ for i in range(3):
     axes[i,1].grid(True)
     axes[i, 2].grid(True)
     axes[i, 3].grid(True)
-    # plot_phase(axes[i,0])
-    # plot_phase(axes[i,1])
+    plot_phase(axes[i,0])
+    plot_phase(axes[i,1])
+    plot_phase(axes[i,2])
+    plot_phase(axes[i,3])
 fig.suptitle("Joint Trq Des")
 
 plt.show()

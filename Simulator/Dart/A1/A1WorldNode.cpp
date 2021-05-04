@@ -87,8 +87,10 @@ void A1WorldNode::customPreStep() {
   vel_cmd_.tail(12) = command_->qdot;
 
   Eigen::VectorXd kp(12), kd(12);
-  kp << 80., 80., 120., 80., 80., 120., 80., 80., 120, 80., 80., 120.;
-  kd << 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5.;
+  // kp << 80., 80., 120., 80., 80., 120., 80., 80., 120, 80., 80., 120.;
+  // kd << 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5.;
+  kp << 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5., 5.;
+  kd << 0.1, 0.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1;
 
   static bool temp = true;
   if(temp){
@@ -97,8 +99,8 @@ void A1WorldNode::customPreStep() {
   }
 
   for(int i=0; i<12; ++i){
-    trq_cmd_[i+6] = command_->jtrq[i];
-    // trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + command_->jtrq[i];
+    // trq_cmd_[i+6] = command_->jtrq[i];
+    trq_cmd_[i+6] = kp[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + command_->jtrq[i];
     // trq_cmd_[i+6] = kp * (initial_jpos[i] - sensor_data_->q[i]) + kd * (0 - sensor_data_->qdot[i]);
   }
   // myUtils::pretty_print(trq_cmd_, std::cout, "trq_cmd_ [World Node]");

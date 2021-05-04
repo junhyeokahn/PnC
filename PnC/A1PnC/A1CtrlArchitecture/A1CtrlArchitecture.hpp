@@ -52,7 +52,8 @@ class A1ControlArchitecture : public ControlArchitecture {
                        const Eigen::VectorXd com_vel_body_frame,
                        const Eigen::VectorXd com_rpy_zyx,
                        const Eigen::VectorXd ang_vel,
-                       const Eigen::VectorXd foot_pos_body_frame);
+                       const Eigen::VectorXd foot_pos_body_frame,
+                       const Eigen::VectorXd state_progression_);
 
   void _InitializeParameters();
   bool b_state_first_visit_;

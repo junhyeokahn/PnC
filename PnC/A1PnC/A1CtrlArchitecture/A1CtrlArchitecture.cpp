@@ -186,7 +186,7 @@ void A1ControlArchitecture::solveMPC() {
     // CoM Position // TODO STATE ESTIMATOR
     com_pos[0] = 0; com_pos[1] = 0; com_pos[2] = sp_->com_pos[2];
     // CoM Desired Position (x,y plane not necessary)
-    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.3;
+    com_pos_des[0] = 0; com_pos_des[1] = 0; com_pos_des[2] = 0.20;// TODO
     // Current CoM Angular Velocity
     Eigen::Vector3d ang_vel;
     ang_vel = robot_->getBodyNodeCoMSpatialVelocity(A1BodyNode::trunk).head(3);
@@ -234,6 +234,9 @@ void A1ControlArchitecture::solveMPC() {
       double rx = atan2(rot.row(2)[1], rot.row(2)[2]);
       com_rpy_zyx[0] = rx; com_rpy_zyx[1] = ry; com_rpy_zyx[2] = rz;
     }
+    // Gather the state transition of the MPC
+    Eigen::VectorXd state_progression_;
+    state_progression_ = Eigen::VectorXd::Zero(13 * _PLANNING_HORIZON_STEPS);
 
     sp_->mpc_rxn_forces = mpc_planner_->ComputeContactForces(
         com_pos,//tmp,// com_pos, // com_pos
@@ -246,9 +249,10 @@ void A1ControlArchitecture::solveMPC() {
         com_pos_des, // com_pos_des
         sp_->x_y_yaw_vel_des, //com_vel_des
         ang_vel_des, // ang_vel_des
-        sp_->x_y_yaw_vel_des); // com ang vel des
-
-    saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame);
+        sp_->x_y_yaw_vel_des, // com ang vel des
+        state_progression_); // track the internal MPC state progression
+    saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
+                    state_progression_);
     ++num_mpc_calls;
     // myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Rxn Forces");
 }
@@ -257,7 +261,8 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd com_pos,
                                             const Eigen::VectorXd com_vel_body_frame,
                                             const Eigen::VectorXd com_rpy_zyx,
                                             const Eigen::VectorXd ang_vel,
-                                            const Eigen::VectorXd foot_pos_body_frame) {
+                                            const Eigen::VectorXd foot_pos_body_frame,
+                                            const Eigen::VectorXd state_progression_) {
   try {
     double t_start = sp_->curr_time;
     double t_end = t_start + _PLANNING_HORIZON_STEPS * _PLANNING_TIMESTEP;
@@ -381,6 +386,141 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd com_pos,
     cfg["output"]["plan_time_10"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_10"]["frfoot_forces"] = frfoot_forces;
     cfg["output"]["plan_time_10"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_10"]["rrfoot_forces"] = rrfoot_forces;
 
+    // =====================================================================
+    // MPC Internal State Progression
+    // =====================================================================
+    // Timestep 1
+    cfg["internal_state"]["plan_time_1"]["roll"] = state_progression_[0];
+    cfg["internal_state"]["plan_time_1"]["pitch"] = state_progression_[1];
+    cfg["internal_state"]["plan_time_1"]["yaw"] = state_progression_[2];
+    cfg["internal_state"]["plan_time_1"]["com_x"] = state_progression_[3];
+    cfg["internal_state"]["plan_time_1"]["com_y"] = state_progression_[4];
+    cfg["internal_state"]["plan_time_1"]["com_z"] = state_progression_[5];
+    cfg["internal_state"]["plan_time_1"]["com_ang_vel0"] = state_progression_[6];
+    cfg["internal_state"]["plan_time_1"]["com_ang_vel1"] = state_progression_[7];
+    cfg["internal_state"]["plan_time_1"]["com_ang_vel2"] = state_progression_[8];
+    cfg["internal_state"]["plan_time_1"]["com_x_vel"] = state_progression_[9];
+    cfg["internal_state"]["plan_time_1"]["com_y_vel"] = state_progression_[10];
+    cfg["internal_state"]["plan_time_1"]["com_z_vel"] = state_progression_[11];
+    // Timestep 2
+    cfg["internal_state"]["plan_time_2"]["roll"] = state_progression_[13];
+    cfg["internal_state"]["plan_time_2"]["pitch"] = state_progression_[14];
+    cfg["internal_state"]["plan_time_2"]["yaw"] = state_progression_[15];
+    cfg["internal_state"]["plan_time_2"]["com_x"] = state_progression_[16];
+    cfg["internal_state"]["plan_time_2"]["com_y"] = state_progression_[17];
+    cfg["internal_state"]["plan_time_2"]["com_z"] = state_progression_[18];
+    cfg["internal_state"]["plan_time_2"]["com_ang_vel0"] = state_progression_[19];
+    cfg["internal_state"]["plan_time_2"]["com_ang_vel1"] = state_progression_[20];
+    cfg["internal_state"]["plan_time_2"]["com_ang_vel2"] = state_progression_[21];
+    cfg["internal_state"]["plan_time_2"]["com_x_vel"] = state_progression_[22];
+    cfg["internal_state"]["plan_time_2"]["com_y_vel"] = state_progression_[23];
+    cfg["internal_state"]["plan_time_2"]["com_z_vel"] = state_progression_[24];
+    // Timestep 3
+    cfg["internal_state"]["plan_time_3"]["roll"] = state_progression_[0 + 26];
+    cfg["internal_state"]["plan_time_3"]["pitch"] = state_progression_[1 + 26];
+    cfg["internal_state"]["plan_time_3"]["yaw"] = state_progression_[2 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_x"] = state_progression_[3 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_y"] = state_progression_[4 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_z"] = state_progression_[5 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_ang_vel0"] = state_progression_[6 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_ang_vel1"] = state_progression_[7 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_ang_vel2"] = state_progression_[8 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_x_vel"] = state_progression_[9 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_y_vel"] = state_progression_[10 + 26];
+    cfg["internal_state"]["plan_time_3"]["com_z_vel"] = state_progression_[11 + 26];
+    // Timestep 4
+    cfg["internal_state"]["plan_time_4"]["roll"] = state_progression_[0 + 39];
+    cfg["internal_state"]["plan_time_4"]["pitch"] = state_progression_[1 + 39];
+    cfg["internal_state"]["plan_time_4"]["yaw"] = state_progression_[2 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_x"] = state_progression_[3 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_y"] = state_progression_[4 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_z"] = state_progression_[5 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_ang_vel0"] = state_progression_[6 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_ang_vel1"] = state_progression_[7 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_ang_vel2"] = state_progression_[8 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_x_vel"] = state_progression_[9 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_y_vel"] = state_progression_[10 + 39];
+    cfg["internal_state"]["plan_time_4"]["com_z_vel"] = state_progression_[11 + 39];
+    // Timestep 5
+    cfg["internal_state"]["plan_time_5"]["roll"] = state_progression_[0 + 52];
+    cfg["internal_state"]["plan_time_5"]["pitch"] = state_progression_[1 + 52];
+    cfg["internal_state"]["plan_time_5"]["yaw"] = state_progression_[2 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_x"] = state_progression_[3 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_y"] = state_progression_[4 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_z"] = state_progression_[5 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_ang_vel0"] = state_progression_[6 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_ang_vel1"] = state_progression_[7 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_ang_vel2"] = state_progression_[8 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_x_vel"] = state_progression_[9 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_y_vel"] = state_progression_[10 + 52];
+    cfg["internal_state"]["plan_time_5"]["com_z_vel"] = state_progression_[11 + 52];
+    // Timestep 6
+    cfg["internal_state"]["plan_time_6"]["roll"] = state_progression_[0 + 65];
+    cfg["internal_state"]["plan_time_6"]["pitch"] = state_progression_[1 + 65];
+    cfg["internal_state"]["plan_time_6"]["yaw"] = state_progression_[2 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_x"] = state_progression_[3 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_y"] = state_progression_[4 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_z"] = state_progression_[5 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_ang_vel0"] = state_progression_[6 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_ang_vel1"] = state_progression_[7 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_ang_vel2"] = state_progression_[8 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_x_vel"] = state_progression_[9 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_y_vel"] = state_progression_[10 + 65];
+    cfg["internal_state"]["plan_time_6"]["com_z_vel"] = state_progression_[11 + 65];
+    // Timestep 7
+    cfg["internal_state"]["plan_time_7"]["roll"] = state_progression_[0 + 78];
+    cfg["internal_state"]["plan_time_7"]["pitch"] = state_progression_[1 + 78];
+    cfg["internal_state"]["plan_time_7"]["yaw"] = state_progression_[2 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_x"] = state_progression_[3 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_y"] = state_progression_[4 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_z"] = state_progression_[5 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_ang_vel0"] = state_progression_[6 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_ang_vel1"] = state_progression_[7 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_ang_vel2"] = state_progression_[8 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_x_vel"] = state_progression_[9 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_y_vel"] = state_progression_[10 + 78];
+    cfg["internal_state"]["plan_time_7"]["com_z_vel"] = state_progression_[11 + 78];
+    // Timestep 8
+    cfg["internal_state"]["plan_time_8"]["roll"] = state_progression_[0 + 91];
+    cfg["internal_state"]["plan_time_8"]["pitch"] = state_progression_[1 + 91];
+    cfg["internal_state"]["plan_time_8"]["yaw"] = state_progression_[2 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_x"] = state_progression_[3 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_y"] = state_progression_[4 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_z"] = state_progression_[5 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_ang_vel0"] = state_progression_[6 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_ang_vel1"] = state_progression_[7 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_ang_vel2"] = state_progression_[8 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_x_vel"] = state_progression_[9 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_y_vel"] = state_progression_[10 + 91];
+    cfg["internal_state"]["plan_time_8"]["com_z_vel"] = state_progression_[11 + 91];
+    // Timestep 9
+    cfg["internal_state"]["plan_time_9"]["roll"] = state_progression_[0 + 104];
+    cfg["internal_state"]["plan_time_9"]["pitch"] = state_progression_[1 + 104];
+    cfg["internal_state"]["plan_time_9"]["yaw"] = state_progression_[2 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_x"] = state_progression_[3 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_y"] = state_progression_[4 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_z"] = state_progression_[5 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_ang_vel0"] = state_progression_[6 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_ang_vel1"] = state_progression_[7 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_ang_vel2"] = state_progression_[8 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_x_vel"] = state_progression_[9 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_y_vel"] = state_progression_[10 + 104];
+    cfg["internal_state"]["plan_time_9"]["com_z_vel"] = state_progression_[11 + 104];
+    // Timestep 10
+    cfg["internal_state"]["plan_time_10"]["roll"] = state_progression_[0 + 117];
+    cfg["internal_state"]["plan_time_10"]["pitch"] = state_progression_[1 + 117];
+    cfg["internal_state"]["plan_time_10"]["yaw"] = state_progression_[2 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_x"] = state_progression_[3 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_y"] = state_progression_[4 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_z"] = state_progression_[5 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_ang_vel0"] = state_progression_[6 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_ang_vel1"] = state_progression_[7 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_ang_vel2"] = state_progression_[8 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_x_vel"] = state_progression_[9 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_y_vel"] = state_progression_[10 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_z_vel"] = state_progression_[11 + 117];
+ 
+
     int plan_step = t_start;
     std::string full_path = THIS_COM + std::string("ExperimentData/mpc_io/mpc_io_") +
                             std::to_string(num_mpc_calls) + std::string(".yaml");
@@ -421,26 +561,31 @@ void A1ControlArchitecture::getCommand(void* _command) {
     // Get the interpolated value for reaction forces from previous MPC call
     command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
     // myUtils::pretty_print(command_rxn_forces,std::cout, "interpolated RXN forces");
+
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
     tmp_rxn_forces[0] = command_rxn_forces[0];
-    tmp_rxn_forces[1] = command_rxn_forces[1];
-    tmp_rxn_forces[2] = -command_rxn_forces[2];
+    tmp_rxn_forces[1] = -command_rxn_forces[1];// y frame in MPC is our -y
+    tmp_rxn_forces[2] = -command_rxn_forces[2];// z frame in MPC is our -z
+    command_rxn_forces[1] = -command_rxn_forces[1];
     command_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[3];
-    tmp_rxn_forces[1] = command_rxn_forces[4];
+    tmp_rxn_forces[1] = -command_rxn_forces[4];
     tmp_rxn_forces[2] = -command_rxn_forces[5];
+    command_rxn_forces[4] = -command_rxn_forces[4];
     command_rxn_forces[5] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[6];
-    tmp_rxn_forces[1] = command_rxn_forces[7];
+    tmp_rxn_forces[1] = -command_rxn_forces[7];
     tmp_rxn_forces[2] = -command_rxn_forces[8];
+    command_rxn_forces[7] = -command_rxn_forces[7];
     command_rxn_forces[8] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = command_rxn_forces[9];
-    tmp_rxn_forces[1] = command_rxn_forces[10];
+    tmp_rxn_forces[1] = -command_rxn_forces[10];
     tmp_rxn_forces[2] = -command_rxn_forces[11];
+    command_rxn_forces[10] = -command_rxn_forces[10];
     command_rxn_forces[11] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   // }
