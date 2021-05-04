@@ -53,7 +53,7 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
   N_pre = Nc * N_nx;
 
   // std::cout << "Task list size = " << task_list.size() << std::endl;
-  // myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 1 Position Error");
+  myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 1 Position Error");
   // myUtils::pretty_print(task->vel_des, std::cout, "[KinWBC] Task 1 Vel Des");
     // myUtils::pretty_print(Jt, std::cout, "task Jt");
   // myUtils::pretty_print(Jc, std::cout, "Jc");
@@ -62,7 +62,7 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
   // Eigen::JacobiSVD<Eigen::MatrixXd> svd(JtPre_pinv, Eigen::ComputeThinU | Eigen::ComputeThinV);
   // std::cout << "singular values: " << svd.singularValues() << std::endl;
   // myUtils::pretty_print(JtPre_pinv, std::cout, "JtPre_inv");
-  // myUtils::pretty_print(delta_q, std::cout, "Task 1 delta q");
+  myUtils::pretty_print(delta_q, std::cout, "Task 1 delta q");
   // myUtils::pretty_print(qdot, std::cout, "qdot");
 
   for (int i(1); i < task_list.size(); ++i) {
@@ -82,8 +82,8 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
       prev_delta_q = delta_q;
       prev_qdot = qdot;
 
-      // myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 2 Position Error");
-      // myUtils::pretty_print(delta_q, std::cout, "Task 2 delta q");
+      myUtils::pretty_print(task->pos_err, std::cout, "[KinWBC] Task 2 Position Error");
+      myUtils::pretty_print(delta_q, std::cout, "Task 2 delta q");
   }
 
   for (size_t i(0); i < num_act_joint_; ++i) {
@@ -92,7 +92,9 @@ bool KinWBC::FindConfiguration(const Eigen::VectorXd& curr_config,
   }
   Eigen::VectorXd temp; temp = Jc * qdot;
   // myUtils::pretty_print(temp, std::cout, "Jc * qdot_sol");
-  // myUtils::pretty_print(jpos_cmd, std::cout, "jpos_cmd");
+  myUtils::pretty_print(jpos_cmd, std::cout, "jpos_cmd");
+  std::cout << "-------------------------------------------------------------" << std::endl;
+  std::cout << "-------------------------------------------------------------" << std::endl;
   // Eigen::VectorXd xdot_c = Jc * delta_q;
   // myUtils::pretty_print(xdot_c, std::cout, "contact vel");
      return true;

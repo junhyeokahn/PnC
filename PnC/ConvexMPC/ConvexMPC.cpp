@@ -448,6 +448,7 @@ VectorXd ConvexMPC::ComputeContactForces(
   // myUtils::pretty_print(b_qp_, std::cout, "b_qp_");
   // myUtils::pretty_print(p_mat_, std::cout, "p_mat_");
 
+  // state_diff would have b_qp_ * u, but q_vec_ * u is what we get when we expand the 2 norms
   const MatrixXd state_diff = a_qp_ * state_ - desired_states_;
   // myUtils::pretty_print(state_diff, std::cout, "state_diff");
 
@@ -589,6 +590,8 @@ VectorXd ConvexMPC::ComputeContactForces(
   // std::cout << "a_qp_ rows, cols = " << a_qp_.rows() << ", " << a_qp_.cols() << std::endl;
   // std::cout << "b_qp_ rows, cols = " << b_qp_.rows() << ", " << b_qp_.cols() << std::endl;
   state_progression_ = a_qp_ * state_ + b_qp_ * qp_solution_;
+  // Eigen::VectorXd cost_ = q_vec_ * qp_solution_;
+  // myUtils::pretty_print(cost_, std::cout, "MPC Cost");
   // myUtils::pretty_print(state_progression_, std::cout, "state progression");
   return qp_solution_;
 

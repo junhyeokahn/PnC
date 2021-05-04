@@ -93,14 +93,15 @@ bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
       Eigen::Quaternion<double> ori_act(
           robot_->getBodyNodeCoMIsometry(link_idx_).linear());
 
-      myUtils::avoid_quat_jump(ori_des, ori_act);
+      // myUtils::avoid_quat_jump(ori_des, ori_act);
 
       Eigen::Quaternion<double> quat_ori_err;
       quat_ori_err = ori_des * (ori_act.inverse());
       Eigen::Vector3d ori_err;
+
       ori_err = dart::math::quatToExp(quat_ori_err);
       for (int i = 0; i < 3; ++i) {
-        // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
+        ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
       }
       pos_err = ori_err;
 

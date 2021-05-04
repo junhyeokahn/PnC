@@ -253,6 +253,7 @@ void A1ControlArchitecture::solveMPC() {
         state_progression_); // track the internal MPC state progression
     saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
                     state_progression_);
+    // exit(0);
     ++num_mpc_calls;
     // myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Rxn Forces");
 }
