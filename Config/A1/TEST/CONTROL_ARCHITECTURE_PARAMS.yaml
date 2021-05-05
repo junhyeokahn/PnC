@@ -1,15 +1,15 @@
 state_stand_params:
     target_pos_duration: 1.0 # duration to reach target com position
     time_to_max_normal_force: 0.1 # seconds to maximum normal force. should be small since the robot is unsupported in sim.
-    target_height: 0.2 # target com position from the midfoot position in world frame
+    target_height: 0.25 # target com position from the midfoot position in world frame
 
 state_swing:
-    swing_duration: 0.3
+    swing_duration: 0.2
     swing_time_percent_early_contact_check: 0.75 # Percent of end_time to check if there are early contacts 
     early_contact_force_threshold: 10 # Exit swing when 10 Newtons have been detected on the foot contact sensor
 
 state_contact_transition:
-    ramp_time: 0.025 # time to ramp to max or reduce to 0 normal force
+    ramp_time: 0.02 # time to ramp to max or reduce to 0 normal force
 
 foot_trajectory_parameters:
     swing_height: 0.05 # cm off the ground
@@ -42,11 +42,11 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [100, 100, 100] 
-    kd_com: [10, 10, 10] 
+    kp_com: [100, 100, 200] 
+    kd_com: [10, 10, 20] 
     # Base Orientation
-    kp_base_ori: [100, 100, 100]
-    kd_base_ori: [10, 10, 10]
+    kp_base_ori: [50, 50, 50]
+    kd_base_ori: [5, 5, 5]
     # Foot Linear and orientation gains
     kp_foot_pos: [100, 100, 100]
     kd_foot_pos: [10, 10, 10]

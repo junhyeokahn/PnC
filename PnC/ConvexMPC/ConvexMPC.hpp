@@ -21,7 +21,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <Eigen/LU>
-#include "Eigen/Core"
 #include "Eigen/SparseCore"
 #include <unsupported/Eigen/MatrixFunctions>
 // PnC myOptimizer
@@ -29,6 +28,15 @@
 // #include <ExternalSource/myOptimizer/osqp/include/ctrlc.h>
 #include <ctrlc.h>
 #include <osqp.h>
+
+#define DCHECK_GT(a,b) assert((a)>(b))
+#define DCHECK_EQ(a,b) assert((a)==(b))
+
+#ifdef _WIN32
+typedef __int64 qp_int64;
+#else
+typedef long long qp_int64;
+#endif //_WIN32
 
 // Converts the roll pitchh yaw angle vector to the corresponding rotation
 // matrix.
@@ -128,7 +136,8 @@ public:
       Eigen::VectorXd desired_com_velocity,
       Eigen::VectorXd desired_com_roll_pitch_yaw,
       Eigen::VectorXd desired_com_angular_velocity,
-      Eigen::VectorXd &state_progression_);
+      Eigen::VectorXd& state_progression_,
+      Eigen::VectorXd& des_states_ );
 
   // Reset the solver so that for the next optimization run the solver is
   // re-initialized.

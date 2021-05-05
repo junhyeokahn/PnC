@@ -25,11 +25,11 @@ using Eigen::Vector3d;
 using Eigen::VectorXd;
 using Eigen::VectorXi;
 
-#ifdef _WIN32
-typedef __int64 qp_int64;
-#else
-typedef long long qp_int64;
-#endif //_WIN32
+// #ifdef _WIN32
+// typedef __int64 qp_int64;
+// #else
+// typedef long long qp_int64;
+// #endif //_WIN32
 
 constexpr int k3Dim = 3;
 constexpr double kGravity = 9.8;
@@ -37,8 +37,8 @@ constexpr double kMaxScale = 10;
 constexpr double kMinScale = 0.1;
 constexpr int ConvexMPC::kStateDim;
 
-#define DCHECK_GT(a,b) assert((a)>(b))
-#define DCHECK_EQ(a,b) assert((a)==(b))
+// #define DCHECK_GT(a,b) assert((a)>(b))
+// #define DCHECK_EQ(a,b) assert((a)==(b))
 
 Matrix3d ConvertRpyToRot(const Vector3d& rpy) {
     assert(rpy.size() == k3Dim);
@@ -115,7 +115,7 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
     const int state_dim = ConvexMPC::kStateDim;
     MatrixXd& a_qp = *a_qp_ptr;
     a_qp.block(0, 0, state_dim, state_dim) = a_exp;
-    for (int i = 1; i < horizon - 1; ++i) {
+    for (int i = 1; i < horizon; ++i) {
         a_qp.block<state_dim, state_dim>(i * state_dim, 0) =
             a_exp * a_qp.block<state_dim, state_dim>((i - 1) * state_dim, 0);
     }
@@ -123,6 +123,7 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
     const int action_dim = b_exp.cols();
 
     MatrixXd& anb_aux = *anb_aux_ptr;
+    // Compute auxiliary matrix: [B_exp, A_exp * B_exp, ..., A_exp^(h-1) * B_exp]
     anb_aux.block(0, 0, state_dim, action_dim) = b_exp;
     for (int i = 1; i < horizon; ++i) {
         anb_aux.block(i * state_dim, 0, state_dim, action_dim) =
@@ -141,13 +142,22 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
         }
     }
 
+    // We construct the P matrix by filling in h x h submatrices, each with size
+    // action_dim x action_dim.
+    // The r_th (r in [1, h]) diagonal submatrix of P is:
+    // 2 * sum_{i=0:h-r}(B'A'^i L A^i B) + alpha, where h is the horizon.
+    // The off-diagonal submatrix at row r and column c of P is:
+    // 2 * sum_{i=0:h-c}(B'A'^{h-r-i} L A^{h-c-i} B)
     MatrixXd& p_mat = *p_mat_ptr;
+    // We first compute the submatrices at column h.
     for (int i = horizon - 1; i >= 0; --i) {
         p_mat.block(i * action_dim, (horizon - 1) * action_dim, action_dim,
             action_dim) =
             anb_aux.block((horizon - i - 1) * state_dim, 0, state_dim, action_dim)
             .transpose() *
             qp_weights_single * b_exp;
+       // Fill the lower-triangle part by transposing the corresponding
+       // upper-triangle part.
         if (i != horizon - 1) {
             p_mat.block((horizon - 1) * action_dim, i * action_dim, action_dim,
                 action_dim) =
@@ -158,6 +168,8 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
         }
     }
 
+    // We then fill in the submatrices in the middle by propagating the values
+    // from lower right to upper left.
     for (int i = horizon - 2; i >= 0; --i) {
         // Diagonal block.
         p_mat.block(i * action_dim, i * action_dim, action_dim, action_dim) =
@@ -178,12 +190,15 @@ void CalculateQpMats(const MatrixXd& a_exp, const MatrixXd& b_exp,
                 qp_weights_single *
                 anb_aux.block((horizon - j - 1) * state_dim, 0, state_dim,
                     action_dim);
+            // Fill the lower-triangle part by transposing the corresponding
+            // upper-triangle part.
             p_mat.block(j * action_dim, i * action_dim, action_dim, action_dim) =
                 p_mat.block(i * action_dim, j * action_dim, action_dim, action_dim)
                 .transpose();
         }
     }
 
+    // Multiply by 2 and add alpha.
     p_mat *= 2.0;
     for (int i = 0; i < horizon; ++i) {
         p_mat.block(i * action_dim, i * action_dim, action_dim, action_dim) +=
@@ -342,7 +357,8 @@ VectorXd ConvexMPC::ComputeContactForces(
       VectorXd desired_com_velocity, // input
       VectorXd desired_com_roll_pitch_yaw, // (0, 0, 0)
       VectorXd desired_com_angular_velocity, // input
-      VectorXd &state_progression_) {
+      VectorXd& state_progression_,
+      VectorXd& des_states_) {
 
   // Test the inputs
   // myUtils::pretty_print(com_position, std::cout, "com_position");
@@ -421,6 +437,7 @@ VectorXd ConvexMPC::ComputeContactForces(
 
     desired_states_[i * kStateDim + 12] = -kGravity;
   }
+  des_states_ = desired_states_;
   // myUtils::pretty_print(desired_states_, std::cout, "MPC desired_states_");
   // std::cout << "desired_states_.size() = " << desired_states_.size() << std::endl;
 
@@ -473,10 +490,11 @@ VectorXd ConvexMPC::ComputeContactForces(
 
   UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_, num_legs_,
                           &constraint_);
-  // myUtils::pretty_print(constraint_, std::cout, "constraint matrix");
   foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
                           foot_friction_coeffs[2], foot_friction_coeffs[3];
-
+  
+  // myUtils::pretty_print(constraint_, std::cout, "constraint matrix");
+  
 
   Eigen::SparseMatrix<double, Eigen::ColMajor, qp_int64> objective_matrix = p_mat_.sparseView();
   Eigen::VectorXd objective_vector = q_vec_;
@@ -516,27 +534,23 @@ VectorXd ConvexMPC::ComputeContactForces(
         objective_matrix.triangularView<Eigen::Upper>();
 
   ::csc osqp_objective_matrix = {
-        objective_matrix_upper_triangle.outerIndexPtr()[num_variables],
-        num_variables,
-        num_variables,
-        const_cast<qp_int64*>(objective_matrix_upper_triangle.outerIndexPtr()),
-        const_cast<qp_int64*>(objective_matrix_upper_triangle.innerIndexPtr()),
-        const_cast<double*>(objective_matrix_upper_triangle.valuePtr()),
-        -1 };
+          objective_matrix_upper_triangle.outerIndexPtr()[num_variables],
+          num_variables,
+          num_variables,
+          const_cast<qp_int64*>(objective_matrix_upper_triangle.outerIndexPtr()),
+          const_cast<qp_int64*>(objective_matrix_upper_triangle.innerIndexPtr()),
+          const_cast<double*>(objective_matrix_upper_triangle.valuePtr()),
+          -1 };
   data.P = &osqp_objective_matrix;
-  for(int i=0; i<objective_matrix_upper_triangle.size(); ++i){}
-  // std::cout << "objective_matrix_upper_triangle.size() = " << objective_matrix_upper_triangle.size() << std::endl;
-  // std::cout << "rows = " << num_constraints << std::endl;
-  // std::cout << "columns = " << num_variables << std::endl;
 
   ::csc osqp_constraint_matrix = {
-      constraint_matrix.outerIndexPtr()[num_variables],
-      num_constraints,
-      num_variables,
-      const_cast<qp_int64*>(constraint_matrix.outerIndexPtr()),
-      const_cast<qp_int64*>(constraint_matrix.innerIndexPtr()),
-      const_cast<double*>(constraint_matrix.valuePtr()),
-      -1 };
+          constraint_matrix.outerIndexPtr()[num_variables],
+          num_constraints,
+          num_variables,
+          const_cast<qp_int64*>(constraint_matrix.outerIndexPtr()),
+          const_cast<qp_int64*>(constraint_matrix.innerIndexPtr()),
+          const_cast<double*>(constraint_matrix.valuePtr()),
+          -1 };
   data.A = &osqp_constraint_matrix;
 
   data.q = const_cast<double*>(objective_vector.data());
@@ -550,25 +564,23 @@ VectorXd ConvexMPC::ComputeContactForces(
       initial_run_ = false;
   } else {
 
-      UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_,
-                              num_legs_, &constraint_);
-      foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
-                              foot_friction_coeffs[2], foot_friction_coeffs[3];
+    UpdateConstraintsMatrix(foot_friction_coeffs, planning_horizon_,
+                            num_legs_, &constraint_);
+    foot_friction_coeff_ << foot_friction_coeffs[0], foot_friction_coeffs[1],
+                            foot_friction_coeffs[2], foot_friction_coeffs[3];
+              
+    c_int nnzP = objective_matrix_upper_triangle.nonZeros();
 
-      c_int nnzP = objective_matrix_upper_triangle.nonZeros();
+    c_int nnzA = constraint_matrix.nonZeros();
 
-      c_int nnzA = constraint_matrix.nonZeros();
-
-      int return_code = osqp_update_P_A(
-            workspace_, objective_matrix_upper_triangle.valuePtr(), OSQP_NULL, nnzP,
-            constraint_matrix.valuePtr(), OSQP_NULL, nnzA);
-
-      return_code =
-            osqp_update_lin_cost(workspace_, objective_vector.data());
+    int return_code = osqp_update_P_A(
+              workspace_, objective_matrix_upper_triangle.valuePtr(), OSQP_NULL, nnzP,
+              constraint_matrix.valuePtr(), OSQP_NULL, nnzA);
+          
+    return_code = osqp_update_lin_cost(workspace_, objective_vector.data());
 
 
-      return_code = osqp_update_bounds(
-            workspace_, clipped_lower_bounds.data(), clipped_upper_bounds.data());
+    return_code = osqp_update_bounds(workspace_, clipped_lower_bounds.data(), clipped_upper_bounds.data());
   }
 
   if (osqp_solve(workspace_) != 0) {

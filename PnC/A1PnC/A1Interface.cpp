@@ -37,8 +37,6 @@ A1Interface::A1Interface() : EnvInterface() {
   data_torque_ = Eigen::VectorXd::Zero(robot_->getNumActuatedDofs());
   stop_test_ = false;
 
-  myUtils::color_print(myColor::BoldCyan, border);
-
   DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE,
                                               "running_time", 1);
   DataManager::GetDataManager()->RegisterData(&cmd_jpos_, VECT, "jpos_des",
@@ -51,6 +49,8 @@ A1Interface::A1Interface() : EnvInterface() {
       &data_torque_, VECT, "actual_torque", robot_->getNumActuatedDofs());
 
   _ParameterSetting();
+
+  myUtils::color_print(myColor::BoldCyan, border);
 }
 
 A1Interface::~A1Interface() {

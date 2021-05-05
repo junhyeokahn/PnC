@@ -110,6 +110,7 @@ def read_yaml(fnames,num_plans=10):
                 for i in range(1,num_plans+1):
                     ii = str(i)
                     internal_state_plan_dict = {}
+                    internal_des_state_plan_dict = {}
 
                     internal_state_plan_dict['roll'] = cfg['internal_state']['plan_time_'+ii]['roll']
                     internal_state_plan_dict['pitch'] = cfg['internal_state']['plan_time_'+ii]['pitch']
@@ -128,6 +129,24 @@ def read_yaml(fnames,num_plans=10):
                     internal_state_plan_dict['com_z_vel'] = cfg['internal_state']['plan_time_'+ii]['com_z_vel']
                     
                     fname_dict['internal_state_plan_time_'+ii] = internal_state_plan_dict
+
+                    internal_des_state_plan_dict['roll_des'] = cfg['internal_state']['plan_time_'+ii]['roll_des']
+                    internal_des_state_plan_dict['pitch_des'] = cfg['internal_state']['plan_time_'+ii]['pitch_des']
+                    internal_des_state_plan_dict['yaw_des'] = cfg['internal_state']['plan_time_'+ii]['yaw_des']
+                    
+                    internal_des_state_plan_dict['com_x_des'] = cfg['internal_state']['plan_time_'+ii]['com_x_des']
+                    internal_des_state_plan_dict['com_y_des'] = cfg['internal_state']['plan_time_'+ii]['com_y_des']
+                    internal_des_state_plan_dict['com_z_des'] = cfg['internal_state']['plan_time_'+ii]['com_z_des']
+                    
+                    internal_des_state_plan_dict['com_ang_vel0_des'] = cfg['internal_state']['plan_time_'+ii]['com_ang_vel0_des']
+                    internal_des_state_plan_dict['com_ang_vel1_des'] = cfg['internal_state']['plan_time_'+ii]['com_ang_vel1_des']
+                    internal_des_state_plan_dict['com_ang_vel2_des'] = cfg['internal_state']['plan_time_'+ii]['com_ang_vel2_des']
+                    
+                    internal_des_state_plan_dict['com_x_vel_des'] = cfg['internal_state']['plan_time_'+ii]['com_x_vel_des']
+                    internal_des_state_plan_dict['com_y_vel_des'] = cfg['internal_state']['plan_time_'+ii]['com_y_vel_des']
+                    internal_des_state_plan_dict['com_z_vel_des'] = cfg['internal_state']['plan_time_'+ii]['com_z_vel_des']
+                    
+                    fname_dict['internal_des_state_plan_time_'+ii] = internal_des_state_plan_dict
                 
                 data[fname] = fname_dict
 
@@ -237,6 +256,7 @@ def make_plots(fnames,data,num_plans=10):
             fig5, axes5 = plt.subplots(3,4)
             
             internal_states = np.zeros((len(fname_dict['internal_state_plan_time_1']),num_plans)) #init -> this is sub optimal but python doesnt let you instantiate empty vars
+            internal_des_states = np.zeros((len(fname_dict['internal_des_state_plan_time_1']),num_plans))
             for j in range(1,num_plans+1):
                 jj = str(j)
 
@@ -244,22 +264,39 @@ def make_plots(fnames,data,num_plans=10):
                 internal_states[1,j-1] = fname_dict['internal_state_plan_time_'+jj]['pitch']
                 internal_states[2,j-1] = fname_dict['internal_state_plan_time_'+jj]['yaw']
 
+                internal_des_states[0,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['roll_des']
+                internal_des_states[1,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['pitch_des']
+                internal_des_states[2,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['yaw_des']
+
                 internal_states[3,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_x']
                 internal_states[4,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_y']
                 internal_states[5,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_z']
+
+                internal_des_states[3,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_x_des']
+                internal_des_states[4,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_y_des']
+                internal_des_states[5,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_z_des']
 
                 internal_states[6,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_ang_vel0']
                 internal_states[7,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_ang_vel1']
                 internal_states[8,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_ang_vel2']
 
+                internal_des_states[6,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_ang_vel0_des']
+                internal_des_states[7,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_ang_vel1_des']
+                internal_des_states[8,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_ang_vel2_des']
+
                 internal_states[9,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_x_vel']
                 internal_states[10,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_y_vel']
                 internal_states[11,j-1] = fname_dict['internal_state_plan_time_'+jj]['com_z_vel']
+
+                internal_des_states[9,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_x_vel_des']
+                internal_des_states[10,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_y_vel_des']
+                internal_des_states[11,j-1] = fname_dict['internal_des_state_plan_time_'+jj]['com_z_vel_des']
             
 
             for f in range(3): #XYZ
                 for l in range(4): #set of values
-                    axes5[f,l].scatter(ts,internal_states[f+3*l,:])
+                    axes5[f,l].scatter(ts,internal_states[f+3*l,:], color='blue')
+                    axes5[f,l].scatter(ts,internal_des_states[f+3*l,:], color='red')
                     axes5[f,l].grid(True)
                     title = xyz[f]+' '+labels[l]+" Profile"  #maybe change to be shorter
                     axes5[f,l].set_title(title) 

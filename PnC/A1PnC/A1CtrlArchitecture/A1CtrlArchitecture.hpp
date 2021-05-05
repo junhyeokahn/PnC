@@ -48,12 +48,13 @@ class A1ControlArchitecture : public ControlArchitecture {
   A1StateProvider* sp_;
   YAML::Node cfg_;
 
-  void saveMPCSolution(const Eigen::VectorXd com_pos,
-                       const Eigen::VectorXd com_vel_body_frame,
-                       const Eigen::VectorXd com_rpy_zyx,
-                       const Eigen::VectorXd ang_vel,
-                       const Eigen::VectorXd foot_pos_body_frame,
-                       const Eigen::VectorXd state_progression_);
+  void saveMPCSolution(const Eigen::VectorXd &com_pos,
+                       const Eigen::VectorXd &com_vel_body_frame,
+                       const Eigen::VectorXd &com_rpy_zyx,
+                       const Eigen::VectorXd &ang_vel,
+                       const Eigen::VectorXd &foot_pos_body_frame,
+                       const Eigen::VectorXd &state_progression_,
+                       const Eigen::VectorXd &des_states_);
 
   void _InitializeParameters();
   bool b_state_first_visit_;
@@ -94,7 +95,7 @@ class A1ControlArchitecture : public ControlArchitecture {
 
   private:
   int num_mpc_calls;
-  double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4;
+  double mass = 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4; // 9.713
   int num_legs = 4;
   int _PLANNING_HORIZON_STEPS = 10;
   double _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
