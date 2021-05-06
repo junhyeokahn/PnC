@@ -24,6 +24,8 @@ class SwingControl : public StateMachine {
   A1StateProvider* sp_;
   A1ControlArchitecture* ctrl_arch_;
   A1TaskAndForceContainer* taf_container_;
+  Eigen::VectorXd front_foot_end_pos;
+  Eigen::VectorXd rear_foot_end_pos;
 
   int leg_side_;
 
@@ -35,4 +37,6 @@ class SwingControl : public StateMachine {
   double early_contact_force_threshold_;
 
   void _taskUpdate();
+
+  void footstepPlanner();
 };

@@ -1,5 +1,7 @@
 #include <PnC/A1PnC/A1CtrlArchitecture/A1CtrlArchitecture.hpp>
 #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
+#include <Eigen/Geometry>
+#include <cmath>
 
 SwingControl::SwingControl(const StateIdentifier state_identifier_in,
                            const int _leg_side,
@@ -20,8 +22,10 @@ SwingControl::SwingControl(const StateIdentifier state_identifier_in,
   // Get State Provider
   sp_ = A1StateProvider::getStateProvider(robot_);
 
-  // Set Leg Side
-  leg_side_ = _leg_side;
+  // Initialize footstep vectors
+  front_foot_end_pos = Eigen::VectorXd::Zero(3);
+  rear_foot_end_pos = Eigen::VectorXd::Zero(3);
+
 }
 
 SwingControl::~SwingControl() {}
@@ -51,21 +55,70 @@ void SwingControl::firstVisit() {
   end_time_ = swing_duration_;
 
   // TODO: FOOTSTEP PLANNING --> pass to initializeSwingFootTrajectory
+  footstepPlanner();
 
   // Initialize the swing foot trajectory
   if (state_identity_ == A1_STATES::FL_SWING) {
     // Set Front Left Swing Foot Trajectory
     ctrl_arch_->flfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des, front_foot_end_pos);
     ctrl_arch_->rrfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des, rear_foot_end_pos);
   } else {
     // Set Front Right Swing Foot Trajectory
     ctrl_arch_->frfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des, front_foot_end_pos);
     ctrl_arch_->rlfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des);
+        0.0, swing_duration_, sp_->com_vel_des, rear_foot_end_pos);
   }
+}
+
+void SwingControl::footstepPlanner() {
+    // Decide which two feet we are planning
+    if(state_identity_ == A1_STATES::FL_SWING) {
+      // FL foot First
+      // p_shoulder = body_pos_world + Rz(yaw) * shoulder_pos_body_frame
+      // where Rz(yaw) = rotation matrix translating angular velocity in the
+      // global frame, ω, to the local (body) coordinate
+      Eigen::Vector3d p_shoulder = sp_->com_pos +
+            (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()// TODO: get the Rz(yaw))
+            * (robot_->getBodyNodeCoMIsometry(A1BodyNode::FL_thigh_shoulder).translation()
+            - sp_->com_pos));
+      Eigen::Vector3d p_sym = (swing_duration_ / 2) * sp_->com_vel +
+                              0.03 * (sp_->com_vel -
+                              ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_);
+      Eigen::Vector3d tmp; tmp[0] = 0; tmp[1] = 0; tmp[2] = sp_->x_y_yaw_vel_des[2];
+      Eigen::Vector3d p_cent = 0.5 * std::sqrt(0.3 / 9.81) *
+                               (sp_->com_vel.cross(tmp));
+
+
+      front_foot_end_pos = p_shoulder + p_sym + p_cent;
+
+      p_shoulder = sp_->com_pos + (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
+                   (robot_->getBodyNodeCoMIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
+                   sp_->com_pos));
+      rear_foot_end_pos = p_shoulder + p_sym + p_cent;
+    } else {
+      Eigen::Vector3d p_shoulder = sp_->com_pos +
+            (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()// TODO: get the Rz(yaw))
+            * (robot_->getBodyNodeCoMIsometry(A1BodyNode::FR_thigh_shoulder).translation()
+            - sp_->com_pos));
+      Eigen::Vector3d p_sym = (swing_duration_ / 2) * sp_->com_vel +
+                              0.03 * (sp_->com_vel -
+                              ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_);
+      Eigen::Vector3d tmp; tmp[0] = 0; tmp[1] = 0; tmp[2] = sp_->x_y_yaw_vel_des[2];
+      Eigen::Vector3d p_cent = 0.5 * std::sqrt(0.3 / 9.81) *
+                               (sp_->com_vel.cross(tmp));
+
+
+      front_foot_end_pos = p_shoulder + p_sym + p_cent;
+
+      p_shoulder = sp_->com_pos + (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
+                   (robot_->getBodyNodeCoMIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
+                   sp_->com_pos));
+      rear_foot_end_pos = p_shoulder + p_sym + p_cent;
+    }
+
 }
 
 void SwingControl::_taskUpdate() {

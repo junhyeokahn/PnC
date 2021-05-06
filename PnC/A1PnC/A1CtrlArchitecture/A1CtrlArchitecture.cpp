@@ -698,25 +698,25 @@ void A1ControlArchitecture::getCommand(void* _command) {
 
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
-    tmp_rxn_forces[0] = command_rxn_forces[0];
+    tmp_rxn_forces[0] = -command_rxn_forces[0];
     tmp_rxn_forces[1] = command_rxn_forces[1];// y frame in MPC is our -y
     tmp_rxn_forces[2] = -command_rxn_forces[2];// z frame in MPC is our -z
     // command_rxn_forces[1] = -command_rxn_forces[1];
     command_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
-    tmp_rxn_forces[0] = command_rxn_forces[3];
+    tmp_rxn_forces[0] = -command_rxn_forces[3];
     tmp_rxn_forces[1] = command_rxn_forces[4];
     tmp_rxn_forces[2] = -command_rxn_forces[5];
     // command_rxn_forces[4] = -command_rxn_forces[4];
     command_rxn_forces[5] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
-    tmp_rxn_forces[0] = command_rxn_forces[6];
+    tmp_rxn_forces[0] = -command_rxn_forces[6];
     tmp_rxn_forces[1] = command_rxn_forces[7];
     tmp_rxn_forces[2] = -command_rxn_forces[8];
     // command_rxn_forces[7] = -command_rxn_forces[7];
     command_rxn_forces[8] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
-    tmp_rxn_forces[0] = command_rxn_forces[9];
+    tmp_rxn_forces[0] = -command_rxn_forces[9];
     tmp_rxn_forces[1] = command_rxn_forces[10];
     tmp_rxn_forces[2] = -command_rxn_forces[11];
     // command_rxn_forces[10] = -command_rxn_forces[10];
