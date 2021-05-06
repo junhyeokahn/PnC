@@ -20,8 +20,8 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   _MPC_WEIGHTS = Eigen::VectorXd::Zero(13);
   body_inertia[0] = 0.02; body_inertia[4] = 0.06; body_inertia[8] = 0.07;
   _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
-  _MPC_WEIGHTS[5] = 10.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
-  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 0.2; _MPC_WEIGHTS[10] = 0.2;
+  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 10.; _MPC_WEIGHTS[10] = 5.;
   _MPC_WEIGHTS[11] = 0.1; 
   mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
