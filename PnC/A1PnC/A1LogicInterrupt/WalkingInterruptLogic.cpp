@@ -45,6 +45,7 @@ void WalkingInterruptLogic::processInterrupts() {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
       // Balance" << std::endl;
     }
+    sp_->x_y_yaw_vel_des[0] = 0.05; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = 0.;
   }
   if (b_interrupt_button_a) {
     if (ctrl_arch_->getState() == A1_STATES::BALANCE) {
@@ -102,6 +103,7 @@ void WalkingInterruptLogic::processInterrupts() {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
       // Balance" << std::endl;
     }
+    sp_->x_y_yaw_vel_des[0] = 0.; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = 0.2;
   }
 
   if (b_interrupt_button_e) {
@@ -117,6 +119,7 @@ void WalkingInterruptLogic::processInterrupts() {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
       // Balance" << std::endl;
     }
+    sp_->x_y_yaw_vel_des[0] = 0.; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = -0.2;
   }
 
   if (b_interrupt_button_x) {

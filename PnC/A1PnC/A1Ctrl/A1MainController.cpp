@@ -76,7 +76,7 @@ void A1MainController::_PreProcessing_Command() {
 
 Eigen::VectorXd A1MainController::getCommand(void* _cmd, bool change_weights) {
   if(change_weights) {
-    wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, 0.1);
+    wbic_data_->_W_floating = Eigen::VectorXd::Constant(6, 1.);
     wbic_data_->_W_rf = Eigen::VectorXd::Constant(12, 1.);
   }
   // Update Dynamic Terms, Task Jacobians, and Contact Jacobians

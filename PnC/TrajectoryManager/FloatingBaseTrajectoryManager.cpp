@@ -43,6 +43,7 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
   tmp_com_vel_des[0] = x_y_yaw_vel_des[0];
   tmp_com_vel_des[1] = x_y_yaw_vel_des[1];
   tmp_com_vel_des[2] = 0.;
+  com_vel_des_ = tmp_com_vel_des;
   // Numerical integration to get com_acc_des
   tmp_com_acc_des = (tmp_com_vel_des - prev_com_vel_des_) / 0.002;
   // Update com_task given current position (because we are velocity controlled)
@@ -55,6 +56,8 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
   tmp_base_ang_vel_des[0] = 0.;
   tmp_base_ang_vel_des[1] = 0;
   tmp_base_ang_vel_des[2] = x_y_yaw_vel_des[2];
+  base_ang_vel_des_ = tmp_base_ang_vel_des;
+  // std::cout << "x_y_yaw_vel_des[2] = " << x_y_yaw_vel_des[2] << std::endl;
   // Get base rpy current from robot current quat
   curr_quat = Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());

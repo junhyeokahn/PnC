@@ -20,8 +20,9 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   _MPC_WEIGHTS = Eigen::VectorXd::Zero(13);
   body_inertia[0] = 0.02; body_inertia[4] = 0.06; body_inertia[8] = 0.07;
   _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
-  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
-  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 10.; _MPC_WEIGHTS[10] = 5.;
+  _MPC_WEIGHTS[3] = 5.; _MPC_WEIGHTS[4] = 5.;
+  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 5.; _MPC_WEIGHTS[7] = 0.5;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 15.; _MPC_WEIGHTS[10] = 15.;
   _MPC_WEIGHTS[11] = 0.1; 
   mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
@@ -701,25 +702,25 @@ void A1ControlArchitecture::getCommand(void* _command) {
     tmp_rxn_forces[0] = -command_rxn_forces[0];
     tmp_rxn_forces[1] = command_rxn_forces[1];// y frame in MPC is our -y
     tmp_rxn_forces[2] = -command_rxn_forces[2];// z frame in MPC is our -z
-    // command_rxn_forces[1] = -command_rxn_forces[1];
+    command_rxn_forces[0] = -command_rxn_forces[0];
     command_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[3];
     tmp_rxn_forces[1] = command_rxn_forces[4];
     tmp_rxn_forces[2] = -command_rxn_forces[5];
-    // command_rxn_forces[4] = -command_rxn_forces[4];
+    command_rxn_forces[3] = -command_rxn_forces[3];
     command_rxn_forces[5] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[6];
     tmp_rxn_forces[1] = command_rxn_forces[7];
     tmp_rxn_forces[2] = -command_rxn_forces[8];
-    // command_rxn_forces[7] = -command_rxn_forces[7];
+    command_rxn_forces[6] = -command_rxn_forces[6];
     command_rxn_forces[8] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[9];
     tmp_rxn_forces[1] = command_rxn_forces[10];
     tmp_rxn_forces[2] = -command_rxn_forces[11];
-    // command_rxn_forces[10] = -command_rxn_forces[10];
+    command_rxn_forces[9] = -command_rxn_forces[9];
     command_rxn_forces[11] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   // }

@@ -74,50 +74,98 @@ void SwingControl::firstVisit() {
 }
 
 void SwingControl::footstepPlanner() {
-    // Decide which two feet we are planning
+
+    Eigen::Vector3d p_shoulder, p_symmetry, p_centrifugal, shoulder_location_local_frame;
+    Eigen::MatrixXd Rz;
+    Eigen::Vector3d com_vel_des = ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_;
+
+
     if(state_identity_ == A1_STATES::FL_SWING) {
+      
+      // p_shoulder = com_pos + Rz(yaw) * shoulder_location_local_frame
+      // where Rz(yaw) = rot matrix translating ang vel from 
+      // global frame to local frame
+      Rz = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose(); // TODO: Is this correct?
+      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation() -
+                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+      p_shoulder = sp_->com_pos + (Rz * shoulder_location_local_frame);
+      // p_symmetry = (t_stance / 2) * com_velocity + k * (com_vel - com_vel_des) 
+      p_symmetry = (swing_duration_ / 2) * sp_->com_vel + 0.05 * (sp_->com_vel - com_vel_des); // TODO: Is t_stance = swing_duration_?
+      // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
+      p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
+      
+      front_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+
+      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
+                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+      p_shoulder = sp_->com_pos + (Rz * shoulder_location_local_frame);
+
+      rear_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+    } else {
+      // p_shoulder = com_pos + Rz(yaw) * shoulder_location_local_frame
+      // where Rz(yaw) = rot matrix translating ang vel from 
+      // global frame to local frame
+      Rz = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose(); // TODO: Is this correct?
+      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation() -
+                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+      p_shoulder = sp_->com_pos + (Rz * shoulder_location_local_frame);
+      // p_symmetry = (t_stance / 2) * com_velocity + k * (com_vel - com_vel_des) 
+      p_symmetry = (swing_duration_ / 2) * sp_->com_vel + 0.05 * (sp_->com_vel - com_vel_des); // TODO: Is t_stance = swing_duration_?
+      // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
+      p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
+      
+      front_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+
+      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
+                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
+      p_shoulder = sp_->com_pos + (Rz * shoulder_location_local_frame);
+
+      rear_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+    }
+    // Decide which two feet we are planning
+    /*if(state_identity_ == A1_STATES::FL_SWING) {
       // FL foot First
       // p_shoulder = body_pos_world + Rz(yaw) * shoulder_pos_body_frame
       // where Rz(yaw) = rotation matrix translating angular velocity in the
       // global frame, ω, to the local (body) coordinate
       Eigen::Vector3d p_shoulder = sp_->com_pos +
             (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()// TODO: get the Rz(yaw))
-            * (robot_->getBodyNodeCoMIsometry(A1BodyNode::FL_thigh_shoulder).translation()
+            * (robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation()
             - sp_->com_pos));
-      Eigen::Vector3d p_sym = (swing_duration_ / 2) * sp_->com_vel +
+      Eigen::Vector3d p_sym = (swing_duration_ / 2) * com_vel_tmp +
                               0.03 * (sp_->com_vel -
                               ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_);
       Eigen::Vector3d tmp; tmp[0] = 0; tmp[1] = 0; tmp[2] = sp_->x_y_yaw_vel_des[2];
       Eigen::Vector3d p_cent = 0.5 * std::sqrt(0.3 / 9.81) *
-                               (sp_->com_vel.cross(tmp));
+                               (com_vel_tmp.cross(tmp));
 
 
       front_foot_end_pos = p_shoulder + p_sym + p_cent;
 
       p_shoulder = sp_->com_pos + (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
-                   (robot_->getBodyNodeCoMIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
+                   (robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
                    sp_->com_pos));
       rear_foot_end_pos = p_shoulder + p_sym + p_cent;
     } else {
       Eigen::Vector3d p_shoulder = sp_->com_pos +
             (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()// TODO: get the Rz(yaw))
-            * (robot_->getBodyNodeCoMIsometry(A1BodyNode::FR_thigh_shoulder).translation()
+            * (robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation()
             - sp_->com_pos));
-      Eigen::Vector3d p_sym = (swing_duration_ / 2) * sp_->com_vel +
+      Eigen::Vector3d p_sym = (swing_duration_ / 2) * com_vel_tmp +
                               0.03 * (sp_->com_vel -
                               ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_);
       Eigen::Vector3d tmp; tmp[0] = 0; tmp[1] = 0; tmp[2] = sp_->x_y_yaw_vel_des[2];
       Eigen::Vector3d p_cent = 0.5 * std::sqrt(0.3 / 9.81) *
-                               (sp_->com_vel.cross(tmp));
+                               (com_vel_tmp.cross(tmp));
 
 
       front_foot_end_pos = p_shoulder + p_sym + p_cent;
 
       p_shoulder = sp_->com_pos + (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
-                   (robot_->getBodyNodeCoMIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
+                   (robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
                    sp_->com_pos));
       rear_foot_end_pos = p_shoulder + p_sym + p_cent;
-    }
+    }*/
 
 }
 
