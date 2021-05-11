@@ -24,6 +24,14 @@ void QuadSupportBalance::firstVisit() {
   // Reset Flags
   state_switch_button_trigger_ = false;
   ctrl_start_time_ = sp_->curr_time;
+
+  // =========================================================================
+  // Call useCurrent() on Foot Position Tasks to Initialize for Walking
+  // =========================================================================
+  ctrl_arch_->flfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->frfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rlfoot_trajectory_manager_->useCurrent();
+  ctrl_arch_->rrfoot_trajectory_manager_->useCurrent();
 }
 
 void QuadSupportBalance::_taskUpdate() {

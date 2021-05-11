@@ -61,7 +61,7 @@ def fetch_yaml():
 
 
 
-def read_yaml(fnames,num_plans=10):
+def read_yaml(fnames,num_plans=6):
     if fnames == []:
         print('\n')
         print('error: fnames returns empty list')
@@ -159,7 +159,7 @@ def read_yaml(fnames,num_plans=10):
     return data
 
 
-def make_plots(fnames,data,num_plans=10):
+def make_plots(fnames,data,num_plans=6):
     if fnames == [] or data == []:
         print('\n')
         print('error: fnames returns empty list')
@@ -189,7 +189,7 @@ def make_plots(fnames,data,num_plans=10):
             rlfoot_pos_body_frame = fname_dict['rlfoot_pos_body_frame']
             rrfoot_pos_body_frame = fname_dict['rrfoot_pos_body_frame']
             
-            ts = np.array([fname_dict['initial_time']+k*fname_dict['time_step'] for k in range(10)])
+            ts = np.array([fname_dict['initial_time']+k*fname_dict['time_step'] for k in range(6)])
 
             fig,axes = plt.subplots(3,3)
 
@@ -309,7 +309,7 @@ def make_plots(fnames,data,num_plans=10):
 
 if __name__=='__main__':
     fnames = fetch_yaml()
-    data = read_yaml(fnames,10)
-    make_plots(fnames,data,10)
+    data = read_yaml(fnames,6)
+    make_plots(fnames,data,6)
     
 

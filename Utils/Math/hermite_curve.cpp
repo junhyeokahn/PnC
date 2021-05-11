@@ -33,10 +33,10 @@ double HermiteCurve::evaluate(const double & s_in){
 
 double HermiteCurve::evaluateFirstDerivative(const double & s_in){
   s_ = this->clamp(s_in);
-  return p1*(6*std::pow(s_, 2) - 6*s_)     +
-         p2*(-6*std::pow(s_, 2) + 6*s_)     +
-         v1*(3*std::pow(s_, 2) - 4*s_ + 1) +
-         v2*(3*std::pow(s_, 2) - 2*s_);
+  return p1 * (6 * std::pow(s_, 2) - 6 * s_) +
+         p2 * (-6 * std::pow(s_, 2) + 6 * s_) +
+         v1 * (3 * std::pow(s_, 2) - 4 * s_ + 1) +
+         v2 * (3 * std::pow(s_, 2) - 2 * s_);
 }
 
 double HermiteCurve::evaluateSecondDerivative(const double & s_in){

@@ -18,12 +18,18 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Initialize Planner
   body_inertia = Eigen::VectorXd::Zero(9);
   _MPC_WEIGHTS = Eigen::VectorXd::Zero(13);
-  body_inertia[0] = 0.02; body_inertia[4] = 0.06; body_inertia[8] = 0.07;
-  _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
+  body_inertia[0] = 0.136; body_inertia[4] = 0.7; body_inertia[8] = 0.7;
+
+  // Weights from Sangbae
+  _MPC_WEIGHTS[0] = 1.; _MPC_WEIGHTS[1] = 1.; _MPC_WEIGHTS[2] = 1.; _MPC_WEIGHTS[3] = 0.;
+  _MPC_WEIGHTS[4] = 0.; _MPC_WEIGHTS[5] = 50.; _MPC_WEIGHTS[6] = 0; _MPC_WEIGHTS[7] = 0;
+  _MPC_WEIGHTS[8] = 1; _MPC_WEIGHTS[9] = 1; _MPC_WEIGHTS[10] = 1; _MPC_WEIGHTS[11] = 1;
+  _MPC_WEIGHTS[12] = 0.;
+  /*_MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
   _MPC_WEIGHTS[3] = 5.; _MPC_WEIGHTS[4] = 5.;
   _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 5.; _MPC_WEIGHTS[7] = 0.5;
   _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 15.; _MPC_WEIGHTS[10] = 15.;
-  _MPC_WEIGHTS[11] = 0.1; 
+  _MPC_WEIGHTS[11] = 0.1; */
   mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
                                _PLANNING_TIMESTEP,
@@ -97,7 +103,7 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   rlfoot_body_frame << 0., 0., 0.;
   rrfoot_body_frame << 0., 0., 0.;
   // double temp = taf_container_->frfoot_contact_->mu_;
-  foot_friction_coeffs << 0.3, 0.3, 0.3, 0.3;
+  foot_friction_coeffs << 0.6, 0.6, 0.6, 0.6;
   mpc_counter = 6;
   num_mpc_calls = 0;
 
@@ -152,8 +158,8 @@ A1ControlArchitecture::~A1ControlArchitecture() {
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
 void A1ControlArchitecture::solveMPC() {
-    // Set contact state
-    /*if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
+    /*// Set contact state
+    if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
     else foot_contact_states[0] = 0;
     if(sp_->b_frfoot_contact) foot_contact_states[1] = 1;
     else foot_contact_states[1] = 0;
@@ -224,7 +230,7 @@ void A1ControlArchitecture::solveMPC() {
     // Get roll_pitch_yaw of robot CoM in ZYX
     Eigen::VectorXd com_rpy_zyx;
     com_rpy_zyx = Eigen::VectorXd::Zero(3);
-    if((rot.row(0)[0] == rot.row(1)[0]) && rot.row(0)[0] <= 0.00001) {
+    if((rot.row(1)[0] <= 0.0001) && rot.row(0)[0] <= 0.0001) {
       double rz = 0; double ry = M_PI / 2.; 
       double rx = atan2(rot.row(0)[1], rot.row(1)[1]);
       com_rpy_zyx[0] = rx; com_rpy_zyx[1] = ry; com_rpy_zyx[2] = rz; 
@@ -254,8 +260,8 @@ void A1ControlArchitecture::solveMPC() {
         sp_->x_y_yaw_vel_des, // com ang vel des
         state_progression_, // track the internal MPC state progression
         des_states_ ); // track the internal MPC desired state progression
-    // saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
-    //                 state_progression_, des_states_);
+    saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
+                    state_progression_, des_states_);
     // std::cout << "sp_->mpc_rxn_forces.size() = " << sp_->mpc_rxn_forces.size() << std::endl;
 
     ++num_mpc_calls;
@@ -363,7 +369,7 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd &com_pos,
     rrfoot_forces[0] = sp_->mpc_rxn_forces[60+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[60+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[60+11];
     cfg["output"]["plan_time_6"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_6"]["frfoot_forces"] = frfoot_forces;
     cfg["output"]["plan_time_6"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_6"]["rrfoot_forces"] = rrfoot_forces;
-    // Timestep 7
+    /*// Timestep 7
     flfoot_forces[0] = sp_->mpc_rxn_forces[72+0]; flfoot_forces[1] = sp_->mpc_rxn_forces[72+1]; flfoot_forces[2] = sp_->mpc_rxn_forces[72+2];
     frfoot_forces[0] = sp_->mpc_rxn_forces[72+3]; frfoot_forces[1] = sp_->mpc_rxn_forces[72+4]; frfoot_forces[2] = sp_->mpc_rxn_forces[72+5];
     rlfoot_forces[0] = sp_->mpc_rxn_forces[72+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[72+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[72+8];
@@ -390,7 +396,7 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd &com_pos,
     rlfoot_forces[0] = sp_->mpc_rxn_forces[108+6]; rlfoot_forces[1] = sp_->mpc_rxn_forces[108+7]; rlfoot_forces[2] = sp_->mpc_rxn_forces[108+8];
     rrfoot_forces[0] = sp_->mpc_rxn_forces[108+9]; rrfoot_forces[1] = sp_->mpc_rxn_forces[108+10];rrfoot_forces[2] = sp_->mpc_rxn_forces[108+11];
     cfg["output"]["plan_time_10"]["flfoot_forces"] = flfoot_forces; cfg["output"]["plan_time_10"]["frfoot_forces"] = frfoot_forces;
-    cfg["output"]["plan_time_10"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_10"]["rrfoot_forces"] = rrfoot_forces;
+    cfg["output"]["plan_time_10"]["rlfoot_forces"] = rlfoot_forces; cfg["output"]["plan_time_10"]["rrfoot_forces"] = rrfoot_forces;*/
 
     // =====================================================================
     // MPC Internal State Progression
@@ -551,7 +557,7 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd &com_pos,
     cfg["internal_state"]["plan_time_6"]["com_x_vel_des"] = des_states_[9 + 65];
     cfg["internal_state"]["plan_time_6"]["com_y_vel_des"] = des_states_[10 + 65];
     cfg["internal_state"]["plan_time_6"]["com_z_vel_des"] = des_states_[11 + 65];
-    // Timestep 7
+    /*// Timestep 7
     cfg["internal_state"]["plan_time_7"]["roll"] = state_progression_[0 + 78];
     cfg["internal_state"]["plan_time_7"]["pitch"] = state_progression_[1 + 78];
     cfg["internal_state"]["plan_time_7"]["yaw"] = state_progression_[2 + 78];
@@ -654,7 +660,7 @@ void A1ControlArchitecture::saveMPCSolution(const Eigen::VectorXd &com_pos,
     cfg["internal_state"]["plan_time_10"]["com_ang_vel2_des"] = des_states_[8 + 117];
     cfg["internal_state"]["plan_time_10"]["com_x_vel_des"] = des_states_[9 + 117];
     cfg["internal_state"]["plan_time_10"]["com_y_vel_des"] = des_states_[10 + 117];
-    cfg["internal_state"]["plan_time_10"]["com_z_vel_des"] = des_states_[11 + 117];
+    cfg["internal_state"]["plan_time_10"]["com_z_vel_des"] = des_states_[11 + 117];*/
  
 
     int plan_step = t_start;
@@ -695,8 +701,11 @@ void A1ControlArchitecture::getCommand(void* _command) {
         }
     } else {++mpc_counter;}
     // Get the interpolated value for reaction forces from previous MPC call
-    command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
+    // command_rxn_forces = rxn_force_manager_->getRFSolution(sp_->curr_time);
     // myUtils::pretty_print(command_rxn_forces,std::cout, "interpolated RXN forces");
+    for(int i=0; i<12; ++i){
+        command_rxn_forces[i] = sp_->mpc_rxn_forces[i];
+    }
 
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
