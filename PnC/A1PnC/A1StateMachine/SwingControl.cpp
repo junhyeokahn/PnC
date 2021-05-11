@@ -81,7 +81,7 @@ void SwingControl::footstepPlanner() {
     Eigen::Vector3d com_vel_des = ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_;
 
     // R_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose(); // TODO: Is this correct?
-    quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()); // TODO: Is this correct?
+    quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());// .transpose()); // TODO: Is this correct?
     double yaw;
     yaw = std::atan2( 2 * (quat.w() * quat.z() + quat.x() * quat.y()), 
                            1 - 2 * ( std::pow(quat.y(),2) + std::pow(quat.z(),2)));
@@ -101,13 +101,17 @@ void SwingControl::footstepPlanner() {
       // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
       p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
 
-      front_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+      front_foot_end_pos = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
+            ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose)() *
+            (p_shoulder + p_symmetry + p_centrifugal));
 
       shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
                                       robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
       p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
 
-      rear_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+      rear_foot_end_pos = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
+            ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose)() *
+            (p_shoulder + p_symmetry + p_centrifugal));
     } else {
       // p_shoulder = com_pos + Rz(yaw) * shoulder_location_local_frame
       // where Rz(yaw) = rot matrix translating ang vel from 
@@ -120,13 +124,18 @@ void SwingControl::footstepPlanner() {
       // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
       p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
 
-      front_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+      front_foot_end_pos = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
+            ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose)() *
+            (p_shoulder + p_symmetry + p_centrifugal));
 
       shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
                                       robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
       p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
 
-      rear_foot_end_pos = p_shoulder + p_symmetry + p_centrifugal;
+      rear_foot_end_pos = robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
+            ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose)() *
+            (p_shoulder + p_symmetry + p_centrifugal));
+
     }
     // Decide which two feet we are planning
     /*if(state_identity_ == A1_STATES::FL_SWING) {
