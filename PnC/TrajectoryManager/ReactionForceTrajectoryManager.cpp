@@ -6,7 +6,7 @@ ReactionForceTrajectoryManager::ReactionForceTrajectoryManager(double _mpc_dt,
                                                                RobotSystem* _robot)
             : TrajectoryManagerBase(_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: Reaction Force Interpolation");
-  full_rxn_force_vector = Eigen::VectorXd::Zero(120);
+  full_rxn_force_vector = Eigen::VectorXd::Zero(12 * _mpc_dt);
   single_rxn_force_vector = Eigen::VectorXd::Zero(12);
   mpc_dt = _mpc_dt;
   mpc_horizon = _mpc_horizon;
@@ -45,17 +45,17 @@ Eigen::VectorXd ReactionForceTrajectoryManager::getRFSolution(double curr_time) 
   vec1 = Eigen::VectorXd::Zero(12);
   vec2 = Eigen::VectorXd::Zero(12);
   double percent;
-  if((curr_time - sol_init_time) < 0.025){
+  if((curr_time - sol_init_time) < mpc_dt){
       vec1 = vec_single_force_vectors[0];
       vec2 = vec_single_force_vectors[1];
-      percent = (curr_time - sol_init_time) / 0.025;
+      percent = (curr_time - sol_init_time) / mpc_dt;
   }
-  else if(((curr_time - sol_init_time) >= 0.025) && ((curr_time - sol_init_time) < 0.05)){
+  else if(((curr_time - sol_init_time) >= mpc_dt) && ((curr_time - sol_init_time) < (2 * mpc_dt))){
       vec1 = vec_single_force_vectors[1];
       vec2 = vec_single_force_vectors[2];
-      percent = (curr_time - sol_init_time) / 0.025;
+      percent = (curr_time - sol_init_time) / mpc_dt;
   }
-  else if((curr_time - sol_init_time) >= 0.05){
+  else if((curr_time - sol_init_time) >= (2 * mpc_dt)){
       std::cout << "curr_time - sol_init_time larger than expected" << std::endl;
       exit(0);
   }

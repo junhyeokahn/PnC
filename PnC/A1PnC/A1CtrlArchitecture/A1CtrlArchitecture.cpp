@@ -254,9 +254,10 @@ void A1ControlArchitecture::solveMPC() {
         sp_->x_y_yaw_vel_des, // com ang vel des
         state_progression_, // track the internal MPC state progression
         des_states_ ); // track the internal MPC desired state progression
-    saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
-                    state_progression_, des_states_);
-    // exit(0);
+    // saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
+    //                 state_progression_, des_states_);
+    // std::cout << "sp_->mpc_rxn_forces.size() = " << sp_->mpc_rxn_forces.size() << std::endl;
+
     ++num_mpc_calls;
     // myUtils::pretty_print(sp_->mpc_rxn_forces, std::cout, "MPC Rxn Forces");
 }
@@ -700,25 +701,25 @@ void A1ControlArchitecture::getCommand(void* _command) {
     // Set the Contact Level Rxn Forces
     Eigen::VectorXd tmp_rxn_forces; tmp_rxn_forces = Eigen::VectorXd::Zero(3);
     tmp_rxn_forces[0] = -command_rxn_forces[0];
-    tmp_rxn_forces[1] = command_rxn_forces[1];// y frame in MPC is our -y
+    tmp_rxn_forces[1] = -command_rxn_forces[1];// y frame in MPC is our -y
     tmp_rxn_forces[2] = -command_rxn_forces[2];// z frame in MPC is our -z
     command_rxn_forces[0] = -command_rxn_forces[0];
     command_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[3];
-    tmp_rxn_forces[1] = command_rxn_forces[4];
+    tmp_rxn_forces[1] = -command_rxn_forces[4];
     tmp_rxn_forces[2] = -command_rxn_forces[5];
     command_rxn_forces[3] = -command_rxn_forces[3];
     command_rxn_forces[5] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[6];
-    tmp_rxn_forces[1] = command_rxn_forces[7];
+    tmp_rxn_forces[1] = -command_rxn_forces[7];
     tmp_rxn_forces[2] = -command_rxn_forces[8];
     command_rxn_forces[6] = -command_rxn_forces[6];
     command_rxn_forces[8] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[9];
-    tmp_rxn_forces[1] = command_rxn_forces[10];
+    tmp_rxn_forces[1] = -command_rxn_forces[10];
     tmp_rxn_forces[2] = -command_rxn_forces[11];
     command_rxn_forces[9] = -command_rxn_forces[9];
     command_rxn_forces[11] = -command_rxn_forces[11];

@@ -95,10 +95,12 @@ class A1ControlArchitecture : public ControlArchitecture {
 
   private:
   int num_mpc_calls;
-  double mass = 140. / 9.8;// 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4; // 9.713
+  double mass = 145. / 9.8;// 9.713 + 0.5*(0.696 + 1.013 + 0.166 + 0.06) * 4; // 9.713
   int num_legs = 4;
-  int _PLANNING_HORIZON_STEPS = 10;
-  double _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
+  // int _PLANNING_HORIZON_STEPS = 10;
+  // double _PLANNING_TIMESTEP = 0.025; // WBC running at .002 // We call MPC every .012
+  int _PLANNING_HORIZON_STEPS = 6;
+  double _PLANNING_TIMESTEP = 0.04;
   Eigen::VectorXd body_inertia;
   Eigen::VectorXd _MPC_WEIGHTS;
   Eigen::VectorXi foot_contact_states;
