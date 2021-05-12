@@ -22,9 +22,14 @@ SwingControl::SwingControl(const StateIdentifier state_identifier_in,
   // Get State Provider
   sp_ = A1StateProvider::getStateProvider(robot_);
 
-  // Initialize footstep vectors
+  // Initialize footstep planning vars
   front_foot_end_pos = Eigen::VectorXd::Zero(3);
   rear_foot_end_pos = Eigen::VectorXd::Zero(3);
+  p_sh = Eigen::VectorXd::Zero(3);
+  p_sym = Eigen::VectorXd::Zero(3);
+  p_cent = Eigen::VectorXd::Zero(3);
+  rot_ = Eigen::MatrixXd::Zero(3,3);
+  yaw = 0;
 
 }
 
@@ -55,7 +60,9 @@ void SwingControl::firstVisit() {
   end_time_ = swing_duration_;
 
   // TODO: FOOTSTEP PLANNING --> pass to initializeSwingFootTrajectory
-  footstepPlanner();
+  // footstepPlanner();
+  // sangbaeFootstepPlanner();
+  donghyunFootstepPlanner();
 
   // Initialize the swing foot trajectory
   if (state_identity_ == A1_STATES::FL_SWING) {
@@ -73,7 +80,54 @@ void SwingControl::firstVisit() {
   }
 }
 
+void SwingControl::sangbaeFootstepPlanner() {
+  // Simple heuristic footstep planning described in eq. (33)
+  // Of the paper https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8594448&casa_token=ZJM0G1WzmawAAAAA:EfSF0JLmpfBXRMVNKTeykbQFDOH6Dl1qKObxkT-7Gjb0BK9CwZtty7757lXPj_Jk5PO2X3SJrg&tag=1
+  // Footstep planning is purely 2D in this formulation
+  // p_des = p_ref + v_com * (dt /2)
+  // p_des = desired landing point
+  // p_ref = location on xy plane underneath the hip of the robot
+  // v_com = robot com vel
+  // dt = time the foot will be on ground = 0.05
+  
+}
+
+void SwingControl::donghyunFootstepPlanner() {
+  // Raibert style footstep planner for a quadruped
+  // From his paper https://arxiv.org/pdf/1909.06586
+  // ri_cmd = p_sh + p_sym + p_cent
+  // p_sh = pk + Rz(yaw) * l_i = body_pos_world_time_k + rot_global_to_local * shoulder_i_pos_body
+  // --> p_sh = shoulder_pos_world
+  // p_sym = (t_stance / 2) * v + k * (v - v_cmd) (Raibert heuristic)
+  // p_cent = 0.5 * sqrt(h/g) * (v x omega)
+
+  // In trot we plan either FL+RR or FR+RL
+  if(state_identity_ == A1_STATES::FL_SWING) {
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation();
+    p_sym = ((0.05 / 2) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des));
+
+    front_foot_end_pos = p_sh + p_sym + p_cent;
+
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation();
+    rear_foot_end_pos = p_sh + p_sym + p_cent;
+  } else {
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation();
+    p_sym = ((0.05 / 2) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des));
+
+    front_foot_end_pos = p_sh + p_sym + p_cent;
+
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation();
+    rear_foot_end_pos = p_sh + p_sym + p_cent;
+  }
+
+
+}
+
 void SwingControl::footstepPlanner() {
+    std::cout << "sp_->base_ang_vel_des = " << sp_->base_ang_vel_des << std::endl;
+    std::cout << "sp_->com_vel_des = " << sp_->com_vel_des << std::endl;
     // Create our local footstep planning vectors
     Eigen::VectorXd p_shoulder, p_symmetry, p_centrifugal, shoulder_location_local_frame;
     // Initialize them at 0

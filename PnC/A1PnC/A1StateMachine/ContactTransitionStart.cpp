@@ -38,6 +38,19 @@ void ContactTransitionStart::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
   end_time_ = ramp_time_;
 
+  Eigen::Vector3d tmp; tmp << 0., 0., 5.;
+  if(taf_container_->flfoot_contact_->getRFDesired()[3] < 5.) {
+    taf_container_->flfoot_contact_->setRFDesired(tmp);
+  }
+  if(taf_container_->frfoot_contact_->getRFDesired()[3] < 5.) {
+    taf_container_->frfoot_contact_->setRFDesired(tmp);
+  }
+  if(taf_container_->rlfoot_contact_->getRFDesired()[3] < 5.) {
+    taf_container_->rlfoot_contact_->setRFDesired(tmp);
+  }
+  if(taf_container_->rrfoot_contact_->getRFDesired()[3] < 5.) {
+    taf_container_->rrfoot_contact_->setRFDesired(tmp);
+  }
   // For all contact transitions, initially ramp up the reaction forces to max
   ctrl_arch_->frfoot_max_normal_force_manager_->initializeRampToMax(
       0.0, ramp_time_);

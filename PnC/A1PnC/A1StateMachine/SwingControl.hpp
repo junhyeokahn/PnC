@@ -24,8 +24,6 @@ class SwingControl : public StateMachine {
   A1StateProvider* sp_;
   A1ControlArchitecture* ctrl_arch_;
   A1TaskAndForceContainer* taf_container_;
-  Eigen::VectorXd front_foot_end_pos;
-  Eigen::VectorXd rear_foot_end_pos;
 
   int leg_side_;
 
@@ -39,4 +37,13 @@ class SwingControl : public StateMachine {
   void _taskUpdate();
 
   void footstepPlanner();
+  void sangbaeFootstepPlanner();
+  void donghyunFootstepPlanner();
+
+  // Footstep Planning Variables
+  Eigen::VectorXd p_sh, p_sym, p_cent;
+  Eigen::VectorXd front_foot_end_pos;
+  Eigen::VectorXd rear_foot_end_pos;
+  Eigen::MatrixXd rot_;
+  double yaw;
 };

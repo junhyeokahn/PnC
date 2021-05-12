@@ -18,18 +18,18 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   // Initialize Planner
   body_inertia = Eigen::VectorXd::Zero(9);
   _MPC_WEIGHTS = Eigen::VectorXd::Zero(13);
-  body_inertia[0] = 0.136; body_inertia[4] = 0.7; body_inertia[8] = 0.7;
+  body_inertia[0] = 0.01; body_inertia[4] = 0.03; body_inertia[8] = 0.03;
 
-  // Weights from Sangbae
+  // Stepping in place infinitely weights
+  _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
+  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 10.; _MPC_WEIGHTS[10] = 5.;
+  _MPC_WEIGHTS[11] = 0.1; 
+  /*// Weights from Sangbae
   _MPC_WEIGHTS[0] = 1.; _MPC_WEIGHTS[1] = 1.; _MPC_WEIGHTS[2] = 1.; _MPC_WEIGHTS[3] = 0.;
   _MPC_WEIGHTS[4] = 0.; _MPC_WEIGHTS[5] = 50.; _MPC_WEIGHTS[6] = 0; _MPC_WEIGHTS[7] = 0;
   _MPC_WEIGHTS[8] = 1; _MPC_WEIGHTS[9] = 1; _MPC_WEIGHTS[10] = 1; _MPC_WEIGHTS[11] = 1;
-  _MPC_WEIGHTS[12] = 0.;
-  /*_MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
-  _MPC_WEIGHTS[3] = 5.; _MPC_WEIGHTS[4] = 5.;
-  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 5.; _MPC_WEIGHTS[7] = 0.5;
-  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 15.; _MPC_WEIGHTS[10] = 15.;
-  _MPC_WEIGHTS[11] = 0.1; */
+  _MPC_WEIGHTS[12] = 0.;*/
   mpc_planner_ = new ConvexMPC(mass, body_inertia, num_legs,
                                _PLANNING_HORIZON_STEPS,
                                _PLANNING_TIMESTEP,
@@ -261,7 +261,7 @@ void A1ControlArchitecture::solveMPC() {
         state_progression_, // track the internal MPC state progression
         des_states_ ); // track the internal MPC desired state progression
     saveMPCSolution(com_pos, com_vel_body_frame, com_rpy_zyx, ang_vel, foot_pos_body_frame,
-                    state_progression_, des_states_);
+                   state_progression_, des_states_);
     // std::cout << "sp_->mpc_rxn_forces.size() = " << sp_->mpc_rxn_forces.size() << std::endl;
 
     ++num_mpc_calls;
@@ -713,24 +713,28 @@ void A1ControlArchitecture::getCommand(void* _command) {
     tmp_rxn_forces[1] = -command_rxn_forces[1];// y frame in MPC is our -y
     tmp_rxn_forces[2] = -command_rxn_forces[2];// z frame in MPC is our -z
     command_rxn_forces[0] = -command_rxn_forces[0];
+    command_rxn_forces[1] = -command_rxn_forces[1];
     command_rxn_forces[2] = -command_rxn_forces[2];
     taf_container_->flfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[3];
     tmp_rxn_forces[1] = -command_rxn_forces[4];
     tmp_rxn_forces[2] = -command_rxn_forces[5];
     command_rxn_forces[3] = -command_rxn_forces[3];
+    command_rxn_forces[4] = -command_rxn_forces[4];
     command_rxn_forces[5] = -command_rxn_forces[5];
     taf_container_->frfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[6];
     tmp_rxn_forces[1] = -command_rxn_forces[7];
     tmp_rxn_forces[2] = -command_rxn_forces[8];
     command_rxn_forces[6] = -command_rxn_forces[6];
+    command_rxn_forces[7] = -command_rxn_forces[7];
     command_rxn_forces[8] = -command_rxn_forces[8];
     taf_container_->rlfoot_contact_->setRFDesired(tmp_rxn_forces);
     tmp_rxn_forces[0] = -command_rxn_forces[9];
     tmp_rxn_forces[1] = -command_rxn_forces[10];
     tmp_rxn_forces[2] = -command_rxn_forces[11];
     command_rxn_forces[9] = -command_rxn_forces[9];
+    command_rxn_forces[10] = -command_rxn_forces[10];
     command_rxn_forces[11] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   // }
