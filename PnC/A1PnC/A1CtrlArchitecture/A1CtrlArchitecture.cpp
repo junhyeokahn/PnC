@@ -115,6 +115,12 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   prev_state_ = state_;
   state_holder_for_mpc_ = state_;
 
+  test_counter = 0;
+  sp_->flfoot_landing = robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+  sp_->frfoot_landing = robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+  sp_->rlfoot_landing = robot_->getBodyNodeIsometry(A1BodyNode::RL_foot).translation();
+  sp_->rrfoot_landing = robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation();
+
   _InitializeParameters();
 }
 
@@ -738,6 +744,9 @@ void A1ControlArchitecture::getCommand(void* _command) {
     command_rxn_forces[11] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   // }
+  if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FR_SWING) {
+    state_machines_[state_]->updateTestCounter(test_counter);
+  }
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Swaying
@@ -786,6 +795,8 @@ void A1ControlArchitecture::getCommand(void* _command) {
   }
   // Save Data
   saveData();
+
+  ++test_counter;
 
   // Check for State Transitions
   if (state_machines_[state_]->endOfState()) {

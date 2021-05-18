@@ -23,6 +23,7 @@ class StateMachine {
   virtual bool endOfState() = 0;
   virtual void initialization(const YAML::Node& node) = 0;
   virtual StateIdentifier getNextState() = 0;
+  virtual void updateTestCounter(int _counter) = 0;
 
   StateIdentifier getStateIdentity() { return state_identity_; }
 

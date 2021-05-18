@@ -21,6 +21,8 @@ class QuadSupportStand : public StateMachine {
   double progression_variable() { return state_machine_time_ / smoothing_dur_; }
   StateIdentifier getNextState();
 
+  void updateTestCounter(int _counter) {}
+
  protected:
   A1StateProvider* sp_;
   A1ControlArchitecture* ctrl_arch_;

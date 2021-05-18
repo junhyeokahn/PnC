@@ -103,7 +103,7 @@ void WalkingInterruptLogic::processInterrupts() {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
       // Balance" << std::endl;
     }
-    sp_->x_y_yaw_vel_des[0] = 0.; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = 0.2;
+    sp_->x_y_yaw_vel_des[0] = 0.; sp_->x_y_yaw_vel_des[1] = 0.; sp_->x_y_yaw_vel_des[2] = 0.05;
   }
 
   if (b_interrupt_button_e) {

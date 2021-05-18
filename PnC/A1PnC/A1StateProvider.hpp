@@ -76,6 +76,11 @@ class A1StateProvider {
   double w_rrfoot_fr;
   double w_rlfoot_fr;
 
+  Eigen::Vector3d flfoot_landing;
+  Eigen::Vector3d frfoot_landing;
+  Eigen::Vector3d rlfoot_landing;
+  Eigen::Vector3d rrfoot_landing;
+
   // ---------------------------------------------------------------------------
   // Variables set here
   // ---------------------------------------------------------------------------

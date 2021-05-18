@@ -22,6 +22,8 @@ class ContactTransitionStart : public StateMachine {
   void initialization(const YAML::Node& node);
   StateIdentifier getNextState();
 
+  void updateTestCounter(int _counter) {}
+
  protected:
   A1StateProvider* sp_;
   A1ControlArchitecture* ctrl_arch_;

@@ -20,6 +20,7 @@ class QuadSupportBalance : public StateMachine {
   bool endOfState();
   void initialization(const YAML::Node& node);
   StateIdentifier getNextState();
+  void updateTestCounter(int _counter) {}
 
   void switchStateButtonTrigger() { state_switch_button_trigger_ = true; }
 

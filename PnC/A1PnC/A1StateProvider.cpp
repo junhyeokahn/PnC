@@ -55,6 +55,12 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   com_vel.setZero();
   com_pos_des.setZero();
   com_vel_des.setZero();
+
+  flfoot_landing = Eigen::VectorXd::Zero(3);
+  frfoot_landing = Eigen::VectorXd::Zero(3);
+  rlfoot_landing = Eigen::VectorXd::Zero(3);
+  rrfoot_landing = Eigen::VectorXd::Zero(3);
+
   // est_com_vel.setZero();
 
   /*fr_rf = 0; // Eigen::VectorXd::Zero(6);
@@ -116,7 +122,6 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   // Foot
   // ---------------------------------------------------------------------------
-  // NOT YET USING
   data_manager->RegisterData(&frfoot_pos, VECT3, "frfoot_pos", 3);
   data_manager->RegisterData(&flfoot_pos, VECT3, "flfoot_pos", 3);
   data_manager->RegisterData(&frfoot_vel, VECT3, "frfoot_vel", 3);
@@ -136,6 +141,11 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&rlfoot_pos_des, VECT3, "rlfoot_pos_des", 3);
   data_manager->RegisterData(&rrfoot_vel_des, VECT3, "rrfoot_vel_des", 3);
   data_manager->RegisterData(&rlfoot_vel_des, VECT3, "rlfoot_vel_des", 3);
+
+  data_manager->RegisterData(&flfoot_landing, VECT3, "flfoot_landing", 3);
+  data_manager->RegisterData(&frfoot_landing, VECT3, "frfoot_landing", 3);
+  data_manager->RegisterData(&rlfoot_landing, VECT3, "rlfoot_landing", 3);
+  data_manager->RegisterData(&rrfoot_landing, VECT3, "rrfoot_landing", 3);
 
   // ---------------------------------------------------------------------------
   // COM

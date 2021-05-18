@@ -22,6 +22,7 @@ class ContactTransitionEnd : public StateMachine {
   bool endOfState();
   void initialization(const YAML::Node& node);
   StateIdentifier getNextState();
+  void updateTestCounter(int _counter) {}
 
  protected:
   A1StateProvider* sp_;

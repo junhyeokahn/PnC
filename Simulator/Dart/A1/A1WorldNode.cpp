@@ -97,7 +97,7 @@ void A1WorldNode::customPreStep() {
   for(int i=0; i<12; ++i){
     // trq_cmd_[i+6] = command_->jtrq[i];
     trq_cmd_[i+6] = kp_[i] * (pos_cmd_[i+6] - sensor_data_->q[i]) + kd_[i] * (vel_cmd_[i+6] - sensor_data_->qdot[i]) + command_->jtrq[i];
-    // trq_cmd_[i+6] = kp * (initial_jpos[i] - sensor_data_->q[i]) + kd * (0 - sensor_data_->qdot[i]);
+    // trq_cmd_[i+6] = kp_[i] * (initial_jpos[i] - sensor_data_->q[i]) + kd_[i] * (0 - sensor_data_->qdot[i]);
   }
   // myUtils::pretty_print(trq_cmd_, std::cout, "trq_cmd_ [World Node]");
   // std::cout << "--------------------------------------------------------" << std::endl;

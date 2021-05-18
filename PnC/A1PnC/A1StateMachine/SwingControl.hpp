@@ -19,7 +19,9 @@ class SwingControl : public StateMachine {
   bool endOfState();
   void initialization(const YAML::Node& node);
   StateIdentifier getNextState();
+  void UpdateTestCounter(int _counter);
 
+  void updateTestCounter(int _counter) {test_counter = _counter;}
  protected:
   A1StateProvider* sp_;
   A1ControlArchitecture* ctrl_arch_;
@@ -46,4 +48,6 @@ class SwingControl : public StateMachine {
   Eigen::VectorXd rear_foot_end_pos;
   Eigen::MatrixXd rot_;
   double yaw;
+
+  int test_counter;
 };

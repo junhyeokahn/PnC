@@ -2,6 +2,7 @@
 #include <PnC/A1PnC/A1StateMachine/SwingControl.hpp>
 #include <Eigen/Geometry>
 #include <cmath>
+#include <PnC/A1PnC/A1Definition.hpp>
 
 SwingControl::SwingControl(const StateIdentifier state_identifier_in,
                            const int _leg_side,
@@ -31,9 +32,12 @@ SwingControl::SwingControl(const StateIdentifier state_identifier_in,
   rot_ = Eigen::MatrixXd::Zero(3,3);
   yaw = 0;
 
+  test_counter = 0;
+
 }
 
 SwingControl::~SwingControl() {}
+
 
 void SwingControl::firstVisit() {
 
@@ -122,7 +126,46 @@ void SwingControl::donghyunFootstepPlanner() {
     rear_foot_end_pos = p_sh + p_sym + p_cent;
   }
 
+  /*// TEST FOOTSTEP PLANNER
+  double yaw = sp_->base_ang_vel_des[2] * A1Aux::servo_rate * test_counter;
+  if(state_identity_ == A1_STATES::FL_SWING) {
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation()
+           + (sp_->com_vel_des * A1Aux::servo_rate * test_counter);
+    p_sh[0] = p_sh[0]*cos(yaw) + p_sh[1]*sin(yaw);
+    p_sh[1] = -p_sh[0]*sin(yaw) + p_sh[1]*cos(yaw);
+    p_sym = ((0.05 / 2) * sp_->com_vel_des); // + (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel_des.cross(sp_->base_ang_vel_des));
 
+    front_foot_end_pos = p_sh + p_sym + p_cent;
+
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation()
+           + (sp_->com_vel_des * A1Aux::servo_rate * test_counter);
+    p_sh[0] = p_sh[0]*cos(yaw) + p_sh[1]*sin(yaw);
+    p_sh[1] = -p_sh[0]*sin(yaw) + p_sh[1]*cos(yaw);
+    rear_foot_end_pos = p_sh + p_sym + p_cent;
+
+    sp_->flfoot_landing = front_foot_end_pos;
+    sp_->rrfoot_landing = rear_foot_end_pos;
+  } else {
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation()
+           + (sp_->com_vel_des * A1Aux::servo_rate * test_counter);
+    p_sh[0] = p_sh[0]*cos(yaw) + p_sh[1]*sin(yaw);
+    p_sh[1] = -p_sh[0]*sin(yaw) + p_sh[1]*cos(yaw);
+
+    p_sym = ((0.05 / 2) * sp_->com_vel_des); //+ (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel_des.cross(sp_->base_ang_vel_des));
+
+    front_foot_end_pos = p_sh + p_sym + p_cent;
+
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation()
+           + (sp_->com_vel_des * A1Aux::servo_rate * test_counter);
+    p_sh[0] = p_sh[0]*cos(yaw) + p_sh[1]*sin(yaw);
+    p_sh[1] = -p_sh[0]*sin(yaw) + p_sh[1]*cos(yaw);
+    rear_foot_end_pos = p_sh + p_sym + p_cent;
+    sp_->frfoot_landing = front_foot_end_pos;
+    sp_->rlfoot_landing = rear_foot_end_pos;
+  }
+  // END TEST FOOTSTEP PLANNER*/
 }
 
 void SwingControl::footstepPlanner() {
