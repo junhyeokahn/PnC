@@ -1,0 +1,26 @@
+<?xml version="0.0" ?>
+<robot name="block">
+  <link name="baseLink">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0"/>
+      <contact_cfm value="0.0"/>
+      <contact_erp value="1.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value="1.0"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.6 0.3"/>
+      </geometry>
+       <material name="brown">
+           <color rgba="0.68 0.45 0.35 1.0"/>
+      </material>
+    </visual>
+  </link>
+</robot>
+

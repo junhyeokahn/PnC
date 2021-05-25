@@ -1,0 +1,67 @@
+<?xml version="0.0" ?>
+<robot name="stair">
+  <link name="baseLink">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0"/>
+      <contact_cfm value="0.0"/>
+      <contact_erp value="1.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.15 0 0.1"/>
+       <mass value="1.0"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.175 0 0.05"/>
+      <geometry>
+        <box size="0.35 0.6 0.1"/>
+      </geometry>
+       <material name="brown">
+           <color rgba="0.68 0.45 0.35 1.0"/>
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin rpy="0 0 0" xyz="0.175 0 0.05"/>-->
+      <!--<geometry>-->
+        <!--<box size="0.35 0.6 0.1"/>-->
+      <!--</geometry>-->
+    <!--</collision>-->
+
+  </link>
+  <joint name="j0" type="fixed">
+      <origin rpy="0 0 0" xyz="0.35 0 0."/>
+      <axis rpy="0 0 0" xyz="0 0 1"/>
+      <parent link="baseLink"/>
+      <child link="secondLink"/>
+  </joint>
+  <link name="secondLink">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0"/>
+      <contact_cfm value="0.0"/>
+      <contact_erp value="1.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.175 0 0.1"/>
+       <mass value="1.0"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0.175 0 0.1"/>
+      <geometry>
+        <box size="0.35 0.6 0.2"/>
+      </geometry>
+       <material name="brown2">
+           <color rgba="0.545 0.27 0.074 1.0"/>
+      </material>
+    </visual>
+    <!--<collision>-->
+      <!--<origin rpy="0 0 0" xyz="0.175 0 0.1"/>-->
+      <!--<geometry>-->
+        <!--<box size="0.35 0.6 0.2"/>-->
+      <!--</geometry>-->
+    <!--</collision>-->
+  </link>
+</robot>
+
