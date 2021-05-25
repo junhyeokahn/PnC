@@ -1,9 +1,0 @@
-[submodule "cmake"]
-	path = cmake
-	url = https://github.com/junhyeokahn/cmake.git
-[submodule "ExternalSource/pybind11"]
-	path = ExternalSource/pybind11
-	url = https://github.com/junhyeokahn/pybind11.git
-[submodule "ReinforcementLearning/baselines"]
-	path = ReinforcementLearning/baselines
-	url = https://github.com/junhyeokahn/baselines.git
