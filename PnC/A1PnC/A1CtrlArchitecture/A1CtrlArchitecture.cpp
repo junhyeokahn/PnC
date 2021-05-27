@@ -744,9 +744,9 @@ void A1ControlArchitecture::getCommand(void* _command) {
     command_rxn_forces[11] = -command_rxn_forces[11];
     taf_container_->rrfoot_contact_->setRFDesired(tmp_rxn_forces);
   // }
-  if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FR_SWING) {
-    state_machines_[state_]->updateTestCounter(test_counter);
-  }
+  // if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FR_SWING) {
+  //   state_machines_[state_]->updateTestCounter(test_counter);
+  // }
   // Update State Machine
   state_machines_[state_]->oneStep();
   // Swaying

@@ -61,7 +61,8 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
   // Get base rpy current from robot current quat
   curr_quat = Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
-  curr_quat_vec << curr_quat.w(), curr_quat.x(), curr_quat.y(), curr_quat.z();
+  // curr_quat_vec << curr_quat.w(), curr_quat.x(), curr_quat.y(), curr_quat.z();
+  curr_quat_vec << 1., 0., 0., 0.;
   curr_rpy = toRPY(Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()));
   // Numerically integrate to get base_ang_acc_des

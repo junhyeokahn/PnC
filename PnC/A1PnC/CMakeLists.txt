@@ -8,6 +8,8 @@ file(GLOB a1_task_headers "A1Task/*.hpp")
 file(GLOB a1_state_machine_headers "A1StateMachine/*.hpp")
 file(GLOB a1_ctrl_headers "A1Ctrl/*.hpp")
 
+file(GLOB a1_mpcctrl_headers "A1MPCCtrl/*.hpp")
+
 
 add_library(A1PnC SHARED ${sources})
 target_link_libraries(A1PnC ${DART_LIBRARIES}
@@ -39,3 +41,5 @@ install(FILES ${a1_state_machine_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1StateMachine")
 install(FILES ${a1_ctrl_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1Ctrl")
+install(FILES ${a1_mpcctrl_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/PnC/A1PnC/A1MPCCtrl")

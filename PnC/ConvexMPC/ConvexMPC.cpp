@@ -601,7 +601,7 @@ VectorXd ConvexMPC::ComputeContactForces(
   // myUtils::pretty_print(qp_solution_, std::cout, "qp solution");
   // std::cout << "a_qp_ rows, cols = " << a_qp_.rows() << ", " << a_qp_.cols() << std::endl;
   // std::cout << "b_qp_ rows, cols = " << b_qp_.rows() << ", " << b_qp_.cols() << std::endl;
-  state_progression_ = a_qp_ * state_ + b_qp_ * qp_solution_;
+  state_progression_ = a_qp_ * state_ + b_qp_ * -qp_solution_;
   // Eigen::VectorXd cost_ = q_vec_ * qp_solution_;
   // myUtils::pretty_print(cost_, std::cout, "MPC Cost");
   // myUtils::pretty_print(state_progression_, std::cout, "state progression");
