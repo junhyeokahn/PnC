@@ -93,10 +93,10 @@ bool ContactTransitionEnd::endOfState() {
 StateIdentifier ContactTransitionEnd::getNextState() {
   if (state_identity_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
     // Switch to left leg swing
-    return A1_STATES::FL_SWING;
+    return A1_STATES::FL_HALF_SWING;
   } else {
     // Switch to right leg swing
-    return A1_STATES::FR_SWING;
+    return A1_STATES::FR_HALF_SWING;
   }
 }
 

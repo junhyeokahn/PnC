@@ -27,10 +27,12 @@ constexpr int STAND = 0;
 constexpr int BALANCE = 1;
 constexpr int FL_CONTACT_TRANSITION_START = 2;
 constexpr int FL_CONTACT_TRANSITION_END = 3;
-constexpr int FL_SWING = 4;
-constexpr int FR_CONTACT_TRANSITION_START = 5;
-constexpr int FR_CONTACT_TRANSITION_END = 6;
-constexpr int FR_SWING = 7;
+constexpr int FL_HALF_SWING = 4;
+constexpr int FL_FINAL_SWING = 5;
+constexpr int FR_CONTACT_TRANSITION_START = 6;
+constexpr int FR_CONTACT_TRANSITION_END = 7;
+constexpr int FR_HALF_SWING = 8;
+constexpr int FR_FINAL_SWING = 9;
 };  // namespace A1_STATES
 
 class A1ControlArchitecture : public ControlArchitecture {

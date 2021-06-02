@@ -66,6 +66,11 @@ void A1Interface::getCommand(void* _data, void* _command) {
   if (!(_Initialization(data, cmd))) {
     state_estimator_->Update(data);
     interrupt->processInterrupts();
+
+    // Update next footstep locations from Mingyo planner
+    sp_->next_front_foot_location = cmd->next_front_foot_location;
+    sp_->next_rear_foot_location = cmd->next_rear_foot_location;
+
     control_architecture_->getCommand(cmd);
   }
   // Save Data

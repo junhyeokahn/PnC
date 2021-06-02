@@ -34,7 +34,7 @@ find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Pybind11
-set(USE_PYBIND11 True)
+set(USE_PYBIND11 False) # True)
 if(USE_PYBIND11)
   message("-- Enable Pybind11")
   find_package(PythonAnaconda)

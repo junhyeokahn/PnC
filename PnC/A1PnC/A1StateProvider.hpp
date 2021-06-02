@@ -18,11 +18,15 @@ class A1StateProvider {
   int front_stance_foot;
   int rear_stance_foot;
 
-  // Added by Ryan, MPC related
+  // MPC related
   Eigen::VectorXd mpc_rxn_forces;
   Eigen::VectorXd x_y_yaw_vel_des;
   Eigen::VectorXd interpolated_mpc_forces;
   Eigen::VectorXd final_reaction_forces;
+
+  // Variables for Mingyo Footstep Planner
+  Eigen::VectorXd next_front_foot_location;
+  Eigen::VectorXd next_rear_foot_location;
 
   Eigen::VectorXd rotor_inertia;
   Eigen::VectorXd q;

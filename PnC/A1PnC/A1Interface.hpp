@@ -50,12 +50,20 @@ class A1Command{
           q = Eigen::VectorXd::Zero(12);
           qdot = Eigen::VectorXd::Zero(12);
           jtrq = Eigen::VectorXd::Zero(12);
+
+          next_front_foot_location =
+                Eigen::VectorXd::Zero(3);
+          next_rear_foot_location =
+                Eigen::VectorXd::Zero(3);
       }
       virtual ~A1Command(){}
 
       Eigen::VectorXd q;
       Eigen::VectorXd qdot;
       Eigen::VectorXd jtrq;
+
+      Eigen::VectorXd next_front_foot_location;
+      Eigen::VectorXd next_rear_foot_location;
 };
 
 

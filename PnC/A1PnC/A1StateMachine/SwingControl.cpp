@@ -46,14 +46,26 @@ void SwingControl::firstVisit() {
   taf_container_->contact_list_.clear();
   taf_container_->task_list_.push_back(taf_container_->com_task_);
   taf_container_->task_list_.push_back(taf_container_->base_ori_task_);
-  if (state_identity_ == A1_STATES::FR_SWING) {
-    std::cout << "[Front Right Foot Swing]" << std::endl;
+  if (state_identity_ == A1_STATES::FR_HALF_SWING) {
+    std::cout << "[Front Right Foot First Half Swing]" << std::endl;
+    taf_container_->task_list_.push_back(taf_container_->frfoot_pos_task_);
+    taf_container_->task_list_.push_back(taf_container_->rlfoot_pos_task_);
+    taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
+    taf_container_->contact_list_.push_back(taf_container_->rrfoot_contact_);
+  } else if (state_identity_ == A1_STATES::FL_HALF_SWING) {
+    std::cout << "[Front Left Foot First Half Swing]" << std::endl;
+    taf_container_->task_list_.push_back(taf_container_->flfoot_pos_task_);
+    taf_container_->task_list_.push_back(taf_container_->rrfoot_pos_task_);
+    taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
+    taf_container_->contact_list_.push_back(taf_container_->rlfoot_contact_);
+  } else if (state_identity_ == A1_STATES::FR_FINAL_SWING) {
+    std::cout << "[Front Right Foot Second Half Swing]" << std::endl;
     taf_container_->task_list_.push_back(taf_container_->frfoot_pos_task_);
     taf_container_->task_list_.push_back(taf_container_->rlfoot_pos_task_);
     taf_container_->contact_list_.push_back(taf_container_->flfoot_contact_);
     taf_container_->contact_list_.push_back(taf_container_->rrfoot_contact_);
   } else {
-    std::cout << "[Front Left Foot Swing]" << std::endl;
+    std::cout << "[Front Left Foot Second Half Swing]" << std::endl;
     taf_container_->task_list_.push_back(taf_container_->flfoot_pos_task_);
     taf_container_->task_list_.push_back(taf_container_->rrfoot_pos_task_);
     taf_container_->contact_list_.push_back(taf_container_->frfoot_contact_);
@@ -61,42 +73,34 @@ void SwingControl::firstVisit() {
   }
   // Set control Starting time
   ctrl_start_time_ = sp_->curr_time;
-  end_time_ = swing_duration_;
+  end_time_ = swing_duration_/2.;
 
-  // TODO: FOOTSTEP PLANNING --> pass to initializeSwingFootTrajectory
-  // footstepPlanner();
-  // sangbaeFootstepPlanner();
-  donghyunFootstepPlanner();
+  // In this implementation, we use the footstep planner of Mingyo
+  // donghyunFootstepPlanner();
+  // Grab the values input from Mingyo through A1Command
+  front_foot_end_pos = sp_->next_front_foot_location;
+  rear_foot_end_pos = sp_->next_rear_foot_location;
 
   // Initialize the swing foot trajectory
-  if (state_identity_ == A1_STATES::FL_SWING) {
+  if (state_identity_ == A1_STATES::FL_HALF_SWING ||
+      state_identity_ == A1_STATES::FL_FINAL_SWING) {
     // Set Front Left Swing Foot Trajectory
     ctrl_arch_->flfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des, front_foot_end_pos);
+        0.0, swing_duration_/2., sp_->com_vel_des, front_foot_end_pos);
     ctrl_arch_->rrfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des, rear_foot_end_pos);
+        0.0, swing_duration_/2., sp_->com_vel_des, rear_foot_end_pos);
   } else {
     // Set Front Right Swing Foot Trajectory
     ctrl_arch_->frfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des, front_foot_end_pos);
+        0.0, swing_duration_/2., sp_->com_vel_des, front_foot_end_pos);
     ctrl_arch_->rlfoot_trajectory_manager_->initializeSwingFootTrajectory(
-        0.0, swing_duration_, sp_->com_vel_des, rear_foot_end_pos);
+        0.0, swing_duration_/2., sp_->com_vel_des, rear_foot_end_pos);
   }
 }
 
-void SwingControl::sangbaeFootstepPlanner() {
-  // Simple heuristic footstep planning described in eq. (33)
-  // Of the paper https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8594448&casa_token=ZJM0G1WzmawAAAAA:EfSF0JLmpfBXRMVNKTeykbQFDOH6Dl1qKObxkT-7Gjb0BK9CwZtty7757lXPj_Jk5PO2X3SJrg&tag=1
-  // Footstep planning is purely 2D in this formulation
-  // p_des = p_ref + v_com * (dt /2)
-  // p_des = desired landing point
-  // p_ref = location on xy plane underneath the hip of the robot
-  // v_com = robot com vel
-  // dt = time the foot will be on ground = 0.05
-  
-}
 
-void SwingControl::donghyunFootstepPlanner() {
+
+/*void SwingControl::donghyunFootstepPlanner() {
   // Raibert style footstep planner for a quadruped
   // From his paper https://arxiv.org/pdf/1909.06586
   // ri_cmd = p_sh + p_sym + p_cent
@@ -130,7 +134,7 @@ void SwingControl::donghyunFootstepPlanner() {
     rear_foot_end_pos = p_sh + p_sym + p_cent;
   }
 
-  /*// TEST FOOTSTEP PLANNER
+  // TEST FOOTSTEP PLANNER
   double yaw = sp_->base_ang_vel_des[2] * A1Aux::servo_rate * test_counter;
   if(state_identity_ == A1_STATES::FL_SWING) {
     p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation()
@@ -169,115 +173,16 @@ void SwingControl::donghyunFootstepPlanner() {
     sp_->frfoot_landing = front_foot_end_pos;
     sp_->rlfoot_landing = rear_foot_end_pos;
   }
-  // END TEST FOOTSTEP PLANNER*/
-}
+  // END TEST FOOTSTEP PLANNER
+}*/
 
-void SwingControl::footstepPlanner() {
-    std::cout << "sp_->base_ang_vel_des = " << sp_->base_ang_vel_des << std::endl;
-    std::cout << "sp_->com_vel_des = " << sp_->com_vel_des << std::endl;
-    // Create our local footstep planning vectors
-    Eigen::VectorXd p_shoulder, p_symmetry, p_centrifugal, shoulder_location_local_frame;
-    // Initialize them at 0
-    p_shoulder = Eigen::VectorXd::Zero(3);
-    p_centrifugal = Eigen::VectorXd::Zero(3);
-    p_symmetry = Eigen::VectorXd::Zero(3);
-    shoulder_location_local_frame = Eigen::VectorXd::Zero(3);
-    Eigen::Matrix<double, 3, 3> Rz_, R_;
-    // Eigen::Quaternion<double> quat;
-    Eigen::Vector3d com_vel_des = ctrl_arch_->floating_base_lifting_up_manager_->com_vel_des_;
 
-    // myUtils::pretty_print(com_vel_des, std::cout, "com_vel_des");
-
-    // R_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose(); // TODO: Is this correct?
-    // quat = Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());// .transpose()); // TODO: Is this correct?
-    // double yaw;
-    // yaw = std::atan2( 2 * (quat.w() * quat.z() + quat.x() * quat.y()), 
-    //                        1 - 2 * ( std::pow(quat.y(),2) + std::pow(quat.z(),2)));
-
-    double yaw;
-    Eigen::MatrixXd rot = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear();
-    Eigen::VectorXd com_rpy_zyx;
-    com_rpy_zyx = Eigen::VectorXd::Zero(3);
-    if((rot.row(1)[0] <= 0.0001) && rot.row(0)[0] <= 0.0001) {
-      yaw = 0;
-    } else {
-      yaw = atan2(rot.row(1)[0], rot.row(0)[0]);
-    }
-    Rz_ << cos(yaw),  sin(yaw), 0, // TODO: I switched the neg from the row 1 sin to row 2
-           -sin(yaw), cos(yaw), 0,
-                  0,         0, 1;
-
-    if(state_identity_ == A1_STATES::FL_SWING) {
-      // p_shoulder = com_pos + Rz(yaw) * shoulder_location_local_frame
-      // where Rz(yaw) = rot matrix translating ang vel from 
-      // global frame to local frame
-      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation() -
-                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-      p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
-      // p_symmetry = (t_stance / 2) * com_velocity + k * (com_vel - com_vel_des) 
-      // TODO: changed from swin_duration_
-      p_symmetry = (swing_duration_ / 2) * sp_->com_vel + 0.03 * (sp_->com_vel - com_vel_des); // TODO: Is t_stance = swing_duration_?
-      // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
-      p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
-
-      myUtils::pretty_print(p_shoulder, std::cout, "front_foot_p_shoulder");
-      myUtils::pretty_print(p_symmetry, std::cout, "front_foot_p_symmetry");
-      myUtils::pretty_print(p_centrifugal, std::cout, "front_foot_p_centrifugal");
-      // front_foot_end_pos = // robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
-            // (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
-      front_foot_end_pos = (p_shoulder + p_symmetry + p_centrifugal);// );
-      myUtils::pretty_print(front_foot_end_pos, std::cout, "front_foot_land_pos");
-
-      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation() -
-                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-      p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
-      myUtils::pretty_print(p_shoulder, std::cout, "rear_foot_p_shoulder");
-      myUtils::pretty_print(p_symmetry, std::cout, "rear_foot_p_symmetry");
-      myUtils::pretty_print(p_centrifugal, std::cout, "rear_foot_p_centrifugal");
-      // TEST: p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(-sp_->base_ang_vel_des));
-      // rear_foot_end_pos = // robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
-            // (robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose() *
-      rear_foot_end_pos = (p_shoulder + p_symmetry + p_centrifugal);// );
-      myUtils::pretty_print(rear_foot_end_pos, std::cout, "rear_foot_land_pos");
-    } else {
-      // p_shoulder = com_pos + Rz(yaw) * shoulder_location_local_frame
-      // where Rz(yaw) = rot matrix translating ang vel from 
-      // global frame to local frame
-      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation() -
-                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-      p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
-      // p_symmetry = (t_stance / 2) * com_velocity + k * (com_vel - com_vel_des) 
-      p_symmetry = (swing_duration_ / 2) * sp_->com_vel + 0.03 * (sp_->com_vel - com_vel_des); // TODO: Is t_stance = swing_duration_?
-      // p_centrifugal = 0.5 * sqrt(h/g) * (com_vel x ang_vel_des)
-      p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des)); // TODO: Is h the desired standing height?
-      myUtils::pretty_print(p_shoulder, std::cout, "front_foot_p_shoulder");
-      myUtils::pretty_print(p_symmetry, std::cout, "front_foot_p_symmetry");
-      myUtils::pretty_print(p_centrifugal, std::cout, "front_foot_p_centrifugal");
-      // front_foot_end_pos = // robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
-            // ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()) *
-      front_foot_end_pos = (p_shoulder + p_symmetry + p_centrifugal);// );
-      myUtils::pretty_print(front_foot_end_pos, std::cout, "front_foot_land_pos");
-
-      shoulder_location_local_frame = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation() -
-                                      robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation();
-      p_shoulder = sp_->com_pos + (Rz_ * shoulder_location_local_frame);
-      myUtils::pretty_print(p_shoulder, std::cout, "rear_foot_p_shoulder");
-      myUtils::pretty_print(p_symmetry, std::cout, "rear_foot_p_symmetry");
-      myUtils::pretty_print(p_centrifugal, std::cout, "rear_foot_p_centrifugal");
-      // TEST: p_centrifugal = 0.5 * std::sqrt(sp_->com_pos[2] / 9.8) * (sp_->com_vel.cross(-sp_->base_ang_vel_des));
-      // rear_foot_end_pos = // robot_->getBodyNodeIsometry(A1BodyNode::trunk).translation() +
-            // ((robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear().transpose()) *
-      rear_foot_end_pos = (p_shoulder + p_symmetry + p_centrifugal);// );
-      myUtils::pretty_print(rear_foot_end_pos, std::cout, "rear_foot_land_pos");
-    }
-
-}
 
 void SwingControl::_taskUpdate() {
   // =========================================================================
   // Foot
   // =========================================================================
-  if (state_identity_ == A1_STATES::FL_SWING) {
+  if (state_identity_ == A1_STATES::FL_HALF_SWING || state_identity_ == A1_STATES::FL_FINAL_SWING) {
     // Set Front Left Swing Foot Trajectory
     ctrl_arch_->flfoot_trajectory_manager_->updateSwingFootDesired(
         state_machine_time_);
@@ -363,10 +268,15 @@ bool SwingControl::endOfState() {
 //}
 
 StateIdentifier SwingControl::getNextState() {
-  if(state_identity_ == A1_STATES::FR_SWING){
+  if(state_identity_ == A1_STATES::FR_FINAL_SWING){
     return A1_STATES::FL_CONTACT_TRANSITION_START;
+  } else if(state_identity_ == A1_STATES::FL_FINAL_SWING) {
+    return A1_STATES::FR_CONTACT_TRANSITION_START;
+  } else if (state_identity_ == A1_STATES::FR_HALF_SWING) {
+    return state_identity_ == A1_STATES::FR_FINAL_SWING;
+  } else {
+    return state_identity_ == A1_STATES::FL_FINAL_SWING;
   }
-  else { return A1_STATES::FR_CONTACT_TRANSITION_START; }
 
 }
 

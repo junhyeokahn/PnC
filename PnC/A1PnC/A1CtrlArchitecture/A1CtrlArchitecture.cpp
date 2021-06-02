@@ -83,16 +83,24 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END] =
       new ContactTransitionEnd(A1_STATES::FL_CONTACT_TRANSITION_END,
                                LEFT_ROBOT_SIDE, this, robot_);
-  state_machines_[A1_STATES::FL_SWING] =
-      new SwingControl(A1_STATES::FL_SWING, LEFT_ROBOT_SIDE, this, robot_);
+
+  state_machines_[A1_STATES::FL_HALF_SWING] =
+      new SwingControl(A1_STATES::FL_HALF_SWING, LEFT_ROBOT_SIDE, this, robot_);
+  state_machines_[A1_STATES::FL_FINAL_SWING] =
+      new SwingControl(A1_STATES::FL_FINAL_SWING, LEFT_ROBOT_SIDE, this, robot_);
+
   state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START] =
       new ContactTransitionStart(A1_STATES::FR_CONTACT_TRANSITION_START,
                                  RIGHT_ROBOT_SIDE, this, robot_);
   state_machines_[A1_STATES::FR_CONTACT_TRANSITION_END] =
       new ContactTransitionEnd(A1_STATES::FR_CONTACT_TRANSITION_END,
                                RIGHT_ROBOT_SIDE, this, robot_);
-  state_machines_[A1_STATES::FR_SWING] =
-      new SwingControl(A1_STATES::FR_SWING, RIGHT_ROBOT_SIDE, this, robot_);
+
+  state_machines_[A1_STATES::FR_HALF_SWING] =
+      new SwingControl(A1_STATES::FR_HALF_SWING, RIGHT_ROBOT_SIDE, this, robot_);
+  state_machines_[A1_STATES::FR_FINAL_SWING] =
+      new SwingControl(A1_STATES::FR_FINAL_SWING, RIGHT_ROBOT_SIDE, this, robot_);
+
 
   // Initialize MPC Variables
   foot_contact_states = Eigen::VectorXi::Zero(4);
@@ -155,10 +163,12 @@ A1ControlArchitecture::~A1ControlArchitecture() {
   delete state_machines_[A1_STATES::BALANCE];
   delete state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START];
   delete state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END];
-  delete state_machines_[A1_STATES::FL_SWING];
+  delete state_machines_[A1_STATES::FL_HALF_SWING];
+  delete state_machines_[A1_STATES::FL_FINAL_SWING];
   delete state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START];
   delete state_machines_[A1_STATES::FR_CONTACT_TRANSITION_END];
-  delete state_machines_[A1_STATES::FR_SWING];
+  delete state_machines_[A1_STATES::FR_HALF_SWING];
+  delete state_machines_[A1_STATES::FR_FINAL_SWING];
 }
 
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
@@ -181,13 +191,15 @@ void A1ControlArchitecture::solveMPC() {
         foot_contact_states[2] = 1;
         foot_contact_states[3] = 1;
     }
-    if(state_ == A1_STATES::FL_SWING || state_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
+    if(state_ == A1_STATES::FL_HALF_SWING || state_ == A1_STATES::FL_FINAL_SWING ||
+       state_ == A1_STATES::FL_CONTACT_TRANSITION_END) {
         foot_contact_states[0] = 0;
         foot_contact_states[1] = 1;
         foot_contact_states[2] = 1;
         foot_contact_states[3] = 0;
     }
-    if(state_ == A1_STATES::FR_SWING || state_ == A1_STATES::FR_CONTACT_TRANSITION_END) {
+    if(state_ == A1_STATES::FR_HALF_SWING || state_ == A1_STATES::FR_FINAL_SWING ||
+       state_ == A1_STATES::FR_CONTACT_TRANSITION_END) {
         foot_contact_states[0] = 1;
         foot_contact_states[1] = 0;
         foot_contact_states[2] = 0;
@@ -773,7 +785,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   Fr_result_ = main_controller_->getCommand(_command, change_qp_weights_for_walking);
   if(Fr_result_.size() < 12) {
     // std::cout << "Fr_result_.size() = " << Fr_result_.size() << std::endl;
-    if(state_ == A1_STATES::FL_SWING) {
+    if(state_ == A1_STATES::FL_HALF_SWING || state_ == A1_STATES::FL_FINAL_SWING) {
         Fr_correct_length_result_[3] = Fr_result_[0];
         Fr_correct_length_result_[4] = Fr_result_[1];
         Fr_correct_length_result_[5] = Fr_result_[2];
@@ -781,7 +793,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
         Fr_correct_length_result_[7] = Fr_result_[4];
         Fr_correct_length_result_[8] = Fr_result_[5];
     }
-    if(state_ == A1_STATES::FR_SWING) {
+    if(state_ == A1_STATES::FR_HALF_SWING || state_ == A1_STATES::FR_FINAL_SWING) {
         Fr_correct_length_result_[0] = Fr_result_[0];
         Fr_correct_length_result_[1] = Fr_result_[1];
         Fr_correct_length_result_[2] = Fr_result_[2];
@@ -844,8 +856,10 @@ void A1ControlArchitecture::_InitializeParameters() {
 
   // States Initialization:
   state_machines_[A1_STATES::STAND]->initialization(cfg_["state_stand_params"]);
-  state_machines_[A1_STATES::FR_SWING]->initialization(cfg_["state_swing"]);
-  state_machines_[A1_STATES::FL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FR_HALF_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FL_HALF_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FR_FINAL_SWING]->initialization(cfg_["state_swing"]);
+  state_machines_[A1_STATES::FL_FINAL_SWING]->initialization(cfg_["state_swing"]);
   state_machines_[A1_STATES::FL_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
   state_machines_[A1_STATES::FL_CONTACT_TRANSITION_END]->initialization(cfg_["state_contact_transition"]);
   state_machines_[A1_STATES::FR_CONTACT_TRANSITION_START]->initialization(cfg_["state_contact_transition"]);
