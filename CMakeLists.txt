@@ -33,6 +33,15 @@ link_directories("/usr/local/lib")
 find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
+# Pybind11
+set(USE_PYBIND11 True)
+if(USE_PYBIND11)
+  message("-- Enable Pybind11")
+  find_package(PythonAnaconda)
+else()
+  message("-- Disable Pybind11")
+endif()
+
 # Eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen3)
@@ -63,6 +72,9 @@ add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
+if(USE_PYBIND11)
+  add_subdirectory(Bindings)
+endif()
 
 ##=============================================================================
 ## Configuration File
