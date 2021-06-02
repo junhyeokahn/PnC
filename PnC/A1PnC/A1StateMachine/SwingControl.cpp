@@ -105,24 +105,28 @@ void SwingControl::donghyunFootstepPlanner() {
   // p_sym = (t_stance / 2) * v + k * (v - v_cmd) (Raibert heuristic)
   // p_cent = 0.5 * sqrt(h/g) * (v x omega)
 
+  Eigen::VectorXd tmp; tmp = Eigen::VectorXd::Zero(3); tmp[0] = 0.1;
+
   // In trot we plan either FL+RR or FR+RL
   if(state_identity_ == A1_STATES::FL_SWING) {
-    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation();
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FL_thigh_shoulder).translation() + tmp;
     p_sym = ((0.05 / 2) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    // p_sym = ((0.1) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
     p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des));
 
     front_foot_end_pos = p_sh + p_sym + p_cent;
 
-    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation();
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RR_thigh_shoulder).translation() + tmp;
     rear_foot_end_pos = p_sh + p_sym + p_cent;
   } else {
-    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation();
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::FR_thigh_shoulder).translation() + tmp;
     p_sym = ((0.05 / 2) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
+    // p_sym = ((0.1) * sp_->com_vel) + (0.03 * (sp_->com_vel - sp_->com_vel_des));
     p_cent = 0.5 * std::sqrt(0.25/9.8) * (sp_->com_vel.cross(sp_->base_ang_vel_des));
 
     front_foot_end_pos = p_sh + p_sym + p_cent;
 
-    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation();
+    p_sh = robot_->getBodyNodeIsometry(A1BodyNode::RL_thigh_shoulder).translation() + tmp;
     rear_foot_end_pos = p_sh + p_sym + p_cent;
   }
 

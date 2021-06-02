@@ -54,6 +54,7 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd freq;
   Eigen::VectorXd mid_point;
 
+  double integrated_yaw_des;
   private:
   Eigen::Vector3d toRPY(Eigen::Quaternion<double> quat);
 };

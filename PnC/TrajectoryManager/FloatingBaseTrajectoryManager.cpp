@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <PnC/A1PnC/A1Definition.hpp>
 #include <cmath>
+#include <math.h>
 
 FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
     Task* _com_task, Task* _base_ori_task, RobotSystem* _robot)
@@ -34,6 +35,7 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   mid_point = Eigen::VectorXd::Zero(3);
   is_swaying = false;
   is_sinusoid = false;
+  integrated_yaw_des = 0;
 }
 
 void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
@@ -52,17 +54,21 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
   Eigen::Vector3d curr_rpy, tmp_base_ang_vel_des, tmp_base_ang_acc_des;
   Eigen::Quaternion<double> curr_quat;
   Eigen::VectorXd curr_quat_vec = Eigen::VectorXd::Zero(4);
-  // Set rpydot from the input
+  // Set ang vel des from the input
   tmp_base_ang_vel_des[0] = 0.;
   tmp_base_ang_vel_des[1] = 0;
   tmp_base_ang_vel_des[2] = x_y_yaw_vel_des[2];
   base_ang_vel_des_ = tmp_base_ang_vel_des;
   // std::cout << "x_y_yaw_vel_des[2] = " << x_y_yaw_vel_des[2] << std::endl;
-  // Get base rpy current from robot current quat
-  curr_quat = Eigen::Quaternion<double>(
-      robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear());
-  // curr_quat_vec << curr_quat.w(), curr_quat.x(), curr_quat.y(), curr_quat.z();
-  curr_quat_vec << 1., 0., 0., 0.;
+  // Set desired base quaternion in form of w x y z vector
+  integrated_yaw_des += A1Aux::servo_rate * x_y_yaw_vel_des[2];
+  // Convert this des yaw into quaternion and put in w x y z vector form
+  curr_quat_vec << cos(integrated_yaw_des/2.), 0, 0, sin(integrated_yaw_des/2.);
+  base_ori_quat_des_.w() = curr_quat_vec[0];
+  base_ori_quat_des_.x() = curr_quat_vec[1];
+  base_ori_quat_des_.y() = curr_quat_vec[2];
+  base_ori_quat_des_.z() = curr_quat_vec[3];
+
   curr_rpy = toRPY(Eigen::Quaternion<double>(
       robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear()));
   // Numerically integrate to get base_ang_acc_des
