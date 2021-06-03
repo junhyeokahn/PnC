@@ -55,14 +55,14 @@ void PointFootTrajectoryManager::initializeSwingFootTrajectory(
   Eigen::Vector3d start_foot_pos =
     robot_->getBodyNodeCoMIsometry(link_idx_).translation();
   Eigen::Vector3d end_foot_pos = _end_foot_pos;
-  end_foot_pos[2] = start_foot_pos[2];
+  // end_foot_pos[2] = start_foot_pos[2];
 
   Eigen::Vector3d midfoot_pos = 0.5 * (end_foot_pos + start_foot_pos);
   midfoot_pos[2] += swing_height_;
 
-  myUtils::pretty_print(start_foot_pos, std::cout, "start_foot_pos");
-  myUtils::pretty_print(midfoot_pos, std::cout, "midfoot_pos");
-  myUtils::pretty_print(end_foot_pos, std::cout, "end_foot_pos");
+  // myUtils::pretty_print(start_foot_pos, std::cout, "start_foot_pos");
+  // myUtils::pretty_print(midfoot_pos, std::cout, "midfoot_pos");
+  // myUtils::pretty_print(end_foot_pos, std::cout, "end_foot_pos");
 
   Eigen::Vector3d mid_swing_velocity =
       (end_foot_pos - start_foot_pos) / swing_duration_;
