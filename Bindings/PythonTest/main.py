@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.getcwd()+'/build/lib')
+sys.path.append('/home/knapsack/project/locomotion/src/PnC/build/lib')
 
 import A1Interface
 import numpy as np
