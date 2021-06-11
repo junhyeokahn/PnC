@@ -45,8 +45,7 @@ PYBIND11_MODULE(A1Interface, m) {
         .def_readwrite("flfoot_contact", &A1SensorData::flfoot_contact)
         .def_readwrite("frfoot_contact", &A1SensorData::frfoot_contact)
         .def_readwrite("rlfoot_contact", &A1SensorData::rlfoot_contact)
-        .def_readwrite("rrfoot_contact", &A1SensorData::rrfoot_contact)
-        
+        .def_readwrite("rrfoot_contact", &A1SensorData::rrfoot_contact);
 
     py::class_<A1Command>(m, "A1Command")
         .def(py::init<>())

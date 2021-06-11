@@ -34,7 +34,7 @@ find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Pybind11
-set(USE_PYBIND11 False) # True)
+set(USE_PYBIND11 True)
 if(USE_PYBIND11)
   message("-- Enable Pybind11")
   find_package(PythonAnaconda)
@@ -68,7 +68,7 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ##=============================================================================
 ## Add Subdirectory
 ##=============================================================================
-add_subdirectory(Simulator)
+# add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
