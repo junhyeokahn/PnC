@@ -279,7 +279,7 @@ void WBIC::_GetSolution(const Eigen::VectorXd & qddot, Eigen::VectorXd& cmd,
   // Torque check
   Eigen::VectorXd delta_tau = Eigen::VectorXd::Zero(num_qdot_);
   for(int i(0); i<_dim_floating; ++i) delta_tau[i] = z[i];
-  // myUtils::pretty_print(delta_tau, std::cout, "Delta tau [WBIC]");
+  myUtils::pretty_print(delta_tau, std::cout, "Delta tau [WBIC]");
   // myUtils::pretty_print(tot_tau, std::cout, "tot tau original");
   // tot_tau += delta_tau;
   // myUtils::pretty_print(tot_tau, std::cout, "tot tau result");

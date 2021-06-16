@@ -42,14 +42,14 @@ task_parameters:
 
     # Task Gains
     # COM
-    kp_com: [100, 100, 250] 
-    kd_com: [10, 10, 25] 
+    kp_com: [100, 100, 100]
+    kd_com: [10, 10, 10]
     # Base Orientation
     kp_base_ori: [100, 100, 100]
     kd_base_ori: [10, 10, 10]
     # Foot Linear and orientation gains
     kp_foot_pos: [100, 100, 100]
-    kd_foot_pos: [10, 10, 10] # [10, 10, 0] #10]
+    kd_foot_pos: [10, 10, 10]
     # Joint
     kp_joint: [100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
     kd_joint: [10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10.]

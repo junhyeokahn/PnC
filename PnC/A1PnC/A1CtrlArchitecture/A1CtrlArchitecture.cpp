@@ -21,9 +21,9 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   body_inertia[0] = 0.01; body_inertia[4] = 0.03; body_inertia[8] = 0.03;
 
   // Stepping in place infinitely weights
-  _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
+  _MPC_WEIGHTS[0] = 3.; _MPC_WEIGHTS[1] = 3.; _MPC_WEIGHTS[2] = 0.2;
   _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
-  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 10.; _MPC_WEIGHTS[10] = 5.;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 0.01; _MPC_WEIGHTS[10] = 5.;
   _MPC_WEIGHTS[11] = 0.1; 
   /*// Weights from Sangbae
   _MPC_WEIGHTS[0] = 1.; _MPC_WEIGHTS[1] = 1.; _MPC_WEIGHTS[2] = 1.; _MPC_WEIGHTS[3] = 0.;
@@ -261,7 +261,7 @@ void A1ControlArchitecture::solveMPC() {
         foot_pos_body_frame, //foot_pos_body_frame
         foot_friction_coeffs, //foot_friction_coeffs
         com_pos_des, // com_pos_des
-        sp_->x_y_yaw_vel_des, //com_vel_des
+        sp_->x_y_yaw_vel_des/2., //com_vel_des
         ang_vel_des, // ang_vel_des
         sp_->x_y_yaw_vel_des, // com ang vel des
         state_progression_, // track the internal MPC state progression
@@ -770,7 +770,16 @@ void A1ControlArchitecture::getCommand(void* _command) {
   // Get Wholebody control commands
   Eigen::VectorXd Fr_result_, Fr_correct_length_result_;
   Fr_correct_length_result_ = Eigen::VectorXd::Zero(12);
+
+  struct timeval begin, end;
+  gettimeofday(&begin, 0);
   Fr_result_ = main_controller_->getCommand(_command, change_qp_weights_for_walking);
+  gettimeofday(&end, 0);
+  long seconds = end.tv_sec - begin.tv_sec;
+  long microseconds = end.tv_usec - begin.tv_usec;
+  double elapsed = seconds + microseconds*1e-6;
+  printf("Time measured: %.3f seconds.\n", elapsed);
+
   if(Fr_result_.size() < 12) {
     // std::cout << "Fr_result_.size() = " << Fr_result_.size() << std::endl;
     if(state_ == A1_STATES::FL_SWING) {
