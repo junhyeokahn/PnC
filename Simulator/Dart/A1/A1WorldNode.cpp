@@ -26,6 +26,8 @@ A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
   initial_jpos = Eigen::VectorXd::Zero(12);
   resetButtonFlags();
   set_parameters_();
+
+  tmp_counter = 10;
 }
 
 A1WorldNode::~A1WorldNode() {
@@ -77,11 +79,13 @@ void A1WorldNode::customPreStep() {
   if (b_button_k) interface_->interrupt->b_interrupt_button_k = true;
   if (b_button_h) interface_->interrupt->b_interrupt_button_h = true;
   if (b_button_l) interface_->interrupt->b_interrupt_button_l = true;
-  interface_->getCommand(sensor_data_, command_);
-  trq_cmd_.setZero();
-  pos_cmd_.setZero();
-  vel_cmd_.setZero();
-
+  if(tmp_counter >= 10) {
+    interface_->getCommand(sensor_data_, command_);
+    trq_cmd_.setZero();
+    pos_cmd_.setZero();
+    vel_cmd_.setZero();
+    tmp_counter = 0;
+  }
   // trq_cmd_.tail(12) = command_->jtrq;
   pos_cmd_.tail(12) = command_->q;
   vel_cmd_.tail(12) = command_->qdot;
@@ -105,6 +109,7 @@ void A1WorldNode::customPreStep() {
 
 
   count_++;
+  ++tmp_counter;
 
   // reset flags
   resetButtonFlags();

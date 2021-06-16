@@ -21,9 +21,9 @@ A1ControlArchitecture::A1ControlArchitecture(RobotSystem* _robot)
   body_inertia[0] = 0.01; body_inertia[4] = 0.03; body_inertia[8] = 0.03;
 
   // Stepping in place infinitely weights
-  _MPC_WEIGHTS[0] = 3.; _MPC_WEIGHTS[1] = 3.; _MPC_WEIGHTS[2] = 0.2;
-  _MPC_WEIGHTS[5] = 15.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
-  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 0.01; _MPC_WEIGHTS[10] = 5.;
+  _MPC_WEIGHTS[0] = 5.; _MPC_WEIGHTS[1] = 5.; _MPC_WEIGHTS[2] = 0.2;
+  _MPC_WEIGHTS[5] = 50.; _MPC_WEIGHTS[6] = 0.5; _MPC_WEIGHTS[7] = 0.5;
+  _MPC_WEIGHTS[8] = 0.2; _MPC_WEIGHTS[9] = 10; _MPC_WEIGHTS[10] = 5.;
   _MPC_WEIGHTS[11] = 0.1; 
   /*// Weights from Sangbae
   _MPC_WEIGHTS[0] = 1.; _MPC_WEIGHTS[1] = 1.; _MPC_WEIGHTS[2] = 1.; _MPC_WEIGHTS[3] = 0.;
@@ -164,7 +164,7 @@ A1ControlArchitecture::~A1ControlArchitecture() {
 void A1ControlArchitecture::ControlArchitectureInitialization() {}
 
 void A1ControlArchitecture::solveMPC() {
-    /*// Set contact state
+    // Set contact state
     if(sp_->b_flfoot_contact) foot_contact_states[0] = 1;
     else foot_contact_states[0] = 0;
     if(sp_->b_frfoot_contact) foot_contact_states[1] = 1;
@@ -172,8 +172,8 @@ void A1ControlArchitecture::solveMPC() {
     if(sp_->b_rlfoot_contact) foot_contact_states[2] = 1;
     else foot_contact_states[2] = 0;
     if(sp_->b_rrfoot_contact) foot_contact_states[3] = 1;
-    else foot_contact_states[3] = 0;*/
-    if(state_ == A1_STATES::BALANCE || state_ == A1_STATES::STAND ||
+    else foot_contact_states[3] = 0;
+    /*if(state_ == A1_STATES::BALANCE || state_ == A1_STATES::STAND ||
        state_ == A1_STATES::FR_CONTACT_TRANSITION_START ||
        state_ == A1_STATES::FL_CONTACT_TRANSITION_START) {
         foot_contact_states[0] = 1;
@@ -192,8 +192,8 @@ void A1ControlArchitecture::solveMPC() {
         foot_contact_states[1] = 0;
         foot_contact_states[2] = 0;
         foot_contact_states[3] = 1;
-    }
-    // std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
+    }*/
+    std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
 
     Eigen::Vector3d com_pos_des, com_pos;
     // CoM Position // TODO STATE ESTIMATOR
@@ -778,7 +778,7 @@ void A1ControlArchitecture::getCommand(void* _command) {
   long seconds = end.tv_sec - begin.tv_sec;
   long microseconds = end.tv_usec - begin.tv_usec;
   double elapsed = seconds + microseconds*1e-6;
-  printf("Time measured: %.3f seconds.\n", elapsed);
+  // printf("Time measured: %.3f seconds.\n", elapsed);
 
   if(Fr_result_.size() < 12) {
     // std::cout << "Fr_result_.size() = " << Fr_result_.size() << std::endl;

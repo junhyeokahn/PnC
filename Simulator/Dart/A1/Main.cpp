@@ -326,7 +326,8 @@ int main(int argc, char** argv) {
 
   Eigen::Vector3d gravity(0.0, 0.0, -9.81);
   world->setGravity(gravity);
-  world->setTimeStep(servo_rate);
+  // world->setTimeStep(servo_rate);
+  world->setTimeStep(0.0002);
 
 
   // =========================================================================

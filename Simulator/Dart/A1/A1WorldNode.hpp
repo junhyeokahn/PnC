@@ -36,6 +36,8 @@ class A1WorldNode : public dart::gui::osg::WorldNode {
   double servo_rate_;
   dart::simulation::WorldPtr world_;
 
+  int tmp_counter;
+
  public:
   Eigen::VectorXd initial_jpos;
 

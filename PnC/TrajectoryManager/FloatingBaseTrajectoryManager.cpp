@@ -52,13 +52,13 @@ void FloatingBaseTrajectoryManager::updateFloatingBaseWalkingDesired(
   tmp_com_acc_des = (tmp_com_vel_des - prev_com_vel_des_) / 0.002;
   // Get new pos desired value using the desired velocity
   // TODO: Commented out to use curr com pos
-  // com_pos_des_ += (tmp_com_vel_des * 0.002);
-  com_pos_des_ = curr_com_pos;
+  com_pos_des_ += (tmp_com_vel_des * 0.002);
+  // com_pos_des_ = curr_com_pos;
   // Update com_task given current position (because we are velocity controlled)
   // TODO: Commented out to use curr com pos
-  // com_task_->updateDesired(com_pos_des_, tmp_com_vel_des, tmp_com_acc_des);
-  curr_com_pos[2] = 0.25;
-  com_task_->updateDesired(curr_com_pos, tmp_com_vel_des, tmp_com_acc_des);
+  com_task_->updateDesired(com_pos_des_, tmp_com_vel_des, tmp_com_acc_des);
+  // curr_com_pos[2] = 0.25;
+  // com_task_->updateDesired(curr_com_pos, tmp_com_vel_des, tmp_com_acc_des);
   // Variables to feed base_ori_task update
   Eigen::Vector3d curr_rpy, tmp_base_ang_vel_des, tmp_base_ang_acc_des;
   Eigen::Quaternion<double> curr_quat;
