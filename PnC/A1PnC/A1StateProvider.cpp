@@ -16,6 +16,11 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   planning_id = 0;
   prev_trq_cmd = Eigen::VectorXd::Zero(12);
 
+  front_stance_foot = A1BodyNode::FL_foot;
+  rear_stance_foot = A1BodyNode::RR_foot;
+  prev_front_stance_foot = front_stance_foot;
+  prev_rear_stance_foot = rear_stance_foot;
+
   rotor_inertia = Eigen::VectorXd::Zero(12);
   q = Eigen::VectorXd::Zero(18);
   qdot = Eigen::VectorXd::Zero(18);

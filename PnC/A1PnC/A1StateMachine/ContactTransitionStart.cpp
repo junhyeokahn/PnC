@@ -113,7 +113,7 @@ StateIdentifier ContactTransitionStart::getNextState() {
     return A1_STATES::FL_CONTACT_TRANSITION_END;
   } else if (state_identity_ == A1_STATES::FR_CONTACT_TRANSITION_START) {
     sp_->front_stance_foot = A1BodyNode::FL_foot;
-    sp_->front_stance_foot = A1BodyNode::RR_foot;
+    sp_->rear_stance_foot = A1BodyNode::RR_foot;
     return A1_STATES::FR_CONTACT_TRANSITION_END;
   }
 

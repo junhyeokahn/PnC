@@ -17,6 +17,8 @@ class A1StateProvider {
 
   int front_stance_foot;
   int rear_stance_foot;
+  int prev_front_stance_foot;
+  int prev_rear_stance_foot;
 
   // Added by Ryan, MPC related
   Eigen::VectorXd mpc_rxn_forces;

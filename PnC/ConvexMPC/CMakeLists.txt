@@ -13,13 +13,13 @@ target_link_libraries(myMPC myUtils
                             myRobotSystem
                             osqp::osqp)
 
-add_executable(test_cmpc test_cmpc.cpp)
-target_link_libraries(test_cmpc  myMPC
+# add_executable(test_cmpc test_cmpc.cpp)
+# target_link_libraries(test_cmpc  myMPC
 #                                  myGaitCycle
-                                 myUtils
-                                 myGoldfarb
-                                 myRobotSystem
-                                 osqp::osqp)
+#                                  myUtils
+#                                  myGoldfarb
+#                                  myRobotSystem
+#                                  osqp::osqp)
 # add_executable(run_test_mpc test_mpc.cpp)
 # target_link_libraries(run_test_mpc myUtils
 #                                    myGaitCycle
