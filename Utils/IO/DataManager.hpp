@@ -1,7 +1,7 @@
 #ifndef DATA_MANAGER
 #define DATA_MANAGER
 
-#include <Addition/DataManager/data_protocol.h>
+#include <Addition/DataManager/DataProtocol.h>
 #include <Utils/IO/Pthread.hpp>
 #include <vector>
 #include <string>

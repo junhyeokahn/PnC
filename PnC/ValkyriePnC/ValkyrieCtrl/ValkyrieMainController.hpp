@@ -5,7 +5,7 @@
 #include <PnC/ValkyriePnC/ValkyrieStateProvider.hpp>
 #include <PnC/ValkyriePnC/ValkyrieTaskAndForceContainer/ValkyrieTaskAndForceContainer.hpp>
 #include <PnC/WBC/JointIntegrator.hpp>
-#include <PnC/WBC/WBC.hpp>
+#include <PnC/WBC/IHWBC.hpp>
 
 class ValkyrieMainController {
  public:

@@ -14,10 +14,10 @@ double smoothing(double ini, double fin, double rat) {
   }
 }
 
-Eigen::MatrixXd hStack(const Eigen::MatrixXd a, const Eigen::MatrixXd b) {
+Eigen::MatrixXd hStack(const Eigen::MatrixXd &a, const Eigen::MatrixXd &b) {
   if (a.rows() != b.rows()) {
     std::cout << "[hStack] Matrix Size is Wrong" << std::endl;
-    exit(0);
+    assert(false);
   }
 
   Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows(), a.cols() + b.cols());
@@ -25,17 +25,17 @@ Eigen::MatrixXd hStack(const Eigen::MatrixXd a, const Eigen::MatrixXd b) {
   return ab;
 }
 
-Eigen::MatrixXd vStack(const Eigen::MatrixXd a, const Eigen::MatrixXd b) {
+Eigen::MatrixXd vStack(const Eigen::MatrixXd &a, const Eigen::MatrixXd &b) {
   if (a.cols() != b.cols()) {
     std::cout << "[vStack] Matrix Size is Wrong" << std::endl;
-    exit(0);
+    assert(false);
   }
   Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows() + b.rows(), a.cols());
   ab << a, b;
   return ab;
 }
 
-Eigen::MatrixXd vStack(const Eigen::VectorXd a, const Eigen::VectorXd b) {
+Eigen::MatrixXd vStack(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
   if (a.size() != b.size()) {
     std::cout << "[vStack] Vector Size is Wrong" << std::endl;
     exit(0);
@@ -45,7 +45,16 @@ Eigen::MatrixXd vStack(const Eigen::VectorXd a, const Eigen::VectorXd b) {
   return ab;
 }
 
-Eigen::MatrixXd deleteRow(const Eigen::MatrixXd& a_, int row_) {
+Eigen::MatrixXd block_diag(const Eigen::MatrixXd &_a,
+                           const Eigen::MatrixXd &b) {
+  Eigen::MatrixXd ret =
+      Eigen::MatrixXd::Zero(_a.rows() + _b.rows(), _a.cols() + _b.cols());
+  ret.block(0, 0, _a.rows(), _a.cols()) = _a;
+  ret.block(_a.rows(), _a.cols(), _b.rows(), _b.cols()) = _b;
+  return ret;
+}
+
+Eigen::MatrixXd deleteRow(const Eigen::MatrixXd &a_, int row_) {
   Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(a_.rows() - 1, a_.cols());
   ret.block(0, 0, row_, a_.cols()) = a_.block(0, 0, row_, a_.cols());
   ret.block(row_, 0, ret.rows() - row_, a_.cols()) =
@@ -84,11 +93,11 @@ double smooth_changing_acc(double ini, double end, double moving_duration,
   return ret;
 }
 
-void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd& midPoint_,
-                           const Eigen::VectorXd& amp_,
-                           const Eigen::VectorXd& freq_, double evalTime_,
-                           Eigen::VectorXd& p_, Eigen::VectorXd& v_,
-                           Eigen::VectorXd& a_) {
+void getSinusoidTrajectory(double initTime_, const Eigen::VectorXd &midPoint_,
+                           const Eigen::VectorXd &amp_,
+                           const Eigen::VectorXd &freq_, double evalTime_,
+                           Eigen::VectorXd &p_, Eigen::VectorXd &v_,
+                           Eigen::VectorXd &a_) {
   int dim = midPoint_.size();
   p_ = Eigen::VectorXd::Zero(dim);
   v_ = Eigen::VectorXd::Zero(dim);
@@ -127,8 +136,8 @@ double bind_half_pi(double ang) {
   return ang;
 }
 
-bool isInBoundingBox(const Eigen::VectorXd& val, const Eigen::VectorXd& lb,
-                     const Eigen::VectorXd& ub) {
+bool isInBoundingBox(const Eigen::VectorXd &val, const Eigen::VectorXd &lb,
+                     const Eigen::VectorXd &ub) {
   int n = lb.size();
   bool ret(true);
   for (int i = 0; i < n; ++i) {
@@ -143,16 +152,16 @@ bool isInBoundingBox(const Eigen::VectorXd& val, const Eigen::VectorXd& lb,
   return ret;
 }
 
-Eigen::VectorXd eulerIntegration(const Eigen::VectorXd& x,
-                                 const Eigen::VectorXd& xdot, double dt) {
+Eigen::VectorXd eulerIntegration(const Eigen::VectorXd &x,
+                                 const Eigen::VectorXd &xdot, double dt) {
   Eigen::VectorXd ret = x;
   ret += xdot * dt;
   return ret;
 }
 
-Eigen::VectorXd doubleIntegration(const Eigen::VectorXd& q,
-                                  const Eigen::VectorXd& alpha,
-                                  const Eigen::VectorXd& alphad, double dt) {
+Eigen::VectorXd doubleIntegration(const Eigen::VectorXd &q,
+                                  const Eigen::VectorXd &alpha,
+                                  const Eigen::VectorXd &alphad, double dt) {
   Eigen::VectorXd ret = q;
   ret += alpha * dt + alphad * dt * dt * 0.5;
   return ret;
@@ -270,7 +279,7 @@ Eigen::VectorXd GetRelativeVector(const Eigen::VectorXd value,
  * Input: Eigen::Vector3d 3x1 angular velocity vector
  * Returns: Eigen::MatrixXd 3x3 skew symmetric matrix
  */
-Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg) {
+Eigen::Matrix3d VecToso3(const Eigen::Vector3d &omg) {
   Eigen::Matrix3d m_ret;
   m_ret << 0, -omg(2), omg(1), omg(2), 0, -omg(0), -omg(1), omg(0), 0;
   return m_ret;
@@ -287,20 +296,33 @@ Eigen::Matrix3d VecToso3(const Eigen::Vector3d& omg) {
  * Returns: Eigen::MatrixXd 6x6 Adjoint matrix for transforming twists
  representation to a different frame
 */
-Eigen::MatrixXd Adjoint(const Eigen::MatrixXd& R, const Eigen::Vector3d& p) {
+Eigen::MatrixXd Adjoint(const Eigen::MatrixXd &R, const Eigen::Vector3d &p) {
   Eigen::MatrixXd ad_ret = Eigen::MatrixXd::Zero(6, 6);
   Eigen::MatrixXd zeroes = Eigen::MatrixXd::Zero(3, 3);
   ad_ret << R, zeroes, VecToso3(p) * R, R;
   return ad_ret;
 }
 
+Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> quat) {
+  Eigen::Vector3d img_vec(quat.x(), quat.y(), quat.z());
+  double w(quat.w());
+  double theta(2.0 * std::asin(std::sqrt(img_vec[0] * img_vec[0] +
+                                         img_vec[1] * img_vec[1] +
+                                         img_vec[2] * img_vec[2])));
+  if (theta < 0.0001) {
+    return Eigen::Vector3d::Zero();
+  }
+  Eigen::Vector3d ret = img_vec / std::sin(theta / 2.);
+  return ret * theta;
+}
+
 double QuatToYaw(const Eigen::Quaternion<double> q) {
   // to match equation from:
   // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-  const double& q0 = q.w();
-  const double& q1 = q.x();
-  const double& q2 = q.y();
-  const double& q3 = q.z();
+  const double &q0 = q.w();
+  const double &q1 = q.x();
+  const double &q2 = q.y();
+  const double &q3 = q.z();
 
   return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
 }
@@ -325,7 +347,7 @@ Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch,
   return q.normalized();
 }
 
-Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond& quat_in) {
+Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond &quat_in) {
   // to match equation from:
   // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
@@ -340,7 +362,7 @@ Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond& quat_in) {
   double sinp = 2 * (quat_in.w() * quat_in.y() - quat_in.z() * quat_in.x());
   double pitch;
   if (std::abs(sinp) >= 1)
-    pitch = std::copysign(M_PI / 2, sinp);  // use 90 degrees if out of range
+    pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
   else
     pitch = std::asin(sinp);
 
@@ -380,8 +402,8 @@ Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch,
   return E * rpy_rates;
 }
 
-void avoid_quat_jump(const Eigen::Quaternion<double>& des_ori,
-                     Eigen::Quaternion<double>& act_ori) {
+void avoid_quat_jump(const Eigen::Quaternion<double> &des_ori,
+                     Eigen::Quaternion<double> &act_ori) {
   Eigen::Quaternion<double> ori_diff1;
   Eigen::Quaternion<double> ori_diff2;
 
@@ -404,4 +426,4 @@ void avoid_quat_jump(const Eigen::Quaternion<double>& des_ori,
     act_ori = act_ori;
 }
 
-}  // namespace myUtils
+} // namespace myUtils

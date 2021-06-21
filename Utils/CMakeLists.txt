@@ -3,11 +3,6 @@ FILE(GLOB general_headers "General/*.hpp")
 FILE(GLOB io_headers "IO/*.hpp")
 FILE(GLOB math_headers "Math/*.hpp" "*.h")
 
-if(NOT ZMQ_FOUND)
-    list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/IO/ZmqUtilities.cpp)
-    list(REMOVE_ITEM io_headers ${CMAKE_CURRENT_SOURCE_DIR}/IO/ZmqUtilities.hpp)
-endif()
-
 add_library(myUtils SHARED  ${sources})
 target_link_libraries(myUtils myYaml)
 

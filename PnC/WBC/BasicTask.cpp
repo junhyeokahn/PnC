@@ -5,276 +5,178 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-BasicTask::BasicTask(RobotSystem* _robot, const BasicTaskType& _taskType,
-                     const int& _dim, const int& _link_idx)
-    : Task(_robot, _dim) {
-  task_type_ = _taskType;
-  link_idx_ = _link_idx;
-  switch (task_type_) {
-    case BasicTaskType::JOINT:
-      assert(dim_task_ = robot_->getNumActuatedDofs());
-      task_type_string_ = "Joint";
-      for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::LINKXYZ:
-      assert(dim_task_ = 3);
-      task_type_string_ = "LinkXYZ";
-      for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::LINKORI:
-      assert(dim_task_ = 3);
-      task_type_string_ = "LinkRPY";
-      for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::ISOLATED_LINKXYZ:
-      assert(dim_task_ = 3);
-      task_type_string_ = "Isolated LinkXYZ";
-      for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::ISOLATED_LINKORI:
-      assert(dim_task_ = 3);
-      task_type_string_ = "Isolated LinkRPY";
-      for (int i = 0; i < dim_task_; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::CENTROID:
-      assert(dim_task_ = 6);
-      task_type_string_ = "Centroid";
-      for (int i = 0; i < 3; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      for (int i = 3; i < 6; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    case BasicTaskType::COM:
-      assert(dim_task_ = 3);
-      task_type_string_ = "CoM";
-      for (int i = 0; i < 3; ++i) {
-        kp_[i] = 0.;
-        kd_[i] = 0.;
-      }
-      break;
-    default:
-      std::cout << "[BasicTask] Type is not Specified" << std::endl;
+BasicTask::BasicTask(RobotSystem *_robot, Type _task_type, const int _dim,
+                     std::vector<std::string> _target_ids)
+    : Task(_robot, _dim, _target_ids) {
+  task_type_ = _task_type;
+  std::string name;
+  for (int i = 0; i < dim; ++i) {
+    kp[i] = 0.;
+    kd[i] = 0.;
   }
-  myUtils::pretty_constructor(3, "Basic Task " + task_type_string_);
+
+  switch (task_type_) {
+  case Type::JOINT:
+    assert(dim == robot_->n_a);
+    name = "Joint";
+    break;
+  case Type::SELECTED_JOINT:
+    name = "Selected Joint";
+    break;
+  case Type::LINK_XYZ:
+    assert(dim == 3);
+    assert(target_ids.size() == 1);
+    name = "LinkXYZ";
+    break;
+  case Type::LINK_ORI:
+    assert(dim == 3);
+    assert(target_ids.size() == 1);
+    name = "LinkORI";
+    break;
+  case Type::COM:
+    assert(dim == 3);
+    name = "CoM";
+    break;
+  case Type::ISOLATED_LINK_XYZ:
+    assert(dim == 3);
+    assert(target_ids.size() == 1);
+    name = "Isolated LinkXYZ";
+    break;
+  case Type::ISOLATED_LINK_ORI:
+    assert(dim == 3);
+    assert(target_ids.size() == 1);
+    name = "Isolated LinkOri";
+    break;
+  case Type::ISOLATED_COM:
+    assert(dim == 3);
+    name = "Isolated CoM";
+    break;
+  default: {
+    assert(false);
+  }
+  }
+  myUtils::pretty_constructor(3, "Basic Task " + name);
 }
 
-bool BasicTask::_UpdateCommand(const Eigen::VectorXd& _pos_des,
-                               const Eigen::VectorXd& _vel_des,
-                               const Eigen::VectorXd& _acc_des) {
-  // vel_des, acc_des
-  vel_des = _vel_des;
-  acc_des = _acc_des;
-  Eigen::VectorXd vel_act = Eigen::VectorXd::Zero(dim_task_);
-
+void BasicTask::update_cmd() {
+  Eigen::VectorXd pos = Eigen::VectorXd::Zero(dim);
+  Eigen::VectorXd vel = Eigen::VectorXd::Zero(dim);
   switch (task_type_) {
-    case BasicTaskType::LINKORI: {
-      // pos_err
-      Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2],
-                                        _pos_des[3]);
-      Eigen::Quaternion<double> ori_act(
-          robot_->getBodyNodeCoMIsometry(link_idx_).linear());
-
-      myUtils::avoid_quat_jump(ori_des, ori_act);
-
-      Eigen::Quaternion<double> quat_ori_err;
-      quat_ori_err = ori_des * (ori_act.inverse());
-      Eigen::Vector3d ori_err;
-      ori_err = dart::math::quatToExp(quat_ori_err);
-      for (int i = 0; i < 3; ++i) {
-        // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
-      }
-      pos_err = ori_err;
-
-      // vel_act
-      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
-      // myUtils::pretty_print(pos_err, std::cout, "pos_err in ori");
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKORI: {
-      // pos_err
-      Eigen::Quaternion<double> ori_des(_pos_des[0], _pos_des[1], _pos_des[2],
-                                        _pos_des[3]);
-      Eigen::Quaternion<double> ori_act(
-          robot_->getBodyNodeCoMIsometry(link_idx_).linear());
-
-      myUtils::avoid_quat_jump(ori_des, ori_act);
-
-      Eigen::Quaternion<double> quat_ori_err;
-      quat_ori_err = ori_des * (ori_act.inverse());
-      Eigen::Vector3d ori_err;
-      ori_err = dart::math::quatToExp(quat_ori_err);
-      for (int i = 0; i < 3; ++i) {
-        // ori_err[i] = myUtils::bind_half_pi(ori_err[i]);
-      }
-      pos_err = ori_err;
-
-      // vel_act
-      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).head(3);
-      // myUtils::pretty_print(pos_err, std::cout, "pos_err in ori");
-      break;
-    }
-    case BasicTaskType::JOINT: {
-      // pos_err
-      pos_err = _pos_des - robot_->getQ().tail(dim_task_);
-      // vel_act
-      vel_act = robot_->getQdot().tail(dim_task_);
-      break;
-    }
-    case BasicTaskType::LINKXYZ: {
-      // pos_err
-      pos_err =
-          _pos_des - robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-      // vel_act
-      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKXYZ: {
-      // pos_err
-      pos_err =
-          _pos_des - robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-      // vel_act
-      vel_act = robot_->getBodyNodeCoMSpatialVelocity(link_idx_).tail(3);
-      break;
-    }
-    case BasicTaskType::CENTROID: {
-      // pos_err
-      pos_err.head(3) = Eigen::VectorXd::Zero(3);
-      pos_err.tail(3) = _pos_des.tail(3) - robot_->getCoMPosition();
-      // vel_act
-      vel_act = robot_->getCentroidMomentum();
-      break;
-    }
-    case BasicTaskType::COM: {
-      // pos_err
-      pos_err = _pos_des - robot_->getCoMPosition();
-      // vel_act
-      vel_act = robot_->getCoMVelocity();
-      break;
-    }
-    default:
-      std::cout << "[BasicTask] Type is not Specified" << std::endl;
+  case Type::JOINT: {
+    pos = robot_->joint_positions;
+    vel = robot_->joint_velocities;
+    pos_err = pos_des_ - pos;
+    break;
   }
-
-  // op_cmd
-  for (int i(0); i < dim_task_; ++i) {
+  case Type::SELECTED_JOINT: {
+    for (int i = 0; i < target_ids.size(); ++i) {
+      pos[i] = robot_->joint_positions[robot_->get_joint_idx(target_ids[i])];
+      vel[i] = robot_->joint_velocities[robot_->get_joint_idx(target_ids[i])];
+    }
+    pos_err = pos_des_ - pos;
+    break;
+  }
+  case Type::ISOLATED_LINK_XYZ:
+  case Type::LINK_XYZ: {
+    pos = robot_->get_link_iso(target_ids[0]).translation();
+    vel = robot_->get_link_vel(target_ids[0]).tail(3);
+    pos_err = pos_des_ - pos;
+    break;
+  }
+  case Type::ISOLATED_LINK_ORI:
+  case Type::LINK_ORI: {
+    Eigen::Quaternion<double> quat_des(pos_des_[0], pos_des_[1], pos_des_[2],
+                                       pos_des_[3]);
+    Eigen::Quaternion<double> quat(
+        robot_->get_link_iso(target_ids[0]).linear());
+    myUtils::avoid_quat_jump(quat_des, quat);
+    Eigen::Quaternion<double> quat_err = quat_des * quat.inverse();
+    Eigen::Vector3d ori_err = myUtils::quat_to_exp(quat_err);
+    pos_err = ori_err;
+    vel = robot_->get_link_vel(target_ids[0]).head(3);
+    break;
+  }
+  case Type::ISOLATED_COM:
+  case Type::COM: {
+    pos = robot_->get_com_pos();
+    pos_err = pos_des_ - pos;
+    vel = robot_->get_com_lin_vel();
+    break;
+  }
+  default: {
+    assert(false);
+  }
+  }
+  for (int i = 0; i < dim; ++i) {
     op_cmd[i] =
-        acc_des[i] + kp_[i] * pos_err[i] + kd_[i] * (vel_des[i] - vel_act[i]);
+        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel[i]);
   }
-
-  return true;
 }
 
-bool BasicTask::_UpdateTaskJacobian() {
+void BasicTask::update_jacobian() {
   switch (task_type_) {
-    case BasicTaskType::JOINT: {
-      (Jt_.block(0, robot_->getNumVirtualDofs(), dim_task_,
-                 robot_->getNumActuatedDofs()))
-          .setIdentity();
-      break;
-    }
-    case BasicTaskType::LINKXYZ: {
-      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
-                .block(3, 0, dim_task_, robot_->getNumDofs());
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKXYZ: {
-      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
-                .block(3, 0, dim_task_, robot_->getNumDofs());
-      Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
-      break;
-    }
-    case BasicTaskType::LINKORI: {
-      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
-                .block(0, 0, dim_task_, robot_->getNumDofs());
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKORI: {
-      Jt_ = (robot_->getBodyNodeCoMJacobian(link_idx_))
-                .block(0, 0, dim_task_, robot_->getNumDofs());
-      Jt_.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
-      break;
-    }
-    case BasicTaskType::CENTROID: {
-      Jt_ = robot_->getCentroidInertiaTimesJacobian();
-      break;
-    }
-    case BasicTaskType::COM: {
-      Jt_ =
-          robot_->getCoMJacobian().block(3, 0, dim_task_, robot_->getNumDofs());
-      break;
-    }
-    default: { std::cout << "[BasicTask] Type is not Specified" << std::endl; }
+  case Type::JOINT: {
+    jacobian.block(0, robot_->n_floating, dim, robot_->n_q_dot) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_q_dot);
+    jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
+    break;
   }
-  return true;
-}
-
-bool BasicTask::_UpdateTaskJDotQdot() {
-  switch (task_type_) {
-    case BasicTaskType::JOINT: {
-      JtDotQdot_.setZero();
-      break;
+  case Type::SELECTED_JOINT: {
+    int id(0);
+    for (int i = 0; i < target_ids.size(); ++i) {
+      jacobian(id, robot_->get_q_dot_idx(target_ids[i])) = 1.;
     }
-    case BasicTaskType::LINKXYZ: {
-      JtDotQdot_ = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
-                       3, 0, dim_task_, robot_->getNumDofs()) *
-                   robot_->getQdot();
-      break;
-    }
-    case BasicTaskType::LINKORI: {
-      JtDotQdot_ = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
-                       0, 0, dim_task_, robot_->getNumDofs()) *
-                   robot_->getQdot();
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKXYZ: {
-      Eigen::MatrixXd Jdot = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
-          3, 0, dim_task_, robot_->getNumDofs());
-      Jdot.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
-      JtDotQdot_ = Jdot * robot_->getQdot();
-      break;
-    }
-    case BasicTaskType::ISOLATED_LINKORI: {
-      Eigen::MatrixXd Jdot = robot_->getBodyNodeCoMJacobianDot(link_idx_).block(
-          0, 0, dim_task_, robot_->getNumDofs());
-      Jdot.block(0, 0, dim_task_, robot_->getNumVirtualDofs()) =
-          Eigen::MatrixXd::Zero(dim_task_, robot_->getNumVirtualDofs());
-      JtDotQdot_ = Jdot * robot_->getQdot();
-      break;
-    }
-    case BasicTaskType::CENTROID: {
-      // JtDotQdot_ = robot_->getCentroidJacobian() *
-      // robot_->getInvMassMatrix() *
-      // robot_->getCoriolis();
-      JtDotQdot_.setZero();
-      break;
-    }
-    case BasicTaskType::COM: {
-      JtDotQdot_.setZero();
-      break;
-    }
-    default: { std::cout << "[BasicTask] Type is not Specified" << std::endl; }
+    jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
+    break;
   }
-  return true;
+  case Type::ISOLATED_LINK_XYZ: {
+    jacobian = robot_->get_link_jacobian(target_ids[0])
+                   .block(3, 0, dim, robot_->n_q_dot);
+    jacobian.block(0, 0, dim, robot_->n_floating) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_floating);
+    jacobian_dot_q_dot =
+        robot_->get_link_jacobian_dot_times_qdot(target_ids[0]).tail(3);
+    break;
+  }
+  case Type::LINK_XYZ: {
+    jacobian = robot_->get_link_jacobian(target_ids[0])
+                   .block(3, 0, dim, robot_->n_q_dot);
+    jacobian_dot_q_dot =
+        robot_->get_link_jacobian_dot_times_qdot(target_ids[0]).tail(3);
+    break;
+  }
+  case Type::ISOLATED_LINK_ORI: {
+    jacobian = robot_->get_link_jacobian(target_ids[0])
+                   .block(0, 0, dim, robot_->n_q_dot);
+    jacobian.block(0, 0, dim, robot_->n_floating) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_floating);
+    jacobian_dot_q_dot =
+        robot_->get_link_jacobian_dot_times_qdot(target_ids[0]).head(3);
+    break;
+  }
+  case Type::LINK_ORI: {
+    jacobian = robot_->get_link_jacobian(target_ids[0])
+                   .block(0, 0, dim, robot_->n_q_dot);
+    jacobian_dot_q_dot =
+        robot_->get_link_jacobian_dot_times_qdot(target_ids[0]).head(3);
+    break;
+  }
+  case Type::ISOLATED_COM: {
+    jacobian = robot_->get_com_lin_jacobian();
+    jacobian.block(0, 0, dim, robot_->n_floating) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_floating);
+    jacobian_dot_q_dot =
+        robot_->get_com_lin_jacobian_dot() * robot_->get_q_dot();
+    break;
+  }
+  case Type::COM: {
+    jacobian = robot_->get_com_lin_jacobian();
+    jacobian_dot_q_dot =
+        robot_->get_com_lin_jacobian_dot() * robot_->get_q_dot();
+    break;
+  }
+  default: {
+    assert(false);
+  }
+  }
 }

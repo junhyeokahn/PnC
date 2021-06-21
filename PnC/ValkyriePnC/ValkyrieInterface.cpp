@@ -19,8 +19,8 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
   myUtils::color_print(myColor::BoldCyan, border);
   myUtils::pretty_constructor(0, "Valkyrie Interface");
 
-  robot_ = new RobotSystem(
-      6, THIS_COM "RobotModel/Robot/Valkyrie/ValkyrieSim_Dart.urdf");
+  robot_ = new RobotSystem(6, THIS_COM
+                           "RobotModel/Robot/Valkyrie/ValkyrieSim_Dart.urdf");
   // robot_->printRobotInfo();
   state_estimator_ = new ValkyrieStateEstimator(robot_);
   sp_ = ValkyrieStateProvider::getStateProvider(robot_);
@@ -40,7 +40,7 @@ ValkyrieInterface::ValkyrieInterface() : EnvInterface() {
 
   myUtils::color_print(myColor::BoldCyan, border);
 
-  DataManager* data_manager = DataManager::GetDataManager();
+  DataManager *data_manager = DataManager::GetDataManager();
   data_manager->RegisterData(&cmd_jpos_, VECT, "jpos_des", Valkyrie::n_adof);
   data_manager->RegisterData(&cmd_jvel_, VECT, "jvel_des", Valkyrie::n_adof);
   data_manager->RegisterData(&cmd_jtrq_, VECT, "command", Valkyrie::n_adof);
@@ -53,9 +53,9 @@ ValkyrieInterface::~ValkyrieInterface() {
   delete control_architecture_;
 }
 
-void ValkyrieInterface::getCommand(void* _data, void* _command) {
-  ValkyrieCommand* cmd = ((ValkyrieCommand*)_command);
-  ValkyrieSensorData* data = ((ValkyrieSensorData*)_data);
+void ValkyrieInterface::getCommand(void *_data, void *_command) {
+  ValkyrieCommand *cmd = ((ValkyrieCommand *)_command);
+  ValkyrieSensorData *data = ((ValkyrieSensorData *)_data);
 
   if (!Initialization_(data, cmd)) {
     state_estimator_->Update(data);
@@ -74,7 +74,7 @@ void ValkyrieInterface::getCommand(void* _data, void* _command) {
   sp_->phase_copy = control_architecture_->getState();
 }
 
-void ValkyrieInterface::CropTorque_(ValkyrieCommand* cmd) {
+void ValkyrieInterface::CropTorque_(ValkyrieCommand *cmd) {
   cmd->jtrq = myUtils::CropVector(cmd->jtrq,
                                   robot_->GetTorqueLowerLimits().segment(
                                       Valkyrie::n_vdof, Valkyrie::n_adof),
@@ -92,14 +92,13 @@ void ValkyrieInterface::_ParameterSetting() {
       control_architecture_ = new ValkyrieControlArchitecture(robot_);
       delete interrupt;
       interrupt = new WalkingInterruptLogic(
-          static_cast<ValkyrieControlArchitecture*>(control_architecture_));
+          static_cast<ValkyrieControlArchitecture *>(control_architecture_));
     } else {
-      printf(
-          "[Valkyrie Interface] There is no test matching test with "
-          "the name\n");
+      printf("[Valkyrie Interface] There is no test matching test with "
+             "the name\n");
       exit(0);
     }
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
@@ -107,8 +106,8 @@ void ValkyrieInterface::_ParameterSetting() {
   }
 }
 
-bool ValkyrieInterface::Initialization_(ValkyrieSensorData* _sensor_data,
-                                        ValkyrieCommand* _command) {
+bool ValkyrieInterface::Initialization_(ValkyrieSensorData *_sensor_data,
+                                        ValkyrieCommand *_command) {
   static bool test_initialized(false);
   if (!test_initialized) {
     control_architecture_->ControlArchitectureInitialization();

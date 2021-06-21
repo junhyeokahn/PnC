@@ -10,7 +10,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS off)
 set(CXX_DISABLE_WERROR True)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
@@ -29,8 +29,9 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
+## TODO : to be removed later
 # Dart
-find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+find_package(DART 6.11 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # Eigen
@@ -50,9 +51,6 @@ find_package(Mosek)
 if(MOSEK_FOUND)
   include_directories(${MOSEK_INCLUDE_DIRS})
 endif()
-
-# For TOWR+
-#find_package(ifopt 2.0.1 REQUIRED)
 
 ##=============================================================================
 ## Include Directory

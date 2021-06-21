@@ -1,156 +1,266 @@
 #pragma once
 
-#include <stdio.h>
-#include <Eigen/Dense>
-#include <dart/dart.hpp>
-#include <dart/utils/urdf/urdf.hpp>
-#include <dart/utils/utils.hpp>
+#include <map>
+#include <string>
+#include <vector>
 
-#include <Utils/IO/IOUtilities.hpp>
+#include <Eigen/Dense>
 
 class RobotSystem {
- protected:
-  dart::dynamics::SkeletonPtr skel_ptr_;
-  int num_dof_;
-  int num_virtual_dof_;
-  int num_actuated_dof_;
-  Eigen::MatrixXd I_cent_;
-  Eigen::MatrixXd J_cent_;
-  Eigen::MatrixXd A_cent_;
+public:
+  RobotSystem(const bool _b_fixed_base, const bool _b_print_info)
+      : b_fixed_base(_b_fixed_base), b_print_info(_b_print_info){};
+
+  virtual ~RobotSystem(){};
+
+  bool b_fixed_base;
+  bool b_print_info;
+
+  int n_floating;
+  int n_q;
+  int n_q_dot;
+  int n_a;
+
+  double total_mass;
+
+  Eigen::Matrix<double, Eigen::Dynamic, 2> joint_pos_limit;
+  Eigen::Matrix<double, Eigen::Dynamic, 2> joint_vel_limit;
+  Eigen::Matrix<double, Eigen::Dynamic, 2> joint_trq_limit;
+
+  Eigen::VectorXd joint_positions;
+  Eigen::VectorXd joint_velocities;
+
+  Eigen::Matrix<double, 6, 6> Ig;
+  Eigen::Matrix<double, 6, Eigen::Dynamic> Ag;
+  Eigen::Matrix<double, 6, 1> hg;
 
   /*
-   * Update I_cent_, A_cent_, J_cent_
-   * , where
-   * centroid_momentum = I_cent_ * centroid_velocity = A_cent_ * qdot
-   *           J_cent_ = inv(I_cent_) * A_cent_
-   * centroid_velocity = J_cent_ * qdot
+   * Get joint index in generalized coordinate
+   *
+   * Parameters
+   * ----------
+   *  joint_name (str)
+   *
+   *  Returns
+   *  -------
+   *  joint_idx (int)
    */
-  void _updateCentroidFrame(const Eigen::VectorXd& q_,
-                            const Eigen::VectorXd& qdot_);
+  virtual int get_q_idx(const std::string joint_name) = 0;
 
- public:
-  RobotSystem(int numVirtual_, std::string file);
-  virtual ~RobotSystem(void);
+  /*
+   * Get joint velocity index in generalized coordinate
+   *
+   * Parameters
+   * ----------
+   *  joint_name (str)
+   *
+   *  Returns
+   *  -------
+   *  joint_idx (int)
+   */
+  virtual int get_q_dot_idx(const std::string joint_name) = 0;
 
-  dart::dynamics::SkeletonPtr getSkeleton() { return skel_ptr_; };
-  dart::dynamics::BodyNodePtr getBodyNode(const std::string& _link_name) {
-    return skel_ptr_->getBodyNode(_link_name);
-  }
-  dart::dynamics::BodyNodePtr getBodyNode(const int& _bn_idx) {
-    return skel_ptr_->getBodyNode(_bn_idx);
-  }
+  /*
+   * Get joint index in generalized coordinate
+   *
+   * Parameters
+   * ----------
+   * joint_name (str)
+   *
+   * Returns
+   * -------
+   * joint_idx (int)
+   */
+  virtual int get_joint_idx(const std::string joint_name) = 0;
 
-  Eigen::VectorXd getQ() { return skel_ptr_->getPositions(); };
-  Eigen::VectorXd getQdot() { return skel_ptr_->getVelocities(); };
-  void printRobotInfo();
-  double getRobotMass() { return skel_ptr_->getMass(); }
-  int getNumDofs() { return num_dof_; };
-  int getNumVirtualDofs() { return num_virtual_dof_; };
-  int getNumActuatedDofs() { return num_actuated_dof_; };
+  /*
+   * Create command map
+   *
+   * Parameters
+   * ----------
+   * cmd_vec (Eigen::Vector)
+   *
+   * Returns
+   * -------
+   * cmd_map (std::map)
+   */
+  virtual std::map<std::string, double>
+  create_cmd_map(const Eigen::VectorXd cmd_vec) = 0;
 
-  int getJointIdx(const std::string& jointName_);
-  int getDofIdx(const std::string& dofName_);
+  /*
+   * Update generalized coordinate
+   *
+   * Parameters
+   * ----------
+   * base_pos (np.array): Root pos, None if the robot is fixed in the world
+   * base_quat (np.array): Root quat
+   * base_lin_vel (np.array): Root linear velocity
+   * base_ang_vel (np.array): Root angular velocity
+   * joint_pos (OrderedDict): Actuator pos
+   * joint_vel (OrderedDict): Actuator vel
+   * b_cent (Bool): Whether updating centroidal frame or not
+   */
+  virtual void update_system(const Eigen::Vector3d base_com_pos,
+                             const Eigen::Quaternion<double> base_com_quat,
+                             const Eigen::Vector3d base_com_lin_vel,
+                             const Eigen::Vector3d base_com_ang_vel,
+                             const Eigen::Vector3d base_joint_pos,
+                             const Eigen::Quaternion<double> base_joint_quat,
+                             const Eigen::Vector3d base_joint_lin_vel,
+                             const Eigen::Vector3d base_joint_ang_vel,
+                             const std::map<std::string, double> joint_pos,
+                             const std::map<std::string, double> joint_vel,
+                             const bool b_cent = false) = 0;
 
-  // Position Limits
-  Eigen::VectorXd getPositionLowerLimits() {
-    return skel_ptr_->getPositionLowerLimits();
-  }
-  Eigen::VectorXd getPositionUpperLimits() {
-    return skel_ptr_->getPositionUpperLimits();
-  }
-  // Velocity Limits
-  Eigen::VectorXd getVelocityLowerLimits() {
-    return skel_ptr_->getVelocityLowerLimits();
-  }
-  Eigen::VectorXd getVelocityUpperLimits() {
-    return skel_ptr_->getVelocityUpperLimits();
-  }
-  // Force Torque Limits
-  Eigen::VectorXd GetTorqueLowerLimits() {
-    return skel_ptr_->getForceLowerLimits();
-  }
-  Eigen::VectorXd GetTorqueUpperLimits() {
-    return skel_ptr_->getForceUpperLimits();
-  }
+  /*
+   * Returns
+   * -------
+   * q (Eigen::Vector): positions in generalized coordinate
+   */
+  virtual Eigen::VectorXd get_q() = 0;
 
-  Eigen::MatrixXd getMassMatrix();
-  Eigen::MatrixXd getInvMassMatrix();
-  Eigen::VectorXd getGravity();
-  Eigen::VectorXd getCoriolis();
-  Eigen::VectorXd getCoriolisGravity();
+  /*
+   * Returns
+   * -------
+   * qdot (Eigen::Vector): velocities in generalized coordinate
+   */
+  virtual Eigen::VectorXd get_q_dot() = 0;
 
-  Eigen::MatrixXd getCentroidJacobian();
-  Eigen::MatrixXd getCentroidInertiaTimesJacobian();
-  Eigen::MatrixXd getCentroidInertia();
-  Eigen::VectorXd getCentroidVelocity();
-  Eigen::VectorXd getCentroidMomentum();
-  Eigen::Vector3d getCoMPosition(
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Vector3d getCoMVelocity(
-      dart::dynamics::Frame* rl_ = dart::dynamics::Frame::World(),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getCoMJacobian(
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getCoMJacobianDot();
-  void updateSystem(const Eigen::VectorXd& q_, const Eigen::VectorXd& qdot_,
-                    bool isUpdatingCentroid_ = true);
-  void updateCentroidFrame();
+  /*
+   * Returns
+   * -------
+   * A (Eigen::Matrix): mass matrix in generalized coordinate
+   */
+  virtual Eigen::MatrixXd get_mass_matrix() = 0;
 
-  Eigen::Isometry3d getBodyNodeIsometry(
-      const std::string& name_,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Isometry3d getBodyNodeCoMIsometry(
-      const std::string& name_,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Vector6d getBodyNodeSpatialVelocity(
-      const std::string& name_,
-      dart::dynamics::Frame* rl_ = dart::dynamics::Frame::World(),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Vector6d getBodyNodeCoMSpatialVelocity(
-      const std::string& name_,
-      dart::dynamics::Frame* rl_ = dart::dynamics::Frame::World(),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeJacobian(
-      const std::string& name_,
-      Eigen::Vector3d localOffset_ = Eigen::Vector3d::Zero(3),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeJacobianDot(
-      const std::string& name_,
-      Eigen::Vector3d localOffset_ = Eigen::Vector3d::Zero(3),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeCoMJacobian(
-      const std::string& name_,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeCoMJacobianDot(
-      const std::string& name_,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
+  /*
+   * Returns
+   * -------
+   * g (Eigen::Vector): Gravity forces in generalized coordinate
+   */
+  virtual Eigen::VectorXd get_gravity() = 0;
 
-  Eigen::Isometry3d getBodyNodeIsometry(
-      const int& _bn_idx,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Isometry3d getBodyNodeCoMIsometry(
-      const int& _bn_idx,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Vector6d getBodyNodeSpatialVelocity(
-      const int& _bn_idx,
-      dart::dynamics::Frame* rl_ = dart::dynamics::Frame::World(),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::Vector6d getBodyNodeCoMSpatialVelocity(
-      const int& _bn_idx,
-      dart::dynamics::Frame* rl_ = dart::dynamics::Frame::World(),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeJacobian(
-      const int& _bn_idx,
-      Eigen::Vector3d localOffset_ = Eigen::Vector3d::Zero(3),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeJacobianDot(
-      const int& _bn_idx,
-      Eigen::Vector3d localOffset_ = Eigen::Vector3d::Zero(3),
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeCoMJacobian(
-      const int& _bn_idx,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
-  Eigen::MatrixXd getBodyNodeCoMJacobianDot(
-      const int& _bn_idx,
-      dart::dynamics::Frame* wrt_ = dart::dynamics::Frame::World());
+  /*
+   * Returns
+   * -------
+   * c (Eigen::Vector): Coriolis forces in generalized coordinate
+   */
+  virtual Eigen::VectorXd get_coriolis() = 0;
+
+  /*
+   * Returns
+   * -------
+   * com_pos (Eigen::Vector): COM position
+   */
+  virtual Eigen::Vector3d get_com_pos() = 0;
+
+  /*
+   * Returns
+   * -------
+   * com_lin_vel (Eigen::Vector): COM velocity
+   */
+  virtual Eigen::Vector3d get_com_lin_vel() = 0;
+
+  /*
+   * Returns
+   * -------
+   * com_lin_jacobian (Eigen::Vector): COM jacobian
+   */
+  virtual Eigen::Matrix<double, 3, Eigen::Dynamic> get_com_lin_jacobian() = 0;
+
+  /*
+   * Returns
+   * -------
+   * com_lin_jacobian_dot (Eigen::Vector): COM jacobian dot
+   */
+  virtual Eigen::Matrix<double, 3, Eigen::Dynamic>
+  get_com_lin_jacobian_dot() = 0;
+
+  /*
+   * Parameters
+   * ----------
+   * link_id (str):
+   *     Link ID
+   *
+   * Returns
+   * -------
+   * link_iso (Eigen::Isometry): Link SE(3)
+   */
+  virtual Eigen::Isometry3d get_link_iso(const std::string link_id) = 0;
+
+  /*
+   * Parameters
+   * ----------
+   * link_id (str):
+   *     Link ID
+   *
+   * Returns
+   * -------
+   * link_vel (Eigen::Vector): Link COM Screw described in World Frame
+   */
+  virtual Eigen::Matrix<double, 6, 1>
+  get_link_vel(const std::string link_id) = 0;
+
+  /*
+   * Parameters
+   * ----------
+   * link_id (str):
+   *     Link ID
+   *
+   * Returns
+   * -------
+   * jac (Eigen::Matrix):
+   *     Link COM Jacobian in World Frame
+   */
+  virtual Eigen::Matrix<double, 6, Eigen::Dynamic>
+  get_link_jacobian(const std::string link_id) = 0;
+
+  /*
+   * Parameters
+   * ----------
+   * link_id (str):
+   *     Link ID
+   *
+   * Returns
+   * -------
+   * jac_dot_times_qdot (Eigen::Matrix):
+   *     Link COM Jacobian_dot times q_dot
+   */
+  virtual Eigen::Matrix<double, 6, 1>
+  get_link_jacobian_dot_times_qdot(const std::string link_id) = 0;
+
+private:
+  /*
+   * Update Ig, Ag, hg:
+   *    hg = Ig * centroid_velocity = Ag * qdot
+   * Note that all quantities are represented in the world frame
+   */
+  virtual void _update_centroidal_quatities() = 0;
+
+  /*
+   * Configure following properties:
+   *     n_floating (int):
+   *         Number of floating joints
+   *     n_q (int):
+   *         Size of joint positions in generalized coordinate
+   *     n_q_dot (int):
+   *         Size of joint velocities in generalized coordinate
+   *     n_a (int):
+   *         Size of actuation in generalized coordinate
+   *     total_mass (double):
+   *         Total mass of the robot
+   *     joint_pos_limit (Eigen::Matrix):
+   *         Joint position limits. Size of (n_a, 2)
+   *     joint_vel_limit (Eigen::Matrix):
+   *         Joint velocity limits. Size of (n_a, 2)
+   *     joint_trq_limit (Eigen::Matrix):
+   *         Joint torque limits. Size of (n_a, 2)
+   *     joint_id (map):
+   *         Key: joint name, Value: joint indicator
+   *     floating_id (map):
+   *         Key: floating joint name, Value: joint indicator
+   *     link_id (map):
+   *         Key: link name, Value: link indicator
+   */
+  virtual void _config_robot() = 0;
 };

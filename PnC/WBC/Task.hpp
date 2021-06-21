@@ -1,113 +1,91 @@
 #pragma once
 
 #include <stdio.h>
+#include <string>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
 
+/*
+ * WBC Task
+ * --------
+ * Usage:
+ *     update_desired --> update_jacobian --> update_cmd
+ */
 class Task {
- public:
-  Task(RobotSystem* _robot, const int& _dim) {
+public:
+  Task(RobotSystem *_robot, const int &_dim,
+       const std::vector<std::string> _target_ids) {
     robot_ = _robot;
-    b_set_task_ = false;
-    dim_task_ = _dim;
+    dim = _dim;
+    target_ids = _target_ids;
 
-    w_hierarchy_ = 1.0;
-    kp_ = Eigen::VectorXd::Zero(_dim);
-    kd_ = Eigen::VectorXd::Zero(_dim);
-    JtDotQdot_ = Eigen::VectorXd::Zero(_dim);
-    Jt_ = Eigen::MatrixXd::Zero(_dim, robot_->getNumDofs());
+    w_hierarchy = 1.0;
 
-    op_cmd = Eigen::VectorXd::Zero(_dim);
+    kp = Eigen::VectorXd::Zero(dim);
+    kd = Eigen::VectorXd::Zero(dim);
 
-    pos_err = Eigen::VectorXd::Zero(_dim);
-    vel_des = Eigen::VectorXd::Zero(_dim);
-    acc_des = Eigen::VectorXd::Zero(_dim);
+    jacobian = Eigen::MatrixXd::Zero(dim, robot_->n_q_dot);
+    jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
 
-    pos_des_ = Eigen::VectorXd::Zero(_dim);
-    vel_des_ = Eigen::VectorXd::Zero(_dim);
-    acc_des_ = Eigen::VectorXd::Zero(_dim);
-  }
-  virtual ~Task() {}
+    op_cmd = Eigen::VectorXd::Zero(dim);
+    pos_err = Eigen::VectorXd::Zero(dim);
 
-  virtual int getLinkID() {
-    std::cout
-        << "Called in Parent Clasee Task.hpp, if this happen use pure virtual"
-        << std::endl;
-    exit(0);
-  }
-  void getCommand(Eigen::VectorXd& _op_cmd) { _op_cmd = op_cmd; }
-  void getTaskJacobian(Eigen::MatrixXd& Jt) { Jt = Jt_; }
-  void getTaskJacobianDotQdot(Eigen::VectorXd& JtDotQdot) {
-    JtDotQdot = JtDotQdot_;
-  }
-  void setGain(const Eigen::VectorXd& _kp, const Eigen::VectorXd& _kd) {
-    kp_ = _kp;
-    kd_ = _kd;
-  }
+    pos_des_ = Eigen::VectorXd::Zero(dim);
+    vel_des_ = Eigen::VectorXd::Zero(dim);
+    acc_des_ = Eigen::VectorXd::Zero(dim);
+  };
+  virtual ~Task(){};
 
-  // Set hierarchy weight for IHWBC
-  void setHierarchyWeight(const double& _w_hierarchy) {
-    w_hierarchy_ = _w_hierarchy;
-  }
-  // Get hierarchy weight
-  double getHierarchyWeight() { return w_hierarchy_; }
+  int dim;
 
-  void updateJacobians() {
-    _UpdateTaskJacobian();
-    _UpdateTaskJDotQdot();
-  }
+  double w_hierarchy;
+  Eigen::VectorXd kp;
+  Eigen::VectorXd kd;
 
-  void updateDesired(const Eigen::VectorXd& pos_des,
-                     const Eigen::VectorXd& vel_des,
-                     const Eigen::VectorXd& acc_des) {
+  Eigen::MatrixXd jacobian;
+  Eigen::VectorXd jacobian_dot_q_dot;
+
+  Eigen::VectorXd op_cmd;
+  Eigen::VectorXd pos_err;
+
+  std::vector<std::string> target_ids;
+
+  /*
+   *  Update pos_des, vel_des, acc_des which will be used later to compute
+   *  op_cmd
+
+   *  Parameters
+   *  ----------
+   *  pos_des (np.array):
+   *      For orientation task, the size of numpy array is 4, and it should
+   *      be represented in scalar-last quaternion
+   *  vel_des (np.array):
+   *      Velocity desired
+   *  acc_des (np.array):
+   *      Acceleration desired
+   */
+  void update_desired(const Eigen::VectorXd &pos_des,
+                      const Eigen::VectorXd &vel_des,
+                      const Eigen::VectorXd &acc_des) {
     pos_des_ = pos_des;
     vel_des_ = vel_des;
     acc_des_ = acc_des;
   }
 
-  void computeCommands() { _UpdateCommand(pos_des_, vel_des_, acc_des_); }
+  /*
+   * Update op_cmd, pos_err given updated pos_des_, vel_des_, acc_des_
+   */
+  virtual void update_cmd() = 0;
 
-  bool updateTask(const Eigen::VectorXd& pos_des,
-                  const Eigen::VectorXd& vel_des,
-                  const Eigen::VectorXd& acc_des) {
-    updateJacobians();
-    updateDesired(pos_des, vel_des, acc_des);
-    computeCommands();
-    b_set_task_ = true;
-    return true;
-  }
+  /*
+   * Update jacobian and jacobian_dot_q_dot
+   */
+  virtual void update_jacobian() = 0;
 
-  bool isTaskSet() { return b_set_task_; }
-  int getDim() { return dim_task_; }
-  void unsetTask() { b_set_task_ = false; }
+protected:
+  RobotSystem *robot_;
 
-  // For Dyn WBC
-  Eigen::VectorXd op_cmd;
-  // For Kin WBC
-  Eigen::VectorXd pos_err;
-  Eigen::VectorXd vel_des;
-  Eigen::VectorXd acc_des;
-
-  // Store for reuse old command
   Eigen::VectorXd pos_des_;
   Eigen::VectorXd vel_des_;
   Eigen::VectorXd acc_des_;
-
- protected:
-  virtual bool _UpdateCommand(const Eigen::VectorXd& pos_des,
-                              const Eigen::VectorXd& vel_des,
-                              const Eigen::VectorXd& acc_des) = 0;
-  virtual bool _UpdateTaskJacobian() = 0;
-  virtual bool _UpdateTaskJDotQdot() = 0;
-
-  RobotSystem* robot_;
-  bool b_set_task_;
-  int dim_task_;
-
-  double w_hierarchy_;
-  Eigen::VectorXd kp_;
-  Eigen::VectorXd kd_;
-
-  Eigen::VectorXd JtDotQdot_;
-  Eigen::MatrixXd Jt_;
 };

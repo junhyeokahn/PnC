@@ -34,9 +34,9 @@ include_directories ("${PROJECT_SOURCE_DIR}/../../")
 
 set (headers
 DataSave.h
-data_protocol.h
+DataProtocol.h
 ../../Utils/IO/Pthread.hpp
-../../Utils/IO/comm_udp.hpp
+../../Utils/IO/CommUDP.hpp
 ../../Utils/IO/IOUtilities.hpp
 ../../Utils/IO/DataManager.hpp
 )
@@ -45,14 +45,10 @@ set (sources
 DataSave.cpp
 Status_Display.cpp
 ../../Utils/IO/Pthread.cpp
-../../Utils/IO/comm_udp.cpp
+../../Utils/IO/CommUDP.cpp
 ../../Utils/IO/IOUtilities.cpp
 ../../Utils/IO/DataManager.cpp
 )
 
-#link_directories("/usr/local/lib/")
-#link_directories("/usr/lib/")
-
-add_executable(Status_Display ${sources} ${headers})
-# add_dependencies(Status_Display comm_comm)
-target_link_libraries(Status_Display pthread)
+add_executable(StatusDisplay ${sources} ${headers})
+target_link_libraries(StatusDisplay pthread)
