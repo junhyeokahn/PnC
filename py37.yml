@@ -1,0 +1,10 @@
+name: py37
+channels:
+  - conda-forge
+dependencies:
+  - python=3.7.9
+  - pip:
+      - numpy==1.17.3
+      - qpsolvers==1.5
+      - scipy==1.6.0
+prefix: /opt/anaconda3/envs/py37
