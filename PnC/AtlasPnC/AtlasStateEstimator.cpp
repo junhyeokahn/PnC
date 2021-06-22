@@ -1,4 +1,7 @@
-#include <PnC/AtlasPnC/AtlasStateEstimator.hAtlasStateEstimator.hpp>
+#include <PnC/AtlasPnC/AtlasInterface.hpp>
+#include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
+#include <PnC/AtlasPnC/AtlasStateProvider.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 
 AtlasStateEstimator::AtlasStateEstimator(RobotSystem *_robot) {
   robot_ = _robot;
@@ -7,7 +10,7 @@ AtlasStateEstimator::AtlasStateEstimator(RobotSystem *_robot) {
 
 AtlasStateEstimator::~AtlasStateEstimator() {}
 
-void AtlasStateEstimator::initialization(AtlasSensorData *data) {
+void AtlasStateEstimator::initialize(AtlasSensorData *data) {
   sp_->nominal_joint_pos = data->joint_positions;
   this->update(data);
 }
@@ -17,7 +20,7 @@ void AtlasStateEstimator::update(AtlasSensorData *data) {
                         data->base_com_lin_vel, data->base_com_ang_vel,
                         data->base_joint_pos, data->base_joint_quat,
                         data->base_joint_lin_vel, data->base_joint_ang_vel,
-                        data->joint_pos, data->joint_vel);
+                        data->joint_positions, data->joint_velocities, true);
 
   if (data->b_rf_contact) {
     sp_->b_rf_contact = 1;

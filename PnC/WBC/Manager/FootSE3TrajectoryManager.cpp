@@ -1,16 +1,16 @@
-#include <PnC/TrajectoryManager/FootSE3TrajectoryManager.hpp>
+#include <PnC/WBC/Manager/FootSE3TrajectoryManager.hpp>
 
-FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task* _foot_pos_task,
-                                                   Task* _foot_ori_task,
-                                                   RobotSystem* _robot)
-    : TrajectoryManagerBase(_robot) {
+FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task *_foot_pos_task,
+                                                   Task *_foot_ori_task,
+                                                   RobotSystem *_robot) {
   myUtils::pretty_constructor(2, "TrajectoryManager: FootSE3");
+  robot_ = _robot;
   // Set Linear and Orientation Foot task
   foot_pos_task_ = _foot_pos_task;
   foot_ori_task_ = _foot_ori_task;
 
   // Assume that both tasks use the same link id.
-  link_idx_ = static_cast<BasicTask*>(foot_pos_task_)->getLinkID();
+  link_idx_ = foot_pos_task_->target_ids[0];
 
   // Initialize member variables
   foot_pos_des_.setZero();
@@ -22,16 +22,16 @@ FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task* _foot_pos_task,
   foot_ang_vel_des_.setZero();
   foot_ang_acc_des_.setZero();
 
-  swing_height_ = 0.04;  // 4cm default
+  swing_height_ = 0.04; // 4cm default
 }
 
 FootSE3TrajectoryManager::~FootSE3TrajectoryManager() {}
 
-void FootSE3TrajectoryManager::paramInitialization(const YAML::Node& node) {
+void FootSE3TrajectoryManager::paramInitialization(const YAML::Node &node) {
   try {
     myUtils::readParameter(node, "swing_height", swing_height_);
 
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
@@ -41,25 +41,13 @@ void FootSE3TrajectoryManager::paramInitialization(const YAML::Node& node) {
 
 void FootSE3TrajectoryManager::useCurrent() {
   // Update desired to use current foot pose
-  foot_pos_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-  foot_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).tail(3);
+  foot_pos_des_ = robot_->get_link_iso(link_idx_).translation();
+  foot_vel_des_ = robot_->get_link_vel(link_idx_).tail(3);
   // foot_vel_des_.setZero();
   foot_acc_des_.setZero();
-  foot_quat_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).linear();
-  foot_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).head(3);
+  foot_quat_des_ = robot_->get_link_iso(link_idx_).linear();
+  foot_ang_vel_des_ = robot_->get_link_vel(link_idx_).head(3);
   // foot_ang_vel_des_.setZero();
-  foot_ang_acc_des_.setZero();
-  convertQuatDesToOriDes();
-  updateDesired();
-}
-
-void FootSE3TrajectoryManager::ignoreTask() {
-  // Update desired to use current foot pose
-  foot_pos_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-  foot_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).tail(3);
-  foot_acc_des_.setZero();
-  foot_quat_des_ = robot_->getBodyNodeCoMIsometry(link_idx_).linear();
-  foot_ang_vel_des_ = robot_->getBodyNodeSpatialVelocity(link_idx_).head(3);
   foot_ang_acc_des_.setZero();
   convertQuatDesToOriDes();
   updateDesired();
@@ -73,15 +61,15 @@ void FootSE3TrajectoryManager::convertQuatDesToOriDes() {
 }
 
 void FootSE3TrajectoryManager::updateDesired() {
-  foot_pos_task_->updateDesired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
-  foot_ori_task_->updateDesired(foot_ori_des_, foot_ang_vel_des_,
-                                foot_ang_acc_des_);
+  foot_pos_task_->update_desired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
+  foot_ori_task_->update_desired(foot_ori_des_, foot_ang_vel_des_,
+                                 foot_ang_acc_des_);
 }
 
 // Initialize the swing foot trajectory
 void FootSE3TrajectoryManager::initializeSwingFootTrajectory(
     const double _start_time, const double _swing_duration,
-    const Footstep& _landing_foot) {
+    const Footstep &_landing_foot) {
   // Copy and initialize variables
   swing_start_time_ = _start_time;
   swing_duration_ = _swing_duration;
@@ -89,9 +77,8 @@ void FootSE3TrajectoryManager::initializeSwingFootTrajectory(
 
   // Initialize swing foot starting pose
   Eigen::Vector3d start_foot_pos =
-      robot_->getBodyNodeCoMIsometry(link_idx_).translation();
-  Eigen::Quaterniond start_foot_ori(
-      robot_->getBodyNodeCoMIsometry(link_idx_).linear());
+      robot_->get_link_iso(link_idx_).translation();
+  Eigen::Quaterniond start_foot_ori(robot_->get_link_iso(link_idx_).linear());
 
   swing_init_foot_.setPosOriSide(start_foot_pos, start_foot_ori,
                                  swing_land_foot_.robot_side);
@@ -136,13 +123,13 @@ void FootSE3TrajectoryManager::computeSwingFoot(const double current_time) {
   double s = (current_time - swing_start_time_) / swing_duration_;
 
   // Get foot position and its derivatives
-  if (s <= 0.5) {  // 0.0 <= s < 0.5 use the first trajectory
+  if (s <= 0.5) { // 0.0 <= s < 0.5 use the first trajectory
     // scale back to 1.0
     s = 2.0 * s;
     foot_pos_des_ = pos_traj_init_to_mid_.evaluate(s);
     foot_vel_des_ = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
     foot_acc_des_ = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
-  } else {  // 0.5 <= s < 1.0 use the second trajectory
+  } else { // 0.5 <= s < 1.0 use the second trajectory
     // scale back to 1.0 after the offset
     s = 2.0 * (s - 0.5);
     foot_pos_des_ = pos_traj_mid_to_end_.evaluate(s);

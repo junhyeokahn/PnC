@@ -1,26 +1,27 @@
 #pragma once
 
-#include <PnC/TrajectoryManager/TrajectoryManagerBase.hpp>
 #include <PnC/WBC/BasicTask.hpp>
+#include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 // Object to manage common trajectory primitives
-class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
- public:
-  FloatingBaseTrajectoryManager(Task* _com_task, Task* _base_ori_task,
-                                RobotSystem* _robot);
+class FloatingBaseTrajectoryManager {
+public:
+  FloatingBaseTrajectoryManager(Task *_com_task, Task *_base_ori_task,
+                                RobotSystem *_robot);
   ~FloatingBaseTrajectoryManager(){};
 
   void initializeFloatingBaseTrajectory(const double _start_time,
                                         const double _duration,
-                                        const Eigen::VectorXd& _target_com_pos);
+                                        const Eigen::VectorXd &_target_com_pos);
   void initializeCoMSwaying(double _start_time, double _duration,
                             Eigen::VectorXd _dis);
   void initializeCoMSinusoid(double _start_time, double _amp, double _freq);
   void updateFloatingBaseDesired(const double current_time);
-  void paramInitialization(const YAML::Node& node){};
+  void paramInitialization(const YAML::Node &node){};
 
-  Task* com_task_;
-  Task* base_ori_task_;
+  Task *com_task_;
+  Task *base_ori_task_;
 
   Eigen::VectorXd com_pos_des_;
   Eigen::VectorXd com_vel_des_;
@@ -43,10 +44,12 @@ class FloatingBaseTrajectoryManager : public TrajectoryManagerBase {
   Eigen::VectorXd ini_com_pos_;
   Eigen::VectorXd ini_base_quat_;
   Eigen::VectorXd target_com_pos_;
-  int base_id_;
+  std::string base_id_;
   bool is_swaying;
   bool is_sinusoid;
   Eigen::VectorXd amp;
   Eigen::VectorXd freq;
   Eigen::VectorXd mid_point;
+
+  RobotSystem *robot_;
 };

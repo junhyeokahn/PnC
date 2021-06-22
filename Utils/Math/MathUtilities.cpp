@@ -46,7 +46,7 @@ Eigen::MatrixXd vStack(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
 }
 
 Eigen::MatrixXd block_diag(const Eigen::MatrixXd &_a,
-                           const Eigen::MatrixXd &b) {
+                           const Eigen::MatrixXd &_b) {
   Eigen::MatrixXd ret =
       Eigen::MatrixXd::Zero(_a.rows() + _b.rows(), _a.cols() + _b.cols());
   ret.block(0, 0, _a.rows(), _a.cols()) = _a;

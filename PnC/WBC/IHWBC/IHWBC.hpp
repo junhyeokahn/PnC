@@ -2,6 +2,7 @@
 
 #include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
 #include <PnC/WBC/Contact.hpp>
+#include <PnC/WBC/InternalConstraint.hpp>
 #include <PnC/WBC/Task.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
@@ -33,6 +34,9 @@ private:
   int n_q_dot_;
   int n_active_;
   int n_passive_;
+
+  int dim_cone_constraint_;
+  int dim_contacts_;
 
   bool b_contact_;
   bool b_internal_constraint_;
@@ -71,4 +75,11 @@ private:
   Eigen::VectorXd qp_dec_vars_;
   Eigen::VectorXd qddot_result_;
   Eigen::VectorXd fr_result_;
+
+  void setQuadProgCosts(const Eigen::MatrixXd &mat, const Eigen::VectorXd &vec);
+  void setEqualityConstraints(const Eigen::MatrixXd &mat,
+                              const Eigen::VectorXd &vec);
+  void setInequalityConstraints(const Eigen::MatrixXd &mat,
+                                const Eigen::VectorXd &vec);
+  void solveQP();
 };

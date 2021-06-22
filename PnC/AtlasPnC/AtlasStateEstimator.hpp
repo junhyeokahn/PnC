@@ -12,7 +12,7 @@ public:
   AtlasStateEstimator(RobotSystem *robot);
   ~AtlasStateEstimator();
 
-  void initialization(AtlasSensorData *);
+  void initialize(AtlasSensorData *);
   void update(AtlasSensorData *);
 
 protected:

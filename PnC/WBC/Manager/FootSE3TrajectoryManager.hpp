@@ -1,27 +1,27 @@
 #pragma once
 
-#include <PnC/Planner/Footstep.hpp>
-#include <PnC/TrajectoryManager/TrajectoryManagerBase.hpp>
-#include <PnC/WBC/BasicContactSpec.hpp>
-#include <PnC/WBC/BasicTask.hpp>
+#include <PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp>
+#include <PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
+#include <PnC/WBC/Contact.hpp>
+#include <PnC/WBC/Task.hpp>
 #include <Utils/Math/HermiteCurveVec.hpp>
 #include <Utils/Math/HermiteQuaternionCurve.hpp>
 
 // Object to manage common trajectory primitives
-class FootSE3TrajectoryManager : public TrajectoryManagerBase {
- public:
-  FootSE3TrajectoryManager(Task* _foot_pos_task, Task* _foot_ori_task,
-                           RobotSystem* _robot);
+class FootSE3TrajectoryManager {
+public:
+  FootSE3TrajectoryManager(Task *_foot_pos_task, Task *_foot_ori_task,
+                           RobotSystem *_robot);
   ~FootSE3TrajectoryManager();
-  void paramInitialization(const YAML::Node& node);
+  void paramInitialization(const YAML::Node &node);
 
   // Use current pose to set the task.
   void useCurrent();
-  void ignoreTask();
 
-  Task* foot_pos_task_;
-  Task* foot_ori_task_;
-  int link_idx_;
+  Task *foot_pos_task_;
+  Task *foot_ori_task_;
+  std::string link_idx_;
 
   Eigen::Vector3d foot_pos_des_;
   Eigen::Vector3d foot_vel_des_;
@@ -38,7 +38,7 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
   // Initialize the swing foot trajectory
   void initializeSwingFootTrajectory(const double _start_time,
                                      const double _swing_duration,
-                                     const Footstep& _landing_foot);
+                                     const Footstep &_landing_foot);
   // Computes the swing foot
   void computeSwingFoot(const double current_time);
   // computes the swing foot and updates the desired swing foot task
@@ -64,6 +64,7 @@ class FootSE3TrajectoryManager : public TrajectoryManagerBase {
   HermiteCurveVec pos_traj_mid_to_end_;
   HermiteQuaternionCurve quat_hermite_curve_;
 
- protected:
+protected:
   void convertQuatDesToOriDes();
+  RobotSystem *robot_;
 };

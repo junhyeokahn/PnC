@@ -21,8 +21,8 @@ public:
   Eigen::Quaternion<double> base_joint_quat;
   Eigen::Vector3d base_joint_lin_vel;
   Eigen::Vector3d base_joint_ang_vel;
-  std::map<std::string, double> joint_pos;
-  std::map<std::string, double> joint_vel;
+  std::map<std::string, double> joint_positions;
+  std::map<std::string, double> joint_velocities;
 
   bool b_rf_contact;
   bool b_lf_contact;
@@ -33,9 +33,9 @@ public:
   AtlasCommand() {}
   virtual ~AtlasCommand() {}
 
-  std::map<std::string, double> joint_pos;
-  std::map<std::string, double> joint_vel;
-  std::map<std::string, double> joint_trq;
+  std::map<std::string, double> joint_positions;
+  std::map<std::string, double> joint_velocities;
+  std::map<std::string, double> joint_torques;
 };
 
 class AtlasInterface : public Interface {

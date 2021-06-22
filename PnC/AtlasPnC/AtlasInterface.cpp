@@ -11,7 +11,7 @@
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-AtlasInterface::AtlasInterface() : EnvInterface() {
+AtlasInterface::AtlasInterface() : Interface() {
   std::string border = "=";
   for (int i = 0; i < 79; ++i) {
     border += "=";
@@ -53,15 +53,9 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
     // control_architecture_->getCommand(cmd);
   }
 
-  if (!Initialization_(data, cmd)) {
-    se_->update(data);
-    // interrupt->processInterrupts();
-    // control_architecture_->getCommand(cmd);
-  }
-
   ++count_;
   running_time_ = (double)(count_)*sp_->dt;
   sp_->curr_time = running_time_;
   sp_->prev_state = sp_->state;
-  sp_->state = control_architecture_->getState();
+  // sp_->state = control_architecture_->getState();
 }

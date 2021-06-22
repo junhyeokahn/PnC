@@ -4,6 +4,7 @@
 #include <string>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
+#include <Utils/Math/PseudoInverse.hpp>
 
 /*
  * WBC Task

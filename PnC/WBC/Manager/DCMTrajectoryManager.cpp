@@ -1,17 +1,15 @@
-#include <PnC/TrajectoryManager/DCMTrajectoryManager.hpp>
+#include <PnC/WBC/Manager/DCMTrajectoryManager.hpp>
 
-DCMTrajectoryManager::DCMTrajectoryManager(DCMPlanner* _dcm_planner,
-                                           Task* _com_task,
-                                           Task* _base_ori_task,
-                                           RobotSystem* _robot, int _lfoot_idx,
-                                           int _rfoot_idx)
-    : TrajectoryManagerBase(_robot) {
+DCMTrajectoryManager::DCMTrajectoryManager(
+    DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
+    RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx) {
   myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
   dcm_planner_ = _dcm_planner;
   com_task_ = _com_task;
   base_ori_task_ = _base_ori_task;
   lfoot_id_ = _lfoot_idx;
   rfoot_id_ = _rfoot_idx;
+  robot_ = _robot;
 
   des_dcm.setZero();
   des_dcm_vel.setZero();
@@ -31,11 +29,10 @@ DCMTrajectoryManager::DCMTrajectoryManager(DCMPlanner* _dcm_planner,
   t_swing_ = 1.0;
 
   // DCM walking parameters
-  percentage_settle_ =
-      0.99;  // percent to converge at the end of the trajectory
+  percentage_settle_ = 0.99; // percent to converge at the end of the trajectory
   alpha_ds_ =
-      0.5;  // value between 0.0 and 1.0 for double support DCM interpolation
-  nominal_com_height_ = 1.015;  // vertical m from stance foot
+      0.5; // value between 0.0 and 1.0 for double support DCM interpolation
+  nominal_com_height_ = 1.015; // vertical m from stance foot
 
   // Nominal walking parameters
   nominal_footwidth_ = 0.27;
@@ -54,21 +51,21 @@ DCMTrajectoryManager::~DCMTrajectoryManager() {}
 
 void DCMTrajectoryManager::convertTemporalParamsToDCMParams() {
   // Fixed transforms
-  t_ds_ = t_contact_transition_;  // double support polynomial transfer time
-  t_ss_ = t_swing_;  // single support exponential interpolation  time
+  t_ds_ = t_contact_transition_; // double support polynomial transfer time
+  t_ss_ = t_swing_; // single support exponential interpolation  time
   // polynomial interpolation time during contact transition: t_transfer + t_ds
   // + (1-alpha*t_ds).
   t_transfer_init_ =
-      t_additional_init_transfer_;  // additional transfer time offset
+      t_additional_init_transfer_; // additional transfer time offset
   t_transfer_mid_ =
-      (alpha_ds_ - 1.0) * t_ds_;  // transfer time offset for midstep transfers
+      (alpha_ds_ - 1.0) * t_ds_; // transfer time offset for midstep transfers
 }
 
 double DCMTrajectoryManager::getInitialContactTransferTime() {
   double t_initial_transfer_time =
       t_additional_init_transfer_ + t_ds_ +
       (1 - alpha_ds_) *
-          t_ds_;  // the total initial transfer time before the foot swinng
+          t_ds_; // the total initial transfer time before the foot swinng
   return t_initial_transfer_time;
 }
 
@@ -98,16 +95,12 @@ void DCMTrajectoryManager::resetStepIndex() { current_footstep_index_ = 0; }
 
 // Updates the feet pose of the starting stance
 void DCMTrajectoryManager::updateStartingStance() {
-  Eigen::Vector3d lfoot_pos =
-      robot_->getBodyNodeCoMIsometry(lfoot_id_).translation();
-  Eigen::Quaterniond lfoot_ori(
-      robot_->getBodyNodeCoMIsometry(lfoot_id_).linear());
+  Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
+  Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
   left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, LEFT_ROBOT_SIDE);
 
-  Eigen::Vector3d rfoot_pos =
-      robot_->getBodyNodeCoMIsometry(rfoot_id_).translation();
-  Eigen::Quaterniond rfoot_ori(
-      robot_->getBodyNodeCoMIsometry(rfoot_id_).linear());
+  Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
+  Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
   right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, RIGHT_ROBOT_SIDE);
 
   mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
@@ -130,9 +123,9 @@ void DCMTrajectoryManager::updatePreview(const int max_footsteps_to_preview) {
 
 bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
                                       const int transfer_type_in,
-                                      const Eigen::Quaterniond& ori_start_in,
-                                      const Eigen::Vector3d& dcm_pos_start_in,
-                                      const Eigen::Vector3d& dcm_vel_start_in) {
+                                      const Eigen::Quaterniond &ori_start_in,
+                                      const Eigen::Vector3d &dcm_pos_start_in,
+                                      const Eigen::Vector3d &dcm_vel_start_in) {
   if (footstep_list_.size() == 0) {
     return false;
   }
@@ -159,7 +152,7 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   // std::cout << dcm_vel_start_in << std::endl;
 
   // Set DCM reference
-  dcm_planner_->setRobotMass(robot_->getRobotMass());
+  dcm_planner_->setRobotMass(robot_->total_mass);
   dcm_planner_->setCoMHeight(nominal_com_height_);
   dcm_planner_->setInitialTime(t_walk_start_);
   dcm_planner_->setInitialOri(ori_start_in);
@@ -190,24 +183,11 @@ void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
   Eigen::VectorXd des_quat_vec = Eigen::VectorXd::Zero(4);
   des_quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
 
-  com_task_->updateDesired(des_com_pos, des_com_vel, des_com_acc);
-  base_ori_task_->updateDesired(des_quat_vec, des_ang_vel, des_ang_acc);
+  com_task_->update_desired(des_com_pos, des_com_vel, des_com_acc);
+  base_ori_task_->update_desired(des_quat_vec, des_ang_vel, des_ang_acc);
 }
 
-// For TOWR+
-// void DCMTrajectoryManager::updateDCMTasksDesired(
-// const Eigen::Vector3d& des_com_pos, const Eigen::Vector3d& des_com_vel,
-// const Eigen::Quaternion<double>& des_quat,
-// const Eigen::Vector3d& des_ang_vel) {
-// Eigen::Vector3d zero3;
-// zero3.setZero();
-// com_task_->updateDesired(des_com_pos, des_com_vel, zero3);
-// Eigen::VectorXd quat_vec(4);
-// quat_vec << des_quat.w(), des_quat.x(), des_quat.y(), des_quat.z();
-// base_ori_task_->updateDesired(quat_vec, des_ang_vel, zero3);
-//}
-
-bool DCMTrajectoryManager::nextStepRobotSide(int& robot_side) {
+bool DCMTrajectoryManager::nextStepRobotSide(int &robot_side) {
   if ((footstep_list_.size() > 0) &&
       (current_footstep_index_ < footstep_list_.size())) {
     // std::cout << "hello:" << std::endl;
@@ -278,7 +258,7 @@ void DCMTrajectoryManager::turnRight() {
 // Creates footstep in place
 void DCMTrajectoryManager::populateStepInPlace(const int num_steps,
                                                const int robot_side_first) {
-  updateStartingStance();  // Update the starting foot locations of the robot
+  updateStartingStance(); // Update the starting foot locations of the robot
 
   Footstep left_footstep = left_foot_stance_;
   Footstep right_footstep = right_foot_stance_;
@@ -310,7 +290,7 @@ void DCMTrajectoryManager::populateStepInPlace(const int num_steps,
 // Populates the input footstep list with a predefined walking forward behavior
 void DCMTrajectoryManager::populateWalkForward(const int num_steps,
                                                const double forward_distance) {
-  updateStartingStance();  // Update the starting foot locations of the robot
+  updateStartingStance(); // Update the starting foot locations of the robot
 
   Footstep new_footstep;
   Footstep mid_footstep = mid_foot_stance_;
@@ -320,16 +300,16 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
     if (robot_side == LEFT_ROBOT_SIDE) {
       Eigen::Vector3d translate((i + 1) * forward_distance,
                                 nominal_footwidth_ / 2.0, 0);
-      new_footstep.setPosOriSide(
-          mid_footstep.position + mid_footstep.R_ori * translate,
-          mid_footstep.orientation, LEFT_ROBOT_SIDE);
+      new_footstep.setPosOriSide(mid_footstep.position +
+                                     mid_footstep.R_ori * translate,
+                                 mid_footstep.orientation, LEFT_ROBOT_SIDE);
       robot_side = RIGHT_ROBOT_SIDE;
     } else {
       Eigen::Vector3d translate((i + 1) * forward_distance,
                                 -nominal_footwidth_ / 2.0, 0);
-      new_footstep.setPosOriSide(
-          mid_footstep.position + mid_footstep.R_ori * translate,
-          mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+      new_footstep.setPosOriSide(mid_footstep.position +
+                                     mid_footstep.R_ori * translate,
+                                 mid_footstep.orientation, RIGHT_ROBOT_SIDE);
       robot_side = LEFT_ROBOT_SIDE;
     }
     footstep_list_.push_back(new_footstep);
@@ -339,15 +319,15 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
   if (robot_side == LEFT_ROBOT_SIDE) {
     Eigen::Vector3d translate(num_steps * forward_distance,
                               nominal_footwidth_ / 2.0, 0);
-    new_footstep.setPosOriSide(
-        mid_footstep.position + mid_footstep.R_ori * translate,
-        mid_footstep.orientation, LEFT_ROBOT_SIDE);
+    new_footstep.setPosOriSide(mid_footstep.position +
+                                   mid_footstep.R_ori * translate,
+                               mid_footstep.orientation, LEFT_ROBOT_SIDE);
   } else {
     Eigen::Vector3d translate(num_steps * forward_distance,
                               -nominal_footwidth_ / 2.0, 0);
-    new_footstep.setPosOriSide(
-        mid_footstep.position + mid_footstep.R_ori * translate,
-        mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+    new_footstep.setPosOriSide(mid_footstep.position +
+                                   mid_footstep.R_ori * translate,
+                               mid_footstep.orientation, RIGHT_ROBOT_SIDE);
   }
   footstep_list_.push_back(new_footstep);
 }
@@ -355,7 +335,7 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
 // Take two steps to rotate at the specified radians. Repeat num_times
 void DCMTrajectoryManager::populateRotateTurn(
     const double turn_radians_per_step, const int num_times) {
-  updateStartingStance();  // Update the starting foot locations of the robot
+  updateStartingStance(); // Update the starting foot locations of the robot
 
   Eigen::Quaterniond foot_rotate(
       Eigen::AngleAxisd(turn_radians_per_step, Eigen::Vector3d::UnitZ()));
@@ -393,7 +373,7 @@ void DCMTrajectoryManager::populateRotateTurn(
 // Take two steps to strafe at the specified distance. Repeat num_times.
 void DCMTrajectoryManager::populateStrafe(const double strafe_distance,
                                           const int num_times) {
-  updateStartingStance();  // Update the starting foot locations of the robot
+  updateStartingStance(); // Update the starting foot locations of the robot
 
   // Strafe
   Footstep left_footstep, right_footstep;
@@ -430,7 +410,7 @@ void DCMTrajectoryManager::populateStrafe(const double strafe_distance,
   }
 }
 
-void DCMTrajectoryManager::paramInitialization(const YAML::Node& node) {
+void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
   // void setCoMHeight(double z_vrp_in); // Sets the desired CoM Height
   // Load Custom Params ----------------------------------
   try {
@@ -452,7 +432,7 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "nominal_strafe_distance",
                            nominal_strafe_distance_);
 
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
@@ -462,14 +442,14 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node& node) {
   convertTemporalParamsToDCMParams();
 
   // Set DCM parameters
-  dcm_planner_->t_transfer = t_transfer_init_;  // Time varying after every step
+  dcm_planner_->t_transfer = t_transfer_init_; // Time varying after every step
   dcm_planner_->t_ds = t_ds_;
   dcm_planner_->t_ss = t_ss_;
   dcm_planner_->percentage_settle = percentage_settle_;
   dcm_planner_->alpha_ds = alpha_ds_;
 }
 
-void DCMTrajectoryManager::saveSolution(const std::string& file_name) {
+void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
   try {
     double t_start = dcm_planner_->getInitialTime();
     double t_end = t_start + dcm_planner_->get_total_trajectory_time();
@@ -609,7 +589,7 @@ void DCMTrajectoryManager::saveSolution(const std::string& file_name) {
     std::ofstream file_out(full_path);
     file_out << cfg;
 
-  } catch (YAML::ParserException& e) {
+  } catch (YAML::ParserException &e) {
     std::cout << e.what() << std::endl;
   }
 }

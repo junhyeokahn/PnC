@@ -1,28 +1,28 @@
 #pragma once
 
-#include <PnC/Planner/DCMPlanner.hpp>
-#include <PnC/Planner/Footstep.hpp>
-#include <PnC/TrajectoryManager/TrajectoryManagerBase.hpp>
+#include <PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp>
+#include <PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp>
+#include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/WBC/BasicTask.hpp>
 
 namespace DCM_TRANSFER_TYPES {
 constexpr int INITIAL = 0;
 constexpr int MIDSTEP = 1;
-};  // namespace DCM_TRANSFER_TYPES
+}; // namespace DCM_TRANSFER_TYPES
 
-class DCMTrajectoryManager : public TrajectoryManagerBase {
- public:
-  DCMTrajectoryManager(DCMPlanner* _dcm_planner, Task* _com_task,
-                       Task* _base_ori_task, RobotSystem* _robot,
-                       int _lfoot_idx, int _rfoot_idx);
+class DCMTrajectoryManager {
+public:
+  DCMTrajectoryManager(DCMPlanner *_dcm_planner, Task *_com_task,
+                       Task *_base_ori_task, RobotSystem *_robot,
+                       std::string _lfoot_idx, std::string _rfoot_idx);
   ~DCMTrajectoryManager();
-  void paramInitialization(const YAML::Node& node);
+  void paramInitialization(const YAML::Node &node);
 
   bool initialize(const double t_walk_start_in, const int transfer_type_in,
-                  const Eigen::Quaterniond& ori_start_in,
-                  const Eigen::Vector3d& dcm_pos_start_in,
-                  const Eigen::Vector3d& dcm_vel_start_in);
+                  const Eigen::Quaterniond &ori_start_in,
+                  const Eigen::Vector3d &dcm_pos_start_in,
+                  const Eigen::Vector3d &dcm_vel_start_in);
 
   // Walking Primitives
   void walkInPlace();
@@ -63,12 +63,12 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   // Rotate at the specified turn angle
   void populateStrafe(const double strafe_distance, const int num_times);
 
-  void saveSolution(const std::string&);
+  void saveSolution(const std::string &);
 
-  DCMPlanner* dcm_planner_;
+  DCMPlanner *dcm_planner_;
   std::vector<Footstep> footstep_list_;
   std::vector<Footstep> footstep_preview_list_;
-  int current_footstep_index_;  // keeps track of which footstep to take.
+  int current_footstep_index_; // keeps track of which footstep to take.
 
   // Initialization
   double t_walk_start_;
@@ -90,27 +90,27 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   int robot_side_first_;
 
   // Human readable parameters  DCM parameters
-  double t_additional_init_transfer_;  // the additional transfer time to switch
-                                       // the stance leg in the beginning
-  double t_contact_transition_;  // the transition time used to change reaction
-                                 // forces and stance leg
-  double t_swing_;               // the foot swing time.
+  double t_additional_init_transfer_; // the additional transfer time to switch
+                                      // the stance leg in the beginning
+  double t_contact_transition_; // the transition time used to change reaction
+                                // forces and stance leg
+  double t_swing_;              // the foot swing time.
 
   // polynomial interpolation time during contact transition: t_transfer + t_ds
   // + (1-alpha*t_ds).
   // DCM walking parameters
   double nominal_com_height_;
-  double t_transfer_init_;  // = t_additional_init_transfer_ ; // additional
-                            // transfer time offset
-  double t_transfer_mid_;   // = (alpha_ds_-1.0)*t_ds;  // transfer time offset
-                            // for midstep transfers
-  double t_ds_;  // = t_contact_transition_; // double support polynomial
-                 // transfer time
-  double t_ss_;  // = t_swing_; // single support exponential interpolation time
-  double percentage_settle_;  // 0.99;//0.999; // percent to converge at the end
-                              // of the trajectory
-  double alpha_ds_;  // = 0.5; // value between 0.0 and 1.0 for double support
-                     // DCM interpolation
+  double t_transfer_init_; // = t_additional_init_transfer_ ; // additional
+                           // transfer time offset
+  double t_transfer_mid_;  // = (alpha_ds_-1.0)*t_ds;  // transfer time offset
+                           // for midstep transfers
+  double t_ds_; // = t_contact_transition_; // double support polynomial
+                // transfer time
+  double t_ss_; // = t_swing_; // single support exponential interpolation time
+  double percentage_settle_; // 0.99;//0.999; // percent to converge at the end
+                             // of the trajectory
+  double alpha_ds_; // = 0.5; // value between 0.0 and 1.0 for double support
+                    // DCM interpolation
 
   // // Getter values for the contact transition time.
   // double t_initial_transfer_time = t_additional_transfer_ + t_ds +
@@ -130,7 +130,7 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   // Returns false if footstep_list is empty or current_step_index_ is greater
   // than the footstep list
   // populates the robot_side when true.
-  bool nextStepRobotSide(int& robot_side);
+  bool nextStepRobotSide(int &robot_side);
 
   // checks whether or not there are emaining footsteps.
   bool noRemainingSteps();
@@ -143,8 +143,8 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   // const Eigen::Quaternion<double>& des_quat,
   // const Eigen::Vector3d& des_ang_vel);
 
-  Task* com_task_;
-  Task* base_ori_task_;
+  Task *com_task_;
+  Task *base_ori_task_;
 
   Eigen::Vector3d des_dcm;
   Eigen::Vector3d des_dcm_vel;
@@ -155,8 +155,9 @@ class DCMTrajectoryManager : public TrajectoryManagerBase {
   Eigen::Vector3d des_ang_vel;
   Eigen::Vector3d des_ang_acc;
 
- protected:
+protected:
+  RobotSystem *robot_;
   void convertTemporalParamsToDCMParams();
-  int lfoot_id_;
-  int rfoot_id_;
+  std::string lfoot_id_;
+  std::string rfoot_id_;
 };

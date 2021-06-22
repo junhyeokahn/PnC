@@ -235,7 +235,7 @@ private:
    *    hg = Ig * centroid_velocity = Ag * qdot
    * Note that all quantities are represented in the world frame
    */
-  virtual void _update_centroidal_quatities() = 0;
+  virtual void _update_centroidal_quantities() = 0;
 
   /*
    * Configure following properties:

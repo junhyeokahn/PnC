@@ -12,23 +12,19 @@
 
 // Generic Control Architecture Object
 class ControlArchitecture {
- public:
-  ControlArchitecture(RobotSystem* _robot) {
+public:
+  ControlArchitecture(RobotSystem *_robot) {
     DataManager::GetDataManager()->RegisterData(&state_, INT, "phase");
     robot_ = _robot;
   };
   virtual ~ControlArchitecture(){};
 
-  virtual void ControlArchitectureInitialization() = 0;
-  virtual void getCommand(void* _command){};
+  virtual void getCommand(void *_command){};
 
-  int getState() { return state_; }
-  int getPrevState() { return prev_state_; }
-  RobotSystem* robot_;
+  std::map<StateIdentifier, StateMachine *> state_machines;
+  int state;
+  int prev_state;
 
-  std::map<StateIdentifier, StateMachine*> state_machines_;
-
- protected:
-  int state_;
-  int prev_state_;
+protected:
+  RobotSystem *robot_;
 };
