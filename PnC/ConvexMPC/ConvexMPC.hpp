@@ -24,10 +24,10 @@
 #include "Eigen/SparseCore"
 #include <unsupported/Eigen/MatrixFunctions>
 // PnC myOptimizer
-// #include <ExternalSource/myOptimizer/osqp/include/osqp.h>
-// #include <ExternalSource/myOptimizer/osqp/include/ctrlc.h>
-#include <ctrlc.h>
-#include <osqp.h>
+#include <ExternalSource/myOptimizer/osqp/osqp.h>
+#include <ExternalSource/myOptimizer/osqp/ctrlc.h>
+// #include <ctrlc.h>
+// #include <osqp.h>
 
 #define DCHECK_GT(a,b) assert((a)>(b))
 #define DCHECK_EQ(a,b) assert((a)==(b))
