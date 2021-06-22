@@ -48,11 +48,11 @@ if(NOT EIGEN_FOUND)
 endif()
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
-# Gurobi
-find_package(Gurobi)
-if(GUROBI_FOUND)
-  include_directories(${GUROBI_INCLUDE_DIRS})
-endif()
+# # Gurobi
+# find_package(Gurobi)
+# if(GUROBI_FOUND)
+#   include_directories(${GUROBI_INCLUDE_DIRS})
+# endif()
 
 # # Mosek
 # find_package(Mosek)
