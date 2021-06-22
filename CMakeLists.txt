@@ -29,9 +29,9 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
-# Dart
-find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
-include_directories(${DART_INCLUDE_DIRS})
+# # Dart
+# find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+# include_directories(${DART_INCLUDE_DIRS})
 
 # Pybind11
 set(USE_PYBIND11 True)
@@ -54,11 +54,11 @@ if(GUROBI_FOUND)
   include_directories(${GUROBI_INCLUDE_DIRS})
 endif()
 
-# Mosek
-find_package(Mosek)
-if(MOSEK_FOUND)
-  include_directories(${MOSEK_INCLUDE_DIRS})
-endif()
+# # Mosek
+# find_package(Mosek)
+# if(MOSEK_FOUND)
+#   include_directories(${MOSEK_INCLUDE_DIRS})
+# endif()
 
 ##=============================================================================
 ## Include Directory
