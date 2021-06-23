@@ -68,7 +68,7 @@ void A1StateEstimator::Initialization(A1SensorData* data) {
   std::vector<double> trunk_ang_vel(3);
   MapToTorso_(data->imu_acc, data->imu_ang_vel, trunk_acc, trunk_ang_vel);
 
-  ori_est_->estimatorInitialization(torso_acc, torso_ang_vel);
+  ori_est_->estimatorInitialization(trunk_acc, trunk_ang_vel);
   ori_est_->getEstimatedState(global_body_euler_zyx_,
                               global_body_euler_zyx_dot_);
 
@@ -109,7 +109,7 @@ void A1StateEstimator::MapToTorso_(const Eigen::VectorXd& imu_acc,
   R_trunk_imu = R_world_trunk.transpose() * R_world_imu;
 
   t_acc_local = R_trunk_imu * imu_acc;
-  t_angvel_local = R_torso_imu * imu_angvel;
+  t_angvel_local = R_trunk_imu * imu_angvel;
 
   for(int i=0; i<3; ++i) {
     trunk_acc[i] = t_acc_local[i];
@@ -155,7 +155,7 @@ void A1StateEstimator::_ConfigurationAndModelUpdate() {
   curr_config_[4] = global_body_euler_zyx_[1];
   curr_config_[5] = global_body_euler_zyx_[2];
 
-  for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = glo bal_body_euler_zyx_dot_[i];
+  for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
 
   robot_->updateSystem(curr_config_, curr_qdot_, false);
   Eigen::VectorXd front_foot_pos, rear_foot_pos;
@@ -186,7 +186,7 @@ void A1StateEstimator::_ConfigurationAndModelUpdate() {
     Eigen::Vector3d new_rear_stance_foot = rear_foot_pos;
     Eigen::Vector3d old_front_stance_foot, old_rear_stance_foot;
 
-    if(sp_->prev_stance_foot == A1BodyNode::FR_foot) {
+    if(sp_->prev_front_stance_foot == A1BodyNode::FR_foot) {
       old_front_stance_foot =
           robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
       old_rear_stance_foot =
@@ -199,15 +199,15 @@ void A1StateEstimator::_ConfigurationAndModelUpdate() {
     }
     Eigen::Vector3d front_stance_difference = new_front_stance_foot - old_front_stance_foot;
     Eigen::Vector3d rear_stance_difference = new_rear_stance_foot - old_rear_stance_foot;
-
+  }
 //TODO
-    // new and old estimates must match, so find the actual offset 
+    /*// new and old estimates must match, so find the actual offset 
     Eigen::Vector3d old_estimate = global_linear_offset_ - old_stance_foot;
 
   sp_->q = curr_config_;
   sp_->qdot = curr_qdot_;
   sp_->com_pos = robot_->getCoMPosition();
-  sp_->com_vel = robot_->getCoMVelocity();
+  sp_->com_vel = robot_->getCoMVelocity();*/
 }
 
 void A1StateEstimator::_FootContactUpdate(A1SensorData* data) {
