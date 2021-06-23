@@ -73,8 +73,9 @@ void A1Interface::getCommand(void* _data, void* _command) {
 
   running_time_ = (double)(count_)*A1Aux::servo_rate;
   if(running_time_ >= 4) sp_->x_y_yaw_vel_des[0] = 0.5;
-  if(running_time_ >= 6) sp_->x_y_yaw_vel_des[0] = 0.75;
-  if(running_time_ >= 8) sp_->x_y_yaw_vel_des[0] = 1.0;
+  //if(running_time_ >= 4) sp_->x_y_yaw_vel_des[0] = 0.6;
+  // if(running_time_ >= 6) sp_->x_y_yaw_vel_des[0] = 0.75;
+  // if(running_time_ >= 8) sp_->x_y_yaw_vel_des[0] = 1.0;
   sp_->curr_time = running_time_;
   sp_->phase_copy = control_architecture_->getState();
   ++count_;
