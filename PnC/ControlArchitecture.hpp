@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <PnC/StateMachine.hpp>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
@@ -14,7 +14,7 @@
 class ControlArchitecture {
 public:
   ControlArchitecture(RobotSystem *_robot) {
-    DataManager::GetDataManager()->RegisterData(&state_, INT, "phase");
+    DataManager::GetDataManager()->RegisterData(&state, INT, "phase");
     robot_ = _robot;
   };
   virtual ~ControlArchitecture(){};
@@ -27,4 +27,6 @@ public:
 
 protected:
   RobotSystem *robot_;
+
+  bool b_state_first_visit_ = true;
 };

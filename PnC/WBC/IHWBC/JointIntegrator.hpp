@@ -4,7 +4,7 @@
 #include <iostream>
 
 class JointIntegrator {
- public:
+public:
   JointIntegrator(const int num_joints_in, const double dt_in);
 
   JointIntegrator(const int num_joints_in, const double vel_cutoff_in,
@@ -18,9 +18,9 @@ class JointIntegrator {
   // Function: performs a leaky integration on the velocity and position.
   // Inputs: the current joint acceleration, velocity and position.
   // Outputs: the integrated velocity and position values.
-  void integrate(const Eigen::VectorXd acc_in, const Eigen::VectorXd& vel_in,
-                 const Eigen::VectorXd& pos_in, Eigen::VectorXd& vel_out,
-                 Eigen::VectorXd& pos_out);
+  void integrate(const Eigen::VectorXd acc_in, const Eigen::VectorXd &vel_in,
+                 const Eigen::VectorXd &pos_in, Eigen::VectorXd &vel_out,
+                 Eigen::VectorXd &pos_out);
 
   // Setters
   void setDt(const double dt_in);
@@ -42,13 +42,13 @@ class JointIntegrator {
 
   bool isInitialized() { return b_initialized; };
 
- private:
-  int n_joints_;            // number of joints
-  double vel_freq_cutoff_;  // frequency cut-off for the velocity  in Hz
-  double pos_freq_cutoff_;  // frequency cut-off for the position in Hz
-  double alpha_vel_;  // the equivalent alpha cut-off for velocity integration
-  double alpha_pos_;  // the equivalent alpha cut-off for position integration
-  double dt_;         // integration time in seconds
+private:
+  int n_joints_;           // number of joints
+  double vel_freq_cutoff_; // frequency cut-off for the velocity  in Hz
+  double pos_freq_cutoff_; // frequency cut-off for the position in Hz
+  double alpha_vel_; // the equivalent alpha cut-off for velocity integration
+  double alpha_pos_; // the equivalent alpha cut-off for position integration
+  double dt_;        // integration time in seconds
   bool b_initialized;
 
   // Internal Integration States
@@ -62,17 +62,17 @@ class JointIntegrator {
   // Position Bounds
   Eigen::VectorXd pos_min_;
   Eigen::VectorXd pos_max_;
-  Eigen::VectorXd pos_max_error_;  // maximum error from current position
+  Eigen::VectorXd pos_max_error_; // maximum error from current position
 
   // Defaults
-  double default_vel_freq_cutoff_ = 2.0;  // Hz
-  double default_pos_freq_cutoff_ = 1.0;  // Hz
+  double default_vel_freq_cutoff_ = 2.0; // Hz
+  double default_pos_freq_cutoff_ = 1.0; // Hz
 
   void setDefaultSaturation();
-  double default_vel_min_max_ = 2;         // +/- radians/s
-  double default_pos_min_max_ = 2 * M_PI;  //  +/- radians
+  double default_vel_min_max_ = 2;        // +/- radians/s
+  double default_pos_min_max_ = 2 * M_PI; //  +/- radians
   double default_pos_max_error_ =
-      0.2;  // radians maximum position deviation from actual
+      0.2; // radians maximum position deviation from actual
 
   // Helper Functions
   // Ouptuts alpha \in [0,1] from a set frequency and dt

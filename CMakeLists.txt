@@ -69,5 +69,7 @@ add_subdirectory(PnC)
 ## Configuration File
 ##=============================================================================
 SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/Configuration.h)
-install(FILES ${PROJECT_SOURCE_DIR}/Configuration.h DESTINATION "${INSTALL_INCLUDE_DIR}")
+SET (SERVO_RATE 0.001)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake
+    ${PROJECT_SOURCE_DIR}/Configuration.hpp)
+install(FILES ${PROJECT_SOURCE_DIR}/Configuration.hpp DESTINATION "${INSTALL_INCLUDE_DIR}")

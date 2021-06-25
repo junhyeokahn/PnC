@@ -1,4 +1,4 @@
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <Simulator/Dart/Atlas/AtlasWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
@@ -87,12 +87,12 @@ public:
   AtlasWorldNode *worldnode_;
 };
 
-void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
-  for (int i = 0; i < robot->getNumJoints(); ++i) {
-    dart::dynamics::Joint *joint = robot->getJoint(i);
-    joint->setPositionLimitEnforced(true);
-  }
-}
+// void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
+// for (int i = 0; i < robot->getNumJoints(); ++i) {
+// dart::dynamics::Joint *joint = robot->getJoint(i);
+// joint->setPositionLimitEnforced(true);
+//}
+//}
 
 void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
   // for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
@@ -159,20 +159,34 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
   int l_leg_aky_idx = robot->getDof("l_leg_aky")->getIndexInSkeleton();
   int r_leg_aky_idx = robot->getDof("r_leg_aky")->getIndexInSkeleton();
 
+  Eigen::Isometry3d joint_iso;
+  joint_iso.translation() << 0., 0., 1.5 - 0.761;
+  Eigen::Matrix<double, 6, 1> zeros = Eigen::Matrix<double, 6, 1>::Zero();
+  dynamic_cast<dart::dynamics::FreeJoint *>(robot->getRootJoint())
+      ->setSpatialMotion(&joint_iso, dart::dynamics::Frame::World(), &zeros,
+                         dart::dynamics::Frame::World(),
+                         dart::dynamics::Frame::World(), &zeros,
+                         dart::dynamics::Frame::World(),
+                         dart::dynamics::Frame::World());
+
   Eigen::VectorXd q = robot->getPositions();
-  // q[2] = 2.5 - 1.365 - 0.11; // TODO : Floating Base
   q[l_arm_shx_idx] = -M_PI / 4.;
   q[r_arm_shx_idx] = M_PI / 4.;
+
   q[l_arm_ely_idx] = -M_PI / 2.;
   q[r_arm_ely_idx] = M_PI / 2.;
+
   q[l_arm_elx_idx] = -M_PI / 2.;
-  q[r_arm_elx_idx] = M_PI / 2.;
+  q[r_arm_elx_idx] = -M_PI / 2.;
+
   q[l_leg_hpy_idx] = -M_PI / 4.;
-  q[r_leg_hpy_idx] = M_PI / 4.;
-  q[l_leg_kny_idx] = -M_PI / 2.;
+  q[r_leg_hpy_idx] = -M_PI / 4.;
+
+  q[l_leg_kny_idx] = M_PI / 2.;
   q[r_leg_kny_idx] = M_PI / 2.;
+
   q[l_leg_aky_idx] = -M_PI / 4.;
-  q[r_leg_aky_idx] = M_PI / 4.;
+  q[r_leg_aky_idx] = -M_PI / 4.;
 
   robot->setPositions(q);
 }
@@ -198,8 +212,8 @@ int main(int argc, char **argv) {
   // =========================================================================
   dart::simulation::WorldPtr world(new dart::simulation::World);
   dart::utils::DartLoader urdfLoader;
-  dart::dynamics::SkeletonPtr ground =
-      urdfLoader.parseSkeleton(THIS_COM "RobotModel/ground/plane.urdf");
+  dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
+      THIS_COM "RobotModel/ground/ground_terrain.urdf");
   dart::dynamics::SkeletonPtr robot =
       urdfLoader.parseSkeleton(THIS_COM "RobotModel/atlas/atlas_rel_path.urdf");
 
@@ -209,11 +223,11 @@ int main(int argc, char **argv) {
   // =========================================================================
   // Friction & Restitution Coefficient
   // =========================================================================
-  double friction(0.5);
-  double restit(0.0);
-  ground->getBodyNode("planeLink")->setFrictionCoeff(friction);
-  robot->getBodyNode("l_foot")->setFrictionCoeff(friction);
-  robot->getBodyNode("r_foot")->setFrictionCoeff(friction);
+  // double friction(0.5);
+  // double restit(0.0);
+  // ground->getBodyNode("planeLink")->setFrictionCoeff(friction);
+  // robot->getBodyNode("l_foot")->setFrictionCoeff(friction);
+  // robot->getBodyNode("r_foot")->setFrictionCoeff(friction);
 
   Eigen::Vector3d gravity(0.0, 0.0, -9.81);
   world->setGravity(gravity);

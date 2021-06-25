@@ -3,7 +3,7 @@
 Footstep::Footstep() {
   position.setZero();
   orientation.setIdentity();
-  robot_side = LEFT_ROBOT_SIDE;
+  robot_side = -1;
   common_initialization();
 }
 
@@ -34,22 +34,21 @@ void Footstep::setPosOri(const Eigen::Vector3d &pos_in,
   R_ori = orientation.toRotationMatrix();
 }
 
-void Footstep::setRightSide() { robot_side = RIGHT_ROBOT_SIDE; }
-void Footstep::setLeftSide() { robot_side = LEFT_ROBOT_SIDE; }
-
-void Footstep::setMidFoot() { robot_side = MIDFOOT_TYPE; }
+void Footstep::setRightSide() { robot_side = EndEffector::RFoot; }
+void Footstep::setLeftSide() { robot_side = EndEffector::LFoot; }
 
 void Footstep::common_initialization() {
   R_ori = orientation.toRotationMatrix();
 }
 
 void Footstep::printInfo() {
-  if ((robot_side == LEFT_ROBOT_SIDE) || (robot_side == RIGHT_ROBOT_SIDE)) {
+  if ((robot_side == EndEffector::LFoot) ||
+      (robot_side == EndEffector::RFoot)) {
     std::cout << "side = "
-              << (robot_side == LEFT_ROBOT_SIDE ? "LEFT_ROBOT_SIDE"
-                                                : "RIGHT_ROBOT_SIDE")
+              << (robot_side == EndEffector::LFoot ? "EndEffector::LFoot"
+                                                   : "EndEffector::RFoot")
               << std::endl;
-  } else if (robot_side == MIDFOOT_TYPE) {
+  } else if (robot_side == -1) {
     std::cout << "MIDFOOT_TYPE" << std::endl;
   }
 
@@ -64,5 +63,5 @@ void Footstep::computeMidfeet(const Footstep &footstep1,
   midfeet.position = 0.5 * (footstep1.position + footstep2.position);
   midfeet.orientation = footstep1.orientation.slerp(0.5, footstep2.orientation);
   midfeet.R_ori = midfeet.orientation.toRotationMatrix();
-  midfeet.robot_side = MIDFOOT_TYPE;
+  midfeet.robot_side = -1;
 }

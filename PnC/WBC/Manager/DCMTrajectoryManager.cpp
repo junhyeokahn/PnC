@@ -4,6 +4,7 @@ DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
     RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx) {
   myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
+
   dcm_planner_ = _dcm_planner;
   com_task_ = _com_task;
   base_ori_task_ = _base_ori_task;
@@ -35,14 +36,14 @@ DCMTrajectoryManager::DCMTrajectoryManager(
   nominal_com_height_ = 1.015; // vertical m from stance foot
 
   // Nominal walking parameters
-  nominal_footwidth_ = 0.27;
-  nominal_forward_step_ = 0.25;
-  nominal_backward_step_ = -0.25;
-  nominal_turn_radians_ = M_PI / 4.0;
-  nominal_strafe_distance_ = 0.125;
+  nominal_footwidth = 0.27;
+  nominal_forward_step = 0.25;
+  nominal_backward_step = -0.25;
+  nominal_turn_radians = M_PI / 4.0;
+  nominal_strafe_distance = 0.125;
 
   // First step before alternating
-  robot_side_first_ = RIGHT_ROBOT_SIDE;
+  robot_side_first_ = EndEffector::RFoot;
 
   convertTemporalParamsToDCMParams();
 }
@@ -90,18 +91,18 @@ double DCMTrajectoryManager::getNormalForceRampDownTime() {
   return (1.0 - alpha_ds_) * t_ds_;
 }
 
-void DCMTrajectoryManager::incrementStepIndex() { current_footstep_index_++; }
-void DCMTrajectoryManager::resetStepIndex() { current_footstep_index_ = 0; }
+void DCMTrajectoryManager::incrementStepIndex() { current_footstep_idx++; }
+void DCMTrajectoryManager::resetStepIndex() { current_footstep_idx = 0; }
 
 // Updates the feet pose of the starting stance
 void DCMTrajectoryManager::updateStartingStance() {
   Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
   Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
-  left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, LEFT_ROBOT_SIDE);
+  left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, EndEffector::LFoot);
 
   Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
   Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
-  right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, RIGHT_ROBOT_SIDE);
+  right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, EndEffector::RFoot);
 
   mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
                                   mid_foot_stance_);
@@ -112,9 +113,8 @@ void DCMTrajectoryManager::updateStartingStance() {
 void DCMTrajectoryManager::updatePreview(const int max_footsteps_to_preview) {
   footstep_preview_list_.clear();
   for (int i = 0; i < max_footsteps_to_preview; i++) {
-    if ((i + current_footstep_index_) < footstep_list_.size()) {
-      footstep_preview_list_.push_back(
-          footstep_list_[i + current_footstep_index_]);
+    if ((i + current_footstep_idx) < footstep_list.size()) {
+      footstep_preview_list_.push_back(footstep_list[i + current_footstep_idx]);
     } else {
       break;
     }
@@ -126,7 +126,7 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
                                       const Eigen::Quaterniond &ori_start_in,
                                       const Eigen::Vector3d &dcm_pos_start_in,
                                       const Eigen::Vector3d &dcm_vel_start_in) {
-  if (footstep_list_.size() == 0) {
+  if (footstep_list.size() == 0) {
     return false;
   }
 
@@ -188,11 +188,11 @@ void DCMTrajectoryManager::updateDCMTasksDesired(double current_time) {
 }
 
 bool DCMTrajectoryManager::nextStepRobotSide(int &robot_side) {
-  if ((footstep_list_.size() > 0) &&
-      (current_footstep_index_ < footstep_list_.size())) {
+  if ((footstep_list.size() > 0) &&
+      (current_footstep_idx < footstep_list.size())) {
     // std::cout << "hello:" << std::endl;
-    // footstep_list_[current_footstep_index_].printInfo();
-    robot_side = footstep_list_[current_footstep_index_].robot_side;
+    // footstep_list[current_footstep_idx].printInfo();
+    robot_side = footstep_list[current_footstep_idx].robot_side;
     return true;
   } else {
     return false;
@@ -200,7 +200,7 @@ bool DCMTrajectoryManager::nextStepRobotSide(int &robot_side) {
 }
 
 bool DCMTrajectoryManager::noRemainingSteps() {
-  if (current_footstep_index_ >= footstep_list_.size()) {
+  if (current_footstep_idx >= footstep_list.size()) {
     return true;
   } else {
     return false;
@@ -208,17 +208,17 @@ bool DCMTrajectoryManager::noRemainingSteps() {
 }
 
 void DCMTrajectoryManager::alternateLeg() {
-  if (robot_side_first_ == LEFT_ROBOT_SIDE) {
-    robot_side_first_ = RIGHT_ROBOT_SIDE;
+  if (robot_side_first_ == EndEffector::LFoot) {
+    robot_side_first_ = EndEffector::RFoot;
   } else {
-    robot_side_first_ = LEFT_ROBOT_SIDE;
+    robot_side_first_ = EndEffector::LFoot;
   }
 }
 
 void DCMTrajectoryManager::resetIndexAndClearFootsteps() {
   // Reset index and footstep list
   resetStepIndex();
-  footstep_list_.clear();
+  footstep_list.clear();
 }
 
 void DCMTrajectoryManager::walkInPlace() {
@@ -228,29 +228,29 @@ void DCMTrajectoryManager::walkInPlace() {
 }
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(5, nominal_forward_step_);
+  populateWalkForward(5, nominal_forward_step);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(5, nominal_backward_step_);
+  populateWalkForward(5, nominal_backward_step);
   alternateLeg();
 }
 void DCMTrajectoryManager::strafeLeft() {
   resetIndexAndClearFootsteps();
-  populateStrafe(nominal_strafe_distance_, 2);
+  populateStrafe(nominal_strafe_distance, 2);
 }
 void DCMTrajectoryManager::strafeRight() {
   resetIndexAndClearFootsteps();
-  populateStrafe(-nominal_strafe_distance_, 2);
+  populateStrafe(-nominal_strafe_distance, 2);
 }
 void DCMTrajectoryManager::turnLeft() {
   resetIndexAndClearFootsteps();
-  populateRotateTurn(nominal_turn_radians_, 2);
+  populateRotateTurn(nominal_turn_radians, 2);
 }
 void DCMTrajectoryManager::turnRight() {
   resetIndexAndClearFootsteps();
-  populateRotateTurn(-nominal_turn_radians_, 2);
+  populateRotateTurn(-nominal_turn_radians, 2);
 }
 
 // Footstep sequence primitives
@@ -267,22 +267,22 @@ void DCMTrajectoryManager::populateStepInPlace(const int num_steps,
   int robot_side = robot_side_first;
   for (int i = 0; i < num_steps; i++) {
     // Square feet and switch sides
-    if (robot_side == LEFT_ROBOT_SIDE) {
+    if (robot_side == EndEffector::LFoot) {
       left_footstep.setPosOri(
           mid_footstep.position +
               mid_footstep.R_ori *
-                  Eigen::Vector3d(0, nominal_footwidth_ / 2.0, 0.0),
+                  Eigen::Vector3d(0, nominal_footwidth / 2.0, 0.0),
           mid_footstep.orientation);
-      footstep_list_.push_back(left_footstep);
-      robot_side = RIGHT_ROBOT_SIDE;
+      footstep_list.push_back(left_footstep);
+      robot_side = EndEffector::RFoot;
     } else {
       right_footstep.setPosOri(
           mid_footstep.position +
               mid_footstep.R_ori *
-                  Eigen::Vector3d(0, -nominal_footwidth_ / 2.0, 0.0),
+                  Eigen::Vector3d(0, -nominal_footwidth / 2.0, 0.0),
           mid_footstep.orientation);
-      footstep_list_.push_back(right_footstep);
-      robot_side = LEFT_ROBOT_SIDE;
+      footstep_list.push_back(right_footstep);
+      robot_side = EndEffector::LFoot;
     }
   }
 }
@@ -295,41 +295,41 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
   Footstep new_footstep;
   Footstep mid_footstep = mid_foot_stance_;
 
-  int robot_side = LEFT_ROBOT_SIDE;
+  int robot_side = EndEffector::LFoot;
   for (int i = 0; i < num_steps; i++) {
-    if (robot_side == LEFT_ROBOT_SIDE) {
+    if (robot_side == EndEffector::LFoot) {
       Eigen::Vector3d translate((i + 1) * forward_distance,
-                                nominal_footwidth_ / 2.0, 0);
+                                nominal_footwidth / 2.0, 0);
       new_footstep.setPosOriSide(mid_footstep.position +
                                      mid_footstep.R_ori * translate,
-                                 mid_footstep.orientation, LEFT_ROBOT_SIDE);
-      robot_side = RIGHT_ROBOT_SIDE;
+                                 mid_footstep.orientation, EndEffector::LFoot);
+      robot_side = EndEffector::RFoot;
     } else {
       Eigen::Vector3d translate((i + 1) * forward_distance,
-                                -nominal_footwidth_ / 2.0, 0);
+                                -nominal_footwidth / 2.0, 0);
       new_footstep.setPosOriSide(mid_footstep.position +
                                      mid_footstep.R_ori * translate,
-                                 mid_footstep.orientation, RIGHT_ROBOT_SIDE);
-      robot_side = LEFT_ROBOT_SIDE;
+                                 mid_footstep.orientation, EndEffector::RFoot);
+      robot_side = EndEffector::LFoot;
     }
-    footstep_list_.push_back(new_footstep);
+    footstep_list.push_back(new_footstep);
   }
 
   // Add additional step forward to square the feet.
-  if (robot_side == LEFT_ROBOT_SIDE) {
+  if (robot_side == EndEffector::LFoot) {
     Eigen::Vector3d translate(num_steps * forward_distance,
-                              nominal_footwidth_ / 2.0, 0);
+                              nominal_footwidth / 2.0, 0);
     new_footstep.setPosOriSide(mid_footstep.position +
                                    mid_footstep.R_ori * translate,
-                               mid_footstep.orientation, LEFT_ROBOT_SIDE);
+                               mid_footstep.orientation, EndEffector::LFoot);
   } else {
     Eigen::Vector3d translate(num_steps * forward_distance,
-                              -nominal_footwidth_ / 2.0, 0);
+                              -nominal_footwidth / 2.0, 0);
     new_footstep.setPosOriSide(mid_footstep.position +
                                    mid_footstep.R_ori * translate,
-                               mid_footstep.orientation, RIGHT_ROBOT_SIDE);
+                               mid_footstep.orientation, EndEffector::RFoot);
   }
-  footstep_list_.push_back(new_footstep);
+  footstep_list.push_back(new_footstep);
 }
 
 // Take two steps to rotate at the specified radians. Repeat num_times
@@ -351,20 +351,20 @@ void DCMTrajectoryManager::populateRotateTurn(
     left_footstep.setPosOriSide(
         mid_footstep_rotated.position +
             mid_footstep_rotated.R_ori *
-                Eigen::Vector3d(0, nominal_footwidth_ / 2.0, 0),
-        mid_footstep_rotated.orientation, LEFT_ROBOT_SIDE);
+                Eigen::Vector3d(0, nominal_footwidth / 2.0, 0),
+        mid_footstep_rotated.orientation, EndEffector::LFoot);
     right_footstep.setPosOriSide(
         mid_footstep_rotated.position +
             mid_footstep_rotated.R_ori *
-                Eigen::Vector3d(0, -nominal_footwidth_ / 2.0, 0),
-        mid_footstep_rotated.orientation, RIGHT_ROBOT_SIDE);
+                Eigen::Vector3d(0, -nominal_footwidth / 2.0, 0),
+        mid_footstep_rotated.orientation, EndEffector::RFoot);
 
     if (turn_radians_per_step > 0) {
-      footstep_list_.push_back(left_footstep);
-      footstep_list_.push_back(right_footstep);
+      footstep_list.push_back(left_footstep);
+      footstep_list.push_back(right_footstep);
     } else {
-      footstep_list_.push_back(right_footstep);
-      footstep_list_.push_back(left_footstep);
+      footstep_list.push_back(right_footstep);
+      footstep_list.push_back(left_footstep);
     }
     mid_footstep = mid_footstep_rotated;
   }
@@ -389,22 +389,22 @@ void DCMTrajectoryManager::populateStrafe(const double strafe_distance,
     left_footstep.setPosOriSide(
         mid_footstep_translated.position +
             mid_footstep_translated.R_ori *
-                Eigen::Vector3d(0, nominal_footwidth_ / 2.0, 0),
-        mid_footstep_translated.orientation, LEFT_ROBOT_SIDE);
+                Eigen::Vector3d(0, nominal_footwidth / 2.0, 0),
+        mid_footstep_translated.orientation, EndEffector::LFoot);
     right_footstep.setPosOriSide(
         mid_footstep_translated.position +
             mid_footstep_translated.R_ori *
-                Eigen::Vector3d(0, -nominal_footwidth_ / 2.0, 0),
-        mid_footstep_translated.orientation, RIGHT_ROBOT_SIDE);
+                Eigen::Vector3d(0, -nominal_footwidth / 2.0, 0),
+        mid_footstep_translated.orientation, EndEffector::RFoot);
 
     if (strafe_distance > 0) {
       // Left strafe
-      footstep_list_.push_back(left_footstep);
-      footstep_list_.push_back(right_footstep);
+      footstep_list.push_back(left_footstep);
+      footstep_list.push_back(right_footstep);
     } else {
       // Right strafe
-      footstep_list_.push_back(right_footstep);
-      footstep_list_.push_back(left_footstep);
+      footstep_list.push_back(right_footstep);
+      footstep_list.push_back(left_footstep);
     }
     mid_footstep = mid_footstep_translated;
   }
@@ -415,22 +415,22 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
   // Load Custom Params ----------------------------------
   try {
     // Load DCM Parameters
-    myUtils::readParameter(node, "nominal_com_height", nominal_com_height_);
-    myUtils::readParameter(node, "t_additional_init_transfer",
+    myUtils::readParameter(node, "com_height", nominal_com_height_);
+    myUtils::readParameter(node, "t_additional_ini_trans",
                            t_additional_init_transfer_);
-    myUtils::readParameter(node, "t_contact_transition", t_contact_transition_);
+    myUtils::readParameter(node, "t_contact_trans", t_contact_transition_);
     myUtils::readParameter(node, "t_swing", t_swing_);
     myUtils::readParameter(node, "percentage_settle", percentage_settle_);
     myUtils::readParameter(node, "alpha_ds", alpha_ds_);
 
     // Load Walking Primitives Parameters
-    myUtils::readParameter(node, "nominal_footwidth", nominal_footwidth_);
-    myUtils::readParameter(node, "nominal_forward_step", nominal_forward_step_);
+    myUtils::readParameter(node, "nominal_footwidth", nominal_footwidth);
+    myUtils::readParameter(node, "nominal_forward_step", nominal_forward_step);
     myUtils::readParameter(node, "nominal_backward_step",
-                           nominal_backward_step_);
-    myUtils::readParameter(node, "nominal_turn_radians", nominal_turn_radians_);
+                           nominal_backward_step);
+    myUtils::readParameter(node, "nominal_turn_radians", nominal_turn_radians);
     myUtils::readParameter(node, "nominal_strafe_distance",
-                           nominal_strafe_distance_);
+                           nominal_strafe_distance);
 
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
@@ -492,8 +492,8 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
 
     int n_rf(0);
     int n_lf(0);
-    for (int i = 0; i < footstep_list_.size(); ++i) {
-      if (footstep_list_[i].robot_side == LEFT_ROBOT_SIDE) {
+    for (int i = 0; i < footstep_list.size(); ++i) {
+      if (footstep_list[i].robot_side == EndEffector::LFoot) {
         n_lf += 1;
       } else {
         n_rf += 1;
@@ -505,24 +505,24 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     Eigen::MatrixXd lfoot_quat = Eigen::MatrixXd::Zero(n_lf, 4);
     int rf_id(0);
     int lf_id(0);
-    for (int i = 0; i < footstep_list_.size(); ++i) {
-      if (footstep_list_[i].robot_side == RIGHT_ROBOT_SIDE) {
+    for (int i = 0; i < footstep_list.size(); ++i) {
+      if (footstep_list[i].robot_side == EndEffector::RFoot) {
         for (int j = 0; j < 3; ++j) {
-          rfoot_pos(rf_id, j) = footstep_list_[i].position(j);
+          rfoot_pos(rf_id, j) = footstep_list[i].position(j);
         }
-        rfoot_quat(rf_id, 0) = footstep_list_[i].orientation.w();
-        rfoot_quat(rf_id, 1) = footstep_list_[i].orientation.x();
-        rfoot_quat(rf_id, 2) = footstep_list_[i].orientation.y();
-        rfoot_quat(rf_id, 3) = footstep_list_[i].orientation.z();
+        rfoot_quat(rf_id, 0) = footstep_list[i].orientation.w();
+        rfoot_quat(rf_id, 1) = footstep_list[i].orientation.x();
+        rfoot_quat(rf_id, 2) = footstep_list[i].orientation.y();
+        rfoot_quat(rf_id, 3) = footstep_list[i].orientation.z();
         rf_id += 1;
       } else {
         for (int j = 0; j < 3; ++j) {
-          lfoot_pos(lf_id, j) = footstep_list_[i].position(j);
+          lfoot_pos(lf_id, j) = footstep_list[i].position(j);
         }
-        lfoot_quat(lf_id, 0) = footstep_list_[i].orientation.w();
-        lfoot_quat(lf_id, 1) = footstep_list_[i].orientation.x();
-        lfoot_quat(lf_id, 2) = footstep_list_[i].orientation.y();
-        lfoot_quat(lf_id, 3) = footstep_list_[i].orientation.z();
+        lfoot_quat(lf_id, 0) = footstep_list[i].orientation.w();
+        lfoot_quat(lf_id, 1) = footstep_list[i].orientation.x();
+        lfoot_quat(lf_id, 2) = footstep_list[i].orientation.y();
+        lfoot_quat(lf_id, 3) = footstep_list[i].orientation.z();
         lf_id += 1;
       }
     }

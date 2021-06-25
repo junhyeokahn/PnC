@@ -22,22 +22,10 @@ FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task *_foot_pos_task,
   foot_ang_vel_des_.setZero();
   foot_ang_acc_des_.setZero();
 
-  swing_height_ = 0.04; // 4cm default
+  swing_height = 0.04; // 4cm default
 }
 
 FootSE3TrajectoryManager::~FootSE3TrajectoryManager() {}
-
-void FootSE3TrajectoryManager::paramInitialization(const YAML::Node &node) {
-  try {
-    myUtils::readParameter(node, "swing_height", swing_height_);
-
-  } catch (std::runtime_error &e) {
-    std::cout << "Error reading parameter [" << e.what() << "] at file: ["
-              << __FILE__ << "]" << std::endl
-              << std::endl;
-    exit(0);
-  }
-}
 
 void FootSE3TrajectoryManager::useCurrent() {
   // Update desired to use current foot pose
@@ -90,7 +78,7 @@ void FootSE3TrajectoryManager::initializeSwingFootTrajectory(
   // Compute midfeet boundary conditions
   // Linear velocity at the middle of the swing is the total swing travel over
   // swing time
-  Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height_);
+  Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
   Eigen::Vector3d mid_swing_position =
       swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity =
@@ -153,15 +141,3 @@ void FootSE3TrajectoryManager::updateSwingFootDesired(
   computeSwingFoot(current_time);
   updateDesired();
 }
-
-// For TOWR+
-// void FootSE3TrajectoryManager::updateSwingFootDesired(
-// const Eigen::Vector3d pos, const Eigen::Vector3d vel,
-// const Eigen::Quaternion<double> quat, const Eigen::Vector3d ang_vel) {
-// Eigen::Vector3d zero3;
-// zero3.setZero();
-// foot_pos_task_->updateDesired(pos, vel, zero3);
-// Eigen::VectorXd quat_vec(4);
-// quat_vec << quat.w(), quat.x(), quat.y(), quat.z();
-// foot_ori_task_->updateDesired(quat_vec, ang_vel, zero3);
-//}

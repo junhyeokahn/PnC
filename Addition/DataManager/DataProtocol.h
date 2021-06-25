@@ -1,6 +1,6 @@
 #ifndef DATA_PROTOCOL
 #define DATA_PROTOCOL
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <stdint.h>
 
 #define IP_ADDR_MYSELF "127.0.0.1"
@@ -16,11 +16,11 @@
 
 namespace DATA_Protocol {
 typedef struct {
-    int num_data;
-    int tot_num_array_data;
-    char data_name[MAX_NUM_DATA][20];
-    int num_array_data[MAX_NUM_DATA];
+  int num_data;
+  int tot_num_array_data;
+  char data_name[MAX_NUM_DATA][20];
+  int num_array_data[MAX_NUM_DATA];
 } DATA_SETUP;
-};  // namespace DATA_Protocol
+}; // namespace DATA_Protocol
 
 #endif

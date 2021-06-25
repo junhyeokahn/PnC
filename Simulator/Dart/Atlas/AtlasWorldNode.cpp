@@ -1,4 +1,4 @@
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 #include <Simulator/Dart/Atlas/AtlasWorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
@@ -9,15 +9,19 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr &_world)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
   world_ = _world;
   robot_ = world_->getSkeleton("multisense_sl");
-  trq_lb_ = robot_->getForceLowerLimits();
-  trq_ub_ = robot_->getForceUpperLimits();
   n_dof_ = robot_->getNumDofs();
-
-  trq_cmd_ = Eigen::VectorXd::Zero(n_dof_);
 
   interface_ = new AtlasInterface();
   sensor_data_ = new AtlasSensorData();
   command_ = new AtlasCommand();
+
+  for (int i = 0; i < robot_->getNumJoints(); ++i) {
+    dart::dynamics::Joint *joint = robot_->getJoint(i);
+    if (joint->getNumDofs() == 1) {
+      sensor_data_->joint_positions[joint->getName()] = 0.;
+      sensor_data_->joint_velocities[joint->getName()] = 0.;
+    }
+  }
 
   resetButtonFlags();
 
@@ -33,14 +37,14 @@ AtlasWorldNode::~AtlasWorldNode() {
 void AtlasWorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
 
-  sensor_data_->q = robot_->getPositions().tail(n_dof_ - 6);
-  sensor_data_->virtual_q = robot_->getPositions().head(6);
-  sensor_data_->qdot = robot_->getVelocities().tail(n_dof_ - 6);
-  sensor_data_->virtual_qdot = robot_->getVelocities().head(6);
-
-  // Use force thresholding to detect contacts
-  GetContactSwitchData_(sensor_data_->rfoot_contact,
-                        sensor_data_->lfoot_contact);
+  // Fill Sensor Data
+  GetBaseData_(sensor_data_->base_com_pos, sensor_data_->base_com_quat,
+               sensor_data_->base_com_lin_vel, sensor_data_->base_com_ang_vel,
+               sensor_data_->base_joint_pos, sensor_data_->base_joint_quat,
+               sensor_data_->base_joint_lin_vel,
+               sensor_data_->base_joint_ang_vel);
+  GetJointData_(sensor_data_->joint_positions, sensor_data_->joint_velocities);
+  GetContactSwitchData_(sensor_data_->b_rf_contact, sensor_data_->b_lf_contact);
 
   // Check for user button presses
   if (b_button_p) {
@@ -79,20 +83,19 @@ void AtlasWorldNode::customPreStep() {
 
   interface_->getCommand(sensor_data_, command_);
 
-  trq_cmd_.tail(n_dof_ - 6) = command_->jtrq;
-  for (int i = 0; i < n_dof_ - 6; ++i) {
-    trq_cmd_[i + 6] += kp_ * (command_->q[i] - sensor_data_->q[i]) +
-                       kd_ * (command_->qdot[i] - sensor_data_->qdot[i]);
+  for (int i = 0; i < robot_->getNumJoints(); ++i) {
+    dart::dynamics::Joint *joint = robot_->getJoint(i);
+    if (joint->getNumDofs() == 1) {
+      double frc = command_->joint_torques[joint->getName()] +
+                   kp_ * (command_->joint_positions[joint->getName()] -
+                          sensor_data_->joint_positions[joint->getName()]) +
+                   kd_ * (command_->joint_velocities[joint->getName()] -
+                          sensor_data_->joint_velocities[joint->getName()]);
+      joint->setForce(0, frc);
+    } else {
+      joint->setForces(Eigen::VectorXd::Zero(joint->getNumDofs()));
+    }
   }
-
-  // Crop Torque to be within the limits
-  trq_cmd_.tail(n_dof_ - 6) = myUtils::CropVector(
-      trq_cmd_.tail(n_dof_ - 6), trq_lb_.segment(Atlas::n_vdof, Atlas::n_adof),
-      trq_ub_.segment(Atlas::n_vdof, Atlas::n_adof), "clip trq in sim");
-
-  trq_cmd_.head(6).setZero();
-
-  robot_->setForces(trq_cmd_);
 
   count_++;
 
@@ -131,5 +134,42 @@ void AtlasWorldNode::SetParams_() {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
+  }
+}
+
+void AtlasWorldNode::GetBaseData_(Eigen::Vector3d &_base_com_pos,
+                                  Eigen::Quaternion<double> &_base_com_quat,
+                                  Eigen::Vector3d &_base_com_lin_vel,
+                                  Eigen::Vector3d &_base_com_ang_vel,
+                                  Eigen::Vector3d &_base_joint_pos,
+                                  Eigen::Quaternion<double> &_base_joint_quat,
+                                  Eigen::Vector3d &_base_joint_lin_vel,
+                                  Eigen::Vector3d &_base_joint_ang_vel) {
+
+  dart::dynamics::BodyNode *root_bn = robot_->getRootBodyNode();
+
+  _base_com_pos = root_bn->getCOM();
+  _base_com_quat =
+      Eigen::Quaternion<double>(root_bn->getWorldTransform().linear());
+  _base_com_ang_vel =
+      root_bn->getSpatialVelocity(root_bn->getLocalCOM()).head(3);
+  _base_com_lin_vel =
+      root_bn->getSpatialVelocity(root_bn->getLocalCOM()).tail(3);
+
+  _base_joint_pos = root_bn->getCOM() - root_bn->getLocalCOM();
+  _base_joint_quat = _base_com_quat;
+  _base_joint_ang_vel = root_bn->getSpatialVelocity().head(3);
+  _base_joint_lin_vel = root_bn->getSpatialVelocity().tail(3);
+}
+
+void AtlasWorldNode::GetJointData_(
+    std::map<std::string, double> &_joint_positions,
+    std::map<std::string, double> &_joint_velocities) {
+  for (int i = 0; i < robot_->getNumJoints(); ++i) {
+    dart::dynamics::Joint *joint = robot_->getJoint(i);
+    if (joint->getNumDofs() == 1) {
+      sensor_data_->joint_positions[joint->getName()] = joint->getPosition(0);
+      sensor_data_->joint_velocities[joint->getName()] = joint->getVelocity(0);
+    }
   }
 }

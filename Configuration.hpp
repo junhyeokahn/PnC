@@ -1,6 +1,6 @@
 #pragma once
 
-#define THIS_COM "@THIS_COM@"
+#define THIS_COM "/home/junhyeok/Repository/PnC/"
 
 namespace EndEffector{
 constexpr int LFoot = 0;

@@ -38,7 +38,7 @@ public:
   // Updates the feet pose of the starting stance
   void updateStartingStance();
 
-  int getStepIndex() { return current_footstep_index_; }
+  int getStepIndex() { return current_footstep_idx; }
 
   void incrementStepIndex();
   void resetStepIndex();
@@ -65,11 +65,6 @@ public:
 
   void saveSolution(const std::string &);
 
-  DCMPlanner *dcm_planner_;
-  std::vector<Footstep> footstep_list_;
-  std::vector<Footstep> footstep_preview_list_;
-  int current_footstep_index_; // keeps track of which footstep to take.
-
   // Initialization
   double t_walk_start_;
   Eigen::Quaterniond ori_start_;
@@ -80,37 +75,17 @@ public:
   Footstep left_foot_stance_;
   Footstep mid_foot_stance_;
 
+  std::vector<Footstep> footstep_list;
+  int current_footstep_idx; // keeps track of which footstep to take.
+
   // Nominal walking parameter primitives
-  double nominal_footwidth_;
-  double nominal_forward_step_;
-  double nominal_backward_step_;
-  double nominal_turn_radians_;
-  double nominal_strafe_distance_;
+  double nominal_footwidth;
+  double nominal_forward_step;
+  double nominal_backward_step;
+  double nominal_turn_radians;
+  double nominal_strafe_distance;
 
   int robot_side_first_;
-
-  // Human readable parameters  DCM parameters
-  double t_additional_init_transfer_; // the additional transfer time to switch
-                                      // the stance leg in the beginning
-  double t_contact_transition_; // the transition time used to change reaction
-                                // forces and stance leg
-  double t_swing_;              // the foot swing time.
-
-  // polynomial interpolation time during contact transition: t_transfer + t_ds
-  // + (1-alpha*t_ds).
-  // DCM walking parameters
-  double nominal_com_height_;
-  double t_transfer_init_; // = t_additional_init_transfer_ ; // additional
-                           // transfer time offset
-  double t_transfer_mid_;  // = (alpha_ds_-1.0)*t_ds;  // transfer time offset
-                           // for midstep transfers
-  double t_ds_; // = t_contact_transition_; // double support polynomial
-                // transfer time
-  double t_ss_; // = t_swing_; // single support exponential interpolation time
-  double percentage_settle_; // 0.99;//0.999; // percent to converge at the end
-                             // of the trajectory
-  double alpha_ds_; // = 0.5; // value between 0.0 and 1.0 for double support
-                    // DCM interpolation
 
   // // Getter values for the contact transition time.
   // double t_initial_transfer_time = t_additional_transfer_ + t_ds +
@@ -137,11 +112,14 @@ public:
 
   void updateDCMTasksDesired(double current_time);
 
-  // For TOWR+
-  // void updateDCMTasksDesired(const Eigen::Vector3d& des_com_pos,
-  // const Eigen::Vector3d& des_com_vel,
-  // const Eigen::Quaternion<double>& des_quat,
-  // const Eigen::Vector3d& des_ang_vel);
+private:
+  RobotSystem *robot_;
+  std::string lfoot_id_;
+  std::string rfoot_id_;
+
+  DCMPlanner *dcm_planner_;
+
+  std::vector<Footstep> footstep_preview_list_;
 
   Task *com_task_;
   Task *base_ori_task_;
@@ -155,9 +133,28 @@ public:
   Eigen::Vector3d des_ang_vel;
   Eigen::Vector3d des_ang_acc;
 
-protected:
-  RobotSystem *robot_;
+  // Human readable parameters  DCM parameters
+  double t_additional_init_transfer_; // the additional transfer time to switch
+                                      // the stance leg in the beginning
+  double t_contact_transition_; // the transition time used to change reaction
+                                // forces and stance leg
+  double t_swing_;              // the foot swing time.
+
+  // polynomial interpolation time during contact transition: t_transfer + t_ds
+  // + (1-alpha*t_ds).
+  // DCM walking parameters
+  double nominal_com_height_;
+  double t_transfer_init_; // = t_additional_init_transfer_; // additional
+                           // transfer time offset
+  double t_transfer_mid_;  // = (alpha_ds_-1.0)*t_ds;  // transfer time offset
+                           // for midstep transfers
+  double t_ds_; // = t_contact_transition_; // double support polynomial
+                // transfer time
+  double t_ss_; // = t_swing_; // single support exponential interpolation time
+  double percentage_settle_; // 0.99;//0.999; // percent to converge at the end
+                             // of the trajectory
+  double alpha_ds_; // = 0.5; // value between 0.0 and 1.0 for double support
+                    // DCM interpolation
+
   void convertTemporalParamsToDCMParams();
-  std::string lfoot_id_;
-  std::string rfoot_id_;
 };

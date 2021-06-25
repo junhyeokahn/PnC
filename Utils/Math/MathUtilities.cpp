@@ -303,7 +303,7 @@ Eigen::MatrixXd Adjoint(const Eigen::MatrixXd &R, const Eigen::Vector3d &p) {
   return ad_ret;
 }
 
-Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> quat) {
+Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> &quat) {
   Eigen::Vector3d img_vec(quat.x(), quat.y(), quat.z());
   double w(quat.w());
   double theta(2.0 * std::asin(std::sqrt(img_vec[0] * img_vec[0] +
@@ -314,6 +314,26 @@ Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> quat) {
   }
   Eigen::Vector3d ret = img_vec / std::sin(theta / 2.);
   return ret * theta;
+}
+
+Eigen::Quaternion<double> exp_to_quat(const Eigen::Vector3d &exp) {
+
+  double theta = exp.norm();
+  Eigen::Quaternion<double> ret;
+
+  if (theta > 1.0e-4) {
+    ret.w() = cos(theta / 2.0);
+    ret.x() = sin(theta / 2.0) * exp[0] / theta;
+    ret.y() = sin(theta / 2.0) * exp[1] / theta;
+    ret.z() = sin(theta / 2.0) * exp[2] / theta;
+  } else {
+    ret.w() = 1.;
+    ret.x() = 0.5 * exp[0];
+    ret.y() = 0.5 * exp[1];
+    ret.z() = 0.5 * exp[2];
+  }
+
+  return ret;
 }
 
 double QuatToYaw(const Eigen::Quaternion<double> q) {

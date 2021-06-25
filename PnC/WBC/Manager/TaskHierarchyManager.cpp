@@ -14,28 +14,28 @@ TaskHierarchyManager::TaskHierarchyManager(Task *_task, double _w_max,
 
 TaskHierarchyManager::~TaskHierarchyManager() {}
 
-void TaskHierarchyManager::initialize_ramp_to_min(double _start_time,
-                                                  double _duration) {
+void TaskHierarchyManager::InitializeRampToMin(double _start_time,
+                                               double _duration) {
   start_time_ = _start_time;
   duration_ = _duration;
   w_starting_ = task_->w_hierarchy;
 }
 
-void TaskHierarchyManager::initialize_ramp_to_max(double _start_time,
-                                                  double _duration) {
+void TaskHierarchyManager::InitializeRampToMax(double _start_time,
+                                               double _duration) {
   start_time_ = _start_time;
   duration_ = _duration;
   w_starting_ = task_->w_hierarchy;
 }
 
-void TaskHierarchyManager::update_ramp_to_min(double _curr_time) {
+void TaskHierarchyManager::UpdateRampToMin(double _curr_time) {
   double t =
       myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
   task_->w_hierarchy =
       (w_min_ - w_starting_) / duration_ * (t - start_time_) + w_starting_;
 }
 
-void TaskHierarchyManager::update_ramp_to_max(double _curr_time) {
+void TaskHierarchyManager::UpdateRampToMax(double _curr_time) {
   double t =
       myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
   task_->w_hierarchy =

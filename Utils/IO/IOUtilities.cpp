@@ -1,5 +1,5 @@
 #include "Utils/IO/IOUtilities.hpp"
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -7,7 +7,7 @@
 
 namespace myUtils {
 
-void saveVector(const Eigen::VectorXd& vec_, std::string name_, bool b_param) {
+void saveVector(const Eigen::VectorXd &vec_, std::string name_, bool b_param) {
   std::string file_name;
   cleaningFile(name_, file_name, b_param);
 
@@ -28,7 +28,7 @@ void saveValue(double _value, std::string _name, bool b_param) {
   savefile.flush();
 }
 
-void saveVector(double* _vec, std::string _name, int size, bool b_param) {
+void saveVector(double *_vec, std::string _name, int size, bool b_param) {
   std::string file_name;
   cleaningFile(_name, file_name, b_param);
   std::ofstream savefile(file_name.c_str(), std::ios::app);
@@ -40,7 +40,7 @@ void saveVector(double* _vec, std::string _name, int size, bool b_param) {
   savefile.flush();
 }
 
-void saveVector(const std::vector<double>& _vec, std::string _name,
+void saveVector(const std::vector<double> &_vec, std::string _name,
                 bool b_param) {
   std::string file_name;
   cleaningFile(_name, file_name, b_param);
@@ -52,7 +52,7 @@ void saveVector(const std::vector<double>& _vec, std::string _name,
   savefile.flush();
 }
 
-void cleaningFile(std::string _file_name, std::string& _ret_file,
+void cleaningFile(std::string _file_name, std::string &_ret_file,
                   bool b_param) {
   if (b_param)
     _ret_file += THIS_COM;
@@ -70,13 +70,13 @@ void cleaningFile(std::string _file_name, std::string& _ret_file,
   }
 }
 
-void pretty_print(Eigen::VectorXd const& vv, std::ostream& os,
-                  std::string const& title, std::string const& prefix,
+void pretty_print(Eigen::VectorXd const &vv, std::ostream &os,
+                  std::string const &title, std::string const &prefix,
                   bool nonl) {
-  pretty_print((Eigen::MatrixXd const&)vv, os, title, prefix, true, nonl);
+  pretty_print((Eigen::MatrixXd const &)vv, os, title, prefix, true, nonl);
 }
 
-void pretty_constructor(const int& _num_tab, const std::string& _name) {
+void pretty_constructor(const int &_num_tab, const std::string &_name) {
   myColor color;
   color_print(myColor::BoldCyan, "|", false);
   std::string content = " ";
@@ -87,21 +87,21 @@ void pretty_constructor(const int& _num_tab, const std::string& _name) {
     }
     content = content + "||--" + _name;
     switch (_num_tab) {
-      case 1:
-        color = myColor::BoldGreen;
-        break;
-      case 2:
-        color = myColor::BoldYellow;
-        break;
-      case 3:
-        color = myColor::BoldBlue;
-        break;
-      case 4:
-        color = myColor::BoldMagneta;
-        break;
-      default:
-        std::cout << "no such color in pretty_constructor" << std::endl;
-        exit(0);
+    case 1:
+      color = myColor::BoldGreen;
+      break;
+    case 2:
+      color = myColor::BoldYellow;
+      break;
+    case 3:
+      color = myColor::BoldBlue;
+      break;
+    case 4:
+      color = myColor::BoldMagneta;
+      break;
+    default:
+      std::cout << "no such color in pretty_constructor" << std::endl;
+      exit(0);
     }
   } else {
     content += _name;
@@ -116,48 +116,48 @@ void pretty_constructor(const int& _num_tab, const std::string& _name) {
   color_print(myColor::BoldCyan, "|");
 }
 
-void color_print(const myColor& _color, const std::string& _name,
+void color_print(const myColor &_color, const std::string &_name,
                  bool line_change) {
   switch (_color) {
-    case Red:
-      printf("\033[0;31m");
-      break;
-    case BoldRed:
-      printf("\033[1;31m");
-      break;
-    case Green:
-      printf("\033[0;32m");
-      break;
-    case BoldGreen:
-      printf("\033[1;32m");
-      break;
-    case Yellow:
-      printf("\033[0;33m");
-      break;
-    case BoldYellow:
-      printf("\033[1;33m");
-      break;
-    case Blue:
-      printf("\033[0;34m");
-      break;
-    case BoldBlue:
-      printf("\033[1;34m");
-      break;
-    case Magneta:
-      printf("\033[0;35m");
-      break;
-    case BoldMagneta:
-      printf("\033[1;35m");
-      break;
-    case Cyan:
-      printf("\033[0;36m");
-      break;
-    case BoldCyan:
-      printf("\033[1;36m");
-      break;
-    default:
-      std::cout << "No Such Color" << std::endl;
-      exit(0);
+  case Red:
+    printf("\033[0;31m");
+    break;
+  case BoldRed:
+    printf("\033[1;31m");
+    break;
+  case Green:
+    printf("\033[0;32m");
+    break;
+  case BoldGreen:
+    printf("\033[1;32m");
+    break;
+  case Yellow:
+    printf("\033[0;33m");
+    break;
+  case BoldYellow:
+    printf("\033[1;33m");
+    break;
+  case Blue:
+    printf("\033[0;34m");
+    break;
+  case BoldBlue:
+    printf("\033[1;34m");
+    break;
+  case Magneta:
+    printf("\033[0;35m");
+    break;
+  case BoldMagneta:
+    printf("\033[1;35m");
+    break;
+  case Cyan:
+    printf("\033[0;36m");
+    break;
+  case BoldCyan:
+    printf("\033[1;36m");
+    break;
+  default:
+    std::cout << "No Such Color" << std::endl;
+    exit(0);
   }
   if (line_change)
     printf("%s\n", _name.c_str());
@@ -166,7 +166,7 @@ void color_print(const myColor& _color, const std::string& _name,
   printf("\033[0m");
 }
 
-void pretty_print(const std::vector<double>& _vec, const char* title) {
+void pretty_print(const std::vector<double> &_vec, const char *title) {
   std::printf("%s: ", title);
   for (int i(0); i < _vec.size(); ++i) {
     std::printf("% 6.4f, \t", _vec[i]);
@@ -174,7 +174,7 @@ void pretty_print(const std::vector<double>& _vec, const char* title) {
   std::printf("\n");
 }
 
-void pretty_print(const std::vector<int>& _vec, const char* title) {
+void pretty_print(const std::vector<int> &_vec, const char *title) {
   std::printf("%s: ", title);
   for (int i(0); i < _vec.size(); ++i) {
     std::printf("%d, \t", _vec[i]);
@@ -182,10 +182,10 @@ void pretty_print(const std::vector<int>& _vec, const char* title) {
   std::printf("\n");
 }
 
-void pretty_print(Eigen::MatrixXd const& mm, std::ostream& os,
-                  std::string const& title, std::string const& prefix,
+void pretty_print(Eigen::MatrixXd const &mm, std::ostream &os,
+                  std::string const &title, std::string const &prefix,
                   bool vecmode, bool nonl) {
-  char const* nlornot("\n");
+  char const *nlornot("\n");
   if (nonl) {
     nlornot = "";
   }
@@ -200,7 +200,8 @@ void pretty_print(Eigen::MatrixXd const& mm, std::ostream& os,
     // }
 
     if (vecmode) {
-      if (!prefix.empty()) os << prefix;
+      if (!prefix.empty())
+        os << prefix;
       for (int ir(0); ir < mm.rows(); ++ir) {
         os << pretty_string(mm.coeff(ir, 0));
       }
@@ -208,7 +209,8 @@ void pretty_print(Eigen::MatrixXd const& mm, std::ostream& os,
 
     } else {
       for (int ir(0); ir < mm.rows(); ++ir) {
-        if (!prefix.empty()) os << prefix;
+        if (!prefix.empty())
+          os << prefix;
         for (int ic(0); ic < mm.cols(); ++ic) {
           os << pretty_string(mm.coeff(ir, ic));
         }
@@ -218,26 +220,26 @@ void pretty_print(Eigen::MatrixXd const& mm, std::ostream& os,
   }
 }
 
-void pretty_print(Eigen::Vector3d const& vv, std::ostream& os,
-                  std::string const& title, std::string const& prefix,
+void pretty_print(Eigen::Vector3d const &vv, std::ostream &os,
+                  std::string const &title, std::string const &prefix,
                   bool nonl) {
-  pretty_print((Eigen::MatrixXd const&)vv, os, title, prefix, true, nonl);
+  pretty_print((Eigen::MatrixXd const &)vv, os, title, prefix, true, nonl);
 }
 
-void pretty_print(Eigen::Quaternion<double> const& qq, std::ostream& os,
-                  std::string const& title, std::string const& prefix,
+void pretty_print(Eigen::Quaternion<double> const &qq, std::ostream &os,
+                  std::string const &title, std::string const &prefix,
                   bool nonl) {
   pretty_print(qq.coeffs(), os, title, prefix, true, nonl);
 }
 
-std::string pretty_string(Eigen::VectorXd const& vv) {
+std::string pretty_string(Eigen::VectorXd const &vv) {
   std::ostringstream os;
   pretty_print(vv, os, "", "", true);
   return os.str();
 }
 
-std::string pretty_string(Eigen::MatrixXd const& mm,
-                          std::string const& prefix) {
+std::string pretty_string(Eigen::MatrixXd const &mm,
+                          std::string const &prefix) {
   std::ostringstream os;
   pretty_print(mm, os, "", prefix);
   return os.str();
@@ -252,7 +254,7 @@ std::string pretty_string(double vv) {
   return str;
 }
 
-void readFile(std::string _file_name, std::vector<std::string>& _vec) {
+void readFile(std::string _file_name, std::vector<std::string> &_vec) {
   std::ifstream InputFile(_file_name.c_str());
   std::string tempstring;
   if (!InputFile.is_open()) {
@@ -268,7 +270,7 @@ void readFile(std::string _file_name, std::vector<std::string>& _vec) {
   }
 }
 
-void splitString(std::string* str_array, std::string strTarget,
+void splitString(std::string *str_array, std::string strTarget,
                  std::string strTok) {
   int nCutPos = 0;
   int nIndex = 0;
@@ -293,4 +295,4 @@ bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
   }
   return ret;
 }
-}  // namespace myUtils
+} // namespace myUtils

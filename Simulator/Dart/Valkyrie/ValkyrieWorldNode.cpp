@@ -1,11 +1,11 @@
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <PnC/ValkyriePnC/ValkyrieInterface.hpp>
 #include <Simulator/Dart/Valkyrie/ValkyrieWorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
 
-ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr& _world)
+ValkyrieWorldNode::ValkyrieWorldNode(const dart::simulation::WorldPtr &_world)
     : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
   world_ = _world;
   robot_ = world_->getSkeleton("valkyrie");
@@ -104,15 +104,15 @@ void ValkyrieWorldNode::customPreStep() {
   resetButtonFlags();
 }
 
-void ValkyrieWorldNode::GetContactSwitchData_(bool& rfoot_contact,
-                                              bool& lfoot_contact) {
+void ValkyrieWorldNode::GetContactSwitchData_(bool &rfoot_contact,
+                                              bool &lfoot_contact) {
   // Get Sensor Wrench Data
   Eigen::VectorXd rf_wrench = sensor_data_->rf_wrench;
   Eigen::VectorXd lf_wrench = sensor_data_->lf_wrench;
 
   // Local Z-Force Threshold
-  double force_threshold = 10;  // 10 Newtons ~ 1kg. If sensor detects this
-                                // force, then we are in contact
+  double force_threshold = 10; // 10 Newtons ~ 1kg. If sensor detects this
+                               // force, then we are in contact
 
   if (fabs(rf_wrench[5]) >= force_threshold) {
     rfoot_contact = true;
@@ -140,7 +140,7 @@ void ValkyrieWorldNode::SetParams_() {
     myUtils::readParameter(simulation_cfg["control_configuration"], "kp", kp_);
     myUtils::readParameter(simulation_cfg["control_configuration"], "kd", kd_);
 
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
@@ -151,14 +151,14 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
   Eigen::VectorXd rf_wrench = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd lf_wrench = Eigen::VectorXd::Zero(6);
 
-  dart::dynamics::BodyNode* lfoot_bn = robot_->getBodyNode("leftFoot");
-  dart::dynamics::BodyNode* rfoot_bn = robot_->getBodyNode("rightFoot");
-  const dart::collision::CollisionResult& _result =
+  dart::dynamics::BodyNode *lfoot_bn = robot_->getBodyNode("leftFoot");
+  dart::dynamics::BodyNode *rfoot_bn = robot_->getBodyNode("rightFoot");
+  const dart::collision::CollisionResult &_result =
       world_->getLastCollisionResult();
 
   Eigen::VectorXd lf_contact_force_sum = Eigen::VectorXd::Zero(3);
-  for (const auto& contact : _result.getContacts()) {
-    for (const auto& shapeNode :
+  for (const auto &contact : _result.getContacts()) {
+    for (const auto &shapeNode :
          lfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
       // Ensure that we view the force as external.
       double sgn = 1.0;
@@ -186,7 +186,7 @@ void ValkyrieWorldNode::GetForceTorqueData_() {
         lf_wrench += w_a;
       }
     }
-    for (const auto& shapeNode :
+    for (const auto &shapeNode :
          rfoot_bn->getShapeNodesWith<dart::dynamics::CollisionAspect>()) {
       // Conditional Check to ensure that we view the force as external.
       double sgn = 1.0;

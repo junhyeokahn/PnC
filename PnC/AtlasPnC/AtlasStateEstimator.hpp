@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <Eigen/Dense>
 
 class AtlasStateProvider;

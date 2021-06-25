@@ -8,111 +8,102 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 
   com_task_ = _com_task;
   base_ori_task_ = _base_ori_task;
+
   base_id_ = base_ori_task_->target_ids[0];
 
-  com_pos_des_ = Eigen::VectorXd::Zero(3);
-  com_vel_des_ = Eigen::VectorXd::Zero(3);
-  com_acc_des_ = Eigen::VectorXd::Zero(3);
+  amp_.setZero();
+  freq_.setZero();
+  exp_error_.setZero();
 
-  dcm_pos_des_ = Eigen::VectorXd::Zero(3);
-  dcm_vel_des_ = Eigen::VectorXd::Zero(3);
-  dcm_acc_des_ = Eigen::VectorXd::Zero(3);
-
-  base_ori_des_ = Eigen::VectorXd::Zero(4);
-  base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
-  base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
-
-  ini_com_pos_ = Eigen::VectorXd::Zero(3);
-  ini_base_quat_ = Eigen::VectorXd::Zero(4);
-  target_com_pos_ = Eigen::VectorXd::Zero(3);
-
-  amp = Eigen::VectorXd::Zero(3);
-  freq = Eigen::VectorXd::Zero(3);
-  mid_point = Eigen::VectorXd::Zero(3);
-  is_swaying = false;
-  is_sinusoid = false;
+  b_swaying_ = false;
 }
 
-void FloatingBaseTrajectoryManager::updateDesired() {
-  com_task_->update_desired(com_pos_des_, com_vel_des_, com_acc_des_);
-  base_ori_task_->update_desired(base_ori_des_, base_ang_vel_des_,
-                                 base_ang_acc_des_);
-  // TEST
-  double dcm_omega = sqrt(9.81 / robot_->get_com_pos()[2]);
-  dcm_pos_des_ = com_pos_des_ + com_vel_des_ / dcm_omega;
-  dcm_vel_des_ = com_vel_des_ + com_acc_des_ / dcm_omega;
-  dcm_pos_des_[2] = com_pos_des_[2];
-  dcm_vel_des_[2] = com_vel_des_[2];
-  dcm_acc_des_.setZero();
-  // TEST
-}
+void FloatingBaseTrajectoryManager::
+    InitializeFloatingBaseInterpolationTrajectory(
+        const double _start_time, const double _duration,
+        const Eigen::Vector3d &_target_com_pos,
+        const Eigen::Quaternion<double> &_target_base_quat) {
 
-void FloatingBaseTrajectoryManager::initializeFloatingBaseTrajectory(
-    const double _start_time, const double _duration,
-    const Eigen::VectorXd &_target_com_pos) {
   start_time_ = _start_time;
   duration_ = _duration;
-  ini_com_pos_ = ((Eigen::VectorXd)robot_->get_com_pos());
-  // base_ori_quat_des_ =
-  // Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  base_ori_quat_des_ = Eigen::Quaternion<double>::Identity();
-  ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
-      base_ori_quat_des_.y(), base_ori_quat_des_.z();
+
+  ini_com_pos_ = robot_->get_com_pos();
+  ini_base_quat_ =
+      Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
+
   target_com_pos_ = _target_com_pos;
+  target_base_quat_ = _target_base_quat;
+
+  Eigen::Quaternion<double> quat_err =
+      target_base_quat_ * ini_base_quat_.inverse();
+  exp_error_ = myUtils::quat_to_exp(quat_err);
 }
 
-void FloatingBaseTrajectoryManager::initializeCoMSwaying(double _start_time,
-                                                         double _duration,
-                                                         Eigen::VectorXd _dis) {
-  is_swaying = true;
+void FloatingBaseTrajectoryManager::InitializeCoMSwayingTrajectory(
+    double _start_time, const Eigen::Vector3d &_amp,
+    const Eigen::Vector3d &_freq) {
+
+  b_swaying_ = true;
+
   start_time_ = _start_time;
-  duration_ = _duration;
-  // ini_com_pos_ = ((Eigen::VectorXd)robot_->getCoMPosition());
-  ini_com_pos_ = target_com_pos_;
-  // base_ori_quat_des_ =
-  // Eigen::Quaternion<double>(robot_->getBodyNodeIsometry(base_id_).linear());
-  base_ori_quat_des_ = Eigen::Quaternion<double>::Identity();
-  ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
-      base_ori_quat_des_.y(), base_ori_quat_des_.z();
-  target_com_pos_ = ini_com_pos_ + _dis;
+  amp_ = _amp;
+  freq_ = _freq;
+
+  ini_com_pos_ = robot_->get_com_pos();
+  ini_base_quat_ =
+      Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
+  target_base_quat_ = ini_base_quat_;
 }
 
-void FloatingBaseTrajectoryManager::initializeCoMSinusoid(double _start_time,
-                                                          double _amp,
-                                                          double _freq) {
-  is_sinusoid = true;
-  start_time_ = _start_time;
-  mid_point = target_com_pos_;
-  amp << 0., _amp, 0;
-  freq << 0., _freq, 0;
-  base_ori_quat_des_ = Eigen::Quaternion<double>::Identity();
-  ini_base_quat_ << base_ori_quat_des_.w(), base_ori_quat_des_.x(),
-      base_ori_quat_des_.y(), base_ori_quat_des_.z();
-}
+void FloatingBaseTrajectoryManager::UpdateFloatingBaseDesired(
+    const double curr_time) {
 
-void FloatingBaseTrajectoryManager::updateFloatingBaseDesired(
-    const double current_time) {
-  if (is_sinusoid) {
-    myUtils::getSinusoidTrajectory(start_time_, mid_point, amp, freq,
-                                   current_time, com_pos_des_, com_vel_des_,
-                                   com_acc_des_);
+  Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
+
+  if (b_swaying_) {
+    myUtils::getSinusoidTrajectory(start_time_, ini_com_pos_, amp_, freq_,
+                                   curr_time, com_pos_des, com_vel_des,
+                                   com_acc_des);
   } else {
     for (int i = 0; i < 3; ++i) {
-      com_pos_des_[i] =
+      com_pos_des[i] =
           myUtils::smooth_changing(ini_com_pos_[i], target_com_pos_[i],
-                                   duration_, current_time - start_time_);
-      com_vel_des_[i] =
+                                   duration_, curr_time - start_time_);
+      com_vel_des[i] =
           myUtils::smooth_changing_vel(ini_com_pos_[i], target_com_pos_[i],
-                                       duration_, current_time - start_time_);
-      com_acc_des_[i] =
+                                       duration_, curr_time - start_time_);
+      com_acc_des[i] =
           myUtils::smooth_changing_acc(ini_com_pos_[i], target_com_pos_[i],
-                                       duration_, current_time - start_time_);
+                                       duration_, curr_time - start_time_);
     }
   }
 
-  base_ori_des_ = ini_base_quat_;
-  base_ang_vel_des_ = Eigen::VectorXd::Zero(3);
-  base_ang_acc_des_ = Eigen::VectorXd::Zero(3);
+  com_task_->update_desired(com_pos_des, com_vel_des, com_acc_des);
 
-  updateDesired();
+  Eigen::VectorXd base_ori_des = Eigen::VectorXd::Zero(4);
+  Eigen::Quaternion<double> base_ori_des_quat;
+  Eigen::VectorXd base_ang_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_ang_acc_des = Eigen::VectorXd::Zero(3);
+
+  double scaled_t =
+      myUtils::smooth_changing(0, 1, duration_, curr_time - start_time_);
+  double scaled_tdot =
+      myUtils::smooth_changing_vel(0, 1, duration_, curr_time - start_time_);
+  double scaled_tddot =
+      myUtils::smooth_changing_acc(0, 1, duration_, curr_time - start_time_);
+
+  Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
+  Eigen::Quaternion<double> quat_inc = myUtils::exp_to_quat(exp_inc);
+  // TODO (Check this again)
+  // base_ori_des_quat = quat_inc * ini_base_quat_;
+  base_ori_des_quat = ini_base_quat_ * quat_inc;
+  base_ori_des << base_ori_des_quat.w(), base_ori_des_quat.x(),
+      base_ori_des_quat.y(), base_ori_des_quat.z();
+  base_ang_vel_des = exp_error_ * scaled_tdot;
+  base_ang_acc_des = exp_error_ * scaled_tddot;
+
+  base_ori_task_->update_desired(base_ori_des, base_ang_vel_des,
+                                 base_ang_acc_des);
 }

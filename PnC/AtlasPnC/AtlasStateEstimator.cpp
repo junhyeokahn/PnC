@@ -46,6 +46,6 @@ void AtlasStateEstimator::_update_dcm() {
   sp_->dcm = com_pos + com_vel / dcm_omega;
 
   double alpha_vel = 0.1; // TODO Study this alpha value
-  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->dt) +
+  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_rate) +
                  (1.0 - alpha_vel) * sp_->dcm_vel;
 }

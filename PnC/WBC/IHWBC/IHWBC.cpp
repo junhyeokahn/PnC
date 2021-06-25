@@ -134,7 +134,7 @@ void IHWBC::solve(
 
     cost_rf_mat = (lambda_rf + w_rf) *
                   Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
-    cost_rf_vec = -rf_des;
+    cost_rf_vec = -w_rf * rf_des;
 
     cost_mat = myUtils::block_diag(cost_t_mat, cost_rf_mat);
     cost_vec = myUtils::vStack(cost_t_vec, cost_rf_vec);

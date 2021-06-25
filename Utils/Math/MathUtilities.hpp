@@ -73,7 +73,8 @@ Eigen::VectorXd doubleIntegration(const Eigen::VectorXd &q,
 Eigen::Matrix3d VecToso3(const Eigen::Vector3d &omg);
 Eigen::MatrixXd Adjoint(const Eigen::MatrixXd &R, const Eigen::Vector3d &p);
 
-Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> quat);
+Eigen::Vector3d quat_to_exp(const Eigen::Quaternion<double> &quat);
+Eigen::Quaternion<double> exp_to_quat(const Eigen::Vector3d &exp);
 
 double QuatToYaw(const Eigen::Quaternion<double> q);
 

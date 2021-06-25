@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <PnC/WBC/BasicTask.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/MathUtilities.hpp>
@@ -51,9 +51,7 @@ BasicTask::BasicTask(RobotSystem *_robot, Type _task_type, const int _dim,
     assert(dim == 3);
     name = "Isolated CoM";
     break;
-  default: {
-    assert(false);
-  }
+  default: { assert(false); }
   }
   myUtils::pretty_constructor(3, "Basic Task " + name);
 }
@@ -103,9 +101,7 @@ void BasicTask::update_cmd() {
     vel = robot_->get_com_lin_vel();
     break;
   }
-  default: {
-    assert(false);
-  }
+  default: { assert(false); }
   }
   for (int i = 0; i < dim; ++i) {
     op_cmd[i] =
@@ -175,8 +171,6 @@ void BasicTask::update_jacobian() {
         robot_->get_com_lin_jacobian_dot() * robot_->get_q_dot();
     break;
   }
-  default: {
-    assert(false);
-  }
+  default: { assert(false); }
   }
 }

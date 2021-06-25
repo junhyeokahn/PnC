@@ -1,0 +1,60 @@
+servo_rate: 0.001
+
+wbc:
+    rf_z_max: 2000.0
+
+    # Task Hierarchy Weights
+    w_com: 10.
+    w_pelvis_ori: 20.
+    w_upper_body_joint: 20.
+    w_contact_foot: 60.
+    w_swing_foot: 40.
+
+    # Reaction Force Weights
+    w_rf: 0.
+
+    # Regulation
+    lambda_q_ddot: 1e-8
+    lambda_rf: 1e-7
+
+    # Task Gains
+    kp_com: [100., 100., 100.]
+    kd_com: [10., 10., 10.]
+
+    kp_pelvis_ori: [100., 100., 100.]
+    kd_pelvis_ori: [10., 10., 10.]
+
+    # 18 joints
+    kp_upper_body_joint: [100., 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+    kd_upper_body_joint: [10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 10.]
+
+    kp_foot_pos: [400., 400., 400.]
+    kd_foot_pos: [40., 40., 40.]
+    kp_foot_ori: [400., 400., 400.]
+    kd_foot_ori: [40., 40., 40.]
+
+    b_trq_limit: true
+
+    # Joint integration parameters
+    vel_cutoff_freq: 2.0 # Hz
+    pos_cutoff_freq: 1.0 # Hz
+    max_pos_err: 0.2 # rad
+
+walking:
+    ini_stand_dur: 1.
+    rf_z_max_time: 0.1
+
+    com_height: 1.02
+    swing_height: 0.05
+
+    t_additional_ini_trans: 0.
+    t_contact_trans: 0.45
+    t_swing: 0.05
+    percentage_settle: 0.9
+    alpha_ds: 0.5
+
+    nominal_footwidth: 0.25
+    nominal_forward_step: 0.15
+    nominal_backward_step: -0.15
+    nominal_turn_radians: 0.52
+    nominal_strafe_distance: 0.05

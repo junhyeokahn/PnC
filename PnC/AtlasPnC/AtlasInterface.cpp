@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 
-//#include <PnC/AtlasPnC/AtlasCtrlArchitecture/AtlasControlArchitecture.hpp>
+#include <PnC/AtlasPnC/AtlasControlArchitecture.hpp>
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 //#include <PnC/AtlasPnC/AtlasLogicInterrupt/WalkingInterruptLogic.hpp>
 #include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
@@ -19,15 +19,18 @@ AtlasInterface::AtlasInterface() : Interface() {
   myUtils::color_print(myColor::BoldCyan, border);
   myUtils::pretty_constructor(0, "Atlas Interface");
 
-  robot_ = new DartRobotSystem(
-      THIS_COM "RobotModel/Robot/atlas/atlas_rel_path.urdf", false, true);
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/Atlas/pnc.yaml");
+
+  robot_ = new DartRobotSystem(THIS_COM "RobotModel/atlas/atlas_rel_path.urdf",
+                               false, false);
   se_ = new AtlasStateEstimator(robot_);
   sp_ = AtlasStateProvider::getStateProvider(robot_);
+  sp_->servo_rate = myUtils::readParameter<double>(cfg, "servo_rate");
 
   count_ = 0;
   waiting_count_ = 2;
 
-  // control_architecture_ = new AtlasControlArchitecture(robot_);
+  control_architecture_ = new AtlasControlArchitecture(robot_);
   // interrupt = new WalkingInterruptLogic(
   // static_cast<ValkyrieControlArchitecture *>(control_architecture_));
 
@@ -38,7 +41,7 @@ AtlasInterface::~AtlasInterface() {
   delete robot_;
   delete se_;
   // delete interrupt;
-  // delete control_architecture_;
+  delete control_architecture_;
 }
 
 void AtlasInterface::getCommand(void *_data, void *_command) {
@@ -50,12 +53,12 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
   } else {
     se_->update(data);
     // interrupt->processInterrupts();
-    // control_architecture_->getCommand(cmd);
+    control_architecture_->getCommand(cmd);
   }
 
   ++count_;
-  running_time_ = (double)(count_)*sp_->dt;
+  running_time_ = (double)(count_)*sp_->servo_rate;
   sp_->curr_time = running_time_;
-  sp_->prev_state = sp_->state;
-  // sp_->state = control_architecture_->getState();
+  sp_->prev_state = control_architecture_->prev_state;
+  sp_->state = control_architecture_->state;
 }

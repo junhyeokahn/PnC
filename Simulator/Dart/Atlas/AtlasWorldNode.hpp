@@ -11,6 +11,16 @@ class AtlasCommand;
 
 class AtlasWorldNode : public dart::gui::osg::WorldNode {
 private:
+  void GetBaseData_(Eigen::Vector3d &_base_com_pos,
+                    Eigen::Quaternion<double> &_base_com_quat,
+                    Eigen::Vector3d &_base_com_lin_vel,
+                    Eigen::Vector3d &_base_com_ang_vel,
+                    Eigen::Vector3d &_base_joint_pos,
+                    Eigen::Quaternion<double> &_base_joint_quat,
+                    Eigen::Vector3d &_base_joint_lin_vel,
+                    Eigen::Vector3d &_base_joint_ang_vel);
+  void GetJointData_(std::map<std::string, double> &_joint_positions,
+                     std::map<std::string, double> &_joint_velocities);
   void GetContactSwitchData_(bool &rfoot_contact, bool &lfoot_contact);
   void SetParams_();
   void GetForceTorqueData_();
@@ -22,16 +32,12 @@ private:
   dart::simulation::WorldPtr world_;
   dart::dynamics::SkeletonPtr robot_;
 
-  Eigen::VectorXd trq_cmd_;
-
   int count_;
   double t_;
   double servo_rate_;
   int n_dof_;
   double kp_;
   double kd_;
-  Eigen::VectorXd trq_lb_;
-  Eigen::VectorXd trq_ub_;
 
 public:
   AtlasWorldNode(const dart::simulation::WorldPtr &world);

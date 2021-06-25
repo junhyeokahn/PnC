@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot name="ground_skeleton">
+    <link name="world" />
+    <link name="ground_link">
+         <collision>
+            <origin xyz="0 0 -0.025" rpy="0 -0 0" />
+            <geometry>
+                <box size="5000.0 500.0 0.05" />
+            </geometry>
+        </collision>
+         <visual name="visual">
+            <origin xyz = "-10. -10. -1.0" rpy="0. 0 0" />
+            <!--<origin xyz = "0 0 -0.54" rpy="0 0 0" />-->
+            <geometry>
+                <mesh filename = "tile_marble_diamond.dae" scale="1. 1. 1." />
+            </geometry>
+        </visual>
+        <inertial>
+            <mass value="1.0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0" />
+        </inertial>
+    </link>
+    <joint name="ground_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="world" />
+        <child link="ground_link" />
+    </joint>
+</robot>

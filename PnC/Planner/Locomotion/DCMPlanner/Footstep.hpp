@@ -1,21 +1,18 @@
 #pragma once
 
+#include <Configuration.hpp>
 #include <Eigen/Dense>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#define LEFT_ROBOT_SIDE 0
-#define RIGHT_ROBOT_SIDE 1
-#define MIDFOOT_TYPE 2
-
 // Data container for a footstep
 
 class Footstep {
- public:
+public:
   Footstep();
-  Footstep(const Eigen::Vector3d& pos_in, const Eigen::Quaterniond& quat_in,
-           const int& robot_side_in);
+  Footstep(const Eigen::Vector3d &pos_in, const Eigen::Quaterniond &quat_in,
+           const int &robot_side_in);
 
   ~Footstep();
 
@@ -25,11 +22,11 @@ class Footstep {
   Eigen::Matrix3d R_ori;
 
   // Setters
-  void setPosOriSide(const Eigen::Vector3d& pos_in,
-                     const Eigen::Quaterniond& quat_in,
-                     const int& robot_side_in);
-  void setPosOri(const Eigen::Vector3d& pos_in,
-                 const Eigen::Quaterniond& quat_in);
+  void setPosOriSide(const Eigen::Vector3d &pos_in,
+                     const Eigen::Quaterniond &quat_in,
+                     const int &robot_side_in);
+  void setPosOri(const Eigen::Vector3d &pos_in,
+                 const Eigen::Quaterniond &quat_in);
   void setRightSide();
   void setLeftSide();
   void setMidFoot();
@@ -37,12 +34,12 @@ class Footstep {
   // Left or right side
   int robot_side;
 
-  void computeMidfeet(const Footstep& footstep1, const Footstep& footstep2,
-                      Footstep& midfeet);
+  void computeMidfeet(const Footstep &footstep1, const Footstep &footstep2,
+                      Footstep &midfeet);
 
   int getSide();
   void printInfo();
 
- private:
+private:
   void common_initialization();
 };

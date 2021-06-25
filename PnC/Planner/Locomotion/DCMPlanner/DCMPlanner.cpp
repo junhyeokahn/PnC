@@ -17,9 +17,9 @@ void DCMPlanner::paramInitialization(const YAML::Node &node) {
   // Load Custom Params ----------------------------------
   try {
     // Load DCM Parameters
-    myUtils::readParameter(node, "t_transfer", t_transfer);
-    myUtils::readParameter(node, "t_ds", t_ds);
-    myUtils::readParameter(node, "t_ss", t_ss);
+    myUtils::readParameter(node, "t_additional_ini_trans", t_transfer);
+    myUtils::readParameter(node, "t_contact_trans", t_ds);
+    myUtils::readParameter(node, "t_swing", t_ss);
     myUtils::readParameter(node, "percentage_settle", percentage_settle);
     myUtils::readParameter(node, "alpha_ds", alpha_ds);
   } catch (std::runtime_error &e) {
@@ -90,9 +90,10 @@ void DCMPlanner::initialize_footsteps_rvrp(
                    input_footstep_list[i].position;
 
     // Set the correct stance rvrp
-    current_stance_rvrp = input_footstep_list[i].robot_side == LEFT_ROBOT_SIDE
-                              ? right_stance_rvrp
-                              : left_stance_rvrp;
+    current_stance_rvrp =
+        input_footstep_list[i].robot_side == EndEffector::LFoot
+            ? right_stance_rvrp
+            : left_stance_rvrp;
     // If this is the last step, use the average rvrp between the stance and
     // current rvrp
     if (i == (input_footstep_list.size() - 1)) {
@@ -107,7 +108,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
       rvrp_list.push_back(current_stance_rvrp);
     } else {
       // otherwise, update the correct stance to the latest rvrp
-      if (input_footstep_list[i].robot_side == LEFT_ROBOT_SIDE) {
+      if (input_footstep_list[i].robot_side == EndEffector::LFoot) {
         left_stance_rvrp = current_rvrp;
       } else {
         right_stance_rvrp = current_rvrp;
@@ -116,7 +117,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
     // -----------------------------------------------------------------
 
     // Specify the right swing VRP type
-    input_footstep_list[i].robot_side == LEFT_ROBOT_SIDE
+    input_footstep_list[i].robot_side == EndEffector::LFoot
         ? rvrp_type_list.push_back(DCM_LL_SWING_VRP_TYPE)
         : rvrp_type_list.push_back(DCM_RL_SWING_VRP_TYPE);
     // Mark the current RVRP index to correspond to this footstep swing.
@@ -181,7 +182,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   ini_dcm_vel.setZero();
 
   // Set the stance leg
-  if (input_footstep_list[0].robot_side == LEFT_ROBOT_SIDE) {
+  if (input_footstep_list[0].robot_side == EndEffector::LFoot) {
     initialize_footsteps_rvrp(input_footstep_list, right_footstance,
                               initial_rvrp);
   } else {
@@ -202,7 +203,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   ini_dcm_vel.setZero();
 
   // Set the stance leg
-  if (input_footstep_list[0].robot_side == LEFT_ROBOT_SIDE) {
+  if (input_footstep_list[0].robot_side == EndEffector::LFoot) {
     initialize_footsteps_rvrp(input_footstep_list, right_footstance,
                               initial_com);
   } else {
@@ -229,7 +230,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   ini_dcm_vel = initial_dcm_vel;
 
   // Set the stance leg
-  if (input_footstep_list[0].robot_side == LEFT_ROBOT_SIDE) {
+  if (input_footstep_list[0].robot_side == EndEffector::LFoot) {
     initialize_footsteps_rvrp(input_footstep_list, right_footstance,
                               initial_dcm);
   } else {
@@ -915,7 +916,7 @@ void DCMPlanner::compute_reference_pelvis_ori() {
     if ((rvrp_type_list[i] == DCM_RL_SWING_VRP_TYPE) ||
         (rvrp_type_list[i] == DCM_LL_SWING_VRP_TYPE)) {
       target_step = footstep_list[step_counter];
-      if (target_step.robot_side == LEFT_ROBOT_SIDE) {
+      if (target_step.robot_side == EndEffector::LFoot) {
         stance_step = prev_right_stance;
         prev_left_stance = target_step;
       } else {

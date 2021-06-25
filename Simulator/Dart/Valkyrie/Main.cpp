@@ -1,4 +1,4 @@
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <Simulator/Dart/Valkyrie/ValkyrieWorldNode.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 #include <dart/dart.hpp>
@@ -6,12 +6,12 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include <dart/utils/utils.hpp>
 
-void displayJointFrames(const dart::simulation::WorldPtr& world,
-                        const dart::dynamics::SkeletonPtr& robot) {
+void displayJointFrames(const dart::simulation::WorldPtr &world,
+                        const dart::dynamics::SkeletonPtr &robot) {
   for (std::size_t i = 0; i < robot->getNumBodyNodes(); ++i) {
-    dart::dynamics::BodyNode* bn = robot->getBodyNode(i);
+    dart::dynamics::BodyNode *bn = robot->getBodyNode(i);
     for (std::size_t j = 0; j < bn->getNumChildJoints(); ++j) {
-      const dart::dynamics::Joint* joint = bn->getChildJoint(j);
+      const dart::dynamics::Joint *joint = bn->getChildJoint(j);
       const Eigen::Isometry3d offset = joint->getTransformFromParentBodyNode();
 
       dart::gui::osg::InteractiveFramePtr frame =
@@ -29,12 +29,12 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
 }
 
 class OneStepProgress : public osgGA::GUIEventHandler {
- public:
-  OneStepProgress(ValkyrieWorldNode* worldnode) : worldnode_(worldnode) {}
+public:
+  OneStepProgress(ValkyrieWorldNode *worldnode) : worldnode_(worldnode) {}
 
   /** Deprecated, Handle events, return true if handled, false otherwise. */
-  virtual bool handle(const osgGA::GUIEventAdapter& ea,
-                      osgGA::GUIActionAdapter& /*aa*/) {
+  virtual bool handle(const osgGA::GUIEventAdapter &ea,
+                      osgGA::GUIActionAdapter & /*aa*/) {
     if (ea.getEventType() == osgGA::GUIEventAdapter::KEYUP) {
       // custom buttons
       // World Node Buttons
@@ -84,12 +84,12 @@ class OneStepProgress : public osgGA::GUIEventHandler {
     }
     return false;
   }
-  ValkyrieWorldNode* worldnode_;
+  ValkyrieWorldNode *worldnode_;
 };
 
 void _setJointLimitConstraint(dart::dynamics::SkeletonPtr robot) {
   for (int i = 0; i < robot->getNumJoints(); ++i) {
-    dart::dynamics::Joint* joint = robot->getJoint(i);
+    dart::dynamics::Joint *joint = robot->getJoint(i);
     joint->setPositionLimitEnforced(true);
   }
 }
@@ -109,7 +109,7 @@ void _printRobotModel(dart::dynamics::SkeletonPtr robot) {
   //}
 
   for (int i = 0; i < robot->getNumDofs(); ++i) {
-    dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+    dart::dynamics::DegreeOfFreedom *dof = robot->getDof(i);
     std::cout << i << "th" << std::endl;
     std::cout << "dof name : " << dof->getName() << std::endl;
     // std::cout << "child body node name and mass : "
@@ -189,13 +189,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 
   q[leftShoulderPitch] = 0.2;
   q[leftShoulderRoll] = -1.1;
-  q[leftElbowPitch] = -0.4;  // TODO
+  q[leftElbowPitch] = -0.4; // TODO
   q[leftForearmYaw] = 1.5;
 
   robot->setPositions(q);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   double servo_rate;
   bool isRecord;
   bool b_show_joint_frame;
@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
     myUtils::readParameter(simulation_cfg, "is_record", isRecord);
     myUtils::readParameter(simulation_cfg, "show_joint_frame",
                            b_show_joint_frame);
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
@@ -240,7 +240,8 @@ int main(int argc, char** argv) {
   // =========================================================================
   // Display Joints Frame
   // =========================================================================
-  if (b_show_joint_frame) displayJointFrames(world, robot);
+  if (b_show_joint_frame)
+    displayJointFrames(world, robot);
 
   // =========================================================================
   // Initial configuration

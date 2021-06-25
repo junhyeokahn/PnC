@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 
-#include <Configuration.h>
+#include <Configuration.hpp>
 #include <Utils/IO/IOUtilities.hpp>
 
 class RobotSystem;
@@ -18,7 +18,7 @@ public:
   int prev_state;
 
   double curr_time;
-  double dt = 0.001;
+  double servo_rate = 0.001;
 
   Eigen::Vector3d dcm;
   Eigen::Vector3d prev_dcm;

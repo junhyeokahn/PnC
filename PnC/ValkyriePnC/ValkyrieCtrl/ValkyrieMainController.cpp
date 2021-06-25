@@ -1,7 +1,7 @@
 #include <PnC/ValkyriePnC/ValkyrieCtrl/ValkyrieMainController.hpp>
 
 ValkyrieMainController::ValkyrieMainController(
-    ValkyrieTaskAndForceContainer* _taf_container, RobotSystem* _robot) {
+    ValkyrieTaskAndForceContainer *_taf_container, RobotSystem *_robot) {
   myUtils::pretty_constructor(2, "Valkyrie Main Controller");
   // Initialize Flag
   b_first_visit_ = true;
@@ -16,7 +16,8 @@ ValkyrieMainController::ValkyrieMainController(
   // Initialize WBC
   std::vector<bool> act_list;
   act_list.resize(Valkyrie::n_dof, true);
-  for (int i(0); i < Valkyrie::n_vdof; ++i) act_list[i] = false;
+  for (int i(0); i < Valkyrie::n_vdof; ++i)
+    act_list[i] = false;
   wbc_ = new WBC(act_list);
 
   tau_cmd_ = Eigen::VectorXd::Zero(Valkyrie::n_adof);
@@ -69,7 +70,7 @@ void ValkyrieMainController::_PreProcessing_Command() {
   }
 }
 
-void ValkyrieMainController::getCommand(void* _cmd) {
+void ValkyrieMainController::getCommand(void *_cmd) {
   // Perform First time visit Initialization
   if (b_first_visit_) {
     firstVisit();
@@ -114,9 +115,9 @@ void ValkyrieMainController::getCommand(void* _cmd) {
 
   // Set Command
   for (int i(0); i < Valkyrie::n_adof; ++i) {
-    ((ValkyrieCommand*)_cmd)->jtrq[i] = tau_cmd_[i];
-    ((ValkyrieCommand*)_cmd)->q[i] = des_jpos_[i];
-    ((ValkyrieCommand*)_cmd)->qdot[i] = des_jvel_[i];
+    ((ValkyrieCommand *)_cmd)->jtrq[i] = tau_cmd_[i];
+    ((ValkyrieCommand *)_cmd)->q[i] = des_jpos_[i];
+    ((ValkyrieCommand *)_cmd)->qdot[i] = des_jvel_[i];
   }
 }
 
@@ -127,18 +128,18 @@ void ValkyrieMainController::firstVisit() {
                                       jpos_ini);
 }
 
-void ValkyrieMainController::ctrlInitialization(const YAML::Node& node) {
+void ValkyrieMainController::ctrlInitialization(const YAML::Node &node) {
   // WBC Defaults
   wbc_dt_ = ValkyrieAux::servo_rate;
-  w_contact_weight_ = 1e-3;        // Contact Weight
-  lambda_qddot_ = 1e-8;            // Generalized Coord Acceleration
-  lambda_Fr_ = 1e-8;               // Reaction Force Regularization
-  b_enable_torque_limits_ = true;  // Enable WBC torque limits
+  w_contact_weight_ = 1e-3;       // Contact Weight
+  lambda_qddot_ = 1e-8;           // Generalized Coord Acceleration
+  lambda_Fr_ = 1e-8;              // Reaction Force Regularization
+  b_enable_torque_limits_ = true; // Enable WBC torque limits
 
   // Joint Integrator Defaults
-  vel_freq_cutoff_ = 2.0;  // Hz
-  pos_freq_cutoff_ = 1.0;  // Hz
-  max_pos_error_ = 0.2;    // Radians
+  vel_freq_cutoff_ = 2.0; // Hz
+  pos_freq_cutoff_ = 1.0; // Hz
+  max_pos_error_ = 0.2;   // Radians
 
   // Load Custom Parmams ----------------------------------
   try {
@@ -153,7 +154,7 @@ void ValkyrieMainController::ctrlInitialization(const YAML::Node& node) {
     myUtils::readParameter(node, "velocity_freq_cutoff", vel_freq_cutoff_);
     myUtils::readParameter(node, "position_freq_cutoff", pos_freq_cutoff_);
     myUtils::readParameter(node, "max_position_error", max_pos_error_);
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
               << std::endl;
