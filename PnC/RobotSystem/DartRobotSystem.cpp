@@ -22,7 +22,7 @@ void DartRobotSystem::_config_robot() {
     dart::dynamics::JointPtr joint = skel_->getJoint(i);
     if (joint->getName() == "rootJoint") {
       n_floating = joint->getNumDofs();
-    } else if (joint->getName() == "WeldJoint") {
+    } else if (joint->getType() != "WeldJoint") {
       joint_id_[joint->getName()] = joint;
     } else {
     }

@@ -15,4 +15,5 @@ private:
   /* data */
   RobotSystem *robot_;
   Task *upper_body_task_;
+  std::vector<std::string> target_ids_;
 };

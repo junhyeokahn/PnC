@@ -1,4 +1,3 @@
-#include <Configuration.hpp>
 #include <PnC/AtlasPnC/AtlasControlArchitecture.hpp>
 #include <PnC/AtlasPnC/AtlasController.hpp>
 #include <PnC/AtlasPnC/AtlasStateMachine/ContactTransitionEnd.hpp>

@@ -45,6 +45,8 @@ protected:
 
   int waiting_count_;
 
+  void SetSafeCommand(AtlasSensorData *data, AtlasCommand *cmd);
+
 public:
   AtlasInterface();
   virtual ~AtlasInterface();

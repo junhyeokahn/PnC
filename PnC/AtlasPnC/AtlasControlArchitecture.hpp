@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Configuration.hpp>
 #include <PnC/AtlasPnC/AtlasController.hpp>
 #include <PnC/AtlasPnC/AtlasTCIContainer.hpp>
 #include <PnC/ControlArchitecture.hpp>

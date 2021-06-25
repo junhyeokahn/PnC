@@ -15,32 +15,15 @@ double smoothing(double ini, double fin, double rat) {
 }
 
 Eigen::MatrixXd hStack(const Eigen::MatrixXd &a, const Eigen::MatrixXd &b) {
-  if (a.rows() != b.rows()) {
-    std::cout << "[hStack] Matrix Size is Wrong" << std::endl;
-    assert(false);
-  }
-
+  assert(a.rows() == b.rows());
   Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows(), a.cols() + b.cols());
   ab << a, b;
   return ab;
 }
 
 Eigen::MatrixXd vStack(const Eigen::MatrixXd &a, const Eigen::MatrixXd &b) {
-  if (a.cols() != b.cols()) {
-    std::cout << "[vStack] Matrix Size is Wrong" << std::endl;
-    assert(false);
-  }
+  assert(a.cols() == b.cols());
   Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.rows() + b.rows(), a.cols());
-  ab << a, b;
-  return ab;
-}
-
-Eigen::MatrixXd vStack(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
-  if (a.size() != b.size()) {
-    std::cout << "[vStack] Vector Size is Wrong" << std::endl;
-    exit(0);
-  }
-  Eigen::MatrixXd ab = Eigen::MatrixXd::Zero(a.size(), 2);
   ab << a, b;
   return ab;
 }

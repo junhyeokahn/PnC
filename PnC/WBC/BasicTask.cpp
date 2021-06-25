@@ -118,9 +118,8 @@ void BasicTask::update_jacobian() {
     break;
   }
   case Type::SELECTED_JOINT: {
-    int id(0);
     for (int i = 0; i < target_ids.size(); ++i) {
-      jacobian(id, robot_->get_q_dot_idx(target_ids[i])) = 1.;
+      jacobian(i, robot_->get_q_dot_idx(target_ids[i])) = 1.;
     }
     jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
     break;

@@ -146,6 +146,10 @@ void IHWBC::solve(
     cost_vec = cost_t_vec;
   }
 
+  // myUtils::pretty_print(cost_mat, std::cout, "cost mat");
+  // myUtils::pretty_print(cost_mat, std::cout, "cost mat");
+  // exit(0);
+
   // ===========================================================================
   // Equality Constraint
   // ===========================================================================
@@ -155,6 +159,11 @@ void IHWBC::solve(
 
   if (b_contact_) {
     eq_floating_mat = myUtils::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+    // std::cout << (sf_ * A_) << std::endl;
+    // exit(0);
+    // std::cout << (-sf_ * (jc * ni).transpose()) << std::endl;
+    myUtils::pretty_print(jc, std::cout, "contact jacobian");
+    exit(0);
     if (b_internal_constraint_) {
       eq_int_mat =
           myUtils::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
@@ -177,6 +186,9 @@ void IHWBC::solve(
     eq_vec = eq_floating_vec;
   }
 
+  std::cout << eq_mat.row(0) << std::endl;
+  exit(0);
+
   // ===========================================================================
   // Equality Constraint
   // ===========================================================================
@@ -184,7 +196,7 @@ void IHWBC::solve(
   Eigen::MatrixXd ineq_mat;
   Eigen::VectorXd ineq_vec;
 
-  if (b_trq_limit) {
+  if (!b_trq_limit) {
     if (b_contact_) {
       ineq_mat = myUtils::hStack(
           Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_), -uf_mat);
@@ -237,9 +249,16 @@ void IHWBC::solve(
   qddot_result_ = Eigen::VectorXd::Zero(n_q_dot_);
   fr_result_ = Eigen::VectorXd::Zero(dim_contacts_);
 
-  setQuadProgCosts(cost_mat, cost_vec);         // Set Quadprog Costs
-  setEqualityConstraints(eq_mat, eq_vec);       // Create Equality Constraints
-  setInequalityConstraints(ineq_mat, ineq_vec); // Create Inequality Constraints
+  /*
+     min
+        0.5 * x G x + g0 x
+     s.t.
+        CE^T x + ce0 = 0
+        CI^T x + ci0 >= 0
+    */
+  setQuadProgCosts(cost_mat, cost_vec);
+  setEqualityConstraints(-eq_mat, eq_vec);
+  setInequalityConstraints(-ineq_mat, ineq_vec);
   solveQP();
 
   if (b_contact_) {
@@ -300,6 +319,7 @@ void IHWBC::solveQP() {
   fr_result_ = qp_dec_vars_.tail(dim_contacts_);
 
   // myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
-  // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
-  // myUtils::pretty_print(Fr_result_, std::cout, "Fr_result_");
+  myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
+  myUtils::pretty_print(fr_result_, std::cout, "Fr_result_");
+  exit(0);
 }

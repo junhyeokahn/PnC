@@ -4,6 +4,6 @@ show_joint_frame: false
 
 # Low-level Joint PD gains
 control_configuration:
-  kp: 4
-  kd: 4
+  kp: 0
+  kd: 0
 

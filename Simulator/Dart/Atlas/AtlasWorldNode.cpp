@@ -20,6 +20,9 @@ AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr &_world)
     if (joint->getNumDofs() == 1) {
       sensor_data_->joint_positions[joint->getName()] = 0.;
       sensor_data_->joint_velocities[joint->getName()] = 0.;
+      command_->joint_positions[joint->getName()] = 0.;
+      command_->joint_velocities[joint->getName()] = 0.;
+      command_->joint_torques[joint->getName()] = 0.;
     }
   }
 
@@ -38,13 +41,17 @@ void AtlasWorldNode::customPreStep() {
   t_ = (double)count_ * servo_rate_;
 
   // Fill Sensor Data
+  std::cout << "a" << std::endl;
   GetBaseData_(sensor_data_->base_com_pos, sensor_data_->base_com_quat,
                sensor_data_->base_com_lin_vel, sensor_data_->base_com_ang_vel,
                sensor_data_->base_joint_pos, sensor_data_->base_joint_quat,
                sensor_data_->base_joint_lin_vel,
                sensor_data_->base_joint_ang_vel);
+  std::cout << "b" << std::endl;
   GetJointData_(sensor_data_->joint_positions, sensor_data_->joint_velocities);
+  std::cout << "c" << std::endl;
   GetContactSwitchData_(sensor_data_->b_rf_contact, sensor_data_->b_lf_contact);
+  std::cout << "d" << std::endl;
 
   // Check for user button presses
   if (b_button_p) {
@@ -81,7 +88,12 @@ void AtlasWorldNode::customPreStep() {
     interface_->interrupt->b_interrupt_button_k = true;
   }
 
+  std::cout << "e" << std::endl;
   interface_->getCommand(sensor_data_, command_);
+  std::cout << "f" << std::endl;
+
+  Eigen::VectorXd trq_cmd = Eigen::VectorXd::Zero(robot_->getNumDofs());
+  trq_cmd.head(6).setZero();
 
   for (int i = 0; i < robot_->getNumJoints(); ++i) {
     dart::dynamics::Joint *joint = robot_->getJoint(i);
@@ -91,16 +103,19 @@ void AtlasWorldNode::customPreStep() {
                           sensor_data_->joint_positions[joint->getName()]) +
                    kd_ * (command_->joint_velocities[joint->getName()] -
                           sensor_data_->joint_velocities[joint->getName()]);
-      joint->setForce(0, frc);
-    } else {
-      joint->setForces(Eigen::VectorXd::Zero(joint->getNumDofs()));
+      trq_cmd[joint->getJointIndexInSkeleton()] = frc;
     }
   }
+  robot_->setForces(trq_cmd);
+  std::cout << trq_cmd << std::endl;
+  std::cout << "g" << std::endl;
+  exit(0);
 
   count_++;
 
   // reset flags
   resetButtonFlags();
+  std::cout << "h" << std::endl;
 }
 
 void AtlasWorldNode::GetContactSwitchData_(bool &rfoot_contact,

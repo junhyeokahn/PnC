@@ -4,7 +4,7 @@
 
 #include <PnC/AtlasPnC/AtlasControlArchitecture.hpp>
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
-//#include <PnC/AtlasPnC/AtlasLogicInterrupt/WalkingInterruptLogic.hpp>
+#include <PnC/AtlasPnC/AtlasInterruptLogic.hpp>
 #include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
 #include <PnC/RobotSystem/DartRobotSystem.hpp>
@@ -31,8 +31,8 @@ AtlasInterface::AtlasInterface() : Interface() {
   waiting_count_ = 2;
 
   control_architecture_ = new AtlasControlArchitecture(robot_);
-  // interrupt = new WalkingInterruptLogic(
-  // static_cast<ValkyrieControlArchitecture *>(control_architecture_));
+  interrupt = new AtlasInterruptLogic(
+      static_cast<AtlasControlArchitecture *>(control_architecture_));
 
   myUtils::color_print(myColor::BoldCyan, border);
 }
@@ -40,7 +40,7 @@ AtlasInterface::AtlasInterface() : Interface() {
 AtlasInterface::~AtlasInterface() {
   delete robot_;
   delete se_;
-  // delete interrupt;
+  delete interrupt;
   delete control_architecture_;
 }
 
@@ -48,17 +48,44 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
   AtlasCommand *cmd = ((AtlasCommand *)_command);
   AtlasSensorData *data = ((AtlasSensorData *)_data);
 
-  if (count_ <= waiting_count_) {
+  std::cout << "count_: " << count_ << std::endl;
+  // if (count_ <= waiting_count_) {
+  /*se_->initialize(data);*/
+  // SetSafeCommand(data, cmd);
+  //} else {
+  // std::cout << "1" << std::endl;
+  // se_->update(data);
+  // std::cout << "2" << std::endl;
+  // interrupt->processInterrupts();
+  // std::cout << "3" << std::endl;
+  // control_architecture_->getCommand(cmd);
+  // std::cout << "4" << std::endl;
+  /*}*/
+
+  if (count_ == 0) {
     se_->initialize(data);
-  } else {
-    se_->update(data);
-    // interrupt->processInterrupts();
-    control_architecture_->getCommand(cmd);
   }
+  std::cout << "1" << std::endl;
+  se_->update(data);
+  std::cout << "2" << std::endl;
+  interrupt->processInterrupts();
+  std::cout << "3" << std::endl;
+  control_architecture_->getCommand(cmd);
+  std::cout << "4" << std::endl;
 
   ++count_;
   running_time_ = (double)(count_)*sp_->servo_rate;
   sp_->curr_time = running_time_;
   sp_->prev_state = control_architecture_->prev_state;
   sp_->state = control_architecture_->state;
+}
+
+void AtlasInterface::SetSafeCommand(AtlasSensorData *data, AtlasCommand *cmd) {
+  for (std::map<std::string, double>::iterator it =
+           data->joint_positions.begin();
+       it != data->joint_positions.end(); it++) {
+    cmd->joint_positions[it->first] = data->joint_positions[it->first];
+    cmd->joint_velocities[it->first] = 0.;
+    cmd->joint_torques[it->first] = 0.;
+  }
 }

@@ -13,7 +13,6 @@ namespace myUtils {
 // =============================================================================
 Eigen::MatrixXd hStack(const Eigen::MatrixXd &a_, const Eigen::MatrixXd &b_);
 Eigen::MatrixXd vStack(const Eigen::MatrixXd &a_, const Eigen::MatrixXd &b_);
-Eigen::MatrixXd vStack(const Eigen::VectorXd &a_, const Eigen::VectorXd &b_);
 Eigen::MatrixXd block_diag(const Eigen::MatrixXd &a, const Eigen::MatrixXd &b);
 Eigen::MatrixXd deleteRow(const Eigen::MatrixXd &a_, int row);
 

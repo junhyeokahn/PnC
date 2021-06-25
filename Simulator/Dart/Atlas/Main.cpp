@@ -73,7 +73,7 @@ public:
       }
 
       if (ea.getKey() == 'f') {
-        int numStepProgress(50);
+        int numStepProgress(1);
         for (int i = 0; i < numStepProgress; ++i) {
           worldnode_->customPreStep();
           worldnode_->getWorld()->step();

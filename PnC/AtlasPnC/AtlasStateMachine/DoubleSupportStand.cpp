@@ -19,7 +19,7 @@ void DoubleSupportStand::firstVisit() {
 
   // Initialize CoM Trajectory
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_sole");
-  Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("l_sole");
+  Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_sole");
   Eigen::Vector3d target_com_pos =
       (lfoot_iso.translation() + rfoot_iso.translation()) / 2.;
   target_com_pos[2] = com_height_des;
