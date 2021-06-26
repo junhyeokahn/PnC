@@ -56,6 +56,7 @@ A1Interface::A1Interface() : EnvInterface() {
 A1Interface::~A1Interface() {
   delete robot_;
   delete interrupt;
+  delete state_estimator_;
   // delete test_;
 }
 
@@ -63,8 +64,11 @@ void A1Interface::getCommand(void* _data, void* _command) {
   A1Command* cmd = ((A1Command*)_command);
   A1SensorData* data = ((A1SensorData*)_data);
 
+  std::cout << "Hello" << std::endl;
+
   if (!(_Initialization(data, cmd))) {
     state_estimator_->Update(data);
+    std::cout << "Hello" << std::endl;
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
   }

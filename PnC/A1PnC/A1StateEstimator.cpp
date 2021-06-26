@@ -118,6 +118,10 @@ void A1StateEstimator::MapToTorso_(const Eigen::VectorXd& imu_acc,
 }
 
 void A1StateEstimator::Update(A1SensorData* data) {
+  sp_->imu_ang_vel = data->imu_ang_vel;
+  sp_->imu_acc = data->imu_acc;
+  myUtils::pretty_print(sp_->imu_ang_vel, std::cout, "imu_ang_vel");
+  myUtils::pretty_print(sp_->imu_acc, std::cout, "imu_acc");
   _JointUpdate(data);
   _ConfigurationAndModelUpdate();
   _FootContactUpdate(data);
@@ -199,15 +203,38 @@ void A1StateEstimator::_ConfigurationAndModelUpdate() {
     }
     Eigen::Vector3d front_stance_difference = new_front_stance_foot - old_front_stance_foot;
     Eigen::Vector3d rear_stance_difference = new_rear_stance_foot - old_rear_stance_foot;
+
+    // new and old estimates must match, so find the actual offset
+    Eigen::Vector3d old_estimate = global_linear_offset_ - old_front_stance_foot;
+    Eigen::Vector3d new_estimate =
+            (global_linear_offset_ + front_stance_difference) - new_front_stance_foot;
+
+    Eigen::Vector3d estimate_diff = new_estimate - old_estimate;
+    Eigen::Vector3d offset_update =
+            global_linear_offset_ + front_stance_difference + estimate_diff;
+
+    global_linear_offset_ = offset_update;
+    front_foot_pos = new_front_stance_foot;
   }
-//TODO
-    /*// new and old estimates must match, so find the actual offset 
-    Eigen::Vector3d old_estimate = global_linear_offset_ - old_stance_foot;
+
+  // Perform Base update using kinematics
+    // pushing the base upwards to put our contact feet on the ground
+    // i.e contact foot position is on the ground
+  curr_config_[0] = global_linear_offset_[0] - front_foot_pos[0];
+  curr_config_[1] = global_linear_offset_[1] - front_foot_pos[1];
+  curr_config_[2] = global_linear_offset_[2] - front_foot_pos[2];
+
+  // Update qdot using the difference between the curr_config_ now and previous
+  curr_qdot_.head(3) =
+    (curr_config_.head(3) - prev_config_.head(3)) / (A1Aux::servo_rate);
+
+  // Again call updateSystem to include linear and orientation
+  robot_->updateSystem(curr_config_, curr_qdot_, false);
 
   sp_->q = curr_config_;
   sp_->qdot = curr_qdot_;
-  sp_->com_pos = robot_->getCoMPosition();
-  sp_->com_vel = robot_->getCoMVelocity();*/
+  sp_->prev_front_stance_foot = sp_->front_stance_foot;
+  prev_config_ = curr_config_;
 }
 
 void A1StateEstimator::_FootContactUpdate(A1SensorData* data) {

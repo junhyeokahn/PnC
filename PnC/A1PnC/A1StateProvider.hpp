@@ -47,6 +47,9 @@ class A1StateProvider {
   Eigen::Quaternion<double> base_quat;
   Eigen::Vector3d base_ang_vel;
 
+  Eigen::Vector3d imu_ang_vel;
+  Eigen::Vector3d imu_acc;
+
   int b_frfoot_contact;
   int b_flfoot_contact;
   int b_rrfoot_contact;

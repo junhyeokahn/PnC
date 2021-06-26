@@ -4,6 +4,7 @@
 
 #include <PnC/WBC/WBIC.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <typeinfo>
 
 WBIC::WBIC(const std::vector<bool> & act_list, const std::vector<Task*> task_list_, const std::vector<ContactSpec*> contact_list_) {
     myUtils::pretty_constructor(3, "WBIC");
@@ -24,6 +25,7 @@ WBIC::WBIC(const std::vector<bool> & act_list, const std::vector<Task*> task_lis
 
     _eye = Eigen::MatrixXd::Identity(num_qdot_, num_qdot_);
     _eye_floating = Eigen::MatrixXd::Identity(num_passive_, num_passive_);
+
 }
 
 

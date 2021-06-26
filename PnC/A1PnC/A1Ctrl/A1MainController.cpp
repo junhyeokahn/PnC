@@ -10,11 +10,11 @@ A1MainController::A1MainController(
 
   // Initialize State Provider
   sp_ = A1StateProvider::getStateProvider(robot_);
-
   // Initialize WBIC
   std::vector<bool> act_list;
   act_list.resize(A1::n_dof, true);
   for (int i(0); i < A1::n_vdof; ++i) act_list[i] = false;
+
   wbic_ = new WBIC(act_list, task_list_, contact_list_);
   kin_wbc_ = new KinWBC(act_list);
   wbic_data_ = new WBIC_ExtraData();

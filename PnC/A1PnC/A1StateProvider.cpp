@@ -21,6 +21,9 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   prev_front_stance_foot = front_stance_foot;
   prev_rear_stance_foot = rear_stance_foot;
 
+  imu_ang_vel = Eigen::VectorXd::Zero(3);
+  imu_acc = Eigen::VectorXd::Zero(3);
+
   rotor_inertia = Eigen::VectorXd::Zero(12);
   q = Eigen::VectorXd::Zero(18);
   qdot = Eigen::VectorXd::Zero(18);
@@ -164,6 +167,8 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&base_ang_vel, VECT3, "base_ang_vel", 3);
   data_manager->RegisterData(&base_quat_des, QUATERNION, "base_quat_des", 4);
   data_manager->RegisterData(&base_ang_vel_des, VECT3, "base_ang_vel_des", 3);
+  data_manager->RegisterData(&imu_ang_vel, VECT3, "imu_ang_vel", 3);
+  data_manager->RegisterData(&imu_acc, VECT3, "imu_acc", 3);
 
   // ---------------------------------------------------------------------------
   // Joint
