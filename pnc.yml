@@ -1,0 +1,19 @@
+name: pnc
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pybind11=2.6.2
+  - python=3.9.5
+  - ruamel.yaml=0.17.10
+  - pip:
+      - certifi==2021.5.30
+      - conda-env-export==0.3.2
+      - imageio==2.9.0
+      - ipdb==0.13.9
+      - opencv-python==4.5.2.54
+      - pybullet==3.0.8
+      - scipy==1.7.0
+      - tqdm==4.61.1
+      - wheel==0.36.2
+prefix: /opt/anaconda3/envs/pnc
