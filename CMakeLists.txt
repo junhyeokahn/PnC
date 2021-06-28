@@ -20,6 +20,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib )
 set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin )
 set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
+set(PYTHON_BINDING TRUE)
 
 ##=============================================================================
 ## Dependancy
@@ -49,6 +50,14 @@ endif()
 find_package(Mosek)
 if(MOSEK_FOUND)
   include_directories(${MOSEK_INCLUDE_DIRS})
+endif()
+
+# Pybind11
+if(PYTHON_BINDING)
+  find_package(Python COMPONENTS Interpreter Development)
+  find_package(pybind11 CONFIG)
+  include_directories(${pybind11_INCLUDE_DIRS})
+  add_subdirectory(bindings)
 endif()
 
 ##=============================================================================
