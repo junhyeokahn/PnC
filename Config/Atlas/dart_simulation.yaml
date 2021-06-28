@@ -1,4 +1,4 @@
-servo_rate: 0.001 # !!this should be match with controller servo rate!!
+servo_rate: 0.002 # !!this should be match with controller servo rate!!
 is_record: false
 show_joint_frame: false
 

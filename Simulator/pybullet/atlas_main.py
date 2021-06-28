@@ -88,6 +88,7 @@ if __name__ == "__main__":
     set_initial_config(robot, joint_id)
 
     # Link Damping
+    p.changeDynamics(robot, -1, linearDamping=0., angularDamping=0.)
     pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
 
     # Joint Friction
@@ -137,11 +138,21 @@ if __name__ == "__main__":
 
         # Copy sensor_data_dict
         sensor_data.base_com_pos = sensor_data_dict["base_com_pos"]
-        sensor_data.base_com_quat = sensor_data_dict["base_com_quat"]
+        sensor_data.base_com_quat = np.array([
+            sensor_data_dict["base_com_quat"][3],
+            sensor_data_dict["base_com_quat"][0],
+            sensor_data_dict["base_com_quat"][1],
+            sensor_data_dict["base_com_quat"][2],
+        ])
         sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
         sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
         sensor_data.base_joint_pos = sensor_data_dict["base_joint_pos"]
-        sensor_data.base_joint_quat = sensor_data_dict["base_joint_quat"]
+        sensor_data.base_joint_quat = np.array([
+            sensor_data_dict["base_joint_quat"][3],
+            sensor_data_dict["base_joint_quat"][0],
+            sensor_data_dict["base_joint_quat"][1],
+            sensor_data_dict["base_joint_quat"][2],
+        ])
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
         sensor_data.joint_positions = sensor_data_dict["joint_pos"]
