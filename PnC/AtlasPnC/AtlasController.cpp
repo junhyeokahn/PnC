@@ -7,6 +7,8 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   tci_container_ = _tci_container;
   robot_ = _robot;
 
+  sp_ = AtlasStateProvider::getStateProvider(robot_);
+
   YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/Atlas/pnc.yaml");
 
   // Initialize WBC
@@ -103,10 +105,11 @@ void AtlasController::getCommand(void *cmd) {
   wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
               tci_container_->internal_constraint_list, rf_des, joint_trq_cmd,
               joint_acc_cmd, rf_cmd);
-  Eigen::VectorXd joint_vel_cmd, joint_pos_cmd;
-  joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
-                               robot_->joint_positions, joint_vel_cmd,
-                               joint_pos_cmd);
+  Eigen::VectorXd joint_vel_cmd = Eigen::VectorXd::Zero(robot_->n_a);
+  Eigen::VectorXd joint_pos_cmd = Eigen::VectorXd::Zero(robot_->n_a);
+  // joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
+  // robot_->joint_positions, joint_vel_cmd,
+  // joint_pos_cmd);
 
   ((AtlasCommand *)cmd)->joint_positions =
       robot_->create_cmd_map(joint_pos_cmd);
@@ -117,6 +120,6 @@ void AtlasController::getCommand(void *cmd) {
 
 void AtlasController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
-  joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
-                                      jpos_ini);
+  // joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
+  // jpos_ini);
 }
