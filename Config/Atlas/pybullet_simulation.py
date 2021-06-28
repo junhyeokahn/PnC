@@ -2,10 +2,10 @@ import numpy as np
 
 
 class Config(object):
-    CONTROLLER_DT = 0.01
-    N_SUBSTEP = 10
-    # CONTROLLER_DT = 0.002
-    # N_SUBSTEP = 1
+    # CONTROLLER_DT = 0.01
+    # N_SUBSTEP = 10
+    CONTROLLER_DT = 0.002
+    N_SUBSTEP = 1
     CAMERA_DT = 0.05
     KP = 0.
     KD = 0.

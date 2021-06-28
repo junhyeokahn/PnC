@@ -12,8 +12,11 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(atlas_interface, m) {
   py::module::import("interface");
+  py::module::import("atlas_interrupt_logic");
 
-  py::class_<AtlasInterface, Interface>(m, "AtlasInterface").def(py::init<>());
+  py::class_<AtlasInterface, Interface>(m, "AtlasInterface")
+      .def(py::init<>())
+      .def_readwrite("interrupt", &AtlasInterface::interrupt);
 
   py::class_<AtlasSensorData>(m, "AtlasSensorData")
       .def(py::init<>())

@@ -1,2 +1,5 @@
 pybind11_add_module(atlas_interface atlas_interface_pybind.cpp)
 target_link_libraries(atlas_interface PRIVATE AtlasPnC)
+
+pybind11_add_module(atlas_interrupt_logic atlas_interrupt_logic_pybind.cpp)
+target_link_libraries(atlas_interrupt_logic PRIVATE AtlasPnC)

@@ -121,20 +121,20 @@ if __name__ == "__main__":
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
-        if pybullet_util.is_key_triggered(keys, '8'):
-            interface.interrupt_logic.b_interrupt_button_eight = True
-        elif pybullet_util.is_key_triggered(keys, '5'):
-            interface.interrupt_logic.b_interrupt_button_five = True
-        elif pybullet_util.is_key_triggered(keys, '4'):
-            interface.interrupt_logic.b_interrupt_button_four = True
-        elif pybullet_util.is_key_triggered(keys, '2'):
-            interface.interrupt_logic.b_interrupt_button_two = True
-        elif pybullet_util.is_key_triggered(keys, '6'):
-            interface.interrupt_logic.b_interrupt_button_six = True
-        elif pybullet_util.is_key_triggered(keys, '7'):
-            interface.interrupt_logic.b_interrupt_button_seven = True
-        elif pybullet_util.is_key_triggered(keys, '9'):
-            interface.interrupt_logic.b_interrupt_button_nine = True
+        if pybullet_util.is_key_triggered(keys, 'w'):
+            interface.interrupt.b_interrupt_button_w = True
+        elif pybullet_util.is_key_triggered(keys, 'x'):
+            interface.interrupt.b_interrupt_button_x = True
+        elif pybullet_util.is_key_triggered(keys, 'a'):
+            interface.interrupt.b_interrupt_button_a = True
+        elif pybullet_util.is_key_triggered(keys, 's'):
+            interface.interrupt.b_interrupt_button_s = True
+        elif pybullet_util.is_key_triggered(keys, 'd'):
+            interface.interrupt.b_interrupt_button_d = True
+        elif pybullet_util.is_key_triggered(keys, 'q'):
+            interface.interrupt.b_interrupt_button_q = True
+        elif pybullet_util.is_key_triggered(keys, 'e'):
+            interface.interrupt.b_interrupt_button_e = True
 
         # Copy sensor_data_dict
         sensor_data.base_com_pos = sensor_data_dict["base_com_pos"]
