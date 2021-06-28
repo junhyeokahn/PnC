@@ -69,6 +69,7 @@ void DartRobotSystem::_config_robot() {
       std::cout << id << ": " << it->first << std::endl;
       id += 1;
     }
+
     std::cout << "Link Info: " << std::endl;
     id = 0;
     for (std::map<std::string, dart::dynamics::BodyNodePtr>::iterator it =
@@ -89,17 +90,7 @@ int DartRobotSystem::get_q_dot_idx(const std::string joint_name) {
 }
 
 int DartRobotSystem::get_joint_idx(const std::string joint_name) {
-  int id(0);
-  for (std::map<std::string, dart::dynamics::JointPtr>::iterator it =
-           joint_id_.begin();
-       it != joint_id_.end(); it++) {
-    if (it->first == joint_name) {
-      return id;
-    } else {
-      id += 1;
-    }
-  }
-  return -1;
+  return joint_id_[joint_name]->getIndexInSkeleton(0) - n_floating;
 }
 
 std::map<std::string, double>
@@ -146,20 +137,16 @@ void DartRobotSystem::update_system(
     // Fixed Base Robot
   }
 
-  int id(0);
   for (std::map<std::string, double>::const_iterator it = joint_pos.begin();
        it != joint_pos.end(); it++) {
     joint_id_.find(it->first)->second->setPosition(0, it->second);
-    joint_positions[id] = it->second;
-    id += 1;
+    joint_positions[this->get_joint_idx(it->first)] = it->second;
   }
 
-  id = 0;
   for (std::map<std::string, double>::const_iterator it = joint_vel.begin();
        it != joint_vel.end(); it++) {
     joint_id_.find(it->first)->second->setVelocity(0, it->second);
-    joint_velocities[id] = it->second;
-    id += 1;
+    joint_velocities[this->get_joint_idx(it->first)] = it->second;
   }
 
   skel_->computeForwardKinematics();

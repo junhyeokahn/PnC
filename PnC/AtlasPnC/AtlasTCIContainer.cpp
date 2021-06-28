@@ -81,7 +81,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   // Initialize Contact
   rfoot_contact = new SurfaceContact(robot_, "r_sole", 0.11, 0.065, 0.3);
   rfoot_contact->rf_z_max = 1e-3;
-  lfoot_contact = new SurfaceContact(robot_, "r_sole", 0.11, 0.065, 0.3);
+  lfoot_contact = new SurfaceContact(robot_, "l_sole", 0.11, 0.065, 0.3);
   lfoot_contact->rf_z_max = 1e-3;
 
   contact_list.push_back(rfoot_contact);

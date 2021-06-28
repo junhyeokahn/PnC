@@ -63,7 +63,7 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
   double rf_max;
   myUtils::readParameter(cfg["wbc"], "rf_z_max", rf_max);
   rfoot_fm = new ReactionForceManager(tci_container_->rfoot_contact, rf_max);
-  lfoot_fm = new ReactionForceManager(tci_container_->rfoot_contact, rf_max);
+  lfoot_fm = new ReactionForceManager(tci_container_->lfoot_contact, rf_max);
 
   // Initialize State Machine
   state_machines[AtlasStates::Stand] =

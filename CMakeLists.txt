@@ -29,7 +29,6 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
-## TODO : to be removed later
 # Dart
 find_package(DART 6.11 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
@@ -64,6 +63,7 @@ add_subdirectory(Simulator)
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
+add_subdirectory(test)
 
 ##=============================================================================
 ## Configuration File

@@ -11,151 +11,160 @@ File $Id: QuadProg++.cc 232 2007-06-21 12:29:00Z digasper $
 
  */
 
-#include <iostream>
+#include "QuadProg++.hh"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-#include "QuadProg++.hh"
 //#define TRACE_SOLVER
 
 // Utility functions for updating some data needed by the solution method
-void compute_d(GVect<double>& d, const GMatr<double>& J, const GVect<double>& np);
-void update_z(GVect<double>& z, const GMatr<double>& J, const GVect<double>& d, int iq);
-void update_r(const GMatr<double>& R, GVect<double>& r, const GVect<double>& d, int iq);
-bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& iq, double& rnorm);
-void delete_constraint(GMatr<double>& R, GMatr<double>& J, GVect<int>& A, GVect<double>& u, int n, int p, int& iq, int l);
+void compute_d(GVect<double> &d, const GMatr<double> &J,
+               const GVect<double> &np);
+void update_z(GVect<double> &z, const GMatr<double> &J, const GVect<double> &d,
+              int iq);
+void update_r(const GMatr<double> &R, GVect<double> &r, const GVect<double> &d,
+              int iq);
+bool add_constraint(GMatr<double> &R, GMatr<double> &J, GVect<double> &d,
+                    int &iq, double &rnorm);
+void delete_constraint(GMatr<double> &R, GMatr<double> &J, GVect<int> &A,
+                       GVect<double> &u, int n, int p, int &iq, int l);
 
 // Utility functions for computing the Cholesky decomposition and solving
 // linear systems
-void cholesky_decomposition(GMatr<double>& A);
-void cholesky_solve(const GMatr<double>& L, GVect<double>& x, const GVect<double>& b);
-void forward_elimination(const GMatr<double>& L, GVect<double>& y, const GVect<double>& b);
-void backward_elimination(const GMatr<double>& U, GVect<double>& x, const GVect<double>& y);
+void cholesky_decomposition(GMatr<double> &A);
+void cholesky_solve(const GMatr<double> &L, GVect<double> &x,
+                    const GVect<double> &b);
+void forward_elimination(const GMatr<double> &L, GVect<double> &y,
+                         const GVect<double> &b);
+void backward_elimination(const GMatr<double> &U, GVect<double> &x,
+                          const GVect<double> &y);
 
 // Utility functions for computing the scalar product and the euclidean
 // distance between two numbers
-double scalar_product(const GVect<double>& x, const GVect<double>& y);
+double scalar_product(const GVect<double> &x, const GVect<double> &y);
 double distance(double a, double b);
 
 // Utility functions for printing vectors and matrices
-void print_matrix(char* name, const GMatr<double>& A, int n = -1, int m = -1);
+void print_matrix(char *name, const GMatr<double> &A, int n = -1, int m = -1);
 
-template<typename T>
-void print_vector(char* name, const GVect<T>& v, int n = -1);
+template <typename T>
+void print_vector(char *name, const GVect<T> &v, int n = -1);
 
 // The Solving function, implementing the Goldfarb-Idnani method
 
-double solve_quadprog(Eigen::MatrixXd& _G, Eigen::VectorXd& _g0,
-                      const Eigen::MatrixXd& _CE, const Eigen::VectorXd& _ce0,
-                      const Eigen::MatrixXd& _CI, const Eigen::VectorXd& _ci0,
-                      Eigen::VectorXd& _x){
+double solve_quadprog(Eigen::MatrixXd &_G, Eigen::VectorXd &_g0,
+                      const Eigen::MatrixXd &_CE, const Eigen::VectorXd &_ce0,
+                      const Eigen::MatrixXd &_CI, const Eigen::VectorXd &_ci0,
+                      Eigen::VectorXd &_x) {
 
-    GMatr<double> G, CE, CI;
-    GVect<double> g0, ce0, ci0, x;
-    int n(_x.size());
-    int m(_ce0.size());
-    int p(_ci0.size());
+  GMatr<double> G, CE, CI;
+  GVect<double> g0, ce0, ci0, x;
+  int n(_x.size());
+  int m(_ce0.size());
+  int p(_ci0.size());
 
-    G.resize(n, n);
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            G[i][j] = _G(i, j);
-        }
+  G.resize(n, n);
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      G[i][j] = _G(i, j);
     }
+  }
 
-    g0.resize(n);
-    for (int i = 0; i < n; ++i) {
-        g0[i] = _g0[i];
+  g0.resize(n);
+  for (int i = 0; i < n; ++i) {
+    g0[i] = _g0[i];
+  }
+
+  CE.resize(n, m);
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < m; ++j) {
+      CE[i][j] = _CE(i, j);
     }
+  }
 
-    CE.resize(n, m);
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < m; ++j) {
-            CE[i][j] = _CE(i, j);
-        }
+  ce0.resize(m);
+  for (int i = 0; i < m; ++i) {
+    ce0[i] = _ce0[i];
+  }
+
+  CI.resize(n, p);
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < p; ++j) {
+      CI[i][j] = _CI(i, j);
     }
+  }
 
-    ce0.resize(m);
-    for (int i = 0; i < m; ++i) {
-        ce0[i] = _ce0[i];
-    }
+  ci0.resize(p);
+  for (int i = 0; i < p; ++i) {
+    ci0[i] = _ci0[i];
+  }
 
-    CI.resize(n, p);
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < p; ++j) {
-            CI[i][j] = _CI(i, j);
-        }
-    }
+  x.resize(n);
 
-    ci0.resize(p);
-    for (int i = 0; i < p; ++i) {
-        ci0[i] = _ci0[i];
-    }
+  double ret(solve_quadprog(G, g0, CE, ce0, CI, ci0, x));
+  for (int i = 0; i < n; ++i) {
+    _x[i] = x[i];
+  }
 
-    x.resize(n);
-
-    double ret(solve_quadprog(G, g0, CE, ce0, CI, ci0, x));
-    for (int i = 0; i < n; ++i) {
-        _x[i] = x[i];
-    }
-
-    return ret;
+  return ret;
 }
 
-double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
-                      const GMatr<double>& CE, const GVect<double>& ce0,
-                      const GMatr<double>& CI, const GVect<double>& ci0,
-                      GVect<double>& x)
-{
+double solve_quadprog(GMatr<double> &G, GVect<double> &g0,
+                      const GMatr<double> &CE, const GVect<double> &ce0,
+                      const GMatr<double> &CI, const GVect<double> &ci0,
+                      GVect<double> &x) {
   std::ostringstream msg;
   int n = G.ncols(), p = CE.ncols(), m = CI.ncols();
-  if (G.nrows() != n)
-  {
-    msg << "The matrix G is not a squared matrix (" << G.nrows() << " x " << G.ncols() << ")";
+  if (G.nrows() != n) {
+    msg << "The matrix G is not a squared matrix (" << G.nrows() << " x "
+        << G.ncols() << ")";
     throw std::logic_error(msg.str());
   }
-  if (CE.nrows() != n)
-  {
-    msg << "The matrix CE is incompatible (incorrect number of rows " << CE.nrows() << " , expecting " << n << ")";
+  if (CE.nrows() != n) {
+    msg << "The matrix CE is incompatible (incorrect number of rows "
+        << CE.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
-  if (ce0.size() != p)
-  {
-    msg << "The vector ce0 is incompatible (incorrect dimension " << ce0.size() << ", expecting " << p << ")";
+  if (ce0.size() != p) {
+    msg << "The vector ce0 is incompatible (incorrect dimension " << ce0.size()
+        << ", expecting " << p << ")";
     throw std::logic_error(msg.str());
   }
-  if (CI.nrows() != n)
-  {
-    msg << "The matrix CI is incompatible (incorrect number of rows " << CI.nrows() << " , expecting " << n << ")";
+  if (CI.nrows() != n) {
+    msg << "The matrix CI is incompatible (incorrect number of rows "
+        << CI.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
-  if (ci0.size() != m)
-  {
-    msg << "The vector ci0 is incompatible (incorrect dimension " << ci0.size() << ", expecting " << m << ")";
+  if (ci0.size() != m) {
+    msg << "The vector ci0 is incompatible (incorrect dimension " << ci0.size()
+        << ", expecting " << m << ")";
     throw std::logic_error(msg.str());
   }
   x.resize(n);
   register int i, j, k, l; /* indices */
   int ip; // this is the index of the constraint to be added to the active set
   GMatr<double> R(n, n), J(n, n);
-  GVect<double> s(m + p), z(n), r(m + p), d(n), np(n), u(m + p), x_old(n), u_old(m + p);
+  GVect<double> s(m + p), z(n), r(m + p), d(n), np(n), u(m + p), x_old(n),
+      u_old(m + p);
   double f_value, psi, c1, c2, sum, ss, R_norm;
   double inf;
   if (std::numeric_limits<double>::has_infinity)
     inf = std::numeric_limits<double>::infinity();
   else
     inf = 1.0E300;
-  double t, t1, t2; /* t is the step lenght, which is the minimum of the partial step length t1
-    * and the full step length t2 */
+  double t, t1, t2; /* t is the step lenght, which is the minimum of the partial
+                     * step length t1 and the full step length t2 */
   GVect<int> A(m + p), A_old(m + p), iai(m + p);
   int q, iq, iter = 0;
   GVect<bool> iaexcl(m + p);
 
   /* p is the number of equality constraints */
   /* m is the number of inequality constraints */
-  q = 0;  /* size of the active set A (containing the indices of the active constraints) */
+  q = 0; /* size of the active set A (containing the indices of the active
+            constraints) */
 #ifdef TRACE_SOLVER
   std::cout << std::endl << "Starting solve_quadprog" << std::endl;
   print_matrix("G", G);
@@ -172,8 +181,7 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
 
   /* compute the trace of the original matrix G */
   c1 = 0.0;
-  for (i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     c1 += G[i][i];
   }
   /* decompose the matrix G in the form L^T L */
@@ -182,18 +190,17 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
   print_matrix("G", G);
 #endif
   /* initialize the matrix R */
-  for (i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     d[i] = 0.0;
     for (j = 0; j < n; j++)
       R[i][j] = 0.0;
   }
   R_norm = 1.0; /* this variable will hold the norm of the matrix R */
 
-  /* compute the inverse of the factorized matrix G^-1, this is the initial value for H */
+  /* compute the inverse of the factorized matrix G^-1, this is the initial
+   * value for H */
   c2 = 0.0;
-  for (i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     d[i] = 1.0;
     forward_elimination(G, z, d);
     for (j = 0; j < n; j++)
@@ -208,7 +215,7 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
   /* c1 * c2 is an estimate for cond(G) */
 
   /*
-    * Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
+   * Find the unconstrained minimizer of the quadratic form 0.5 * x G x + g0 x
    * this is a feasible point in the dual space
    * x = G^-1 * g0
    */
@@ -224,8 +231,7 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
 
   /* Add equality constraints to the working set A */
   iq = 0;
-  for (i = 0; i < p; i++)
-  {
+  for (i = 0; i < p; i++) {
     for (j = 0; j < n; j++)
       np[j] = CE[j][i];
     compute_d(d, J, np);
@@ -238,10 +244,11 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
     print_vector("d", d);
 #endif
 
-    /* compute full step length t2: i.e., the minimum step in primal space s.t. the contraint
-      becomes feasible */
+    /* compute full step length t2: i.e., the minimum step in primal space s.t.
+      the contraint becomes feasible */
     t2 = 0.0;
-    if (fabs(scalar_product(z, z)) > std::numeric_limits<double>::epsilon()) // i.e. z != 0
+    if (fabs(scalar_product(z, z)) >
+        std::numeric_limits<double>::epsilon()) // i.e. z != 0
       t2 = (-scalar_product(np, x) - ce0[i]) / scalar_product(z, np);
 
     /* set x = x + t2 * z */
@@ -257,8 +264,7 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
     f_value += 0.5 * (t2 * t2) * scalar_product(z, np);
     A[i] = -i - 1;
 
-    if (!add_constraint(R, J, d, iq, R_norm))
-    {
+    if (!add_constraint(R, J, d, iq, R_norm)) {
       // Equality constraints are linearly dependent
       throw std::runtime_error("Constraints are linearly dependent");
       return f_value;
@@ -269,13 +275,13 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
   for (i = 0; i < m; i++)
     iai[i] = i;
 
-l1:	iter++;
+l1:
+  iter++;
 #ifdef TRACE_SOLVER
   print_vector("x", x);
 #endif
   /* step 1: choose a violated constraint */
-  for (i = p; i < iq; i++)
-  {
+  for (i = p; i < iq; i++) {
     ip = A[i];
     iai[ip] = -1;
   }
@@ -283,9 +289,8 @@ l1:	iter++;
   /* compute s[x] = ci^T * x + ci0 for all elements of K \ A */
   ss = 0.0;
   psi = 0.0; /* this value will contain the sum of all infeasibilities */
-  ip = 0; /* ip will be the index of the chosen violated constraint */
-  for (i = 0; i < m; i++)
-  {
+  ip = 0;    /* ip will be the index of the chosen violated constraint */
+  for (i = 0; i < m; i++) {
     iaexcl[i] = true;
     sum = 0.0;
     for (j = 0; j < n; j++)
@@ -298,9 +303,8 @@ l1:	iter++;
   print_vector("s", s, m);
 #endif
 
-
-  if (fabs(psi) <= m * std::numeric_limits<double>::epsilon() * c1 * c2* 100.0)
-  {
+  if (fabs(psi) <=
+      m * std::numeric_limits<double>::epsilon() * c1 * c2 * 100.0) {
     /* numerically there are not infeasibilities anymore */
     q = iq;
 
@@ -308,8 +312,7 @@ l1:	iter++;
   }
 
   /* save old values for u and A */
-  for (i = 0; i < iq; i++)
-  {
+  for (i = 0; i < iq; i++) {
     u_old[i] = u[i];
     A_old[i] = A[i];
   }
@@ -318,16 +321,13 @@ l1:	iter++;
     x_old[i] = x[i];
 
 l2: /* Step 2: check for feasibility and determine a new S-pair */
-    for (i = 0; i < m; i++)
-    {
-      if (s[i] < ss && iai[i] != -1 && iaexcl[i])
-      {
-        ss = s[i];
-        ip = i;
-      }
+  for (i = 0; i < m; i++) {
+    if (s[i] < ss && iai[i] != -1 && iaexcl[i]) {
+      ss = s[i];
+      ip = i;
     }
-  if (ss >= 0.0)
-  {
+  }
+  if (ss >= 0.0) {
     q = iq;
 
     return f_value;
@@ -346,11 +346,13 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
   print_vector("np", np);
 #endif
 
-l2a:/* Step 2a: determine step direction */
-    /* compute z = H np: the step direction in the primal space (through J, see the paper) */
-    compute_d(d, J, np);
+l2a: /* Step 2a: determine step direction */
+  /* compute z = H np: the step direction in the primal space (through J, see
+   * the paper) */
+  compute_d(d, J, np);
   update_z(z, J, d, iq);
-  /* compute N* np (if q > 0): the negative of the step direction in the dual space */
+  /* compute N* np (if q > 0): the negative of the step direction in the dual
+   * space */
   update_r(R, r, d, iq);
 #ifdef TRACE_SOLVER
   std::cout << "Step direction z" << std::endl;
@@ -363,49 +365,48 @@ l2a:/* Step 2a: determine step direction */
 
   /* Step 2b: compute step length */
   l = 0;
-  /* Compute t1: partial step length (maximum step in dual space without violating dual feasibility */
+  /* Compute t1: partial step length (maximum step in dual space without
+   * violating dual feasibility */
   t1 = inf; /* +inf */
   /* find the index l s.t. it reaches the minimum of u+[x] / r */
-  for (k = p; k < iq; k++)
-  {
-    if (r[k] > 0.0)
-    {
-      if (u[k] / r[k] < t1)
-	    {
-	      t1 = u[k] / r[k];
-	      l = A[k];
-	    }
+  for (k = p; k < iq; k++) {
+    if (r[k] > 0.0) {
+      if (u[k] / r[k] < t1) {
+        t1 = u[k] / r[k];
+        l = A[k];
+      }
     }
   }
-  /* Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible */
-  if (fabs(scalar_product(z, z))  > std::numeric_limits<double>::epsilon()) // i.e. z != 0
+  /* Compute t2: full step length (minimum step in primal space such that the
+   * constraint ip becomes feasible */
+  if (fabs(scalar_product(z, z)) >
+      std::numeric_limits<double>::epsilon()) // i.e. z != 0
   {
     t2 = -s[ip] / scalar_product(z, np);
-    if (t2 < 0) // patch suggested by Takano Akio for handling numerical inconsistencies
+    if (t2 < 0) // patch suggested by Takano Akio for handling numerical
+                // inconsistencies
       t2 = inf;
-  }
-  else
+  } else
     t2 = inf; /* +inf */
 
   /* the step is chosen as the minimum of t1 and t2 */
   t = std::min(t1, t2);
 #ifdef TRACE_SOLVER
-  std::cout << "Step sizes: " << t << " (t1 = " << t1 << ", t2 = " << t2 << ") ";
+  std::cout << "Step sizes: " << t << " (t1 = " << t1 << ", t2 = " << t2
+            << ") ";
 #endif
 
   /* Step 2c: determine new S-pair and take step: */
 
   /* case (i): no step in primal or dual space */
-  if (t >= inf)
-  {
+  if (t >= inf) {
     /* QPP is infeasible */
     // FIXME: unbounded to raise
     q = iq;
     return inf;
   }
   /* case (ii): step in dual space */
-  if (t2 >= inf)
-  {
+  if (t2 >= inf) {
     /* set u = u +  t * [-r 1] and drop constraint l from the active set A */
     for (k = 0; k < iq; k++)
       u[k] -= t * r[k];
@@ -413,8 +414,7 @@ l2a:/* Step 2a: determine step direction */
     iai[l] = l;
     delete_constraint(R, J, A, u, n, p, iq, l);
 #ifdef TRACE_SOLVER
-    std::cout << " in dual space: "
-      << f_value << std::endl;
+    std::cout << " in dual space: " << f_value << std::endl;
     print_vector("x", x);
     print_vector("z", z);
     print_vector("A", A, iq + 1);
@@ -434,49 +434,44 @@ l2a:/* Step 2a: determine step direction */
     u[k] -= t * r[k];
   u[iq] += t;
 #ifdef TRACE_SOLVER
-  std::cout << " in both spaces: "
-    << f_value << std::endl;
+  std::cout << " in both spaces: " << f_value << std::endl;
   print_vector("x", x);
   print_vector("u", u, iq + 1);
   print_vector("r", r, iq + 1);
   print_vector("A", A, iq + 1);
 #endif
 
-  if (fabs(t - t2) < std::numeric_limits<double>::epsilon())
-  {
+  if (fabs(t - t2) < std::numeric_limits<double>::epsilon()) {
 #ifdef TRACE_SOLVER
     std::cout << "Full step has taken " << t << std::endl;
     print_vector("x", x);
 #endif
     /* full step has taken */
     /* add constraint ip to the active set*/
-    if (!add_constraint(R, J, d, iq, R_norm))
-    {
+    if (!add_constraint(R, J, d, iq, R_norm)) {
       iaexcl[ip] = false;
       delete_constraint(R, J, A, u, n, p, iq, ip);
 #ifdef TRACE_SOLVER
       print_matrix("R", R);
       print_vector("A", A, iq);
-			print_vector("iai", iai);
+      print_vector("iai", iai);
 #endif
       for (i = 0; i < m; i++)
         iai[i] = i;
-      for (i = p; i < iq; i++)
-	    {
-	      A[i] = A_old[i];
-	      u[i] = u_old[i];
-				iai[A[i]] = -1;
-	    }
+      for (i = p; i < iq; i++) {
+        A[i] = A_old[i];
+        u[i] = u_old[i];
+        iai[A[i]] = -1;
+      }
       for (i = 0; i < n; i++)
         x[i] = x_old[i];
       goto l2; /* go to step 2 */
-    }
-    else
+    } else
       iai[ip] = -1;
 #ifdef TRACE_SOLVER
     print_matrix("R", R);
     print_vector("A", A, iq);
-		print_vector("iai", iai);
+    print_vector("iai", iai);
 #endif
     goto l1;
   }
@@ -506,14 +501,13 @@ l2a:/* Step 2a: determine step direction */
   goto l2a;
 }
 
-inline void compute_d(GVect<double>& d, const GMatr<double>& J, const GVect<double>& np)
-{
+inline void compute_d(GVect<double> &d, const GMatr<double> &J,
+                      const GVect<double> &np) {
   register int i, j, n = d.size();
   register double sum;
 
   /* compute d = H^T * np */
-  for (i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     sum = 0.0;
     for (j = 0; j < n; j++)
       sum += J[j][i] * np[j];
@@ -521,27 +515,25 @@ inline void compute_d(GVect<double>& d, const GMatr<double>& J, const GVect<doub
   }
 }
 
-inline void update_z(GVect<double>& z, const GMatr<double>& J, const GVect<double>& d, int iq)
-{
+inline void update_z(GVect<double> &z, const GMatr<double> &J,
+                     const GVect<double> &d, int iq) {
   register int i, j, n = z.size();
 
   /* setting of z = H * d */
-  for (i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     z[i] = 0.0;
     for (j = iq; j < n; j++)
       z[i] += J[i][j] * d[j];
   }
 }
 
-inline void update_r(const GMatr<double>& R, GVect<double>& r, const GVect<double>& d, int iq)
-{
+inline void update_r(const GMatr<double> &R, GVect<double> &r,
+                     const GVect<double> &d, int iq) {
   register int i, j, n = d.size();
   register double sum;
 
   /* setting of r = R^-1 d */
-  for (i = iq - 1; i >= 0; i--)
-  {
+  for (i = iq - 1; i >= 0; i--) {
     sum = 0.0;
     for (j = i + 1; j < iq; j++)
       sum += R[i][j] * r[j];
@@ -549,8 +541,8 @@ inline void update_r(const GMatr<double>& R, GVect<double>& r, const GVect<doubl
   }
 }
 
-bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& iq, double& R_norm)
-{
+bool add_constraint(GMatr<double> &R, GMatr<double> &J, GVect<double> &d,
+                    int &iq, double &R_norm) {
   int n = d.size();
 #ifdef TRACE_SOLVER
   std::cout << "Add constraint " << iq << '/';
@@ -562,8 +554,7 @@ bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& i
     d[j] to zero.
     if it is already zero we don't have to do anything, except of
     decreasing j */
-  for (j = n - 1; j >= iq + 1; j--)
-  {
+  for (j = n - 1; j >= iq + 1; j--) {
     /* The Givens rotation is done with the matrix (cc cs, cs -cc).
     If cc is one, then element (j) of d is zero compared with element
     (j - 1). Hence we don't have to do anything.
@@ -580,17 +571,14 @@ bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& i
     d[j] = 0.0;
     ss = ss / h;
     cc = cc / h;
-    if (cc < 0.0)
-    {
+    if (cc < 0.0) {
       cc = -cc;
       ss = -ss;
       d[j - 1] = -h;
-    }
-    else
+    } else
       d[j - 1] = h;
     xny = ss / (1.0 + cc);
-    for (k = 0; k < n; k++)
-    {
+    for (k = 0; k < n; k++) {
       t1 = J[k][j - 1];
       t2 = J[k][j];
       J[k][j - 1] = t1 * cc + t2 * ss;
@@ -611,8 +599,7 @@ bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& i
   print_vector("d", d, iq);
 #endif
 
-  if (fabs(d[iq - 1]) <= std::numeric_limits<double>::epsilon() * R_norm)
-  {
+  if (fabs(d[iq - 1]) <= std::numeric_limits<double>::epsilon() * R_norm) {
     // problem degenerate
     return false;
   }
@@ -620,30 +607,29 @@ bool add_constraint(GMatr<double>& R, GMatr<double>& J, GVect<double>& d, int& i
   return true;
 }
 
-void delete_constraint(GMatr<double>& R, GMatr<double>& J, GVect<int>& A, GVect<double>& u, int n, int p, int& iq, int l)
-{
+void delete_constraint(GMatr<double> &R, GMatr<double> &J, GVect<int> &A,
+                       GVect<double> &u, int n, int p, int &iq, int l) {
 #ifdef TRACE_SOLVER
   std::cout << "Delete constraint " << l << ' ' << iq;
 #endif
-  register int i, j, k, qq = -1; // just to prevent warnings from smart compilers
+  register int i, j, k,
+      qq = -1; // just to prevent warnings from smart compilers
   double cc, ss, h, xny, t1, t2;
 
   /* Find the index qq for active constraint l to be removed */
   for (i = p; i < iq; i++)
-    if (A[i] == l)
-    {
+    if (A[i] == l) {
       qq = i;
       break;
     }
 
   /* remove the constraint from the active set and the duals */
-  for (i = qq; i < iq - 1; i++)
-    {
-      A[i] = A[i + 1];
-      u[i] = u[i + 1];
-      for (j = 0; j < n; j++)
-        R[j][i] = R[j][i + 1];
-    }
+  for (i = qq; i < iq - 1; i++) {
+    A[i] = A[i + 1];
+    u[i] = u[i + 1];
+    for (j = 0; j < n; j++)
+      R[j][i] = R[j][i + 1];
+  }
 
   A[iq - 1] = A[iq];
   u[iq - 1] = u[iq];
@@ -660,8 +646,7 @@ void delete_constraint(GMatr<double>& R, GMatr<double>& J, GVect<int>& A, GVect<
   if (iq == 0)
     return;
 
-  for (j = qq; j < iq; j++)
-  {
+  for (j = qq; j < iq; j++) {
     cc = R[j][j];
     ss = R[j + 1][j];
     h = distance(cc, ss);
@@ -670,25 +655,21 @@ void delete_constraint(GMatr<double>& R, GMatr<double>& J, GVect<int>& A, GVect<
     cc = cc / h;
     ss = ss / h;
     R[j + 1][j] = 0.0;
-    if (cc < 0.0)
-    {
+    if (cc < 0.0) {
       R[j][j] = -h;
       cc = -cc;
       ss = -ss;
-    }
-    else
+    } else
       R[j][j] = h;
 
     xny = ss / (1.0 + cc);
-    for (k = j + 1; k < iq; k++)
-    {
+    for (k = j + 1; k < iq; k++) {
       t1 = R[j][k];
       t2 = R[j + 1][k];
       R[j][k] = t1 * cc + t2 * ss;
       R[j + 1][k] = xny * (t1 + R[j][k]) - t2;
     }
-    for (k = 0; k < n; k++)
-    {
+    for (k = 0; k < n; k++) {
       t1 = J[k][j];
       t2 = J[k][j + 1];
       J[k][j] = t1 * cc + t2 * ss;
@@ -697,28 +678,21 @@ void delete_constraint(GMatr<double>& R, GMatr<double>& J, GVect<int>& A, GVect<
   }
 }
 
-inline double distance(double a, double b)
-{
+inline double distance(double a, double b) {
   register double a1, b1, t;
   a1 = fabs(a);
   b1 = fabs(b);
-  if (a1 > b1)
-  {
+  if (a1 > b1) {
     t = (b1 / a1);
     return a1 * sqrt(1.0 + t * t);
+  } else if (b1 > a1) {
+    t = (a1 / b1);
+    return b1 * sqrt(1.0 + t * t);
   }
-  else
-    if (b1 > a1)
-    {
-      t = (a1 / b1);
-      return b1 * sqrt(1.0 + t * t);
-    }
   return a1 * sqrt(2.0);
 }
 
-
-inline double scalar_product(const GVect<double>& x, const GVect<double>& y)
-{
+inline double scalar_product(const GVect<double> &x, const GVect<double> &y) {
   register int i, n = x.size();
   register double sum;
 
@@ -728,22 +702,17 @@ inline double scalar_product(const GVect<double>& x, const GVect<double>& y)
   return sum;
 }
 
-void cholesky_decomposition(GMatr<double>& A)
-{
+void cholesky_decomposition(GMatr<double> &A) {
   register int i, j, k, n = A.nrows();
   register double sum;
 
-  for (i = 0; i < n; i++)
-  {
-    for (j = i; j < n; j++)
-    {
+  for (i = 0; i < n; i++) {
+    for (j = i; j < n; j++) {
       sum = A[i][j];
       for (k = i - 1; k >= 0; k--)
-        sum -= A[i][k]*A[j][k];
-      if (i == j)
-	    {
-	      if (sum <= 0.0)
-        {
+        sum -= A[i][k] * A[j][k];
+      if (i == j) {
+        if (sum <= 0.0) {
           std::ostringstream os;
           // raise error
           print_matrix("A", A);
@@ -751,9 +720,8 @@ void cholesky_decomposition(GMatr<double>& A)
           throw std::logic_error(os.str());
           exit(-1);
         }
-	      A[i][i] = sqrt(sum);
-	    }
-      else
+        A[i][i] = sqrt(sum);
+      } else
         A[j][i] = sum / A[i][i];
     }
     for (k = i + 1; k < n; k++)
@@ -761,8 +729,8 @@ void cholesky_decomposition(GMatr<double>& A)
   }
 }
 
-void cholesky_solve(const GMatr<double>& L, GVect<double>& x, const GVect<double>& b)
-{
+void cholesky_solve(const GMatr<double> &L, GVect<double> &x,
+                    const GVect<double> &b) {
   int n = L.nrows();
   GVect<double> y(n);
 
@@ -772,13 +740,12 @@ void cholesky_solve(const GMatr<double>& L, GVect<double>& x, const GVect<double
   backward_elimination(L, x, y);
 }
 
-inline void forward_elimination(const GMatr<double>& L, GVect<double>& y, const GVect<double>& b)
-{
+inline void forward_elimination(const GMatr<double> &L, GVect<double> &y,
+                                const GVect<double> &b) {
   register int i, j, n = L.nrows();
 
   y[0] = b[0] / L[0][0];
-  for (i = 1; i < n; i++)
-  {
+  for (i = 1; i < n; i++) {
     y[i] = b[i];
     for (j = 0; j < i; j++)
       y[i] -= L[i][j] * y[j];
@@ -786,13 +753,12 @@ inline void forward_elimination(const GMatr<double>& L, GVect<double>& y, const 
   }
 }
 
-inline void backward_elimination(const GMatr<double>& U, GVect<double>& x, const GVect<double>& y)
-{
+inline void backward_elimination(const GMatr<double> &U, GVect<double> &x,
+                                 const GVect<double> &y) {
   register int i, j, n = U.nrows();
 
   x[n - 1] = y[n - 1] / U[n - 1][n - 1];
-  for (i = n - 2; i >= 0; i--)
-  {
+  for (i = n - 2; i >= 0; i--) {
     x[i] = y[i];
     for (j = i + 1; j < n; j++)
       x[i] -= U[i][j] * x[j];
@@ -800,8 +766,7 @@ inline void backward_elimination(const GMatr<double>& U, GVect<double>& x, const
   }
 }
 
-void print_matrix(char* name, const GMatr<double>& A, int n, int m)
-{
+void print_matrix(char *name, const GMatr<double> &A, int n, int m) {
   std::ostringstream s;
   std::string t;
   if (n == -1)
@@ -810,30 +775,27 @@ void print_matrix(char* name, const GMatr<double>& A, int n, int m)
     m = A.ncols();
 
   s << name << ": " << std::endl;
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     s << " ";
     for (int j = 0; j < m; j++)
       s << A[i][j] << ", ";
     s << std::endl;
   }
   t = s.str();
-  t = t.substr(0, t.size() - 3); // To remove the trailing space, comma and newline
+  t = t.substr(0,
+               t.size() - 3); // To remove the trailing space, comma and newline
 
   std::cout << t << std::endl;
 }
 
-template<typename T>
-void print_vector(char* name, const GVect<T>& v, int n)
-{
+template <typename T> void print_vector(char *name, const GVect<T> &v, int n) {
   std::ostringstream s;
   std::string t;
   if (n == -1)
     n = v.size();
 
   s << name << ": " << std::endl << " ";
-  for (int i = 0; i < n; i++)
-  {
+  for (int i = 0; i < n; i++) {
     s << v[i] << ", ";
   }
   t = s.str();

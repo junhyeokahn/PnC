@@ -48,30 +48,21 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
   AtlasCommand *cmd = ((AtlasCommand *)_command);
   AtlasSensorData *data = ((AtlasSensorData *)_data);
 
-  std::cout << "count_: " << count_ << std::endl;
   // if (count_ <= waiting_count_) {
   /*se_->initialize(data);*/
   // SetSafeCommand(data, cmd);
   //} else {
-  // std::cout << "1" << std::endl;
   // se_->update(data);
-  // std::cout << "2" << std::endl;
   // interrupt->processInterrupts();
-  // std::cout << "3" << std::endl;
   // control_architecture_->getCommand(cmd);
-  // std::cout << "4" << std::endl;
   /*}*/
 
   if (count_ == 0) {
     se_->initialize(data);
   }
-  std::cout << "1" << std::endl;
   se_->update(data);
-  std::cout << "2" << std::endl;
   interrupt->processInterrupts();
-  std::cout << "3" << std::endl;
   control_architecture_->getCommand(cmd);
-  std::cout << "4" << std::endl;
 
   ++count_;
   running_time_ = (double)(count_)*sp_->servo_rate;

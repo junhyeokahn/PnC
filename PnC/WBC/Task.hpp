@@ -4,6 +4,7 @@
 #include <string>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
+#include <Utils/IO/IOUtilities.hpp>
 #include <Utils/Math/PseudoInverse.hpp>
 
 /*
@@ -82,6 +83,14 @@ public:
    * Update jacobian and jacobian_dot_q_dot
    */
   virtual void update_jacobian() = 0;
+
+  void Debug() {
+    myUtils::pretty_print(pos_des_, std::cout, "pos des");
+    myUtils::pretty_print(pos_err, std::cout, "pos err");
+    myUtils::pretty_print(vel_des_, std::cout, "vel des");
+    myUtils::pretty_print(acc_des_, std::cout, "acc des");
+    myUtils::pretty_print(op_cmd, std::cout, "xddot");
+  }
 
 protected:
   RobotSystem *robot_;

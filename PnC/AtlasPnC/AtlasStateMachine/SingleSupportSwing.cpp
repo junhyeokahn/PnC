@@ -46,11 +46,9 @@ void SingleSupportSwing::oneStep() {
   if (leg_side_ == EndEffector::LFoot) {
     atlas_ctrl_arch_->lfoot_tm->updateSwingFootDesired(sp_->curr_time);
     atlas_ctrl_arch_->rfoot_tm->useCurrent();
-  } else if (leg_side_ == EndEffector::LFoot) {
+  } else {
     atlas_ctrl_arch_->rfoot_tm->updateSwingFootDesired(sp_->curr_time);
     atlas_ctrl_arch_->lfoot_tm->useCurrent();
-  } else {
-    assert(false);
   }
 
   // Update floating base task
@@ -81,6 +79,7 @@ bool SingleSupportSwing::endOfState() {
         }
       }
     }
+    return false;
   }
 }
 

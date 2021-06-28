@@ -223,7 +223,7 @@ void DCMTrajectoryManager::resetIndexAndClearFootsteps() {
 
 void DCMTrajectoryManager::walkInPlace() {
   resetIndexAndClearFootsteps();
-  populateStepInPlace(1, robot_side_first_);
+  populateStepInPlace(5, robot_side_first_);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkForward() {

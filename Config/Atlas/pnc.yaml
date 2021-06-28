@@ -49,7 +49,7 @@ walking:
 
     t_additional_ini_trans: 0.
     t_contact_trans: 0.45
-    t_swing: 0.05
+    t_swing: 0.75
     percentage_settle: 0.9
     alpha_ds: 0.5
 
