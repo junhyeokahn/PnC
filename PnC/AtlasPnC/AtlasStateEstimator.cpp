@@ -16,9 +16,15 @@ void AtlasStateEstimator::initialize(AtlasSensorData *data) {
 }
 
 void AtlasStateEstimator::update(AtlasSensorData *data) {
-  robot_->update_system(data->base_com_pos, data->base_com_quat,
+  Eigen::Quaternion<double> base_com_quat(
+      data->base_com_quat[0], data->base_com_quat[1], data->base_com_quat[2],
+      data->base_com_quat[3]);
+  Eigen::Quaternion<double> base_joint_quat(
+      data->base_joint_quat[0], data->base_joint_quat[1],
+      data->base_joint_quat[2], data->base_joint_quat[3]);
+  robot_->update_system(data->base_com_pos, base_com_quat,
                         data->base_com_lin_vel, data->base_com_ang_vel,
-                        data->base_joint_pos, data->base_joint_quat,
+                        data->base_joint_pos, base_joint_quat,
                         data->base_joint_lin_vel, data->base_joint_ang_vel,
                         data->joint_positions, data->joint_velocities, true);
 

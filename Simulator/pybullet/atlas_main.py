@@ -20,6 +20,7 @@ np.set_printoptions(precision=2)
 
 from Config.Atlas.pybullet_simulation import Config
 from utils import pybullet_util
+
 import atlas_interface
 
 
@@ -76,7 +77,8 @@ if __name__ == "__main__":
                        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
                        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
-    p.loadURDF(cwd + "/RobotModel/ground/plane.urdf", [0, 0, 0])
+    p.loadURDF(cwd + "/RobotModel/ground/plane.urdf", [0, 0, 0],
+               useFixedBase=1)
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(
         robot, Config.INITIAL_POS_WORLD_TO_BASEJOINT,
@@ -95,8 +97,6 @@ if __name__ == "__main__":
     interface = atlas_interface.AtlasInterface()
     sensor_data = atlas_interface.AtlasSensorData()
     command = atlas_interface.AtlasCommand()
-
-    __import__('ipdb').set_trace()
 
     # Run Sim
     t = 0
@@ -144,15 +144,13 @@ if __name__ == "__main__":
         sensor_data.base_joint_quat = sensor_data_dict["base_joint_quat"]
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
-        sensor_data.joint_positions = sensor_data_dict["joint_positions"]
-        sensor_data.joint_velocities = sensor_data_dict["joint_velocities"]
-
-        __import__('ipdb').set_trace()
+        sensor_data.joint_positions = sensor_data_dict["joint_pos"]
+        sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
 
         # Compute Command
         if Config.PRINT_TIME:
             start_time = time.time()
-        command = interface.get_command(copy.deepcopy(sensor_data_dict))
+        interface.getCommand(sensor_data, command)
 
         if Config.PRINT_TIME:
             end_time = time.time()

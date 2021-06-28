@@ -12,11 +12,11 @@ class AtlasCommand;
 class AtlasWorldNode : public dart::gui::osg::WorldNode {
 private:
   void GetBaseData_(Eigen::Vector3d &_base_com_pos,
-                    Eigen::Quaternion<double> &_base_com_quat,
+                    Eigen::Vector4d &_base_com_quat,
                     Eigen::Vector3d &_base_com_lin_vel,
                     Eigen::Vector3d &_base_com_ang_vel,
                     Eigen::Vector3d &_base_joint_pos,
-                    Eigen::Quaternion<double> &_base_joint_quat,
+                    Eigen::Vector4d &_base_joint_quat,
                     Eigen::Vector3d &_base_joint_lin_vel,
                     Eigen::Vector3d &_base_joint_ang_vel);
   void GetJointData_(std::map<std::string, double> &_joint_positions,

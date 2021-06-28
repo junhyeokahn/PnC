@@ -143,19 +143,22 @@ void AtlasWorldNode::SetParams_() {
 }
 
 void AtlasWorldNode::GetBaseData_(Eigen::Vector3d &_base_com_pos,
-                                  Eigen::Quaternion<double> &_base_com_quat,
+                                  Eigen::Vector4d &_base_com_quat,
                                   Eigen::Vector3d &_base_com_lin_vel,
                                   Eigen::Vector3d &_base_com_ang_vel,
                                   Eigen::Vector3d &_base_joint_pos,
-                                  Eigen::Quaternion<double> &_base_joint_quat,
+                                  Eigen::Vector4d &_base_joint_quat,
                                   Eigen::Vector3d &_base_joint_lin_vel,
                                   Eigen::Vector3d &_base_joint_ang_vel) {
 
   dart::dynamics::BodyNode *root_bn = robot_->getRootBodyNode();
 
   _base_com_pos = root_bn->getCOM();
-  _base_com_quat =
+  Eigen::Quaternion<double> base_com_quat =
       Eigen::Quaternion<double>(root_bn->getWorldTransform().linear());
+  _base_com_quat << base_com_quat.w(), base_com_quat.x(), base_com_quat.y(),
+      base_com_quat.z();
+
   _base_com_ang_vel =
       root_bn->getSpatialVelocity(root_bn->getLocalCOM()).head(3);
   _base_com_lin_vel =
