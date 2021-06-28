@@ -131,7 +131,7 @@ void AtlasWorldNode::GetContactSwitchData_(bool &rfoot_contact,
 void AtlasWorldNode::SetParams_() {
   try {
     YAML::Node simulation_cfg =
-        YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
+        YAML::LoadFile(THIS_COM "Config/Atlas/dart_simulation.yaml");
     myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
     myUtils::readParameter(simulation_cfg["control_configuration"], "kp", kp_);
     myUtils::readParameter(simulation_cfg["control_configuration"], "kd", kd_);

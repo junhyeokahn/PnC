@@ -23,12 +23,15 @@ set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 set(PYTHON_BINDING TRUE)
 
 ##=============================================================================
-## Dependancy
+## Include Directory
 ##=============================================================================
-
-# System
+include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
+
+##=============================================================================
+## Dependancy
+##=============================================================================
 
 # Dart
 find_package(DART 6.11 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
@@ -60,10 +63,6 @@ if(PYTHON_BINDING)
   add_subdirectory(bindings)
 endif()
 
-##=============================================================================
-## Include Directory
-##=============================================================================
-include_directories("${PROJECT_SOURCE_DIR}")
 
 ##=============================================================================
 ## Add Subdirectory

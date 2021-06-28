@@ -1,5 +1,3 @@
-#pragma once
-
 #include <pybind11/pybind11.h>
 
 #include <PnC/Interface.hpp>
@@ -12,14 +10,14 @@ class PyInterface : public Interface {
         void,       /* Return Type*/
         Interface,  /* Parent class*/
         getCommand, /* Name of function in c++ (must match python name) */
-        _sensor_data, _command_data /* arguement(s) */
+        _sensor_data, _command /* arguement(s) */
     );
   }
 };
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(Interface, m) {
+PYBIND11_MODULE(interface, m) {
   py::class_<Interface, PyInterface>(m, "Interface")
       .def(py::init<>())
       .def("getCommand", &Interface::getCommand);

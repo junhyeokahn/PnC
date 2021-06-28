@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
   bool b_show_joint_frame;
   try {
     YAML::Node simulation_cfg =
-        YAML::LoadFile(THIS_COM "Config/Atlas/SIMULATION.yaml");
+        YAML::LoadFile(THIS_COM "Config/Atlas/dart_simulation.yaml");
     myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate);
     myUtils::readParameter(simulation_cfg, "is_record", isRecord);
     myUtils::readParameter(simulation_cfg, "show_joint_frame",
