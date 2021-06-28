@@ -5,10 +5,11 @@
 
 class JointIntegrator {
 public:
-  JointIntegrator(const int num_joints_in, const double dt_in);
+  JointIntegrator(int num_joints_in, double dt_in);
 
   JointIntegrator(const int num_joints_in, const double vel_cutoff_in,
                   const double pos_cutoff_in, const double dt_in);
+  ~JointIntegrator();
 
   // Initialize internal starting velocity and position states
   void initializeStates(const Eigen::VectorXd init_vel,

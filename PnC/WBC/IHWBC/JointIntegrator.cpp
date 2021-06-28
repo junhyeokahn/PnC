@@ -1,10 +1,15 @@
 #include <PnC/WBC/IHWBC/JointIntegrator.hpp>
 
-JointIntegrator::JointIntegrator(const int num_joints_in, const double dt_in) {
+JointIntegrator::JointIntegrator(int num_joints_in, double dt_in) {
   myUtils::pretty_constructor(3, "WBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);
+  vel_min_ = Eigen::VectorXd::Zero(n_joints_);
+  vel_max_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_min_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_max_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_max_error_ = Eigen::VectorXd::Zero(n_joints_);
   setDt(dt_in);
   setDefaultSaturation();
   setVelocityFrequencyCutOff(default_vel_freq_cutoff_);
@@ -16,16 +21,24 @@ JointIntegrator::JointIntegrator(const int num_joints_in,
                                  const double vel_cutoff_in,
                                  const double pos_cutoff_in,
                                  const double dt_in) {
+  std::cout << "a" << std::endl;
   myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);
+  vel_min_ = Eigen::VectorXd::Zero(n_joints_);
+  vel_max_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_min_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_max_ = Eigen::VectorXd::Zero(n_joints_);
+  pos_max_error_ = Eigen::VectorXd::Zero(n_joints_);
   setDt(dt_in);
   setDefaultSaturation();
   setVelocityFrequencyCutOff(vel_cutoff_in);
   setPositionFrequencyCutOff(pos_cutoff_in);
   b_initialized = false;
 }
+
+JointIntegrator::~JointIntegrator() {}
 
 void JointIntegrator::integrate(const Eigen::VectorXd acc_in,
                                 const Eigen::VectorXd &vel_in,

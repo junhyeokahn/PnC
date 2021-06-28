@@ -1,9 +1,9 @@
 #include <PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp>
 
-int const DCMPlanner::DCM_RL_SWING_VRP_TYPE = 1;
-int const DCMPlanner::DCM_LL_SWING_VRP_TYPE = 2;
-int const DCMPlanner::DCM_TRANSFER_VRP_TYPE = 3;
-int const DCMPlanner::DCM_END_VRP_TYPE = 4;
+constexpr int DCMPlanner::DCM_RL_SWING_VRP_TYPE = 1;
+constexpr int DCMPlanner::DCM_LL_SWING_VRP_TYPE = 2;
+constexpr int DCMPlanner::DCM_TRANSFER_VRP_TYPE = 3;
+constexpr int DCMPlanner::DCM_END_VRP_TYPE = 4;
 
 DCMPlanner::DCMPlanner() {
   initial_leftfoot_stance.setLeftSide();
