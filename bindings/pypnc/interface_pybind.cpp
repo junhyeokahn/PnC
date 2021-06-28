@@ -6,7 +6,7 @@ class PyInterface : public Interface {
   using Interface::Interface;
 
   void getCommand(void *_sensor_data, void *_command) override {
-    PYBIND11_OVERRIDE_PURE(
+    PYBIND11_OVERLOAD_PURE(
         void,       /* Return Type*/
         Interface,  /* Parent class*/
         getCommand, /* Name of function in c++ (must match python name) */
