@@ -44,10 +44,10 @@ class A1StateEstimator {
   Eigen::VectorXd virtual_q_;
   Eigen::VectorXd virtual_qdot_;
 
-  BasicAccumulation* ori_est_;
-  filter* x_vel_est_;
-  filter* y_vel_est_;
-  filter* z_vel_est_;
+  // BasicAccumulation* ori_est_;
+  // filter* x_vel_est_;
+  // filter* y_vel_est_;
+  // filter* z_vel_est_;
 
   void _JointUpdate(A1SensorData* data);
   void _ConfigurationAndModelUpdate();
