@@ -132,6 +132,7 @@ public:
   void get_ref_dcm_vel(const double t, Eigen::Vector3d &dcm_vel_out);
   void get_ref_com(const double t, Eigen::Vector3d &com_out);
   void get_ref_com_vel(const double t, Eigen::Vector3d &com_vel_out);
+  void get_ref_com_acc(const double t, Eigen::Vector3d &com_acc_out);
   void get_ref_r_vrp(const double t, Eigen::Vector3d &r_vrvp_out);
   void get_ref_reaction_force(const double t, Eigen::Vector3d &f_out);
 
@@ -144,6 +145,9 @@ public:
   // state.
   void get_com_vel(const Eigen::Vector3d &com_pos, const Eigen::Vector3d &dcm,
                    Eigen::Vector3d &com_vel_out);
+  void get_com_acc(const Eigen::Vector3d &com_vel,
+                   const Eigen::Vector3d &dcm_vel,
+                   Eigen::Vector3d &com_acc_out);
   // computes the CoM reaction force / leg reaction force given mass, CoM
   // position and the r_vrp
   void get_reaction_force(const double mass, const Eigen::Vector3d &com_pos,
@@ -225,6 +229,7 @@ private:
   // containers for the integrated reference CoM position and velocites
   std::vector<Eigen::Vector3d> ref_com_pos;
   std::vector<Eigen::Vector3d> ref_com_vel;
+  std::vector<Eigen::Vector3d> ref_com_acc;
 
   // computes the reference pelvis orientation.
   void compute_reference_pelvis_ori();

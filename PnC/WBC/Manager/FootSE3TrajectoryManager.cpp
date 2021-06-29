@@ -112,14 +112,18 @@ void FootSE3TrajectoryManager::computeSwingFoot(const double current_time) {
     // scale back to 1.0
     s = 2.0 * s;
     foot_pos_des_ = pos_traj_init_to_mid_.evaluate(s);
-    foot_vel_des_ = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
-    foot_acc_des_ = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
+    foot_vel_des_ = pos_traj_init_to_mid_.evaluateFirstDerivative(s) /
+                    (swing_duration_ * 0.5);
+    foot_acc_des_ = pos_traj_init_to_mid_.evaluateSecondDerivative(s) /
+                    (swing_duration_ * 0.5);
   } else { // 0.5 <= s < 1.0 use the second trajectory
     // scale back to 1.0 after the offset
     s = 2.0 * (s - 0.5);
     foot_pos_des_ = pos_traj_mid_to_end_.evaluate(s);
-    foot_vel_des_ = pos_traj_mid_to_end_.evaluateFirstDerivative(s);
-    foot_acc_des_ = pos_traj_mid_to_end_.evaluateSecondDerivative(s);
+    foot_vel_des_ = pos_traj_mid_to_end_.evaluateFirstDerivative(s) /
+                    (swing_duration_ * 0.5);
+    foot_acc_des_ = pos_traj_mid_to_end_.evaluateSecondDerivative(s) /
+                    (swing_duration_ * 0.5);
   }
 
   // Get foot orientation and its derivatives
@@ -127,6 +131,8 @@ void FootSE3TrajectoryManager::computeSwingFoot(const double current_time) {
   quat_hermite_curve_.evaluate(s, foot_quat_des_);
   quat_hermite_curve_.getAngularVelocity(s, foot_ang_vel_des_);
   quat_hermite_curve_.getAngularAcceleration(s, foot_ang_acc_des_);
+  foot_ang_vel_des_ /= swing_duration_;
+  foot_ang_acc_des_ /= swing_duration_;
   convertQuatDesToOriDes();
 
   // myUtils::pretty_print(foot_pos_des_, std::cout, "foot_pos_des_");

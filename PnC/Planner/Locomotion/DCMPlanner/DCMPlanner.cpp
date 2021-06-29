@@ -818,6 +818,12 @@ void DCMPlanner::get_com_vel(const Eigen::Vector3d &com_pos,
   com_vel_out = (-1.0 / b) * (com_pos - dcm);
 }
 
+void DCMPlanner::get_com_acc(const Eigen::Vector3d &com_vel,
+                             const Eigen::Vector3d &dcm_vel,
+                             Eigen::Vector3d &com_acc_out) {
+  com_acc_out = (-1.0 / b) * (com_vel - dcm_vel);
+}
+
 void DCMPlanner::get_reaction_force(const double mass,
                                     const Eigen::Vector3d &com_pos,
                                     const Eigen::Vector3d &r_vrp,
@@ -853,21 +859,27 @@ void DCMPlanner::compute_reference_com() {
   // Resize reference vectors
   ref_com_pos.resize(N_local + 1);
   ref_com_vel.resize(N_local + 1);
+  ref_com_acc.resize(N_local + 1);
 
   // Initialize variables
   Eigen::Vector3d com_pos = rvrp_list[0];
   Eigen::Vector3d com_vel = Eigen::Vector3d::Zero();
+  Eigen::Vector3d com_acc = Eigen::Vector3d::Zero();
   Eigen::Vector3d dcm_cur = Eigen::Vector3d::Zero();
+  Eigen::Vector3d dcm_vel = Eigen::Vector3d::Zero();
 
   for (int i = 0; i < (N_local + 1); i++) {
     t_local = t_start + i * dt_local;
     get_ref_dcm(t_local, dcm_cur);
+    get_ref_dcm_vel(t_local, dcm_vel);
     get_com_vel(com_pos, dcm_cur, com_vel);
+    get_com_acc(com_vel, dcm_vel, com_acc);
     com_pos = com_pos + com_vel * dt_local;
 
     // Set reference CoM position and velocities
     ref_com_pos[i] = com_pos;
     ref_com_vel[i] = com_vel;
+    ref_com_acc[i] = com_acc;
   }
 }
 
@@ -891,6 +903,22 @@ void DCMPlanner::get_ref_com_vel(const double t, Eigen::Vector3d &com_vel_out) {
   double time = clampDOUBLE(t - t_start, 0.0, t_end);
   int index = int(time / dt_local);
   com_vel_out = ref_com_vel[index];
+}
+
+void DCMPlanner::get_ref_com_acc(const double t, Eigen::Vector3d &com_acc_out) {
+  // Eigen::Vector3d com_pos, dcm;
+  // get_ref_com(t, com_pos);
+  // get_ref_dcm(t, dcm);
+  // get_com_vel(com_pos, dcm, com_vel_out);
+  // Velocities are zero before time starts
+  if (t < t_start) {
+    com_acc_out.setZero();
+    return;
+  }
+
+  double time = clampDOUBLE(t - t_start, 0.0, t_end);
+  int index = int(time / dt_local);
+  com_acc_out = ref_com_acc[index];
 }
 
 void DCMPlanner::compute_reference_pelvis_ori() {
