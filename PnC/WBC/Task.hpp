@@ -15,8 +15,9 @@
  */
 class Task {
 public:
-  Task(RobotSystem *_robot, const int &_dim,
-       const std::vector<std::string> _target_ids) {
+  Task(
+      RobotSystem *_robot, const int &_dim,
+      const std::vector<std::string> _target_ids = std::vector<std::string>()) {
     robot_ = _robot;
     dim = _dim;
     target_ids = _target_ids;
@@ -33,7 +34,9 @@ public:
     pos_err = Eigen::VectorXd::Zero(dim);
 
     pos_des_ = Eigen::VectorXd::Zero(dim);
+    pos_ = Eigen::VectorXd::Zero(dim);
     vel_des_ = Eigen::VectorXd::Zero(dim);
+    vel_ = Eigen::VectorXd::Zero(dim);
     acc_des_ = Eigen::VectorXd::Zero(dim);
   };
   virtual ~Task(){};
@@ -96,6 +99,8 @@ protected:
   RobotSystem *robot_;
 
   Eigen::VectorXd pos_des_;
+  Eigen::VectorXd pos_;
   Eigen::VectorXd vel_des_;
+  Eigen::VectorXd vel_;
   Eigen::VectorXd acc_des_;
 };

@@ -24,7 +24,6 @@ protected:
 
   double ctrl_start_time_;
   int leg_side_;
-  int planning_id_;
 
   double end_time_;
 };

@@ -56,8 +56,8 @@ void ContactTransitionStart::firstVisit() {
           robot_->get_link_iso("pelvis").linear());
       atlas_ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,
                                            pelvis_quat, sp_->dcm, sp_->dcm_vel);
-      atlas_ctrl_arch_->dcm_tm->saveSolution(std::to_string(planning_id_));
-      planning_id_ += 1;
+      atlas_ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
+      sp_->planning_id += 1;
     }
   }
 }

@@ -57,7 +57,7 @@ void cleaningFile(std::string _file_name, std::string &_ret_file,
   if (b_param)
     _ret_file += THIS_COM;
   else
-    _ret_file += THIS_COM "ExperimentData/";
+    _ret_file += THIS_COM "experiment_data/";
 
   _ret_file += _file_name;
   _ret_file += ".txt";

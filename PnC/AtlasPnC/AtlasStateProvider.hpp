@@ -27,6 +27,8 @@ public:
   int b_rf_contact;
   int b_lf_contact;
 
+  int planning_id = 0;
+
 private:
   AtlasStateProvider(RobotSystem *_robot);
   RobotSystem *robot_;

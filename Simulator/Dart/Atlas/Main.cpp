@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
 
   if (isRecord) {
     std::cout << "[Video Record Enable]" << std::endl;
-    viewer.record(THIS_COM "/ExperimentVideo");
+    viewer.record(THIS_COM "/video");
   }
 
   // viewer.setUpViewInWindow(0, 0, 2880, 1800);

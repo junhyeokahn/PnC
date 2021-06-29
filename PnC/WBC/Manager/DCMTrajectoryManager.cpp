@@ -584,7 +584,7 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     cfg["reference"]["vrp"] = vrp_ref;
     cfg["reference"]["time"] = t_traj;
 
-    std::string full_path = THIS_COM + std::string("ExperimentData/") +
+    std::string full_path = THIS_COM + std::string("experiment_data/") +
                             file_name + std::string(".yaml");
     std::ofstream file_out(full_path);
     file_out << cfg;

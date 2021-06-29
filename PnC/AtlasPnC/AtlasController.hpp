@@ -23,5 +23,12 @@ private:
   AtlasTCIContainer *tci_container_;
   AtlasStateProvider *sp_;
 
+  Eigen::VectorXd joint_trq_cmd_;
+  Eigen::VectorXd joint_acc_cmd_;
+  Eigen::VectorXd r_rf_cmd_;
+  Eigen::VectorXd l_rf_cmd_;
+  Eigen::VectorXd joint_pos_cmd_;
+  Eigen::VectorXd joint_vel_cmd_;
+
   void FirstVisit();
 };

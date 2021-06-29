@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 
 #include <PnC/InterruptLogic.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 class ControlArchitecture;
 class RobotSystem;
@@ -18,6 +19,7 @@ public:
   Interface() {
     count_ = 0;
     running_time_ = 0.;
+    DataManager::GetDataManager()->RegisterData(&running_time_, DOUBLE, "time");
   }
   InterruptLogic *interrupt;
   virtual ~Interface(){};

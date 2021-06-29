@@ -1,6 +1,8 @@
+#include <PnC/AtlasPnC/AtlasControlArchitecture.hpp>
 #include <PnC/AtlasPnC/AtlasController.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
 #include <PnC/WBC/IHWBC/JointIntegrator.hpp>
+#include <Utils/IO/DataManager.hpp>
 
 AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
@@ -60,6 +62,19 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
                                        robot_->joint_vel_limit.col(1));
   joint_integrator_->setPositionBounds(robot_->joint_pos_limit.col(0),
                                        robot_->joint_pos_limit.col(1));
+
+  joint_trq_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  joint_vel_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  r_rf_cmd_ = Eigen::VectorXd::Zero(6);
+  l_rf_cmd_ = Eigen::VectorXd::Zero(6);
+
+  DataManager *data_manager = DataManager::GetDataManager();
+  data_manager->RegisterData(&joint_pos_cmd_, VECT, "cmd_jpos", robot_->n_a);
+  data_manager->RegisterData(&joint_vel_cmd_, VECT, "cmd_jvel", robot_->n_a);
+  data_manager->RegisterData(&joint_trq_cmd_, VECT, "cmd_jtrq", robot_->n_a);
+  data_manager->RegisterData(&r_rf_cmd_, VECT, "cmd_r_rf", 6);
+  data_manager->RegisterData(&l_rf_cmd_, VECT, "cmd_l_rf", 6);
 }
 
 AtlasController::~AtlasController() {
@@ -101,25 +116,35 @@ void AtlasController::getCommand(void *cmd) {
 
   // WBC commands
   Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
-  Eigen::VectorXd joint_trq_cmd, joint_acc_cmd, rf_cmd;
+  Eigen::VectorXd joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_a);
   wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
-              tci_container_->internal_constraint_list, rf_des, joint_trq_cmd,
-              joint_acc_cmd, rf_cmd);
-  Eigen::VectorXd joint_vel_cmd = Eigen::VectorXd::Zero(robot_->n_a);
-  Eigen::VectorXd joint_pos_cmd = Eigen::VectorXd::Zero(robot_->n_a);
-  // joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
-  // robot_->joint_positions, joint_vel_cmd,
-  // joint_pos_cmd);
+              tci_container_->internal_constraint_list, rf_des, joint_trq_cmd_,
+              joint_acc_cmd, rf_des);
+  if (sp_->state == AtlasStates::LFootSwing) {
+    l_rf_cmd_ = Eigen::VectorXd::Zero(6);
+    r_rf_cmd_ = rf_des;
+  } else if (sp_->state == AtlasStates::RFootSwing) {
+    r_rf_cmd_ = Eigen::VectorXd::Zero(6);
+    l_rf_cmd_ = rf_des;
+  } else {
+    // right foot first
+    r_rf_cmd_ = rf_des.head(6);
+    l_rf_cmd_ = rf_des.tail(6);
+  }
+
+  joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
+                               robot_->joint_positions, joint_vel_cmd_,
+                               joint_pos_cmd_);
 
   ((AtlasCommand *)cmd)->joint_positions =
-      robot_->create_cmd_map(joint_pos_cmd);
+      robot_->create_cmd_map(joint_pos_cmd_);
   ((AtlasCommand *)cmd)->joint_velocities =
-      robot_->create_cmd_map(joint_vel_cmd);
-  ((AtlasCommand *)cmd)->joint_torques = robot_->create_cmd_map(joint_trq_cmd);
+      robot_->create_cmd_map(joint_vel_cmd_);
+  ((AtlasCommand *)cmd)->joint_torques = robot_->create_cmd_map(joint_trq_cmd_);
 }
 
 void AtlasController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
-  // joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
-  // jpos_ini);
+  joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
+                                      jpos_ini);
 }

@@ -17,7 +17,6 @@ if(NOT EIGEN_FOUND)
 endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
-
 message ("")
 message ("-[ MAKE INFORMATION ]-----------------------------------------------------------")
 message (" The project name: ${PROJECT_NAME}")
@@ -43,7 +42,7 @@ DataProtocol.h
 
 set (sources
 DataSave.cpp
-Status_Display.cpp
+StatusDisplay.cpp
 ../../Utils/IO/Pthread.cpp
 ../../Utils/IO/CommUDP.cpp
 ../../Utils/IO/IOUtilities.cpp

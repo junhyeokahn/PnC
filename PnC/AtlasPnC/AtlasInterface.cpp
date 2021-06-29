@@ -48,17 +48,9 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
   AtlasCommand *cmd = ((AtlasCommand *)_command);
   AtlasSensorData *data = ((AtlasSensorData *)_data);
 
-  // if (count_ <= waiting_count_) {
-  /*se_->initialize(data);*/
-  // SetSafeCommand(data, cmd);
-  //} else {
-  // se_->update(data);
-  // interrupt->processInterrupts();
-  // control_architecture_->getCommand(cmd);
-  /*}*/
-
   if (count_ == 0) {
     se_->initialize(data);
+    DataManager::GetDataManager()->start();
   }
   se_->update(data);
   interrupt->processInterrupts();

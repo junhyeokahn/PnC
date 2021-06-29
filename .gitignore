@@ -32,9 +32,8 @@
 build
 tags
 .DS_Store
-ExperimentData
-ExperimentDataCheck
-ExperimentVideo
+experiment_data
+video
 Configuration.hpp
 drake_binary
 *_RESULTS.yaml
