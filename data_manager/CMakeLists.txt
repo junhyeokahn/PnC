@@ -11,7 +11,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug | Release | RelWithDebInfo | MinSizeRel" FORCE)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
 endif()
@@ -27,26 +27,25 @@ message (" The install destination: ${CMAKE_INSTALL_PREFIX}")
 message ("--------------------------------------------------------------------------------")
 message ("")
 
-include_directories ("${PROJECT_SOURCE_DIR}/../../Utils")
-include_directories ("${PROJECT_SOURCE_DIR}/../../ExternalSource")
-include_directories ("${PROJECT_SOURCE_DIR}/../../")
+include_directories ("${PROJECT_SOURCE_DIR}/../Utils")
+include_directories ("${PROJECT_SOURCE_DIR}/../")
 
 set (headers
 DataSave.h
 DataProtocol.h
-../../Utils/IO/Pthread.hpp
-../../Utils/IO/CommUDP.hpp
-../../Utils/IO/IOUtilities.hpp
-../../Utils/IO/DataManager.hpp
+../Utils/IO/Pthread.hpp
+../Utils/IO/CommUDP.hpp
+../Utils/IO/IOUtilities.hpp
+../Utils/IO/DataManager.hpp
 )
 
 set (sources
 DataSave.cpp
 StatusDisplay.cpp
-../../Utils/IO/Pthread.cpp
-../../Utils/IO/CommUDP.cpp
-../../Utils/IO/IOUtilities.cpp
-../../Utils/IO/DataManager.cpp
+../Utils/IO/Pthread.cpp
+../Utils/IO/CommUDP.cpp
+../Utils/IO/IOUtilities.cpp
+../Utils/IO/DataManager.cpp
 )
 
 add_executable(StatusDisplay ${sources} ${headers})

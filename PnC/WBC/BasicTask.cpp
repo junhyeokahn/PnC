@@ -42,7 +42,7 @@ SelectedJointTask::SelectedJointTask(RobotSystem *_robot,
   DataManager *data_manager = DataManager::GetDataManager();
   data_manager->RegisterData(&pos_des_, VECT, "sj_pos_d", dim);
   data_manager->RegisterData(&pos_, VECT, "sj_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, "sjvel_d", dim);
+  data_manager->RegisterData(&vel_des_, VECT, "sj_vel_d", dim);
   data_manager->RegisterData(&vel_, VECT, "sj_vel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, "sj_w");
 
@@ -75,9 +75,9 @@ LinkPosTask::LinkPosTask(RobotSystem *_robot,
   assert(dim == 3 * _target_ids.size());
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, _target_ids[0] + "_pos_des", dim);
+  data_manager->RegisterData(&pos_des_, VECT, _target_ids[0] + "_pos_d", dim);
   data_manager->RegisterData(&pos_, VECT, target_ids[0] + "_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, target_ids[0] + "_vel_des", dim);
+  data_manager->RegisterData(&vel_des_, VECT, target_ids[0] + "_vel_d", dim);
   data_manager->RegisterData(&vel_, VECT, target_ids[0] + "_vel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, target_ids[0] + "_pos_w");
 
