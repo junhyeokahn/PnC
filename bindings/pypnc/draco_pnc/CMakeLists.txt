@@ -1,0 +1,5 @@
+pybind11_add_module(draco_interface draco_interface_pybind.cpp)
+target_link_libraries(draco_interface PUBLIC pnc-draco-pnc)
+
+pybind11_add_module(draco_interrupt_logic draco_interrupt_logic_pybind.cpp)
+target_link_libraries(draco_interrupt_logic PUBLIC pnc-draco-pnc)

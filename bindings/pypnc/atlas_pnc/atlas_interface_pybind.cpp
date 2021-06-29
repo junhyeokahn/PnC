@@ -39,7 +39,9 @@ PYBIND11_MODULE(atlas_interface, m) {
       .def_readwrite("base_joint_lin_vel", &AtlasSensorData::base_joint_lin_vel)
       .def_readwrite("base_joint_ang_vel", &AtlasSensorData::base_joint_ang_vel)
       .def_readwrite("joint_positions", &AtlasSensorData::joint_positions)
-      .def_readwrite("joint_velocities", &AtlasSensorData::joint_velocities);
+      .def_readwrite("joint_velocities", &AtlasSensorData::joint_velocities)
+      .def_readwrite("b_rf_contact", &AtlasSensorData::b_rf_contact)
+      .def_readwrite("b_lf_contact", &AtlasSensorData::b_lf_contact);
 
   py::class_<AtlasCommand>(m, "AtlasCommand")
       .def(py::init<>())

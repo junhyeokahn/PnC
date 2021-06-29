@@ -3,7 +3,6 @@
 #include <PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp>
 #include <PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/ValkyriePnC/ValkyrieDefinition.hpp>
 #include <PnC/WBC/BasicTask.hpp>
 
 namespace DCM_TRANSFER_TYPES {

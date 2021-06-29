@@ -3,15 +3,13 @@
 #include <map>
 #include <string>
 
-#include <Configuration.hpp>
-#include <Utils/IO/IOUtilities.hpp>
+#include "Configuration.hpp"
+#include "Utils/IO/IOUtilities.hpp"
 
-class RobotSystem;
-
-class AtlasStateProvider {
+class DracoStateProvider {
 public:
-  static AtlasStateProvider *getStateProvider(RobotSystem *_robot);
-  ~AtlasStateProvider() {}
+  static DracoStateProvider *getStateProvider();
+  ~DracoStateProvider() {}
 
   std::map<std::string, double> nominal_joint_pos;
 
@@ -31,6 +29,5 @@ public:
   int planning_id = 0;
 
 private:
-  AtlasStateProvider(RobotSystem *_robot);
-  RobotSystem *robot_;
+  DracoStateProvider();
 };
