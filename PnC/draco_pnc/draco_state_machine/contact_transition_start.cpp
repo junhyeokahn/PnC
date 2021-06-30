@@ -53,7 +53,7 @@ void ContactTransitionStart::firstVisit() {
 
       // TODO : Replanning
       Eigen::Quaternion<double> torso_quat(
-          robot_->get_link_iso("torso").linear());
+          robot_->get_link_iso("torso_link").linear());
       ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type, torso_quat,
                                      sp_->dcm, sp_->dcm_vel);
       ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
