@@ -94,6 +94,10 @@ void IHWBC::solve(
     jit_lmd_jidot_qdot = Eigen::VectorXd::Zero(n_q_dot_);
     sa_ni_trc_bar_tr = Eigen::MatrixXd::Identity(n_active_, n_active_);
   }
+  // myUtils::pretty_print(ni, std::cout, "ni");
+  // myUtils::pretty_print(jit_lmd_jidot_qdot, std::cout, "jit_lmd_jidot_qdot");
+  // myUtils::pretty_print(sa_ni_trc_bar_tr, std::cout, "sa_ni_trc_bar_tr");
+  // exit(0);
 
   // ===========================================================================
   // Cost
@@ -108,6 +112,9 @@ void IHWBC::solve(
     Eigen::MatrixXd jt = task_list[i]->jacobian;
     Eigen::VectorXd jt_dot_q_dot = task_list[i]->jacobian_dot_q_dot;
     Eigen::VectorXd x_ddot = task_list[i]->op_cmd;
+
+    // std::cout << i << " th task" << std::endl;
+    // task_list[i]->Debug();
 
     cost_t_mat += (w_hierarchy[i] * (jt.transpose() * jt));
     cost_t_vec += (w_hierarchy[i] * ((jt_dot_q_dot - x_ddot).transpose() * jt));
@@ -262,6 +269,7 @@ void IHWBC::solve(
   // myUtils::pretty_print(tau_cmd, std::cout, "tau_cmd");
   // myUtils::pretty_print(rf_cmd, std::cout, "rf_cmd");
   // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result");
+  // exit(0);
 }
 
 void IHWBC::setQuadProgCosts(const Eigen::MatrixXd &P_cost,

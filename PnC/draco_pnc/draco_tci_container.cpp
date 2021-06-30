@@ -84,6 +84,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   contact_list.push_back(lfoot_contact);
 
   // Initialize Internal Constraint
+  rolling_joint_constraint = new DracoRollingJointConstraint(robot_);
+  internal_constraint_list.push_back(rolling_joint_constraint);
 }
 
 DracoTCIContainer::~DracoTCIContainer() {
@@ -98,4 +100,6 @@ DracoTCIContainer::~DracoTCIContainer() {
 
   delete rfoot_contact;
   delete lfoot_contact;
+
+  delete rolling_joint_constraint;
 }

@@ -3,6 +3,7 @@
 #include "PnC/WBC/BasicContact.hpp"
 #include "PnC/WBC/BasicTask.hpp"
 #include "PnC/WBC/TCIContainer.hpp"
+#include "PnC/draco_pnc/draco_rolling_joint_constraint.hpp"
 
 class DracoTCIContainer : public TCIContainer {
 public:
@@ -20,6 +21,8 @@ public:
 
   Contact *rfoot_contact;
   Contact *lfoot_contact;
+
+  InternalConstraint *rolling_joint_constraint;
 
 protected:
   /* data */

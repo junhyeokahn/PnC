@@ -35,6 +35,7 @@ DracoInterface::DracoInterface() : Interface() {
   interrupt = new DracoInterruptLogic(
       static_cast<DracoControlArchitecture *>(control_architecture_));
 
+  sp_->state = control_architecture_->state;
   myUtils::color_print(myColor::BoldCyan, border);
 }
 
