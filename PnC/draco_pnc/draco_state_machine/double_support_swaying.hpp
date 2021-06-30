@@ -18,10 +18,6 @@ public:
   bool endOfState();
   StateIdentifier getNextState();
 
-  double end_time;
-  double rf_z_max_time;
-  double com_height_des;
-
   Eigen::Vector3d amp;
   Eigen::Vector3d freq;
 

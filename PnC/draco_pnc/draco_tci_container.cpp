@@ -13,7 +13,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   com_task->kd = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
   com_task->w_hierarchy = myUtils::readParameter<double>(cfg["wbc"], "w_com");
 
-  torso_ori_task = new LinkOriTask(robot_, {"torso_com"});
+  torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"});
   torso_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_torso_ori");
   torso_ori_task->kd =

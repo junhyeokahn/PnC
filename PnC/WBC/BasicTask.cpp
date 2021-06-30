@@ -9,23 +9,22 @@
 JointTask::JointTask(RobotSystem *_robot) : Task(_robot, _robot->n_a) {
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, "t_j_pos_d", dim);
-  data_manager->RegisterData(&pos_, VECT, "t_j_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, "t_j_vel_d", dim);
-  data_manager->RegisterData(&vel_, VECT, "t_jvel", dim);
+  data_manager->RegisterData(&pos_des, VECT, "t_j_pos_d", dim);
+  data_manager->RegisterData(&pos, VECT, "t_j_pos", dim);
+  data_manager->RegisterData(&vel_des, VECT, "t_j_vel_d", dim);
+  data_manager->RegisterData(&vel, VECT, "t_jvel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, "t_j_w");
 
   myUtils::pretty_constructor(3, "Joint Task ");
 }
 
 void JointTask::update_cmd() {
-  pos_ = robot_->joint_positions;
-  vel_ = robot_->joint_velocities;
-  pos_err = pos_des_ - pos_;
+  pos = robot_->joint_positions;
+  vel = robot_->joint_velocities;
+  pos_err = pos_des - pos;
 
   for (int i = 0; i < dim; ++i) {
-    op_cmd[i] =
-        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel_[i]);
+    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
   }
 }
 
@@ -40,10 +39,10 @@ SelectedJointTask::SelectedJointTask(RobotSystem *_robot,
     : Task(_robot, _target_ids.size(), _target_ids) {
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, "sj_pos_d", dim);
-  data_manager->RegisterData(&pos_, VECT, "sj_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, "sj_vel_d", dim);
-  data_manager->RegisterData(&vel_, VECT, "sj_vel", dim);
+  data_manager->RegisterData(&pos_des, VECT, "sj_pos_d", dim);
+  data_manager->RegisterData(&pos, VECT, "sj_pos", dim);
+  data_manager->RegisterData(&vel_des, VECT, "sj_vel_d", dim);
+  data_manager->RegisterData(&vel, VECT, "sj_vel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, "sj_w");
 
   myUtils::pretty_constructor(3, "Selected Joint Task ");
@@ -51,14 +50,13 @@ SelectedJointTask::SelectedJointTask(RobotSystem *_robot,
 
 void SelectedJointTask::update_cmd() {
   for (int i = 0; i < target_ids.size(); ++i) {
-    pos_[i] = robot_->joint_positions[robot_->get_joint_idx(target_ids[i])];
-    vel_[i] = robot_->joint_velocities[robot_->get_joint_idx(target_ids[i])];
+    pos[i] = robot_->joint_positions[robot_->get_joint_idx(target_ids[i])];
+    vel[i] = robot_->joint_velocities[robot_->get_joint_idx(target_ids[i])];
   }
-  pos_err = pos_des_ - pos_;
+  pos_err = pos_des - pos;
 
   for (int i = 0; i < dim; ++i) {
-    op_cmd[i] =
-        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel_[i]);
+    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
   }
 }
 
@@ -75,10 +73,10 @@ LinkPosTask::LinkPosTask(RobotSystem *_robot,
   assert(dim == 3 * _target_ids.size());
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, _target_ids[0] + "_pos_d", dim);
-  data_manager->RegisterData(&pos_, VECT, target_ids[0] + "_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, target_ids[0] + "_vel_d", dim);
-  data_manager->RegisterData(&vel_, VECT, target_ids[0] + "_vel", dim);
+  data_manager->RegisterData(&pos_des, VECT, _target_ids[0] + "_pos_d", dim);
+  data_manager->RegisterData(&pos, VECT, target_ids[0] + "_pos", dim);
+  data_manager->RegisterData(&vel_des, VECT, target_ids[0] + "_vel_d", dim);
+  data_manager->RegisterData(&vel, VECT, target_ids[0] + "_vel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, target_ids[0] + "_pos_w");
 
   myUtils::pretty_constructor(3, "Link Pos Task ");
@@ -87,14 +85,13 @@ LinkPosTask::LinkPosTask(RobotSystem *_robot,
 void LinkPosTask::update_cmd() {
 
   for (int i = 0; i < target_ids.size(); ++i) {
-    pos_.segment(3 * i, 3) = robot_->get_link_iso(target_ids[i]).translation();
-    vel_.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).tail(3);
+    pos.segment(3 * i, 3) = robot_->get_link_iso(target_ids[i]).translation();
+    vel.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).tail(3);
   }
-  pos_err = pos_des_ - pos_;
+  pos_err = pos_des - pos;
 
   for (int i = 0; i < dim; ++i) {
-    op_cmd[i] =
-        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel_[i]);
+    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
   }
 }
 
@@ -112,15 +109,15 @@ LinkOriTask::LinkOriTask(RobotSystem *_robot,
                          std::vector<std::string> _target_ids)
     : Task(_robot, 3 * _target_ids.size(), _target_ids) {
   assert(dim == 3 * _target_ids.size());
-  pos_des_ = Eigen::VectorXd::Zero(4 * _target_ids.size());
-  pos_ = Eigen::VectorXd::Zero(4 * _target_ids.size());
+  pos_des = Eigen::VectorXd::Zero(4 * _target_ids.size());
+  pos = Eigen::VectorXd::Zero(4 * _target_ids.size());
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, _target_ids[0] + "_ori_d",
+  data_manager->RegisterData(&pos_des, VECT, _target_ids[0] + "_ori_d",
                              dim + 1);
-  data_manager->RegisterData(&pos_, VECT, target_ids[0] + "_ori", dim + 1);
-  data_manager->RegisterData(&vel_des_, VECT, target_ids[0] + "_angvel_d", dim);
-  data_manager->RegisterData(&vel_, VECT, target_ids[0] + "_angvel", dim);
+  data_manager->RegisterData(&pos, VECT, target_ids[0] + "_ori", dim + 1);
+  data_manager->RegisterData(&vel_des, VECT, target_ids[0] + "_angvel_d", dim);
+  data_manager->RegisterData(&vel, VECT, target_ids[0] + "_angvel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, target_ids[0] + "_ori_w");
 
   myUtils::pretty_constructor(3, "Link Ori Task ");
@@ -129,23 +126,21 @@ LinkOriTask::LinkOriTask(RobotSystem *_robot,
 void LinkOriTask::update_cmd() {
 
   for (int i = 0; i < target_ids.size(); ++i) {
-    Eigen::Quaternion<double> quat_des(pos_des_[4 * i + 0], pos_des_[4 * i + 1],
-                                       pos_des_[4 * i + 2],
-                                       pos_des_[4 * i + 3]);
+    Eigen::Quaternion<double> quat_des(pos_des[4 * i + 0], pos_des[4 * i + 1],
+                                       pos_des[4 * i + 2], pos_des[4 * i + 3]);
     Eigen::Quaternion<double> quat(
         robot_->get_link_iso(target_ids[i]).linear());
     myUtils::avoid_quat_jump(quat_des, quat);
     Eigen::Quaternion<double> quat_err = quat_des * quat.inverse();
     Eigen::Vector3d ori_err = myUtils::quat_to_exp(quat_err);
-    pos_.segment(4 * i, 4) =
+    pos.segment(4 * i, 4) =
         Eigen::Vector4d(quat.w(), quat.x(), quat.y(), quat.z());
     pos_err.segment(3 * i, 3) = ori_err;
-    vel_.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).head(3);
+    vel.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).head(3);
   }
 
   for (int i = 0; i < dim; ++i) {
-    op_cmd[i] =
-        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel_[i]);
+    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
   }
 }
 
@@ -162,10 +157,10 @@ void LinkOriTask::update_jacobian() {
 CenterOfMassTask::CenterOfMassTask(RobotSystem *_robot) : Task(_robot, 3) {
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des_, VECT, "com_pos_d", dim);
-  data_manager->RegisterData(&pos_, VECT, "com_pos", dim);
-  data_manager->RegisterData(&vel_des_, VECT, "com_vel_d", dim);
-  data_manager->RegisterData(&vel_, VECT, "com_vel", dim);
+  data_manager->RegisterData(&pos_des, VECT, "com_pos_d", dim);
+  data_manager->RegisterData(&pos, VECT, "com_pos", dim);
+  data_manager->RegisterData(&vel_des, VECT, "com_vel_d", dim);
+  data_manager->RegisterData(&vel, VECT, "com_vel", dim);
   data_manager->RegisterData(&w_hierarchy, DOUBLE, "com_w");
 
   myUtils::pretty_constructor(3, "Center Of Mass Task ");
@@ -173,13 +168,12 @@ CenterOfMassTask::CenterOfMassTask(RobotSystem *_robot) : Task(_robot, 3) {
 
 void CenterOfMassTask::update_cmd() {
 
-  pos_ = robot_->get_com_pos();
-  pos_err = pos_des_ - pos_;
-  vel_ = robot_->get_com_lin_vel();
+  pos = robot_->get_com_pos();
+  pos_err = pos_des - pos;
+  vel = robot_->get_com_lin_vel();
 
   for (int i = 0; i < dim; ++i) {
-    op_cmd[i] =
-        acc_des_[i] + kp[i] * pos_err[i] + kd[i] * (vel_des_[i] - vel_[i]);
+    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
   }
 }
 

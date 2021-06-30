@@ -197,22 +197,22 @@ if __name__ == "__main__":
         # Compute Command
         if Config.PRINT_TIME:
             start_time = time.time()
-        # interface.getCommand(sensor_data, command)
+        interface.getCommand(sensor_data, command)
 
         if Config.PRINT_TIME:
             end_time = time.time()
             print("ctrl computation time: ", end_time - start_time)
 
         # Exclude Knee Distal Joints Command
-        # del command.joint_positions.l_knee_fe_jd
-        # del command.joint_positions.r_knee_fe_jd
-        # del command.joint_velocities.l_knee_fe_jd
-        # del command.joint_velocities.r_knee_fe_jd
-        # del command.joint_torques.l_knee_fe_jd
-        # del command.joint_torques.r_knee_fe_jd
+        del command.joint_positions["l_knee_fe_jd"]
+        del command.joint_positions["r_knee_fe_jd"]
+        del command.joint_velocities["l_knee_fe_jd"]
+        del command.joint_velocities["r_knee_fe_jd"]
+        del command.joint_torques["l_knee_fe_jd"]
+        del command.joint_torques["r_knee_fe_jd"]
 
         # Apply Command
-        # pybullet_util.set_motor_trq(robot, joint_id, command.joint_torques)
+        pybullet_util.set_motor_trq(robot, joint_id, command.joint_torques)
 
         # Save Image
         if (Config.VIDEO_RECORD) and (count % Config.RECORD_FREQ == 0):

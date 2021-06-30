@@ -17,6 +17,13 @@ void DracoInterruptLogic::processInterrupts() {
 
   if (b_interrupt_button_r) {
     std::cout << "[Walking Interrupt Logic] button R pressed" << std::endl;
+    if (ctrl_arch_->state == draco_states::kBalance) {
+      std::cout << "---------                    ---------" << std::endl;
+      std::cout << "---------      COM Swaying   ---------" << std::endl;
+      (static_cast<DoubleSupportBalance *>(
+           ctrl_arch_->state_machines[draco_states::kBalance]))
+          ->b_swaying_trigger = true;
+    }
   }
 
   if (b_interrupt_button_w) {
@@ -27,7 +34,7 @@ void DracoInterruptLogic::processInterrupts() {
       std::cout << "---------   Walking Forward  ---------" << std::endl;
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
       // Balance" << std::endl;
@@ -40,7 +47,7 @@ void DracoInterruptLogic::processInterrupts() {
       std::cout << "---------   Strafing Left    ---------" << std::endl;
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
@@ -56,7 +63,7 @@ void DracoInterruptLogic::processInterrupts() {
 
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
@@ -73,7 +80,7 @@ void DracoInterruptLogic::processInterrupts() {
 
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
@@ -90,7 +97,7 @@ void DracoInterruptLogic::processInterrupts() {
 
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
@@ -107,7 +114,7 @@ void DracoInterruptLogic::processInterrupts() {
 
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support
@@ -124,7 +131,7 @@ void DracoInterruptLogic::processInterrupts() {
 
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
-          ->b_state_switch_trigger = true;
+          ->b_walking_trigger = true;
 
     } else {
       // std::cout << "-- Command Ignored. Please Wait for Double Support

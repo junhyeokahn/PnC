@@ -137,10 +137,10 @@ void AtlasController::getCommand(void *cmd) {
                                joint_pos_cmd_);
 
   ((AtlasCommand *)cmd)->joint_positions =
-      robot_->create_cmd_map(joint_pos_cmd_);
+      robot_->vector_to_map(joint_pos_cmd_);
   ((AtlasCommand *)cmd)->joint_velocities =
-      robot_->create_cmd_map(joint_vel_cmd_);
-  ((AtlasCommand *)cmd)->joint_torques = robot_->create_cmd_map(joint_trq_cmd_);
+      robot_->vector_to_map(joint_vel_cmd_);
+  ((AtlasCommand *)cmd)->joint_torques = robot_->vector_to_map(joint_trq_cmd_);
 }
 
 void AtlasController::FirstVisit() {

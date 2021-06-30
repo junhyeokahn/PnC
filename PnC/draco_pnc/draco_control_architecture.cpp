@@ -10,7 +10,8 @@
 #include "PnC/draco_pnc/draco_state_machine/contact_transition_start.hpp"
 #include "PnC/draco_pnc/draco_state_machine/double_support_balance.hpp"
 #include "PnC/draco_pnc/draco_state_machine/double_support_stand.hpp"
-//#include "PnC/draco_pnc/draco_state_machine/initialize.hpp"
+#include "PnC/draco_pnc/draco_state_machine/double_support_swaying.hpp"
+#include "PnC/draco_pnc/draco_state_machine/initialize.hpp"
 #include "PnC/draco_pnc/draco_state_machine/single_support_swing.hpp"
 #include "PnC/draco_pnc/draco_state_provider.hpp"
 #include "PnC/draco_pnc/draco_tci_container.hpp"
@@ -20,10 +21,10 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   robot_ = _robot;
 
   // Initialize Task Force Container
-  tci_container_ = new DracoTCIContainer(robot_);
+  tci_container = new DracoTCIContainer(robot_);
 
   // Initialize Controller
-  controller_ = new DracoController(tci_container_, robot_);
+  controller_ = new DracoController(tci_container, robot_);
 
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();
@@ -32,19 +33,19 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/draco/pnc.yaml");
 
   rfoot_tm = new FootSE3TrajectoryManager(
-      tci_container_->rfoot_pos_task, tci_container_->rfoot_ori_task, robot_);
+      tci_container->rfoot_pos_task, tci_container->rfoot_ori_task, robot_);
   rfoot_tm->swing_height =
       myUtils::readParameter<double>(cfg["walking"], "swing_height");
   lfoot_tm = new FootSE3TrajectoryManager(
-      tci_container_->lfoot_pos_task, tci_container_->lfoot_ori_task, robot_);
+      tci_container->lfoot_pos_task, tci_container->lfoot_ori_task, robot_);
   lfoot_tm->swing_height =
       myUtils::readParameter<double>(cfg["walking"], "swing_height");
   upper_body_tm =
-      new UpperBodyTrajectoryManager(tci_container_->upper_body_task, robot_);
+      new UpperBodyTrajectoryManager(tci_container->upper_body_task, robot_);
   floating_base_tm = new FloatingBaseTrajectoryManager(
-      tci_container_->com_task, tci_container_->torso_ori_task, robot_);
-  dcm_tm = new DCMTrajectoryManager(dcm_planner_, tci_container_->com_task,
-                                    tci_container_->torso_ori_task, robot_,
+      tci_container->com_task, tci_container->torso_ori_task, robot_);
+  dcm_tm = new DCMTrajectoryManager(dcm_planner_, tci_container->com_task,
+                                    tci_container->torso_ori_task, robot_,
                                     "l_foot_contact", "r_foot_contact");
   dcm_tm->paramInitialization(cfg["walking"]);
 
@@ -52,25 +53,35 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   double w_contact_foot, w_swing_foot;
   myUtils::readParameter(cfg["wbc"], "w_contact_foot", w_contact_foot);
   myUtils::readParameter(cfg["wbc"], "w_swing_foot", w_swing_foot);
-  rfoot_pos_hm = new TaskHierarchyManager(tci_container_->rfoot_pos_task,
+  rfoot_pos_hm = new TaskHierarchyManager(tci_container->rfoot_pos_task,
                                           w_contact_foot, w_swing_foot);
-  rfoot_ori_hm = new TaskHierarchyManager(tci_container_->rfoot_ori_task,
+  rfoot_ori_hm = new TaskHierarchyManager(tci_container->rfoot_ori_task,
                                           w_contact_foot, w_swing_foot);
-  lfoot_pos_hm = new TaskHierarchyManager(tci_container_->lfoot_pos_task,
+  lfoot_pos_hm = new TaskHierarchyManager(tci_container->lfoot_pos_task,
                                           w_contact_foot, w_swing_foot);
-  lfoot_ori_hm = new TaskHierarchyManager(tci_container_->lfoot_ori_task,
+  lfoot_ori_hm = new TaskHierarchyManager(tci_container->lfoot_ori_task,
                                           w_contact_foot, w_swing_foot);
 
   // Initialize Reaction Force Manager
   double rf_max;
   myUtils::readParameter(cfg["wbc"], "rf_z_max", rf_max);
-  rfoot_fm = new ReactionForceManager(tci_container_->rfoot_contact, rf_max);
-  lfoot_fm = new ReactionForceManager(tci_container_->lfoot_contact, rf_max);
+  rfoot_fm = new ReactionForceManager(tci_container->rfoot_contact, rf_max);
+  lfoot_fm = new ReactionForceManager(tci_container->lfoot_contact, rf_max);
 
   // Initialize State Machine
-  // TODO: Add kInitialize phase
-  // state_machines[draco_states::kInitialize] =
-  // new Initialize(draco_states::kInitialize, this, robot_);
+  state_machines[draco_states::kInitialize] =
+      new Initialize(draco_states::kInitialize, this, robot_);
+  ((Initialize *)state_machines[draco_states::kInitialize])->end_time =
+      myUtils::readParameter<double>(cfg["walking"], "ini_joint_dur");
+  YAML::Node ini_jpos_node = cfg["walking"]["ini_joint_pos"];
+  std::map<std::string, double> target_ini_jpos_map;
+  for (const auto &kv : ini_jpos_node) {
+    target_ini_jpos_map[kv.first.as<std::string>()] = kv.second.as<double>();
+  }
+  Eigen::VectorXd target_ini_jpos = robot_->map_to_vector(target_ini_jpos_map);
+  ((Initialize *)state_machines[draco_states::kInitialize])->target_jpos =
+      target_ini_jpos;
+
   state_machines[draco_states::kStand] =
       new DoubleSupportStand(draco_states::kStand, this, robot_);
   ((DoubleSupportStand *)state_machines[draco_states::kStand])->end_time =
@@ -101,6 +112,13 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   state_machines[draco_states::kRFootSwing] = new SingleSupportSwing(
       draco_states::kRFootSwing, this, EndEffector::RFoot, robot_);
 
+  state_machines[draco_states::kSwaying] =
+      new DoubleSupportSwaying(draco_states::kSwaying, this, robot_);
+  ((DoubleSupportSwaying *)state_machines[draco_states::kSwaying])->amp =
+      myUtils::readParameter<Eigen::Vector3d>(cfg["walking"], "swaying_amp");
+  ((DoubleSupportSwaying *)state_machines[draco_states::kSwaying])->freq =
+      myUtils::readParameter<Eigen::Vector3d>(cfg["walking"], "swaying_freq");
+
   state = draco_states::kStand;
   prev_state = draco_states::kStand;
 
@@ -109,7 +127,8 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 }
 
 DracoControlArchitecture::~DracoControlArchitecture() {
-  delete tci_container_;
+  delete tci_container;
+
   delete controller_;
   delete dcm_planner_;
 
@@ -127,6 +146,7 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete rfoot_fm;
   delete lfoot_fm;
 
+  delete state_machines[draco_states::kInitialize];
   delete state_machines[draco_states::kStand];
   delete state_machines[draco_states::kBalance];
   delete state_machines[draco_states::kLFootContactTransitionStart];
@@ -135,6 +155,7 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete state_machines[draco_states::kRFootContactTransitionStart];
   delete state_machines[draco_states::kRFootContactTransitionEnd];
   delete state_machines[draco_states::kRFootSwing];
+  delete state_machines[draco_states::kSwaying];
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {

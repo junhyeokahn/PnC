@@ -18,7 +18,8 @@ public:
   bool endOfState();
   StateIdentifier getNextState();
 
-  bool b_state_switch_trigger;
+  bool b_walking_trigger;
+  bool b_swaying_trigger;
 
 protected:
   DracoStateProvider *sp_;

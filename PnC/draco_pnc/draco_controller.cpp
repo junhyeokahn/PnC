@@ -93,70 +93,77 @@ DracoController::~DracoController() {
 }
 
 void DracoController::getCommand(void *cmd) {
-  static bool b_first_visit(true);
-  if (b_first_visit) {
-    FirstVisit();
-    b_first_visit = false;
-  }
+  if (sp_->state == draco_states::kInitialize) {
+    joint_pos_cmd_ = tci_container_->joint_task->pos_des;
+    joint_vel_cmd_ = tci_container_->joint_task->vel_des;
+    joint_trq_cmd_.setZero();
 
-  // Dynamics properties
-  Eigen::MatrixXd A = robot_->get_mass_matrix();
-  Eigen::MatrixXd Ainv = A.inverse();
-  Eigen::VectorXd grav = robot_->get_gravity();
-  Eigen::VectorXd cori = robot_->get_coriolis();
-  wbc_->update_setting(A, Ainv, cori, grav);
-
-  // Task, Contact, Internal Constraint Setup
-  wbc_->w_hierarchy = Eigen::VectorXd::Zero(tci_container_->task_list.size());
-  for (int i = 0; i < tci_container_->task_list.size(); ++i) {
-    tci_container_->task_list[i]->update_jacobian();
-    tci_container_->task_list[i]->update_cmd();
-    wbc_->w_hierarchy[i] = tci_container_->task_list[i]->w_hierarchy;
-  }
-
-  int rf_dim(0);
-  for (int i = 0; i < tci_container_->contact_list.size(); ++i) {
-    tci_container_->contact_list[i]->update_contact();
-    rf_dim += tci_container_->contact_list[i]->dim;
-  }
-
-  for (int i = 0; i < tci_container_->internal_constraint_list.size(); ++i) {
-    tci_container_->internal_constraint_list[i]->update_internal_constraint();
-  }
-
-  // WBC commands
-  Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
-  Eigen::VectorXd wbc_joint_trq_cmd = Eigen::VectorXd::Zero(sa_.rows());
-  Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(sa_.rows());
-  wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
-              tci_container_->internal_constraint_list, rf_des,
-              wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des);
-  joint_trq_cmd_ = (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
-                   wbc_joint_trq_cmd;
-  Eigen::VectorXd joint_acc_cmd =
-      (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
-      wbc_joint_acc_cmd;
-  if (sp_->state == draco_states::kLFootSwing) {
-    l_rf_cmd_ = Eigen::VectorXd::Zero(6);
-    r_rf_cmd_ = rf_des;
-  } else if (sp_->state == draco_states::kRFootSwing) {
-    r_rf_cmd_ = Eigen::VectorXd::Zero(6);
-    l_rf_cmd_ = rf_des;
   } else {
-    // right foot first
-    r_rf_cmd_ = rf_des.head(6);
-    l_rf_cmd_ = rf_des.tail(6);
-  }
+    static bool b_first_visit(true);
+    if (b_first_visit) {
+      FirstVisit();
+      b_first_visit = false;
+    }
 
-  joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
-                               robot_->joint_positions, joint_vel_cmd_,
-                               joint_pos_cmd_);
+    // Dynamics properties
+    Eigen::MatrixXd A = robot_->get_mass_matrix();
+    Eigen::MatrixXd Ainv = A.inverse();
+    Eigen::VectorXd grav = robot_->get_gravity();
+    Eigen::VectorXd cori = robot_->get_coriolis();
+    wbc_->update_setting(A, Ainv, cori, grav);
+
+    // Task, Contact, Internal Constraint Setup
+    wbc_->w_hierarchy = Eigen::VectorXd::Zero(tci_container_->task_list.size());
+    for (int i = 0; i < tci_container_->task_list.size(); ++i) {
+      tci_container_->task_list[i]->update_jacobian();
+      tci_container_->task_list[i]->update_cmd();
+      wbc_->w_hierarchy[i] = tci_container_->task_list[i]->w_hierarchy;
+    }
+
+    int rf_dim(0);
+    for (int i = 0; i < tci_container_->contact_list.size(); ++i) {
+      tci_container_->contact_list[i]->update_contact();
+      rf_dim += tci_container_->contact_list[i]->dim;
+    }
+
+    for (int i = 0; i < tci_container_->internal_constraint_list.size(); ++i) {
+      tci_container_->internal_constraint_list[i]->update_internal_constraint();
+    }
+
+    // WBC commands
+    Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
+    Eigen::VectorXd wbc_joint_trq_cmd = Eigen::VectorXd::Zero(sa_.rows());
+    Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(sa_.rows());
+    wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
+                tci_container_->internal_constraint_list, rf_des,
+                wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des);
+    joint_trq_cmd_ = (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
+                     wbc_joint_trq_cmd;
+    Eigen::VectorXd joint_acc_cmd =
+        (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
+        wbc_joint_acc_cmd;
+    if (sp_->state == draco_states::kLFootSwing) {
+      l_rf_cmd_ = Eigen::VectorXd::Zero(6);
+      r_rf_cmd_ = rf_des;
+    } else if (sp_->state == draco_states::kRFootSwing) {
+      r_rf_cmd_ = Eigen::VectorXd::Zero(6);
+      l_rf_cmd_ = rf_des;
+    } else {
+      // right foot first
+      r_rf_cmd_ = rf_des.head(6);
+      l_rf_cmd_ = rf_des.tail(6);
+    }
+
+    joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
+                                 robot_->joint_positions, joint_vel_cmd_,
+                                 joint_pos_cmd_);
+  }
 
   ((DracoCommand *)cmd)->joint_positions =
-      robot_->create_cmd_map(joint_pos_cmd_);
+      robot_->vector_to_map(joint_pos_cmd_);
   ((DracoCommand *)cmd)->joint_velocities =
-      robot_->create_cmd_map(joint_vel_cmd_);
-  ((DracoCommand *)cmd)->joint_torques = robot_->create_cmd_map(joint_trq_cmd_);
+      robot_->vector_to_map(joint_vel_cmd_);
+  ((DracoCommand *)cmd)->joint_torques = robot_->vector_to_map(joint_trq_cmd_);
 }
 
 void DracoController::FirstVisit() {

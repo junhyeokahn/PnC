@@ -44,8 +44,29 @@ wbc:
     max_pos_err: 0.2 # rad
 
 walking:
+    ini_joint_dur: 4.
+    ini_joint_pos:
+        l_shoulder_aa: 0.523
+        l_elbow_fe: -1.57
+        r_shoulder_aa: -0.523
+        r_elbow_fe: -1.57
+        l_hip_aa: 0.087
+        l_hip_fe: -0.785
+        l_knee_fe_jp: 0.785
+        l_knee_fe_jd: 0.785
+        l_ankle_fe: -0.785
+        l_ankle_ie: -0.087
+        r_hip_aa: -0.087
+        r_hip_fe: -0.785
+        r_knee_fe_jp: 0.785
+        r_knee_fe_jd: 0.785
+        r_ankle_fe: -0.785
+        r_ankle_ie: 0.087
     ini_stand_dur: 1.
     rf_z_max_time: 0.1
+
+    swaying_amp: [0., 0.08, 0.]
+    swaying_freq: [0., 0.3, 0.]
 
     com_height: 0.73
     swing_height: 0.04

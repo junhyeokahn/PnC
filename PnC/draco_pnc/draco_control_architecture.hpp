@@ -45,13 +45,14 @@ public:
   ReactionForceManager *rfoot_fm;
   ReactionForceManager *lfoot_fm;
 
+  DracoTCIContainer *tci_container;
+
 private:
   /* data */
   RobotSystem *robot_;
   DCMPlanner *dcm_planner_;
 
   DracoController *controller_;
-  DracoTCIContainer *tci_container_;
 
   DracoStateProvider *sp_;
 };

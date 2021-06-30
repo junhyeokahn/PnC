@@ -94,7 +94,7 @@ int DartRobotSystem::get_joint_idx(const std::string joint_name) {
 }
 
 std::map<std::string, double>
-DartRobotSystem::create_cmd_map(const Eigen::VectorXd cmd_vec) {
+DartRobotSystem::vector_to_map(const Eigen::VectorXd &cmd_vec) {
   std::map<std::string, double> ret;
 
   for (std::map<std::string, dart::dynamics::JointPtr>::iterator it =
@@ -105,6 +105,19 @@ DartRobotSystem::create_cmd_map(const Eigen::VectorXd cmd_vec) {
   }
 
   return ret;
+}
+
+Eigen::VectorXd
+DartRobotSystem::map_to_vector(std::map<std::string, double> _map) {
+  Eigen::VectorXd vec = Eigen::VectorXd::Zero(joint_positions.size());
+
+  for (std::map<std::string, double>::iterator it = _map.begin();
+       it != _map.end(); it++) {
+    int joint_id = get_joint_idx(it->first);
+    vec[joint_id] = it->second;
+  }
+
+  return vec;
 }
 
 void DartRobotSystem::update_system(

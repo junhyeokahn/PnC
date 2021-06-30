@@ -33,11 +33,11 @@ public:
     op_cmd = Eigen::VectorXd::Zero(dim);
     pos_err = Eigen::VectorXd::Zero(dim);
 
-    pos_des_ = Eigen::VectorXd::Zero(dim);
-    pos_ = Eigen::VectorXd::Zero(dim);
-    vel_des_ = Eigen::VectorXd::Zero(dim);
-    vel_ = Eigen::VectorXd::Zero(dim);
-    acc_des_ = Eigen::VectorXd::Zero(dim);
+    pos_des = Eigen::VectorXd::Zero(dim);
+    pos = Eigen::VectorXd::Zero(dim);
+    vel_des = Eigen::VectorXd::Zero(dim);
+    vel = Eigen::VectorXd::Zero(dim);
+    acc_des = Eigen::VectorXd::Zero(dim);
   };
   virtual ~Task(){};
 
@@ -52,6 +52,12 @@ public:
 
   Eigen::VectorXd op_cmd;
   Eigen::VectorXd pos_err;
+
+  Eigen::VectorXd pos_des;
+  Eigen::VectorXd pos;
+  Eigen::VectorXd vel_des;
+  Eigen::VectorXd vel;
+  Eigen::VectorXd acc_des;
 
   std::vector<std::string> target_ids;
 
@@ -69,16 +75,16 @@ public:
    *  acc_des (np.array):
    *      Acceleration desired
    */
-  void update_desired(const Eigen::VectorXd &pos_des,
-                      const Eigen::VectorXd &vel_des,
-                      const Eigen::VectorXd &acc_des) {
-    pos_des_ = pos_des;
-    vel_des_ = vel_des;
-    acc_des_ = acc_des;
+  void update_desired(const Eigen::VectorXd &_pos_des,
+                      const Eigen::VectorXd &_vel_des,
+                      const Eigen::VectorXd &_acc_des) {
+    pos_des = _pos_des;
+    vel_des = _vel_des;
+    acc_des = _acc_des;
   }
 
   /*
-   * Update op_cmd, pos_err given updated pos_des_, vel_des_, acc_des_
+   * Update op_cmd, pos_err given updated pos_des, vel_des, acc_des
    */
   virtual void update_cmd() = 0;
 
@@ -88,19 +94,13 @@ public:
   virtual void update_jacobian() = 0;
 
   void Debug() {
-    myUtils::pretty_print(pos_des_, std::cout, "pos des");
+    myUtils::pretty_print(pos_des, std::cout, "pos des");
     myUtils::pretty_print(pos_err, std::cout, "pos err");
-    myUtils::pretty_print(vel_des_, std::cout, "vel des");
-    myUtils::pretty_print(acc_des_, std::cout, "acc des");
+    myUtils::pretty_print(vel_des, std::cout, "vel des");
+    myUtils::pretty_print(acc_des, std::cout, "acc des");
     myUtils::pretty_print(op_cmd, std::cout, "xddot");
   }
 
 protected:
   RobotSystem *robot_;
-
-  Eigen::VectorXd pos_des_;
-  Eigen::VectorXd pos_;
-  Eigen::VectorXd vel_des_;
-  Eigen::VectorXd vel_;
-  Eigen::VectorXd acc_des_;
 };

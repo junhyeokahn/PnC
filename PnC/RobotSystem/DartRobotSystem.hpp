@@ -21,7 +21,8 @@ public:
   virtual int get_q_dot_idx(const std::string joint_name);
   virtual int get_joint_idx(const std::string joint_name);
   virtual std::map<std::string, double>
-  create_cmd_map(const Eigen::VectorXd cmd_vec);
+  vector_to_map(const Eigen::VectorXd &cmd_vec);
+  virtual Eigen::VectorXd map_to_vector(std::map<std::string, double>);
   virtual void update_system(const Eigen::Vector3d base_com_pos,
                              const Eigen::Quaternion<double> base_com_quat,
                              const Eigen::Vector3d base_com_lin_vel,

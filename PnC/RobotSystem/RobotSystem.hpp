@@ -74,18 +74,31 @@ public:
   virtual int get_joint_idx(const std::string joint_name) = 0;
 
   /*
-   * Create command map
+   * Create map from eigen vector
    *
    * Parameters
    * ----------
-   * cmd_vec (Eigen::Vector)
+   * vec (Eigen::Vector)
    *
    * Returns
    * -------
-   * cmd_map (std::map)
+   * map (std::map)
    */
   virtual std::map<std::string, double>
-  create_cmd_map(const Eigen::VectorXd cmd_vec) = 0;
+  vector_to_map(const Eigen::VectorXd &cmd_vec) = 0;
+
+  /*
+   * Create eigen vector from map
+   *
+   * Parameters
+   * ----------
+   * map (std::map)
+   *
+   * Returns
+   * -------
+   * vec (Eigen::Vector)
+   */
+  virtual Eigen::VectorXd map_to_vector(std::map<std::string, double>) = 0;
 
   /*
    * Update generalized coordinate
