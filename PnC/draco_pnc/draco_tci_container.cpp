@@ -13,7 +13,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   com_task->kd = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
   com_task->w_hierarchy = myUtils::readParameter<double>(cfg["wbc"], "w_com");
 
-  torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"});
+  torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"}, "base");
   torso_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_torso_ori");
   torso_ori_task->kd =
@@ -34,7 +34,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   upper_body_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_upper_body_joint");
 
-  rfoot_pos_task = new LinkPosTask(robot_, {"r_foot_contact"});
+  rfoot_pos_task = new LinkPosTask(robot_, {"r_foot_contact"}, "rfoot");
   rfoot_pos_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   rfoot_pos_task->kd =
@@ -42,7 +42,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   rfoot_pos_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  rfoot_ori_task = new LinkOriTask(robot_, {"r_foot_contact"});
+  rfoot_ori_task = new LinkOriTask(robot_, {"r_foot_contact"}, "rfoot");
   rfoot_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   rfoot_ori_task->kd =
@@ -50,7 +50,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   rfoot_ori_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  lfoot_pos_task = new LinkPosTask(robot_, {"l_foot_contact"});
+  lfoot_pos_task = new LinkPosTask(robot_, {"l_foot_contact"}, "lfoot");
   lfoot_pos_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   lfoot_pos_task->kd =
@@ -58,7 +58,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   lfoot_pos_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  lfoot_ori_task = new LinkOriTask(robot_, {"l_foot_contact"});
+  lfoot_ori_task = new LinkOriTask(robot_, {"l_foot_contact"}, "lfoot");
   lfoot_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   lfoot_ori_task->kd =

@@ -9,11 +9,11 @@
 JointTask::JointTask(RobotSystem *_robot) : Task(_robot, _robot->n_a) {
 
   DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des, VECT, "t_j_pos_d", dim);
-  data_manager->RegisterData(&pos, VECT, "t_j_pos", dim);
-  data_manager->RegisterData(&vel_des, VECT, "t_j_vel_d", dim);
-  data_manager->RegisterData(&vel, VECT, "t_jvel", dim);
-  data_manager->RegisterData(&w_hierarchy, DOUBLE, "t_j_w");
+  data_manager->RegisterData(&pos_des, VECT, "j_pos_d", dim);
+  data_manager->RegisterData(&pos, VECT, "j_pos", dim);
+  data_manager->RegisterData(&vel_des, VECT, "j_vel_d", dim);
+  data_manager->RegisterData(&vel, VECT, "jvel", dim);
+  data_manager->RegisterData(&w_hierarchy, DOUBLE, "j_w");
 
   myUtils::pretty_constructor(3, "Joint Task ");
 }
@@ -68,17 +68,21 @@ void SelectedJointTask::update_jacobian() {
 }
 
 LinkPosTask::LinkPosTask(RobotSystem *_robot,
-                         std::vector<std::string> _target_ids)
+                         std::vector<std::string> _target_ids,
+                         std::string _topic_name)
     : Task(_robot, 3 * _target_ids.size(), _target_ids) {
   assert(dim == 3 * _target_ids.size());
 
-  DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des, VECT, _target_ids[0] + "_pos_d", dim);
-  data_manager->RegisterData(&pos, VECT, target_ids[0] + "_pos", dim);
-  data_manager->RegisterData(&vel_des, VECT, target_ids[0] + "_vel_d", dim);
-  data_manager->RegisterData(&vel, VECT, target_ids[0] + "_vel", dim);
-  data_manager->RegisterData(&w_hierarchy, DOUBLE, target_ids[0] + "_pos_w");
-
+  if (_topic_name.empty()) {
+    // Do not save
+  } else {
+    DataManager *data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&pos_des, VECT, _topic_name + "_pos_d", dim);
+    data_manager->RegisterData(&pos, VECT, _topic_name + "_pos", dim);
+    data_manager->RegisterData(&vel_des, VECT, _topic_name + "_vel_d", dim);
+    data_manager->RegisterData(&vel, VECT, _topic_name + "_vel", dim);
+    data_manager->RegisterData(&w_hierarchy, DOUBLE, _topic_name + "_pos_w");
+  }
   myUtils::pretty_constructor(3, "Link Pos Task ");
 }
 
@@ -106,19 +110,23 @@ void LinkPosTask::update_jacobian() {
 }
 
 LinkOriTask::LinkOriTask(RobotSystem *_robot,
-                         std::vector<std::string> _target_ids)
+                         std::vector<std::string> _target_ids,
+                         std::string _topic_name)
     : Task(_robot, 3 * _target_ids.size(), _target_ids) {
   assert(dim == 3 * _target_ids.size());
   pos_des = Eigen::VectorXd::Zero(4 * _target_ids.size());
   pos = Eigen::VectorXd::Zero(4 * _target_ids.size());
 
-  DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&pos_des, VECT, _target_ids[0] + "_ori_d",
-                             dim + 1);
-  data_manager->RegisterData(&pos, VECT, target_ids[0] + "_ori", dim + 1);
-  data_manager->RegisterData(&vel_des, VECT, target_ids[0] + "_angvel_d", dim);
-  data_manager->RegisterData(&vel, VECT, target_ids[0] + "_angvel", dim);
-  data_manager->RegisterData(&w_hierarchy, DOUBLE, target_ids[0] + "_ori_w");
+  if (_topic_name.empty()) {
+    // Do not save
+  } else {
+    DataManager *data_manager = DataManager::GetDataManager();
+    data_manager->RegisterData(&pos_des, VECT, _topic_name + "_ori_d", dim);
+    data_manager->RegisterData(&pos, VECT, _topic_name + "_ori", dim);
+    data_manager->RegisterData(&vel_des, VECT, _topic_name + "_angvel_d", dim);
+    data_manager->RegisterData(&vel, VECT, _topic_name + "_angvel", dim);
+    data_manager->RegisterData(&w_hierarchy, DOUBLE, _topic_name + "_ori_w");
+  }
 
   myUtils::pretty_constructor(3, "Link Ori Task ");
 }

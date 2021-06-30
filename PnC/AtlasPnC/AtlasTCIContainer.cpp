@@ -11,7 +11,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   com_task->kd = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
   com_task->w_hierarchy = myUtils::readParameter<double>(cfg["wbc"], "w_com");
 
-  pelvis_ori_task = new LinkOriTask(robot_, {"pelvis_com"});
+  pelvis_ori_task = new LinkOriTask(robot_, {"pelvis_com"}, "base");
   pelvis_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_pelvis_ori");
   pelvis_ori_task->kd =
@@ -32,7 +32,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   upper_body_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_upper_body_joint");
 
-  rfoot_pos_task = new LinkPosTask(robot_, {"r_sole"});
+  rfoot_pos_task = new LinkPosTask(robot_, {"r_sole"}, "rfoot");
   rfoot_pos_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   rfoot_pos_task->kd =
@@ -40,7 +40,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   rfoot_pos_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  rfoot_ori_task = new LinkOriTask(robot_, {"r_sole"});
+  rfoot_ori_task = new LinkOriTask(robot_, {"r_sole"}, "rfoot");
   rfoot_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   rfoot_ori_task->kd =
@@ -48,7 +48,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   rfoot_ori_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  lfoot_pos_task = new LinkPosTask(robot_, {"l_sole"});
+  lfoot_pos_task = new LinkPosTask(robot_, {"l_sole"}, "lfoot");
   lfoot_pos_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   lfoot_pos_task->kd =
@@ -56,7 +56,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   lfoot_pos_task->w_hierarchy =
       myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  lfoot_ori_task = new LinkOriTask(robot_, {"l_sole"});
+  lfoot_ori_task = new LinkOriTask(robot_, {"l_sole"}, "lfoot");
   lfoot_ori_task->kp =
       myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   lfoot_ori_task->kd =

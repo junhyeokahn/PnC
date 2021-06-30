@@ -27,7 +27,8 @@ private:
 
 class LinkPosTask : public Task {
 public:
-  LinkPosTask(RobotSystem *_robot, std::vector<std::string> _target_ids);
+  LinkPosTask(RobotSystem *_robot, std::vector<std::string> _target_ids,
+              std::string _topic_name = {});
   virtual ~LinkPosTask(){};
 
 private:
@@ -38,7 +39,8 @@ private:
 
 class LinkOriTask : public Task {
 public:
-  LinkOriTask(RobotSystem *_robot, std::vector<std::string> _target_ids);
+  LinkOriTask(RobotSystem *_robot, std::vector<std::string> _target_ids,
+              std::string _topic_name = {});
   virtual ~LinkOriTask(){};
 
 private:
