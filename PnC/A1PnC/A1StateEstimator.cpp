@@ -33,15 +33,15 @@ A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
   joint_velocity_filter_freq_ = 100.0;    // Hz
   angular_velocity_filter_freq_ = 100.0;  // Hz
 
-  // ori_est_ = new BasicAccumulation();
-  // x_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.15);
+  ori_est_ = new BasicAccumulation();
+  x_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.15);
   // y_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.4);
   // z_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.2);
 }
 
 A1StateEstimator::~A1StateEstimator() {
-  // delete ori_est_;
-  // delete x_vel_est_;
+  delete ori_est_;
+  delete x_vel_est_;
   // delete y_vel_est_;
   // delete z_vel_est_;
 }

@@ -9,6 +9,7 @@ class RobotSystem;
 class A1SensorData;
 class BasicAccumulation;
 class filter;
+class AverageFilter;
 
 class A1StateEstimator {
  public:
@@ -44,7 +45,10 @@ class A1StateEstimator {
   Eigen::VectorXd virtual_q_;
   Eigen::VectorXd virtual_qdot_;
 
-  // BasicAccumulation* ori_est_;
+  BasicAccumulation* ori_est_;
+  AverageFilter* x_vel_est_;
+  // AverageFilter* y_vel_est_;
+  // AverageFilter* z_vel_est_;
   // filter* x_vel_est_;
   // filter* y_vel_est_;
   // filter* z_vel_est_;

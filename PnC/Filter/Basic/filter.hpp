@@ -117,7 +117,7 @@ class CFilterButterworth24db {
   float min_cutoff, max_cutoff;
 };
 
-class AverageFilter : public filter {
+class AverageFilter { // : public filter {
  public:
   AverageFilter(double dt, double t_const, double limit);
   virtual ~AverageFilter();
