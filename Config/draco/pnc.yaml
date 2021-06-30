@@ -36,7 +36,7 @@ wbc:
     kp_foot_ori: [300., 300., 300.]
     kd_foot_ori: [30., 30., 30.]
 
-    b_trq_limit: true
+    b_trq_limit: false
 
     # Joint integration parameters
     vel_cutoff_freq: 2.0 # Hz

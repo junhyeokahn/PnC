@@ -15,37 +15,45 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/draco/pnc.yaml");
 
   // Initialize WBC
-  // TODO handle passive joint
+  int l_jp_idx = robot_->get_q_dot_idx("l_knee_fe_jp");
+  int l_jd_idx = robot_->get_q_dot_idx("l_knee_fe_jd");
+  int r_jp_idx = robot_->get_q_dot_idx("r_knee_fe_jp");
+  int r_jd_idx = robot_->get_q_dot_idx("r_knee_fe_jd");
+
   std::vector<bool> act_list;
   for (int i = 0; i < robot_->n_floating; ++i)
     act_list.push_back(false);
   for (int i = 0; i < robot_->n_a; ++i)
     act_list.push_back(true);
+  act_list[l_jd_idx] = false;
+  act_list[r_jd_idx] = false;
+
   int n_q_dot(act_list.size());
-  int n_active(robot_->n_a);
+  int n_active(std::count(act_list.begin(), act_list.end(), true));
   int n_passive(n_q_dot - n_active - robot_->n_floating);
 
-  Eigen::MatrixXd sa = Eigen::MatrixXd::Zero(n_active, n_q_dot);
-  Eigen::MatrixXd sv = Eigen::MatrixXd::Zero(n_passive, n_q_dot);
+  sa_ = Eigen::MatrixXd::Zero(n_active, n_q_dot);
+  sv_ = Eigen::MatrixXd::Zero(n_passive, n_q_dot);
   int j(0), k(0);
   for (int i = 0; i < n_q_dot; ++i) {
     if (i >= 6) {
       if (act_list[i]) {
-        sa(j, i) = 1.;
+        sa_(j, i) = 1.;
         j += 1;
       } else {
-        sv(k, i) = 1.;
+        sv_(k, i) = 1.;
         k += 1;
       }
     }
   }
-  Eigen::MatrixXd sf = Eigen::MatrixXd::Zero(robot_->n_floating, n_q_dot);
-  sf.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
-  wbc_ = new IHWBC(sf, sa, sv);
+  sf_ = Eigen::MatrixXd::Zero(robot_->n_floating, n_q_dot);
+  sf_.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
+
+  wbc_ = new IHWBC(sf_, sa_, sv_);
   wbc_->b_trq_limit = myUtils::readParameter<bool>(cfg["wbc"], "b_trq_limit");
   if (wbc_->b_trq_limit) {
-    wbc_->trq_limit = sa.block(0, robot_->n_floating, n_active,
-                               n_q_dot - robot_->n_floating) *
+    wbc_->trq_limit = sa_.block(0, robot_->n_floating, n_active,
+                                n_q_dot - robot_->n_floating) *
                       robot_->joint_trq_limit;
   }
   wbc_->lambda_q_ddot =
@@ -118,11 +126,16 @@ void DracoController::getCommand(void *cmd) {
 
   // WBC commands
   Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
-  Eigen::VectorXd joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_a);
-  // TODO: Handle passive joint
+  Eigen::VectorXd wbc_joint_trq_cmd = Eigen::VectorXd::Zero(sa_.rows());
+  Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(sa_.rows());
   wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
-              tci_container_->internal_constraint_list, rf_des, joint_trq_cmd_,
-              joint_acc_cmd, rf_des);
+              tci_container_->internal_constraint_list, rf_des,
+              wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des);
+  joint_trq_cmd_ = (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
+                   wbc_joint_trq_cmd;
+  Eigen::VectorXd joint_acc_cmd =
+      (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
+      wbc_joint_acc_cmd;
   if (sp_->state == draco_states::kLFootSwing) {
     l_rf_cmd_ = Eigen::VectorXd::Zero(6);
     r_rf_cmd_ = rf_des;

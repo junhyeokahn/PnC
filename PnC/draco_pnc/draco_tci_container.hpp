@@ -9,6 +9,7 @@ public:
   DracoTCIContainer(RobotSystem *_robot);
   virtual ~DracoTCIContainer();
 
+  Task *joint_task;
   Task *com_task;
   Task *torso_ori_task;
   Task *upper_body_task;

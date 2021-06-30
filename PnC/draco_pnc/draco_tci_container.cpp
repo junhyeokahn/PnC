@@ -6,6 +6,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/draco/pnc.yaml");
 
   // Initialize Task
+  joint_task = new JointTask(robot_);
+
   com_task = new CenterOfMassTask(robot_);
   com_task->kp = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_com");
   com_task->kd = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
@@ -85,6 +87,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
 }
 
 DracoTCIContainer::~DracoTCIContainer() {
+  delete joint_task;
   delete com_task;
   delete torso_ori_task;
   delete upper_body_task;

@@ -23,6 +23,7 @@ constexpr int kLFootSwing = 5;
 constexpr int kRFootContactTransitionStart = 6;
 constexpr int kRFootContactTransitionEnd = 7;
 constexpr int kRFootSwing = 8;
+constexpr int kSwaying = 10;
 } // namespace draco_states
 
 class DracoControlArchitecture : public ControlArchitecture {
