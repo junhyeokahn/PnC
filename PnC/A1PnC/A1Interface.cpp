@@ -26,7 +26,7 @@ A1Interface::A1Interface() : EnvInterface() {
   interrupt = new InterruptLogic();
 
   sp_ = A1StateProvider::getStateProvider(robot_);
-  state_estimator_ = new A1StateEstimator(robot_);
+  // state_estimator_ = new A1StateEstimator(robot_);
 
   waiting_count_ = 10;
 
@@ -48,6 +48,18 @@ A1Interface::A1Interface() : EnvInterface() {
   DataManager::GetDataManager()->RegisterData(
       &data_torque_, VECT, "actual_torque", robot_->getNumActuatedDofs());
 
+  // TEMP
+  initial_config = Eigen::VectorXd::Zero(12);
+  final_config = Eigen::VectorXd::Zero(12);
+  jpos_step_des = Eigen::VectorXd::Zero(12);
+
+  DataManager::GetDataManager()->RegisterData(
+      &initial_config, VECT, "initial_config", 12);
+  DataManager::GetDataManager()->RegisterData(
+      &final_config, VECT, "final_config", 12);
+  DataManager::GetDataManager()->RegisterData(
+      &jpos_step_des, VECT, "jpos_step_des", 12);
+
   _ParameterSetting();
 
   myUtils::color_print(myColor::BoldCyan, border);
@@ -56,7 +68,7 @@ A1Interface::A1Interface() : EnvInterface() {
 A1Interface::~A1Interface() {
   delete robot_;
   delete interrupt;
-  delete state_estimator_;
+  // delete state_estimator_;
   // delete test_;
 }
 
@@ -67,7 +79,7 @@ void A1Interface::getCommand(void* _data, void* _command) {
   std::cout << "Hello" << std::endl;
 
   if (!(_Initialization(data, cmd))) {
-    state_estimator_->Update(data);
+    // state_estimator_->Update(data);
     std::cout << "Hello" << std::endl;
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
@@ -152,7 +164,7 @@ bool A1Interface::_Initialization(A1SensorData* data, A1Command* cmd) {
   }
   if (count_ < waiting_count_) {
     _SetStopCommand(data, cmd);
-    state_estimator_->Initialization(data);
+    // state_estimator_->Initialization(data);
     DataManager::GetDataManager()->start();
     return true;
   }

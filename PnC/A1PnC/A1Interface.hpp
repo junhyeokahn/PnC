@@ -41,6 +41,7 @@ class A1SensorData{
       bool frfoot_contact;
       bool rlfoot_contact;
       bool rrfoot_contact;
+
 };
 
 
@@ -72,7 +73,7 @@ class A1Interface : public EnvInterface{
       void _SaveData(A1SensorData* data, A1Command* cmd);
 
       A1StateProvider* sp_;
-      A1StateEstimator* state_estimator_;
+      // A1StateEstimator* state_estimator_;
 
       Eigen::VectorXd cmd_jpos_;
       Eigen::VectorXd cmd_jvel_;
@@ -92,6 +93,10 @@ class A1Interface : public EnvInterface{
       A1Interface();
       virtual ~A1Interface();
       virtual void getCommand(void* _sensor_data, void* _command_data);
+      // TEMP VARS
+      Eigen::VectorXd initial_config;
+      Eigen::VectorXd jpos_step_des;
+      Eigen::VectorXd final_config;
 
 };
 
