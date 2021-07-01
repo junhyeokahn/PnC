@@ -6,31 +6,56 @@ import A1Interface
 import numpy as np
 
 def main():
-    draco_interface = A1Interface.A1Interface()
-    draco_sensor_data = A1Interface.A1SensorData()
-    draco_command = A1Interface.A1Command()
+    interface_ = A1Interface.A1Interface()
+    sensor_data_ = A1Interface.A1SensorData()
+    command_ = A1Interface.A1Command()
 
-    # draco_sensor_data.imu_ang_vel = np.zeros(3)
-    # draco_sensor_data.imu_acc = np.array([0, 0, -9.81])
-    # draco_sensor_data.q = np.array([0, 0, -0.5, 1.8, 1.03, 0, 0, -0.5, 1.8, 1.03])
-    # draco_sensor_data.qdot = np.zeros(10)
-    # draco_sensor_data.jtrq = np.zeros(10)
-    # draco_sensor_data.temperature = np.zeros(10)
-    # draco_sensor_data.motor_current = np.zeros(10)
-    # draco_sensor_data.bus_voltage = np.zeros(10)
-    # draco_sensor_data.bus_current = np.zeros(10)
-    # draco_sensor_data.rotor_inertia = np.zeros(10)
-    # draco_sensor_data.rfoot_ati = np.zeros(6)
-    # draco_sensor_data.lfoot_ati = np.zeros(6)
-    # draco_sensor_data.rfoot_contact = True
-    # draco_sensor_data.lfoot_contact = True
-    # draco_command.turn_off = False
-    # draco_command.q = np.zeros(10)
-    # draco_command.qdot = np.zeros(10)
-    # draco_command.jtrq = np.zeros(10)
+    #######################
+    # Set up the Simulation
+    #######################
 
-    #for i in range(10):
-        #draco_interface.getCommand(draco_sensor_data, draco_command)
+    while True:
+        #################################
+        # Set Sensor Data from Simulation
+        #################################
+        sensor_data_.imu_ang_vel = np.zeros(3)
+        sensor_data_.imu_acc = np.zeros(3)
+
+        sensor_data_.q = np.zeros(12)
+        sensor_data_.qdot = np.zeros(12)
+        sensor_data_.jtrq = np.zeros(12)
+        sensor_data_.virtual_q = np.zeros(6)
+        sensor_data_.virtual_qdot = np.zeros(6)
+
+        sensor_data_.flfoot_contact = True
+        sensor_data_.frfoot_contact = True
+        sensor_data_.rlfoot_contact = True
+        sensor_data_.rrfoot_contact = True
+
+        ##############################
+        # Call Interface to getCommand
+        ##############################
+        interface_.getCommand(sensor_data_, command_)
+
+        #####################################
+        # Compute PD Values and add to Torque
+        #####################################
+        trq_cmd_ = np.zeros(18)
+        pos_cmd_ = np.zeros(12)
+        vel_cmd_ = np.zeros(12)
+        pos_cmd_ = command_.q
+        vel_cmd_ = command_.qdot
+
+        for i in range(12):
+            trq_cmd_[i+6]= kp_[i] * (pos_cmd_[i] - sensor_data_.q[i]) +
+                           kd_[i] * (vel_cmd_[i] - sensor_data_.qdot[i]) +
+                           command_.jtrq[i]
+
+        ########################
+        # Feed data to simulator
+        ########################
+
+    # end While True
 
     print("Done")
 
