@@ -42,8 +42,8 @@ A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
 A1StateEstimator::~A1StateEstimator() {
   delete ori_est_;
   delete x_vel_est_;
-  // delete y_vel_est_;
-  // delete z_vel_est_;
+  delete y_vel_est_;
+  delete z_vel_est_;
 }
 
 void A1StateEstimator::Initialization(A1SensorData* data) {

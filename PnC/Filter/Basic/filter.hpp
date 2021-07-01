@@ -120,10 +120,10 @@ class CFilterButterworth24db {
 class AverageFilter { // : public filter {
  public:
   AverageFilter(double dt, double t_const, double limit);
-  virtual ~AverageFilter();
-  virtual void input(double input_value);
-  virtual double output(void);
-  virtual void clear(void);
+  ~AverageFilter();
+  void input(double input_value);
+  double output(void);
+  void clear(void);
   void initialization(double);
 
  private:

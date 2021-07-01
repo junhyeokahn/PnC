@@ -47,8 +47,8 @@ class A1StateEstimator {
 
   BasicAccumulation* ori_est_;
   AverageFilter* x_vel_est_;
-  // AverageFilter* y_vel_est_;
-  // AverageFilter* z_vel_est_;
+  AverageFilter* y_vel_est_;
+  AverageFilter* z_vel_est_;
   // filter* x_vel_est_;
   // filter* y_vel_est_;
   // filter* z_vel_est_;
