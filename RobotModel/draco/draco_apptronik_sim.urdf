@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<robot name="draco">
+<robot name="draco_3_model">
 
   <material name = "dark_gray">
     <color rgba="0.3 0.3 0.3 1"/>
@@ -23,7 +23,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/torso_link.stl"/>
+        <mesh filename="package://meshes/torso_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -61,7 +61,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/neck_pitch_link.stl"/>
+        <mesh filename="package://meshes/neck_pitch_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -85,7 +85,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_shoulder_fe_link.stl"/>
+        <mesh filename="package://meshes/l_shoulder_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -109,7 +109,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_shoulder_aa_link.stl"/>
+        <mesh filename="package://meshes/l_shoulder_aa_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -133,7 +133,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_shoulder_ie_link.stl"/>
+        <mesh filename="package://meshes/l_shoulder_ie_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -157,7 +157,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_elbow_fe_link.stl"/>
+        <mesh filename="package://meshes/l_elbow_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -181,7 +181,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_wrist_ps_link.stl"/>
+        <mesh filename="package://meshes/l_wrist_ps_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -219,7 +219,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_sake_gripper_link.stl"/>
+        <mesh filename="package://meshes/l_sake_gripper_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -284,7 +284,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_shoulder_fe_link.stl"/>
+        <mesh filename="package://meshes/r_shoulder_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -308,7 +308,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_shoulder_aa_link.stl"/>
+        <mesh filename="package://meshes/r_shoulder_aa_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -332,7 +332,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_shoulder_ie_link.stl"/>
+        <mesh filename="package://meshes/r_shoulder_ie_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -356,7 +356,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_elbow_fe_link.stl"/>
+        <mesh filename="package://meshes/r_elbow_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -380,7 +380,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_wrist_ps_link.stl"/>
+        <mesh filename="package://meshes/r_wrist_ps_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -418,7 +418,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_sake_gripper_link.stl"/>
+        <mesh filename="package://meshes/r_sake_gripper_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -470,6 +470,21 @@
     </inertial>
   </link>
 
+  <!--=============================== lower body ===========================-->
+  <!--These are special mechanism plugin tags for the rolling joint plugin-->
+  <!--This allows Apptronik's HL Driver to parse rolling joint with appropriate kinematics and dynamics-->
+  <!--Joint effort and velocity limits here, are half of the max permissible limits for the Knee FE-->
+  <mechanism name="l_knee_fe" type="aptk::ctrl::RollingJointMechanism">
+    <proximal_component joint="l_knee_fe_jp"/>
+    <distal_component joint="l_knee_fe_jd" ratio="1.0"/>
+    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+  </mechanism>
+  <mechanism name="r_knee_fe" type="aptk::ctrl::RollingJointMechanism">
+    <proximal_component joint="r_knee_fe_jp"/>
+    <distal_component joint="r_knee_fe_jd" ratio="1.0"/>
+    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+  </mechanism>
+
   <!--=============================== l_hip_ie (l_hip_ie_link) ===========================-->
   <joint name="l_hip_ie" type="revolute">
     <origin rpy="0.523599 0 0" xyz="0 0.06 -0.0893782"/>
@@ -483,7 +498,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_hip_ie_link.stl"/>
+        <mesh filename="package://meshes/l_hip_ie_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -507,7 +522,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_hip_aa_link.stl"/>
+        <mesh filename="package://meshes/l_hip_aa_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -531,7 +546,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_hip_fe_link.stl"/>
+        <mesh filename="package://meshes/l_hip_fe_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -555,7 +570,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_knee_fe_lp.stl"/>
+        <mesh filename="package://meshes/l_knee_fe_lp.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -576,7 +591,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_knee_adj_link.stl"/>
+        <mesh filename="package://meshes/l_knee_adj_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -601,7 +616,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_knee_fe_ld.stl"/>
+        <mesh filename="package://meshes/l_knee_fe_ld.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -627,7 +642,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_ankle_fe_link.stl"/>
+        <mesh filename="package://meshes/l_ankle_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -651,7 +666,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_ankle_ie_link.stl"/>
+        <mesh filename="package://meshes/l_ankle_ie_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -695,7 +710,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_hip_ie_link.stl"/>
+        <mesh filename="package://meshes/r_hip_ie_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -719,7 +734,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_hip_aa_link.stl"/>
+        <mesh filename="package://meshes/r_hip_aa_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -743,7 +758,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_hip_fe_link.stl"/>
+        <mesh filename="package://meshes/r_hip_fe_link.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -767,7 +782,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_knee_fe_lp.stl"/>
+        <mesh filename="package://meshes/r_knee_fe_lp.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -788,7 +803,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_knee_adj_link.stl"/>
+        <mesh filename="package://meshes/r_knee_adj_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -814,7 +829,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_knee_fe_ld.stl"/>
+        <mesh filename="package://meshes/r_knee_fe_ld.stl"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -840,7 +855,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_ankle_fe_link.stl"/>
+        <mesh filename="package://meshes/r_ankle_fe_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -864,7 +879,7 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_ankle_ie_link.stl"/>
+        <mesh filename="package://meshes/r_ankle_ie_link.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
