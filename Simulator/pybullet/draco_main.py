@@ -150,8 +150,10 @@ if __name__ == "__main__":
                                                link_id['r_foot_contact'])[2, 3]
         lf_height = pybullet_util.get_link_iso(robot,
                                                link_id['l_foot_contact'])[2, 3]
-        sensor_data_dict['b_rf_contact'] = True if rf_height <= 0.01 else False
-        sensor_data_dict['b_lf_contact'] = True if lf_height <= 0.01 else False
+        sensor_data_dict[
+            'b_rf_contact'] = True if rf_height <= 0.005 else False
+        sensor_data_dict[
+            'b_lf_contact'] = True if lf_height <= 0.005 else False
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
@@ -199,20 +201,24 @@ if __name__ == "__main__":
             start_time = time.time()
         interface.getCommand(sensor_data, command)
 
+        command_joint_positions = copy.deepcopy(command.joint_positions)
+        command_joint_velocities = copy.deepcopy(command.joint_velocities)
+        command_joint_torques = copy.deepcopy(command.joint_torques)
+
         if Config.PRINT_TIME:
             end_time = time.time()
             print("ctrl computation time: ", end_time - start_time)
 
         # Exclude Knee Distal Joints Command
-        del command.joint_positions["l_knee_fe_jd"]
-        del command.joint_positions["r_knee_fe_jd"]
-        del command.joint_velocities["l_knee_fe_jd"]
-        del command.joint_velocities["r_knee_fe_jd"]
-        del command.joint_torques["l_knee_fe_jd"]
-        del command.joint_torques["r_knee_fe_jd"]
+        del command_joint_positions["l_knee_fe_jp"]
+        del command_joint_positions["r_knee_fe_jp"]
+        del command_joint_velocities["l_knee_fe_jp"]
+        del command_joint_velocities["r_knee_fe_jp"]
+        del command_joint_torques["l_knee_fe_jp"]
+        del command_joint_torques["r_knee_fe_jp"]
 
         # Apply Command
-        pybullet_util.set_motor_trq(robot, joint_id, command.joint_torques)
+        pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
 
         # Save Image
         if (Config.VIDEO_RECORD) and (count % Config.RECORD_FREQ == 0):

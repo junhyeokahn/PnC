@@ -61,24 +61,30 @@ void SingleSupportSwing::lastVisit() {
 
 bool SingleSupportSwing::endOfState() {
 
+  // if (state_machine_time_ >= end_time_) {
+  // return true;
+  //} else {
+  // if (state_machine_time_ >= 0.5 * end_time_) {
+  // if (leg_side_ == EndEffector::LFoot) {
+  // if (sp_->b_lf_contact) {
+  // printf("Early left foot contact at %f/%f\n", state_machine_time_,
+  // end_time_);
+  // return true;
+  //}
+  //} else {
+  // if (sp_->b_rf_contact) {
+  // printf("Early right foot contact at %f/%f\n", state_machine_time_,
+  // end_time_);
+  // return true;
+  //}
+  //}
+  //}
+  // return false;
+  //}
+
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {
-    if (state_machine_time_ >= 0.5 * end_time_) {
-      if (leg_side_ == EndEffector::LFoot) {
-        if (sp_->b_lf_contact) {
-          printf("Early left foot contact at %f/%f\n", state_machine_time_,
-                 end_time_);
-          return true;
-        }
-      } else {
-        if (sp_->b_rf_contact) {
-          printf("Early right foot contact at %f/%f\n", state_machine_time_,
-                 end_time_);
-          return true;
-        }
-      }
-    }
     return false;
   }
 }

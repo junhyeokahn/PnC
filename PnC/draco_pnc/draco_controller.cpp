@@ -25,8 +25,8 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
     act_list.push_back(false);
   for (int i = 0; i < robot_->n_a; ++i)
     act_list.push_back(true);
-  act_list[l_jd_idx] = false;
-  act_list[r_jd_idx] = false;
+  act_list[l_jp_idx] = false;
+  act_list[r_jp_idx] = false;
 
   int n_q_dot(act_list.size());
   int n_active(std::count(act_list.begin(), act_list.end(), true));

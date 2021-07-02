@@ -116,8 +116,13 @@ if __name__ == "__main__":
 
         rf_height = pybullet_util.get_link_iso(robot, link_id['r_sole'])[2, 3]
         lf_height = pybullet_util.get_link_iso(robot, link_id['l_sole'])[2, 3]
-        sensor_data_dict['b_rf_contact'] = True if rf_height <= 0.01 else False
-        sensor_data_dict['b_lf_contact'] = True if lf_height <= 0.01 else False
+        sensor_data_dict[
+            'b_rf_contact'] = True if rf_height <= 0.005 else False
+        sensor_data_dict[
+            'b_lf_contact'] = True if lf_height <= 0.005 else False
+
+        sensor_data_dict['b_rf_contact'] = False
+        sensor_data_dict['b_lf_contact'] = False
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
