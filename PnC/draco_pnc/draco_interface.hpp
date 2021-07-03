@@ -12,24 +12,12 @@ class DracoSensorData {
 public:
   DracoSensorData() {}
   virtual ~DracoSensorData() {
-    base_com_pos.setZero();
-    base_com_quat.setZero();
-    base_com_lin_vel.setZero();
-    base_com_ang_vel.setZero();
-    base_joint_pos.setZero();
-    base_joint_quat.setZero();
-    base_joint_lin_vel.setZero();
-    base_joint_ang_vel.setZero();
+    imu_frame_iso.setZero();
+    imu_frame_vel.setZero();
   }
 
-  Eigen::Vector3d base_com_pos;
-  Eigen::Vector4d base_com_quat; // scalar first quaternion (w, x, y, z)
-  Eigen::Vector3d base_com_lin_vel;
-  Eigen::Vector3d base_com_ang_vel;
-  Eigen::Vector3d base_joint_pos;
-  Eigen::Vector4d base_joint_quat; // scalar first quaternion (w, x, y, z)
-  Eigen::Vector3d base_joint_lin_vel;
-  Eigen::Vector3d base_joint_ang_vel;
+  Eigen::Matrix<double, 4, 4> imu_frame_iso;
+  Eigen::Matrix<double, 6, 1> imu_frame_vel;
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
 
@@ -57,7 +45,7 @@ protected:
   void SetSafeCommand(DracoSensorData *data, DracoCommand *cmd);
 
 public:
-  DracoInterface();
+  DracoInterface(bool b_sim);
   virtual ~DracoInterface();
   virtual void getCommand(void *_sensor_data, void *_command_data);
 };

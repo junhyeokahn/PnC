@@ -20,5 +20,8 @@ protected:
   DracoStateProvider *sp_;
   RobotSystem *robot_;
 
+  Eigen::Isometry3d iso_base_joint_to_imu_;
+  Eigen::Isometry3d iso_base_com_to_imu_;
+
   void _update_dcm();
 };

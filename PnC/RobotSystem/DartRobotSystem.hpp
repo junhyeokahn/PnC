@@ -23,6 +23,7 @@ public:
   virtual std::map<std::string, double>
   vector_to_map(const Eigen::VectorXd &cmd_vec);
   virtual Eigen::VectorXd map_to_vector(std::map<std::string, double>);
+  virtual Eigen::Vector3d get_base_local_com_pos();
   virtual void update_system(const Eigen::Vector3d base_com_pos,
                              const Eigen::Quaternion<double> base_com_quat,
                              const Eigen::Vector3d base_com_lin_vel,

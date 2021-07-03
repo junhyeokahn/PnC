@@ -81,6 +81,10 @@ void DartRobotSystem::_config_robot() {
   }
 }
 
+Eigen::Vector3d DartRobotSystem::get_base_local_com_pos() {
+  return skel_->getRootBodyNode()->getLocalCOM();
+}
+
 int DartRobotSystem::get_q_idx(const std::string joint_name) {
   return joint_id_[joint_name]->getIndexInSkeleton(0);
 }

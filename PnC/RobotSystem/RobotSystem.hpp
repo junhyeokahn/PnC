@@ -101,6 +101,12 @@ public:
   virtual Eigen::VectorXd map_to_vector(std::map<std::string, double>) = 0;
 
   /*
+   * Get relative pos of base com frame w.r.t. base joint frame
+   *
+   */
+  virtual Eigen::Vector3d get_base_local_com_pos() = 0;
+
+  /*
    * Update generalized coordinate
    *
    * Parameters
@@ -197,7 +203,7 @@ public:
    *
    * Returns
    * -------
-   * link_iso (Eigen::Isometry): Link SE(3)
+   * link_iso (Eigen::Isometry): Link COM SE(3)
    */
   virtual Eigen::Isometry3d get_link_iso(const std::string link_id) = 0;
 

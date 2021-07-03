@@ -12,7 +12,7 @@
 #include "Utils/IO/IOUtilities.hpp"
 #include "Utils/Math/MathUtilities.hpp"
 
-DracoInterface::DracoInterface() : Interface() {
+DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   std::string border = "=";
   for (int i = 0; i < 79; ++i) {
     border += "=";
@@ -32,10 +32,16 @@ DracoInterface::DracoInterface() : Interface() {
   waiting_count_ = 2;
 
   control_architecture_ = new DracoControlArchitecture(robot_);
+  if (_b_sim) {
+    control_architecture_->state = draco_states::kStand;
+    sp_->state = control_architecture_->state;
+  } else {
+    control_architecture_->state = draco_states::kInitialize;
+    sp_->state = control_architecture_->state;
+  }
   interrupt = new DracoInterruptLogic(
       static_cast<DracoControlArchitecture *>(control_architecture_));
 
-  sp_->state = control_architecture_->state;
   myUtils::color_print(myColor::BoldCyan, border);
 }
 

@@ -122,7 +122,7 @@ if __name__ == "__main__":
     pybullet_util.set_joint_friction(robot, joint_id, 0)
 
     # Construct Interface
-    interface = draco_interface.DracoInterface()
+    interface = draco_interface.DracoInterface(True)
     sensor_data = draco_interface.DracoSensorData()
     command = draco_interface.DracoCommand()
 
@@ -155,6 +155,11 @@ if __name__ == "__main__":
         sensor_data_dict[
             'b_lf_contact'] = True if lf_height <= 0.005 else False
 
+        sensor_data_dict['imu_frame_iso'] = pybullet_util.get_link_iso(
+            robot, link_id['torso_imu'])
+        sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
+            robot, link_id['torso_imu'])
+
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
         if pybullet_util.is_key_triggered(keys, 'w'):
@@ -173,24 +178,8 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_e = True
 
         # Copy sensor_data_dict
-        sensor_data.base_com_pos = sensor_data_dict["base_com_pos"]
-        sensor_data.base_com_quat = np.array([
-            sensor_data_dict["base_com_quat"][3],
-            sensor_data_dict["base_com_quat"][0],
-            sensor_data_dict["base_com_quat"][1],
-            sensor_data_dict["base_com_quat"][2],
-        ])
-        sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
-        sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
-        sensor_data.base_joint_pos = sensor_data_dict["base_joint_pos"]
-        sensor_data.base_joint_quat = np.array([
-            sensor_data_dict["base_joint_quat"][3],
-            sensor_data_dict["base_joint_quat"][0],
-            sensor_data_dict["base_joint_quat"][1],
-            sensor_data_dict["base_joint_quat"][2],
-        ])
-        sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
-        sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
+        sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
+        sensor_data.imu_frame_vel = sensor_data_dict['imu_frame_vel']
         sensor_data.joint_positions = sensor_data_dict["joint_pos"]
         sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
         sensor_data.b_rf_contact = sensor_data_dict["b_rf_contact"]
