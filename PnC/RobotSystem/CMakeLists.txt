@@ -5,7 +5,7 @@ add_library(myRobotSystem SHARED ${sources}
                                  ${robot_system_headers})
 
 target_link_libraries(myRobotSystem ${DART_LIBRARIES}
-                                    myUtils)
+                                    pnc-util)
 
 install(TARGETS myRobotSystem DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${robot_system_headers} DESTINATION

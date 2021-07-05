@@ -1,10 +1,10 @@
 #pragma once
 
+#include "utils/util.hpp"
 #include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
 #include <PnC/WBC/Contact.hpp>
 #include <PnC/WBC/InternalConstraint.hpp>
 #include <PnC/WBC/Task.hpp>
-#include <Utils/IO/IOUtilities.hpp>
 
 // Implicit Hierarchical Whole Body Controller
 class IHWBC {

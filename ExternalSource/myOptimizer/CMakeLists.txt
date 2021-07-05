@@ -1,5 +1,1 @@
 add_subdirectory(Goldfarb)
-add_subdirectory(ConicSolver)
-if(GUROBI_FOUND)
-    add_subdirectory(EigenGurobi)
-endif()

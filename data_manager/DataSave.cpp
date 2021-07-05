@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <Utils/IO/CommUDP.hpp>
-#include <Utils/IO/IOUtilities.hpp>
+#include <utils/util.hpp>
 #include <Utils/IO/DataManager.hpp>
 
 DataSave::DataSave(bool b_verbose):Pthread(), socket1_(0), socket2_(0){
@@ -39,7 +39,7 @@ void DataSave::run(void ) {
       }
 
       // Save Data
-      myUtils::saveVector(&data[st_idx],
+      util::SaveVector(&data[st_idx],
                          data_setup.data_name[i],
                          data_setup.num_array_data[i]);
       st_idx += data_setup.num_array_data[i];

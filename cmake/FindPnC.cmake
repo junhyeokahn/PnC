@@ -9,7 +9,7 @@ find_path(PNC_INCLUDE_DIR
           PATHS "/usr/local/include/PnC"
           )
 find_library(PNC_UTILS_LIBRARY
-             NAMES myUtils
+             NAMES util
              PATHS "/usr/local/lib"
              )
 find_library(DRACO_PNC_LIBRARY

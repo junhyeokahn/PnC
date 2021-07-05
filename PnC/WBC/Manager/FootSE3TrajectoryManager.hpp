@@ -1,12 +1,12 @@
 #pragma once
 
-#include <PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp>
-#include <PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp>
-#include <PnC/RobotSystem/RobotSystem.hpp>
-#include <PnC/WBC/Contact.hpp>
-#include <PnC/WBC/Task.hpp>
-#include <Utils/Math/HermiteCurveVec.hpp>
-#include <Utils/Math/HermiteQuaternionCurve.hpp>
+#include "PnC/Planner/Locomotion/DCMPlanner/DCMPlanner.hpp"
+#include "PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp"
+#include "PnC/RobotSystem/RobotSystem.hpp"
+#include "PnC/WBC/Contact.hpp"
+#include "PnC/WBC/Task.hpp"
+#include "utils/interpolation.hpp"
+#include "utils/util.hpp"
 
 // Object to manage common trajectory primitives
 class FootSE3TrajectoryManager {

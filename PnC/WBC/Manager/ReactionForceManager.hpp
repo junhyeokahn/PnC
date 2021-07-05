@@ -1,8 +1,7 @@
 #pragma once
 
 #include <PnC/WBC/Contact.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/MathUtilities.hpp>
+#include <utils/util.hpp>
 
 class ReactionForceManager {
 public:

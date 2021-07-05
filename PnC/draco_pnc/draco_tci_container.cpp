@@ -9,17 +9,17 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   joint_task = new JointTask(robot_);
 
   com_task = new CenterOfMassTask(robot_);
-  com_task->kp = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_com");
-  com_task->kd = myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
-  com_task->w_hierarchy = myUtils::readParameter<double>(cfg["wbc"], "w_com");
+  com_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_com");
+  com_task->kd = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
+  com_task->w_hierarchy = util::ReadParameter<double>(cfg["wbc"], "w_com");
 
   torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"}, "base");
   torso_ori_task->kp =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_torso_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_torso_ori");
   torso_ori_task->kd =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_torso_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_torso_ori");
   torso_ori_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_torso_ori");
+      util::ReadParameter<double>(cfg["wbc"], "w_torso_ori");
 
   std::vector<std::string> upper_body_joint = {
       "neck_pitch",    "l_shoulder_fe", "l_shoulder_aa", "l_shoulder_ie",
@@ -27,44 +27,44 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
       "r_shoulder_aa", "r_shoulder_ie", "r_elbow_fe",    "r_wrist_ps",
       "r_wrist_pitch"};
   upper_body_task = new SelectedJointTask(robot_, upper_body_joint);
-  upper_body_task->kp = myUtils::readParameter<Eigen::VectorXd>(
+  upper_body_task->kp = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"], "kp_upper_body_joint");
-  upper_body_task->kd = myUtils::readParameter<Eigen::VectorXd>(
+  upper_body_task->kd = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"], "kd_upper_body_joint");
   upper_body_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_upper_body_joint");
+      util::ReadParameter<double>(cfg["wbc"], "w_upper_body_joint");
 
   rfoot_pos_task = new LinkPosTask(robot_, {"r_foot_contact"}, "rfoot");
   rfoot_pos_task->kp =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   rfoot_pos_task->kd =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
   rfoot_pos_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
 
   rfoot_ori_task = new LinkOriTask(robot_, {"r_foot_contact"}, "rfoot");
   rfoot_ori_task->kp =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   rfoot_ori_task->kd =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
   rfoot_ori_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
 
   lfoot_pos_task = new LinkPosTask(robot_, {"l_foot_contact"}, "lfoot");
   lfoot_pos_task->kp =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_pos");
   lfoot_pos_task->kd =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
   lfoot_pos_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
 
   lfoot_ori_task = new LinkOriTask(robot_, {"l_foot_contact"}, "lfoot");
   lfoot_ori_task->kp =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_foot_ori");
   lfoot_ori_task->kd =
-      myUtils::readParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
   lfoot_ori_task->w_hierarchy =
-      myUtils::readParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
 
   task_list.push_back(com_task);
   task_list.push_back(torso_ori_task);

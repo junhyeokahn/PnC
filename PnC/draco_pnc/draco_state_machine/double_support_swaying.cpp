@@ -5,7 +5,7 @@ DoubleSupportSwaying::DoubleSupportSwaying(
     DracoControlArchitecture *_ctrl_arch, RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  myUtils::pretty_constructor(2, "SM: Double Support Swaying");
+  util::PrettyConstructor(2, "SM: Double Support Swaying");
 
   ctrl_arch_ = _ctrl_arch;
 

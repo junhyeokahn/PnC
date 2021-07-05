@@ -68,8 +68,8 @@ endif()
 ##=============================================================================
 ## Add Subdirectory
 ##=============================================================================
-add_subdirectory(Simulator)
-add_subdirectory(Utils)
+add_subdirectory(simulator)
+add_subdirectory(utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 add_subdirectory(test)

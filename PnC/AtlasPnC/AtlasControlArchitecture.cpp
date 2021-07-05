@@ -32,11 +32,11 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
   rfoot_tm = new FootSE3TrajectoryManager(
       tci_container_->rfoot_pos_task, tci_container_->rfoot_ori_task, robot_);
   rfoot_tm->swing_height =
-      myUtils::readParameter<double>(cfg["walking"], "swing_height");
+      util::ReadParameter<double>(cfg["walking"], "swing_height");
   lfoot_tm = new FootSE3TrajectoryManager(
       tci_container_->lfoot_pos_task, tci_container_->lfoot_ori_task, robot_);
   lfoot_tm->swing_height =
-      myUtils::readParameter<double>(cfg["walking"], "swing_height");
+      util::ReadParameter<double>(cfg["walking"], "swing_height");
   upper_body_tm =
       new UpperBodyTrajectoryManager(tci_container_->upper_body_task, robot_);
   floating_base_tm = new FloatingBaseTrajectoryManager(
@@ -48,8 +48,8 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
 
   // Initialize Hierarchy Manager
   double w_contact_foot, w_swing_foot;
-  myUtils::readParameter(cfg["wbc"], "w_contact_foot", w_contact_foot);
-  myUtils::readParameter(cfg["wbc"], "w_swing_foot", w_swing_foot);
+  util::ReadParameter(cfg["wbc"], "w_contact_foot", w_contact_foot);
+  util::ReadParameter(cfg["wbc"], "w_swing_foot", w_swing_foot);
   rfoot_pos_hm = new TaskHierarchyManager(tci_container_->rfoot_pos_task,
                                           w_contact_foot, w_swing_foot);
   rfoot_ori_hm = new TaskHierarchyManager(tci_container_->rfoot_ori_task,
@@ -61,7 +61,7 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
 
   // Initialize Reaction Force Manager
   double rf_max;
-  myUtils::readParameter(cfg["wbc"], "rf_z_max", rf_max);
+  util::ReadParameter(cfg["wbc"], "rf_z_max", rf_max);
   rfoot_fm = new ReactionForceManager(tci_container_->rfoot_contact, rf_max);
   lfoot_fm = new ReactionForceManager(tci_container_->lfoot_contact, rf_max);
 
@@ -69,11 +69,11 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
   state_machines[AtlasStates::Stand] =
       new DoubleSupportStand(AtlasStates::Stand, this, robot_);
   ((DoubleSupportStand *)state_machines[AtlasStates::Stand])->end_time =
-      myUtils::readParameter<double>(cfg["walking"], "ini_stand_dur");
+      util::ReadParameter<double>(cfg["walking"], "ini_stand_dur");
   ((DoubleSupportStand *)state_machines[AtlasStates::Stand])->rf_z_max_time =
-      myUtils::readParameter<double>(cfg["walking"], "rf_z_max_time");
+      util::ReadParameter<double>(cfg["walking"], "rf_z_max_time");
   ((DoubleSupportStand *)state_machines[AtlasStates::Stand])->com_height_des =
-      myUtils::readParameter<double>(cfg["walking"], "com_height");
+      util::ReadParameter<double>(cfg["walking"], "com_height");
 
   state_machines[AtlasStates::Balance] =
       new DoubleSupportBalance(AtlasStates::Balance, this, robot_);

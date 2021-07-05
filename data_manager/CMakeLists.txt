@@ -35,7 +35,7 @@ DataSave.h
 DataProtocol.h
 ../Utils/IO/Pthread.hpp
 ../Utils/IO/CommUDP.hpp
-../Utils/IO/IOUtilities.hpp
+../utils/util.hpp
 ../Utils/IO/DataManager.hpp
 )
 

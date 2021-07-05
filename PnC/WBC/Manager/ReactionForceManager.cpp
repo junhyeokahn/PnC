@@ -1,8 +1,8 @@
-#include <PnC/WBC/Manager/ReactionForceManager.hpp>
+#include "PnC/WBC/Manager/ReactionForceManager.hpp"
 
 ReactionForceManager::ReactionForceManager(Contact *_contact,
                                            double _maximum_rf_z_max) {
-  myUtils::pretty_constructor(2, "TrajectoryManager: Max Normal Force");
+  util::PrettyConstructor(2, "TrajectoryManager: Max Normal Force");
 
   contact_ = _contact;
   maximum_rf_z_max_ = _maximum_rf_z_max;
@@ -29,16 +29,14 @@ void ReactionForceManager::InitializeRampToMax(double _start_time,
 }
 
 void ReactionForceManager::UpdateRampToMin(double _curr_time) {
-  double t =
-      myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
+  double t = util::Clamp(_curr_time, start_time_, start_time_ + duration_);
   contact_->rf_z_max =
       (minimum_rf_z_max_ - starting_rf_z_max_) / duration_ * (t - start_time_) +
       starting_rf_z_max_;
 }
 
 void ReactionForceManager::UpdateRampToMax(double _curr_time) {
-  double t =
-      myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
+  double t = util::Clamp(_curr_time, start_time_, start_time_ + duration_);
   contact_->rf_z_max =
       (maximum_rf_z_max_ - starting_rf_z_max_) / duration_ * (t - start_time_) +
       starting_rf_z_max_;

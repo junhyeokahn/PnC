@@ -2,7 +2,7 @@
 #include <PnC/AtlasPnC/AtlasController.hpp>
 #include <PnC/WBC/IHWBC/IHWBC.hpp>
 #include <PnC/WBC/IHWBC/JointIntegrator.hpp>
-#include <Utils/IO/DataManager.hpp>
+//#include <Utils/IO/DataManager.hpp>
 
 AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
@@ -40,24 +40,24 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   Eigen::MatrixXd sf = Eigen::MatrixXd::Zero(robot_->n_floating, n_q_dot);
   sf.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
   wbc_ = new IHWBC(sf, sa, sv);
-  wbc_->b_trq_limit = myUtils::readParameter<bool>(cfg["wbc"], "b_trq_limit");
+  wbc_->b_trq_limit = util::ReadParameter<bool>(cfg["wbc"], "b_trq_limit");
   if (wbc_->b_trq_limit) {
     wbc_->trq_limit = sa.block(0, robot_->n_floating, n_active,
                                n_q_dot - robot_->n_floating) *
                       robot_->joint_trq_limit;
   }
   wbc_->lambda_q_ddot =
-      myUtils::readParameter<double>(cfg["wbc"], "lambda_q_ddot");
-  wbc_->lambda_rf = myUtils::readParameter<double>(cfg["wbc"], "lambda_rf");
+      util::ReadParameter<double>(cfg["wbc"], "lambda_q_ddot");
+  wbc_->lambda_rf = util::ReadParameter<double>(cfg["wbc"], "lambda_rf");
 
   // Initialize Joint Integrator
   joint_integrator_ = new JointIntegrator(robot_->n_a, sp_->servo_rate);
   joint_integrator_->setVelocityFrequencyCutOff(
-      myUtils::readParameter<double>(cfg["wbc"], "vel_cutoff_freq"));
+      util::ReadParameter<double>(cfg["wbc"], "vel_cutoff_freq"));
   joint_integrator_->setPositionFrequencyCutOff(
-      myUtils::readParameter<double>(cfg["wbc"], "pos_cutoff_freq"));
+      util::ReadParameter<double>(cfg["wbc"], "pos_cutoff_freq"));
   joint_integrator_->setMaxPositionError(
-      myUtils::readParameter<double>(cfg["wbc"], "max_pos_err"));
+      util::ReadParameter<double>(cfg["wbc"], "max_pos_err"));
   joint_integrator_->setVelocityBounds(robot_->joint_vel_limit.col(0),
                                        robot_->joint_vel_limit.col(1));
   joint_integrator_->setPositionBounds(robot_->joint_pos_limit.col(0),
@@ -69,12 +69,12 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   r_rf_cmd_ = Eigen::VectorXd::Zero(6);
   l_rf_cmd_ = Eigen::VectorXd::Zero(6);
 
-  DataManager *data_manager = DataManager::GetDataManager();
-  data_manager->RegisterData(&joint_pos_cmd_, VECT, "cmd_jpos", robot_->n_a);
-  data_manager->RegisterData(&joint_vel_cmd_, VECT, "cmd_jvel", robot_->n_a);
-  data_manager->RegisterData(&joint_trq_cmd_, VECT, "cmd_jtrq", robot_->n_a);
-  data_manager->RegisterData(&r_rf_cmd_, VECT, "cmd_r_rf", 6);
-  data_manager->RegisterData(&l_rf_cmd_, VECT, "cmd_l_rf", 6);
+  // DataManager *data_manager = DataManager::GetDataManager();
+  // data_manager->RegisterData(&joint_pos_cmd_, VECT, "cmd_jpos", robot_->n_a);
+  // data_manager->RegisterData(&joint_vel_cmd_, VECT, "cmd_jvel", robot_->n_a);
+  // data_manager->RegisterData(&joint_trq_cmd_, VECT, "cmd_jtrq", robot_->n_a);
+  // data_manager->RegisterData(&r_rf_cmd_, VECT, "cmd_r_rf", 6);
+  // data_manager->RegisterData(&l_rf_cmd_, VECT, "cmd_l_rf", 6);
 }
 
 AtlasController::~AtlasController() {

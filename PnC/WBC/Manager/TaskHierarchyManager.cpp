@@ -2,7 +2,7 @@
 
 TaskHierarchyManager::TaskHierarchyManager(Task *_task, double _w_max,
                                            double _w_min) {
-  myUtils::pretty_constructor(2, "TrajectoryManager: Task Gain Schedule");
+  util::PrettyConstructor(2, "TrajectoryManager: Task Gain Schedule");
 
   task_ = _task;
   w_max_ = _w_max;
@@ -29,15 +29,13 @@ void TaskHierarchyManager::InitializeRampToMax(double _start_time,
 }
 
 void TaskHierarchyManager::UpdateRampToMin(double _curr_time) {
-  double t =
-      myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
+  double t = util::Clamp(_curr_time, start_time_, start_time_ + duration_);
   task_->w_hierarchy =
       (w_min_ - w_starting_) / duration_ * (t - start_time_) + w_starting_;
 }
 
 void TaskHierarchyManager::UpdateRampToMax(double _curr_time) {
-  double t =
-      myUtils::CropValue(_curr_time, start_time_, start_time_ + duration_);
+  double t = util::Clamp(_curr_time, start_time_, start_time_ + duration_);
   task_->w_hierarchy =
       (w_max_ - w_starting_) / duration_ * (t - start_time_) + w_starting_;
 }

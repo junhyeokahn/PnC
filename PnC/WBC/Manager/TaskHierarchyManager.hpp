@@ -1,7 +1,6 @@
 #pragma once
 
 #include <PnC/WBC/Task.hpp>
-#include <Utils/Math/MathUtilities.hpp>
 
 class TaskHierarchyManager {
 public:

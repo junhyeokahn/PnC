@@ -3,7 +3,6 @@
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/draco_pnc/draco_interface.hpp>
 #include <PnC/draco_pnc/draco_state_provider.hpp>
-#include <Utils/Math/MathUtilities.hpp>
 
 DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
   robot_ = _robot;

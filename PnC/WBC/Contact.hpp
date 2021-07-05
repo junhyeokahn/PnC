@@ -4,9 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 
-#include <PnC/RobotSystem/RobotSystem.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/MathUtilities.hpp>
+#include "PnC/RobotSystem/RobotSystem.hpp"
+#include "utils/util.hpp"
 
 /*
  * WBC Contact

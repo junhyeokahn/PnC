@@ -5,7 +5,7 @@ FILE(GLOB manager_headers "Manager/*.hpp")
 
 add_library(myWBC SHARED ${sources})
 
-target_link_libraries(myWBC myUtils
+target_link_libraries(myWBC pnc-util
                             myGoldfarb
                             myRobotSystem
                             myDCMPlanner)

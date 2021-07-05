@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <Utils/IO/IOUtilities.hpp>
+#include <utils/util.hpp>
 
 #include <PnC/WBC/Contact.hpp>
 #include <PnC/WBC/InternalConstraint.hpp>

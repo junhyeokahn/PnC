@@ -1,8 +1,8 @@
-#include <PnC/WBC/Manager/FloatingBaseTrajectoryManager.hpp>
+#include "PnC/WBC/Manager/FloatingBaseTrajectoryManager.hpp"
 
 FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
     Task *_com_task, Task *_base_ori_task, RobotSystem *_robot) {
-  myUtils::pretty_constructor(2, "TrajectoryManager: Floating Base");
+  util::PrettyConstructor(2, "TrajectoryManager: Floating Base");
 
   robot_ = _robot;
 
@@ -36,7 +36,7 @@ void FloatingBaseTrajectoryManager::
 
   Eigen::Quaternion<double> quat_err =
       target_base_quat_ * ini_base_quat_.inverse();
-  exp_error_ = myUtils::quat_to_exp(quat_err);
+  exp_error_ = util::QuatToExp(quat_err);
 }
 
 void FloatingBaseTrajectoryManager::InitializeCoMSwayingTrajectory(
@@ -63,19 +63,15 @@ void FloatingBaseTrajectoryManager::UpdateFloatingBaseDesired(
   Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
   if (b_swaying_) {
-    myUtils::getSinusoidTrajectory(start_time_, ini_com_pos_, amp_, freq_,
-                                   curr_time, com_pos_des, com_vel_des,
-                                   com_acc_des);
+    util::SinusoidTrajectory(start_time_, ini_com_pos_, amp_, freq_, curr_time,
+                             com_pos_des, com_vel_des, com_acc_des);
   } else {
     for (int i = 0; i < 3; ++i) {
-      com_pos_des[i] =
-          myUtils::smooth_changing(ini_com_pos_[i], target_com_pos_[i],
-                                   duration_, curr_time - start_time_);
-      com_vel_des[i] =
-          myUtils::smooth_changing_vel(ini_com_pos_[i], target_com_pos_[i],
+      com_pos_des[i] = util::SmoothPos(ini_com_pos_[i], target_com_pos_[i],
                                        duration_, curr_time - start_time_);
-      com_acc_des[i] =
-          myUtils::smooth_changing_acc(ini_com_pos_[i], target_com_pos_[i],
+      com_vel_des[i] = util::SmoothVel(ini_com_pos_[i], target_com_pos_[i],
+                                       duration_, curr_time - start_time_);
+      com_acc_des[i] = util::SmoothAcc(ini_com_pos_[i], target_com_pos_[i],
                                        duration_, curr_time - start_time_);
     }
   }
@@ -87,15 +83,14 @@ void FloatingBaseTrajectoryManager::UpdateFloatingBaseDesired(
   Eigen::VectorXd base_ang_vel_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd base_ang_acc_des = Eigen::VectorXd::Zero(3);
 
-  double scaled_t =
-      myUtils::smooth_changing(0, 1, duration_, curr_time - start_time_);
+  double scaled_t = util::SmoothPos(0, 1, duration_, curr_time - start_time_);
   double scaled_tdot =
-      myUtils::smooth_changing_vel(0, 1, duration_, curr_time - start_time_);
+      util::SmoothVel(0, 1, duration_, curr_time - start_time_);
   double scaled_tddot =
-      myUtils::smooth_changing_acc(0, 1, duration_, curr_time - start_time_);
+      util::SmoothAcc(0, 1, duration_, curr_time - start_time_);
 
   Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
-  Eigen::Quaternion<double> quat_inc = myUtils::exp_to_quat(exp_inc);
+  Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
   // TODO (Check this again)
   // base_ori_des_quat = quat_inc * ini_base_quat_;
   base_ori_des_quat = ini_base_quat_ * quat_inc;

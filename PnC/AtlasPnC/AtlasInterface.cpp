@@ -2,22 +2,21 @@
 #include <stdio.h>
 #include <string>
 
+#include "utils/util.hpp"
 #include <PnC/AtlasPnC/AtlasControlArchitecture.hpp>
 #include <PnC/AtlasPnC/AtlasInterface.hpp>
 #include <PnC/AtlasPnC/AtlasInterruptLogic.hpp>
 #include <PnC/AtlasPnC/AtlasStateEstimator.hpp>
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
 #include <PnC/RobotSystem/DartRobotSystem.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/MathUtilities.hpp>
 
 AtlasInterface::AtlasInterface() : Interface() {
   std::string border = "=";
   for (int i = 0; i < 79; ++i) {
     border += "=";
   }
-  myUtils::color_print(myColor::BoldCyan, border);
-  myUtils::pretty_constructor(0, "Atlas Interface");
+  util::ColorPrint(color::kBoldCyan, border);
+  util::PrettyConstructor(0, "Atlas Interface");
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "Config/Atlas/pnc.yaml");
 
@@ -25,7 +24,7 @@ AtlasInterface::AtlasInterface() : Interface() {
                                false, false);
   se_ = new AtlasStateEstimator(robot_);
   sp_ = AtlasStateProvider::getStateProvider(robot_);
-  sp_->servo_rate = myUtils::readParameter<double>(cfg, "servo_rate");
+  sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
 
   count_ = 0;
   waiting_count_ = 2;
@@ -34,7 +33,7 @@ AtlasInterface::AtlasInterface() : Interface() {
   interrupt = new AtlasInterruptLogic(
       static_cast<AtlasControlArchitecture *>(control_architecture_));
 
-  myUtils::color_print(myColor::BoldCyan, border);
+  util::ColorPrint(color::kBoldCyan, border);
 }
 
 AtlasInterface::~AtlasInterface() {
@@ -50,7 +49,7 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
 
   if (count_ == 0) {
     se_->initialize(data);
-    DataManager::GetDataManager()->start();
+    // DataManager::GetDataManager()->start();
   }
   se_->update(data);
   interrupt->processInterrupts();

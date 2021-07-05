@@ -1,6 +1,5 @@
 #include <PnC/AtlasPnC/AtlasStateProvider.hpp>
 #include <PnC/RobotSystem/RobotSystem.hpp>
-#include <Utils/IO/DataManager.hpp>
 
 AtlasStateProvider *AtlasStateProvider::getStateProvider(RobotSystem *_robot) {
   static AtlasStateProvider state_provider_(_robot);
@@ -8,7 +7,7 @@ AtlasStateProvider *AtlasStateProvider::getStateProvider(RobotSystem *_robot) {
 }
 
 AtlasStateProvider::AtlasStateProvider(RobotSystem *_robot) {
-  myUtils::pretty_constructor(1, "Atlas State Provider");
+  util::PrettyConstructor(1, "Atlas State Provider");
 
   robot_ = _robot;
 

@@ -5,7 +5,7 @@ Initialize::Initialize(const StateIdentifier _state_identifier,
                        RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  myUtils::pretty_constructor(2, "SM: Initialize");
+  util::PrettyConstructor(2, "SM: Initialize");
 
   ctrl_arch_ = _ctrl_arch;
   sp_ = DracoStateProvider::getStateProvider();
@@ -33,11 +33,11 @@ void Initialize::oneStep() {
   Eigen::VectorXd des_jvel = Eigen::VectorXd::Zero(robot_->n_a);
   Eigen::VectorXd des_jacc = Eigen::VectorXd::Zero(robot_->n_a);
   for (int i = 0; i < robot_->n_a; ++i) {
-    des_jpos[i] = myUtils::smooth_changing(initial_jpos_[i], target_jpos[i],
+    des_jpos[i] = util::SmoothPos(initial_jpos_[i], target_jpos[i],
                                            end_time, state_machine_time_);
-    des_jvel[i] = myUtils::smooth_changing_vel(initial_jpos_[i], target_jpos[i],
+    des_jvel[i] = util::SmoothVel(initial_jpos_[i], target_jpos[i],
                                                end_time, state_machine_time_);
-    des_jacc[i] = myUtils::smooth_changing_acc(initial_jpos_[i], target_jpos[i],
+    des_jacc[i] = util::SmoothAcc(initial_jpos_[i], target_jpos[i],
                                                end_time, state_machine_time_);
   }
   ctrl_arch_->tci_container->joint_task->update_desired(des_jpos, des_jvel,

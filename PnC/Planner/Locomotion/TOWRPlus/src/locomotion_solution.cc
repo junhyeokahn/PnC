@@ -32,15 +32,15 @@ LocomotionSolution::LocomotionSolution(const std::string &name,
   Eigen::VectorXd tmp_vec;
   bool tmp_bool;
   try {
-    readParameter(node, "duration_base_polynomial", duration_base_polynomial_);
-    readParameter(node, "force_polynomials_per_stance_phase",
+    ReadParameter(node, "duration_base_polynomial", duration_base_polynomial_);
+    ReadParameter(node, "force_polynomials_per_stance_phase",
                   force_polynomials_per_stance_phase_);
-    readParameter(node, "ee_polynomials_per_swing_phase",
+    ReadParameter(node, "ee_polynomials_per_swing_phase",
                   ee_polynomials_per_swing_phase_);
-    readParameter(node, "b_optimize_timings", b_optimize_timings_);
+    ReadParameter(node, "b_optimize_timings", b_optimize_timings_);
     assert(ee_polynomials_per_swing_phase_ == 2); // Assume this is always 2
     for (auto ee : {L, R}) {
-      readParameter(node["ee_phase_durations"], std::to_string(ee), tmp_vec);
+      ReadParameter(node["ee_phase_durations"], std::to_string(ee), tmp_vec);
       for (int i = 0; i < tmp_vec.size(); ++i)
         ee_phase_durations_.at(ee).push_back(tmp_vec(i));
     }

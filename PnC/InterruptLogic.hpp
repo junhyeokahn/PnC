@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Utils/IO/IOUtilities.hpp>
+#include <utils/util.hpp>
 
 class InterruptLogic {
  public:

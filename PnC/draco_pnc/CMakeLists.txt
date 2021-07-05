@@ -5,7 +5,7 @@ file(GLOB draco_state_machine_headers "draco_state_machine/*.hpp")
 add_library(pnc-draco-pnc ${sources})
 target_link_libraries(pnc-draco-pnc ${DART_LIBRARIES}
                                     myRobotSystem
-                                    myUtils
+                                    pnc-util
                                     myFilters
                                     myDCMPlanner
                                     myWBC)

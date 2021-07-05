@@ -3,7 +3,7 @@
 
 AtlasInterruptLogic::AtlasInterruptLogic(AtlasControlArchitecture *_ctrl_arch)
     : InterruptLogic() {
-  myUtils::pretty_constructor(1, "Valkyrie Walking Interrupt Logic");
+  util::PrettyConstructor(1, "Valkyrie Walking Interrupt Logic");
   ctrl_arch_ = _ctrl_arch;
 }
 

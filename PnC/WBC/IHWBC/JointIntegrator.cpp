@@ -1,7 +1,7 @@
-#include <PnC/WBC/IHWBC/JointIntegrator.hpp>
+#include "PnC/WBC/IHWBC/JointIntegrator.hpp"
 
 JointIntegrator::JointIntegrator(int num_joints_in, double dt_in) {
-  myUtils::pretty_constructor(3, "WBC Joint Integrator");
+  util::PrettyConstructor(3, "WBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);
@@ -22,7 +22,7 @@ JointIntegrator::JointIntegrator(const int num_joints_in,
                                  const double pos_cutoff_in,
                                  const double dt_in) {
   std::cout << "a" << std::endl;
-  myUtils::pretty_constructor(3, "IHWBC Joint Integrator");
+  util::PrettyConstructor(3, "IHWBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);
@@ -157,12 +157,12 @@ void JointIntegrator::printIntegrationParams() {
   printf("  position cutoff alpha: %0.6f \n", alpha_pos_);
   printf("  (1.0 - position cutoff alpha): %0.6f \n", (1.0 - alpha_pos_));
 
-  myUtils::pretty_print(vel_min_, std::cout, "velocity_min");
-  myUtils::pretty_print(vel_max_, std::cout, "velocity_max");
-  myUtils::pretty_print(pos_min_, std::cout, "position_min");
-  myUtils::pretty_print(pos_max_, std::cout, "position_max");
-  myUtils::pretty_print(pos_max_error_, std::cout, "position max error");
+  // util::PrettyPrint(vel_min_, std::cout, "velocity_min");
+  // util::PrettyPrint(vel_max_, std::cout, "velocity_max");
+  // util::PrettyPrint(pos_min_, std::cout, "position_min");
+  // util::PrettyPrint(pos_max_, std::cout, "position_max");
+  // util::PrettyPrint(pos_max_error_, std::cout, "position max error");
 
-  myUtils::pretty_print(pos_, std::cout, "position current");
-  myUtils::pretty_print(vel_, std::cout, "velocity current");
+  // util::PrettyPrint(pos_, std::cout, "position current");
+  // util::PrettyPrint(vel_, std::cout, "velocity current");
 }

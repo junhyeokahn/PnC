@@ -14,20 +14,20 @@ void LocomotionTask::from_yaml(const YAML::Node &node) {
   std::string terrain_type;
   Eigen::VectorXd tmp_vec;
   try {
-    readParameter(node, "initial_base_lin", initial_base_lin);
-    readParameter(node, "initial_base_ang", initial_base_ang);
+    ReadParameter(node, "initial_base_lin", initial_base_lin);
+    ReadParameter(node, "initial_base_ang", initial_base_ang);
     for (auto ee : {L, R}) {
-      readParameter(node["initial_ee_motion_lin"], std::to_string(ee), tmp_vec);
+      ReadParameter(node["initial_ee_motion_lin"], std::to_string(ee), tmp_vec);
       for (auto dim : {X, Y, Z})
         initial_ee_motion_lin.at(ee)(dim) = tmp_vec(dim);
-      readParameter(node["initial_ee_motion_ang"], std::to_string(ee), tmp_vec);
+      ReadParameter(node["initial_ee_motion_ang"], std::to_string(ee), tmp_vec);
       for (auto dim : {X, Y, Z})
         initial_ee_motion_ang.at(ee)(dim) = tmp_vec(dim);
     }
-    readParameter(node, "final_base_lin", final_base_lin);
-    readParameter(node, "final_base_ang", final_base_ang);
+    ReadParameter(node, "final_base_lin", final_base_lin);
+    ReadParameter(node, "final_base_ang", final_base_ang);
 
-    readParameter(node, "terrain_type", terrain_type);
+    ReadParameter(node, "terrain_type", terrain_type);
 
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["

@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <string>
 
-#include <PnC/RobotSystem/RobotSystem.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/PseudoInverse.hpp>
+#include "PnC/RobotSystem/RobotSystem.hpp"
+#include "utils/util.hpp"
 
 /*
  * WBC Task
@@ -94,11 +93,16 @@ public:
   virtual void update_jacobian() = 0;
 
   void Debug() {
-    myUtils::pretty_print(pos_des, std::cout, "pos des");
-    myUtils::pretty_print(pos_err, std::cout, "pos err");
-    myUtils::pretty_print(vel_des, std::cout, "vel des");
-    myUtils::pretty_print(acc_des, std::cout, "acc des");
-    myUtils::pretty_print(op_cmd, std::cout, "xddot");
+    std::cout << "pos des" << std::endl;
+    std::cout << pos_des << std::endl;
+    std::cout << "pos err" << std::endl;
+    std::cout << pos_err << std::endl;
+    std::cout << "vel des" << std::endl;
+    std::cout << vel_des << std::endl;
+    std::cout << "acc des" << std::endl;
+    std::cout << acc_des << std::endl;
+    std::cout << "xddot" << std::endl;
+    std::cout << op_cmd << std::endl;
   }
 
 protected:

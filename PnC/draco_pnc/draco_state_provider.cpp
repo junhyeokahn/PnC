@@ -1,6 +1,6 @@
 #include "PnC/draco_pnc/draco_state_provider.hpp"
 
-#include "Utils/IO/DataManager.hpp"
+//#include "Utils/IO/DataManager.hpp"
 
 DracoStateProvider *DracoStateProvider::getStateProvider() {
   static DracoStateProvider state_provider_;
@@ -8,7 +8,7 @@ DracoStateProvider *DracoStateProvider::getStateProvider() {
 }
 
 DracoStateProvider::DracoStateProvider() {
-  myUtils::pretty_constructor(1, "Draco State Provider");
+  util::PrettyConstructor(1, "Draco State Provider");
 
   state = 0;
   prev_state = 0;

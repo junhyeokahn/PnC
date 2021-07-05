@@ -7,9 +7,8 @@
 #include <string>
 
 #include <PnC/Planner/Locomotion/DCMPlanner/Footstep.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/HermiteQuaternionCurve.hpp>
-#include <Utils/Math/MinjerkVec.hpp>
+#include <utils/interpolation.hpp>
+#include <utils/util.hpp>
 
 class DCMPlanner {
 public:

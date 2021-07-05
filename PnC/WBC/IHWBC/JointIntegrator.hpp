@@ -1,7 +1,8 @@
 #pragma once
 
-#include <Utils/Math/MathUtilities.hpp>
 #include <iostream>
+
+#include "utils/util.hpp"
 
 class JointIntegrator {
 public:

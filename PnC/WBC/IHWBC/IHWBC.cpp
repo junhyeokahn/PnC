@@ -2,7 +2,7 @@
 
 IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
              const Eigen::MatrixXd &_sv) {
-  myUtils::pretty_constructor(3, "IHWBC");
+  util::PrettyConstructor(3, "IHWBC");
 
   n_q_dot_ = _sa.cols();
   n_active_ = _sa.rows();
@@ -69,13 +69,13 @@ void IHWBC::solve(
         ji = internal_constraint_list[i]->jacobian;
         jidot_qdot = internal_constraint_list[i]->jacobian_dot_q_dot;
       } else {
-        ji = myUtils::vStack(ji, internal_constraint_list[i]->jacobian);
-        jidot_qdot = myUtils::vStack(
+        ji = util::vStack(ji, internal_constraint_list[i]->jacobian);
+        jidot_qdot = util::vStack(
             jidot_qdot, internal_constraint_list[i]->jacobian_dot_q_dot);
       }
     }
     Eigen::MatrixXd lmd_i;
-    myUtils::pseudo_inverse(ji * Ainv_ * ji.transpose(), 0.001, lmd_i);
+    util::PseudoInverse(ji * Ainv_ * ji.transpose(), 0.001, lmd_i);
     Eigen::MatrixXd ji_bar = Ainv_ * ji.transpose() * lmd_i;
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_) - ji_bar * ji;
     jit_lmd_jidot_qdot = ji.transpose() * lmd_i * jidot_qdot;
@@ -84,7 +84,7 @@ void IHWBC::solve(
     Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
         Ainv_.block(6, 6, n_active_ + n_passive_, n_active_ + n_passive_);
-    myUtils::pseudo_inverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
+    util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
                             lmd_sa_ni_trc);
     Eigen::MatrixXd sa_ni_trc_bar =
         Ainv_trc * sa_ni_trc.transpose() * lmd_sa_ni_trc;
@@ -94,9 +94,9 @@ void IHWBC::solve(
     jit_lmd_jidot_qdot = Eigen::VectorXd::Zero(n_q_dot_);
     sa_ni_trc_bar_tr = Eigen::MatrixXd::Identity(n_active_, n_active_);
   }
-  // myUtils::pretty_print(ni, std::cout, "ni");
-  // myUtils::pretty_print(jit_lmd_jidot_qdot, std::cout, "jit_lmd_jidot_qdot");
-  // myUtils::pretty_print(sa_ni_trc_bar_tr, std::cout, "sa_ni_trc_bar_tr");
+  // util::PrettyPrint(ni, std::cout, "ni");
+  // util::PrettyPrint(jit_lmd_jidot_qdot, std::cout, "jit_lmd_jidot_qdot");
+  // util::PrettyPrint(sa_ni_trc_bar_tr, std::cout, "sa_ni_trc_bar_tr");
   // exit(0);
 
   // ===========================================================================
@@ -131,9 +131,9 @@ void IHWBC::solve(
         jc = contact_list[i]->jacobian;
       } else {
         uf_mat =
-            myUtils::block_diag(uf_mat, contact_list[i]->cone_constraint_mat);
-        uf_vec = myUtils::vStack(uf_vec, contact_list[i]->cone_constraint_vec);
-        jc = myUtils::vStack(jc, contact_list[i]->jacobian);
+            util::block_diag(uf_mat, contact_list[i]->cone_constraint_mat);
+        uf_vec = util::vStack(uf_vec, contact_list[i]->cone_constraint_vec);
+        jc = util::vStack(jc, contact_list[i]->jacobian);
       }
     }
     dim_cone_constraint_ = uf_mat.rows();
@@ -143,8 +143,8 @@ void IHWBC::solve(
                   Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
     cost_rf_vec = -w_rf * rf_des;
 
-    cost_mat = myUtils::block_diag(cost_t_mat, cost_rf_mat);
-    cost_vec = myUtils::vStack(cost_t_vec, cost_rf_vec);
+    cost_mat = util::block_diag(cost_t_mat, cost_rf_mat);
+    cost_vec = util::vStack(cost_t_vec, cost_rf_vec);
   } else {
     dim_cone_constraint_ = 0;
     dim_contacts_ = 0;
@@ -161,10 +161,10 @@ void IHWBC::solve(
   Eigen::VectorXd eq_floating_vec, eq_int_vec, eq_vec;
 
   if (b_contact_) {
-    eq_floating_mat = myUtils::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+    eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
     if (b_internal_constraint_) {
       eq_int_mat =
-          myUtils::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
+          util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
       eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
     }
   } else {
@@ -177,8 +177,8 @@ void IHWBC::solve(
   eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
 
   if (b_internal_constraint_) {
-    eq_mat = myUtils::vStack(eq_floating_mat, eq_int_mat);
-    eq_vec = myUtils::vStack(eq_floating_vec, eq_int_vec);
+    eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
+    eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
   } else {
     eq_mat = eq_floating_mat;
     eq_vec = eq_floating_vec;
@@ -193,7 +193,7 @@ void IHWBC::solve(
 
   if (!b_trq_limit) {
     if (b_contact_) {
-      ineq_mat = myUtils::hStack(
+      ineq_mat = util::hStack(
           Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_), -uf_mat);
       ineq_vec = -uf_vec;
     } else {
@@ -203,27 +203,27 @@ void IHWBC::solve(
     if (b_contact_) {
       Eigen::MatrixXd tmp1 = sa_ni_trc_bar_tr * snf_ * A_;
       Eigen::MatrixXd tmp2 = sa_ni_trc_bar_tr * snf_ * (jc * ni).transpose();
-      ineq_mat = myUtils::hStack(
-          myUtils::vStack(Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_),
-                          myUtils::vStack(-tmp1, tmp1)),
-          myUtils::vStack(-uf_mat, myUtils::vStack(tmp2, -tmp2)));
+      ineq_mat = util::hStack(
+          util::vStack(Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_),
+                          util::vStack(-tmp1, tmp1)),
+          util::vStack(-uf_mat, util::vStack(tmp2, -tmp2)));
       Eigen::VectorXd tmp3 =
           sa_ni_trc_bar_tr * snf_ * ni.transpose() * (cori_ + grav_) +
           sa_ni_trc_bar_tr * snf_ * jit_lmd_jidot_qdot - trq_limit.col(0);
       Eigen::VectorXd tmp4 =
           -sa_ni_trc_bar_tr * snf_ * ni.transpose() * (cori_ + grav_) -
           sa_ni_trc_bar_tr * snf_ * jit_lmd_jidot_qdot + trq_limit.col(1);
-      ineq_vec = myUtils::vStack(-uf_vec, myUtils::vStack(tmp3, tmp4));
+      ineq_vec = util::vStack(-uf_vec, util::vStack(tmp3, tmp4));
     } else {
       Eigen::MatrixXd tmp1 = sa_ni_trc_bar_tr * snf_ * A_;
-      ineq_mat = myUtils::hStack(-tmp1, tmp1);
+      ineq_mat = util::hStack(-tmp1, tmp1);
       Eigen::MatrixXd tmp2 =
           sa_ni_trc_bar_tr * snf_ * ni.transpose() * (cori_ + grav_) +
           sa_ni_trc_bar_tr * snf_ * jit_lmd_jidot_qdot - trq_limit.col(0);
       Eigen::MatrixXd tmp3 =
           -sa_ni_trc_bar_tr * snf_ * ni.transpose() * (cori_ + grav_) -
           sa_ni_trc_bar_tr * snf_ * jit_lmd_jidot_qdot + trq_limit.col(1);
-      ineq_vec = myUtils::vStack(tmp2, tmp3);
+      ineq_vec = util::vStack(tmp2, tmp3);
     }
   }
 
@@ -266,9 +266,9 @@ void IHWBC::solve(
   }
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
-  // myUtils::pretty_print(tau_cmd, std::cout, "tau_cmd");
-  // myUtils::pretty_print(rf_cmd, std::cout, "rf_cmd");
-  // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result");
+  // util::PrettyPrint(tau_cmd, std::cout, "tau_cmd");
+  // util::PrettyPrint(rf_cmd, std::cout, "rf_cmd");
+  // util::PrettyPrint(qddot_result_, std::cout, "qddot_result");
   // exit(0);
 }
 
@@ -317,7 +317,7 @@ void IHWBC::solveQP() {
   qddot_result_ = qp_dec_vars_.head(n_q_dot_);
   fr_result_ = qp_dec_vars_.tail(dim_contacts_);
 
-  // myUtils::pretty_print(qp_dec_vars_, std::cout, "qp_dec_vars_");
-  // myUtils::pretty_print(qddot_result_, std::cout, "qddot_result_");
-  // myUtils::pretty_print(fr_result_, std::cout, "Fr_result_");
+  // util::PrettyPrint(qp_dec_vars_, std::cout, "qp_dec_vars_");
+  // util::PrettyPrint(qddot_result_, std::cout, "qddot_result_");
+  // util::PrettyPrint(fr_result_, std::cout, "Fr_result_");
 }

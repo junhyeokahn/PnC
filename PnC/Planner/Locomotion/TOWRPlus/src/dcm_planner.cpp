@@ -18,11 +18,11 @@ void DCMPlanner::paramInitialization(const YAML::Node &node) {
   // Load Custom Params ----------------------------------
   try {
     // Load DCM Parameters
-    readParameter(node, "t_transfer", t_transfer);
-    readParameter(node, "t_ds", t_ds);
-    readParameter(node, "t_ss", t_ss);
-    readParameter(node, "percentage_settle", percentage_settle);
-    readParameter(node, "alpha_ds", alpha_ds);
+    ReadParameter(node, "t_transfer", t_transfer);
+    ReadParameter(node, "t_ds", t_ds);
+    ReadParameter(node, "t_ss", t_ss);
+    ReadParameter(node, "percentage_settle", percentage_settle);
+    ReadParameter(node, "alpha_ds", alpha_ds);
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
@@ -362,28 +362,28 @@ void DCMPlanner::printBoundaryConditions() {
   for (int i = 0; i < rvrp_list.size(); i++) {
     val = rvrp_list[i];
     std::cout << "i:" << i << " " << std::endl;
-    pretty_print(val, std::cout, "  vrp:");
+    PrettyPrint(val, std::cout, "  vrp:");
     std::cout << "  type:" << rvrp_type_list[i] << std::endl;
   }
 
   for (int i = 0; i < dcm_ini_list.size(); i++) {
     val = dcm_ini_list[i];
     std::cout << "i:" << i << " " << std::endl;
-    pretty_print(val, std::cout, "  dcm_ini:");
+    PrettyPrint(val, std::cout, "  dcm_ini:");
     val = dcm_eos_list[i];
-    pretty_print(val, std::cout, "  dcm_eos:");
+    PrettyPrint(val, std::cout, "  dcm_eos:");
   }
 
   for (int i = 0; i < rvrp_list.size(); i++) {
     val = dcm_ini_DS_list[i];
     std::cout << "i:" << i << " " << std::endl;
-    pretty_print(val, std::cout, "  dcm_ini_DS:");
+    PrettyPrint(val, std::cout, "  dcm_ini_DS:");
     val = dcm_end_DS_list[i];
-    pretty_print(val, std::cout, "  dcm_end_DS:");
+    PrettyPrint(val, std::cout, "  dcm_end_DS:");
     val = dcm_vel_ini_DS_list[i];
-    pretty_print(val, std::cout, "  dcm_vel_ini_DS:");
+    PrettyPrint(val, std::cout, "  dcm_vel_ini_DS:");
     val = dcm_vel_end_DS_list[i];
-    pretty_print(val, std::cout, "  dcm_vel_end_DS:");
+    PrettyPrint(val, std::cout, "  dcm_vel_end_DS:");
   }
 
   for (int i = 0; i < rvrp_list.size(); i++) {

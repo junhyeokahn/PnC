@@ -1,6 +1,6 @@
 #include <Configuration.hpp>
 #include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
-#include <Utils/IO/IOUtilities.hpp>
+#include <utils/util.hpp>
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -8,12 +8,12 @@ int main(int argc, char *argv[]) {
   Eigen::VectorXd cost_vec, eq_vec, ineq_vec;
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "ExperimentData/cpp.yaml");
-  myUtils::readParameter(cfg, "cost_mat", cost_mat);
-  myUtils::readParameter(cfg, "cost_vec", cost_vec);
-  myUtils::readParameter(cfg, "eq_mat", eq_mat);
-  myUtils::readParameter(cfg, "eq_vec", eq_vec);
-  myUtils::readParameter(cfg, "ineq_mat", ineq_mat);
-  myUtils::readParameter(cfg, "ineq_vec", ineq_vec);
+  util::ReadParameter(cfg, "cost_mat", cost_mat);
+  util::ReadParameter(cfg, "cost_vec", cost_vec);
+  util::ReadParameter(cfg, "eq_mat", eq_mat);
+  util::ReadParameter(cfg, "eq_vec", eq_vec);
+  util::ReadParameter(cfg, "ineq_mat", ineq_mat);
+  util::ReadParameter(cfg, "ineq_vec", ineq_vec);
 
   //
 
@@ -32,12 +32,12 @@ int main(int argc, char *argv[]) {
 
   //
 
-  // myUtils::pretty_print(cost_mat, std::cout, "cost_mat");
-  // myUtils::pretty_print(cost_vec, std::cout, "cost_vec");
-  // myUtils::pretty_print(eq_mat, std::cout, "eq_mat");
-  // myUtils::pretty_print(eq_vec, std::cout, "eq_vec");
-  // myUtils::pretty_print(ineq_mat, std::cout, "ineq_mat");
-  // myUtils::pretty_print(ineq_vec, std::cout, "ineq_vec");
+  // util::PrettyPrint(cost_mat, std::cout, "cost_mat");
+  // util::PrettyPrint(cost_vec, std::cout, "cost_vec");
+  // util::PrettyPrint(eq_mat, std::cout, "eq_mat");
+  // util::PrettyPrint(eq_vec, std::cout, "eq_vec");
+  // util::PrettyPrint(ineq_mat, std::cout, "ineq_mat");
+  // util::PrettyPrint(ineq_vec, std::cout, "ineq_vec");
 
   eq_mat = -eq_mat;
   ineq_mat = -ineq_mat;

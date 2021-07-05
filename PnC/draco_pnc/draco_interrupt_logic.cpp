@@ -3,7 +3,7 @@
 
 DracoInterruptLogic::DracoInterruptLogic(DracoControlArchitecture *_ctrl_arch)
     : InterruptLogic() {
-  myUtils::pretty_constructor(1, "Draco Walking Interrupt Logic");
+  util::PrettyConstructor(1, "Draco Walking Interrupt Logic");
   ctrl_arch_ = _ctrl_arch;
 }
 

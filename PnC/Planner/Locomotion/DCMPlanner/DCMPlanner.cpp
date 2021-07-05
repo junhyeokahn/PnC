@@ -17,11 +17,11 @@ void DCMPlanner::paramInitialization(const YAML::Node &node) {
   // Load Custom Params ----------------------------------
   try {
     // Load DCM Parameters
-    myUtils::readParameter(node, "t_additional_ini_trans", t_transfer);
-    myUtils::readParameter(node, "t_contact_trans", t_ds);
-    myUtils::readParameter(node, "t_swing", t_ss);
-    myUtils::readParameter(node, "percentage_settle", percentage_settle);
-    myUtils::readParameter(node, "alpha_ds", alpha_ds);
+    util::ReadParameter(node, "t_additional_ini_trans", t_transfer);
+    util::ReadParameter(node, "t_contact_trans", t_ds);
+    util::ReadParameter(node, "t_swing", t_ss);
+    util::ReadParameter(node, "percentage_settle", percentage_settle);
+    util::ReadParameter(node, "alpha_ds", alpha_ds);
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["
               << __FILE__ << "]" << std::endl
@@ -354,39 +354,39 @@ double DCMPlanner::get_eoDS_transition_time() {
 double DCMPlanner::get_iniDS_transition_time() { return alpha_ds * t_ds; }
 
 void DCMPlanner::printBoundaryConditions() {
-  Eigen::Vector3d val;
-  for (int i = 0; i < rvrp_list.size(); i++) {
-    val = rvrp_list[i];
-    std::cout << "i:" << i << " " << std::endl;
-    myUtils::pretty_print(val, std::cout, "  vrp:");
-    std::cout << "  type:" << rvrp_type_list[i] << std::endl;
-  }
+  // Eigen::Vector3d val;
+  // for (int i = 0; i < rvrp_list.size(); i++) {
+  // val = rvrp_list[i];
+  // std::cout << "i:" << i << " " << std::endl;
+  // util::PrettyPrint(val, std::cout, "  vrp:");
+  // std::cout << "  type:" << rvrp_type_list[i] << std::endl;
+  //}
 
-  for (int i = 0; i < dcm_ini_list.size(); i++) {
-    val = dcm_ini_list[i];
-    std::cout << "i:" << i << " " << std::endl;
-    myUtils::pretty_print(val, std::cout, "  dcm_ini:");
-    val = dcm_eos_list[i];
-    myUtils::pretty_print(val, std::cout, "  dcm_eos:");
-  }
+  // for (int i = 0; i < dcm_ini_list.size(); i++) {
+  // val = dcm_ini_list[i];
+  // std::cout << "i:" << i << " " << std::endl;
+  // util::PrettyPrint(val, std::cout, "  dcm_ini:");
+  // val = dcm_eos_list[i];
+  // util::PrettyPrint(val, std::cout, "  dcm_eos:");
+  //}
 
-  for (int i = 0; i < rvrp_list.size(); i++) {
-    val = dcm_ini_DS_list[i];
-    std::cout << "i:" << i << " " << std::endl;
-    myUtils::pretty_print(val, std::cout, "  dcm_ini_DS:");
-    val = dcm_end_DS_list[i];
-    myUtils::pretty_print(val, std::cout, "  dcm_end_DS:");
-    val = dcm_vel_ini_DS_list[i];
-    myUtils::pretty_print(val, std::cout, "  dcm_vel_ini_DS:");
-    val = dcm_vel_end_DS_list[i];
-    myUtils::pretty_print(val, std::cout, "  dcm_vel_end_DS:");
-  }
+  // for (int i = 0; i < rvrp_list.size(); i++) {
+  // val = dcm_ini_DS_list[i];
+  // std::cout << "i:" << i << " " << std::endl;
+  // util::PrettyPrint(val, std::cout, "  dcm_ini_DS:");
+  // val = dcm_end_DS_list[i];
+  // util::PrettyPrint(val, std::cout, "  dcm_end_DS:");
+  // val = dcm_vel_ini_DS_list[i];
+  // util::PrettyPrint(val, std::cout, "  dcm_vel_ini_DS:");
+  // val = dcm_vel_end_DS_list[i];
+  // util::PrettyPrint(val, std::cout, "  dcm_vel_end_DS:");
+  //}
 
-  for (int i = 0; i < rvrp_list.size(); i++) {
-    printf("%i, %0.3f, %0.3f, %0.3f, %0.3f\n", i, get_t_step_start(i),
-           get_t_step_end(i), get_double_support_t_start(i),
-           get_double_support_t_end(i));
-  }
+  // for (int i = 0; i < rvrp_list.size(); i++) {
+  // printf("%i, %0.3f, %0.3f, %0.3f, %0.3f\n", i, get_t_step_start(i),
+  // get_t_step_end(i), get_double_support_t_start(i),
+  // get_double_support_t_end(i));
+  //}
 }
 
 // Total trajectory time from t_start
@@ -582,7 +582,7 @@ Eigen::Vector3d DCMPlanner::get_DCM_DS_minjerk(const int &step_index,
                                                const double &t) {
   double Ts = get_polynomial_duration(step_index);
   double time = clampDOUBLE(t, 0.0, Ts);
-  return dcm_minjerk[step_index].evaluate(time);
+  return dcm_minjerk[step_index].Evaluate(time);
 }
 
 // Returns the DCM double support velocity min jerk interpolation for the
@@ -592,7 +592,7 @@ Eigen::Vector3d DCMPlanner::get_DCM_DS_vel_minjerk(const int &step_index,
                                                    const double &t) {
   double Ts = get_polynomial_duration(step_index);
   double time = clampDOUBLE(t, 0.0, Ts);
-  return dcm_minjerk[step_index].evaluateFirstDerivative(time);
+  return dcm_minjerk[step_index].EvaluateFirstDerivative(time);
 }
 
 void DCMPlanner::get_ref_dcm(const double t, Eigen::Vector3d &dcm_out) {
@@ -1002,9 +1002,9 @@ void DCMPlanner::get_ref_ori_ang_vel_acc(const double t,
   }
 
   // Obtain the reference values
-  pelvis_ori_quat_curves[step_index].evaluate(s, quat_out);
-  pelvis_ori_quat_curves[step_index].getAngularVelocity(s, ang_vel_out);
-  pelvis_ori_quat_curves[step_index].getAngularAcceleration(s, ang_acc_out);
+  pelvis_ori_quat_curves[step_index].Evaluate(s, quat_out);
+  pelvis_ori_quat_curves[step_index].GetAngularVelocity(s, ang_vel_out);
+  pelvis_ori_quat_curves[step_index].GetAngularAcceleration(s, ang_acc_out);
 
   // std::cout << "t:" << time << " s:" << s << " ang_vel_out = " <<
   // ang_vel_out.transpose() << std::endl;

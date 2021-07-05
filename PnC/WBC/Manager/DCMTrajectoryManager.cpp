@@ -3,7 +3,7 @@
 DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
     RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx) {
-  myUtils::pretty_constructor(2, "TrajectoryManager: DCM Planner");
+  util::PrettyConstructor(2, "TrajectoryManager: DCM Planner");
 
   dcm_planner_ = _dcm_planner;
   com_task_ = _com_task;
@@ -416,21 +416,21 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
   // Load Custom Params ----------------------------------
   try {
     // Load DCM Parameters
-    myUtils::readParameter(node, "com_height", nominal_com_height_);
-    myUtils::readParameter(node, "t_additional_ini_trans",
+    util::ReadParameter(node, "com_height", nominal_com_height_);
+    util::ReadParameter(node, "t_additional_ini_trans",
                            t_additional_init_transfer_);
-    myUtils::readParameter(node, "t_contact_trans", t_contact_transition_);
-    myUtils::readParameter(node, "t_swing", t_swing_);
-    myUtils::readParameter(node, "percentage_settle", percentage_settle_);
-    myUtils::readParameter(node, "alpha_ds", alpha_ds_);
+    util::ReadParameter(node, "t_contact_trans", t_contact_transition_);
+    util::ReadParameter(node, "t_swing", t_swing_);
+    util::ReadParameter(node, "percentage_settle", percentage_settle_);
+    util::ReadParameter(node, "alpha_ds", alpha_ds_);
 
     // Load Walking Primitives Parameters
-    myUtils::readParameter(node, "nominal_footwidth", nominal_footwidth);
-    myUtils::readParameter(node, "nominal_forward_step", nominal_forward_step);
-    myUtils::readParameter(node, "nominal_backward_step",
+    util::ReadParameter(node, "nominal_footwidth", nominal_footwidth);
+    util::ReadParameter(node, "nominal_forward_step", nominal_forward_step);
+    util::ReadParameter(node, "nominal_backward_step",
                            nominal_backward_step);
-    myUtils::readParameter(node, "nominal_turn_radians", nominal_turn_radians);
-    myUtils::readParameter(node, "nominal_strafe_distance",
+    util::ReadParameter(node, "nominal_turn_radians", nominal_turn_radians);
+    util::ReadParameter(node, "nominal_strafe_distance",
                            nominal_strafe_distance);
 
   } catch (std::runtime_error &e) {

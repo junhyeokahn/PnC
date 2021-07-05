@@ -1,8 +1,8 @@
 #pragma once
 
-#include <PnC/WBC/BasicTask.hpp>
-#include <Utils/IO/IOUtilities.hpp>
-#include <Utils/Math/MathUtilities.hpp>
+#include "PnC/WBC/BasicTask.hpp"
+#include "utils/interpolation.hpp"
+#include "utils/util.hpp"
 
 // Object to manage common trajectory primitives
 class FloatingBaseTrajectoryManager {

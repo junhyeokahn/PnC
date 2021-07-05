@@ -5,7 +5,7 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier _state_identifier,
                                        RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  myUtils::pretty_constructor(2, "SM: Double Support Stand");
+  util::PrettyConstructor(2, "SM: Double Support Stand");
 
   ctrl_arch_ = _ctrl_arch;
   sp_ = DracoStateProvider::getStateProvider();
