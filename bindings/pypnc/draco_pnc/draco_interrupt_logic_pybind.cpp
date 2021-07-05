@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "PnC/draco_pnc/draco_interrupt_logic.hpp"
+#include "pnc/draco_pnc/draco_interrupt_logic.hpp"
 
 namespace py = pybind11;
 

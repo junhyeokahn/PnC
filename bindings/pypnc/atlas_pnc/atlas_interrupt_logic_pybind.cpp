@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <PnC/AtlasPnC/AtlasInterruptLogic.hpp>
+#include <pnc/atlas_pnc/atlas_interrupt_logic.hpp>
 
 namespace py = pybind11;
 

@@ -1,7 +1,7 @@
 #include "simulator/dart/atlas/atlas_world_node.hpp"
 
-#include "Configuration.hpp"
-#include <PnC/AtlasPnC/AtlasInterface.hpp>
+#include "configuration.hpp"
+#include <pnc/atlas_pnc/atlas_interface.hpp>
 #include <utils/util.hpp>
 
 AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr &_world)
@@ -130,7 +130,7 @@ void AtlasWorldNode::GetContactSwitchData_(bool &rfoot_contact,
 void AtlasWorldNode::SetParams_() {
   try {
     YAML::Node simulation_cfg =
-        YAML::LoadFile(THIS_COM "Config/Atlas/dart_simulation.yaml");
+        YAML::LoadFile(THIS_COM "config/atlas/dart_simulation.yaml");
     util::ReadParameter(simulation_cfg, "servo_rate", servo_rate_);
     util::ReadParameter(simulation_cfg["control_configuration"], "kp", kp_);
     util::ReadParameter(simulation_cfg["control_configuration"], "kd", kd_);

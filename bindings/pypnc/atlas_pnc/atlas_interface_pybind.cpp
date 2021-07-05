@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <PnC/AtlasPnC/AtlasInterface.hpp>
+#include <pnc/atlas_pnc/atlas_interface.hpp>
 
 class PyInterface : public Interface {
   using Interface::Interface;

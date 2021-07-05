@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "PnC/draco_pnc/draco_interface.hpp"
+#include "pnc/draco_pnc/draco_interface.hpp"
 
 class PyInterface : public Interface {
   using Interface::Interface;

@@ -1,6 +1,6 @@
 #ifndef DATA_PROTOCOL
 #define DATA_PROTOCOL
-#include <Configuration.hpp>
+#include <configuration.hpp>
 #include <stdint.h>
 
 #define IP_ADDR_MYSELF "127.0.0.1"

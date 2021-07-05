@@ -19,7 +19,7 @@ import numpy as np
 
 np.set_printoptions(precision=2)
 
-from Config.draco.pybullet_simulation import Config
+from config.draco.pybullet_simulation import Config
 from python_utils import pybullet_util
 from python_utils import util
 
@@ -82,11 +82,11 @@ if __name__ == "__main__":
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/RobotModel/draco/draco.urdf",
+    robot = p.loadURDF(cwd + "/robot_model/draco/draco.urdf",
                        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
                        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
-    p.loadURDF(cwd + "/RobotModel/ground/plane.urdf", [0, 0, 0],
+    p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0],
                useFixedBase=1)
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(

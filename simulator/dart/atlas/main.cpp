@@ -1,4 +1,4 @@
-#include <Configuration.hpp>
+#include <configuration.hpp>
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/urdf/urdf.hpp>
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
   bool b_show_joint_frame;
   try {
     YAML::Node simulation_cfg =
-        YAML::LoadFile(THIS_COM "Config/Atlas/dart_simulation.yaml");
+        YAML::LoadFile(THIS_COM "config/atlas/dart_simulation.yaml");
     util::ReadParameter(simulation_cfg, "servo_rate", servo_rate);
     util::ReadParameter(simulation_cfg, "is_record", isRecord);
     util::ReadParameter(simulation_cfg, "show_joint_frame", b_show_joint_frame);
@@ -212,9 +212,9 @@ int main(int argc, char **argv) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
   dart::utils::DartLoader urdfLoader;
   dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-      THIS_COM "RobotModel/ground/ground_terrain.urdf");
+      THIS_COM "robot_model/ground/ground_terrain.urdf");
   dart::dynamics::SkeletonPtr robot =
-      urdfLoader.parseSkeleton(THIS_COM "RobotModel/atlas/atlas_rel_path.urdf");
+      urdfLoader.parseSkeleton(THIS_COM "robot_model/atlas/atlas_rel_path.urdf");
 
   world->addSkeleton(ground);
   world->addSkeleton(robot);

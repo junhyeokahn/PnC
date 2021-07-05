@@ -1,5 +1,5 @@
-#include <Configuration.hpp>
-#include <ExternalSource/myOptimizer/Goldfarb/QuadProg++.hh>
+#include <configuration.hpp>
+#include <third_party//goldfarb/QuadProg++.hh>
 #include <utils/util.hpp>
 #include <iostream>
 

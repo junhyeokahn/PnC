@@ -8,8 +8,8 @@
 
 #include <Eigen/Dense>
 
-#include "Configuration.hpp"
-#include "ExternalSource/myYaml/include/myYaml/yaml.h"
+#include "configuration.hpp"
+#include "third_party/yaml/include/yaml/yaml.h"
 
 namespace color {
 constexpr int kRed = 0;

@@ -70,8 +70,8 @@ endif()
 ##=============================================================================
 add_subdirectory(simulator)
 add_subdirectory(utils)
-add_subdirectory(ExternalSource)
-add_subdirectory(PnC)
+add_subdirectory(third_party)
+add_subdirectory(pnc)
 add_subdirectory(test)
 
 ##=============================================================================
@@ -80,5 +80,5 @@ add_subdirectory(test)
 set(THIS_COM "${PROJECT_SOURCE_DIR}/" )
 set(SERVO_RATE 0.001)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake
-    ${PROJECT_SOURCE_DIR}/Configuration.hpp)
-install(FILES ${PROJECT_SOURCE_DIR}/Configuration.hpp DESTINATION "${INSTALL_INCLUDE_DIR}")
+    ${PROJECT_SOURCE_DIR}/configuration.hpp)
+install(FILES ${PROJECT_SOURCE_DIR}/configuration.hpp DESTINATION "${INSTALL_INCLUDE_DIR}")

@@ -8,7 +8,7 @@
 
 #include <Eigen/Dense>
 
-#include "Configuration.hpp"
+#include "configuration.hpp"
 #include "utils/util.hpp"
 
 namespace util {

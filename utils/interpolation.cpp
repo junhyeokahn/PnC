@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <Configuration.hpp>
+#include <configuration.hpp>
 
 namespace util {
 double Smooth(double ini, double fin, double rat) {
