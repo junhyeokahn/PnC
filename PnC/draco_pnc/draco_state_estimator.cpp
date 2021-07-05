@@ -11,8 +11,16 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
 
   iso_base_com_to_imu_ = robot_->get_link_iso("torso_link").inverse() *
                          robot_->get_link_iso("torso_imu");
-  iso_base_joint_to_imu_ = iso_base_com_to_imu_;
-  iso_base_joint_to_imu_.translation() += robot_->get_base_local_com_pos();
+  iso_base_joint_to_imu_.linear() = iso_base_com_to_imu_.linear();
+  iso_base_joint_to_imu_.translation() =
+      iso_base_com_to_imu_.translation() +
+      robot_->get_link_iso("torso_link").linear() *
+          robot_->get_base_local_com_pos();
+
+  global_linear_offset_.setZero();
+  // global_linear_offset_ << 0.05374, 0.14599, 0.00296; // TODO: TESTING
+  prev_base_joint_pos_.setZero();
+  prev_base_com_pos_.setZero();
 }
 
 DracoStateEstimator::~DracoStateEstimator() {}
@@ -24,44 +32,73 @@ void DracoStateEstimator::initialize(DracoSensorData *data) {
 
 void DracoStateEstimator::update(DracoSensorData *data) {
 
-  // estimate base states from imu data
-  Eigen::Isometry3d iso_world_to_imu;
-  iso_world_to_imu.linear() = data->imu_frame_iso.block(0, 0, 3, 3);
-  iso_world_to_imu.translation() = data->imu_frame_iso.block(0, 3, 3, 1);
+  // estimate base angular state from imu data
+  Eigen::Matrix<double, 3, 3> rot_world_to_base =
+      data->imu_frame_iso.block(0, 0, 3, 3) *
+      iso_base_joint_to_imu_.inverse().linear();
 
-  Eigen::Isometry3d iso_world_to_base_joint =
-      iso_world_to_imu * iso_base_joint_to_imu_.inverse();
-  Eigen::Isometry3d iso_world_to_base_com =
-      iso_world_to_imu * iso_base_com_to_imu_.inverse();
-
-  Eigen::Matrix<double, 6, 1> imu_frame_vel_at_imu_frame =
-      myUtils::block_diag(iso_world_to_imu.linear().transpose(),
-                          iso_world_to_imu.linear().transpose()) *
-      data->imu_frame_vel;
-
-  Eigen::Matrix<double, 6, 1> base_joint_vel =
-      myUtils::block_diag(iso_world_to_base_joint.linear(),
-                          iso_world_to_base_joint.linear()) *
-      (myUtils::Adjoint(iso_base_joint_to_imu_.linear(),
-                        iso_base_joint_to_imu_.translation()) *
-       imu_frame_vel_at_imu_frame);
-  Eigen::Matrix<double, 6, 1> base_com_vel =
-      myUtils::block_diag(iso_world_to_base_com.linear(),
-                          iso_world_to_base_com.linear()) *
-      (myUtils::Adjoint(iso_base_com_to_imu_.linear(),
-                        iso_base_com_to_imu_.translation()) *
-       imu_frame_vel_at_imu_frame);
-
-  // update system
+  // update system without base linear states
   robot_->update_system(
-      iso_world_to_base_com.translation(),
-      Eigen::Quaternion<double>(iso_world_to_base_com.linear()),
-      base_com_vel.tail(3), base_com_vel.head(3),
-      iso_world_to_base_joint.translation(),
-      Eigen::Quaternion<double>(iso_world_to_base_joint.linear()),
-      base_joint_vel.tail(3), base_joint_vel.head(3), data->joint_positions,
+      Eigen::Vector3d::Zero(), Eigen::Quaternion<double>(rot_world_to_base),
+      Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
+      Eigen::Vector3d::Zero(), Eigen::Quaternion<double>(rot_world_to_base),
+      Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
+      data->joint_positions, data->joint_velocities, true);
+
+  // estimate base linear states
+  Eigen::Vector3d foot_pos, foot_vel;
+  if (sp_->stance_foot == "l_foot_contact") {
+    foot_pos = robot_->get_link_iso("l_foot_contact").translation();
+    foot_vel = robot_->get_link_vel("l_foot_contact").tail(3);
+  } else if (sp_->stance_foot == "r_foot_contact") {
+    foot_pos = robot_->get_link_iso("r_foot_contact").translation();
+    foot_vel = robot_->get_link_vel("r_foot_contact").tail(3);
+  } else {
+    assert(false);
+  }
+
+  if (sp_->stance_foot != sp_->prev_stance_foot) {
+    Eigen::Vector3d new_stance_foot = foot_pos;
+    Eigen::Vector3d old_stance_foot;
+    if (sp_->prev_stance_foot == "r_foot_contact") {
+      old_stance_foot = robot_->get_link_iso("r_foot_contact").translation();
+    } else if (sp_->prev_stance_foot == "l_foot_contact") {
+      old_stance_foot = robot_->get_link_iso("l_foot_contact").translation();
+    } else {
+      assert(false);
+    }
+    Eigen::Vector3d old_to_new = new_stance_foot - old_stance_foot;
+    global_linear_offset_ += old_to_new;
+  }
+
+  Eigen::Vector3d base_joint_pos = global_linear_offset_ - foot_pos;
+  Eigen::Vector3d base_com_pos =
+      base_joint_pos + rot_world_to_base * robot_->get_base_local_com_pos();
+
+  static bool b_first_visit(true);
+  if (b_first_visit) {
+    prev_base_joint_pos_ = base_joint_pos;
+    prev_base_com_pos_ = base_com_pos;
+    b_first_visit = false;
+  }
+  Eigen::Vector3d base_joint_lin_vel =
+      (base_joint_pos - prev_base_joint_pos_) / sp_->servo_rate;
+  Eigen::Vector3d base_com_lin_vel =
+      (base_com_pos - prev_base_com_pos_) / sp_->servo_rate;
+  // Eigen::Vector3d base_joint_vel = -foot_vel; // TODO: also use kinematics
+
+  // update system with base linear states
+  robot_->update_system(
+      base_com_pos, Eigen::Quaternion<double>(rot_world_to_base),
+      base_com_lin_vel, data->imu_frame_vel.head(3), base_joint_pos,
+      Eigen::Quaternion<double>(rot_world_to_base), base_joint_lin_vel,
+      data->imu_frame_vel.head(3), data->joint_positions,
       data->joint_velocities, true);
 
+  // update dcm
+  this->_update_dcm();
+
+  // update contact
   if (data->b_rf_contact) {
     sp_->b_rf_contact = 1;
   } else {
@@ -74,7 +111,10 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     sp_->b_lf_contact = 0;
   }
 
-  this->_update_dcm();
+  // save current time step data
+  sp_->prev_stance_foot = sp_->stance_foot;
+  prev_base_joint_pos_ = base_joint_pos;
+  prev_base_com_pos_ = base_com_pos;
 }
 
 void DracoStateEstimator::_update_dcm() {

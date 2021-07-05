@@ -23,5 +23,9 @@ protected:
   Eigen::Isometry3d iso_base_joint_to_imu_;
   Eigen::Isometry3d iso_base_com_to_imu_;
 
+  Eigen::Vector3d global_linear_offset_;
+  Eigen::Vector3d prev_base_joint_pos_;
+  Eigen::Vector3d prev_base_com_pos_;
+
   void _update_dcm();
 };

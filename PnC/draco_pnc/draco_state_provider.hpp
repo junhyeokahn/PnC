@@ -16,6 +16,9 @@ public:
   int state;
   int prev_state;
 
+  std::string stance_foot;
+  std::string prev_stance_foot;
+
   double curr_time;
   double servo_rate = 0.001;
 

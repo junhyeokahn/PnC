@@ -99,8 +99,10 @@ StateIdentifier ContactTransitionStart::getNextState() {
     return draco_states::kBalance;
   } else {
     if (leg_side_ == EndEffector::LFoot) {
+      sp_->stance_foot = "r_foot_contact";
       return draco_states::kLFootContactTransitionEnd;
     } else if (leg_side_ == EndEffector::RFoot) {
+      sp_->stance_foot = "l_foot_contact";
       return draco_states::kRFootContactTransitionEnd;
     }
   }

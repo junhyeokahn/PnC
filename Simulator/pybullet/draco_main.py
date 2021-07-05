@@ -20,6 +20,7 @@ np.set_printoptions(precision=2)
 
 from Config.draco.pybullet_simulation import Config
 from utils import pybullet_util
+from utils import util
 
 import draco_interface
 
