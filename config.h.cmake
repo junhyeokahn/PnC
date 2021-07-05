@@ -1,6 +1,7 @@
 #pragma once
 
 #define THIS_COM "@THIS_COM@"
+#define B_MESSAGING @B_MESSAGING@
 
 namespace EndEffector{
 constexpr int LFoot = 0;

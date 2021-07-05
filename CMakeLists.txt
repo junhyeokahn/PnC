@@ -35,29 +35,28 @@ link_directories("/usr/local/lib")
 ## Dependancy
 ##=============================================================================
 
-# Dart
+# dart
 find_package(DART 6.11 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
-# Eigen
+# eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen)
 endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
-# Gurobi
-find_package(Gurobi)
-if(GUROBI_FOUND)
-  include_directories(${GUROBI_INCLUDE_DIRS})
+# zmq and protobuf
+set(B_MESSAGING false)
+find_package(ZMQ)
+find_package(Protobuf)
+if(ZMQ_FOUND AND Protobuf_FOUND)
+  include_directories(${ZMQ_INCLUDE_DIRS})
+  include_directories(${Protobuf_INCLUDE_DIRS})
+  add_subdirectory(messages)
+  set(B_MESSAGING true)
 endif()
 
-# Mosek
-find_package(Mosek)
-if(MOSEK_FOUND)
-  include_directories(${MOSEK_INCLUDE_DIRS})
-endif()
-
-# Pybind11
+# pybind11
 if(PYTHON_BINDING)
   find_package(Python COMPONENTS Interpreter Development)
   find_package(pybind11 CONFIG)
@@ -78,8 +77,8 @@ add_subdirectory(test)
 ##=============================================================================
 ## Configuration File
 ##=============================================================================
-SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
-SET (SERVO_RATE 0.001)
+set(THIS_COM "${PROJECT_SOURCE_DIR}/" )
+set(SERVO_RATE 0.001)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config.h.cmake
     ${PROJECT_SOURCE_DIR}/Configuration.hpp)
 install(FILES ${PROJECT_SOURCE_DIR}/Configuration.hpp DESTINATION "${INSTALL_INCLUDE_DIR}")

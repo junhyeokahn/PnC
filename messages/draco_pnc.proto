@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package draco_pnc;
+
+message data {
+  float time = 1;
+  uint32 phase = 2;
+  repeated float task_com_pos = 3;
+  repeated float task_com_pos_des = 4;
+  repeated float task_com_vel = 5;
+  repeated float task_com_vel_des = 6;
+}
