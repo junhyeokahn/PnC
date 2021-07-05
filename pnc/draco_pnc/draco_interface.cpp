@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <string>
 
-#include "pnc/robot_system/dart_robot_system.hpp"
 #include "pnc/draco_pnc/draco_control_architecture.hpp"
 #include "pnc/draco_pnc/draco_interrupt_logic.hpp"
 #include "pnc/draco_pnc/draco_state_estimator.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/robot_system/dart_robot_system.hpp"
 #include "utils/util.hpp"
 
 DracoInterface::DracoInterface(bool _b_sim) : Interface() {
@@ -26,6 +26,7 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   se_ = new DracoStateEstimator(robot_);
   sp_ = DracoStateProvider::getStateProvider();
   sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
+  sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
   count_ = 0;
   waiting_count_ = 2;
@@ -40,6 +41,9 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   }
   interrupt = new DracoInterruptLogic(
       static_cast<DracoControlArchitecture *>(control_architecture_));
+
+  DracoDataManager::GetDracoDataManager()->InitializeSockets(
+      util::ReadParameter<std::string>(cfg, "ip_addr"));
 
   util::ColorPrint(color::kBoldCyan, border);
 }
@@ -65,9 +69,16 @@ void DracoInterface::getCommand(void *_data, void *_command) {
 
   ++count_;
   running_time_ = (double)(count_)*sp_->servo_rate;
+  sp_->count = count_;
   sp_->curr_time = running_time_;
   sp_->prev_state = control_architecture_->prev_state;
   sp_->state = control_architecture_->state;
+
+  if (sp_->count % sp_->save_freq == 0) {
+    DracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
+    DracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
+    DracoDataManager::GetDracoDataManager()->Send();
+  }
 }
 
 void DracoInterface::SetSafeCommand(DracoSensorData *data, DracoCommand *cmd) {

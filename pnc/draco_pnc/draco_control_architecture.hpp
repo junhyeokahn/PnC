@@ -1,17 +1,18 @@
 #pragma once
 
-#include <configuration.hpp>
-#include <pnc/control_architecture.hpp>
-#include <pnc/draco_pnc/draco_controller.hpp>
-#include <pnc/draco_pnc/draco_tci_container.hpp>
-#include <pnc/planners/locomotion/dcm_planner/dcm_planner.hpp>
-#include <pnc/robot_system/robot_system.hpp>
-#include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/reaction_force_manager.hpp>
-#include <pnc/whole_body_controllers/managers/task_hierarchy_manager.hpp>
-#include <pnc/whole_body_controllers/managers/upper_body_trajectory_manager.hpp>
+#include "configuration.hpp"
+#include "pnc/control_architecture.hpp"
+#include "pnc/draco_pnc/draco_controller.hpp"
+#include "pnc/draco_pnc/draco_data_manager.hpp"
+#include "pnc/draco_pnc/draco_tci_container.hpp"
+#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
+#include "pnc/robot_system/robot_system.hpp"
+#include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
+#include "pnc/whole_body_controllers/managers/task_hierarchy_manager.hpp"
+#include "pnc/whole_body_controllers/managers/upper_body_trajectory_manager.hpp"
 
 namespace draco_states {
 constexpr int kInitialize = 0;
@@ -55,4 +56,6 @@ private:
   DracoController *controller_;
 
   DracoStateProvider *sp_;
+
+  void SaveData();
 };

@@ -16,6 +16,8 @@ DracoStateProvider::DracoStateProvider() {
   stance_foot = "l_foot_contact";
   prev_stance_foot = "l_foot_contact";
 
+  save_freq = 50;
+  count = 0;
   curr_time = 0.;
 
   dcm.setZero();

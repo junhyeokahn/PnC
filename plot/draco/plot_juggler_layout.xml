@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root version="2.3.8">
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab containers="1" tab_name="task_com">
+   <Container>
+    <DockSplitter count="3" sizes="0.333502;0.332996;0.333502" orientation="-">
+     <DockSplitter count="2" sizes="0.500143;0.499857" orientation="|">
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.942687" top="1.954365" left="11.214281" bottom="-1.959755"/>
+        <limitY/>
+        <curve curve_y="/task_com_pos_des[0]" name="/t[ime;ask_com_pos_des[0]]" color="#1ac938" curve_x="/time"/>
+        <curve curve_y="/task_com_pos[0]" name="/t[ime;ask_com_pos[0]]" color="#9467bd" curve_x="/time"/>
+       </plot>
+      </DockArea>
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.928750" top="1.956112" left="11.221250" bottom="-1.953357"/>
+        <limitY/>
+        <curve curve_y="/task_com_vel_des[0]" name="/t[ime;ask_com_vel_des[0]]" color="#1f77b4" curve_x="/time"/>
+        <curve curve_y="/task_com_vel[0]" name="/t[ime;ask_com_vel[0]]" color="#d62728" curve_x="/time"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+     <DockSplitter count="2" sizes="0.502436;0.497564" orientation="|">
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.928750" top="1.801771" left="11.221250" bottom="-2.079934"/>
+        <limitY/>
+        <curve curve_y="/task_com_pos[1]" name="/t[ime;ask_com_pos[1]]" color="#ff7f0e" curve_x="/time"/>
+        <curve curve_y="/task_com_pos_des[1]" name="/t[ime;ask_com_pos_des[1]]" color="#17becf" curve_x="/time"/>
+       </plot>
+      </DockArea>
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.942725" top="1.957518" left="11.214281" bottom="-1.970669"/>
+        <limitY/>
+        <curve curve_y="/task_com_vel[1]" name="/t[ime;ask_com_vel[1]]" color="#1ac938" curve_x="/time"/>
+        <curve curve_y="/task_com_vel_des[1]" name="/t[ime;ask_com_vel_des[1]]" color="#ff7f0e" curve_x="/time"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+     <DockSplitter count="2" sizes="0.502436;0.497564" orientation="|">
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.928750" top="2.674444" left="11.221250" bottom="-1.214193"/>
+        <limitY/>
+        <curve curve_y="/task_com_pos[2]" name="/t[ime;ask_com_pos[2]]" color="#f14cc1" curve_x="/time"/>
+        <curve curve_y="/task_com_pos_des[2]" name="/t[ime;ask_com_pos_des[2]]" color="#bcbd22" curve_x="/time"/>
+       </plot>
+      </DockArea>
+      <DockArea name="...">
+       <plot mode="XYPlot" style="Lines">
+        <range right="22.928750" top="1.967471" left="11.221250" bottom="-1.960704"/>
+        <limitY/>
+        <curve curve_y="/task_com_vel[2]" name="/t[ime;ask_com_vel[2]]" color="#f14cc1" curve_x="/time"/>
+        <curve curve_y="/task_com_vel_des[2]" name="/t[ime;ask_com_vel_des[2]]" color="#9467bd" curve_x="/time"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <default time_axis=""/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin status="idle" ID="CSV Exporter"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ZMQ Subscriber"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+

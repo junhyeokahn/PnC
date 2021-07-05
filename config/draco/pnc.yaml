@@ -1,5 +1,8 @@
 servo_rate: 0.001
 
+save_freq: 50
+ip_addr: "tcp://127.0.0.1:5557"
+
 wbc:
     rf_z_max: 1000.0
 

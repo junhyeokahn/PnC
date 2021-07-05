@@ -179,4 +179,22 @@ void DracoControlArchitecture::getCommand(void *_command) {
     state = state_machines[state]->getNextState();
     b_state_first_visit_ = true;
   }
+
+  if (sp_->count % sp_->save_freq == 0) {
+    this->SaveData();
+  }
+}
+
+void DracoControlArchitecture::SaveData() {
+  // com task
+  DracoDataManager::GetDracoDataManager()->data->task_com_pos_des =
+      tci_container->com_task->pos_des;
+  DracoDataManager::GetDracoDataManager()->data->task_com_vel_des =
+      tci_container->com_task->vel_des;
+  DracoDataManager::GetDracoDataManager()->data->task_com_acc_des =
+      tci_container->com_task->acc_des;
+  DracoDataManager::GetDracoDataManager()->data->task_com_pos =
+      tci_container->com_task->pos;
+  DracoDataManager::GetDracoDataManager()->data->task_com_vel =
+      tci_container->com_task->vel;
 }

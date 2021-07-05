@@ -2,8 +2,11 @@ file(GLOB_RECURSE sources "*.cpp")
 file(GLOB draco_pnc_headers "*.hpp")
 file(GLOB draco_state_machine_headers "draco_state_machine/*.hpp")
 
-add_library(pnc-draco-pnc ${sources})
+add_library(pnc-draco-pnc SHARED ${sources})
 target_link_libraries(pnc-draco-pnc ${DART_LIBRARIES}
+                                    ${ZMQ_LIBRARIES}
+                                    ${Protobuf_LIBRARIES}
+                                    pnc-msg-draco
                                     pnc-robot-system
                                     pnc-utils
                                     pnc-filters

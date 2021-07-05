@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 
+#include "pnc/draco_pnc/draco_data_manager.hpp"
 #include "pnc/interface.hpp"
 
 class DracoStateProvider;

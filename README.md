@@ -14,7 +14,7 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 - install plotjuggler: ```source scripts/install/install_plotjuggler.sh```
 - install dart: ```source scripts/install/install_dart.sh```
 - install pinocchio: ```source scripts/install/install_pinocchio.sh```
-- install python dependancies: ```conda env create -f pnc.yml`
+- install python dependancies: ```conda env create -f pnc.yml```
 
 ### Compile and Run the Code
 - initiate python env: ```conda activate pnc```

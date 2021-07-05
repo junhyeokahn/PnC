@@ -13,13 +13,20 @@ public:
 
   std::map<std::string, double> nominal_joint_pos;
 
+  // finite state machine
   int state;
   int prev_state;
 
+  // contact info << used in pos estimate
   std::string stance_foot;
   std::string prev_stance_foot;
 
+  // timing
+  int count;
   double curr_time;
+
+  // should be set outside
+  int save_freq;
   double servo_rate = 0.001;
 
   Eigen::Vector3d dcm;
