@@ -1,20 +1,22 @@
-#include <pnc/atlas_pnc/atlas_control_architecture.hpp>
-#include <pnc/atlas_pnc/atlas_controller.hpp>
-#include <pnc/atlas_pnc/atlas_state_machine/contact_transition_end.hpp>
-#include <pnc/atlas_pnc/atlas_state_machine/contact_transition_start.hpp>
-#include <pnc/atlas_pnc/atlas_state_machine/double_support_balance.hpp>
-#include <pnc/atlas_pnc/atlas_state_machine/double_support_stand.hpp>
-#include <pnc/atlas_pnc/atlas_state_machine/single_support_swing.hpp>
-#include <pnc/atlas_pnc/atlas_state_provider.hpp>
-#include <pnc/atlas_pnc/atlas_tci_container.hpp>
-#include <pnc/planners/locomotion/dcm_planner/dcm_planner.hpp>
-#include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp>
-#include <pnc/whole_body_controllers/managers/reaction_force_manager.hpp>
+#include "pnc/atlas_pnc/atlas_control_architecture.hpp"
+
+#include "pnc/atlas_pnc/atlas_controller.hpp"
+#include "pnc/atlas_pnc/atlas_state_machine/contact_transition_end.hpp"
+#include "pnc/atlas_pnc/atlas_state_machine/contact_transition_start.hpp"
+#include "pnc/atlas_pnc/atlas_state_machine/double_support_balance.hpp"
+#include "pnc/atlas_pnc/atlas_state_machine/double_support_stand.hpp"
+#include "pnc/atlas_pnc/atlas_state_machine/single_support_swing.hpp"
+#include "pnc/atlas_pnc/atlas_state_provider.hpp"
+#include "pnc/atlas_pnc/atlas_tci_container.hpp"
+#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
+#include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 
 AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
+  util::PrettyConstructor(1, "AtlasControlArchitecture");
   robot_ = _robot;
 
   // Initialize Task Force Container
@@ -29,12 +31,12 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
   // Initialize Task Manager
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/atlas/pnc.yaml");
 
-  rfoot_tm = new FootSE3TrajectoryManager(
-      tci_container_->rfoot_pos_task, tci_container_->rfoot_ori_task, robot_);
+  rfoot_tm = new FootTrajectoryManager(tci_container_->rfoot_pos_task,
+                                       tci_container_->rfoot_ori_task, robot_);
   rfoot_tm->swing_height =
       util::ReadParameter<double>(cfg["walking"], "swing_height");
-  lfoot_tm = new FootSE3TrajectoryManager(
-      tci_container_->lfoot_pos_task, tci_container_->lfoot_ori_task, robot_);
+  lfoot_tm = new FootTrajectoryManager(tci_container_->lfoot_pos_task,
+                                       tci_container_->lfoot_ori_task, robot_);
   lfoot_tm->swing_height =
       util::ReadParameter<double>(cfg["walking"], "swing_height");
   upper_body_tm =

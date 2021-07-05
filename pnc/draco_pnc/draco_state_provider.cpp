@@ -8,7 +8,7 @@ DracoStateProvider *DracoStateProvider::getStateProvider() {
 }
 
 DracoStateProvider::DracoStateProvider() {
-  util::PrettyConstructor(1, "Draco State Provider");
+  util::PrettyConstructor(1, "DracoStateProvider");
 
   state = 0;
   prev_state = 0;

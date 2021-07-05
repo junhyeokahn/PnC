@@ -1,7 +1,6 @@
 name: pnc
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - pybind11=2.6.2
   - python=3.9.5
@@ -11,9 +10,12 @@ dependencies:
       - conda-env-export==0.3.2
       - imageio==2.9.0
       - ipdb==0.13.9
+      - matplotlib==3.4.2
       - opencv-python==4.5.2.54
+      - pybind11-global==2.6.2
       - pybullet==3.0.8
       - scipy==1.7.0
       - tqdm==4.61.1
       - wheel==0.36.2
-prefix: /opt/anaconda3/envs/pnc
+      - zmq==0.0.0
+prefix: /home/junhyeok/anaconda3/envs/pnc

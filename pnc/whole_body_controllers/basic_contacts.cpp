@@ -3,7 +3,7 @@
 PointContact::PointContact(RobotSystem *robot, const std::string _target_id,
                            const double _mu)
     : Contact(robot, 3, _target_id, _mu) {
-  util::PrettyConstructor(3, "Point Contact");
+  util::PrettyConstructor(3, "PointContact");
 }
 
 PointContact::~PointContact() {}
@@ -43,7 +43,7 @@ SurfaceContact::SurfaceContact(RobotSystem *robot, const std::string _target_id,
                                const double _x, const double _y,
                                const double _mu)
     : Contact(robot, 6, _target_id, _mu) {
-  util::PrettyConstructor(3, "Surface Contact");
+  util::PrettyConstructor(3, "SurfaceContact");
 
   x_ = _x;
   y_ = _y;

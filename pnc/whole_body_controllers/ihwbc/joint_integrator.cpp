@@ -1,7 +1,7 @@
 #include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
 
 JointIntegrator::JointIntegrator(int num_joints_in, double dt_in) {
-  util::PrettyConstructor(3, "WBC Joint Integrator");
+  util::PrettyConstructor(3, "JointIntegrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
   pos_ = Eigen::VectorXd::Zero(n_joints_);

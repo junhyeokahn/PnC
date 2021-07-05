@@ -1,14 +1,15 @@
+#include "pnc/atlas_pnc/atlas_interface.hpp"
+
 #include <math.h>
 #include <stdio.h>
 #include <string>
 
+#include "pnc/atlas_pnc/atlas_control_architecture.hpp"
+#include "pnc/atlas_pnc/atlas_interrupt_logic.hpp"
+#include "pnc/atlas_pnc/atlas_state_estimator.hpp"
+#include "pnc/atlas_pnc/atlas_state_provider.hpp"
+#include "pnc/robot_system/dart_robot_system.hpp"
 #include "utils/util.hpp"
-#include <pnc/atlas_pnc/atlas_control_architecture.hpp>
-#include <pnc/atlas_pnc/atlas_interface.hpp>
-#include <pnc/atlas_pnc/atlas_interrupt_logic.hpp>
-#include <pnc/atlas_pnc/atlas_state_estimator.hpp>
-#include <pnc/atlas_pnc/atlas_state_provider.hpp>
-#include <pnc/robot_system/dart_robot_system.hpp>
 
 AtlasInterface::AtlasInterface() : Interface() {
   std::string border = "=";
@@ -16,7 +17,7 @@ AtlasInterface::AtlasInterface() : Interface() {
     border += "=";
   }
   util::ColorPrint(color::kBoldCyan, border);
-  util::PrettyConstructor(0, "Atlas Interface");
+  util::PrettyConstructor(0, "AtlasInterface");
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/atlas/pnc.yaml");
 

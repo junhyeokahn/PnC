@@ -4,6 +4,7 @@
 #include <pnc/robot_system/robot_system.hpp>
 
 AtlasStateEstimator::AtlasStateEstimator(RobotSystem *_robot) {
+  util::PrettyConstructor(1, "AtlasStateEstimator");
   robot_ = _robot;
   sp_ = AtlasStateProvider::getStateProvider(robot_);
 }

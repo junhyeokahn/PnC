@@ -5,7 +5,7 @@ ContactTransitionStart::ContactTransitionStart(
     AtlasControlArchitecture *_ctrl_arch, int _leg_side, RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  util::PrettyConstructor(2, "SM: Double Support Balance");
+  util::PrettyConstructor(2, "ContactTransitionStart");
 
   atlas_ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;

@@ -5,7 +5,7 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier _state_identifier,
                                        RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  util::PrettyConstructor(2, "SM: Double Support Stand");
+  util::PrettyConstructor(2, "DoubleSupportStand");
 
   atlas_ctrl_arch_ = _ctrl_arch;
   sp_ = AtlasStateProvider::getStateProvider(_robot);

@@ -2,6 +2,7 @@
 
 UpperBodyTrajectoryManager::UpperBodyTrajectoryManager(Task *_upper_body_task,
                                                        RobotSystem *_robot) {
+  util::PrettyConstructor(2, "UpperBodyTrajectoryManager");
   upper_body_task_ = _upper_body_task;
   robot_ = _robot;
   target_ids_ = upper_body_task_->target_ids;

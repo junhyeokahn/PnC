@@ -5,7 +5,7 @@ DoubleSupportBalance::DoubleSupportBalance(
     DracoControlArchitecture *_ctrl_arch, RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  util::PrettyConstructor(2, "SM: Double Support Balance");
+  util::PrettyConstructor(2, "DoubleSupportBalance");
 
   ctrl_arch_ = _ctrl_arch;
   sp_ = DracoStateProvider::getStateProvider();

@@ -1,10 +1,5 @@
 #include "pnc/draco_pnc/draco_control_architecture.hpp"
 
-#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
-#include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
-#include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
-#include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
-#include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 #include "pnc/draco_pnc/draco_controller.hpp"
 #include "pnc/draco_pnc/draco_state_machine/contact_transition_end.hpp"
 #include "pnc/draco_pnc/draco_state_machine/contact_transition_start.hpp"
@@ -15,9 +10,15 @@
 #include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/draco_pnc/draco_tci_container.hpp"
+#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
+#include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 
 DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
+  util::PrettyConstructor(1, "DracoControlArchitecture");
   robot_ = _robot;
 
   // Initialize Task Force Container
@@ -32,12 +33,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   // Initialize Task Manager
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
 
-  rfoot_tm = new FootSE3TrajectoryManager(
-      tci_container->rfoot_pos_task, tci_container->rfoot_ori_task, robot_);
+  rfoot_tm = new FootTrajectoryManager(tci_container->rfoot_pos_task,
+                                       tci_container->rfoot_ori_task, robot_);
   rfoot_tm->swing_height =
       util::ReadParameter<double>(cfg["walking"], "swing_height");
-  lfoot_tm = new FootSE3TrajectoryManager(
-      tci_container->lfoot_pos_task, tci_container->lfoot_ori_task, robot_);
+  lfoot_tm = new FootTrajectoryManager(tci_container->lfoot_pos_task,
+                                       tci_container->lfoot_ori_task, robot_);
   lfoot_tm->swing_height =
       util::ReadParameter<double>(cfg["walking"], "swing_height");
   upper_body_tm =

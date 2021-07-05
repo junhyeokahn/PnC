@@ -6,6 +6,7 @@ constexpr int DCMPlanner::DCM_TRANSFER_VRP_TYPE = 3;
 constexpr int DCMPlanner::DCM_END_VRP_TYPE = 4;
 
 DCMPlanner::DCMPlanner() {
+  util::PrettyConstructor(2, "DCMPlanner");
   initial_leftfoot_stance.setLeftSide();
   initial_rightfoot_stance.setRightSide();
   // std::cout << "[DCMPlanner] Constructed" << std::endl;

@@ -2,7 +2,7 @@
 
 ReactionForceManager::ReactionForceManager(Contact *_contact,
                                            double _maximum_rf_z_max) {
-  util::PrettyConstructor(2, "TrajectoryManager: Max Normal Force");
+  util::PrettyConstructor(2, "ReactionForceManager");
 
   contact_ = _contact;
   maximum_rf_z_max_ = _maximum_rf_z_max;

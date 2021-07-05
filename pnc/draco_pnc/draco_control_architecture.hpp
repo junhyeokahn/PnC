@@ -2,6 +2,8 @@
 
 #include <configuration.hpp>
 #include <pnc/control_architecture.hpp>
+#include <pnc/draco_pnc/draco_controller.hpp>
+#include <pnc/draco_pnc/draco_tci_container.hpp>
 #include <pnc/planners/locomotion/dcm_planner/dcm_planner.hpp>
 #include <pnc/robot_system/robot_system.hpp>
 #include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
@@ -10,8 +12,6 @@
 #include <pnc/whole_body_controllers/managers/reaction_force_manager.hpp>
 #include <pnc/whole_body_controllers/managers/task_hierarchy_manager.hpp>
 #include <pnc/whole_body_controllers/managers/upper_body_trajectory_manager.hpp>
-#include <pnc/draco_pnc/draco_controller.hpp>
-#include <pnc/draco_pnc/draco_tci_container.hpp>
 
 namespace draco_states {
 constexpr int kInitialize = 0;
@@ -33,8 +33,8 @@ public:
 
   virtual void getCommand(void *_command);
 
-  FootSE3TrajectoryManager *rfoot_tm;
-  FootSE3TrajectoryManager *lfoot_tm;
+  FootTrajectoryManager *rfoot_tm;
+  FootTrajectoryManager *lfoot_tm;
   UpperBodyTrajectoryManager *upper_body_tm;
   FloatingBaseTrajectoryManager *floating_base_tm;
   DCMTrajectoryManager *dcm_tm;

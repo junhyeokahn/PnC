@@ -7,7 +7,7 @@ AtlasStateProvider *AtlasStateProvider::getStateProvider(RobotSystem *_robot) {
 }
 
 AtlasStateProvider::AtlasStateProvider(RobotSystem *_robot) {
-  util::PrettyConstructor(1, "Atlas State Provider");
+  util::PrettyConstructor(1, "AtlasStateProvider");
 
   robot_ = _robot;
 

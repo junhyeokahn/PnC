@@ -3,7 +3,7 @@
 DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
     RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx) {
-  util::PrettyConstructor(2, "TrajectoryManager: DCM Planner");
+  util::PrettyConstructor(2, "DCMTrajectoryManager");
 
   dcm_planner_ = _dcm_planner;
   com_task_ = _com_task;
@@ -418,7 +418,7 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
     // Load DCM Parameters
     util::ReadParameter(node, "com_height", nominal_com_height_);
     util::ReadParameter(node, "t_additional_ini_trans",
-                           t_additional_init_transfer_);
+                        t_additional_init_transfer_);
     util::ReadParameter(node, "t_contact_trans", t_contact_transition_);
     util::ReadParameter(node, "t_swing", t_swing_);
     util::ReadParameter(node, "percentage_settle", percentage_settle_);
@@ -427,11 +427,10 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
     // Load Walking Primitives Parameters
     util::ReadParameter(node, "nominal_footwidth", nominal_footwidth);
     util::ReadParameter(node, "nominal_forward_step", nominal_forward_step);
-    util::ReadParameter(node, "nominal_backward_step",
-                           nominal_backward_step);
+    util::ReadParameter(node, "nominal_backward_step", nominal_backward_step);
     util::ReadParameter(node, "nominal_turn_radians", nominal_turn_radians);
     util::ReadParameter(node, "nominal_strafe_distance",
-                           nominal_strafe_distance);
+                        nominal_strafe_distance);
 
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["

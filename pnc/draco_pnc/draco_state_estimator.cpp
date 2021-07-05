@@ -1,10 +1,11 @@
-#include <pnc/draco_pnc/draco_state_estimator.hpp>
+#include "pnc/draco_pnc/draco_state_estimator.hpp"
 
-#include <pnc/robot_system/robot_system.hpp>
-#include <pnc/draco_pnc/draco_interface.hpp>
-#include <pnc/draco_pnc/draco_state_provider.hpp>
+#include "pnc/draco_pnc/draco_interface.hpp"
+#include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/robot_system/robot_system.hpp"
 
 DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
+  util::PrettyConstructor(1, "DracoStateEstimator");
   robot_ = _robot;
   sp_ = DracoStateProvider::getStateProvider();
 
@@ -17,7 +18,6 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
           robot_->get_base_local_com_pos();
 
   global_linear_offset_.setZero();
-  // global_linear_offset_ << 0.05374, 0.14599, 0.00296; // TODO: TESTING
   prev_base_joint_pos_.setZero();
   prev_base_com_pos_.setZero();
 }

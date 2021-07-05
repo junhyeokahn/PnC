@@ -31,8 +31,8 @@ public:
 
   virtual void getCommand(void *_command);
 
-  FootSE3TrajectoryManager *rfoot_tm;
-  FootSE3TrajectoryManager *lfoot_tm;
+  FootTrajectoryManager *rfoot_tm;
+  FootTrajectoryManager *lfoot_tm;
   UpperBodyTrajectoryManager *upper_body_tm;
   FloatingBaseTrajectoryManager *floating_base_tm;
   DCMTrajectoryManager *dcm_tm;

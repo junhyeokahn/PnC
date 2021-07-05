@@ -1,9 +1,12 @@
-#include <pnc/robot_system/dart_robot_system.hpp>
+#include "pnc/robot_system/dart_robot_system.hpp"
+
+#include <utils/util.hpp>
 
 DartRobotSystem::DartRobotSystem(const std::string _urdf_file,
                                  const bool _b_fixed_base,
                                  const bool _b_print_info)
     : RobotSystem(_b_fixed_base, _b_print_info), urdf_file_(_urdf_file) {
+  util::PrettyConstructor(1, "DartRobotSystem");
   this->_config_robot();
 
   joint_positions.resize(n_a);

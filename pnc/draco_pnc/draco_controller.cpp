@@ -1,11 +1,12 @@
 #include "pnc/draco_pnc/draco_controller.hpp"
 
+#include "pnc/draco_pnc/draco_control_architecture.hpp"
 #include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
 #include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
-#include "pnc/draco_pnc/draco_control_architecture.hpp"
 
 DracoController::DracoController(DracoTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
+  util::PrettyConstructor(2, "DracoController");
   tci_container_ = _tci_container;
   robot_ = _robot;
 

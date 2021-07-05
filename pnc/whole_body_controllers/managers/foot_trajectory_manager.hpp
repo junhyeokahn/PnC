@@ -9,11 +9,11 @@
 #include "utils/util.hpp"
 
 // Object to manage common trajectory primitives
-class FootSE3TrajectoryManager {
+class FootTrajectoryManager {
 public:
-  FootSE3TrajectoryManager(Task *_foot_pos_task, Task *_foot_ori_task,
-                           RobotSystem *_robot);
-  ~FootSE3TrajectoryManager();
+  FootTrajectoryManager(Task *_foot_pos_task, Task *_foot_ori_task,
+                        RobotSystem *_robot);
+  ~FootTrajectoryManager();
   void paramInitialization(const YAML::Node &node);
 
   // Use current pose to set the task.

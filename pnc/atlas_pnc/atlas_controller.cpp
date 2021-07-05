@@ -6,6 +6,7 @@
 
 AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
+  util::PrettyConstructor(2, "AtlasController");
   tci_container_ = _tci_container;
   robot_ = _robot;
 

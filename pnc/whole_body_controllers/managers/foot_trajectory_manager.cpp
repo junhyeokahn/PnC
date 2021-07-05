@@ -1,9 +1,9 @@
-#include <pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp>
+#include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
 
-FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task *_foot_pos_task,
-                                                   Task *_foot_ori_task,
-                                                   RobotSystem *_robot) {
-  util::PrettyConstructor(2, "TrajectoryManager: FootSE3");
+FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
+                                             Task *_foot_ori_task,
+                                             RobotSystem *_robot) {
+  util::PrettyConstructor(2, "FootTrajectoryManager");
   robot_ = _robot;
   // Set Linear and Orientation Foot task
   foot_pos_task_ = _foot_pos_task;
@@ -25,9 +25,9 @@ FootSE3TrajectoryManager::FootSE3TrajectoryManager(Task *_foot_pos_task,
   swing_height = 0.04; // 4cm default
 }
 
-FootSE3TrajectoryManager::~FootSE3TrajectoryManager() {}
+FootTrajectoryManager::~FootTrajectoryManager() {}
 
-void FootSE3TrajectoryManager::useCurrent() {
+void FootTrajectoryManager::useCurrent() {
   // Update desired to use current foot pose
   foot_pos_des_ = robot_->get_link_iso(link_idx_).translation();
   foot_vel_des_ = robot_->get_link_vel(link_idx_).tail(3);
@@ -41,21 +41,21 @@ void FootSE3TrajectoryManager::useCurrent() {
   updateDesired();
 }
 
-void FootSE3TrajectoryManager::convertQuatDesToOriDes() {
+void FootTrajectoryManager::convertQuatDesToOriDes() {
   foot_ori_des_[0] = foot_quat_des_.w();
   foot_ori_des_[1] = foot_quat_des_.x();
   foot_ori_des_[2] = foot_quat_des_.y();
   foot_ori_des_[3] = foot_quat_des_.z();
 }
 
-void FootSE3TrajectoryManager::updateDesired() {
+void FootTrajectoryManager::updateDesired() {
   foot_pos_task_->update_desired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
   foot_ori_task_->update_desired(foot_ori_des_, foot_ang_vel_des_,
                                  foot_ang_acc_des_);
 }
 
 // Initialize the swing foot trajectory
-void FootSE3TrajectoryManager::initializeSwingFootTrajectory(
+void FootTrajectoryManager::initializeSwingFootTrajectory(
     const double _start_time, const double _swing_duration,
     const Footstep &_landing_foot) {
   // Copy and initialize variables
@@ -103,7 +103,7 @@ void FootSE3TrajectoryManager::initializeSwingFootTrajectory(
 }
 
 // Computes the swing foot
-void FootSE3TrajectoryManager::computeSwingFoot(const double current_time) {
+void FootTrajectoryManager::computeSwingFoot(const double current_time) {
   // Compute progression variable
   double s = (current_time - swing_start_time_) / swing_duration_;
 
@@ -139,8 +139,7 @@ void FootSE3TrajectoryManager::computeSwingFoot(const double current_time) {
   // util::PrettyPrint(foot_ori_des_, std::cout, "foot_ori_des_");
 }
 
-void FootSE3TrajectoryManager::updateSwingFootDesired(
-    const double current_time) {
+void FootTrajectoryManager::updateSwingFootDesired(const double current_time) {
   computeSwingFoot(current_time);
   updateDesired();
 }

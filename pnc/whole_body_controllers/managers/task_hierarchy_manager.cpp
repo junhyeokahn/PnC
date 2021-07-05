@@ -2,7 +2,7 @@
 
 TaskHierarchyManager::TaskHierarchyManager(Task *_task, double _w_max,
                                            double _w_min) {
-  util::PrettyConstructor(2, "TrajectoryManager: Task Gain Schedule");
+  util::PrettyConstructor(2, "TaskHierarchyManager");
 
   task_ = _task;
   w_max_ = _w_max;
