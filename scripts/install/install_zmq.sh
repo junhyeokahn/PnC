@@ -8,7 +8,7 @@ echo '# ==============================================================='
 
 if [ "$(uname)" == "Darwin" ]; then
 
-   cd $PATH_PACKAGE/../ &&
+    cd $PATH_PACKAGE/../ &&
     git clone git@github.com:zeromq/libzmq.git &&
     cd libzmq &&
     mkdir build &&
