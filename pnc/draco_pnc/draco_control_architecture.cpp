@@ -186,15 +186,35 @@ void DracoControlArchitecture::getCommand(void *_command) {
 }
 
 void DracoControlArchitecture::SaveData() {
-  // com task
-  DracoDataManager::GetDracoDataManager()->data->task_com_pos_des =
-      tci_container->com_task->pos_des;
-  DracoDataManager::GetDracoDataManager()->data->task_com_vel_des =
-      tci_container->com_task->vel_des;
-  DracoDataManager::GetDracoDataManager()->data->task_com_acc_des =
-      tci_container->com_task->acc_des;
-  DracoDataManager::GetDracoDataManager()->data->task_com_pos =
-      tci_container->com_task->pos;
-  DracoDataManager::GetDracoDataManager()->data->task_com_vel =
-      tci_container->com_task->vel;
+  DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+
+  tci_container->com_task->CopyData(
+      dm->data->task_com_pos_des, dm->data->task_com_vel_des,
+      dm->data->task_com_acc_des, dm->data->task_com_pos,
+      dm->data->task_com_vel);
+
+  tci_container->torso_ori_task->CopyData(
+      dm->data->task_torso_ori_des, dm->data->task_torso_ang_vel_des,
+      dm->data->task_torso_ang_acc_des, dm->data->task_torso_ori,
+      dm->data->task_torso_ang_vel);
+
+  tci_container->rfoot_pos_task->CopyData(
+      dm->data->task_rfoot_pos_des, dm->data->task_rfoot_vel_des,
+      dm->data->task_rfoot_acc_des, dm->data->task_rfoot_pos,
+      dm->data->task_rfoot_vel);
+
+  tci_container->rfoot_ori_task->CopyData(
+      dm->data->task_rfoot_ori_des, dm->data->task_rfoot_ang_vel_des,
+      dm->data->task_rfoot_ang_acc_des, dm->data->task_rfoot_ori,
+      dm->data->task_rfoot_ang_vel);
+
+  tci_container->lfoot_pos_task->CopyData(
+      dm->data->task_lfoot_pos_des, dm->data->task_lfoot_vel_des,
+      dm->data->task_lfoot_acc_des, dm->data->task_lfoot_pos,
+      dm->data->task_lfoot_vel);
+
+  tci_container->lfoot_ori_task->CopyData(
+      dm->data->task_lfoot_ori_des, dm->data->task_lfoot_ang_vel_des,
+      dm->data->task_lfoot_ang_acc_des, dm->data->task_lfoot_ori,
+      dm->data->task_lfoot_ang_vel);
 }

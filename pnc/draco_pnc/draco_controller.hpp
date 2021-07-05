@@ -1,11 +1,11 @@
 #pragma once
 
-#include "pnc/robot_system/robot_system.hpp"
-#include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
-#include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
 #include "pnc/draco_pnc/draco_interface.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/draco_pnc/draco_tci_container.hpp"
+#include "pnc/robot_system/robot_system.hpp"
+#include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
+#include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
 
 class DracoController {
 public:
@@ -13,6 +13,8 @@ public:
   virtual ~DracoController();
 
   void getCommand(void *_cmd);
+
+  void SaveData();
 
 private:
   /* data */
@@ -25,8 +27,8 @@ private:
 
   Eigen::VectorXd joint_trq_cmd_;
   Eigen::VectorXd joint_acc_cmd_;
-  Eigen::VectorXd r_rf_cmd_;
-  Eigen::VectorXd l_rf_cmd_;
+  Eigen::VectorXd cmd_lfoot_rf_;
+  Eigen::VectorXd cmd_rfoot_rf_;
   Eigen::VectorXd joint_pos_cmd_;
   Eigen::VectorXd joint_vel_cmd_;
 

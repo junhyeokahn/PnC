@@ -11,4 +11,43 @@ message pnc_msg {
   repeated float task_com_pos_des = 5;
   repeated float task_com_vel_des = 6;
   repeated float task_com_acc_des = 7;
+
+  // base ori
+  repeated float task_torso_ori_des = 8;
+  repeated float task_torso_ang_vel_des = 9;
+  repeated float task_torso_ang_acc_des = 10;
+  repeated float task_torso_ori = 11;
+  repeated float task_torso_ang_vel = 12;
+
+  // rfoot pos
+  repeated float task_rfoot_pos = 13;
+  repeated float task_rfoot_vel = 14;
+  repeated float task_rfoot_pos_des = 15;
+  repeated float task_rfoot_vel_des = 16;
+  repeated float task_rfoot_acc_des = 17;
+
+  // rfoot ori
+  repeated float task_rfoot_ori_des = 18;
+  repeated float task_rfoot_ang_vel_des = 19;
+  repeated float task_rfoot_ang_acc_des = 20;
+  repeated float task_rfoot_ori = 21;
+  repeated float task_rfoot_ang_vel = 22;
+
+  // lfoot pos
+  repeated float task_lfoot_pos = 23;
+  repeated float task_lfoot_vel = 24;
+  repeated float task_lfoot_pos_des = 25;
+  repeated float task_lfoot_vel_des = 26;
+  repeated float task_lfoot_acc_des = 27;
+
+  // rfoot ori
+  repeated float task_lfoot_ori_des = 28;
+  repeated float task_lfoot_ang_vel_des = 29;
+  repeated float task_lfoot_ang_acc_des = 30;
+  repeated float task_lfoot_ori = 31;
+  repeated float task_lfoot_ang_vel = 32;
+
+  // rf cmd
+  repeated float cmd_lfoot_rf = 33;
+  repeated float cmd_rfoot_rf = 34;
 }

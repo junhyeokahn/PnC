@@ -105,6 +105,16 @@ public:
     std::cout << op_cmd << std::endl;
   }
 
+  void CopyData(Eigen::VectorXd &_pos_des, Eigen::VectorXd &_vel_des,
+                Eigen::VectorXd &_acc_des, Eigen::VectorXd &_pos,
+                Eigen::VectorXd &_vel) {
+    _pos_des = pos_des;
+    _vel_des = vel_des;
+    _acc_des = acc_des;
+    _pos = pos;
+    _vel = vel;
+  }
+
 protected:
   RobotSystem *robot_;
 };

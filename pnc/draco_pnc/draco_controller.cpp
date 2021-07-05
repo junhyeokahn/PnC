@@ -76,15 +76,8 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   joint_trq_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_vel_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
-  r_rf_cmd_ = Eigen::VectorXd::Zero(6);
-  l_rf_cmd_ = Eigen::VectorXd::Zero(6);
-
-  // DataManager *data_manager = DataManager::GetDataManager();
-  // data_manager->RegisterData(&joint_pos_cmd_, VECT, "cmd_jpos", robot_->n_a);
-  // data_manager->RegisterData(&joint_vel_cmd_, VECT, "cmd_jvel", robot_->n_a);
-  // data_manager->RegisterData(&joint_trq_cmd_, VECT, "cmd_jtrq", robot_->n_a);
-  // data_manager->RegisterData(&r_rf_cmd_, VECT, "cmd_r_rf", 6);
-  // data_manager->RegisterData(&l_rf_cmd_, VECT, "cmd_l_rf", 6);
+  cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
+  cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
 }
 
 DracoController::~DracoController() {
@@ -143,20 +136,24 @@ void DracoController::getCommand(void *cmd) {
         (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
         wbc_joint_acc_cmd;
     if (sp_->state == draco_states::kLFootSwing) {
-      l_rf_cmd_ = Eigen::VectorXd::Zero(6);
-      r_rf_cmd_ = rf_des;
+      cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
+      cmd_rfoot_rf_ = rf_des;
     } else if (sp_->state == draco_states::kRFootSwing) {
-      r_rf_cmd_ = Eigen::VectorXd::Zero(6);
-      l_rf_cmd_ = rf_des;
+      cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
+      cmd_lfoot_rf_ = rf_des;
     } else {
       // right foot first
-      r_rf_cmd_ = rf_des.head(6);
-      l_rf_cmd_ = rf_des.tail(6);
+      cmd_rfoot_rf_ = rf_des.head(6);
+      cmd_lfoot_rf_ = rf_des.tail(6);
     }
 
     joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
                                  robot_->joint_positions, joint_vel_cmd_,
                                  joint_pos_cmd_);
+  }
+
+  if (sp_->count % sp_->save_freq == 0) {
+    this->SaveData();
   }
 
   ((DracoCommand *)cmd)->joint_positions =
@@ -170,4 +167,11 @@ void DracoController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
+}
+
+void DracoController::SaveData() {
+  DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+
+  dm->data->cmd_lfoot_rf = cmd_lfoot_rf_;
+  dm->data->cmd_rfoot_rf = cmd_rfoot_rf_;
 }

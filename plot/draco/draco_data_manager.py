@@ -48,6 +48,39 @@ while True:
     data_saver.add('task_com_pos', list(msg.task_com_pos))
     data_saver.add('task_com_vel', list(msg.task_com_vel))
 
+    data_saver.add('task_torso_ori_des', list(msg.task_torso_ori_des))
+    data_saver.add('task_torso_ang_vel_des', list(msg.task_torso_ang_vel_des))
+    data_saver.add('task_torso_ang_acc_des', list(msg.task_torso_ang_acc_des))
+    data_saver.add('task_torso_ori', list(msg.task_torso_ori))
+    data_saver.add('task_torso_ang_vel', list(msg.task_torso_ang_vel))
+
+    data_saver.add('task_rfoot_pos_des', list(msg.task_rfoot_pos_des))
+    data_saver.add('task_rfoot_vel_des', list(msg.task_rfoot_vel_des))
+    data_saver.add('task_rfoot_acc_des', list(msg.task_rfoot_acc_des))
+    data_saver.add('task_rfoot_pos', list(msg.task_rfoot_pos))
+    data_saver.add('task_rfoot_vel', list(msg.task_rfoot_vel))
+
+    data_saver.add('task_rfoot_ori_des', list(msg.task_rfoot_ori_des))
+    data_saver.add('task_rfoot_ang_vel_des', list(msg.task_rfoot_ang_vel_des))
+    data_saver.add('task_rfoot_ang_acc_des', list(msg.task_rfoot_ang_acc_des))
+    data_saver.add('task_rfoot_ori', list(msg.task_rfoot_ori))
+    data_saver.add('task_rfoot_ang_vel', list(msg.task_rfoot_ang_vel))
+
+    data_saver.add('task_lfoot_pos_des', list(msg.task_lfoot_pos_des))
+    data_saver.add('task_lfoot_vel_des', list(msg.task_lfoot_vel_des))
+    data_saver.add('task_lfoot_acc_des', list(msg.task_lfoot_acc_des))
+    data_saver.add('task_lfoot_pos', list(msg.task_lfoot_pos))
+    data_saver.add('task_lfoot_vel', list(msg.task_lfoot_vel))
+
+    data_saver.add('task_lfoot_ori_des', list(msg.task_lfoot_ori_des))
+    data_saver.add('task_lfoot_ang_vel_des', list(msg.task_lfoot_ang_vel_des))
+    data_saver.add('task_lfoot_ang_acc_des', list(msg.task_lfoot_ang_acc_des))
+    data_saver.add('task_lfoot_ori', list(msg.task_lfoot_ori))
+    data_saver.add('task_lfoot_ang_vel', list(msg.task_lfoot_ang_vel))
+
+    data_saver.add('cmd_lfoot_rf', list(msg.cmd_lfoot_rf))
+    data_saver.add('cmd_rfoot_rf', list(msg.cmd_rfoot_rf))
+
     data_saver.advance()
 
     # publish back for plot juggler

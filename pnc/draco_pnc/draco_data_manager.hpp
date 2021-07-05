@@ -5,28 +5,7 @@
 
 #include "build/messages/draco.pb.h"
 
-class DracoData {
-public:
-  DracoData() {
-    time = 0.;
-    phase = 0;
-    task_com_pos.setZero();
-    task_com_vel.setZero();
-    task_com_pos_des.setZero();
-    task_com_vel_des.setZero();
-    task_com_acc_des.setZero();
-  };
-  ~DracoData(){};
-
-  // should be matching with protobuf msg
-  double time;
-  int phase;
-  Eigen::Vector3d task_com_pos;
-  Eigen::Vector3d task_com_vel;
-  Eigen::Vector3d task_com_pos_des;
-  Eigen::Vector3d task_com_vel_des;
-  Eigen::Vector3d task_com_acc_des;
-};
+class DracoData;
 
 class DracoDataManager {
 public:
@@ -47,4 +26,54 @@ private:
   std::unique_ptr<zmq::socket_t> socket_;
 
   bool b_initialized_;
+};
+
+class DracoData {
+public:
+  DracoData(){};
+  ~DracoData(){};
+
+  // should be matching with protobuf msg
+  double time;
+  int phase;
+
+  Eigen::VectorXd task_com_pos;
+  Eigen::VectorXd task_com_vel;
+  Eigen::VectorXd task_com_pos_des;
+  Eigen::VectorXd task_com_vel_des;
+  Eigen::VectorXd task_com_acc_des;
+
+  Eigen::VectorXd task_torso_ori_des;
+  Eigen::VectorXd task_torso_ang_vel_des;
+  Eigen::VectorXd task_torso_ang_acc_des;
+  Eigen::VectorXd task_torso_ori;
+  Eigen::VectorXd task_torso_ang_vel;
+
+  Eigen::VectorXd task_rfoot_pos;
+  Eigen::VectorXd task_rfoot_vel;
+  Eigen::VectorXd task_rfoot_pos_des;
+  Eigen::VectorXd task_rfoot_vel_des;
+  Eigen::VectorXd task_rfoot_acc_des;
+
+  Eigen::VectorXd task_rfoot_ori_des;
+  Eigen::VectorXd task_rfoot_ang_vel_des;
+  Eigen::VectorXd task_rfoot_ang_acc_des;
+  Eigen::VectorXd task_rfoot_ori;
+  Eigen::VectorXd task_rfoot_ang_vel;
+
+  Eigen::VectorXd task_lfoot_pos;
+  Eigen::VectorXd task_lfoot_vel;
+  Eigen::VectorXd task_lfoot_pos_des;
+  Eigen::VectorXd task_lfoot_vel_des;
+  Eigen::VectorXd task_lfoot_acc_des;
+
+  Eigen::VectorXd task_lfoot_ori_des;
+  Eigen::VectorXd task_lfoot_ang_vel_des;
+  Eigen::VectorXd task_lfoot_ang_acc_des;
+  Eigen::VectorXd task_lfoot_ori;
+  Eigen::VectorXd task_lfoot_ang_vel;
+
+  // wbc solution
+  Eigen::VectorXd cmd_rfoot_rf;
+  Eigen::VectorXd cmd_lfoot_rf;
 };
