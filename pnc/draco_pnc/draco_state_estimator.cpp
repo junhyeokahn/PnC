@@ -95,7 +95,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
       data->joint_velocities, true);
 
   // update dcm
-  this->_update_dcm();
+  this->ComputeDCM();
 
   // update contact
   if (data->b_rf_contact) {
@@ -114,9 +114,19 @@ void DracoStateEstimator::update(DracoSensorData *data) {
   sp_->prev_stance_foot = sp_->stance_foot;
   prev_base_joint_pos_ = base_joint_pos;
   prev_base_com_pos_ = base_com_pos;
+
+  if (sp_->count % sp_->save_freq == 0) {
+    DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+    dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
+    dm->data->base_joint_pos = base_joint_pos;
+    Eigen::Quaternion<double> quat =
+        Eigen::Quaternion<double>(rot_world_to_base);
+    dm->data->base_joint_quat =
+        Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
+  }
 }
 
-void DracoStateEstimator::_update_dcm() {
+void DracoStateEstimator::ComputeDCM() {
   Eigen::Vector3d com_pos = robot_->get_com_pos();
   Eigen::Vector3d com_vel = robot_->get_com_lin_vel();
   double dcm_omega = sqrt(9.81 / com_pos[2]);

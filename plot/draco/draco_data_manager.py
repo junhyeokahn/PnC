@@ -9,6 +9,8 @@ import time
 import json
 from ruamel.yaml import YAML
 import numpy as np
+from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin
 
 from plot.data_saver import DataSaver
 
@@ -27,11 +29,24 @@ pj_context = zmq.Context()
 pj_socket = pj_context.socket(zmq.PUB)
 pj_socket.bind("tcp://*:9872")
 
-time.sleep(1)
+data_saver = DataSaver()
+
+model, collision_model, visual_model = pin.buildModelsFromUrdf(
+    "robot_model/draco/draco.urdf", "robot_model/draco",
+    pin.JointModelFreeFlyer())
+viz = MeshcatVisualizer(model, collision_model, visual_model)
+try:
+    viz.initViewer(open=True)
+except ImportError as err:
+    print(
+        "Error while initializing the viewer. It seems you should install python meshcat"
+    )
+    print(err)
+    exit()
+viz.loadViewerModel()
+vis_q = pin.neutral(model)
 
 msg = pnc_msg()
-
-data_saver = DataSaver()
 
 while True:
 
@@ -85,3 +100,12 @@ while True:
 
     # publish back for plot juggler
     pj_socket.send_string(json.dumps(data_saver.history))
+
+    # publish joint positions for meshcat
+    vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
+    vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
+    vis_q[4] = msg.base_joint_quat[1]  # << quaternion y
+    vis_q[5] = msg.base_joint_quat[1]  # << quaternion z
+    vis_q[6] = msg.base_joint_quat[1]  # << quaternion w
+    vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+    viz.display(vis_q)

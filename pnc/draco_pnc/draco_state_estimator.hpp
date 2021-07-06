@@ -27,5 +27,5 @@ protected:
   Eigen::Vector3d prev_base_joint_pos_;
   Eigen::Vector3d prev_base_com_pos_;
 
-  void _update_dcm();
+  void ComputeDCM();
 };

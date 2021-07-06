@@ -73,6 +73,16 @@ void DracoDataManager::Send() {
     pb_msg.add_cmd_lfoot_rf(data->cmd_lfoot_rf[i]);
   }
 
+  for (int i = 0; i < data->joint_positions.size(); ++i) {
+    pb_msg.add_joint_positions(data->joint_positions[i]);
+  }
+
+  for (int i = 0; i < 3; ++i) {
+    pb_msg.add_base_joint_pos(data->base_joint_pos[i]);
+    pb_msg.add_base_joint_quat(data->base_joint_quat[i]);
+  }
+  pb_msg.add_base_joint_quat(data->base_joint_quat[3]);
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

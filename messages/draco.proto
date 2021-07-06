@@ -50,4 +50,9 @@ message pnc_msg {
   // rf cmd
   repeated float cmd_lfoot_rf = 33;
   repeated float cmd_rfoot_rf = 34;
+
+  // meshcat visualization
+  repeated float joint_positions = 35;
+  repeated float base_joint_pos = 36;
+  repeated float base_joint_quat = 37;
 }

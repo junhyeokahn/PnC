@@ -76,4 +76,9 @@ public:
   // wbc solution
   Eigen::VectorXd cmd_rfoot_rf;
   Eigen::VectorXd cmd_lfoot_rf;
+
+  // for meshcat visualization
+  Eigen::VectorXd joint_positions;
+  Eigen::VectorXd base_joint_pos;
+  Eigen::VectorXd base_joint_quat;
 };
