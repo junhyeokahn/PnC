@@ -2,6 +2,7 @@ name: pnc
 channels:
   - conda-forge
 dependencies:
+  - pinocchio=2.5.6
   - pybind11=2.6.2
   - python=3.9.5
   - ruamel.yaml=0.17.10
@@ -11,7 +12,9 @@ dependencies:
       - imageio==2.9.0
       - ipdb==0.13.9
       - matplotlib==3.4.2
+      - meshcat==0.1.1
       - opencv-python==4.5.2.54
+      - protobuf==3.17.3
       - pybind11-global==2.6.2
       - pybullet==3.0.8
       - scipy==1.7.0
