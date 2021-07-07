@@ -9,8 +9,8 @@ echo '# ==============================================================='
 if [ "$(uname)" == "Darwin" ]; then
     brew install cmake
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    sudo apt remove --purge cmake &&
-    hash -r
+    sudo apt remove cmake &&
+    hash -r &&
     cd $PATH_PACKAGE/../ &&
     git clone git@github.com:Kitware/CMake.git
     cd CMake &&
