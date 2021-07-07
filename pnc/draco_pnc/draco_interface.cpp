@@ -61,7 +61,6 @@ void DracoInterface::getCommand(void *_data, void *_command) {
 
   if (count_ == 0) {
     se_->initialize(data);
-    // DataManager::GetDataManager()->start();
   }
   se_->update(data);
   interrupt->processInterrupts();

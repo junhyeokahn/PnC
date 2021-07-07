@@ -1,8 +1,8 @@
 file(GLOB sources "*.cpp" "*.c")
 file(GLOB robot_system_headers "*.hpp")
 
-add_library(pnc-robot-system SHARED ${sources}
-                                    ${robot_system_headers})
+add_library(pnc-robot-system ${sources}
+                             ${robot_system_headers})
 
 target_link_libraries(pnc-robot-system ${DART_LIBRARIES}
                                        pnc-utils)

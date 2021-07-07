@@ -30,6 +30,7 @@ set(PYTHON_BINDING TRUE)
 ## Include Directory
 ##=============================================================================
 include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/build")
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
@@ -60,7 +61,7 @@ endif()
 
 # pybind11
 if(PYTHON_BINDING)
-  # control pc requires this for some reason..
+  # control pc requires this snippet for some reason..
   set(pybind11_DIR "/home/apptronik/.local/lib/python3.6/site-packages/pybind11/share/cmake/pybind11")
   find_package(Python COMPONENTS Interpreter Development)
   find_package(pybind11 CONFIG REQUIRED)

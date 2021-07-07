@@ -25,9 +25,9 @@ pnc_socket = context.socket(zmq.SUB)
 pnc_socket.connect(addr)
 pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
-pj_context = zmq.Context()
-pj_socket = pj_context.socket(zmq.PUB)
-pj_socket.bind("tcp://*:9872")
+# pj_context = zmq.Context()
+# pj_socket = pj_context.socket(zmq.PUB)
+# pj_socket.bind("tcp://*:9872")
 
 data_saver = DataSaver()
 
@@ -99,7 +99,7 @@ while True:
     data_saver.advance()
 
     # publish back for plot juggler
-    pj_socket.send_string(json.dumps(data_saver.history))
+    # pj_socket.send_string(json.dumps(data_saver.history))
 
     # publish joint positions for meshcat
     vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos

@@ -7,16 +7,12 @@
 
 #include <pnc/robot_system/robot_system.hpp>
 
-//#include <Utils/IO/DataManager.hpp>
 #include <utils/util.hpp>
 
 // Generic Control Architecture Object
 class ControlArchitecture {
 public:
-  ControlArchitecture(RobotSystem *_robot) {
-    // DataManager::GetDataManager()->RegisterData(&state, INT, "phase");
-    robot_ = _robot;
-  };
+  ControlArchitecture(RobotSystem *_robot) { robot_ = _robot; };
   virtual ~ControlArchitecture(){};
 
   virtual void getCommand(void *_command){};

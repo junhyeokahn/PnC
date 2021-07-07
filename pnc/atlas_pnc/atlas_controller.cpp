@@ -2,7 +2,6 @@
 #include <pnc/atlas_pnc/atlas_controller.hpp>
 #include <pnc/whole_body_controllers/ihwbc/ihwbc.hpp>
 #include <pnc/whole_body_controllers/ihwbc/joint_integrator.hpp>
-//#include <Utils/IO/DataManager.hpp>
 
 AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
@@ -69,13 +68,6 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   r_rf_cmd_ = Eigen::VectorXd::Zero(6);
   l_rf_cmd_ = Eigen::VectorXd::Zero(6);
-
-  // DataManager *data_manager = DataManager::GetDataManager();
-  // data_manager->RegisterData(&joint_pos_cmd_, VECT, "cmd_jpos", robot_->n_a);
-  // data_manager->RegisterData(&joint_vel_cmd_, VECT, "cmd_jvel", robot_->n_a);
-  // data_manager->RegisterData(&joint_trq_cmd_, VECT, "cmd_jtrq", robot_->n_a);
-  // data_manager->RegisterData(&r_rf_cmd_, VECT, "cmd_r_rf", 6);
-  // data_manager->RegisterData(&l_rf_cmd_, VECT, "cmd_l_rf", 6);
 }
 
 AtlasController::~AtlasController() {

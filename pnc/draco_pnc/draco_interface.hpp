@@ -11,7 +11,10 @@ class DracoStateEstimator;
 
 class DracoSensorData {
 public:
-  DracoSensorData() {}
+  DracoSensorData() {
+    imu_frame_iso.setIdentity();
+    imu_frame_vel.setZero();
+  }
   virtual ~DracoSensorData() {
     imu_frame_iso.setZero();
     imu_frame_vel.setZero();

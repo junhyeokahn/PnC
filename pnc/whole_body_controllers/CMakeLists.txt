@@ -3,7 +3,7 @@ FILE(GLOB wbc_headers "*.hpp")
 FILE(GLOB ihwbc_headers "ihwbc/*.hpp")
 FILE(GLOB manager_headers "managers/*.hpp")
 
-add_library(pnc-wbc SHARED ${sources})
+add_library(pnc-wbc ${sources})
 
 target_link_libraries(pnc-wbc pnc-utils
                               pnc-goldfarb

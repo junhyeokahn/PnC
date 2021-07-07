@@ -5,15 +5,12 @@
 #  PNC_LIBRARIES - The libraries needed to use Gurobi
 
 find_path(PNC_INCLUDE_DIR
-          NAMES Configuration.h
+          NAMES configuration.hpp
           PATHS "/usr/local/include/PnC"
           )
-find_library(PNC_UTILS_LIBRARY
-             NAMES util
-             PATHS "/usr/local/lib"
-             )
+
 find_library(DRACO_PNC_LIBRARY
-             NAMES DracoPnC
+             NAMES pnc-draco-pnc
              PATHS "/usr/local/lib"
              )
 
@@ -21,7 +18,7 @@ include(FindPackageHandleStandardArgs)
 
 if(PNC_INCLUDE_DIR)
     set(PNC_INCLUDE_DIRS "${PNC_INCLUDE_DIR}" )
-    set(PNC_LIBRARIES "${DRACO_PNC_LIBRARY};${PNC_UTILS_LIBRARY}" )
+    set(PNC_LIBRARIES "${DRACO_PNC_LIBRARY}" )
     set(PNC_FOUND TRUE)
     message("-- Found PnC: TRUE")
 else()
@@ -29,5 +26,4 @@ else()
 endif()
 
 mark_as_advanced( PNC_INCLUDE_DIR
-                  DRACO_PNC_LIBRARY
-                  PNC_UTILS_LIBRARY )
+                  DRACO_PNC_LIBRARY )

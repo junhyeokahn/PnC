@@ -126,13 +126,6 @@ void LinkOriTask::update_jacobian() {
 
 CenterOfMassTask::CenterOfMassTask(RobotSystem *_robot) : Task(_robot, 3) {
 
-  // DataManager *data_manager = DataManager::GetDataManager();
-  // data_manager->RegisterData(&pos_des, VECT, "com_pos_d", dim);
-  // data_manager->RegisterData(&pos, VECT, "com_pos", dim);
-  // data_manager->RegisterData(&vel_des, VECT, "com_vel_d", dim);
-  // data_manager->RegisterData(&vel, VECT, "com_vel", dim);
-  // data_manager->RegisterData(&w_hierarchy, DOUBLE, "com_w");
-
   util::PrettyConstructor(3, "CenterOfMassTask ");
 }
 

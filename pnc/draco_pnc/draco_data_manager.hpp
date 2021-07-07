@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <zmq.hpp>
 
-#include "build/messages/draco.pb.h"
+#include "messages/draco.pb.h"
 
 class DracoData;
 
