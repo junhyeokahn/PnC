@@ -23,6 +23,14 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
 
   imu_ang_vel = Eigen::VectorXd::Zero(3);
   imu_acc = Eigen::VectorXd::Zero(3);
+  imu_rpy = Eigen::VectorXd::Zero(3);
+
+  // Force Data from A1 is vector length 4
+  //   Each Foot only has a magnitude value
+  //   Roughly >0 = Contact
+  //           <0 = No Contact
+  foot_force = Eigen::VectorXd::Zero(4);
+
 
   rotor_inertia = Eigen::VectorXd::Zero(12);
   q = Eigen::VectorXd::Zero(18);
@@ -88,6 +96,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&q, VECT, "config", robot_->getNumDofs());
   data_manager->RegisterData(&qdot, VECT, "qdot", robot_->getNumDofs());
 
+
   // ---------------------------------------------------------------------------
   // Contact
   // ---------------------------------------------------------------------------
@@ -95,6 +104,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&b_flfoot_contact, INT, "flfoot_contact", 1);
   data_manager->RegisterData(&b_rlfoot_contact, INT, "rlfoot_contact", 1);
   data_manager->RegisterData(&b_rrfoot_contact, INT, "rrfoot_contact", 1);
+  data_manager->RegisterData(&foot_force, VECT, "foot_force", 4);
   /*data_manager->RegisterData(&fr_rf, INT, "fr_rf", 1);
   data_manager->RegisterData(&fl_rf, INT, "fl_rf", 1);
   data_manager->RegisterData(&fr_rf_des, INT, "fr_rf_des", 1);
@@ -169,6 +179,8 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   data_manager->RegisterData(&base_ang_vel_des, VECT3, "base_ang_vel_des", 3);
   data_manager->RegisterData(&imu_ang_vel, VECT3, "imu_ang_vel", 3);
   data_manager->RegisterData(&imu_acc, VECT3, "imu_acc", 3);
+  data_manager->RegisterData(&imu_rpy, VECT3, "imu_rpy", 3);
+
 
   // ---------------------------------------------------------------------------
   // Joint

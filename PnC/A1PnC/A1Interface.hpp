@@ -14,6 +14,7 @@ class A1SensorData{
 
         imu_ang_vel = Eigen::VectorXd::Zero(3);
         imu_acc = Eigen::VectorXd::Zero(3);
+        imu_rpy = Eigen::VectorXd::Zero(3);
 
         q = Eigen::VectorXd::Zero(12);
         qdot = Eigen::VectorXd::Zero(12);
@@ -26,11 +27,14 @@ class A1SensorData{
         rlfoot_contact = false;
         rrfoot_contact = false;
 
+        foot_force = Eigen::VectorXd::Zero(4);
+
       }
       virtual ~A1SensorData() {}
 
       Eigen::VectorXd imu_ang_vel;
       Eigen::VectorXd imu_acc;
+      Eigen::VectorXd imu_rpy;
       Eigen::VectorXd q;
       Eigen::VectorXd qdot;
       Eigen::VectorXd jtrq;
@@ -41,6 +45,8 @@ class A1SensorData{
       bool frfoot_contact;
       bool rlfoot_contact;
       bool rrfoot_contact;
+
+      Eigen::VectorXd foot_force;
 
 };
 
@@ -73,7 +79,7 @@ class A1Interface : public EnvInterface{
       void _SaveData(A1SensorData* data, A1Command* cmd);
 
       A1StateProvider* sp_;
-      // A1StateEstimator* state_estimator_;
+      A1StateEstimator* state_estimator_;
 
       Eigen::VectorXd cmd_jpos_;
       Eigen::VectorXd cmd_jvel_;

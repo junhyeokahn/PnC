@@ -33,31 +33,58 @@ A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
   joint_velocity_filter_freq_ = 100.0;    // Hz
   angular_velocity_filter_freq_ = 100.0;  // Hz
 
-  ori_est_ = new BasicAccumulation();
-  x_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.15);
+  // TODO: Memory Issue
+  // x_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.15);
   // y_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.4);
   // z_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.2);
 }
 
 A1StateEstimator::~A1StateEstimator() {
-  delete ori_est_;
-  delete x_vel_est_;
-  delete y_vel_est_;
-  delete z_vel_est_;
+  // delete x_vel_est_;
+  // delete y_vel_est_;
+  // delete z_vel_est_;
 }
 
 void A1StateEstimator::Initialization(A1SensorData* data) {
   _JointUpdate(data);
-  _ConfigurationAndModelUpdate();
+  _ConfigurationAndModelUpdate(data);
   sp_->jpos_ini = curr_config_.segment(A1::n_vdof, A1::n_adof);
   _FootContactUpdate(data);
   sp_->saveCurrentData();
 }
 
+void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
+    // TODO: Correct?
+  global_body_euler_zyx_[0] = data->imu_rpy[2];
+  global_body_euler_zyx_[1] = data->imu_rpy[1];
+  global_body_euler_zyx_[2] = data->imu_rpy[0];
+
+  global_body_euler_zyx_dot_[0] = data->imu_ang_vel[0];
+  global_body_euler_zyx_dot_[1] = data->imu_ang_vel[1];
+  global_body_euler_zyx_dot_[2] = data->imu_ang_vel[2];
+
+  global_body_quat_ = Eigen::Quaternion<double> (
+        dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
+}
+
 void A1StateEstimator::Update(A1SensorData* data) {
+  _COMAngularUpdate(data);
+
   _JointUpdate(data);
-  _ConfigurationAndModelUpdate();
+
+  _ConfigurationAndModelUpdate(data);
+  
+  // TODO: Below Block Taken from DraceStateEstimator, what is phase_copy == 2?
+  // static bool visit_once(false);
+  // if ((sp_->phase_copy == 2) && (!visit_once)) {
+  //   ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
+  //   ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
+  //   ((AverageFilter*)z_vel_est_)->initialization(sp_->com_vel[2]);
+  //   visit_once = true;
+  // }
+
   _FootContactUpdate(data);
+
   sp_->frfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
   sp_->flfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation(); 
   sp_->rrfoot_pos = robot_->getBodyNodeIsometry(A1BodyNode::RR_foot).translation(); 
@@ -66,6 +93,10 @@ void A1StateEstimator::Update(A1SensorData* data) {
   sp_->flfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::FL_foot).tail(3);
   sp_->rrfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::RR_foot).tail(3);
   sp_->rlfoot_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::RL_foot).tail(3);
+  sp_->imu_ang_vel = data->imu_ang_vel;
+  sp_->imu_acc = data->imu_acc;
+  sp_->imu_rpy = data->imu_rpy;
+
   sp_->saveCurrentData();
 }
 
@@ -83,16 +114,93 @@ void A1StateEstimator::_JointUpdate(A1SensorData* data) {
 
 }
 
-void A1StateEstimator::_ConfigurationAndModelUpdate() {
+void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   robot_->updateSystem(curr_config_, curr_qdot_, true);
 
   sp_->q = curr_config_;
   sp_->qdot = curr_qdot_;
+  // TODO: What is going on here?
   sp_->com_pos = robot_->getCoMPosition();
   sp_->com_vel = robot_->getCoMVelocity();
+
+  curr_config_[3] = global_body_euler_zyx_[0];
+  curr_config_[4] = global_body_euler_zyx_[1];
+  curr_config_[5] = global_body_euler_zyx_[2];
+
+  for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
+
+  robot_->updateSystem(curr_config_, curr_qdot_, false); // update robot as is correct ori but 0,0,0 floating base
+  Eigen::VectorXd foot_pos;
+  Eigen::VectorXd foot_vel;
+  if (sp_->front_stance_foot == A1BodyNode::FR_foot) {
+    foot_pos =
+        robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+    foot_vel =
+        robot_->getBodyNodeSpatialVelocity(A1BodyNode::FR_foot).tail(3);
+  } else {
+    foot_pos =
+        robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+    foot_vel =
+        robot_->getBodyNodeSpatialVelocity(A1BodyNode::FL_foot).tail(3);
+  }// Foot pos will be under the ground
+
+  // check if stance foot changes. If so, find the new linear offset
+  if (sp_->front_stance_foot != sp_->prev_front_stance_foot) {
+    Eigen::Vector3d new_stance_foot = foot_pos;
+    Eigen::Vector3d old_stance_foot;
+    if (sp_->prev_front_stance_foot == A1BodyNode::FR_foot) {
+      old_stance_foot =
+          robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
+    } else {
+      old_stance_foot =
+          robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
+    }
+    Eigen::Vector3d stance_difference = new_stance_foot - old_stance_foot;
+
+    // new and old estimates must match, so find the actual offset
+    Eigen::Vector3d old_estimate = global_linear_offset_ - old_stance_foot;
+    Eigen::Vector3d new_estimate =
+        (global_linear_offset_ + stance_difference) - new_stance_foot;
+    Eigen::Vector3d estimate_diff = new_estimate - old_estimate;
+
+    Eigen::Vector3d offset_update =
+        global_linear_offset_ + stance_difference + estimate_diff;
+
+    // myUtils::pretty_print(new_stance_foot, std::cout, "new_stance_foot");
+    // myUtils::pretty_print(old_stance_foot, std::cout, "old_stance_foot");
+    // myUtils::pretty_print(stance_difference, std::cout, "stance_difference");
+    // myUtils::pretty_print(old_estimate, std::cout, "old_estimate");
+    // myUtils::pretty_print(new_estimate, std::cout, "new_estimate");
+    // myUtils::pretty_print(offset_update, std::cout, "offset_update");
+
+    // Update foot positions
+    global_linear_offset_ = offset_update;
+    foot_pos = new_stance_foot;
+  }
+
+  // Perform Base update using kinematics
+  curr_config_[0] = global_linear_offset_[0] - foot_pos[0];// pushing the base upwards to put our contact feet on the ground
+  curr_config_[1] = global_linear_offset_[1] - foot_pos[1];// i.e contact foot position is on ground
+  curr_config_[2] = global_linear_offset_[2] - foot_pos[2];
+
+  // Update qdot using the difference between the curr_config_ now and previous
+  curr_qdot_.head(3) =
+      (curr_config_.head(3) - prev_config_.head(3)) / (A1Aux::servo_rate);
+
+  robot_->updateSystem(curr_config_, curr_qdot_, false);// Again call updateSystem to include linear and orientation 
+
+  sp_->q = curr_config_;
+  sp_->qdot = curr_qdot_;
+  // update previous stance foot.
+  sp_->prev_front_stance_foot = sp_->front_stance_foot;
+  // update previous config:
+  prev_config_ = curr_config_;
 }
 
 void A1StateEstimator::_FootContactUpdate(A1SensorData* data) {
+  sp_->foot_force = data->foot_force;
+
+  // TODO: New contact method
   if (data->frfoot_contact) sp_->b_frfoot_contact = 1;
   else sp_->b_frfoot_contact = 0;
   if (data->flfoot_contact) sp_->b_flfoot_contact = 1;

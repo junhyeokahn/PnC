@@ -26,7 +26,7 @@ A1Interface::A1Interface() : EnvInterface() {
   interrupt = new InterruptLogic();
 
   sp_ = A1StateProvider::getStateProvider(robot_);
-  // state_estimator_ = new A1StateEstimator(robot_);
+  state_estimator_ = new A1StateEstimator(robot_);
 
   waiting_count_ = 10;
 
@@ -68,7 +68,7 @@ A1Interface::A1Interface() : EnvInterface() {
 A1Interface::~A1Interface() {
   delete robot_;
   delete interrupt;
-  // delete state_estimator_;
+  delete state_estimator_;
   // delete test_;
 }
 
@@ -76,11 +76,8 @@ void A1Interface::getCommand(void* _data, void* _command) {
   A1Command* cmd = ((A1Command*)_command);
   A1SensorData* data = ((A1SensorData*)_data);
 
-  std::cout << "Hello" << std::endl;
-
   if (!(_Initialization(data, cmd))) {
-    // state_estimator_->Update(data);
-    std::cout << "Hello" << std::endl;
+    state_estimator_->Update(data);
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
   }
@@ -88,9 +85,9 @@ void A1Interface::getCommand(void* _data, void* _command) {
   _SaveData(data, cmd);
 
   running_time_ = (double)(count_)*A1Aux::servo_rate;
-  if(running_time_ >= 4) sp_->x_y_yaw_vel_des[0] = 0.5;
+  /*if(running_time_ >= 4) sp_->x_y_yaw_vel_des[0] = 0.5;
   if(running_time_ >= 6) sp_->x_y_yaw_vel_des[0] = 0.75;
-  if(running_time_ >= 8) sp_->x_y_yaw_vel_des[0] = 1.0;
+  if(running_time_ >= 8) sp_->x_y_yaw_vel_des[0] = 1.0;*/
   sp_->curr_time = running_time_;
   sp_->phase_copy = control_architecture_->getState();
   ++count_;
@@ -164,7 +161,7 @@ bool A1Interface::_Initialization(A1SensorData* data, A1Command* cmd) {
   }
   if (count_ < waiting_count_) {
     _SetStopCommand(data, cmd);
-    // state_estimator_->Initialization(data);
+    state_estimator_->Initialization(data);
     DataManager::GetDataManager()->start();
     return true;
   }
