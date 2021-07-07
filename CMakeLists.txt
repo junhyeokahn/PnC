@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.5.1)
+
 project(PnC)
 
 ##=============================================================================
@@ -15,6 +16,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 
 ##=============================================================================
 ## Build Setup
@@ -36,7 +38,7 @@ link_directories("/usr/local/lib")
 ##=============================================================================
 
 # dart
-find_package(DART 6.11 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
+find_package(DART 6.10 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
 # eigen
@@ -58,8 +60,10 @@ endif()
 
 # pybind11
 if(PYTHON_BINDING)
+  # control pc requires this for some reason..
+  set(pybind11_DIR "/home/apptronik/.local/lib/python3.6/site-packages/pybind11/share/cmake/pybind11")
   find_package(Python COMPONENTS Interpreter Development)
-  find_package(pybind11 CONFIG)
+  find_package(pybind11 CONFIG REQUIRED)
   include_directories(${pybind11_INCLUDE_DIRS})
   add_subdirectory(bindings)
 endif()

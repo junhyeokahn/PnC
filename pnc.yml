@@ -6,6 +6,7 @@ dependencies:
   - pybind11=2.6.2
   - python=3.9.5
   - ruamel.yaml=0.17.10
+  - pip
   - pip:
       - certifi==2021.5.30
       - conda-env-export==0.3.2
@@ -21,4 +22,4 @@ dependencies:
       - tqdm==4.61.1
       - wheel==0.36.2
       - zmq==0.0.0
-prefix: /home/junhyeok/anaconda3/envs/pnc
+prefix: /home/apptronik/anaconda3/envs/pnc

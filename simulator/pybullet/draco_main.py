@@ -3,7 +3,7 @@ import sys
 
 cwd = os.getcwd()
 sys.path.append(cwd)
-sys.path.append(cwd + '/utils')
+sys.path.append(cwd + '/utils/python_utils')
 sys.path.append(cwd + '/simulator/pybullet')
 sys.path.append(cwd + '/build/lib')
 
@@ -20,8 +20,8 @@ import numpy as np
 np.set_printoptions(precision=2)
 
 from config.draco.pybullet_simulation import Config
-from python_utils import pybullet_util
-from python_utils import util
+import pybullet_util
+import util
 
 import draco_interface
 

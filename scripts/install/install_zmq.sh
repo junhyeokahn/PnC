@@ -29,4 +29,6 @@ if [ "$(uname)" == "Darwin" ]; then
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     sudo apt-get install libzmq3-dev
 
+fi
+
 cd $PATH_PACKAGE

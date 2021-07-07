@@ -8,8 +8,8 @@ from tqdm import tqdm
 import cv2
 import imageio
 
-from python_utils import util
-from python_utils import liegroup
+from utils.python_utils import util
+from utils.python_utils import liegroup
 
 
 def get_robot_config(robot,

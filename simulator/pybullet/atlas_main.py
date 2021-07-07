@@ -3,9 +3,10 @@ import sys
 
 cwd = os.getcwd()
 sys.path.append(cwd)
-sys.path.append(cwd + '/utils')
+sys.path.append(cwd + '/utils/python_utils')
 sys.path.append(cwd + '/simulator/pybullet')
 sys.path.append(cwd + '/build/lib')
+
 
 import time, math
 from collections import OrderedDict
@@ -20,7 +21,8 @@ import numpy as np
 np.set_printoptions(precision=2)
 
 from config.atlas.pybullet_simulation import Config
-from python_utils import pybullet_util
+import pybullet_util
+import util
 
 import atlas_interface
 
