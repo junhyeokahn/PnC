@@ -27,6 +27,17 @@ public:
 
   bool b_rf_contact;
   bool b_lf_contact;
+
+  // for debugging purpose
+  Eigen::Vector3d base_com_pos;
+  Eigen::Vector4d base_com_quat;
+  Eigen::Vector3d base_com_lin_vel;
+  Eigen::Vector3d base_com_ang_vel;
+
+  Eigen::Vector3d base_joint_pos;
+  Eigen::Vector4d base_joint_quat;
+  Eigen::Vector3d base_joint_lin_vel;
+  Eigen::Vector3d base_joint_ang_vel;
 };
 
 class DracoCommand {

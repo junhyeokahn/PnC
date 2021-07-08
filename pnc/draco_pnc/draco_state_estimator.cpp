@@ -26,7 +26,28 @@ DracoStateEstimator::~DracoStateEstimator() {}
 
 void DracoStateEstimator::initialize(DracoSensorData *data) {
   sp_->nominal_joint_pos = data->joint_positions;
-  this->update(data);
+  // this->update(data);
+  this->update_debug(data); // TODO : Deubbing purpose
+}
+
+void DracoStateEstimator::update_debug(DracoSensorData *_data) {
+  Eigen::Quaternion<double> base_com_quat(
+      _data->base_com_quat[0], _data->base_com_quat[1], _data->base_com_quat[2],
+      _data->base_com_quat[3]);
+
+  robot_->update_system(_data->base_com_pos, base_com_quat,
+                        _data->base_com_lin_vel, _data->base_com_ang_vel,
+                        _data->base_joint_pos, base_com_quat,
+                        _data->base_joint_lin_vel, _data->base_joint_ang_vel,
+                        _data->joint_positions, _data->joint_velocities, true);
+
+  if (sp_->count % sp_->save_freq == 0) {
+    DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+    dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
+    dm->data->base_joint_pos = _data->base_joint_pos;
+    dm->data->base_joint_quat = _data->base_com_quat;
+  }
+  this->ComputeDCM();
 }
 
 void DracoStateEstimator::update(DracoSensorData *data) {

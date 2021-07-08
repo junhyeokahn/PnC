@@ -35,7 +35,17 @@ PYBIND11_MODULE(draco_interface, m) {
       .def_readwrite("joint_positions", &DracoSensorData::joint_positions)
       .def_readwrite("joint_velocities", &DracoSensorData::joint_velocities)
       .def_readwrite("b_rf_contact", &DracoSensorData::b_rf_contact)
-      .def_readwrite("b_lf_contact", &DracoSensorData::b_lf_contact);
+      .def_readwrite("b_lf_contact", &DracoSensorData::b_lf_contact)
+      .def_readwrite("base_com_pos", &DracoSensorData::base_com_pos)
+      .def_readwrite("base_com_quat", &DracoSensorData::base_com_quat)
+      .def_readwrite("base_com_lin_vel", &DracoSensorData::base_com_lin_vel)
+      .def_readwrite("base_com_ang_vel", &DracoSensorData::base_com_ang_vel)
+      .def_readwrite("base_joint_pos", &DracoSensorData::base_joint_pos)
+      .def_readwrite("base_joint_quat", &DracoSensorData::base_joint_quat)
+      .def_readwrite("base_joint_lin_vel", &DracoSensorData::base_joint_lin_vel)
+      .def_readwrite("base_joint_ang_vel",
+                     &DracoSensorData::base_joint_ang_vel);
+  // TODO : for deubugging purpose
 
   py::class_<DracoCommand>(m, "DracoCommand")
       .def(py::init<>())

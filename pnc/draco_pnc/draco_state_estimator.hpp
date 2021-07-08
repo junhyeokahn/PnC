@@ -15,6 +15,7 @@ public:
 
   void initialize(DracoSensorData *);
   void update(DracoSensorData *);
+  void update_debug(DracoSensorData *);
 
 protected:
   DracoStateProvider *sp_;

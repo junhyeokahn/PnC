@@ -22,7 +22,7 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
 
   robot_ = new DartRobotSystem(THIS_COM "robot_model/draco/draco_rel_path.urdf",
-                               false, false);
+                               false, true);
   se_ = new DracoStateEstimator(robot_);
   sp_ = DracoStateProvider::getStateProvider();
   sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
@@ -62,7 +62,8 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   if (count_ == 0) {
     se_->initialize(data);
   }
-  se_->update(data);
+  // se_->update(data);
+  se_->update_debug(data); // TODO : For debugging purpose
   interrupt->processInterrupts();
   control_architecture_->getCommand(cmd);
 

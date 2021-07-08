@@ -104,8 +104,8 @@ while True:
     # publish joint positions for meshcat
     vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
     vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
-    vis_q[4] = msg.base_joint_quat[1]  # << quaternion y
-    vis_q[5] = msg.base_joint_quat[1]  # << quaternion z
-    vis_q[6] = msg.base_joint_quat[1]  # << quaternion w
+    vis_q[4] = msg.base_joint_quat[2]  # << quaternion y
+    vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
+    vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
     vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
     viz.display(vis_q)

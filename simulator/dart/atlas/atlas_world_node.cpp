@@ -163,7 +163,7 @@ void AtlasWorldNode::GetBaseData_(Eigen::Vector3d &_base_com_pos,
   _base_com_lin_vel =
       root_bn->getSpatialVelocity(root_bn->getLocalCOM()).tail(3);
 
-  _base_joint_pos = root_bn->getCOM() - root_bn->getLocalCOM();
+  _base_joint_pos = root_bn->getWorldTransform().translation();
   _base_joint_quat = _base_com_quat;
   _base_joint_ang_vel = root_bn->getSpatialVelocity().head(3);
   _base_joint_lin_vel = root_bn->getSpatialVelocity().tail(3);

@@ -187,6 +187,18 @@ if __name__ == "__main__":
         sensor_data.b_rf_contact = sensor_data_dict["b_rf_contact"]
         sensor_data.b_lf_contact = sensor_data_dict["b_lf_contact"]
 
+        # TODO : Debugging purpose
+        # Copy Base
+        sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
+        qt = sensor_data_dict['base_com_quat']
+        sensor_data.base_com_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
+        sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
+        sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
+        sensor_data.base_joint_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
+        sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
+
         # Compute Command
         if Config.PRINT_TIME:
             start_time = time.time()
