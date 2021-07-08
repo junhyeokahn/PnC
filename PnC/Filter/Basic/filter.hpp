@@ -117,18 +117,18 @@ class CFilterButterworth24db {
   float min_cutoff, max_cutoff;
 };
 
-class AverageFilter { // : public filter {
- public:
-  AverageFilter(double dt, double t_const, double limit);
-  ~AverageFilter();
-  void input(double input_value);
-  double output(void);
-  void clear(void);
-  void initialization(double);
+// class AverageFilter { // : public filter {
+//  public:
+//   AverageFilter(double dt, double t_const, double limit);
+//   ~AverageFilter();
+//   void input(double input_value);
+//   double output(void);
+//   void clear(void);
+//   void initialization(double);
 
- private:
-  double est_value_;
-  double dt_;
-  double t_const_;
-  double limit_;
-};
+//  private:
+//   double est_value_;
+//   double dt_;
+//   double t_const_;
+//   double limit_;
+// };

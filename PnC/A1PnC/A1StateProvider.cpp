@@ -71,22 +71,12 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   com_vel.setZero();
   com_pos_des.setZero();
   com_vel_des.setZero();
+  est_com_vel.setZero();
 
   flfoot_landing = Eigen::VectorXd::Zero(3);
   frfoot_landing = Eigen::VectorXd::Zero(3);
   rlfoot_landing = Eigen::VectorXd::Zero(3);
   rrfoot_landing = Eigen::VectorXd::Zero(3);
-
-  // est_com_vel.setZero();
-
-  /*fr_rf = 0; // Eigen::VectorXd::Zero(6);
-  fl_rf = 0; // Eigen::VectorXd::Zero(6);
-  rr_rf = 0; // Eigen::VectorXd::Zero(6);
-  rl_rf = 0; // Eigen::VectorXd::Zero(6);
-  fr_rf_des = 0; // Eigen::VectorXd::Zero(6);
-  fl_rf_des = 0; // Eigen::VectorXd::Zero(6);
-  rr_rf_des = 0; // Eigen::VectorXd::Zero(6);
-  rl_rf_des = 0; // Eigen::VectorXd::Zero(6);*/
 
   DataManager* data_manager = DataManager::GetDataManager();
 
@@ -170,7 +160,7 @@ A1StateProvider::A1StateProvider(RobotSystem* _robot) {
   // ---------------------------------------------------------------------------
   data_manager->RegisterData(&com_pos, VECT3, "com_pos", 3);
   data_manager->RegisterData(&com_vel, VECT3, "com_vel", 3);
-  // data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
+  data_manager->RegisterData(&est_com_vel, VECT3, "est_com_vel", 3);
   data_manager->RegisterData(&com_pos_des, VECT3, "com_pos_des", 3);
   data_manager->RegisterData(&com_vel_des, VECT3, "com_vel_des", 3);
   data_manager->RegisterData(&base_quat, QUATERNION, "base_quat", 4);

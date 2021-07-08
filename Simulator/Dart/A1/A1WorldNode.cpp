@@ -60,7 +60,8 @@ void A1WorldNode::customPreStep() {
   sensor_data_->virtual_qdot = skel_->getVelocities().head(6);
   sensor_data_->jtrq = skel_->getForces().tail(12);
   // get_force_torque_data_(); // TODO
-  get_imu_data_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc);
+  get_imu_data_(sensor_data_->imu_ang_vel, sensor_data_->imu_acc,
+                sensor_data_->imu_rpy);
   check_foot_contact_by_pos_(sensor_data_->frfoot_contact,
                              sensor_data_->flfoot_contact,
                              sensor_data_->rrfoot_contact,
@@ -116,7 +117,8 @@ void A1WorldNode::customPreStep() {
 }
 
 void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
-                                   Eigen::VectorXd& acc) {
+                                   Eigen::VectorXd& acc,
+                                   Eigen::VectorXd& rpy) {
   // angvel
   Eigen::VectorXd ang_vel_local =
       skel_->getBodyNode("imu_link")
@@ -131,6 +133,13 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
   Eigen::Vector3d global_grav(0, 0, 9.81);
   // acc = R_world_imu.transpose() * (global_grav + linear_imu_acc);
   acc = R_world_imu.transpose() * (global_grav);
+  // TODO: Is this correct?
+  // rpy
+  Eigen::Vector3d robot_xyzrpy = skel_->getPositions().head(6);
+  rpy[0] = robot_xyzrpy[3];
+  rpy[1] = robot_xyzrpy[4];
+  rpy[2] = robot_xyzrpy[5];
+
 
 }
 

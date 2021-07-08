@@ -41,7 +41,7 @@ class A1StateProvider {
   Eigen::Vector3d com_vel_des;
   Eigen::Vector3d com_pos;
   Eigen::Vector3d com_vel;
-  // Eigen::Vector3d est_com_vel;
+  Eigen::Vector3d est_com_vel;
   Eigen::Quaternion<double> base_quat_des;
   Eigen::Vector3d base_ang_vel_des;
   Eigen::Quaternion<double> base_quat;

@@ -8,8 +8,22 @@ class A1StateProvider;
 class RobotSystem;
 class A1SensorData;
 class BasicAccumulation;
-class filter;
-class AverageFilter;
+
+class AverageFilter {
+ public:
+  AverageFilter(double dt, double t_const, double limit);
+  ~AverageFilter();
+  void input(double input_value);
+  double output();
+  void clear();
+  void initialization(double init_value);
+
+ private:
+  double est_value_;
+  double dt_;
+  double t_const_;
+  double limit_;
+};
 
 class A1StateEstimator {
  public:
@@ -46,9 +60,9 @@ class A1StateEstimator {
   Eigen::VectorXd virtual_qdot_;
 
   // BasicAccumulation* ori_est_;
-  // AverageFilter* x_vel_est_;
-  // AverageFilter* y_vel_est_;
-  // AverageFilter* z_vel_est_;
+  AverageFilter* x_vel_est_;
+  AverageFilter* y_vel_est_;
+  AverageFilter* z_vel_est_;
   // filter* x_vel_est_;
   // filter* y_vel_est_;
   // filter* z_vel_est_;
