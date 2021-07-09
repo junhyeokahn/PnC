@@ -217,4 +217,9 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_lfoot_ori_des, dm->data->task_lfoot_ang_vel_des,
       dm->data->task_lfoot_ang_acc_des, dm->data->task_lfoot_ori,
       dm->data->task_lfoot_ang_vel);
+
+  tci_container->upper_body_task->CopyData(
+      dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,
+      dm->data->task_upper_body_acc_des, dm->data->task_upper_body_pos,
+      dm->data->task_upper_body_vel);
 }

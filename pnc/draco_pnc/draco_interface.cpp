@@ -62,8 +62,7 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   if (count_ == 0) {
     se_->initialize(data);
   }
-  // se_->update(data);
-  se_->update_debug(data); // TODO : For debugging purpose
+  se_->update_debug(data);
   interrupt->processInterrupts();
   control_architecture_->getCommand(cmd);
 

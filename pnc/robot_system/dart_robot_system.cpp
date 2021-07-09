@@ -181,6 +181,7 @@ void DartRobotSystem::update_system(
   }
 
   skel_->computeForwardKinematics();
+  skel_->computeForwardDynamics();
 
   if (b_cent) {
     this->_update_centroidal_quantities();

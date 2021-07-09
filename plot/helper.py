@@ -19,9 +19,9 @@ facecolors = [
 ]
 
 
-def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
-    if pos_des.shape[1] == 3:
+def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle, label=None):
 
+    if pos_des.shape[1] == 3 and label is None:
         fig, axes = plt.subplots(3, 2)
         for i in range(3):
             axes[i, 0].plot(time,
@@ -46,7 +46,7 @@ def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
         axes[2, 1].set_xlabel('time')
         fig.suptitle(suptitle)
 
-    elif pos_des.shape[1] == 4:
+    elif pos_des.shape[1] == 4 and label is None:
         fig, axes = plt.subplots(4, 2)
         for i in range(4):
             axes[i, 0].plot(time,
@@ -84,6 +84,8 @@ def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
             axes[i, 0].plot(time, pos[:, i], color='b', linewidth=2)
             plot_phase(axes[i, 0], time, phase)
             axes[i, 0].grid(True)
+            if label is not None:
+                axes[i, 0].set_ylabel(label[i])
             axes[i, 1].plot(time,
                             vel_des[:, i],
                             color='r',
@@ -129,12 +131,14 @@ def plot_rf_z_max(time, rf_z_max, phase):
     fig.suptitle('rf_z_max')
 
 
-def plot_vector_traj(time, vector, suptitle):
+def plot_vector_traj(time, vector, phase, suptitle, label):
     dim = vector.shape[1]
     fig, axes = plt.subplots(dim, 1)
     for i in range(dim):
         axes[i].plot(time, vector[:, i], color='k', linewidth=3)
         axes[i].grid(True)
+        axes[i].set_ylabel(label[i])
+        plot_phase(axes[i], time, phase)
     axes[dim - 1].set_xlabel('time')
     fig.suptitle(suptitle)
 

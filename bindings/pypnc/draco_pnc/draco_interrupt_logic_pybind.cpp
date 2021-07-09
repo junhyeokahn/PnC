@@ -26,6 +26,8 @@ PYBIND11_MODULE(draco_interrupt_logic, m) {
                      &DracoInterruptLogic::b_interrupt_button_q)
       .def_readwrite("b_interrupt_button_e",
                      &DracoInterruptLogic::b_interrupt_button_e)
+      .def_readwrite("b_interrupt_button_r",
+                     &DracoInterruptLogic::b_interrupt_button_r)
       .def_readwrite("b_interrupt_button_x",
                      &DracoInterruptLogic::b_interrupt_button_x);
 }

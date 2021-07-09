@@ -74,6 +74,14 @@ void DracoDataManager::Send() {
   pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori[3]);
   pb_msg.add_task_rfoot_ori(data->task_rfoot_ori[3]);
 
+  for (int i = 0; i < data->task_upper_body_pos_des.size(); ++i) {
+    pb_msg.add_task_upper_body_pos_des(data->task_upper_body_pos_des[i]);
+    pb_msg.add_task_upper_body_vel_des(data->task_upper_body_vel_des[i]);
+    pb_msg.add_task_upper_body_acc_des(data->task_upper_body_acc_des[i]);
+    pb_msg.add_task_upper_body_pos(data->task_upper_body_pos[i]);
+    pb_msg.add_task_upper_body_vel(data->task_upper_body_vel[i]);
+  }
+
   for (int i = 0; i < 6; ++i) {
     pb_msg.add_cmd_rfoot_rf(data->cmd_rfoot_rf[i]);
     pb_msg.add_cmd_lfoot_rf(data->cmd_lfoot_rf[i]);
@@ -81,6 +89,7 @@ void DracoDataManager::Send() {
 
   for (int i = 0; i < data->joint_positions.size(); ++i) {
     pb_msg.add_joint_positions(data->joint_positions[i]);
+    pb_msg.add_joint_velocities(data->joint_velocities[i]);
   }
 
   for (int i = 0; i < 3; ++i) {
@@ -88,6 +97,12 @@ void DracoDataManager::Send() {
     pb_msg.add_base_joint_quat(data->base_joint_quat[i]);
   }
   pb_msg.add_base_joint_quat(data->base_joint_quat[3]);
+
+  for (int i = 0; i < data->cmd_joint_positions.size(); ++i) {
+    pb_msg.add_cmd_joint_positions(data->cmd_joint_positions[i]);
+    pb_msg.add_cmd_joint_velocities(data->cmd_joint_velocities[i]);
+    pb_msg.add_cmd_joint_torques(data->cmd_joint_torques[i]);
+  }
 
   // serialize
   std::string serialized_str;

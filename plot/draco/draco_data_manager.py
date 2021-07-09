@@ -93,8 +93,20 @@ while True:
     data_saver.add('task_lfoot_ori', list(msg.task_lfoot_ori))
     data_saver.add('task_lfoot_ang_vel', list(msg.task_lfoot_ang_vel))
 
+    data_saver.add('task_upper_body_pos_des', list(msg.task_upper_body_pos_des))
+    data_saver.add('task_upper_body_vel_des', list(msg.task_upper_body_vel_des))
+    data_saver.add('task_upper_body_acc_des', list(msg.task_upper_body_acc_des))
+    data_saver.add('task_upper_body_pos',     list(msg.task_upper_body_pos))
+    data_saver.add('task_upper_body_vel',     list(msg.task_upper_body_vel))
+
     data_saver.add('cmd_lfoot_rf', list(msg.cmd_lfoot_rf))
     data_saver.add('cmd_rfoot_rf', list(msg.cmd_rfoot_rf))
+    data_saver.add('cmd_joint_positions', list(msg.cmd_joint_positions))
+    data_saver.add('cmd_joint_velocities', list(msg.cmd_joint_velocities))
+    data_saver.add('cmd_joint_torques', list(msg.cmd_joint_torques))
+
+    data_saver.add('joint_positions', list(msg.joint_positions))
+    data_saver.add('joint_velocities', list(msg.joint_velocities))
 
     data_saver.advance()
 

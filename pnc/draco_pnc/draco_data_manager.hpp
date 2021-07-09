@@ -73,9 +73,20 @@ public:
   Eigen::VectorXd task_lfoot_ori;
   Eigen::VectorXd task_lfoot_ang_vel;
 
-  // wbc solution
+  Eigen::VectorXd task_upper_body_pos_des;
+  Eigen::VectorXd task_upper_body_vel_des;
+  Eigen::VectorXd task_upper_body_acc_des;
+  Eigen::VectorXd task_upper_body_pos;
+  Eigen::VectorXd task_upper_body_vel;
+
+  // wbc cmd
   Eigen::VectorXd cmd_rfoot_rf;
   Eigen::VectorXd cmd_lfoot_rf;
+
+  Eigen::VectorXd cmd_joint_positions;
+  Eigen::VectorXd cmd_joint_velocities;
+  Eigen::VectorXd cmd_joint_torques;
+  Eigen::VectorXd joint_velocities;
 
   // for meshcat visualization
   Eigen::VectorXd joint_positions;

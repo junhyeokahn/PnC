@@ -47,12 +47,25 @@ message pnc_msg {
   repeated float task_lfoot_ori = 31;
   repeated float task_lfoot_ang_vel = 32;
 
+  // upper body
+  repeated float task_upper_body_pos_des = 33;
+  repeated float task_upper_body_vel_des = 34;
+  repeated float task_upper_body_acc_des = 35;
+  repeated float task_upper_body_pos = 36;
+  repeated float task_upper_body_vel = 37;
+
   // rf cmd
-  repeated float cmd_lfoot_rf = 33;
-  repeated float cmd_rfoot_rf = 34;
+  repeated float cmd_lfoot_rf = 38;
+  repeated float cmd_rfoot_rf = 39;
+
+  // pos, vel, trq cmd
+  repeated float cmd_joint_positions = 40;
+  repeated float cmd_joint_velocities = 41;
+  repeated float cmd_joint_torques = 42;
+  repeated float joint_velocities = 43;
 
   // meshcat visualization
-  repeated float joint_positions = 35;
-  repeated float base_joint_pos = 36;
-  repeated float base_joint_quat = 37;
+  repeated float joint_positions = 44;
+  repeated float base_joint_pos = 45;
+  repeated float base_joint_quat = 46;
 }
