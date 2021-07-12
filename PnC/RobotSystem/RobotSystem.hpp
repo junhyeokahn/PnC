@@ -40,6 +40,8 @@ class RobotSystem {
     return skel_ptr_->getBodyNode(_bn_idx);
   }
 
+  Eigen::Vector3d getBaseLocalCOMPos();
+
   Eigen::VectorXd getQ() { return skel_ptr_->getPositions(); };
   Eigen::VectorXd getQdot() { return skel_ptr_->getVelocities(); };
   void printRobotInfo();

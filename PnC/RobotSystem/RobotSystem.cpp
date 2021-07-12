@@ -161,6 +161,10 @@ Eigen::MatrixXd RobotSystem::getBodyNodeCoMJacobian(
                                 wrt_);
 }
 
+Eigen::Vector3d RobotSystem::getBaseLocalCOMPos() {
+  return skel_ptr_->getRootBodyNode()->getLocalCOM();
+}
+
 Eigen::MatrixXd RobotSystem::getBodyNodeCoMJacobian(
     const int& _bn_idx, dart::dynamics::Frame* wrt_) {
   return skel_ptr_->getJacobian(skel_ptr_->getBodyNode(_bn_idx),

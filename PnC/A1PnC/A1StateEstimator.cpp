@@ -36,6 +36,14 @@ double AverageFilter::output() { return est_value_; }
 A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
   myUtils::pretty_constructor(1, "A1 State Estimator");
 
+  iso_base_com_to_imu_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).inverse() *
+                         robot_->getBodyNodeIsometry(A1BodyNode::imu_link);
+  iso_base_joint_to_imu_.linear() = iso_base_com_to_imu_.linear();
+  iso_base_joint_to_imu_.translation() =
+                         iso_base_com_to_imu_.translation() +
+                         robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear() *
+                         robot_->getBaseLocalCOMPos();
+
   robot_ = robot;
   sp_ = A1StateProvider::getStateProvider(robot_);
 
@@ -87,8 +95,9 @@ void A1StateEstimator::Initialization(A1SensorData* data) {
 
 void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
     // TODO: 1) NED->Robot World Frame
-    //       2) imu_link->trunk
-  global_body_euler_zyx_[0] = data->imu_rpy[2];
+    //       2) imu_link->trunk (This step is done in the lines 
+    //          following _JointUpdate
+  /*global_body_euler_zyx_[0] = data->imu_rpy[2];
   global_body_euler_zyx_[1] = data->imu_rpy[1];
   global_body_euler_zyx_[2] = data->imu_rpy[0];
 
@@ -97,14 +106,23 @@ void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
   global_body_euler_zyx_dot_[2] = data->imu_ang_vel[0];
 
   global_body_quat_ = Eigen::Quaternion<double> (
-        dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
+        dart::math::eulerZYXToMatrix(global_body_euler_zyx_));*/
+
 }
 
 void A1StateEstimator::Update(A1SensorData* data) {
   // TODO: NED->RobotWorld then IMU->trunk
-  _COMAngularUpdate(data);
+  // _COMAngularUpdate(data);
 
   _JointUpdate(data);
+
+  // estimate base angular state from imu data
+  // TODO: The second line needs to be replaced after we
+  // can generate the imu frame wrt world
+  Eigen::Matrix<double, 3, 3> rot_world_to_base =
+      robot_->getBodyNodeIsometry(A1BodyNode::imu_link).linear() *
+      iso_base_joint_to_imu_.inverse().linear();
+
 
   std::vector<double> trunk_acc(3), trunk_ang_vel(3);
 
@@ -126,7 +144,7 @@ void A1StateEstimator::Update(A1SensorData* data) {
   sp_->est_com_vel[1] = y_vel_est_->output();
 
   z_vel_est_->input(sp_->com_vel[2]);
-  sp_->est_com_vel[2] = 1_vel_est_->output();
+  sp_->est_com_vel[2] = z_vel_est_->output();
 
   _FootContactUpdate(data);
 
@@ -148,11 +166,12 @@ void A1StateEstimator::Update(A1SensorData* data) {
 void A1StateEstimator::_JointUpdate(A1SensorData* data) {
   curr_config_.setZero();
   curr_qdot_.setZero();
-  // Removed the code block below because we only have in sim
-  /*for (int i = 0; i < A1::n_vdof; ++i) {
+
+  // TODO: Remove once we implement COMAngular
+  for (int i = 0; i < A1::n_vdof; ++i) {
     curr_config_[i] = data->virtual_q[i];
     curr_qdot_[i] = data->virtual_qdot[i];
-  }*/
+  }
   for (int i(0); i < A1::n_adof; ++i) {
     curr_config_[A1::n_vdof + i] = data->q[i];
     curr_qdot_[A1::n_vdof + i] = data->qdot[i];
@@ -163,7 +182,12 @@ void A1StateEstimator::_JointUpdate(A1SensorData* data) {
 void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   robot_->updateSystem(curr_config_, curr_qdot_, true);
 
-    for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
+  // estimate base angular state from imu data
+    Eigen::Matrix<double, 3, 3> rot_world_to_base =
+          robot_->getBodyNodeIsometry(A1BodyNode::imu_link).linear() *
+          iso_base_joint_to_imu_.inverse().linear();
+
+  // for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
 
   robot_->updateSystem(curr_config_, curr_qdot_, false); // update robot as is correct ori but 0,0,0 floating base
   Eigen::VectorXd foot_pos;
@@ -171,9 +195,7 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   if (sp_->front_stance_foot == A1BodyNode::FR_foot) {
     foot_pos =
         robot_->getBodyNodeIsometry(A1BodyNode::FR_foot).translation();
-    foot_vel =  sp_->q = curr_config_;
-  sp_->qdot = curr_qdot_;
-
+    foot_vel =
         robot_->getBodyNodeSpatialVelocity(A1BodyNode::FR_foot).tail(3);
   } else {
     foot_pos =
@@ -193,9 +215,7 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
       old_stance_foot =
           robot_->getBodyNodeIsometry(A1BodyNode::FL_foot).translation();
     }
-    Eigen::Vector3d stance_difference = new_stance_foot - old_stance_foot;
 
-    // new and old estimates must match, so find the actual offset
     Eigen::Vector3d old_to_new = new_stance_foot - old_stance_foot;
     global_linear_offset_ += old_to_new;
     // myUtils::pretty_print(new_stance_foot, std::cout, "new_stance_foot");
@@ -205,8 +225,24 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
     // myUtils::pretty_print(new_estimate, std::cout, "new_estimate");
     // myUtils::pretty_print(offset_update, std::cout, "offset_update");
 
-    foot_pos = new_stance_foot;
   }
+  Eigen::Vector3d base_joint_pos = global_linear_offset_ - foot_pos;
+  Eigen::Vector3d base_com_pos =
+      base_joint_pos + rot_world_to_base * robot_->getBaseLocalCOMPos();
+/////////////////////////////////////////////////////////////////////////
+  /*static bool b_first_visit(true);
+  if (b_first_visit) {
+    prev_base_joint_pos_ = base_joint_pos;
+    prev_base_com_pos_ = base_com_pos;
+    b_first_visit = false;
+  }
+
+
+  Eigen::Vector3d base_joint_lin_vel =
+      (base_joint_pos - prev_base_joint_pos_) / (A1Aux::servo_rate);
+  Eigen::Vector3d base_com_lin_vel =
+      (base_com_pos - prev_base_com_pos_) / (A1Aux::servo_rate);*/
+////////////////////////////////////////////////////////////////////////
   // TODO: See June version.. some rotation pieces missing
   // Perform Base update using kinematics
   curr_config_[0] = global_linear_offset_[0] - foot_pos[0];// pushing the base upwards to put our contact feet on the ground
@@ -224,9 +260,9 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   sp_->com_vel = robot_->getCoMVelocity();
 
   // TODO
-  curr_config_[3] = global_body_euler_zyx_[0];
+  /*curr_config_[3] = global_body_euler_zyx_[0];
   curr_config_[4] = global_body_euler_zyx_[1];
-  curr_config_[5] = global_body_euler_zyx_[2];
+  curr_config_[5] = global_body_euler_zyx_[2];*/
 
   // update previous stance foot.
   sp_->prev_front_stance_foot = sp_->front_stance_foot;

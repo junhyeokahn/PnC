@@ -19,11 +19,10 @@ t = t[st_idx:end_idx]
 
 task_names = ['frfoot_pos', 'frfoot_vel', 'flfoot_pos', 'flfoot_vel', 'rrfoot_pos', 'rrfoot_vel', \
               'rlfoot_pos', 'rlfoot_vel', \
-              'com_pos', 'com_vel', 'base_quat', 'base_ang_vel', \
-              'jpos_des', 'final_config']
+              'com_pos', 'com_vel', 'base_quat', 'base_ang_vel']
 task_labels = [
     'frfoot lin', 'flfoot lin', 'rrfoot lin', 'rlfoot lin', 'com lin',
-    'base ori', 'joint'
+    'base ori'
 ]
 tasks = dict()
 tasks_des = dict()

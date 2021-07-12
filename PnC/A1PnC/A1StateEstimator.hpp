@@ -37,6 +37,9 @@ class A1StateEstimator {
   double joint_velocity_filter_freq_;
   double angular_velocity_filter_freq_;
 
+  Eigen::Isometry3d iso_base_joint_to_imu_;
+  Eigen::Isometry3d iso_base_com_to_imu_;
+
   double initial_height_;
   int front_fixed_foot_;
   int rear_fixed_foot_;
