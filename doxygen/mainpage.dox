@@ -1,0 +1,7 @@
+/*! \mainpage PnC - Planning and Control for Robotics
+
+\section intro Introduction
+
+PnC is a C++ library designed for generating trajectories for a robot system and stabilizing the system over the trajectories.
+
+*/

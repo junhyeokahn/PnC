@@ -9,6 +9,7 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 
 ### Install Dependancies
 - install cmake: ```source scripts/install/install_cmake.sh```
+- install doxygen: ```source scripts/install/install_doxygen.sh```
 - install zmq and cppzmq: ```source scripts/install/install_zmq.sh```
 - install protobuf: ```source scripts/install/install_protobuf.sh```
 - install plotjuggler: ```source scripts/install/install_plotjuggler.sh```
@@ -21,3 +22,4 @@ $ cd 'your workspace' && git clone --recurse https://github.com/junhyeokahn/PnC.
 - compile: ```mkdir build && cd build && cmake.. && make -j4 ```
 - run dart sim: ``` ./build/bin/run_atlas```
 - run pybullet sim: ```python simulator/pybullet/draco_main.py```
+- see API documentation: ```mkdir build && cd build && cmake.. && make view_docs ```
