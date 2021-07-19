@@ -10,6 +10,7 @@
 #include "utils/interpolation.hpp"
 #include "utils/util.hpp"
 
+/// namespace vrp_type
 namespace vrp_type {
 constexpr int kRFootSwing = 1;
 constexpr int kLFootSwing = 2;
@@ -309,7 +310,7 @@ private:
   Eigen::Vector3d get_DCM_DS_vel_minjerk(const int &step_index,
                                          const double &t);
 
-  /// Return matrix P \in R^{4x3}
+  /// Return matrix P
   Eigen::MatrixXd polynomialMatrix(const double Ts,
                                    const Eigen::Vector3d &dcm_ini,
                                    const Eigen::Vector3d &dcm_vel_ini,

@@ -6,7 +6,7 @@
 #include "third_party//goldfarb/QuadProg++.hh"
 #include "utils/util.hpp"
 
-// class IHWBC
+/// class IHWBC
 class IHWBC {
 public:
   /// \{ \name Constructor and Destructor

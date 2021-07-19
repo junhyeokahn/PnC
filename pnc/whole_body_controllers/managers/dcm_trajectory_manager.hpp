@@ -5,6 +5,7 @@
 #include "pnc/robot_system/robot_system.hpp"
 #include "pnc/whole_body_controllers/basic_tasks.hpp"
 
+/// namespace dcm_transfer_type
 namespace dcm_transfer_type {
 constexpr int kInitial = 0;
 constexpr int kMidStep = 1;
