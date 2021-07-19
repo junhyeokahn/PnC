@@ -180,6 +180,8 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_e = True
         elif pybullet_util.is_key_triggered(keys, 'r'):
             interface.interrupt.b_interrupt_button_r = True
+        elif pybullet_util.is_key_triggered(keys, 'f'):
+            interface.interrupt.b_interrupt_button_f = True
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
@@ -193,11 +195,11 @@ if __name__ == "__main__":
         # Copy Base
         sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
         qt = sensor_data_dict['base_com_quat']
-        sensor_data.base_com_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        sensor_data.base_com_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
         sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
         sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
-        sensor_data.base_joint_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        sensor_data.base_joint_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
 

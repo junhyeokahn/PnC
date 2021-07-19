@@ -5,12 +5,12 @@
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/state_machine.hpp"
 
-class DoubleSupportSwaying : public StateMachine {
+class DoubleSupportInterpolation : public StateMachine {
 public:
-  DoubleSupportSwaying(const StateIdentifier state_identifier_in,
-                       DracoControlArchitecture *_ctrl_arch,
-                       RobotSystem *_robot);
-  ~DoubleSupportSwaying();
+  DoubleSupportInterpolation(const StateIdentifier state_identifier_in,
+                             DracoControlArchitecture *_ctrl_arch,
+                             RobotSystem *_robot);
+  ~DoubleSupportInterpolation();
 
   void oneStep();
   void firstVisit();
@@ -18,8 +18,8 @@ public:
   bool endOfState();
   StateIdentifier getNextState();
 
-  Eigen::Vector3d amp;
-  Eigen::Vector3d freq;
+  Eigen::Vector3d local_offset;
+  double end_time;
 
 protected:
   DracoStateProvider *sp_;

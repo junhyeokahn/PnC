@@ -3,7 +3,7 @@
 
 DracoInterruptLogic::DracoInterruptLogic(DracoControlArchitecture *_ctrl_arch)
     : InterruptLogic() {
-  util::PrettyConstructor(1, "Draco Walking Interrupt Logic");
+  util::PrettyConstructor(1, "Draco Interrupt Logic");
   ctrl_arch_ = _ctrl_arch;
 }
 
@@ -11,15 +11,22 @@ DracoInterruptLogic::~DracoInterruptLogic() {}
 
 // Process Interrupts here
 void DracoInterruptLogic::processInterrupts() {
-  if (b_interrupt_button_p) {
-    std::cout << "[Walking Interrupt Logic] button P pressed" << std::endl;
+  if (b_interrupt_button_f) {
+    std::cout << "[Walking Interrupt Logic] button F pressed" << std::endl;
+    if (ctrl_arch_->state == draco_states::kBalance) {
+      std::cout << "---------                       ---------" << std::endl;
+      std::cout << "---------   COM Interpolation   ---------" << std::endl;
+      (static_cast<DoubleSupportBalance *>(
+           ctrl_arch_->state_machines[draco_states::kBalance]))
+          ->b_interpolation_trigger = true;
+    }
   }
 
   if (b_interrupt_button_r) {
     std::cout << "[Walking Interrupt Logic] button R pressed" << std::endl;
     if (ctrl_arch_->state == draco_states::kBalance) {
-      std::cout << "---------                    ---------" << std::endl;
-      std::cout << "---------      COM Swaying   ---------" << std::endl;
+      std::cout << "---------                  ---------" << std::endl;
+      std::cout << "---------    COM Swaying   ---------" << std::endl;
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
           ->b_swaying_trigger = true;

@@ -7,14 +7,10 @@
 #include "pnc/robot_system/robot_system.hpp"
 #include "utils/util.hpp"
 
-/*
- * WBC Contact
- * -----------
- * Usage:
- *     update_contact
- */
+/// class Contact
 class Contact {
 public:
+  /// \{ \name Constructor and Destructor
   Contact(RobotSystem *_robot, const int _dim, const std::string _target_id,
           const double _mu) {
     robot_ = _robot;
@@ -27,18 +23,32 @@ public:
     jacobian = Eigen::MatrixXd::Zero(dim, robot_->n_q_dot);
     jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
   }
-  virtual ~Contact() {}
 
+  virtual ~Contact() {}
+  /// \}
+
+  /// Contact dimension
   int dim;
+
+  /// Contact frame
   std::string target_id;
+
+  /// Maximum normal force
   double rf_z_max;
 
+  /// Contact jacobian
   Eigen::MatrixXd jacobian;
+
+  /// Contact jacobian times qdot
   Eigen::MatrixXd jacobian_dot_q_dot;
 
+  /// Contact constraint matrix
   Eigen::MatrixXd cone_constraint_mat;
+
+  /// Contact constraint vector
   Eigen::VectorXd cone_constraint_vec;
 
+  /// Update contact jacobian and contact constraint.
   void update_contact() {
     this->_update_jacobian();
     this->_update_cone_constraint();
@@ -49,8 +59,6 @@ protected:
 
   virtual void _update_jacobian() = 0;
   virtual void _update_cone_constraint() = 0;
-
-  Eigen::MatrixXd _get_u(double _x, double _y, double _mu);
 
   double mu_;
 };

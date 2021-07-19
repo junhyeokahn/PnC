@@ -43,11 +43,11 @@ void ContactTransitionStart::firstVisit() {
   if (atlas_ctrl_arch_->dcm_tm->noRemainingSteps()) {
     end_time_ = atlas_ctrl_arch_->dcm_tm->getFinalContactTransferTime();
   } else {
-    int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;
+    int transfer_type = dcm_transfer_type::kMidStep;
     end_time_ = atlas_ctrl_arch_->dcm_tm->getNormalForceRampUpTime();
 
     if (sp_->prev_state == AtlasStates::Balance) {
-      transfer_type = DCM_TRANSFER_TYPES::INITIAL;
+      transfer_type = dcm_transfer_type::kInitial;
       end_time_ = atlas_ctrl_arch_->dcm_tm->getInitialContactTransferTime() -
                   atlas_ctrl_arch_->dcm_tm->getNormalForceRampDownTime();
 
@@ -76,8 +76,8 @@ void ContactTransitionStart::oneStep() {
   atlas_ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-  atlas_ctrl_arch_->rfoot_tm->useCurrent();
-  atlas_ctrl_arch_->lfoot_tm->useCurrent();
+  atlas_ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  atlas_ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update floating base task
   atlas_ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "pnc/state_machine.hpp"
 #include "pnc/draco_pnc/draco_control_architecture.hpp"
 #include "pnc/draco_pnc/draco_controller.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/state_machine.hpp"
 
 class DoubleSupportBalance : public StateMachine {
 public:
@@ -20,6 +20,7 @@ public:
 
   bool b_walking_trigger;
   bool b_swaying_trigger;
+  bool b_interpolation_trigger;
 
 protected:
   DracoStateProvider *sp_;

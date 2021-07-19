@@ -158,9 +158,9 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   dcm_planner_->setInitialOri(ori_start_in);
 
   // Set transfer time
-  if (transfer_type_in == DCM_TRANSFER_TYPES::INITIAL) {
+  if (transfer_type_in == dcm_transfer_type::kInitial) {
     dcm_planner_->t_transfer = t_transfer_init_;
-  } else if (transfer_type_in == DCM_TRANSFER_TYPES::MIDSTEP) {
+  } else if (transfer_type_in == dcm_transfer_type::kMidStep) {
     dcm_planner_->t_transfer = t_transfer_mid_;
   }
 

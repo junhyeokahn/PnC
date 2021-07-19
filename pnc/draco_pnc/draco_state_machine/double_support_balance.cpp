@@ -12,6 +12,7 @@ DoubleSupportBalance::DoubleSupportBalance(
 
   b_walking_trigger = false;
   b_swaying_trigger = false;
+  b_interpolation_trigger = false;
 }
 
 DoubleSupportBalance::~DoubleSupportBalance() {}
@@ -21,14 +22,16 @@ void DoubleSupportBalance::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
   b_walking_trigger = false;
+  b_swaying_trigger = false;
+  b_interpolation_trigger = false;
 }
 
 void DoubleSupportBalance::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->useCurrent();
-  ctrl_arch_->lfoot_tm->useCurrent();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 }
 
 void DoubleSupportBalance::lastVisit() {}
@@ -40,6 +43,9 @@ bool DoubleSupportBalance::endOfState() {
     return true;
   }
   if (b_swaying_trigger) {
+    return true;
+  }
+  if (b_interpolation_trigger) {
     return true;
   }
   return false;
@@ -57,5 +63,9 @@ StateIdentifier DoubleSupportBalance::getNextState() {
 
   if (b_swaying_trigger) {
     return draco_states::kSwaying;
+  }
+
+  if (b_interpolation_trigger) {
+    return draco_states::kBaseInterpolation;
   }
 }

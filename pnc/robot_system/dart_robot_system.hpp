@@ -2,7 +2,7 @@
 #include <dart/utils/urdf/urdf.hpp>
 #include <dart/utils/utils.hpp>
 
-#include <pnc/robot_system/robot_system.hpp>
+#include "pnc/robot_system/robot_system.hpp"
 
 /*
  *  Dart considers floating base with 6 positions and 6 velocities with the
@@ -11,11 +11,14 @@
  *  floating base.
  */
 
+/// class DartRobotSystem
 class DartRobotSystem : public RobotSystem {
 public:
+  /// \{ \name Constructor and Destructor
   DartRobotSystem(const std::string _urdf_file, const bool _b_fixed_base,
                   const bool _b_print_info = false);
   virtual ~DartRobotSystem();
+  /// \}
 
   virtual int get_q_idx(const std::string joint_name);
   virtual int get_q_dot_idx(const std::string joint_name);
@@ -58,6 +61,9 @@ private:
   dart::dynamics::SkeletonPtr skel_;
   std::string urdf_file_;
 
+  /// Map of joint name and dart's JointPtr
   std::map<std::string, dart::dynamics::JointPtr> joint_id_;
+
+  /// Map of link name and dart's BodyNodePtr
   std::map<std::string, dart::dynamics::BodyNodePtr> link_id_;
 };
