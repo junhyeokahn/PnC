@@ -7,15 +7,15 @@ and stabilizing the system over the trajectories.
 ```source scripts/install/install_cmake.sh```
 - Install [doxygen](https://www.doxygen.nl/index.html):<br/>
 ```source scripts/install/install_doxygen.sh```
-- Install zmq and cppzmq:<br/>
+- Install [zmq](https://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq):<br/>
 ```source scripts/install/install_zmq.sh```
-- Install protobuf:<br/>
+- Install [protobuf](https://developers.google.com/protocol-buffers):<br/>
 ```source scripts/install/install_protobuf.sh```
-- Install plotjuggler:<br/>
+- Install [plotjuggler](https://github.com/facontidavide/PlotJuggler):<br/>
 ```source scripts/install/install_plotjuggler.sh```
-- Install dart:<br/>
+- Install [dart](http://dartsim.github.io/):<br/>
 ```source scripts/install/install_dart.sh```
-- Install pinocchio:<br/>
+- Install [pinocchio](https://github.com/stack-of-tasks/pinocchio):<br/>
 ```source scripts/install/install_pinocchio.sh```
 - Install [anaconda](https://docs.anaconda.com/anaconda/install/)
 - Install python dependancies:<br/>
