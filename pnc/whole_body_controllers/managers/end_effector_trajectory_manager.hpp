@@ -18,7 +18,7 @@ public:
   /// \}
 
   /// Use current pose and vel to set the task to make zero acceleration.
-  void UseCurrent();
+  void UpdateZeroAccCmd();
 
   /// Initialize interpolation trajectory
   void InitializeInterpolationTrajectory(

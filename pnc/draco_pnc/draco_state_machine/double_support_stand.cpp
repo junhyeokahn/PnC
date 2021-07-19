@@ -41,8 +41,8 @@ void DoubleSupportStand::oneStep() {
   // Update Floating Base Task
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UseCurrent();
-  ctrl_arch_->lfoot_tm->UseCurrent();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   // Update Max Normal Reaction Force
   ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
   ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);

@@ -20,7 +20,7 @@ EndEffectorTrajectoryManager::EndEffectorTrajectoryManager(
 
 EndEffectorTrajectoryManager::~EndEffectorTrajectoryManager() {}
 
-void EndEffectorTrajectoryManager::UseCurrent() {
+void EndEffectorTrajectoryManager::UpdateZeroAccCmd() {
   Eigen::VectorXd pos_des = robot_->get_link_iso(link_idx_).translation();
   Eigen::VectorXd vel_des = robot_->get_link_vel(link_idx_).tail(3);
   Eigen::VectorXd acc_des = Eigen::VectorXd::Zero(3);

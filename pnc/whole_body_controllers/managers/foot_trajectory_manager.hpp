@@ -17,8 +17,8 @@ public:
   ~FootTrajectoryManager();
   /// \}
 
-  /// Use current pose and vel to set the task.
-  void UseCurrent();
+  /// Use current pose and vel to set zero acceleration command.
+  void UpdateZeroAccCmd();
 
   /// Initialize the swing foot trajectory
   void InitializeSwingTrajectory(const double _start_time,

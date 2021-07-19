@@ -36,8 +36,8 @@ void DoubleSupportInterpolation::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UseCurrent();
-  ctrl_arch_->lfoot_tm->UseCurrent();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update Floating Base
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);

@@ -58,8 +58,8 @@ void ContactTransitionEnd::oneStep() {
   }
 
   // Update Foot Task
-  atlas_ctrl_arch_->rfoot_tm->UseCurrent();
-  atlas_ctrl_arch_->lfoot_tm->UseCurrent();
+  atlas_ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  atlas_ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update floating base task
   atlas_ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);

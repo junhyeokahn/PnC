@@ -45,10 +45,10 @@ void SingleSupportSwing::oneStep() {
   // Update Foot Task
   if (leg_side_ == EndEffector::LFoot) {
     atlas_ctrl_arch_->lfoot_tm->UpdateDesired(sp_->curr_time);
-    atlas_ctrl_arch_->rfoot_tm->UseCurrent();
+    atlas_ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
   } else {
     atlas_ctrl_arch_->rfoot_tm->UpdateDesired(sp_->curr_time);
-    atlas_ctrl_arch_->lfoot_tm->UseCurrent();
+    atlas_ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   }
 
   // Update floating base task

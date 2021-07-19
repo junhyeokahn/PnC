@@ -16,7 +16,7 @@ FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
 
 FootTrajectoryManager::~FootTrajectoryManager() {}
 
-void FootTrajectoryManager::UseCurrent() {
+void FootTrajectoryManager::UpdateZeroAccCmd() {
   Eigen::VectorXd foot_pos_des = robot_->get_link_iso(link_idx_).translation();
   Eigen::VectorXd foot_vel_des = robot_->get_link_vel(link_idx_).tail(3);
   Eigen::VectorXd foot_acc_des = Eigen::VectorXd::Zero(3);
