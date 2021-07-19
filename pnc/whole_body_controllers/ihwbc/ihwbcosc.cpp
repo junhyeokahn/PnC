@@ -7,19 +7,15 @@ IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
   n_q_dot_ = _sa.cols();
   n_active_ = _sa.rows();
   n_passive_ = _sv.rows();
-  if (n_q_dot_ == n_active_ + n_passive_){
+  if (n_q_dot_ == n_active_ + n_passive_)
     b_floating_ = false;
-    num_floating_ = 0;
-  }
-  else{
+  else
     b_floating_ = true;
-    num_floating_ = 6;
-    sf_ = _sf;
-  }
 
+  sf_ = _sf;
   snf_ =
-      Eigen::MatrixXd::Zero(n_active_ + n_passive_, num_floating_ + n_active_ + n_passive_);
-  snf_.block(0, num_floating_, n_active_ + n_passive_, n_active_ + n_passive_) =
+      Eigen::MatrixXd::Zero(n_active_ + n_passive_, 6 + n_active_ + n_passive_);
+  snf_.block(0, 6, n_active_ + n_passive_, n_active_ + n_passive_) =
       Eigen::MatrixXd::Identity(n_active_ + n_passive_, n_active_ + n_passive_);
   sv_ = _sv;
   sa_ = _sa;
@@ -84,10 +80,10 @@ void IHWBC::solve(
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_) - ji_bar * ji;
     jit_lmd_jidot_qdot = ji.transpose() * lmd_i * jidot_qdot;
     Eigen::MatrixXd sa_ni_trc =
-        (sa_ * ni).block(0, num_floating_, n_active_, n_active_ + n_passive_);
+        (sa_ * ni).block(0, 6, n_active_, n_active_ + n_passive_);
     Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
-        Ainv_.block(num_floating_, num_floating_, n_active_ + n_passive_, n_active_ + n_passive_);
+        Ainv_.block(6, 6, n_active_ + n_passive_, n_active_ + n_passive_);
     util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
                             lmd_sa_ni_trc);
     Eigen::MatrixXd sa_ni_trc_bar =
@@ -160,85 +156,33 @@ void IHWBC::solve(
   // ===========================================================================
   // Equality Constraint
   // ===========================================================================
+
   Eigen::MatrixXd eq_floating_mat, eq_int_mat, eq_mat;
   Eigen::VectorXd eq_floating_vec, eq_int_vec, eq_vec;
 
   if (b_contact_) {
-      eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-      if (b_internal_constraint_) {
-          //Are these needed???
-          eq_int_mat =
-              util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-          //eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
-          eq_int_vec = -jidot_qdot; //modified
-      }
+    eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+    if (b_internal_constraint_) {
+      eq_int_mat =
+          util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
+      eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
+    }
   } else {
-      eq_floating_mat = sf_ * A_;
-      if (b_internal_constraint_) {
-          eq_int_mat = ji;
-          eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
-      }
+    eq_floating_mat = sf_ * A_;
+    if (b_internal_constraint_) {
+      eq_int_mat = ji;
+      eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
+    }
   }
   eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
 
   if (b_internal_constraint_) {
-      eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
-      eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
+    eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
+    eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
   } else {
-      eq_mat = eq_floating_mat;
-      eq_vec = eq_floating_vec;
+    eq_mat = eq_floating_mat;
+    eq_vec = eq_floating_vec;
   }
-
-  //SH classification
-  if (b_floating_) {
-      if (b_contact_) {
-          if (b_internal_constraint_) {
-              eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-              eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
-
-              //????
-              eq_int_mat =
-                  util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-              eq_int_vec = -jidot_qdot;
-              //????
-
-              eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
-              eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
-          } else {
-              eq_floating_mat = util::hStack(sf_ * A_, -sf_ * jc.transpose()); 
-              eq_floating_vec = -sf_ * (cori_ + grav_);
-          }
-      } else {
-          assert(false); //Assume there always contact
-      }
-  } else if (b_contact_) {
-      if (b_internal_constraint_) {
-          //Draco3 in fixed base config & contact
-          eq_int_mat =
-              util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-          eq_int_vec = -jidot_qdot;
-
-          eq_mat = eq_int_mat;
-          eq_vec = eq_int_vec;
-     } else {
-         // fixed base & contact & no internal constraint
-         // no equality constraints
-     } 
-  } else if (b_internal_constraint_) {
-      //Draco3 in fixed base & no contact
-      eq_int_mat =
-          util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-      eq_int_vec = -jidot_qdot;
-
-      eq_mat = eq_int_mat;
-      eq_vec = eq_int_vec;
-  } else{   
-      // fixed base & no contact & no internal constraint
-      // no equality constraints
-  }
-
-
-
 
   // ===========================================================================
   // Inequality Constraint

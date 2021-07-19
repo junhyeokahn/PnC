@@ -41,7 +41,6 @@ private:
   bool b_contact_;
   bool b_internal_constraint_;
   bool b_floating_;
-  int num_floating_;
 
   Eigen::MatrixXd sf_;
   Eigen::MatrixXd snf_;

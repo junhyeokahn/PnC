@@ -24,7 +24,7 @@ fi
 cd $PATH_PACKAGE/../ &&
 git clone git@github.com:dartsim/dart.git &&
 cd dart &&
-git checkout release-6.11 &&
+git checkout release-6.10 &&
 mkdir build &&
 cd build &&
 cmake .. && make -j4
