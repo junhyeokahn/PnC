@@ -22,19 +22,19 @@ void DoubleSupportSwaying::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
 
-  ctrl_arch_->floating_base_tm->InitializeCoMSwayingTrajectory(sp_->curr_time,
-                                                               amp, freq);
+  ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(sp_->curr_time, amp,
+                                                            freq);
 }
 
 void DoubleSupportSwaying::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->useCurrent();
-  ctrl_arch_->lfoot_tm->useCurrent();
+  ctrl_arch_->rfoot_tm->UseCurrent();
+  ctrl_arch_->lfoot_tm->UseCurrent();
 
   // Update Floating Base
-  ctrl_arch_->floating_base_tm->UpdateFloatingBaseDesired(sp_->curr_time);
+  ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
 }
 
 void DoubleSupportSwaying::lastVisit() {}

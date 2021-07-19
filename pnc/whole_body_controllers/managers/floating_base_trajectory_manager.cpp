@@ -18,11 +18,10 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   b_swaying_ = false;
 }
 
-void FloatingBaseTrajectoryManager::
-    InitializeFloatingBaseInterpolationTrajectory(
-        const double _start_time, const double _duration,
-        const Eigen::Vector3d &_target_com_pos,
-        const Eigen::Quaternion<double> &_target_base_quat) {
+void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
+    const double _start_time, const double _duration,
+    const Eigen::Vector3d &_target_com_pos,
+    const Eigen::Quaternion<double> &_target_base_quat) {
 
   start_time_ = _start_time;
   duration_ = _duration;
@@ -39,7 +38,7 @@ void FloatingBaseTrajectoryManager::
   exp_error_ = util::QuatToExp(quat_err);
 }
 
-void FloatingBaseTrajectoryManager::InitializeCoMSwayingTrajectory(
+void FloatingBaseTrajectoryManager::InitializeSwayingTrajectory(
     double _start_time, const Eigen::Vector3d &_amp,
     const Eigen::Vector3d &_freq) {
 
@@ -55,8 +54,7 @@ void FloatingBaseTrajectoryManager::InitializeCoMSwayingTrajectory(
   target_base_quat_ = ini_base_quat_;
 }
 
-void FloatingBaseTrajectoryManager::UpdateFloatingBaseDesired(
-    const double curr_time) {
+void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
 
   Eigen::VectorXd com_pos_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);

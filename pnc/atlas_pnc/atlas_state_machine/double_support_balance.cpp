@@ -1,4 +1,4 @@
-#include <pnc/atlas_pnc/atlas_state_machine/double_support_balance.hpp>
+#include "pnc/atlas_pnc/atlas_state_machine/double_support_balance.hpp"
 
 DoubleSupportBalance::DoubleSupportBalance(
     const StateIdentifier _state_identifier,
@@ -24,8 +24,8 @@ void DoubleSupportBalance::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  atlas_ctrl_arch_->rfoot_tm->useCurrent();
-  atlas_ctrl_arch_->lfoot_tm->useCurrent();
+  atlas_ctrl_arch_->rfoot_tm->UseCurrent();
+  atlas_ctrl_arch_->lfoot_tm->UseCurrent();
 }
 
 void DoubleSupportBalance::lastVisit() {}

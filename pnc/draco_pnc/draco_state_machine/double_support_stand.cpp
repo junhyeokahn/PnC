@@ -27,7 +27,7 @@ void DoubleSupportStand::firstVisit() {
       Eigen::Quaternion<double>(lfoot_iso.linear())
           .slerp(0.5, Eigen::Quaternion<double>(rfoot_iso.linear()));
 
-  ctrl_arch_->floating_base_tm->InitializeFloatingBaseInterpolationTrajectory(
+  ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
 
   // Initialize Reaction Force Ramp to Max
@@ -39,10 +39,10 @@ void DoubleSupportStand::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Floating Base Task
-  ctrl_arch_->floating_base_tm->UpdateFloatingBaseDesired(sp_->curr_time);
+  ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->useCurrent();
-  ctrl_arch_->lfoot_tm->useCurrent();
+  ctrl_arch_->rfoot_tm->UseCurrent();
+  ctrl_arch_->lfoot_tm->UseCurrent();
   // Update Max Normal Reaction Force
   ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
   ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);

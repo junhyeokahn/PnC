@@ -4,63 +4,41 @@ FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
                                              Task *_foot_ori_task,
                                              RobotSystem *_robot) {
   util::PrettyConstructor(2, "FootTrajectoryManager");
+
   robot_ = _robot;
-  // Set Linear and Orientation Foot task
   foot_pos_task_ = _foot_pos_task;
   foot_ori_task_ = _foot_ori_task;
 
-  // Assume that both tasks use the same link id.
   link_idx_ = foot_pos_task_->target_ids[0];
 
-  // Initialize member variables
-  foot_pos_des_.setZero();
-  foot_vel_des_.setZero();
-  foot_acc_des_.setZero();
-
-  foot_quat_des_.setIdentity();
-  foot_ori_des_ = Eigen::VectorXd::Zero(4);
-  foot_ang_vel_des_.setZero();
-  foot_ang_acc_des_.setZero();
-
-  swing_height = 0.04; // 4cm default
+  swing_height = 0.04;
 }
 
 FootTrajectoryManager::~FootTrajectoryManager() {}
 
-void FootTrajectoryManager::useCurrent() {
-  // Update desired to use current foot pose
-  foot_pos_des_ = robot_->get_link_iso(link_idx_).translation();
-  foot_vel_des_ = robot_->get_link_vel(link_idx_).tail(3);
-  // foot_vel_des_.setZero();
-  foot_acc_des_.setZero();
-  foot_quat_des_ = robot_->get_link_iso(link_idx_).linear();
-  foot_ang_vel_des_ = robot_->get_link_vel(link_idx_).head(3);
-  // foot_ang_vel_des_.setZero();
-  foot_ang_acc_des_.setZero();
-  convertQuatDesToOriDes();
-  updateDesired();
+void FootTrajectoryManager::UseCurrent() {
+  Eigen::VectorXd foot_pos_des = robot_->get_link_iso(link_idx_).translation();
+  Eigen::VectorXd foot_vel_des = robot_->get_link_vel(link_idx_).tail(3);
+  Eigen::VectorXd foot_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::Quaternion<double> foot_quat_des =
+      Eigen::Quaternion<double>(robot_->get_link_iso(link_idx_).linear());
+  Eigen::VectorXd foot_ori_des(4);
+  foot_ori_des << foot_quat_des.w(), foot_quat_des.x(), foot_quat_des.y(),
+      foot_quat_des.z();
+  Eigen::VectorXd foot_ang_vel_des = robot_->get_link_vel(link_idx_).head(3);
+
+  foot_pos_task_->update_desired(foot_pos_des, foot_vel_des, foot_acc_des);
+  foot_ori_task_->update_desired(foot_ori_des, foot_ang_vel_des, foot_acc_des);
 }
 
-void FootTrajectoryManager::convertQuatDesToOriDes() {
-  foot_ori_des_[0] = foot_quat_des_.w();
-  foot_ori_des_[1] = foot_quat_des_.x();
-  foot_ori_des_[2] = foot_quat_des_.y();
-  foot_ori_des_[3] = foot_quat_des_.z();
-}
-
-void FootTrajectoryManager::updateDesired() {
-  foot_pos_task_->update_desired(foot_pos_des_, foot_vel_des_, foot_acc_des_);
-  foot_ori_task_->update_desired(foot_ori_des_, foot_ang_vel_des_,
-                                 foot_ang_acc_des_);
-}
-
-// Initialize the swing foot trajectory
-void FootTrajectoryManager::initializeSwingFootTrajectory(
+void FootTrajectoryManager::InitializeSwingTrajectory(
     const double _start_time, const double _swing_duration,
     const Footstep &_landing_foot) {
+
   // Copy and initialize variables
-  swing_start_time_ = _start_time;
-  swing_duration_ = _swing_duration;
+  start_time_ = _start_time;
+  duration_ = _swing_duration;
   swing_land_foot_ = _landing_foot;
 
   // Initialize swing foot starting pose
@@ -82,7 +60,7 @@ void FootTrajectoryManager::initializeSwingFootTrajectory(
   Eigen::Vector3d mid_swing_position =
       swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity =
-      (swing_land_foot_.position - swing_init_foot_.position) / swing_duration_;
+      (swing_land_foot_.position - swing_init_foot_.position) / duration_;
 
   // Construct Position trajectories
   pos_traj_init_to_mid_.Initialize(swing_init_foot_.position,
@@ -102,44 +80,44 @@ void FootTrajectoryManager::initializeSwingFootTrajectory(
                                  swing_land_foot_.orientation, ang_vel_end);
 }
 
-// Computes the swing foot
-void FootTrajectoryManager::computeSwingFoot(const double current_time) {
-  // Compute progression variable
-  double s = (current_time - swing_start_time_) / swing_duration_;
+void FootTrajectoryManager::UpdateDesired(const double current_time) {
 
-  // Get foot position and its derivatives
-  if (s <= 0.5) { // 0.0 <= s < 0.5 use the first trajectory
-    // scale back to 1.0
+  Eigen::VectorXd pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::Quaternion<double> quat_des;
+  Eigen::VectorXd ori_des = Eigen::VectorXd::Zero(4);
+  Eigen::Vector3d ang_vel_des;
+  Eigen::Vector3d ang_acc_des;
+
+  double s = (current_time - start_time_) / duration_;
+
+  if (s <= 0.5) {
     s = 2.0 * s;
-    foot_pos_des_ = pos_traj_init_to_mid_.Evaluate(s);
-    foot_vel_des_ = pos_traj_init_to_mid_.EvaluateFirstDerivative(s) /
-                    (swing_duration_ * 0.5);
-    foot_acc_des_ = pos_traj_init_to_mid_.EvaluateSecondDerivative(s) /
-                    (swing_duration_ * 0.5);
-  } else { // 0.5 <= s < 1.0 use the second trajectory
-    // scale back to 1.0 after the offset
+    pos_des = pos_traj_init_to_mid_.Evaluate(s);
+    vel_des =
+        pos_traj_init_to_mid_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
+    acc_des =
+        pos_traj_init_to_mid_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
+  } else {
     s = 2.0 * (s - 0.5);
-    foot_pos_des_ = pos_traj_mid_to_end_.Evaluate(s);
-    foot_vel_des_ = pos_traj_mid_to_end_.EvaluateFirstDerivative(s) /
-                    (swing_duration_ * 0.5);
-    foot_acc_des_ = pos_traj_mid_to_end_.EvaluateSecondDerivative(s) /
-                    (swing_duration_ * 0.5);
+    pos_des = pos_traj_mid_to_end_.Evaluate(s);
+    vel_des =
+        pos_traj_mid_to_end_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
+    acc_des =
+        pos_traj_mid_to_end_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
   }
 
-  // Get foot orientation and its derivatives
-  s = (current_time - swing_start_time_) / swing_duration_;
-  quat_hermite_curve_.Evaluate(s, foot_quat_des_);
-  quat_hermite_curve_.GetAngularVelocity(s, foot_ang_vel_des_);
-  quat_hermite_curve_.GetAngularAcceleration(s, foot_ang_acc_des_);
-  foot_ang_vel_des_ /= swing_duration_;
-  foot_ang_acc_des_ /= swing_duration_;
-  convertQuatDesToOriDes();
+  s = (current_time - start_time_) / duration_;
 
-  // util::PrettyPrint(foot_pos_des_, std::cout, "foot_pos_des_");
-  // util::PrettyPrint(foot_ori_des_, std::cout, "foot_ori_des_");
-}
+  quat_hermite_curve_.Evaluate(s, quat_des);
+  ori_des << quat_des.w(), quat_des.x(), quat_des.y(), quat_des.z();
+  quat_hermite_curve_.GetAngularVelocity(s, ang_vel_des);
+  quat_hermite_curve_.GetAngularAcceleration(s, ang_acc_des);
+  ang_vel_des /= duration_;
+  ang_acc_des /= duration_;
 
-void FootTrajectoryManager::updateSwingFootDesired(const double current_time) {
-  computeSwingFoot(current_time);
-  updateDesired();
+  foot_pos_task_->update_desired(pos_des, vel_des, acc_des);
+  foot_ori_task_->update_desired(ori_des, ang_vel_des, ang_acc_des);
 }

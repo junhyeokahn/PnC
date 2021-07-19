@@ -76,8 +76,8 @@ void ContactTransitionStart::oneStep() {
   atlas_ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-  atlas_ctrl_arch_->rfoot_tm->useCurrent();
-  atlas_ctrl_arch_->lfoot_tm->useCurrent();
+  atlas_ctrl_arch_->rfoot_tm->UseCurrent();
+  atlas_ctrl_arch_->lfoot_tm->UseCurrent();
 
   // Update floating base task
   atlas_ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);

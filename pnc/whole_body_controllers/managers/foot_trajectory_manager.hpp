@@ -18,22 +18,28 @@ public:
   /// \}
 
   /// Use current pose and vel to set the task.
-  void useCurrent();
-
-  /// Updates the task desired values
-  void updateDesired();
+  void UseCurrent();
 
   /// Initialize the swing foot trajectory
-  void initializeSwingFootTrajectory(const double _start_time,
-                                     const double _swing_duration,
-                                     const Footstep &_landing_foot);
-  /// Computes the swing foot
-  void computeSwingFoot(const double current_time);
+  void InitializeSwingTrajectory(const double _start_time,
+                                 const double _swing_duration,
+                                 const Footstep &_landing_foot);
 
   /// computes the swing foot and updates the desired swing foot task
-  void updateSwingFootDesired(const double current_time);
+  void UpdateDesired(const double current_time);
 
   double swing_height;
+
+private:
+  void convertQuatDesToOriDes();
+  RobotSystem *robot_;
+
+  double start_time_;
+  double duration_;
+
+  Task *foot_pos_task_;
+  Task *foot_ori_task_;
+  std::string link_idx_;
 
   Footstep swing_init_foot_;
   Footstep swing_midfoot_;
@@ -42,24 +48,4 @@ public:
   HermiteCurveVec pos_traj_init_to_mid_;
   HermiteCurveVec pos_traj_mid_to_end_;
   HermiteQuaternionCurve quat_hermite_curve_;
-
-private:
-  void convertQuatDesToOriDes();
-  RobotSystem *robot_;
-
-  double swing_start_time_;
-  double swing_duration_;
-
-  Task *foot_pos_task_;
-  Task *foot_ori_task_;
-  std::string link_idx_;
-
-  Eigen::Vector3d foot_pos_des_;
-  Eigen::Vector3d foot_vel_des_;
-  Eigen::Vector3d foot_acc_des_;
-
-  Eigen::Quaterniond foot_quat_des_;
-  Eigen::VectorXd foot_ori_des_;
-  Eigen::Vector3d foot_ang_vel_des_;
-  Eigen::Vector3d foot_ang_acc_des_;
 };

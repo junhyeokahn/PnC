@@ -15,18 +15,18 @@ public:
 
   /// Initialize floating base interpolation to _target_com_pos and
   /// _target_base_quat
-  void InitializeFloatingBaseInterpolationTrajectory(
+  void InitializeInterpolationTrajectory(
       const double _start_time, const double _duration,
       const Eigen::Vector3d &_target_com_pos,
       const Eigen::Quaternion<double> &_target_base_quat);
 
   /// Initialize swaying trajectory
-  void InitializeCoMSwayingTrajectory(double _start_time,
-                                      const Eigen::Vector3d &_amp,
-                                      const Eigen::Vector3d &_freq);
+  void InitializeSwayingTrajectory(double _start_time,
+                                   const Eigen::Vector3d &_amp,
+                                   const Eigen::Vector3d &_freq);
 
   /// Update floating base task commands.
-  void UpdateFloatingBaseDesired(const double current_time);
+  void UpdateDesired(const double current_time);
 
 private:
   RobotSystem *robot_;

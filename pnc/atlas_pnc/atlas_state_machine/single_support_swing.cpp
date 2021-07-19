@@ -27,11 +27,11 @@ void SingleSupportSwing::firstVisit() {
   int footstep_idx = atlas_ctrl_arch_->dcm_tm->current_footstep_idx;
 
   if (leg_side_ == EndEffector::RFoot) {
-    atlas_ctrl_arch_->rfoot_tm->initializeSwingFootTrajectory(
+    atlas_ctrl_arch_->rfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_,
         atlas_ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
   } else if (leg_side_ == EndEffector::LFoot) {
-    atlas_ctrl_arch_->lfoot_tm->initializeSwingFootTrajectory(
+    atlas_ctrl_arch_->lfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_,
         atlas_ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
   } else {
@@ -44,11 +44,11 @@ void SingleSupportSwing::oneStep() {
 
   // Update Foot Task
   if (leg_side_ == EndEffector::LFoot) {
-    atlas_ctrl_arch_->lfoot_tm->updateSwingFootDesired(sp_->curr_time);
-    atlas_ctrl_arch_->rfoot_tm->useCurrent();
+    atlas_ctrl_arch_->lfoot_tm->UpdateDesired(sp_->curr_time);
+    atlas_ctrl_arch_->rfoot_tm->UseCurrent();
   } else {
-    atlas_ctrl_arch_->rfoot_tm->updateSwingFootDesired(sp_->curr_time);
-    atlas_ctrl_arch_->lfoot_tm->useCurrent();
+    atlas_ctrl_arch_->rfoot_tm->UpdateDesired(sp_->curr_time);
+    atlas_ctrl_arch_->lfoot_tm->UseCurrent();
   }
 
   // Update floating base task

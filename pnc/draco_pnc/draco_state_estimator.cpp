@@ -26,7 +26,8 @@ DracoStateEstimator::~DracoStateEstimator() {}
 
 void DracoStateEstimator::initialize(DracoSensorData *data) {
   sp_->nominal_joint_pos = data->joint_positions;
-  this->update_debug(data);
+  // this->update_debug(data);
+  this->update(data);
 }
 
 void DracoStateEstimator::update_debug(DracoSensorData *_data) {

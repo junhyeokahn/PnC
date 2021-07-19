@@ -27,8 +27,8 @@ void DoubleSupportBalance::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->useCurrent();
-  ctrl_arch_->lfoot_tm->useCurrent();
+  ctrl_arch_->rfoot_tm->UseCurrent();
+  ctrl_arch_->lfoot_tm->UseCurrent();
 }
 
 void DoubleSupportBalance::lastVisit() {}
