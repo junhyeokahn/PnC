@@ -51,6 +51,9 @@ private:
   /// Number of qdot.
   int n_q_dot_;
 
+  /// Number of floating dofs.
+  int n_floating_;
+
   /// Number of actuating dofs.
   int n_active_;
 
@@ -131,6 +134,9 @@ private:
   /// Set equality constraints.
   void setEqualityConstraints(const Eigen::MatrixXd &mat,
                               const Eigen::VectorXd &vec);
+
+  /// Set null equality constraints.
+  void setNullEqualityConstraints();
 
   /// Set inequality constraints.
   void setInequalityConstraints(const Eigen::MatrixXd &mat,
