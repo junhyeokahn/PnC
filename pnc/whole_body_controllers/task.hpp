@@ -6,14 +6,10 @@
 #include "pnc/robot_system/robot_system.hpp"
 #include "utils/util.hpp"
 
-/*
- * WBC Task
- * --------
- * Usage:
- *     update_desired --> update_jacobian --> update_cmd
- */
+/// class Task
 class Task {
 public:
+  /// \{ \name Constructor and Destructor
   Task(
       RobotSystem *_robot, const int &_dim,
       const std::vector<std::string> _target_ids = std::vector<std::string>()) {
@@ -38,42 +34,56 @@ public:
     vel = Eigen::VectorXd::Zero(dim);
     acc_des = Eigen::VectorXd::Zero(dim);
   };
-  virtual ~Task(){};
 
+  virtual ~Task(){};
+  /// \}
+
+  /// Task dimension.
   int dim;
 
+  /// Task hierarchy weight.
   double w_hierarchy;
+
+  /// Task P gain.
   Eigen::VectorXd kp;
+
+  /// Task D gain.
   Eigen::VectorXd kd;
 
+  /// Task jacobian.
   Eigen::MatrixXd jacobian;
+
+  /// Task jacobian times qdot.
   Eigen::VectorXd jacobian_dot_q_dot;
 
+  /// Accelration command.
   Eigen::VectorXd op_cmd;
+
+  /// Position error.
   Eigen::VectorXd pos_err;
 
+  /// Desired Position.
   Eigen::VectorXd pos_des;
+
+  /// Measured position.
   Eigen::VectorXd pos;
+
+  /// Desired velocity.
   Eigen::VectorXd vel_des;
+
+  /// Measured velocity.
   Eigen::VectorXd vel;
+
+  /// Desired acceleration.
   Eigen::VectorXd acc_des;
 
+  /// Task target ids.
   std::vector<std::string> target_ids;
 
-  /*
-   *  Update pos_des, vel_des, acc_des which will be used later to compute
-   *  op_cmd
-
-   *  Parameters
-   *  ----------
-   *  pos_des (np.array):
-   *      For orientation task, the size of numpy array is 4, and it should
-   *      be represented in scalar-last quaternion
-   *  vel_des (np.array):
-   *      Velocity desired
-   *  acc_des (np.array):
-   *      Acceleration desired
-   */
+  /// Update pos_des, vel_des, acc_des which will be used later to compute
+  /// op_cmd
+  /// \note For orientation task, _pos_des has 4 dimensional vector that
+  /// represents scalar first quaternion.
   void update_desired(const Eigen::VectorXd &_pos_des,
                       const Eigen::VectorXd &_vel_des,
                       const Eigen::VectorXd &_acc_des) {
@@ -82,16 +92,13 @@ public:
     acc_des = _acc_des;
   }
 
-  /*
-   * Update op_cmd, pos_err given updated pos_des, vel_des, acc_des
-   */
+  /// Update task command.
   virtual void update_cmd() = 0;
 
-  /*
-   * Update jacobian and jacobian_dot_q_dot
-   */
+  /// Update task jacobian.
   virtual void update_jacobian() = 0;
 
+  /// Print outs for debugging purpose.
   void Debug() {
     std::cout << "pos des" << std::endl;
     std::cout << pos_des << std::endl;
@@ -105,6 +112,7 @@ public:
     std::cout << op_cmd << std::endl;
   }
 
+  /// Copies task commands.
   void CopyData(Eigen::VectorXd &_pos_des, Eigen::VectorXd &_vel_des,
                 Eigen::VectorXd &_acc_des, Eigen::VectorXd &_pos,
                 Eigen::VectorXd &_vel) {

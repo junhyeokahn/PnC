@@ -1,21 +1,32 @@
 #pragma once
 
+/// class DigitalFilter
 class DigitalFilter {
 public:
-  DigitalFilter(void);
-  virtual ~DigitalFilter(void);
+  /// \{ \name Constructor and Destructor
+  DigitalFilter();
+
+  virtual ~DigitalFilter();
+  /// \}
+
+  /// Input to this filter
   virtual void Input(double input_value) = 0;
-  virtual double Output(void) = 0;
-  virtual void Clear(void) = 0;
+
+  /// Output of this filter
+  virtual double Output() = 0;
+
+  /// Reset data history in this filter
+  virtual void Clear() = 0;
 };
 
+/// class ButterWorthFilter
 class ButterWorthFilter : public DigitalFilter {
 public:
   ButterWorthFilter(int num_sample, double dt, double cutoff_frequency);
-  virtual ~ButterWorthFilter(void);
+  virtual ~ButterWorthFilter();
   virtual void Input(double input_value);
-  virtual double Output(void);
-  virtual void Clear(void);
+  virtual double Output();
+  virtual void Clear();
 
 private:
   double *mpBuffer;
@@ -26,13 +37,14 @@ private:
   double mValue;
 };
 
+/// class LowPassFilter
 class LowPassFilter : public DigitalFilter {
 public:
   LowPassFilter(double w_c, double t_s);
-  virtual ~LowPassFilter(void);
+  virtual ~LowPassFilter();
   virtual void Input(double input_value);
-  virtual double Output(void);
-  virtual void Clear(void);
+  virtual double Output();
+  virtual void Clear();
 
 private:
   double Lpf_in_prev[2];
@@ -41,13 +53,14 @@ private:
   double lpf_out;
 };
 
+/// class SimpleMovingAverage
 class SimpleMovingAverage : public DigitalFilter {
 public:
   SimpleMovingAverage(int num_data);
   virtual ~SimpleMovingAverage();
   virtual void Input(double input_value);
-  virtual double Output(void);
-  virtual void Clear(void);
+  virtual double Output();
+  virtual void Clear();
 
 private:
   double *buffer_;
@@ -56,13 +69,14 @@ private:
   double sum_;
 };
 
+/// class DerivativeLowPassFilter
 class DerivativeLowPassFilter : public DigitalFilter {
 public:
   DerivativeLowPassFilter(double w_c, double t_s);
-  virtual ~DerivativeLowPassFilter(void);
+  virtual ~DerivativeLowPassFilter();
   virtual void Input(double input_value);
-  virtual double Output(void);
-  virtual void Clear(void);
+  virtual double Output();
+  virtual void Clear();
 
 private:
   double Lpf_in_prev[2];

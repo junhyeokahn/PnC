@@ -1,70 +1,93 @@
 #pragma once
 
-#include <pnc/planners/locomotion/dcm_planner/dcm_planner.hpp>
-#include <pnc/planners/locomotion/dcm_planner/footstep.hpp>
-#include <pnc/robot_system/robot_system.hpp>
-#include <pnc/whole_body_controllers/basic_tasks.hpp>
+#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
+#include "pnc/planners/locomotion/dcm_planner/footstep.hpp"
+#include "pnc/robot_system/robot_system.hpp"
+#include "pnc/whole_body_controllers/basic_tasks.hpp"
 
-namespace DCM_TRANSFER_TYPES {
-constexpr int INITIAL = 0;
-constexpr int MIDSTEP = 1;
-}; // namespace DCM_TRANSFER_TYPES
+namespace dcm_transfer_type {
+constexpr int kInitial = 0;
+constexpr int kMidStep = 1;
+}; // namespace dcm_transfer_type
 
+/// class DCMTrajectoryManager
 class DCMTrajectoryManager {
 public:
+  /// \{ \name Constructor and Destructor
   DCMTrajectoryManager(DCMPlanner *_dcm_planner, Task *_com_task,
                        Task *_base_ori_task, RobotSystem *_robot,
                        std::string _lfoot_idx, std::string _rfoot_idx);
   ~DCMTrajectoryManager();
   void paramInitialization(const YAML::Node &node);
+  /// \}
 
+  /// Initialize DCM planning.
   bool initialize(const double t_walk_start_in, const int transfer_type_in,
                   const Eigen::Quaterniond &ori_start_in,
                   const Eigen::Vector3d &dcm_pos_start_in,
                   const Eigen::Vector3d &dcm_vel_start_in);
 
-  // Walking Primitives
+  /// \{ \name Walking primitives
+  /// Initialize trajectories for in-place walking.
   void walkInPlace();
+
+  /// Initialize trajectories for forward walking.
   void walkForward();
+
+  /// Initialize trajectories for backward walking.
   void walkBackward();
+
+  /// Initialize trajectories for left walking.
   void strafeLeft();
+
+  /// Initialize trajectories for right walking.
   void strafeRight();
+
+  /// Initialize trajectories for counter clock wise turning.
   void turnLeft();
+
+  /// Initialize trajectories for clock wise turning.
   void turnRight();
+  /// \}
+
+  /// Reset footstep lists.
   void resetIndexAndClearFootsteps();
+
+  /// Alternate leg side.
   void alternateLeg();
 
-  // Updates the feet pose of the starting stance
+  /// Updates the feet pose of the starting stance.
   void updateStartingStance();
 
+  /// Return current footstep.
   int getStepIndex() { return current_footstep_idx; }
 
+  /// Increment footstep index.
   void incrementStepIndex();
+
+  /// Reset footstep index
   void resetStepIndex();
 
-  // Updates the local footstep list (ie: footstep preview) for trajectory
-  // generation:
+  /// Updates the local footstep list (ie: footstep preview) for trajectory
+  /// generation.
   void updatePreview(const int max_footsteps_to_preview);
 
-  // Footstep sequence primitives
-  // -----------------------------------------------------------
-  // Creates footstep in place
+  /// Create footsteps for in place walking.
   void populateStepInPlace(const int num_steps, const int robot_side_first);
 
-  // Populates the input footstep list with a predefined walking forward
-  // behavior
+  /// Create footsteps for forward walking.
   void populateWalkForward(const int num_steps, const double forward_distance);
 
-  // Rotate at the specified turn angle
+  /// Create footsteps for turning.
   void populateRotateTurn(const double turn_radians_per_step,
                           const int num_times);
 
-  // Rotate at the specified turn angle
+  /// Create footsteps for side walking.
   void populateStrafe(const double strafe_distance, const int num_times);
 
+  /// Save solution file
   void saveSolution(const std::string &);
 
-  // Initialization
   double t_walk_start_;
   Eigen::Quaterniond ori_start_;
   Footstep right_foot_start_;
@@ -74,10 +97,12 @@ public:
   Footstep left_foot_stance_;
   Footstep mid_foot_stance_;
 
+  /// Footstep list.
   std::vector<Footstep> footstep_list;
-  int current_footstep_idx; // keeps track of which footstep to take.
 
-  // Nominal walking parameter primitives
+  /// Index that keeps track of which footstep to take.
+  int current_footstep_idx;
+
   double nominal_footwidth;
   double nominal_forward_step;
   double nominal_backward_step;
@@ -86,29 +111,32 @@ public:
 
   int robot_side_first_;
 
-  // // Getter values for the contact transition time.
-  // double t_initial_transfer_time = t_additional_transfer_ + t_ds +
-  // (1-alpha_ds_)*t_ds; // the total initial transfer time before the foot
-  // swinng
-  // double t_midstep_transfer = t_ds; // midstep transfer time before contact
-  // transition
-  // double t_final_transfer = t_ds + settle_time;
+  /// Return total initial transfer time before the foot swing.
   double getInitialContactTransferTime();
+
+  /// Return midstep transfer time before contact transition.
   double getMidStepContactTransferTime();
+
+  /// Return final transfer time including settling time.
   double getFinalContactTransferTime();
+
+  /// Return swing time.
   double getSwingTime();
 
+  /// Return contact transition time.
   double getNormalForceRampUpTime();
+
+  /// Return contact transition time.
   double getNormalForceRampDownTime();
 
-  // Returns false if footstep_list is empty or current_step_index_ is greater
-  // than the footstep list
-  // populates the robot_side when true.
+  /// Return false if footstep_list is empty or current_step_index_ is greater
+  /// than the footstep list and populate the robot_side when true.
   bool nextStepRobotSide(int &robot_side);
 
-  // checks whether or not there are emaining footsteps.
+  /// Check whether or not there are remaining footsteps.
   bool noRemainingSteps();
 
+  /// Update tasks command.
   void updateDCMTasksDesired(double current_time);
 
 private:
@@ -132,28 +160,34 @@ private:
   Eigen::Vector3d des_ang_vel;
   Eigen::Vector3d des_ang_acc;
 
-  // Human readable parameters  DCM parameters
-  double t_additional_init_transfer_; // the additional transfer time to switch
-                                      // the stance leg in the beginning
-  double t_contact_transition_; // the transition time used to change reaction
-                                // forces and stance leg
-  double t_swing_;              // the foot swing time.
+  /// \{ \name Human Readible Temporal Parameters
+  /// Additional transfer time to swith the stance leg in the beginning.
+  double t_additional_init_transfer_;
 
-  // polynomial interpolation time during contact transition: t_transfer + t_ds
-  // + (1-alpha*t_ds).
-  // DCM walking parameters
+  /// Transition time used to change reaction force and stance leg.
+  double t_contact_transition_;
+
+  /// Foot swing time.
+  double t_swing_;
+  /// \}
+
+  /// \{ \name DCM Planning Parameters
+  /// Additional transfer time to swith the stance leg in the beginning.
+  double t_transfer_init_;
+  /// Additional transfer time to swith the stance leg in the mid step.
+  double t_transfer_mid_;
+  /// Double support polynomial transfer time.
+  double t_ds_;
+  /// Single support exponential interpolation time.
+  double t_ss_;
+  /// Percent to converge at the end of the trajectory .
+  double percentage_settle_;
+  /// Value between 0.0 and 1.0 for double support DCM interpolation.
+  double alpha_ds_;
+  /// \}
+
   double nominal_com_height_;
-  double t_transfer_init_; // = t_additional_init_transfer_; // additional
-                           // transfer time offset
-  double t_transfer_mid_;  // = (alpha_ds_-1.0)*t_ds;  // transfer time offset
-                           // for midstep transfers
-  double t_ds_; // = t_contact_transition_; // double support polynomial
-                // transfer time
-  double t_ss_; // = t_swing_; // single support exponential interpolation time
-  double percentage_settle_; // 0.99;//0.999; // percent to converge at the end
-                             // of the trajectory
-  double alpha_ds_; // = 0.5; // value between 0.0 and 1.0 for double support
-                    // DCM interpolation
 
+  /// Convert human readible temporal parameters to DCM planning parameters.
   void convertTemporalParamsToDCMParams();
 };

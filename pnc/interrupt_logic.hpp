@@ -1,13 +1,20 @@
 #pragma once
 
-#include <utils/util.hpp>
+#include "utils/util.hpp"
 
+/// class InterruptLogic
 class InterruptLogic {
- public:
+public:
+  /// \{ \name Constructor and Destructor
   InterruptLogic() { resetFlags(); }
   virtual ~InterruptLogic() {}
+  /// \}
+
+  /// Process user interrupts
   virtual void processInterrupts() { resetFlags(); }
 
+  /// Reset the interrupt flags. This should be called at the end of the method
+  /// processInterrupts.
   virtual void resetFlags() {
     b_interrupt_button_p = false;
     b_interrupt_button_r = false;

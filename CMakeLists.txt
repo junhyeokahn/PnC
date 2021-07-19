@@ -59,7 +59,8 @@ if(DOXYGEN_FOUND)
   set(DOXYGEN_INCLUDE_PATH     "${PROJECT_SOURCE_DIR}"                        )
   set(DOXYGEN_INPUT_ROOT       "${PROJECT_SOURCE_DIR}/pnc"                    )
   set(DOXYGEN_EXTRA_INPUTS     "${PROJECT_SOURCE_DIR}/doxygen/mainpage.dox"   )
-  set(DOXYGEN_EXCLUDE          ""                                             )
+  set(DOXYGEN_EXCLUDE          "${PROJECT_SOURCE_DIR}/pnc/draco_pnc \
+                                ${PROJECT_SOURCE_DIR}/pnc/atlas_pnc"          )
   set(DOXYGEN_STRIP_FROM_PATH  "${CMAKE_CURRENT_SOURCE_DIR}"                  )
 
   # Generate a Doxyfile. This uses the variables:

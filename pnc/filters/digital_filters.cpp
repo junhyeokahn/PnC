@@ -27,7 +27,7 @@ void SimpleMovingAverage::Input(double input_value) {
 
 double SimpleMovingAverage::Output() { return sum_ / num_data_; }
 
-void SimpleMovingAverage::Clear(void) {
+void SimpleMovingAverage::Clear() {
   sum_ = 0.0;
   memset((void *)buffer_, 0.0, sizeof(double) * num_data_);
 }
@@ -47,7 +47,7 @@ ButterWorthFilter::ButterWorthFilter(int num_sample, double dt,
   mCurIdx = 0;
 }
 
-ButterWorthFilter::~ButterWorthFilter(void) { delete[] mpBuffer; }
+ButterWorthFilter::~ButterWorthFilter() { delete[] mpBuffer; }
 
 void ButterWorthFilter::Input(double input_value) {
   int j;
@@ -66,9 +66,9 @@ void ButterWorthFilter::Input(double input_value) {
   mValue = value;
 }
 
-double ButterWorthFilter::Output(void) { return mValue; }
+double ButterWorthFilter::Output() { return mValue; }
 
-void ButterWorthFilter::Clear(void) {
+void ButterWorthFilter::Clear() {
   for (int i(0); i < mNumSample; ++i) {
     mpBuffer[i] = 0.0;
   }
@@ -87,7 +87,7 @@ LowPassFilter::LowPassFilter(double w_c, double t_s) : DigitalFilter() {
   Lpf_out2 = -(2500 * t_s * t_s * w_c * w_c - 7071 * t_s * w_c + 10000) / den;
 }
 
-LowPassFilter::~LowPassFilter(void) {}
+LowPassFilter::~LowPassFilter() {}
 
 void LowPassFilter::Input(double lpf_in) {
   lpf_out = Lpf_in1 * lpf_in + Lpf_in2 * Lpf_in_prev[0] +
@@ -100,9 +100,9 @@ void LowPassFilter::Input(double lpf_in) {
   Lpf_out_prev[0] = lpf_out;
 }
 
-double LowPassFilter::Output(void) { return lpf_out; }
+double LowPassFilter::Output() { return lpf_out; }
 
-void LowPassFilter::Clear(void) {
+void LowPassFilter::Clear() {
   Lpf_in_prev[1] = 0;
   Lpf_in_prev[0] = 0;
   Lpf_out_prev[1] = 0;
@@ -131,7 +131,7 @@ DerivativeLowPassFilter::DerivativeLowPassFilter(double w_c, double t_s) {
   Clear();
 }
 
-DerivativeLowPassFilter::~DerivativeLowPassFilter(void) {}
+DerivativeLowPassFilter::~DerivativeLowPassFilter() {}
 
 void DerivativeLowPassFilter::Input(double lpf_in) {
   lpf_out = Lpf_in1 * lpf_in + Lpf_in2 * Lpf_in_prev[0] +
@@ -145,9 +145,9 @@ void DerivativeLowPassFilter::Input(double lpf_in) {
   Lpf_out_prev[0] = lpf_out;
 }
 
-double DerivativeLowPassFilter::Output(void) { return lpf_out; }
+double DerivativeLowPassFilter::Output() { return lpf_out; }
 
-void DerivativeLowPassFilter::Clear(void) {
+void DerivativeLowPassFilter::Clear() {
   Lpf_in_prev[1] = 0;
   Lpf_in_prev[0] = 0;
   Lpf_out_prev[1] = 0;

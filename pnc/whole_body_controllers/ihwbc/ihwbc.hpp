@@ -1,29 +1,46 @@
 #pragma once
 
+#include "pnc/whole_body_controllers/contact.hpp"
+#include "pnc/whole_body_controllers/internal_constraint.hpp"
+#include "pnc/whole_body_controllers/task.hpp"
+#include "third_party//goldfarb/QuadProg++.hh"
 #include "utils/util.hpp"
-#include <third_party//goldfarb/QuadProg++.hh>
-#include <pnc/whole_body_controllers/contact.hpp>
-#include <pnc/whole_body_controllers/internal_constraint.hpp>
-#include <pnc/whole_body_controllers/task.hpp>
 
-// Implicit Hierarchical Whole Body Controller
+// class IHWBC
 class IHWBC {
 public:
+  /// \{ \name Constructor and Destructor
   IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
         const Eigen::MatrixXd &_sv);
-  virtual ~IHWBC();
 
+  virtual ~IHWBC();
+  /// \}
+
+  /// Whether to enforce torque limit constraint.
   bool b_trq_limit = false;
+
+  /// Torque limits of the actuating joints (size of n_a). The first and the
+  /// second row represent min and max values, respectively.
   Eigen::MatrixXd trq_limit;
 
+  /// Regularization weight for qddot.
   double lambda_q_ddot;
+
+  /// Regularization weight for reaction force.
   double lambda_rf;
+
+  /// Weight for reaction force tracking.
   double w_rf;
+
+  /// Weights for task hierarchy.
   Eigen::VectorXd w_hierarchy;
 
+  /// Update mass matrix, inverse of mass matrix, coriolis forces, gravity
+  /// forces.
   void update_setting(const Eigen::MatrixXd &A, const Eigen::MatrixXd &Ainv,
                       const Eigen::VectorXd &cori, const Eigen::VectorXd &grav);
 
+  /// Solve QP given tasks, contacts, internal constraints.
   void solve(const std::vector<Task *> &_task_list,
              const std::vector<Contact *> &_contact_list,
              const std::vector<InternalConstraint *> &_internal_constraint_list,
@@ -31,55 +48,94 @@ public:
              Eigen::VectorXd &qddot_cmd, Eigen::VectorXd &rf_cmd);
 
 private:
+  /// Number of qdot.
   int n_q_dot_;
+
+  /// Number of actuating dofs.
   int n_active_;
+
+  /// Number of passive dofs.
   int n_passive_;
 
+  /// Number of contact constraints.
   int dim_cone_constraint_;
+
+  /// Total contact dimension
   int dim_contacts_;
 
+  /// Whether there is contact or not
   bool b_contact_;
+
+  /// Whether there is internal constraint or not
   bool b_internal_constraint_;
+
+  /// Whether there is internal constraint or not
   bool b_floating_;
 
+  /// Selection matrix for floating dofs.
   Eigen::MatrixXd sf_;
+
+  /// Selection matrix for non floating dofs.
   Eigen::MatrixXd snf_;
+
+  /// Selection matrix for actuating dofs.
   Eigen::MatrixXd sa_;
+
+  /// Selection matrix for passive dofs.
   Eigen::MatrixXd sv_;
 
+  /// Mass matrix.
   Eigen::MatrixXd A_;
+
+  /// Inverse of mass matrix.
   Eigen::MatrixXd Ainv_;
+
+  /// Coriolis forces.
   Eigen::VectorXd cori_;
+
+  /// Gravity forces.
   Eigen::VectorXd grav_;
 
-  // Quadprog sizes
-  int n_quadprog_ = 1; // Number of Decision Variables
-  int p_quadprog_ = 0; // Number of Inequality Constraints
-  int m_quadprog_ = 0; // Number of Equality Constraints
+  /// Number of decision variables.
+  int n_quadprog_ = 1;
 
-  // Quadprog Variables
+  /// Number of inequality constraints.
+  int p_quadprog_ = 0;
+
+  /// Number of equality constraints.
+  int m_quadprog_ = 0;
+
+  /// QP variables.
   GolDIdnani::GVect<double> x_;
-  // Cost
+
+  /// QP cost.
   GolDIdnani::GMatr<double> G_;
   GolDIdnani::GVect<double> g0_;
 
-  // Equality
+  /// QP equality cosntraint.
   GolDIdnani::GMatr<double> CE_;
   GolDIdnani::GVect<double> ce0_;
 
-  // Inequality
+  /// QP inequality constraint.
   GolDIdnani::GMatr<double> CI_;
   GolDIdnani::GVect<double> ci0_;
 
-  // Quadprog Result Containers
+  /// QP Result Containers.
   Eigen::VectorXd qp_dec_vars_;
   Eigen::VectorXd qddot_result_;
   Eigen::VectorXd fr_result_;
 
+  /// Set QP cost.
   void setQuadProgCosts(const Eigen::MatrixXd &mat, const Eigen::VectorXd &vec);
+
+  /// Set equality constraints.
   void setEqualityConstraints(const Eigen::MatrixXd &mat,
                               const Eigen::VectorXd &vec);
+
+  /// Set inequality constraints.
   void setInequalityConstraints(const Eigen::MatrixXd &mat,
                                 const Eigen::VectorXd &vec);
+
+  /// Solve QP.
   void solveQP();
 };

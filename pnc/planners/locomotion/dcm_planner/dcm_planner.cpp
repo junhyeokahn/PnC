@@ -1,9 +1,4 @@
-#include <pnc/planners/locomotion/dcm_planner/dcm_planner.hpp>
-
-constexpr int DCMPlanner::DCM_RL_SWING_VRP_TYPE = 1;
-constexpr int DCMPlanner::DCM_LL_SWING_VRP_TYPE = 2;
-constexpr int DCMPlanner::DCM_TRANSFER_VRP_TYPE = 3;
-constexpr int DCMPlanner::DCM_END_VRP_TYPE = 4;
+#include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
 
 DCMPlanner::DCMPlanner() {
   util::PrettyConstructor(2, "DCMPlanner");
@@ -15,9 +10,7 @@ DCMPlanner::DCMPlanner() {
 DCMPlanner::~DCMPlanner() {}
 
 void DCMPlanner::paramInitialization(const YAML::Node &node) {
-  // Load Custom Params ----------------------------------
   try {
-    // Load DCM Parameters
     util::ReadParameter(node, "t_additional_ini_trans", t_transfer);
     util::ReadParameter(node, "t_contact_trans", t_ds);
     util::ReadParameter(node, "t_swing", t_ss);
@@ -31,23 +24,21 @@ void DCMPlanner::paramInitialization(const YAML::Node &node) {
   }
 }
 
-// Sets the desired CoM Height
 void DCMPlanner::setCoMHeight(double z_vrp_in) {
   z_vrp = z_vrp_in;
-  b = std::sqrt(z_vrp / gravity); // set time constant of DCM dynamics
+  b = std::sqrt(z_vrp / gravity);
 }
 
 void DCMPlanner::setRobotMass(double mass) { robot_mass = mass; }
 
 void DCMPlanner::setInitialTime(double t_start_in) { t_start = t_start_in; }
 
-double DCMPlanner::getInitialTime() { return t_start; }
-
 void DCMPlanner::setInitialOri(const Eigen::Quaterniond initial_ori_in) {
   initial_ori = initial_ori_in;
 }
 
-// Third method : set the rest of vrp
+double DCMPlanner::getInitialTime() { return t_start; }
+
 void DCMPlanner::initialize_footsteps_rvrp(
     const std::vector<Footstep> &input_footstep_list,
     const Footstep &initial_footstance, bool clear_list) {
@@ -105,7 +96,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
     // If taking a footstep on the same side, first go to the stance foot
     if (input_footstep_list[i].robot_side == previous_step) {
       // Add a new rvrp
-      rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+      rvrp_type_list.push_back(vrp_type::kTransfer);
       rvrp_list.push_back(current_stance_rvrp);
     } else {
       // otherwise, update the correct stance to the latest rvrp
@@ -119,8 +110,8 @@ void DCMPlanner::initialize_footsteps_rvrp(
 
     // Specify the right swing VRP type
     input_footstep_list[i].robot_side == EndEffector::LFoot
-        ? rvrp_type_list.push_back(DCM_LL_SWING_VRP_TYPE)
-        : rvrp_type_list.push_back(DCM_RL_SWING_VRP_TYPE);
+        ? rvrp_type_list.push_back(vrp_type::kLFootSwing)
+        : rvrp_type_list.push_back(vrp_type::kRFootSwing);
     // Mark the current RVRP index to correspond to this footstep swing.
     rvrp_index_to_footstep_index[rvrp_list.size() - 1] = i;
 
@@ -131,7 +122,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
     previous_step = input_footstep_list[i].robot_side;
   }
   // Add final RVRP as ending
-  rvrp_type_list.push_back(DCM_END_VRP_TYPE);
+  rvrp_type_list.push_back(vrp_type::kEnd);
 
   // Compute DCM states
   computeDCM_states();
@@ -163,7 +154,7 @@ void DCMPlanner::initialize_footsteps_rvrp(
   // Add the initial virtual repellant point.
   rvrp_list.push_back(initial_rvrp);
   // Specify that this is the eos for the previous rvrp
-  rvrp_type_list.push_back(DCM_TRANSFER_VRP_TYPE);
+  rvrp_type_list.push_back(vrp_type::kTransfer);
 
   // Add the remaining virtual repellant points
   initialize_footsteps_rvrp(input_footstep_list, initial_footstance);
@@ -242,12 +233,12 @@ void DCMPlanner::initialize_footsteps_rvrp(
 
 double DCMPlanner::get_t_step(const int &step_i) {
   // Use transfer time for double support and overall step time for swing types
-  if (rvrp_type_list[step_i] == DCMPlanner::DCM_TRANSFER_VRP_TYPE) {
+  if (rvrp_type_list[step_i] == vrp_type::kTransfer) {
     return t_transfer + t_ds;
-  } else if ((rvrp_type_list[step_i] == DCMPlanner::DCM_RL_SWING_VRP_TYPE) ||
-             (rvrp_type_list[step_i] == DCMPlanner::DCM_LL_SWING_VRP_TYPE)) {
+  } else if ((rvrp_type_list[step_i] == vrp_type::kRFootSwing) ||
+             (rvrp_type_list[step_i] == vrp_type::kLFootSwing)) {
     return t_ss + t_ds; // every swing has a double support transfer
-  } else if (rvrp_type_list[step_i] == DCMPlanner::DCM_END_VRP_TYPE) {
+  } else if (rvrp_type_list[step_i] == vrp_type::kEnd) {
     return t_ds * (1 - alpha_ds);
   }
 }
@@ -740,8 +731,8 @@ int DCMPlanner::which_step_index_to_use(const double t) {
 bool DCMPlanner::get_t_swing_start_end(const int step_index,
                                        double &swing_start_time,
                                        double &swing_end_time) {
-  if ((rvrp_type_list[step_index] == DCM_LL_SWING_VRP_TYPE) ||
-      (rvrp_type_list[step_index] == DCM_RL_SWING_VRP_TYPE)) {
+  if ((rvrp_type_list[step_index] == vrp_type::kLFootSwing) ||
+      (rvrp_type_list[step_index] == vrp_type::kRFootSwing)) {
     swing_start_time = get_t_step_start(step_index) + t_ds * (1.0 - alpha_ds);
     swing_end_time = get_t_step_end(step_index) - (alpha_ds * t_ds);
     return true;
@@ -942,8 +933,8 @@ void DCMPlanner::compute_reference_pelvis_ori() {
 
   for (int i = 0; i < rvrp_type_list.size(); i++) {
     // Swing State
-    if ((rvrp_type_list[i] == DCM_RL_SWING_VRP_TYPE) ||
-        (rvrp_type_list[i] == DCM_LL_SWING_VRP_TYPE)) {
+    if ((rvrp_type_list[i] == vrp_type::kRFootSwing) ||
+        (rvrp_type_list[i] == vrp_type::kLFootSwing)) {
       target_step = footstep_list[step_counter];
       if (target_step.robot_side == EndEffector::LFoot) {
         stance_step = prev_right_stance;

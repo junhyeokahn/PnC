@@ -43,11 +43,11 @@ void ContactTransitionStart::firstVisit() {
   if (ctrl_arch_->dcm_tm->noRemainingSteps()) {
     end_time_ = ctrl_arch_->dcm_tm->getFinalContactTransferTime();
   } else {
-    int transfer_type = DCM_TRANSFER_TYPES::MIDSTEP;
+    int transfer_type = dcm_transfer_type::kMidStep;
     end_time_ = ctrl_arch_->dcm_tm->getNormalForceRampUpTime();
 
     if (sp_->prev_state == draco_states::kBalance) {
-      transfer_type = DCM_TRANSFER_TYPES::INITIAL;
+      transfer_type = dcm_transfer_type::kInitial;
       end_time_ = ctrl_arch_->dcm_tm->getInitialContactTransferTime() -
                   ctrl_arch_->dcm_tm->getNormalForceRampDownTime();
 

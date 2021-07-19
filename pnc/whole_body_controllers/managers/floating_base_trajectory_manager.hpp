@@ -4,20 +4,28 @@
 #include "utils/interpolation.hpp"
 #include "utils/util.hpp"
 
-// Object to manage common trajectory primitives
+/// class FloatingBaseTrajectoryManager
 class FloatingBaseTrajectoryManager {
 public:
+  /// \{ \name Constructor and Destructor
   FloatingBaseTrajectoryManager(Task *_com_task, Task *_base_ori_task,
                                 RobotSystem *_robot);
   ~FloatingBaseTrajectoryManager(){};
+  /// \}
 
+  /// Initialize floating base interpolation to _target_com_pos and
+  /// _target_base_quat
   void InitializeFloatingBaseInterpolationTrajectory(
       const double _start_time, const double _duration,
       const Eigen::Vector3d &_target_com_pos,
       const Eigen::Quaternion<double> &_target_base_quat);
+
+  /// Initialize swaying trajectory
   void InitializeCoMSwayingTrajectory(double _start_time,
                                       const Eigen::Vector3d &_amp,
                                       const Eigen::Vector3d &_freq);
+
+  /// Update floating base task commands.
   void UpdateFloatingBaseDesired(const double current_time);
 
 private:
