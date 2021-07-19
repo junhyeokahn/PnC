@@ -3,7 +3,7 @@
 FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
                                              Task *_foot_ori_task,
                                              RobotSystem *_robot) {
-  util::PrettyConstructor(2, "FootTrajectoryManager");
+  util::PrettyConstructor(2, "TrajectoryManager: Foot");
 
   robot_ = _robot;
   foot_pos_task_ = _foot_pos_task;

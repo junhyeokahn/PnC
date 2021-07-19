@@ -16,6 +16,7 @@ public:
   /// Reset the interrupt flags. This should be called at the end of the method
   /// processInterrupts.
   virtual void resetFlags() {
+    b_interrupt_button_f = false;
     b_interrupt_button_p = false;
     b_interrupt_button_r = false;
 
@@ -33,6 +34,7 @@ public:
     b_interrupt_button_l = false;
   }
 
+  bool b_interrupt_button_f;
   bool b_interrupt_button_p;
   bool b_interrupt_button_r;
   bool b_interrupt_button_w;

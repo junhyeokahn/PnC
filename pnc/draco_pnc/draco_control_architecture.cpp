@@ -4,6 +4,7 @@
 #include "pnc/draco_pnc/draco_state_machine/contact_transition_end.hpp"
 #include "pnc/draco_pnc/draco_state_machine/contact_transition_start.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_balance.hpp"
+#include "pnc/draco_pnc/draco_state_machine/double_support_interpolation.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_stand.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_swaying.hpp"
 #include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
@@ -116,9 +117,21 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   state_machines[draco_states::kSwaying] =
       new DoubleSupportSwaying(draco_states::kSwaying, this, robot_);
   ((DoubleSupportSwaying *)state_machines[draco_states::kSwaying])->amp =
-      util::ReadParameter<Eigen::Vector3d>(cfg["walking"], "swaying_amp");
+      util::ReadParameter<Eigen::Vector3d>(cfg["balancing"], "swaying_amp");
   ((DoubleSupportSwaying *)state_machines[draco_states::kSwaying])->freq =
-      util::ReadParameter<Eigen::Vector3d>(cfg["walking"], "swaying_freq");
+      util::ReadParameter<Eigen::Vector3d>(cfg["balancing"], "swaying_freq");
+
+  state_machines[draco_states::kBaseInterpolation] =
+      new DoubleSupportInterpolation(draco_states::kBaseInterpolation, this,
+                                     robot_);
+  ((DoubleSupportInterpolation *)
+       state_machines[draco_states::kBaseInterpolation])
+      ->local_offset = util::ReadParameter<Eigen::Vector3d>(
+      cfg["balancing"], "interpolation_local_offset");
+  ((DoubleSupportInterpolation *)
+       state_machines[draco_states::kBaseInterpolation])
+      ->end_time =
+      util::ReadParameter<double>(cfg["balancing"], "interpolation_duration");
 
   state = draco_states::kStand;
   prev_state = draco_states::kStand;

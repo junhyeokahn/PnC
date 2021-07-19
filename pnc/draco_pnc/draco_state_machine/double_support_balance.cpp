@@ -12,6 +12,7 @@ DoubleSupportBalance::DoubleSupportBalance(
 
   b_walking_trigger = false;
   b_swaying_trigger = false;
+  b_interpolation_trigger = false;
 }
 
 DoubleSupportBalance::~DoubleSupportBalance() {}
@@ -21,6 +22,8 @@ void DoubleSupportBalance::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
   b_walking_trigger = false;
+  b_swaying_trigger = false;
+  b_interpolation_trigger = false;
 }
 
 void DoubleSupportBalance::oneStep() {
@@ -42,6 +45,9 @@ bool DoubleSupportBalance::endOfState() {
   if (b_swaying_trigger) {
     return true;
   }
+  if (b_interpolation_trigger) {
+    return true;
+  }
   return false;
 }
 
@@ -57,5 +63,9 @@ StateIdentifier DoubleSupportBalance::getNextState() {
 
   if (b_swaying_trigger) {
     return draco_states::kSwaying;
+  }
+
+  if (b_interpolation_trigger) {
+    return draco_states::kBaseInterpolation;
   }
 }
