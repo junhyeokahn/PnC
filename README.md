@@ -32,9 +32,9 @@ $ ./bin/run_draco
 - We compile the code using Anaconda. We first need to make a python virtual environment
 ```
 $ cd PnC/
-$ conda env create -f py37.yml
-$ conda activate py37
-$ mkdir build && cd build && cmake ..
+$ conda env create -f mingyo.yml
+$ conda activate mingyo
+$ mkdir build && cd build && cmake .. -DPYTHON_EXECUTABLE=$(which python)
 $ make -j
 ```
 ### Link the Library Files

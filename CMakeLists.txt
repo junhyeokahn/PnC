@@ -33,15 +33,6 @@ link_directories("/usr/local/lib")
 find_package(DART 6.9 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 include_directories(${DART_INCLUDE_DIRS})
 
-# Pybind11
-set(USE_PYBIND11 True)
-if(USE_PYBIND11)
-    message("-- Enable Pybind11")
-    find_package(PythonAnaconda)
-else()
-    message("-- Disable Pybind11")
-endif()
-
 # Eigen
 if(NOT EIGEN_FOUND)
   find_package(Eigen3)
@@ -72,9 +63,22 @@ include_directories("${PROJECT_SOURCE_DIR}")
 add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
+
+# Pybind11
+set(USE_PYBIND11 True)
 if(USE_PYBIND11)
+    message("-- Enable Pybind11")
+    find_package(PythonAnaconda)
+    # find_package(Python COMPONENTS Interpreter Development)
+    # find_package(PythonInterp 3.8 REQUIRED)
+    #  find_package(PythonLibs 3.8 REQUIRED)
+    find_package(pybind11 CONFIG REQUIRED)
+    include_directories(/home/knapsack/software/anaconda3/envs/mingyo/include/pybind11)
     add_subdirectory(Bindings)
+else()
+    message("-- Disable Pybind11")
 endif()
+
 
 ##=============================================================================
 ## Configuration File

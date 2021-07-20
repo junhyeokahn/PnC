@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append('/home/knapsack/project/locomotion/src/PnC/build/lib')
+sys.path.append('/home/knapsack/project/locomotion/src/PnC_extra/build/lib')
 
 import A1Interface
 import numpy as np
@@ -13,6 +13,8 @@ def main():
     #######################
     # Set up the Simulation
     #######################
+
+    print("Initialized")
 
     while True:
         #################################
@@ -47,8 +49,8 @@ def main():
         vel_cmd_ = command_.qdot
 
         for i in range(12):
-            trq_cmd_[i+6]= kp_[i] * (pos_cmd_[i] - sensor_data_.q[i]) +
-                           kd_[i] * (vel_cmd_[i] - sensor_data_.qdot[i]) +
+            trq_cmd_[i+6]= kp_[i] * (pos_cmd_[i] - sensor_data_.q[i]) + \
+                           kd_[i] * (vel_cmd_[i] - sensor_data_.qdot[i]) + \
                            command_.jtrq[i]
 
         ########################
