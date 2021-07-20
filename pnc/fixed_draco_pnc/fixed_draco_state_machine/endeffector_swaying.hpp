@@ -1,14 +1,14 @@
 #pragma once
 
 #include "pnc/state_machine.hpp"
-#include "pnc/draco_pnc/draco_control_architecture.hpp"
-#include "pnc/draco_pnc/draco_controller.hpp"
-#include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_control_architecture.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_controller.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_state_provider.hpp"
 
 class EndEffectorSwaying : public StateMachine {
 public:
   EndEffectorSwaying(const StateIdentifier state_identifier_in,
-                     DracoControlArchitecture *_ctrl_arch, int _endeffector_side,
+                     FixedDracoControlArchitecture *_ctrl_arch, int _leg_side,
                      RobotSystem *_robot);
   ~EndEffectorSwaying();
 
@@ -22,7 +22,7 @@ public:
   Eigen::Vector3d freq;
 
 protected:
-  DracoStateProvider *sp_;
+  FixedDracoStateProvider *sp_;
   FixedDracoControlArchitecture *ctrl_arch_;
 
   double ctrl_start_time_;

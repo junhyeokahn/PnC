@@ -8,18 +8,18 @@ IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
   n_active_ = _sa.rows();
   n_passive_ = _sv.rows();
   if (n_q_dot_ == n_active_ + n_passive_){
-    b_floating_ = false;
-    num_floating_ = 0;
+      b_floating_ = false;
+      n_floating_ = 0;
   }
   else{
     b_floating_ = true;
-    num_floating_ = 6;
+    n_floating_ = 6;
     sf_ = _sf;
   }
 
   snf_ =
-      Eigen::MatrixXd::Zero(n_active_ + n_passive_, num_floating_ + n_active_ + n_passive_);
-  snf_.block(0, num_floating_, n_active_ + n_passive_, n_active_ + n_passive_) =
+      Eigen::MatrixXd::Zero(n_active_ + n_passive_, n_floating_ + n_active_ + n_passive_);
+  snf_.block(0, n_floating_, n_active_ + n_passive_, n_active_ + n_passive_) =
       Eigen::MatrixXd::Identity(n_active_ + n_passive_, n_active_ + n_passive_);
   sv_ = _sv;
   sa_ = _sa;
@@ -84,10 +84,10 @@ void IHWBC::solve(
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_) - ji_bar * ji;
     jit_lmd_jidot_qdot = ji.transpose() * lmd_i * jidot_qdot;
     Eigen::MatrixXd sa_ni_trc =
-        (sa_ * ni).block(0, num_floating_, n_active_, n_active_ + n_passive_);
+        (sa_ * ni).block(0, n_floating_, n_active_, n_active_ + n_passive_);
     Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
-        Ainv_.block(num_floating_, num_floating_, n_active_ + n_passive_, n_active_ + n_passive_);
+        Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_, n_active_ + n_passive_);
     util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
                             lmd_sa_ni_trc);
     Eigen::MatrixXd sa_ni_trc_bar =
@@ -117,12 +117,13 @@ void IHWBC::solve(
     Eigen::VectorXd jt_dot_q_dot = task_list[i]->jacobian_dot_q_dot;
     Eigen::VectorXd x_ddot = task_list[i]->op_cmd;
 
-    // std::cout << i << " th task" << std::endl;
-    // task_list[i]->Debug();
+     //std::cout << i << " th task" << std::endl;
+     //task_list[i]->Debug();
 
     cost_t_mat += (w_hierarchy[i] * (jt.transpose() * jt));
     cost_t_vec += (w_hierarchy[i] * ((jt_dot_q_dot - x_ddot).transpose() * jt));
   }
+
   cost_t_mat += lambda_q_ddot * A_;
 
   Eigen::MatrixXd uf_mat, jc;
@@ -160,85 +161,16 @@ void IHWBC::solve(
   // ===========================================================================
   // Equality Constraint
   // ===========================================================================
-  Eigen::MatrixXd eq_floating_mat, eq_int_mat, eq_mat;
-  Eigen::VectorXd eq_floating_vec, eq_int_vec, eq_vec;
+  Eigen::MatrixXd eq_mat;
+  Eigen::VectorXd eq_vec;
 
-  if (b_contact_) {
-      eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-      if (b_internal_constraint_) {
-          //Are these needed???
-          eq_int_mat =
-              util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-          //eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
-          eq_int_vec = -jidot_qdot; //modified
-      }
-  } else {
-      eq_floating_mat = sf_ * A_;
-      if (b_internal_constraint_) {
-          eq_int_mat = ji;
-          eq_int_vec = Eigen::VectorXd::Zero(ji.rows());
-      }
-  }
-  eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
-
-  if (b_internal_constraint_) {
-      eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
-      eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
-  } else {
-      eq_mat = eq_floating_mat;
-      eq_vec = eq_floating_vec;
-  }
-
-  //SH classification
   if (b_floating_) {
-      if (b_contact_) {
-          if (b_internal_constraint_) {
-              eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-              eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
-
-              //????
-              eq_int_mat =
-                  util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-              eq_int_vec = -jidot_qdot;
-              //????
-
-              eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
-              eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
-          } else {
-              eq_floating_mat = util::hStack(sf_ * A_, -sf_ * jc.transpose()); 
-              eq_floating_vec = -sf_ * (cori_ + grav_);
-          }
-      } else {
-          assert(false); //Assume there always contact
-      }
-  } else if (b_contact_) {
-      if (b_internal_constraint_) {
-          //Draco3 in fixed base config & contact
-          eq_int_mat =
-              util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-          eq_int_vec = -jidot_qdot;
-
-          eq_mat = eq_int_mat;
-          eq_vec = eq_int_vec;
-     } else {
-         // fixed base & contact & no internal constraint
-         // no equality constraints
-     } 
-  } else if (b_internal_constraint_) {
-      //Draco3 in fixed base & no contact
-      eq_int_mat =
-          util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
-      eq_int_vec = -jidot_qdot;
-
-      eq_mat = eq_int_mat;
-      eq_vec = eq_int_vec;
-  } else{   
-      // fixed base & no contact & no internal constraint
-      // no equality constraints
+      eq_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+      eq_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+  } else{
+      eq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_ + dim_contacts_);
+      eq_vec = Eigen::VectorXd::Zero(0);
   }
-
-
-
 
   // ===========================================================================
   // Inequality Constraint
@@ -253,7 +185,8 @@ void IHWBC::solve(
           Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_), -uf_mat);
       ineq_vec = -uf_vec;
     } else {
-      assert(false); // Not Implemented (GoldIdnani doesn't solve this case)
+        ineq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_);
+        ineq_vec = Eigen::VectorXd::Zero(0);
     }
   } else {
     if (b_contact_) {
@@ -308,8 +241,16 @@ void IHWBC::solve(
         CI^T x + ci0 >= 0
     */
   setQuadProgCosts(cost_mat, cost_vec);
-  setEqualityConstraints(-eq_mat, eq_vec);
-  setInequalityConstraints(-ineq_mat, ineq_vec);
+  if (m_quadprog_ == 0) {
+    setNullEqualityConstraints();
+  } else{
+    setEqualityConstraints(-eq_mat, eq_vec);
+  }
+  if (p_quadprog_ == 0) {
+    setNullInEqualityConstraints();
+  } else{
+    setInEqualityConstraints(-ineq_mat, ineq_vec);
+  }
   solveQP();
 
   if (b_contact_) {
@@ -352,13 +293,30 @@ void IHWBC::setEqualityConstraints(const Eigen::MatrixXd &Eq_mat,
   }
 }
 
-void IHWBC::setInequalityConstraints(const Eigen::MatrixXd &IEq_mat,
+void IHWBC::setNullEqualityConstraints() {
+  for (int i = 0; i < m_quadprog_; i++) {
+    for (int j = 0; j < n_quadprog_; j++) {
+      CE_[j][i] = 0.;
+    }
+    ce0_[i] = 0.; //??
+  }
+}
+void IHWBC::setInEqualityConstraints(const Eigen::MatrixXd &IEq_mat,
                                      const Eigen::VectorXd &IEq_vec) {
   for (int i = 0; i < p_quadprog_; ++i) {
     for (int j = 0; j < n_quadprog_; ++j) {
       CI_[j][i] = IEq_mat(i, j);
     }
     ci0_[i] = IEq_vec[i];
+  }
+}
+
+void IHWBC::setNullInEqualityConstraints() {
+  for (int i = 0; i < p_quadprog_; ++i) {
+    for (int j = 0; j < n_quadprog_; ++j) {
+      CI_[j][i] = 0.;
+    }
+    ci0_[i] = 0.;
   }
 }
 

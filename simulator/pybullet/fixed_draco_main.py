@@ -23,7 +23,7 @@ from config.fixed_draco.pybullet_simulation import Config
 import pybullet_util
 import util
 
-import draco_interface
+import fixed_draco_interface
 
 
 def set_initial_config(robot, joint_id):
@@ -125,9 +125,9 @@ if __name__ == "__main__":
     pybullet_util.set_joint_friction(robot, joint_id, 0)
 
     # Construct Interface
-    interface = draco_interface.DracoInterface(True)
-    sensor_data = draco_interface.DracoSensorData()
-    command = draco_interface.DracoCommand()
+    interface = fixed_draco_interface.FixedDracoInterface(True)
+    sensor_data = fixed_draco_interface.FixedDracoSensorData()
+    command = fixed_draco_interface.FixedDracoCommand()
 
     # Run Sim
     t = 0
@@ -183,24 +183,20 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_r = True
 
         # Copy sensor_data_dict
-        sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
-        sensor_data.imu_frame_vel = sensor_data_dict['imu_frame_vel']
         sensor_data.joint_positions = sensor_data_dict["joint_pos"]
         sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
-        sensor_data.b_rf_contact = sensor_data_dict["b_rf_contact"]
-        sensor_data.b_lf_contact = sensor_data_dict["b_lf_contact"]
 
         # TODO : Debugging purpose
         # Copy Base
-        sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
-        qt = sensor_data_dict['base_com_quat']
-        sensor_data.base_com_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
-        sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
-        sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
-        sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
-        sensor_data.base_joint_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
-        sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
-        sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
+        # sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
+        # qt = sensor_data_dict['base_com_quat']
+        # sensor_data.base_com_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        # sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
+        # sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
+        # sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
+        # sensor_data.base_joint_quat =  np.array([qt[3], qt[0], qt[1], qt[2]])
+        # sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
+        # sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
 
         # Compute Command
         if Config.PRINT_TIME:

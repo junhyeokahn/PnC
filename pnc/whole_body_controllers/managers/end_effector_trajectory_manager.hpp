@@ -31,6 +31,9 @@ public:
                                    const Eigen::Vector3d &_amp,
                                    const Eigen::Vector3d &_freq);
 
+  /// Initialize hold trajectory
+  void InitializeHoldTrajectory();
+
   void UpdateDesired(const double &_curr_time);
 
 private:
@@ -42,6 +45,7 @@ private:
   std::string link_idx_;
 
   bool b_swaying_;
+  bool b_hold_;
   double start_time_;
   double duration_;
 
@@ -49,7 +53,7 @@ private:
   Task *ori_task_;
 
   Eigen::Vector3d ini_pos_;
-  Eigen::VectorXd target_pos_;
+  Eigen::Vector3d target_pos_;
   Eigen::Quaternion<double> ini_quat_;
   Eigen::Quaternion<double> target_quat_;
   Eigen::Vector3d exp_error_;

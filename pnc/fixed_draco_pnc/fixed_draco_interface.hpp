@@ -4,6 +4,7 @@
 #include <string>
 
 #include "pnc/fixed_draco_pnc/fixed_draco_data_manager.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_state_estimator.hpp"
 #include "pnc/interface.hpp"
 
 class FixedDracoStateProvider;
@@ -15,9 +16,6 @@ public:
 
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
-
-  bool b_rf_contact;
-  bool b_lf_contact;
 };
 
 class FixedDracoCommand {
@@ -33,6 +31,7 @@ public:
 class FixedDracoInterface : public Interface {
 protected:
   FixedDracoStateProvider *sp_;
+  FixedDracoStateEstimator *se_;
 
   int waiting_count_;
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "pnc/draco_pnc/draco_interface.hpp"
-#include "pnc/draco_pnc/draco_state_provider.hpp"
-#include "pnc/draco_pnc/draco_tci_container.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_interface.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_state_provider.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_tci_container.hpp"
 #include "pnc/robot_system/robot_system.hpp"
 #include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
 #include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
@@ -23,7 +23,7 @@ private:
   JointIntegrator *joint_integrator_;
 
   FixedDracoTCIContainer *tci_container_;
-  DracoStateProvider *sp_;
+  FixedDracoStateProvider *sp_;
 
   Eigen::VectorXd joint_trq_cmd_;
   Eigen::VectorXd joint_acc_cmd_;

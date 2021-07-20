@@ -9,14 +9,6 @@ FixedDracoTCIContainer::FixedDracoTCIContainer(RobotSystem *_robot)
   // Initialize Task
   joint_task = new JointTask(robot_);
 
-  torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"});
-  torso_ori_task->kp =
-      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_torso_ori");
-  torso_ori_task->kd =
-      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_torso_ori");
-  torso_ori_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_torso_ori");
-
   std::vector<std::string> upper_body_joint = {
       "neck_pitch",    "l_shoulder_fe", "l_shoulder_aa", "l_shoulder_ie",
       "l_elbow_fe",    "l_wrist_ps",    "l_wrist_pitch", "r_shoulder_fe",
@@ -62,7 +54,6 @@ FixedDracoTCIContainer::FixedDracoTCIContainer(RobotSystem *_robot)
   lfoot_ori_task->w_hierarchy =
       util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
 
-  task_list.push_back(torso_ori_task);
   task_list.push_back(upper_body_task);
   task_list.push_back(rfoot_pos_task);
   task_list.push_back(rfoot_ori_task);
@@ -72,13 +63,12 @@ FixedDracoTCIContainer::FixedDracoTCIContainer(RobotSystem *_robot)
   // Initialize Contact
 
   // Initialize Internal Constraint
-  rolling_joint_constraint = new DracoRollingJointConstraint(robot_);
+  rolling_joint_constraint = new FixedDracoRollingJointConstraint(robot_);
   internal_constraint_list.push_back(rolling_joint_constraint);
 }
 
 FixedDracoTCIContainer::~FixedDracoTCIContainer() {
   delete joint_task;
-  delete torso_ori_task;
   delete upper_body_task;
   delete rfoot_pos_task;
   delete rfoot_ori_task;

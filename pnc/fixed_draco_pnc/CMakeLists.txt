@@ -1,6 +1,6 @@
 file(GLOB_RECURSE sources "*.cpp")
 file(GLOB fixed_draco_pnc_headers "*.hpp")
-file(GLOB fixed_draco_state_machine_headers "draco_state_machine/*.hpp")
+file(GLOB fixed_draco_state_machine_headers "fixed_draco_state_machine/*.hpp")
 
 add_library(pnc-fixed-draco-pnc SHARED ${sources})
 target_link_libraries(pnc-fixed-draco-pnc ${DART_LIBRARIES}

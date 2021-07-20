@@ -1,14 +1,14 @@
-#include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_state_machine/initialize.hpp"
 
 Initialize::Initialize(const StateIdentifier _state_identifier,
-                       DracoControlArchitecture *_ctrl_arch,
+                       FixedDracoControlArchitecture *_ctrl_arch,
                        RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
   util::PrettyConstructor(2, "Initialize");
 
   ctrl_arch_ = _ctrl_arch;
-  sp_ = DracoStateProvider::getStateProvider();
+  sp_ = FixedDracoStateProvider::getStateProvider();
   end_time = 5.;
 
   target_jpos = Eigen::VectorXd::Zero(robot_->n_a);
@@ -18,7 +18,7 @@ Initialize::Initialize(const StateIdentifier _state_identifier,
 Initialize::~Initialize() {}
 
 void Initialize::firstVisit() {
-  std::cout << "draco_states::kInitialize" << std::endl;
+  std::cout << "fixed_draco_states::kInitialize" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
 
@@ -54,4 +54,4 @@ bool Initialize::endOfState() {
   }
 }
 
-StateIdentifier Initialize::getNextState() { return draco_states::kStand; }
+StateIdentifier Initialize::getNextState() { return fixed_draco_states::kSwaying; }

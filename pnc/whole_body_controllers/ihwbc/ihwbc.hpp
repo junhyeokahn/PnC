@@ -51,6 +51,9 @@ private:
   /// Number of qdot.
   int n_q_dot_;
 
+  /// Number of floating dofs.
+  int n_floating_;
+
   /// Number of actuating dofs.
   int n_active_;
 
@@ -71,7 +74,6 @@ private:
 
   /// Whether there is internal constraint or not
   bool b_floating_;
-  int num_floating_;
 
   /// Selection matrix for floating dofs.
   Eigen::MatrixXd sf_;
@@ -133,8 +135,14 @@ private:
   void setEqualityConstraints(const Eigen::MatrixXd &mat,
                               const Eigen::VectorXd &vec);
 
+  /// Set null equality constraints.
+  void setNullEqualityConstraints();
+
+  /// Set null inequality constraints.
+  void setNullInEqualityConstraints();
+
   /// Set inequality constraints.
-  void setInequalityConstraints(const Eigen::MatrixXd &mat,
+  void setInEqualityConstraints(const Eigen::MatrixXd &mat,
                                 const Eigen::VectorXd &vec);
 
   /// Solve QP.

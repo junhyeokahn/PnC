@@ -1,2 +1,3 @@
 add_subdirectory(atlas_pnc)
 add_subdirectory(draco_pnc)
+add_subdirectory(fixed_draco_pnc)

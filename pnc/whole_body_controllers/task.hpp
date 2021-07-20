@@ -110,6 +110,8 @@ public:
     std::cout << acc_des << std::endl;
     std::cout << "xddot" << std::endl;
     std::cout << op_cmd << std::endl;
+    std::cout << "weight" << std::endl;
+    std::cout << w_hierarchy << std::endl;
   }
 
   /// Copies task commands.

@@ -13,9 +13,15 @@ EndEffectorTrajectoryManager::EndEffectorTrajectoryManager(
 
   amp_.setZero();
   freq_.setZero();
-  Eigen::Vector3d exp_error_;
+
+  ini_pos_.setZero();
+  target_pos_.setZero();
+  ini_quat_.setIdentity();
+  target_quat_.setIdentity();
+  exp_error_.setZero();
 
   b_swaying_ = false;
+  b_hold_ = false;
 }
 
 EndEffectorTrajectoryManager::~EndEffectorTrajectoryManager() {}
@@ -68,47 +74,56 @@ void EndEffectorTrajectoryManager::InitializeSwayingTrajectory(
   target_quat_ = ini_quat_;
 }
 
+void EndEffectorTrajectoryManager::InitializeHoldTrajectory(){
+  b_hold_ = true;
+  target_pos_ = robot_->get_link_iso(link_idx_).translation();
+  target_quat_ = 
+    Eigen::Quaternion<double>(robot_->get_link_iso(link_idx_).linear());
+}
+
 void EndEffectorTrajectoryManager::UpdateDesired(const double &_curr_time) {
   Eigen::VectorXd pos_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd vel_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd acc_des = Eigen::VectorXd::Zero(3);
-
-  if (b_swaying_) {
-    util::SinusoidTrajectory(start_time_, ini_pos_, amp_, freq_, _curr_time,
-                             pos_des, vel_des, acc_des);
-  } else {
-    for (int i = 0; i < 3; ++i) {
-      pos_des[i] = util::SmoothPos(ini_pos_[i], target_pos_[i], duration_,
-                                   _curr_time - start_time_);
-      vel_des[i] = util::SmoothVel(ini_pos_[i], target_pos_[i], duration_,
-                                   _curr_time - start_time_);
-      acc_des[i] = util::SmoothAcc(ini_pos_[i], target_pos_[i], duration_,
-                                   _curr_time - start_time_);
-    }
-  }
-
-  pos_task_->update_desired(pos_des, vel_des, acc_des);
 
   Eigen::VectorXd ori_des = Eigen::VectorXd::Zero(4);
   Eigen::Quaternion<double> ori_des_quat;
   Eigen::VectorXd ang_vel_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd ang_acc_des = Eigen::VectorXd::Zero(3);
 
-  double scaled_t = util::SmoothPos(0, 1, duration_, _curr_time - start_time_);
-  double scaled_tdot =
-      util::SmoothVel(0, 1, duration_, _curr_time - start_time_);
-  double scaled_tddot =
-      util::SmoothAcc(0, 1, duration_, _curr_time - start_time_);
-
-  Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
-  Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
-  // TODO (Check this again)
-  // ori_des_quat = quat_inc * ini_quat_;
-  ori_des_quat = ini_quat_ * quat_inc;
-  ori_des << ori_des_quat.w(), ori_des_quat.x(), ori_des_quat.y(),
-      ori_des_quat.z();
-  ang_vel_des = exp_error_ * scaled_tdot;
-  ang_acc_des = exp_error_ * scaled_tddot;
-
+  if (b_swaying_) {
+      util::SinusoidTrajectory(start_time_, ini_pos_, amp_, freq_, _curr_time,
+              pos_des, vel_des, acc_des);
+      ori_des << target_quat_.w(), target_quat_.x(), target_quat_.y(), target_quat_.z();
+  } else if (b_hold_) {
+      for (int i = 0; i < 3; ++i) {
+          pos_des[i] = target_pos_[i]; 
+      } 
+      ori_des << target_quat_.w(), target_quat_.x(), target_quat_.y(), target_quat_.z();
+  } else {
+      for (int i = 0; i < 3; ++i) {
+          pos_des[i] = util::SmoothPos(ini_pos_[i], target_pos_[i], duration_,
+                  _curr_time - start_time_);
+          vel_des[i] = util::SmoothVel(ini_pos_[i], target_pos_[i], duration_,
+                  _curr_time - start_time_);
+          acc_des[i] = util::SmoothAcc(ini_pos_[i], target_pos_[i], duration_,
+                  _curr_time - start_time_);
+      }
+      double scaled_t = util::SmoothPos(0, 1, duration_, _curr_time - start_time_);
+      double scaled_tdot =
+          util::SmoothVel(0, 1, duration_, _curr_time - start_time_);
+      double scaled_tddot =
+          util::SmoothAcc(0, 1, duration_, _curr_time - start_time_);
+      Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
+      Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
+      // TODO (Check this again)
+      // ori_des_quat = quat_inc * ini_quat_;
+      ori_des_quat = ini_quat_ * quat_inc;
+      ori_des << ori_des_quat.w(), ori_des_quat.x(), ori_des_quat.y(),
+              ori_des_quat.z();
+      ang_vel_des = exp_error_ * scaled_tdot;
+      ang_acc_des = exp_error_ * scaled_tddot;
+  }
+  pos_task_->update_desired(pos_des, vel_des, acc_des);
   ori_task_->update_desired(ori_des, ang_vel_des, ang_acc_des);
 }

@@ -1,0 +1,5 @@
+pybind11_add_module(fixed_draco_interface fixed_draco_interface_pybind.cpp)
+target_link_libraries(fixed_draco_interface PUBLIC pnc-fixed-draco-pnc)
+
+pybind11_add_module(fixed_draco_interrupt_logic fixed_draco_interrupt_logic_pybind.cpp)
+target_link_libraries(fixed_draco_interrupt_logic PUBLIC pnc-fixed-draco-pnc)

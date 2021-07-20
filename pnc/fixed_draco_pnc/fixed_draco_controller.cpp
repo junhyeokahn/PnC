@@ -83,7 +83,7 @@ FixedDracoController::~FixedDracoController() {
 }
 
 void FixedDracoController::getCommand(void *cmd) {
-  if (sp_->state == draco_states::kInitialize) {
+  if (sp_->state == fixed_draco_states::kInitialize) {
     joint_pos_cmd_ = tci_container_->joint_task->pos_des;
     joint_vel_cmd_ = tci_container_->joint_task->vel_des;
     joint_trq_cmd_.setZero();
@@ -154,7 +154,7 @@ void FixedDracoController::FirstVisit() {
 }
 
 void FixedDracoController::SaveData() {
-  DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+  FixedDracoDataManager *dm = FixedDracoDataManager::GetDracoDataManager();
 
   dm->data->cmd_joint_positions = joint_pos_cmd_;
   dm->data->cmd_joint_velocities = joint_vel_cmd_;

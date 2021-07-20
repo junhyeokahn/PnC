@@ -21,8 +21,9 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/fixed_draco/pnc.yaml");
 
   robot_ = new DartRobotSystem(THIS_COM "robot_model/draco/draco_rel_path.urdf",
-                               true, true);
-  sp_ = DracoStateProvider::getStateProvider();
+                               true, false);
+  se_ = new FixedDracoStateEstimator(robot_);
+  sp_ = FixedDracoStateProvider::getStateProvider();
   sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
@@ -31,16 +32,16 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
 
   control_architecture_ = new FixedDracoControlArchitecture(robot_);
   if (_b_sim) {
-    control_architecture_->state = draco_states::kStand;
+    control_architecture_->state = fixed_draco_states::kSwaying;
     sp_->state = control_architecture_->state;
   } else {
-    control_architecture_->state = draco_states::kInitialize;
+    control_architecture_->state = fixed_draco_states::kInitialize;
     sp_->state = control_architecture_->state;
   }
   interrupt = new FixedDracoInterruptLogic(
       static_cast<FixedDracoControlArchitecture *>(control_architecture_));
 
-  DracoDataManager::GetDracoDataManager()->InitializeSockets(
+  FixedDracoDataManager::GetDracoDataManager()->InitializeSockets(
       util::ReadParameter<std::string>(cfg, "ip_addr"));
 
   util::ColorPrint(color::kBoldCyan, border);
@@ -48,6 +49,7 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
 
 FixedDracoInterface::~FixedDracoInterface() {
   delete robot_;
+  delete se_;
   delete interrupt;
   delete control_architecture_;
 }
@@ -56,6 +58,11 @@ void FixedDracoInterface::getCommand(void *_data, void *_command) {
   FixedDracoCommand *cmd = ((FixedDracoCommand *)_command);
   FixedDracoSensorData *data = ((FixedDracoSensorData *)_data);
 
+  if (count_ == 0) {
+    se_->initialize(data);
+  }
+
+  se_->update(data);
   interrupt->processInterrupts();
   control_architecture_->getCommand(cmd);
 
@@ -67,9 +74,9 @@ void FixedDracoInterface::getCommand(void *_data, void *_command) {
   sp_->state = control_architecture_->state;
 
   if (sp_->count % sp_->save_freq == 0) {
-    DracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
-    DracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
-    DracoDataManager::GetDracoDataManager()->Send();
+    FixedDracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
+    FixedDracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
+    FixedDracoDataManager::GetDracoDataManager()->Send();
   }
 }
 

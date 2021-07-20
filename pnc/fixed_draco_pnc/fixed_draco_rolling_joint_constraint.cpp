@@ -1,6 +1,6 @@
-#include "pnc/draco_pnc/draco_rolling_joint_constraint.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_rolling_joint_constraint.hpp"
 
-DracoRollingJointConstraint::DracoRollingJointConstraint(RobotSystem *_robot)
+FixedDracoRollingJointConstraint::FixedDracoRollingJointConstraint(RobotSystem *_robot)
     : InternalConstraint(_robot, 2) {
   int l_jp_idx = robot_->get_q_dot_idx("l_knee_fe_jp");
   int l_jd_idx = robot_->get_q_dot_idx("l_knee_fe_jd");

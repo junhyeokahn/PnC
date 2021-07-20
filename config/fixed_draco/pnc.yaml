@@ -92,7 +92,7 @@ walking:
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
 
-ee_swing:
+ee_swaying:
     ini_joint_dur: 4.
     ini_joint_pos:
         l_shoulder_aa: 0.523
@@ -112,6 +112,6 @@ ee_swing:
         r_ankle_fe: -0.785
         r_ankle_ie: 0.087
     swaying_dur: 10.
-    swaying_amp: [0., 0.08, 0.]
-    swaying_freq: [0., 0.3, 0.]
+    swaying_amp: [0., 0.02, 0.]
+    swaying_freq: [0., 0.8, 0.]
 
