@@ -48,6 +48,9 @@ def main():
         pos_cmd_ = command_.q
         vel_cmd_ = command_.qdot
 
+        kp_ = np.zeros(12)
+        kd_ = np.zeros(12)
+
         for i in range(12):
             trq_cmd_[i+6]= kp_[i] * (pos_cmd_[i] - sensor_data_.q[i]) + \
                            kd_[i] * (vel_cmd_[i] - sensor_data_.qdot[i]) + \
