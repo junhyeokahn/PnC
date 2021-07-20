@@ -14,18 +14,6 @@ $ cd PnC && git submodule update --init --recursive
 ### Install Required Dependancies
 - run ```source Script/install_sim.sh``` for [Dart 6.9.0](https://dartsim.github.io/install_dart_on_mac.html).
 
-### Install Optional Dependancies
-- run ```source Script/install_rl_package.sh``` for Reinforcement Learning.
-- [Gurobi](http://www.gurobi.com/), [Mosek](https://www.mosek.com/), [Snopt](http://ccom.ucsd.edu/~optimizers) for Optimal control.
-
-### Compile the Code
-```
-$ mkdir build && cd build && cmake..
-$ make -j
-$ ./bin/run_draco
-```
-
-
 ## Python Binding for A1 Quadruped
 
 ### Compile the Code
