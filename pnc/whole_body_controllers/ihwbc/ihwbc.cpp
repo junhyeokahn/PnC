@@ -10,8 +10,7 @@ IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
   if (n_q_dot_ == n_active_ + n_passive_){
       b_floating_ = false;
       n_floating_ = 0;
-  }
-  else{
+  } else {
     b_floating_ = true;
     n_floating_ = 6;
     sf_ = _sf;
@@ -87,9 +86,10 @@ void IHWBC::solve(
         (sa_ * ni).block(0, n_floating_, n_active_, n_active_ + n_passive_);
     Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
-        Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_, n_active_ + n_passive_);
+    Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_,
+                    n_active_ + n_passive_);
     util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
-                            lmd_sa_ni_trc);
+                        lmd_sa_ni_trc);
     Eigen::MatrixXd sa_ni_trc_bar =
         Ainv_trc * sa_ni_trc.transpose() * lmd_sa_ni_trc;
     sa_ni_trc_bar_tr = sa_ni_trc_bar.transpose();
@@ -135,8 +135,7 @@ void IHWBC::solve(
         uf_vec = contact_list[i]->cone_constraint_vec;
         jc = contact_list[i]->jacobian;
       } else {
-        uf_mat =
-            util::block_diag(uf_mat, contact_list[i]->cone_constraint_mat);
+        uf_mat = util::block_diag(uf_mat, contact_list[i]->cone_constraint_mat);
         uf_vec = util::vStack(uf_vec, contact_list[i]->cone_constraint_vec);
         jc = util::vStack(jc, contact_list[i]->jacobian);
       }
@@ -194,7 +193,7 @@ void IHWBC::solve(
       Eigen::MatrixXd tmp2 = sa_ni_trc_bar_tr * snf_ * (jc * ni).transpose();
       ineq_mat = util::hStack(
           util::vStack(Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_),
-                          util::vStack(-tmp1, tmp1)),
+                       util::vStack(-tmp1, tmp1)),
           util::vStack(-uf_mat, util::vStack(tmp2, -tmp2)));
       Eigen::VectorXd tmp3 =
           sa_ni_trc_bar_tr * snf_ * ni.transpose() * (cori_ + grav_) +
