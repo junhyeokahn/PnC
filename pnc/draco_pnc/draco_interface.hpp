@@ -14,11 +14,10 @@ public:
   DracoSensorData() {
     imu_frame_iso.setIdentity();
     imu_frame_vel.setZero();
+    b_rf_contact = false;
+    b_lf_contact = false;
   }
-  virtual ~DracoSensorData() {
-    imu_frame_iso.setZero();
-    imu_frame_vel.setZero();
-  }
+  virtual ~DracoSensorData() {}
 
   Eigen::Matrix<double, 4, 4> imu_frame_iso;
   Eigen::Matrix<double, 6, 1> imu_frame_vel;
