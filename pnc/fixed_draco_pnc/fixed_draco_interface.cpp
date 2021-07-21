@@ -21,7 +21,7 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/fixed_draco/pnc.yaml");
 
   robot_ = new DartRobotSystem(THIS_COM "robot_model/draco/draco_rel_path.urdf",
-                               true, false);
+                               true, true);
   se_ = new FixedDracoStateEstimator(robot_);
   sp_ = FixedDracoStateProvider::getStateProvider();
   sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
@@ -80,7 +80,8 @@ void FixedDracoInterface::getCommand(void *_data, void *_command) {
   }
 }
 
-void FixedDracoInterface::SetSafeCommand(FixedDracoSensorData *data, FixedDracoCommand *cmd) {
+void FixedDracoInterface::SetSafeCommand(FixedDracoSensorData *data,
+                                         FixedDracoCommand *cmd) {
   for (std::map<std::string, double>::iterator it =
            data->joint_positions.begin();
        it != data->joint_positions.end(); it++) {

@@ -1,5 +1,54 @@
 #include <pnc/whole_body_controllers/ihwbc/ihwbc.hpp>
 
+void __cholesky_decomposition(GMatr<double> &A);
+void __cholesky_decomposition(GMatr<double> &A) {
+  register int i, j, k, n = A.nrows();
+  register double sum;
+
+  for (i = 0; i < n; i++) {
+    for (j = i; j < n; j++) {
+      sum = A[i][j];
+      for (k = i - 1; k >= 0; k--)
+        sum -= A[i][k] * A[j][k];
+      if (i == j) {
+        if (sum <= 0.0) {
+          std::ostringstream os;
+          // raise error
+          os << "Error in cholesky decomposition, sum: " << sum;
+          throw std::logic_error(os.str());
+          exit(-1);
+        }
+        A[i][i] = sqrt(sum);
+      } else
+        A[j][i] = sum / A[i][i];
+    }
+    for (k = i + 1; k < n; k++)
+      A[i][k] = A[k][i];
+  }
+}
+void __print_matrix(char *name, const GMatr<double> &A, int n = -1, int m = -1);
+void __print_matrix(char *name, const GMatr<double> &A, int n, int m) {
+  std::ostringstream s;
+  std::string t;
+  if (n == -1)
+    n = A.nrows();
+  if (m == -1)
+    m = A.ncols();
+
+  s << name << ": " << std::endl;
+  for (int i = 0; i < n; i++) {
+    s << " ";
+    for (int j = 0; j < m; j++)
+      s << A[i][j] << ", ";
+    s << std::endl;
+  }
+  t = s.str();
+  t = t.substr(0,
+               t.size() - 3); // To remove the trailing space, comma and newline
+
+  std::cout << t << std::endl;
+}
+
 IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
              const Eigen::MatrixXd &_sv) {
   util::PrettyConstructor(3, "IHWBC");
@@ -7,17 +56,17 @@ IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
   n_q_dot_ = _sa.cols();
   n_active_ = _sa.rows();
   n_passive_ = _sv.rows();
-  if (n_q_dot_ == n_active_ + n_passive_){
-      b_floating_ = false;
-      n_floating_ = 0;
+  if (n_q_dot_ == n_active_ + n_passive_) {
+    b_floating_ = false;
+    n_floating_ = 0;
   } else {
     b_floating_ = true;
     n_floating_ = 6;
     sf_ = _sf;
   }
 
-  snf_ =
-      Eigen::MatrixXd::Zero(n_active_ + n_passive_, n_floating_ + n_active_ + n_passive_);
+  snf_ = Eigen::MatrixXd::Zero(n_active_ + n_passive_,
+                               n_floating_ + n_active_ + n_passive_);
   snf_.block(0, n_floating_, n_active_ + n_passive_, n_active_ + n_passive_) =
       Eigen::MatrixXd::Identity(n_active_ + n_passive_, n_active_ + n_passive_);
   sv_ = _sv;
@@ -86,7 +135,7 @@ void IHWBC::solve(
         (sa_ * ni).block(0, n_floating_, n_active_, n_active_ + n_passive_);
     Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
-    Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_,
+        Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_,
                     n_active_ + n_passive_);
     util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
                         lmd_sa_ni_trc);
@@ -117,14 +166,64 @@ void IHWBC::solve(
     Eigen::VectorXd jt_dot_q_dot = task_list[i]->jacobian_dot_q_dot;
     Eigen::VectorXd x_ddot = task_list[i]->op_cmd;
 
-     //std::cout << i << " th task" << std::endl;
-     //task_list[i]->Debug();
+    // std::cout << i << " th task" << std::endl;
+    // task_list[i]->Debug();
 
     cost_t_mat += (w_hierarchy[i] * (jt.transpose() * jt));
     cost_t_vec += (w_hierarchy[i] * ((jt_dot_q_dot - x_ddot).transpose() * jt));
+
+    // std::cout << "jt size" << std::endl;
+    // std::cout << jt.cols() << " , " << jt.rows() << std::endl;
+
+    // TODO
+    // cost_t_mat = Eigen::MatrixXd::Zero(3, 3);
+    // cost_t_mat << 0, 0, 0, 0, 20, 0, 0, 0, 20;
+    // std::cout << "!!" << std::endl;
+    // std::cout << cost_t_mat << std::endl;
+    // std::cout << "eigen" << std::endl;
+    // std::cout << "l" << std::endl;
+    // Eigen::MatrixXd L(cost_t_mat.llt().matrixL());
+    // std::cout << L << std::endl;
+    // Eigen::MatrixXd U(cost_t_mat.llt().matrixU());
+    // std::cout << "u" << std::endl;
+    // std::cout << U << std::endl;
+    // std::cout << "l times u" << std::endl;
+    // std::cout << L * U << std::endl;
+    // std::cout << "quadprog" << std::endl;
+    // G_.resize(cost_t_mat.cols(), cost_t_mat.cols());
+    // g0_.resize(cost_t_mat.cols());
+    // setQuadProgCosts(cost_t_mat, cost_t_vec);
+    //__cholesky_decomposition(G_);
+    //__print_matrix("G", G_);
+    // exit(0);
+    // TODO
   }
 
   cost_t_mat += lambda_q_ddot * A_;
+  // cost_t_mat += lambda_q_ddot * Eigen::MatrixXd::Identity(n_q_dot_,
+  // n_q_dot_);
+
+  // TODO
+  // std::cout << "mat" << std::endl;
+  // std::cout << cost_t_mat.rows() << " , " << cost_t_mat.cols() << std::endl;
+  // std::cout << cost_t_mat << std::endl;
+  // std::cout << "eigen" << std::endl;
+  // std::cout << "l" << std::endl;
+  // Eigen::MatrixXd L(cost_t_mat.llt().matrixL());
+  // std::cout << L << std::endl;
+  // Eigen::MatrixXd U(cost_t_mat.llt().matrixU());
+  // std::cout << "l times u" << std::endl;
+  // std::cout << L * U << std::endl;
+  // std::cout << "quadprog" << std::endl;
+  // n_quadprog_ = cost_t_mat.cols();
+  // G_.resize(cost_t_mat.cols(), cost_t_mat.cols());
+  // g0_.resize(cost_t_mat.cols());
+  // setQuadProgCosts(cost_t_mat, cost_t_vec);
+  //__print_matrix("G", G_);
+  //__cholesky_decomposition(G_);
+  //__print_matrix("G", G_);
+  // exit(0);
+  // TODO
 
   Eigen::MatrixXd uf_mat, jc;
   Eigen::VectorXd uf_vec;
@@ -164,11 +263,11 @@ void IHWBC::solve(
   Eigen::VectorXd eq_vec;
 
   if (b_floating_) {
-      eq_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-      eq_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
-  } else{
-      eq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_ + dim_contacts_);
-      eq_vec = Eigen::VectorXd::Zero(0);
+    eq_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+    eq_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+  } else {
+    eq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_ + dim_contacts_);
+    eq_vec = Eigen::VectorXd::Zero(0);
   }
 
   // ===========================================================================
@@ -184,8 +283,8 @@ void IHWBC::solve(
           Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_), -uf_mat);
       ineq_vec = -uf_vec;
     } else {
-        ineq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_);
-        ineq_vec = Eigen::VectorXd::Zero(0);
+      ineq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_);
+      ineq_vec = Eigen::VectorXd::Zero(0);
     }
   } else {
     if (b_contact_) {
@@ -242,12 +341,12 @@ void IHWBC::solve(
   setQuadProgCosts(cost_mat, cost_vec);
   if (m_quadprog_ == 0) {
     setNullEqualityConstraints();
-  } else{
+  } else {
     setEqualityConstraints(-eq_mat, eq_vec);
   }
   if (p_quadprog_ == 0) {
     setNullInEqualityConstraints();
-  } else{
+  } else {
     setInEqualityConstraints(-ineq_mat, ineq_vec);
   }
   solveQP();
