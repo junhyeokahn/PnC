@@ -1,4 +1,4 @@
-servo_rate: 0.001
+servo_dt: 0.001
 
 wbc:
     rf_z_max: 2000.0

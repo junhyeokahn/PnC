@@ -104,9 +104,9 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     b_first_visit = false;
   }
   Eigen::Vector3d base_joint_lin_vel =
-      (base_joint_pos - prev_base_joint_pos_) / sp_->servo_rate;
+      (base_joint_pos - prev_base_joint_pos_) / sp_->servo_dt;
   Eigen::Vector3d base_com_lin_vel =
-      (base_com_pos - prev_base_com_pos_) / sp_->servo_rate;
+      (base_com_pos - prev_base_com_pos_) / sp_->servo_dt;
   // Eigen::Vector3d base_joint_vel = -foot_vel; // TODO: also use kinematics
 
   // update system with base linear states
@@ -159,6 +159,6 @@ void DracoStateEstimator::ComputeDCM() {
   sp_->dcm = com_pos + com_vel / dcm_omega;
 
   double alpha_vel = 0.1; // TODO Study this alpha value
-  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_rate) +
+  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_dt) +
                  (1.0 - alpha_vel) * sp_->dcm_vel;
 }

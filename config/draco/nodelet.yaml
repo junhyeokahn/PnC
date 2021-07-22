@@ -2,103 +2,178 @@ contact_threshold: 30. # TODO (JH) : Need to be tuned
 
 service_call:
     neck_pitch:
-        kp:
-        kd:
-        current_limit:
+        kp: 10.
+        kd: 0.
+        current_limit: 0.15
+        weak_kp: 10.
+        weak_kd: 0.
+        weak_current_limit: 0.05
     r_hip_ie:
-        kp:
-        kd:
-        current_limit:
+        kp: 100.
+        kd: 2.
+        current_limit: 0.3
+        weak_kp: 100.
+        weak_kd: 2.
+        weak_current_limit: 0.1
     r_hip_aa:
-        kp:
-        kd:
-        current_limit:
+        kp: 160.
+        kd: 6.
+        current_limit: 0.6
+        weak_kp: 160.
+        weak_kd: 6.
+        weak_current_limit: 0.1
     r_hip_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 250.
+        kd: 7.
+        current_limit: 0.7
+        weak_kp: 250.
+        weak_kd: 7.
+        weak_current_limit: 0.1
     r_knee_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 80.
+        kd: 2.5
+        current_limit: 0.7
+        weak_kp: 80.
+        weak_kd: 2.5
+        weak_current_limit: 0.1
     r_ankle_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 60.
+        kd: 1.
+        current_limit: 0.3
+        weak_kp: 60.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     r_ankle_ie:
-        kp:
-        kd:
-        current_limit:
+        kp: 12.
+        kd: 1.
+        current_limit: 0.3
+        weak_kp: 12.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     l_hip_ie:
-        kp:
-        kd:
-        current_limit:
+        kp: 100.
+        kd: 2.
+        current_limit: 0.3
+        weak_kp: 100.
+        weak_kd: 2.
+        weak_current_limit: 0.1
     l_hip_aa:
-        kp:
-        kd:
-        current_limit:
+        kp: 160.
+        kd: 6.
+        current_limit: 0.6
+        weak_kp: 160.
+        weak_kd: 6.
+        weak_current_limit: 0.1
     l_hip_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 250.
+        kd: 7.
+        current_limit: 0.7
+        weak_kp: 250.
+        weak_kd: 7.
+        weak_current_limit: 0.1
     l_knee_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 80.
+        kd: 2.5
+        current_limit: 0.7
+        weak_kp: 80.
+        weak_kd: 2.5
+        weak_current_limit: 0.1
     l_ankle_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 60.
+        kd: 1.
+        current_limit: 0.3
+        weak_kp: 60.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     l_ankle_ie:
-        kp:
-        kd:
-        current_limit:
+        kp: 12.
+        kd: 1.
+        current_limit: 0.3
+        weak_kp: 12.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     l_shoulder_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 150.
+        kd: 13.
+        current_limit: 0.65
+        weak_kp: 120.
+        weak_kd: 7.
+        weak_current_limit: 0.1
     l_shoulder_aa:
-        kp:
-        kd:
-        current_limit:
+        kp: 150.
+        kd: 13
+        current_limit: 0.65
+        weak_kp: 120.
+        weak_kd: 3.
+        weak_current_limit: 0.1
     l_shoulder_ie:
-        kp:
-        kd:
-        current_limit:
-    l_elbow:
-        kp:
-        kd:
-        current_limit:
-    l_wrist_roll:
-        kp:
-        kd:
-        current_limit:
+        kp: 150.
+        kd: 13.
+        current_limit: 0.3
+        weak_kp: 45.
+        weak_kd: 2.
+        weak_current_limit: 0.1
+    l_elbow_fe:
+        kp: 60.
+        kd: 4.5
+        current_limit: 0.3
+        weak_kp: 25.
+        weak_kd: 1.2
+        weak_current_limit: 0.1
+    l_wrist_ps:
+        kp: 9.
+        kd: 1.
+        current_limit: 0.2
+        weak_kp: 9.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     l_wrist_pitch:
-        kp:
-        kd:
-        current_limit:
+        kp: 2.5
+        kd: 0.07
+        current_limit: 0.1
+        weak_kp: 2.5
+        weak_kd: 0.07
+        weak_current_limit: 0.05
     r_shoulder_fe:
-        kp:
-        kd:
-        current_limit:
+        kp: 150.
+        kd: 13.
+        current_limit: 0.65
+        weak_kp: 120.
+        weak_kd: 7.
+        weak_current_limit: 0.1
     r_shoulder_aa:
-        kp:
-        kd:
-        current_limit:
+        kp: 150.
+        kd: 13
+        current_limit: 0.65
+        weak_kp: 120.
+        weak_kd: 3.
+        weak_current_limit: 0.1
     r_shoulder_ie:
-        kp:
-        kd:
+        kp: 150.
+        kd: 13.
+        current_limit: 0.3
+        weak_kp: 45.
+        weak_kd: 2.
+        weak_current_limit: 0.1
+    r_elbow_fe:
+        kp: 60.
+        kd: 4.5
         current_limit:
-    r_elbow:
-        kp:
-        kd:
-        current_limit:
-    r_wrist_roll:
-        kp:
-        kd:
-        current_limit:
+        weak_kp: 25.
+        weak_kd: 1.2
+        weak_current_limit:
+    r_wrist_ps:
+        kp: 9.
+        kd: 1.
+        current_limit: 0.2
+        weak_kp: 9.
+        weak_kd: 1.
+        weak_current_limit: 0.1
     r_wrist_pitch:
-        kp:
-        kd:
-        current_limit:
+        kp: 2.5
+        kd: 0.07
+        current_limit: 0.1
+        weak_kp: 2.5
+        weak_kd: 0.07
+        weak_current_limit: 0.05
 

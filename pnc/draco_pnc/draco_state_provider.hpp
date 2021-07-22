@@ -27,7 +27,7 @@ public:
 
   // should be set outside
   int save_freq;
-  double servo_rate = 0.001;
+  double servo_dt = 0.001;
 
   Eigen::Vector3d dcm;
   Eigen::Vector3d prev_dcm;

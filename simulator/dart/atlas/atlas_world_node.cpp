@@ -5,7 +5,7 @@
 #include <utils/util.hpp>
 
 AtlasWorldNode::AtlasWorldNode(const dart::simulation::WorldPtr &_world)
-    : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_rate_(0) {
+    : dart::gui::osg::WorldNode(_world), count_(0), t_(0.0), servo_dt_(0) {
   world_ = _world;
   robot_ = world_->getSkeleton("multisense_sl");
   n_dof_ = robot_->getNumDofs();
@@ -37,7 +37,7 @@ AtlasWorldNode::~AtlasWorldNode() {
 }
 
 void AtlasWorldNode::customPreStep() {
-  t_ = (double)count_ * servo_rate_;
+  t_ = (double)count_ * servo_dt_;
 
   // Fill Sensor Data
   GetBaseData_(sensor_data_->base_com_pos, sensor_data_->base_com_quat,
@@ -131,7 +131,7 @@ void AtlasWorldNode::SetParams_() {
   try {
     YAML::Node simulation_cfg =
         YAML::LoadFile(THIS_COM "config/atlas/dart_simulation.yaml");
-    util::ReadParameter(simulation_cfg, "servo_rate", servo_rate_);
+    util::ReadParameter(simulation_cfg, "servo_dt", servo_dt_);
     util::ReadParameter(simulation_cfg["control_configuration"], "kp", kp_);
     util::ReadParameter(simulation_cfg["control_configuration"], "kd", kd_);
   } catch (std::runtime_error &e) {

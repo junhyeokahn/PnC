@@ -192,13 +192,13 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 }
 
 int main(int argc, char **argv) {
-  double servo_rate;
+  double servo_dt;
   bool isRecord;
   bool b_show_joint_frame;
   try {
     YAML::Node simulation_cfg =
         YAML::LoadFile(THIS_COM "config/atlas/dart_simulation.yaml");
-    util::ReadParameter(simulation_cfg, "servo_rate", servo_rate);
+    util::ReadParameter(simulation_cfg, "servo_dt", servo_dt);
     util::ReadParameter(simulation_cfg, "is_record", isRecord);
     util::ReadParameter(simulation_cfg, "show_joint_frame", b_show_joint_frame);
   } catch (std::runtime_error &e) {
@@ -213,8 +213,8 @@ int main(int argc, char **argv) {
   dart::utils::DartLoader urdfLoader;
   dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
       THIS_COM "robot_model/ground/ground_terrain.urdf");
-  dart::dynamics::SkeletonPtr robot =
-      urdfLoader.parseSkeleton(THIS_COM "robot_model/atlas/atlas_rel_path.urdf");
+  dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
+      THIS_COM "robot_model/atlas/atlas_rel_path.urdf");
 
   world->addSkeleton(ground);
   world->addSkeleton(robot);
@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
 
   Eigen::Vector3d gravity(0.0, 0.0, -9.81);
   world->setGravity(gravity);
-  world->setTimeStep(servo_rate);
+  world->setTimeStep(servo_dt);
 
   // =========================================================================
   // Display Joints Frame

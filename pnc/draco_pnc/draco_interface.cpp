@@ -25,7 +25,7 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
                                false, true);
   se_ = new DracoStateEstimator(robot_);
   sp_ = DracoStateProvider::getStateProvider();
-  sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
+  sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
   count_ = 0;
@@ -68,7 +68,7 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   control_architecture_->getCommand(cmd);
 
   ++count_;
-  running_time_ = (double)(count_)*sp_->servo_rate;
+  running_time_ = (double)(count_)*sp_->servo_dt;
   sp_->count = count_;
   sp_->curr_time = running_time_;
   sp_->prev_state = control_architecture_->prev_state;

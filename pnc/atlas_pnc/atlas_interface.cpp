@@ -25,7 +25,7 @@ AtlasInterface::AtlasInterface() : Interface() {
                                false, false);
   se_ = new AtlasStateEstimator(robot_);
   sp_ = AtlasStateProvider::getStateProvider(robot_);
-  sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
+  sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
 
   count_ = 0;
   waiting_count_ = 2;
@@ -56,7 +56,7 @@ void AtlasInterface::getCommand(void *_data, void *_command) {
   control_architecture_->getCommand(cmd);
 
   ++count_;
-  running_time_ = (double)(count_)*sp_->servo_rate;
+  running_time_ = (double)(count_)*sp_->servo_dt;
   sp_->curr_time = running_time_;
   sp_->prev_state = control_architecture_->prev_state;
   sp_->state = control_architecture_->state;

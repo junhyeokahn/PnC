@@ -34,7 +34,7 @@ private:
 
   int count_;
   double t_;
-  double servo_rate_;
+  double servo_dt_;
   int n_dof_;
   double kp_;
   double kd_;

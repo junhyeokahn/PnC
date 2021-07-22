@@ -51,7 +51,7 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   wbc_->lambda_rf = util::ReadParameter<double>(cfg["wbc"], "lambda_rf");
 
   // Initialize Joint Integrator
-  joint_integrator_ = new JointIntegrator(robot_->n_a, sp_->servo_rate);
+  joint_integrator_ = new JointIntegrator(robot_->n_a, sp_->servo_dt);
   joint_integrator_->setVelocityFrequencyCutOff(
       util::ReadParameter<double>(cfg["wbc"], "vel_cutoff_freq"));
   joint_integrator_->setPositionFrequencyCutOff(
