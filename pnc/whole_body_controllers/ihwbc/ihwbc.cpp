@@ -159,15 +159,89 @@ void IHWBC::solve(
   // ===========================================================================
   // Equality Constraint
   // ===========================================================================
-  Eigen::MatrixXd eq_mat;
-  Eigen::VectorXd eq_vec;
+
+  Eigen::MatrixXd eq_floating_mat, eq_int_mat, eq_mat;
+  Eigen::VectorXd eq_floating_vec, eq_int_vec, eq_vec;
 
   if (b_floating_) {
-    eq_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
-    eq_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+    if (b_internal_constraint_) {
+      if (b_contact_) {
+        // floating o, internal constraint o, contact o:
+        // tested with draco3 walking in sim
+        eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+        eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+
+        eq_int_mat =
+            util::hStack(ji, Eigen::MatrixXd::Zero(ji.rows(), dim_contacts_));
+        eq_int_vec = -jidot_qdot;
+
+        eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
+        eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
+      } else {
+        // floating o, internal constraint o, contact x
+        // haven't tested yet. can be tested with draco3 in space scenario.
+        eq_floating_mat = sf_ * A_;
+        eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+
+        eq_int_mat = ji;
+        eq_int_vec = -jidot_qdot;
+
+        eq_mat = util::vStack(eq_floating_mat, eq_int_mat);
+        eq_vec = util::vStack(eq_floating_vec, eq_int_vec);
+      }
+    } else {
+      if (b_contact_) {
+        // floating o, internal constraint x, contact o
+        // tested with atlas walking in sim
+        eq_floating_mat = util::hStack(sf_ * A_, -sf_ * (jc * ni).transpose());
+        eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+
+        eq_mat = eq_floating_mat;
+        eq_vec = eq_floating_vec;
+
+      } else {
+        // floating o, internal constraint x, contact x
+        // haven't tested yet. can be tested with atlas in space scenario.
+        eq_floating_mat = sf_ * A_;
+        eq_floating_vec = -sf_ * (ni.transpose() * (cori_ + grav_));
+
+        eq_mat = eq_floating_mat;
+        eq_vec = eq_floating_vec;
+      }
+    }
   } else {
-    eq_mat = Eigen::MatrixXd::Zero(n_floating_, n_q_dot_ + dim_contacts_);
-    eq_vec = Eigen::VectorXd::Zero(n_q_dot_ + dim_contacts_);
+    if (b_internal_constraint_) {
+      if (b_contact_) {
+        // floating x, internal constraint o, contact o:
+        // haven't tested yet. can be tested with fixed draco3 with contact.
+        eq_int_mat = ji;
+        eq_int_vec = -jidot_qdot;
+
+        eq_mat = eq_int_mat;
+        eq_vec = eq_int_vec;
+
+      } else {
+        // floating x, internal constraint o, contact x
+        // tested with fixed draco3.
+        eq_int_mat = ji;
+        eq_int_vec = -jidot_qdot;
+
+        eq_mat = eq_int_mat;
+        eq_vec = eq_int_vec;
+      }
+    } else {
+      if (b_contact_) {
+        // floating x, internal constraint x, contact o
+        // haven't tested yet. can be tested with fixed atlas with contact.
+        eq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_ + dim_contacts_);
+        eq_vec = Eigen::VectorXd::Zero(0);
+      } else {
+        // floating x, internal constraint x, contact x
+        // haven't tested yet. can be tested with fixed atlas.
+        eq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_);
+        eq_vec = Eigen::VectorXd::Zero(0);
+      }
+    }
   }
 
   // ===========================================================================
@@ -183,7 +257,8 @@ void IHWBC::solve(
           Eigen::MatrixXd::Zero(dim_cone_constraint_, n_q_dot_), -uf_mat);
       ineq_vec = -uf_vec;
     } else {
-      assert(false); // Not Implemented (GoldIdnani doesn't solve this case)
+      ineq_mat = Eigen::MatrixXd::Zero(0, n_q_dot_);
+      ineq_vec = Eigen::VectorXd::Zero(0);
     }
   } else {
     if (b_contact_) {
@@ -238,27 +313,31 @@ void IHWBC::solve(
         CI^T x + ci0 >= 0
     */
   setQuadProgCosts(cost_mat, cost_vec);
-  if (b_floating_) {
-    setEqualityConstraints(-eq_mat, eq_vec);
-  } else {
+  if (m_quadprog_ == 0) {
     setNullEqualityConstraints();
+  } else {
+    setEqualityConstraints(-eq_mat, eq_vec);
   }
-  setInequalityConstraints(-ineq_mat, ineq_vec);
+  if (p_quadprog_ == 0) {
+    setNullInEqualityConstraints();
+  } else {
+    setInEqualityConstraints(-ineq_mat, ineq_vec);
+  }
   solveQP();
 
   if (b_contact_) {
     tau_cmd = sa_ni_trc_bar_tr * snf_ *
               (A_ * qddot_result_ + ni.transpose() * (cori_ + grav_) -
-               (jc * ni).transpose() * fr_result_);
+               (jc * ni).transpose() * fr_result_ + jit_lmd_jidot_qdot);
   } else {
-    tau_cmd =
-        sa_ni_trc_bar_tr * snf_ * (A_ * qddot_result_ + ni * (cori_ + grav_));
+    tau_cmd = sa_ni_trc_bar_tr * snf_ *
+              (A_ * qddot_result_ + ni * (cori_ + grav_) + jit_lmd_jidot_qdot);
   }
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
   // util::PrettyPrint(tau_cmd, std::cout, "tau_cmd");
   // util::PrettyPrint(rf_cmd, std::cout, "rf_cmd");
-  // util::PrettyPrint(qddot_result_, std::cout, "qddot_result");
+  // std::cout << qddot_result_.transpose() << std::endl;
   // exit(0);
 }
 
@@ -294,7 +373,17 @@ void IHWBC::setNullEqualityConstraints() {
     ce0_[i] = 0.; // TODO
   }
 }
-void IHWBC::setInequalityConstraints(const Eigen::MatrixXd &IEq_mat,
+
+void IHWBC::setNullInEqualityConstraints() {
+  for (int i = 0; i < p_quadprog_; i++) {
+    for (int j = 0; j < n_quadprog_; j++) {
+      CI_[j][i] = 0.;
+    }
+    ci0_[i] = 0.; // TODO
+  }
+}
+
+void IHWBC::setInEqualityConstraints(const Eigen::MatrixXd &IEq_mat,
                                      const Eigen::VectorXd &IEq_vec) {
   for (int i = 0; i < p_quadprog_; ++i) {
     for (int j = 0; j < n_quadprog_; ++j) {

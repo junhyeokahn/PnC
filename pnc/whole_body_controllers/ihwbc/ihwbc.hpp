@@ -139,8 +139,11 @@ private:
   void setNullEqualityConstraints();
 
   /// Set inequality constraints.
-  void setInequalityConstraints(const Eigen::MatrixXd &mat,
+  void setInEqualityConstraints(const Eigen::MatrixXd &mat,
                                 const Eigen::VectorXd &vec);
+
+  /// Set null inequality constraints.
+  void setNullInEqualityConstraints();
 
   /// Solve QP.
   void solveQP();

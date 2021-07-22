@@ -1,5 +1,10 @@
 contact_threshold: 30. # TODO (JH) : Need to be tuned
 
+imu_servo_rate: 800. # Hz TODO (JH) : Check this with Josh
+vel_damping: 1. # TODO (JH) : Tune this gain
+damping_threshold: 1. # TODO (JH) : Tune this gain
+n_data_for_imu_initialize: 100 # TODO (JH) : Tune this gain
+
 service_call:
     neck_pitch:
         kp: 10.
