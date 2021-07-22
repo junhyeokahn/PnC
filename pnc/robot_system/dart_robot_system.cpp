@@ -21,6 +21,12 @@ void DartRobotSystem::_config_robot() {
   dart::utils::DartLoader urdfLoader;
   skel_ = urdfLoader.parseSkeleton(urdf_file_);
 
+  if (b_fixed_base) {
+    skel_->getRootBodyNode()
+        ->changeParentJointType<dart::dynamics::WeldJoint>();
+    n_floating = 0;
+  }
+
   for (int i = 0; i < skel_->getNumJoints(); ++i) {
     dart::dynamics::JointPtr joint = skel_->getJoint(i);
     if (joint->getName() == "rootJoint") {
