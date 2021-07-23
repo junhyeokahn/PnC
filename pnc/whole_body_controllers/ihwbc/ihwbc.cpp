@@ -370,7 +370,7 @@ void IHWBC::setNullEqualityConstraints() {
     for (int j = 0; j < n_quadprog_; j++) {
       CE_[j][i] = 0.;
     }
-    ce0_[i] = 0.; // TODO
+    ce0_[i] = 0.;
   }
 }
 
@@ -379,7 +379,7 @@ void IHWBC::setNullInEqualityConstraints() {
     for (int j = 0; j < n_quadprog_; j++) {
       CI_[j][i] = 0.;
     }
-    ci0_[i] = 0.; // TODO
+    ci0_[i] = 0.;
   }
 }
 

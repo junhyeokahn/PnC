@@ -22,14 +22,15 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
 
   robot_ = new DartRobotSystem(THIS_COM "robot_model/draco/draco_rel_path.urdf",
-                               false, true);
+                               false, false);
   se_ = new DracoStateEstimator(robot_);
   sp_ = DracoStateProvider::getStateProvider();
   sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
   count_ = 0;
-  waiting_count_ = 2;
+  waiting_count_ = 10;
+  smoothing_count_ = 20;
 
   control_architecture_ = new DracoControlArchitecture(robot_);
   if (_b_sim) {
@@ -59,13 +60,23 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   DracoCommand *cmd = ((DracoCommand *)_command);
   DracoSensorData *data = ((DracoSensorData *)_data);
 
-  if (count_ == 0) {
+  if (count_ <= waiting_count_) {
     se_->initialize(data);
+    this->SetSafeCommand(data, cmd);
+  } else {
+    se_->update(data);
+    interrupt->processInterrupts();
+    control_architecture_->getCommand(cmd);
+    if (count_ <= waiting_count_ + smoothing_count_) {
+      this->SmoothCommand(cmd);
+    }
   }
-  // se_->update_debug(data);
-  se_->update(data);
-  interrupt->processInterrupts();
-  control_architecture_->getCommand(cmd);
+
+  if (sp_->count != 0 && sp_->count % sp_->save_freq == 0) {
+    DracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
+    DracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
+    DracoDataManager::GetDracoDataManager()->Send();
+  }
 
   ++count_;
   running_time_ = (double)(count_)*sp_->servo_dt;
@@ -73,11 +84,16 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   sp_->curr_time = running_time_;
   sp_->prev_state = control_architecture_->prev_state;
   sp_->state = control_architecture_->state;
+}
 
-  if (sp_->count % sp_->save_freq == 0) {
-    DracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
-    DracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
-    DracoDataManager::GetDracoDataManager()->Send();
+void DracoInterface::SmoothCommand(DracoCommand *cmd) {
+  double s = static_cast<double>(count_ - waiting_count_) /
+             static_cast<double>(smoothing_count_);
+  for (std::map<std::string, double>::iterator it =
+           cmd->joint_velocities.begin();
+       it != cmd->joint_velocities.end(); ++it) {
+    cmd->joint_velocities[it->first] *= s;
+    cmd->joint_torques[it->first] *= s;
   }
 }
 

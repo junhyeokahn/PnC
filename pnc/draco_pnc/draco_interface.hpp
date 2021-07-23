@@ -55,8 +55,10 @@ protected:
   DracoStateProvider *sp_;
 
   int waiting_count_;
+  int smoothing_count_;
 
   void SetSafeCommand(DracoSensorData *data, DracoCommand *cmd);
+  void SmoothCommand(DracoCommand *cmd);
 
 public:
   DracoInterface(bool b_sim);
