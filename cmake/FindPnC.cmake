@@ -13,12 +13,16 @@ find_library(DRACO_PNC_LIBRARY
              NAMES pnc-draco-pnc
              PATHS "/usr/local/lib"
              )
+find_library(FIXED_DRACO_PNC_LIBRARY
+             NAMES pnc-fixed-draco-pnc
+             PATHS "/usr/local/lib"
+             )
 
 include(FindPackageHandleStandardArgs)
 
 if(PNC_INCLUDE_DIR)
     set(PNC_INCLUDE_DIRS "${PNC_INCLUDE_DIR}" )
-    set(PNC_LIBRARIES "${DRACO_PNC_LIBRARY}" )
+    set(PNC_LIBRARIES "${DRACO_PNC_LIBRARY};${FIXED_DRACO_PNC_LIBRARY}" )
     set(PNC_FOUND TRUE)
     message("-- Found PnC: TRUE")
 else()

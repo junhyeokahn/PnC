@@ -24,7 +24,7 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
                                true, false);
   se_ = new FixedDracoStateEstimator(robot_);
   sp_ = FixedDracoStateProvider::getStateProvider();
-  sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
+  sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
   sp_->smoothing_duration =
       util::ReadParameter<double>(cfg, "smoothing_duration");
@@ -57,7 +57,7 @@ FixedDracoInterface::~FixedDracoInterface() {
 }
 
 void FixedDracoInterface::getCommand(void *_data, void *_command) {
-  running_time_ = (double)(count_)*sp_->servo_rate;
+  running_time_ = (double)(count_)*sp_->servo_dt;
   sp_->count = count_;
   sp_->curr_time = running_time_;
   sp_->state = control_architecture_->state;

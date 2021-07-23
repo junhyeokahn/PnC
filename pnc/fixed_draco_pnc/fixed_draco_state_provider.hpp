@@ -24,7 +24,7 @@ public:
 
   // should be set outside
   int save_freq;
-  double servo_rate = 0.001;
+  double servo_dt = 0.001;
 
   // command smoothing for hardware experiment
   bool b_smoothing_cmd;

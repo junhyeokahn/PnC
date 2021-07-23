@@ -1,27 +1,29 @@
-#include "pnc/draco_pnc/draco_interface.hpp"
+//#include "pnc/draco_pnc/draco_interface.hpp"
+#include "pnc/fixed_draco_pnc/fixed_draco_interface.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  DracoInterface *interface;
+  FixedDracoInterface *interface;
+  FixedDracoSensorData *sensor;
+  FixedDracoCommand *cmd;
   double sleep_time(2.);
-  interface = new DracoInterface(true);
-  delete interface;
-  std::cout << "deleted" << std::endl;
-  sleep(sleep_time);
-  interface = new DracoInterface(true);
-  delete interface;
-  std::cout << "deleted" << std::endl;
-  sleep(sleep_time);
-  interface = new DracoInterface(false);
-  delete interface;
-  std::cout << "deleted" << std::endl;
-  sleep(sleep_time);
-  interface = new DracoInterface(true);
-  delete interface;
-  std::cout << "deleted" << std::endl;
-  sleep(sleep_time);
+  for (int i = 0; i < 100; ++i) {
+    std::cout << "i : " << i << std::endl;
+    interface = new FixedDracoInterface(false);
+    sensor = new FixedDracoSensorData();
+    cmd = new FixedDracoCommand();
+    cmd->joint_positions["hi"] = 1.0;
+    cmd->joint_positions["hroi"] = 1.0;
+    delete interface;
+    delete sensor;
+    delete cmd;
+    std::cout << "destructed" << std::endl;
+    // sleep(sleep_time);
+  }
+
   std::cout << "done" << std::endl;
+
   return 0;
 }
