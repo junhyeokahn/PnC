@@ -26,10 +26,11 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
   sp_ = FixedDracoStateProvider::getStateProvider();
   sp_->servo_rate = util::ReadParameter<double>(cfg, "servo_rate");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
+  sp_->smoothing_duration =
+      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   count_ = 0;
   waiting_count_ = 10;
-  smoothing_count_ = 20;
 
   control_architecture_ = new FixedDracoControlArchitecture(robot_);
   if (_b_sim) {
@@ -56,6 +57,12 @@ FixedDracoInterface::~FixedDracoInterface() {
 }
 
 void FixedDracoInterface::getCommand(void *_data, void *_command) {
+  running_time_ = (double)(count_)*sp_->servo_rate;
+  sp_->count = count_;
+  sp_->curr_time = running_time_;
+  sp_->state = control_architecture_->state;
+  sp_->prev_state = control_architecture_->prev_state;
+
   FixedDracoCommand *cmd = ((FixedDracoCommand *)_command);
   FixedDracoSensorData *data = ((FixedDracoSensorData *)_data);
 
@@ -66,12 +73,12 @@ void FixedDracoInterface::getCommand(void *_data, void *_command) {
     se_->update(data);
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
-    if (count_ <= waiting_count_ + smoothing_count_) {
+    if (sp_->b_smoothing_cmd) {
       this->SmoothCommand(cmd);
     }
   }
 
-  if (sp_->count != 0 && sp_->count % sp_->save_freq == 0) {
+  if (sp_->count % sp_->save_freq == 0) {
     FixedDracoDataManager::GetFixedDracoDataManager()->data->time =
         sp_->curr_time;
     FixedDracoDataManager::GetFixedDracoDataManager()->data->phase = sp_->state;
@@ -79,21 +86,19 @@ void FixedDracoInterface::getCommand(void *_data, void *_command) {
   }
 
   ++count_;
-  running_time_ = (double)(count_)*sp_->servo_rate;
-  sp_->count = count_;
-  sp_->curr_time = running_time_;
-  sp_->prev_state = control_architecture_->prev_state;
-  sp_->state = control_architecture_->state;
 }
 
 void FixedDracoInterface::SmoothCommand(FixedDracoCommand *cmd) {
-  double s = static_cast<double>(count_ - waiting_count_) /
-             static_cast<double>(smoothing_count_);
+  double s = util::SmoothPos(0., 1., sp_->smoothing_duration,
+                             sp_->curr_time - sp_->smoothing_start_time);
   for (std::map<std::string, double>::iterator it =
            cmd->joint_velocities.begin();
        it != cmd->joint_velocities.end(); ++it) {
     cmd->joint_velocities[it->first] *= s;
     cmd->joint_torques[it->first] *= s;
+  }
+  if (sp_->curr_time >= sp_->smoothing_start_time + sp_->smoothing_duration) {
+    sp_->b_smoothing_cmd = false;
   }
 }
 

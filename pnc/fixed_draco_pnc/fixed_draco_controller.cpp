@@ -152,6 +152,8 @@ void FixedDracoController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
+  sp_->b_smoothing_cmd = true;
+  sp_->smoothing_start_time = sp_->curr_time;
 }
 
 void FixedDracoController::SaveData() {

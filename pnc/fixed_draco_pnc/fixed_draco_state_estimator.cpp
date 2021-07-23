@@ -15,8 +15,6 @@ FixedDracoStateEstimator::FixedDracoStateEstimator(RobotSystem *_robot) {
 FixedDracoStateEstimator::~FixedDracoStateEstimator() {}
 
 void FixedDracoStateEstimator::initialize(FixedDracoSensorData *data) {
-  sp_->nominal_joint_pos = data->joint_positions;
-  // this->update_debug(data);
   this->update(data);
 }
 

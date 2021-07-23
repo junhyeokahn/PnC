@@ -53,10 +53,10 @@ void FixedDracoDataManager::Send() {
     pb_msg.add_task_lfoot_ang_vel_des(data->task_lfoot_ang_vel_des[i]);
     pb_msg.add_task_lfoot_ang_acc_des(data->task_lfoot_ang_acc_des[i]);
   }
-  pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori[3]);
+  pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori_des[3]);
   pb_msg.add_task_lfoot_ori(data->task_lfoot_ori[3]);
 
-  pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori[3]);
+  pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori_des[3]);
   pb_msg.add_task_rfoot_ori(data->task_rfoot_ori[3]);
 
   for (int i = 0; i < data->task_upper_body_pos_des.size(); ++i) {

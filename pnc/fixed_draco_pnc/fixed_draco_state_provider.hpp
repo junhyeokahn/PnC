@@ -11,6 +11,7 @@ public:
   static FixedDracoStateProvider *getStateProvider();
   ~FixedDracoStateProvider() {}
 
+  // should be set outside
   std::map<std::string, double> nominal_joint_pos;
 
   // finite state machine
@@ -24,6 +25,11 @@ public:
   // should be set outside
   int save_freq;
   double servo_rate = 0.001;
+
+  // command smoothing for hardware experiment
+  bool b_smoothing_cmd;
+  double smoothing_start_time;
+  double smoothing_duration;
 
 private:
   FixedDracoStateProvider();

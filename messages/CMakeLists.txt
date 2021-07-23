@@ -17,5 +17,5 @@ install(TARGETS pnc-msg-fixed-draco DESTINATION "${INSTALL_LIB_DIR}")
 
 install(FILES ${PROJECT_SOURCE_DIR}/build/messages/draco.pb.h DESTINATION
     "${INSTALL_INCLUDE_DIR}/messages/")
-install(FILES ${PROJECT_SOURCE_DIR}/build/messages/fixed-draco.pb.h DESTINATION
+install(FILES ${PROJECT_SOURCE_DIR}/build/messages/fixed_draco.pb.h DESTINATION
     "${INSTALL_INCLUDE_DIR}/messages/")

@@ -2,6 +2,7 @@ servo_rate: 0.001
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
+smoothing_duration: 0.1
 
 wbc:
     rf_z_max: 1000.0
@@ -56,6 +57,17 @@ ee_swaying:
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
         r_ankle_ie: 0.087
-    swaying_amp: [0.02, 0., 0.1]
-    swaying_freq: [1., 0., 1.]
+        neck_pitch: 0.
+        r_hip_ie: 0.
+        l_hip_ie: 0.
+        l_shoulder_fe: 0.
+        r_shoulder_fe: 0.
+        l_shoulder_ie: 0.
+        r_shoulder_ie: 0.
+        l_wrist_ps: 0.
+        r_wrist_ps: 0.
+        l_wrist_pitch: 0.
+        r_wrist_pitch: 0.
+    swaying_amp: [0.02, 0., 0.05]
+    swaying_freq: [0.2, 0., 0.2]
 

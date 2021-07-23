@@ -21,6 +21,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
   util::PrettyConstructor(1, "DracoControlArchitecture");
   robot_ = _robot;
+  sp_ = DracoStateProvider::getStateProvider();
 
   // Initialize Task Force Container
   tci_container = new DracoTCIContainer(robot_);
@@ -81,6 +82,7 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     target_ini_jpos_map[kv.first.as<std::string>()] = kv.second.as<double>();
   }
   Eigen::VectorXd target_ini_jpos = robot_->map_to_vector(target_ini_jpos_map);
+  sp_->nominal_joint_pos = target_ini_jpos_map;
   ((Initialize *)state_machines[draco_states::kInitialize])->target_jpos =
       target_ini_jpos;
 
@@ -137,7 +139,6 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   prev_state = draco_states::kStand;
 
   b_state_first_visit_ = true;
-  sp_ = DracoStateProvider::getStateProvider();
 }
 
 DracoControlArchitecture::~DracoControlArchitecture() {

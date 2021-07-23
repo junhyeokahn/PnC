@@ -11,6 +11,7 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
     : ControlArchitecture(_robot) {
   util::PrettyConstructor(1, "FixedDracoControlArchitecture");
   robot_ = _robot;
+  sp_ = FixedDracoStateProvider::getStateProvider();
 
   // Initialize Task Force Container
   tci_container = new FixedDracoTCIContainer(robot_);
@@ -41,6 +42,7 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
     target_ini_jpos_map[kv.first.as<std::string>()] = kv.second.as<double>();
   }
   Eigen::VectorXd target_ini_jpos = robot_->map_to_vector(target_ini_jpos_map);
+  sp_->nominal_joint_pos = target_ini_jpos_map;
   ((Initialize *)state_machines[fixed_draco_states::kInitialize])->target_jpos =
       target_ini_jpos;
 
@@ -70,7 +72,6 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
   prev_state = fixed_draco_states::kHold;
 
   b_state_first_visit_ = true;
-  sp_ = FixedDracoStateProvider::getStateProvider();
 }
 
 FixedDracoControlArchitecture::~FixedDracoControlArchitecture() {

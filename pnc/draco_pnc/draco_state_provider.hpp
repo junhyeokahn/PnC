@@ -11,6 +11,7 @@ public:
   static DracoStateProvider *getStateProvider();
   ~DracoStateProvider() {}
 
+  // should be set outside
   std::map<std::string, double> nominal_joint_pos;
 
   // finite state machine
@@ -24,6 +25,11 @@ public:
   // timing
   int count;
   double curr_time;
+
+  // command smoothing for hardware experiment
+  bool b_smoothing_cmd;
+  double smoothing_start_time;
+  double smoothing_duration;
 
   // should be set outside
   int save_freq;

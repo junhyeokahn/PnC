@@ -2,6 +2,7 @@ import random
 
 import numpy as np
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
@@ -137,10 +138,13 @@ def plot_vector_traj(time, vector, phase, suptitle, label):
     for i in range(dim):
         axes[i].plot(time, vector[:, i], color='k', linewidth=3)
         axes[i].grid(True)
-        axes[i].set_ylabel(label[i])
-        plot_phase(axes[i], time, phase)
+        if label is not None:
+            axes[i].set_ylabel(label[i])
+        if phase is not None:
+            plot_phase(axes[i], time, phase)
     axes[dim - 1].set_xlabel('time')
-    fig.suptitle(suptitle)
+    if suptitle is not None:
+        fig.suptitle(suptitle)
 
 
 def plot_rf(time, rfs, phase):

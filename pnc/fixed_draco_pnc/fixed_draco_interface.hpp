@@ -34,7 +34,6 @@ protected:
   FixedDracoStateEstimator *se_;
 
   int waiting_count_;
-  int smoothing_count_;
 
   void SetSafeCommand(FixedDracoSensorData *data, FixedDracoCommand *cmd);
   void SmoothCommand(FixedDracoCommand *cmd);

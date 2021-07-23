@@ -24,10 +24,7 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
 
 DracoStateEstimator::~DracoStateEstimator() {}
 
-// TODO : set nominal pos in different way
 void DracoStateEstimator::initialize(DracoSensorData *data) {
-  sp_->nominal_joint_pos = data->joint_positions;
-  // this->update_debug(data);
   this->update(data);
 }
 
