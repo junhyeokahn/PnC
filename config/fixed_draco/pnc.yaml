@@ -1,0 +1,61 @@
+servo_rate: 0.001
+
+save_freq: 50
+ip_addr: "tcp://127.0.0.1:5557"
+
+wbc:
+    rf_z_max: 1000.0
+
+    # Task Hierarchy Weights
+    w_upper_body_joint: 20.
+    w_foot: 40.
+
+    # Reaction Force Weights
+    w_rf: 0.
+
+    # Regulation
+    lambda_q_ddot: 1e-8
+    lambda_rf: 1e-7
+
+    # Task Gains
+    # ['neck_pitch', 'l_shoulder_fe', 'l_shoulder_aa', 'l_shoulder_ie',
+    # 'l_elbow_fe', 'l_wrist_ps', 'l_wrist_pitch', 'r_shoulder_fe',
+    # 'r_shoulder_aa', 'r_shoulder_ie', 'r_elbow_fe', 'r_wrist_ps',
+    # 'r_wrist_pitch']
+    kp_upper_body_joint: [40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.]
+    kd_upper_body_joint: [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.]
+
+    kp_foot_pos: [300., 300., 300.]
+    kd_foot_pos: [30., 30., 30.]
+    kp_foot_ori: [300., 300., 300.]
+    kd_foot_ori: [30., 30., 30.]
+
+    b_trq_limit: false
+
+    # Joint integration parameters
+    vel_cutoff_freq: 2.0 # Hz
+    pos_cutoff_freq: 1.0 # Hz
+    max_pos_err: 0.2 # rad
+
+ee_swaying:
+    ini_joint_dur: 4.
+    ini_joint_pos:
+        l_shoulder_aa: 0.523
+        l_elbow_fe: -1.57
+        r_shoulder_aa: -0.523
+        r_elbow_fe: -1.57
+        l_hip_aa: 0.087
+        l_hip_fe: -0.785
+        l_knee_fe_jp: 0.785
+        l_knee_fe_jd: 0.785
+        l_ankle_fe: -0.785
+        l_ankle_ie: -0.087
+        r_hip_aa: -0.087
+        r_hip_fe: -0.785
+        r_knee_fe_jp: 0.785
+        r_knee_fe_jd: 0.785
+        r_ankle_fe: -0.785
+        r_ankle_ie: 0.087
+    swaying_amp: [0.02, 0., 0.1]
+    swaying_freq: [1., 0., 1.]
+

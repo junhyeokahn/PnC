@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package fixed_draco;
+
+message pnc_msg {
+  float time = 1;
+  uint32 phase = 2;
+
+  // rfoot pos
+  repeated float task_rfoot_pos = 3;
+  repeated float task_rfoot_vel = 4;
+  repeated float task_rfoot_pos_des = 5;
+  repeated float task_rfoot_vel_des = 6;
+  repeated float task_rfoot_acc_des = 7;
+
+  // rfoot ori
+  repeated float task_rfoot_ori_des = 8;
+  repeated float task_rfoot_ang_vel_des = 9;
+  repeated float task_rfoot_ang_acc_des = 10;
+  repeated float task_rfoot_ori = 11;
+  repeated float task_rfoot_ang_vel = 12;
+
+  // lfoot pos
+  repeated float task_lfoot_pos = 13;
+  repeated float task_lfoot_vel = 14;
+  repeated float task_lfoot_pos_des = 15;
+  repeated float task_lfoot_vel_des = 16;
+  repeated float task_lfoot_acc_des = 17;
+
+  // rfoot ori
+  repeated float task_lfoot_ori_des = 18;
+  repeated float task_lfoot_ang_vel_des = 19;
+  repeated float task_lfoot_ang_acc_des = 20;
+  repeated float task_lfoot_ori = 21;
+  repeated float task_lfoot_ang_vel = 22;
+
+  // upper body
+  repeated float task_upper_body_pos_des = 23;
+  repeated float task_upper_body_vel_des = 24;
+  repeated float task_upper_body_acc_des = 25;
+  repeated float task_upper_body_pos = 26;
+  repeated float task_upper_body_vel = 27;
+
+  // pos, vel, trq cmd
+  repeated float cmd_joint_positions = 28;
+  repeated float cmd_joint_velocities = 29;
+  repeated float cmd_joint_torques = 30;
+  repeated float joint_velocities = 31;
+
+  // meshcat visualization
+  repeated float joint_positions = 32;
+}
