@@ -25,7 +25,7 @@ private:
   std::unique_ptr<zmq::context_t> context_;
   std::unique_ptr<zmq::socket_t> socket_;
 
-  bool b_initialized_;
+  bool b_socket_initialized_;
 };
 
 class DracoData {

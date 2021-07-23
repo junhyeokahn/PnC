@@ -1,7 +1,8 @@
 #include "pnc/draco_pnc/draco_data_manager.hpp"
+#include <iostream>
 
 DracoDataManager::DracoDataManager() {
-  b_initialized_ = false;
+  b_socket_initialized_ = false;
   data = std::make_unique<DracoData>();
 }
 
@@ -13,14 +14,18 @@ DracoDataManager *DracoDataManager::GetDracoDataManager() {
 }
 
 void DracoDataManager::InitializeSockets(const std::string &_addr) {
-  context_ = std::make_unique<zmq::context_t>(1);
-  socket_ = std::make_unique<zmq::socket_t>(*context_, ZMQ_PUB);
-  socket_->bind(_addr);
-  b_initialized_ = true;
+  if (b_socket_initialized_) {
+    // skip this
+  } else {
+    context_ = std::make_unique<zmq::context_t>(1);
+    socket_ = std::make_unique<zmq::socket_t>(*context_, ZMQ_PUB);
+    socket_->bind(_addr);
+    b_socket_initialized_ = true;
+  }
 }
 
 void DracoDataManager::Send() {
-  assert(b_initialized_);
+  assert(b_socket_initialized_);
 
   // copy data to protobuf msg
   draco::pnc_msg pb_msg;

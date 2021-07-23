@@ -164,10 +164,10 @@ service_call:
     r_elbow_fe:
         kp: 60.
         kd: 4.5
-        current_limit:
+        current_limit: 0.3
         weak_kp: 25.
         weak_kd: 1.2
-        weak_current_limit:
+        weak_current_limit: 0.1
     r_wrist_ps:
         kp: 9.
         kd: 1.
