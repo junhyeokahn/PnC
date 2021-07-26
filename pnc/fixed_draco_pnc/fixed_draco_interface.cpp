@@ -16,7 +16,7 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
     border += "=";
   }
   util::ColorPrint(color::kBoldCyan, border);
-  util::PrettyConstructor(0, "Draco Interface");
+  util::PrettyConstructor(0, "Fixed Draco Interface");
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/fixed_draco/pnc.yaml");
 

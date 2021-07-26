@@ -5,9 +5,10 @@ Initialize::Initialize(const StateIdentifier _state_identifier,
                        RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
-  util::PrettyConstructor(2, "Initialize");
+  util::PrettyConstructor(2, "Fixed Draco State: Initialize");
 
   ctrl_arch_ = _ctrl_arch;
+  ctrl_start_time_ = 0.;
   sp_ = FixedDracoStateProvider::getStateProvider();
   end_time = 5.;
 
@@ -47,11 +48,12 @@ void Initialize::oneStep() {
 void Initialize::lastVisit() {}
 
 bool Initialize::endOfState() {
-  if (state_machine_time_ >= end_time) {
-    return true;
-  } else {
-    return false;
-  }
+  // if (state_machine_time_ >= end_time) {
+  // return true;
+  //} else {
+  // return false;
+  //}
+  return false;
 }
 
 StateIdentifier Initialize::getNextState() { return fixed_draco_states::kHold; }
