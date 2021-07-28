@@ -39,7 +39,7 @@ wbc:
     max_pos_err: 0.2 # rad
 
 ee_swaying:
-    ini_joint_dur: 8.
+    ini_joint_dur: 5.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57
