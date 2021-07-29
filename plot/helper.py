@@ -186,3 +186,16 @@ def plot_phase(ax, t, data_phse):
                     ul,
                     facecolor=facecolors[data_phse[prev_j + 1]],
                     alpha=shading)
+
+
+def plot_joints(full_joint, selected_joint, time, cmd_joint_positions,
+                joint_positions, cmd_joint_velocities, joint_velocities,
+                cmd_joint_torques, phase, title):
+    idx_list = []
+    for name in selected_joint:
+        idx_list.append(full_joint.index(name))
+    plot_task(time, cmd_joint_positions[:, idx_list],
+              joint_positions[:, idx_list], cmd_joint_velocities[:, idx_list],
+              joint_velocities[:, idx_list], phase, title, selected_joint)
+    plot_vector_traj(time, cmd_joint_torques[:, idx_list], phase,
+                     title + " torque command", selected_joint)

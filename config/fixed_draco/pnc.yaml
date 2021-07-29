@@ -26,10 +26,10 @@ wbc:
     kp_upper_body_joint: [40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.]
     kd_upper_body_joint: [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.]
 
-    kp_foot_pos: [300., 300., 300.]
-    kd_foot_pos: [30., 30., 30.]
-    kp_foot_ori: [300., 300., 300.]
-    kd_foot_ori: [30., 30., 30.]
+    kp_foot_pos: [10., 10., 10.]
+    kd_foot_pos: [0.1, 0.1, 0.1]
+    kp_foot_ori: [10., 10., 10.]
+    kd_foot_ori: [0.1, 0.1, 0.1]
 
     b_trq_limit: false
 
@@ -39,7 +39,7 @@ wbc:
     max_pos_err: 0.2 # rad
 
 ee_swaying:
-    ini_joint_dur: 2.
+    ini_joint_dur: 6.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57

@@ -143,16 +143,19 @@ void FixedDracoController::getCommand(void *cmd) {
     this->SmoothCommand();
   }
 
-  if (sp_->count % sp_->save_freq == 0) {
-    this->SaveData();
-  }
-
   ((FixedDracoCommand *)cmd)->joint_positions =
       robot_->vector_to_map(joint_pos_cmd_);
   ((FixedDracoCommand *)cmd)->joint_velocities =
       robot_->vector_to_map(joint_vel_cmd_);
+  // TEST for admittance
+  // joint_trq_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  // TEST END
   ((FixedDracoCommand *)cmd)->joint_torques =
       robot_->vector_to_map(joint_trq_cmd_);
+
+  if (sp_->count % sp_->save_freq == 0) {
+    this->SaveData();
+  }
 }
 
 void FixedDracoController::FirstVisit() {

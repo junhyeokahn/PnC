@@ -21,7 +21,6 @@ JointIntegrator::JointIntegrator(const int num_joints_in,
                                  const double vel_cutoff_in,
                                  const double pos_cutoff_in,
                                  const double dt_in) {
-  std::cout << "a" << std::endl;
   util::PrettyConstructor(3, "IHWBC Joint Integrator");
   n_joints_ = num_joints_in;
   vel_ = Eigen::VectorXd::Zero(n_joints_);
@@ -50,8 +49,7 @@ void JointIntegrator::integrate(const Eigen::VectorXd acc_in,
   // Decay desired velocity to 0.0
   // default alpha_vel_=0.0124
   // default alpha_pos_=0.006
-  // vel_ = (1.0 - alpha_vel_) * vel_;
-  vel_ = (1.0 - alpha_vel_) * vel_ + alpha_vel_ * vel_in;
+  vel_ = (1.0 - alpha_vel_) * vel_;
   // Integrate Joint Acceleration
   vel_ += (acc_in * dt_);
   // Clamp and Store Value
