@@ -1,8 +1,8 @@
-servo_dt: 0.001
+servo_dt: 0.00125
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
-smoothing_duration: 0.1
+smoothing_duration: 5.
 
 wbc:
     rf_z_max: 1000.0
@@ -39,7 +39,7 @@ wbc:
     max_pos_err: 0.2 # rad
 
 ee_swaying:
-    ini_joint_dur: 5.
+    ini_joint_dur: 2.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57

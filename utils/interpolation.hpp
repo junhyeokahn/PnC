@@ -22,7 +22,7 @@ void SinusoidTrajectory(double initTime_, const Eigen::VectorXd &midPoint_,
                         const Eigen::VectorXd &amp_,
                         const Eigen::VectorXd &freq_, double evalTime_,
                         Eigen::VectorXd &p_, Eigen::VectorXd &v_,
-                        Eigen::VectorXd &a_);
+                        Eigen::VectorXd &a_, double smoothing_dur = 1.0);
 double Smooth(double ini, double fin, double rat);
 } // namespace util
 

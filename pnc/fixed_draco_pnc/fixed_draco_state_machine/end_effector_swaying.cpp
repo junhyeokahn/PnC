@@ -16,6 +16,8 @@ EndEffectorSwaying::EndEffectorSwaying(
 EndEffectorSwaying::~EndEffectorSwaying() {}
 
 void EndEffectorSwaying::firstVisit() {
+  ctrl_start_time_ = sp_->curr_time;
+
   if (leg_side_ == EndEffector::RFoot) {
     std::cout << "fixed_draco_states::kRightFootSwaying" << std::endl;
     ctrl_arch_->rf_ee_tm->InitializeSwayingTrajectory(ctrl_start_time_, amp,
@@ -29,8 +31,6 @@ void EndEffectorSwaying::firstVisit() {
   } else {
     std::cout << "Wrong leg side" << std::endl;
   }
-
-  ctrl_start_time_ = sp_->curr_time;
 }
 
 void EndEffectorSwaying::oneStep() {

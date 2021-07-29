@@ -9,8 +9,11 @@
 
 class FixedDracoController {
 public:
-  FixedDracoController(FixedDracoTCIContainer *_tci_container, RobotSystem *_robot);
+  FixedDracoController(FixedDracoTCIContainer *_tci_container,
+                       RobotSystem *_robot);
   virtual ~FixedDracoController();
+
+  double smoothing_duration;
 
   void getCommand(void *_cmd);
 
@@ -30,9 +33,17 @@ private:
   Eigen::VectorXd joint_pos_cmd_;
   Eigen::VectorXd joint_vel_cmd_;
 
-  void FirstVisit();
-
   Eigen::MatrixXd sa_;
   Eigen::MatrixXd sv_;
   Eigen::MatrixXd sf_;
+
+  bool b_smoothing_cmd_;
+  double smoothing_start_time_;
+  Eigen::VectorXd smoothing_start_joint_positions_;
+
+  // First visit of IHWBC
+  void FirstVisit();
+
+  // Smooth increment of the commands
+  void SmoothCommand();
 };

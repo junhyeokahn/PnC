@@ -87,25 +87,25 @@ joint_velocities = np.stack(joint_velocities, axis=0)
 ## Plot Task
 ## =============================================================================
 
-for i in range(3):
-    slc = slice(5 * i, 5 * (i + 1))
-    plot_task(time, des['task_upper_body_pos'][:, slc],
-              act['task_upper_body_pos'][:,
-                                         slc], des['task_upper_body_vel'][:,
-                                                                          slc],
-              act['task_upper_body_vel'][:, slc], phase, 'upper body',
-              upper_body_pos_label[slc])
+# for i in range(3):
+# slc = slice(5 * i, 5 * (i + 1))
+# plot_task(time, des['task_upper_body_pos'][:, slc],
+# act['task_upper_body_pos'][:,
+# slc], des['task_upper_body_vel'][:,
+# slc],
+# act['task_upper_body_vel'][:, slc], phase, 'upper body',
+# upper_body_pos_label[slc])
+
+# for i in range(6):
+# slc = slice(5 * i, 5 * (i + 1))
+# plot_vector_traj(time, cmd_joint_torques[:, slc], phase,
+# 'joint torque command', joint_label[slc])
 
 for i in range(6):
     slc = slice(5 * i, 5 * (i + 1))
-    plot_vector_traj(time, cmd_joint_torques[:, slc], phase,
-                     'joint torque command', joint_label[slc])
-
-# for i in range(6):
-# slc = slice(5*i, 5*(i+1))
-# plot_task(time, cmd_joint_positions[:,slc], joint_positions[:,slc],
-# cmd_joint_velocities[:,slc], joint_velocities[:,slc], phase,
-# 'joint', joint_label[slc])
+    plot_task(time, cmd_joint_positions[:, slc], joint_positions[:, slc],
+              cmd_joint_velocities[:, slc], joint_velocities[:, slc], phase,
+              'joint', joint_label[slc])
 
 plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
           des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')

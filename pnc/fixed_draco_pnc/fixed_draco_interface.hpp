@@ -36,7 +36,6 @@ protected:
   int waiting_count_;
 
   void SetSafeCommand(FixedDracoSensorData *data, FixedDracoCommand *cmd);
-  void SmoothCommand(FixedDracoCommand *cmd);
 
 public:
   FixedDracoInterface(bool b_sim);

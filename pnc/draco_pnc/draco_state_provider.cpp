@@ -20,10 +20,6 @@ DracoStateProvider::DracoStateProvider() {
   count = 0;
   curr_time = 0.;
 
-  b_smoothing_cmd = false;
-  smoothing_start_time = 0.;
-  smoothing_duration = 3.;
-
   dcm.setZero();
   prev_dcm.setZero();
   dcm_vel.setZero();

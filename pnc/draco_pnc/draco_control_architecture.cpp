@@ -20,6 +20,9 @@
 DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
   util::PrettyConstructor(1, "DracoControlArchitecture");
+
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+
   robot_ = _robot;
   sp_ = DracoStateProvider::getStateProvider();
 
@@ -28,13 +31,13 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 
   // Initialize Controller
   controller_ = new DracoController(tci_container, robot_);
+  controller_->smoothing_duration =
+      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();
 
-  // Initialize Task Manager
-  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
-
+  // Initialize Trajectory Manager
   rfoot_tm = new FootTrajectoryManager(tci_container->rfoot_pos_task,
                                        tci_container->rfoot_ori_task, robot_);
   rfoot_tm->swing_height =

@@ -26,11 +26,6 @@ public:
   int count;
   double curr_time;
 
-  // command smoothing for hardware experiment
-  bool b_smoothing_cmd;
-  double smoothing_start_time;
-  double smoothing_duration;
-
   // should be set outside
   int save_freq;
   double servo_dt = 0.001;

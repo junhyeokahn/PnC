@@ -78,6 +78,11 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
   cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
+
+  b_smoothing_cmd_ = false;
+  smoothing_start_time_ = 0.;
+  smoothing_duration = 3.;
+  smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
 }
 
 DracoController::~DracoController() {
@@ -152,6 +157,10 @@ void DracoController::getCommand(void *cmd) {
                                  joint_pos_cmd_);
   }
 
+  if (b_smoothing_cmd_) {
+    this->SmoothCommand();
+  }
+
   if (sp_->count % sp_->save_freq == 0) {
     this->SaveData();
   }
@@ -167,8 +176,25 @@ void DracoController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
-  sp_->b_smoothing_cmd = true;
-  sp_->smoothing_start_time = sp_->curr_time;
+
+  b_smoothing_cmd_ = true;
+  smoothing_start_time_ = sp_->curr_time;
+  smoothing_start_joint_positions_ = robot_->joint_positions;
+}
+
+void DracoController::SmoothCommand() {
+  double s = util::SmoothPos(0., 1., smoothing_duration,
+                             sp_->curr_time - smoothing_start_time_);
+
+  for (int i = 0; i < robot_->n_a; ++i) {
+    joint_pos_cmd_[i] =
+        s * joint_pos_cmd_[i] + (1 - s) * smoothing_start_joint_positions_[i];
+    joint_vel_cmd_[i] *= s;
+    joint_trq_cmd_[i] *= s;
+  }
+  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration) {
+    b_smoothing_cmd_ = false;
+  }
 }
 
 void DracoController::SaveData() {

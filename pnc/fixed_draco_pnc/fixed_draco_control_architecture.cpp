@@ -10,6 +10,9 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
     RobotSystem *_robot)
     : ControlArchitecture(_robot) {
   util::PrettyConstructor(1, "FixedDracoControlArchitecture");
+
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/fixed_draco/pnc.yaml");
+
   robot_ = _robot;
   sp_ = FixedDracoStateProvider::getStateProvider();
 
@@ -18,12 +21,12 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
 
   // Initialize Controller
   controller_ = new FixedDracoController(tci_container, robot_);
+  controller_->smoothing_duration =
+      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   // Initialize Planner
 
-  // Initialize Task Manager
-  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/fixed_draco/pnc.yaml");
-
+  // Initialize Trajectory Manager
   rf_ee_tm = new EndEffectorTrajectoryManager(
       tci_container->rfoot_pos_task, tci_container->rfoot_ori_task, robot_);
   lf_ee_tm = new EndEffectorTrajectoryManager(

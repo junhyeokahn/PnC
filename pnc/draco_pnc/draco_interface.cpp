@@ -27,8 +27,6 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   sp_ = DracoStateProvider::getStateProvider();
   sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
-  sp_->smoothing_duration =
-      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   count_ = 0;
   waiting_count_ = 10;
@@ -74,9 +72,6 @@ void DracoInterface::getCommand(void *_data, void *_command) {
     se_->update(data);
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
-    if (sp_->b_smoothing_cmd) {
-      this->SmoothCommand(cmd);
-    }
   }
 
   if (sp_->count % sp_->save_freq == 0) {
@@ -86,20 +81,6 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   }
 
   ++count_;
-}
-
-void DracoInterface::SmoothCommand(DracoCommand *cmd) {
-  double s = util::SmoothPos(0., 1., sp_->smoothing_duration,
-                             sp_->curr_time - sp_->smoothing_start_time);
-  for (std::map<std::string, double>::iterator it =
-           cmd->joint_velocities.begin();
-       it != cmd->joint_velocities.end(); ++it) {
-    cmd->joint_velocities[it->first] *= s;
-    cmd->joint_torques[it->first] *= s;
-  }
-  if (sp_->curr_time >= sp_->smoothing_start_time + sp_->smoothing_duration) {
-    sp_->b_smoothing_cmd = false;
-  }
 }
 
 void DracoInterface::SetSafeCommand(DracoSensorData *data, DracoCommand *cmd) {

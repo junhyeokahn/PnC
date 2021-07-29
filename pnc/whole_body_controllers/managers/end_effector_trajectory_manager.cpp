@@ -85,7 +85,7 @@ void EndEffectorTrajectoryManager::UpdateDesired(const double &_curr_time) {
 
   if (b_swaying_) {
     util::SinusoidTrajectory(start_time_, ini_pos_, amp_, freq_, _curr_time,
-                             pos_des, vel_des, acc_des);
+                             pos_des, vel_des, acc_des, 3.);
     ori_des << target_quat_.w(), target_quat_.x(), target_quat_.y(),
         target_quat_.z();
   } else {

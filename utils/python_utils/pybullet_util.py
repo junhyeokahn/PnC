@@ -186,6 +186,21 @@ def set_motor_pos(robot, joint_id, pos_cmd):
                                 targetPositions=list(pos_applied.values()))
 
 
+def set_motor_pos_vel(robot, joint_id, pos_cmd, vel_cmd):
+    pos_applied = OrderedDict()
+    vel_applied = OrderedDict()
+    for (joint_name, pos_des), (_, vel_des) in zip(pos_cmd.items(),
+                                                   vel_cmd.items()):
+        pos_applied[joint_id[joint_name]] = pos_des
+        vel_applied[joint_id[joint_name]] = vel_des
+
+    p.setJointMotorControlArray(robot,
+                                pos_applied.keys(),
+                                controlMode=p.POSITION_CONTROL,
+                                targetPositions=list(pos_applied.values()),
+                                targetVelocities=list(vel_applied.values()))
+
+
 def get_sensor_data(robot, joint_id, link_id, pos_basejoint_to_basecom,
                     rot_basejoint_to_basecom):
     """

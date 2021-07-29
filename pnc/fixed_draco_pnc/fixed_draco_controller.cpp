@@ -21,8 +21,6 @@ FixedDracoController::FixedDracoController(
   int r_jd_idx = robot_->get_q_dot_idx("r_knee_fe_jd");
 
   std::vector<bool> act_list;
-  // for (int i = 0; i < robot_->n_floating; ++i)
-  // act_list.push_back(false);
   for (int i = 0; i < robot_->n_a; ++i)
     act_list.push_back(true);
   act_list[l_jp_idx] = false;
@@ -75,6 +73,11 @@ FixedDracoController::FixedDracoController(
   joint_trq_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_vel_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+
+  b_smoothing_cmd_ = false;
+  smoothing_start_time_ = 0.;
+  smoothing_duration = 3.;
+  smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
 }
 
 FixedDracoController::~FixedDracoController() {
@@ -136,6 +139,10 @@ void FixedDracoController::getCommand(void *cmd) {
                                  joint_pos_cmd_);
   }
 
+  if (b_smoothing_cmd_) {
+    this->SmoothCommand();
+  }
+
   if (sp_->count % sp_->save_freq == 0) {
     this->SaveData();
   }
@@ -152,8 +159,9 @@ void FixedDracoController::FirstVisit() {
   Eigen::VectorXd jpos_ini = robot_->joint_positions;
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
-  sp_->b_smoothing_cmd = true;
-  sp_->smoothing_start_time = sp_->curr_time;
+  b_smoothing_cmd_ = true;
+  smoothing_start_time_ = sp_->curr_time;
+  smoothing_start_joint_positions_ = robot_->joint_positions;
 }
 
 void FixedDracoController::SaveData() {
@@ -162,4 +170,19 @@ void FixedDracoController::SaveData() {
   dm->data->cmd_joint_positions = joint_pos_cmd_;
   dm->data->cmd_joint_velocities = joint_vel_cmd_;
   dm->data->cmd_joint_torques = joint_trq_cmd_;
+}
+
+void FixedDracoController::SmoothCommand() {
+  double s = util::SmoothPos(0., 1., smoothing_duration,
+                             sp_->curr_time - smoothing_start_time_);
+
+  for (int i = 0; i < robot_->n_a; ++i) {
+    joint_pos_cmd_[i] =
+        s * joint_pos_cmd_[i] + (1 - s) * smoothing_start_joint_positions_[i];
+    joint_vel_cmd_[i] *= s;
+    joint_trq_cmd_[i] *= s;
+  }
+  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration) {
+    b_smoothing_cmd_ = false;
+  }
 }
