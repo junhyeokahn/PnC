@@ -25,8 +25,6 @@ import util
 
 import fixed_draco_interface
 
-b_admittance = True
-
 
 def set_initial_config(robot, joint_id):
     # Upperbody
@@ -116,8 +114,7 @@ if __name__ == "__main__":
     p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
     # Initial Config
-    if not b_admittance:
-        set_initial_config(robot, joint_id)
+    set_initial_config(robot, joint_id)
 
     # Link Damping
     pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
@@ -126,10 +123,7 @@ if __name__ == "__main__":
     pybullet_util.set_joint_friction(robot, joint_id, 0)
 
     # Construct Interface
-    if b_admittance:
-        interface = fixed_draco_interface.FixedDracoInterface(False)
-    else:
-        interface = fixed_draco_interface.FixedDracoInterface(True)
+    interface = fixed_draco_interface.FixedDracoInterface(True)
     sensor_data = fixed_draco_interface.FixedDracoSensorData()
     command = fixed_draco_interface.FixedDracoCommand()
 
@@ -203,13 +197,6 @@ if __name__ == "__main__":
             end_time = time.time()
             print("ctrl computation time: ", end_time - start_time)
 
-        # Just show visualization
-        if b_admittance:
-            pybullet_util.set_config(robot, joint_id, link_id,
-                                     nominal_sensor_data['base_joint_pos'],
-                                     nominal_sensor_data['base_joint_quat'],
-                                     command_joint_positions)
-
         # Exclude Knee Proximal Joints Command
         del command_joint_positions["l_knee_fe_jp"]
         del command_joint_positions["r_knee_fe_jp"]
@@ -219,8 +206,7 @@ if __name__ == "__main__":
         del command_joint_torques["r_knee_fe_jp"]
 
         # Apply Command
-        if not b_admittance:
-            pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
+        pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
 
         # Save Image
         if (Config.VIDEO_RECORD) and (count % Config.RECORD_FREQ == 0):
@@ -232,8 +218,7 @@ if __name__ == "__main__":
             cv2.imwrite(filename, frame)
             jpg_count += 1
 
-        if not b_admittance:
-            p.stepSimulation()
+        p.stepSimulation()
 
         time.sleep(dt)
         t += dt

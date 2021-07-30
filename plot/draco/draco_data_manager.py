@@ -1,6 +1,7 @@
 import zmq
 import sys
 import os
+
 sys.path.append(os.getcwd() + '/build')
 sys.path.append(os.getcwd() + 'plot')
 sys.path.append(os.getcwd())
@@ -93,11 +94,14 @@ while True:
     data_saver.add('task_lfoot_ori', list(msg.task_lfoot_ori))
     data_saver.add('task_lfoot_ang_vel', list(msg.task_lfoot_ang_vel))
 
-    data_saver.add('task_upper_body_pos_des', list(msg.task_upper_body_pos_des))
-    data_saver.add('task_upper_body_vel_des', list(msg.task_upper_body_vel_des))
-    data_saver.add('task_upper_body_acc_des', list(msg.task_upper_body_acc_des))
-    data_saver.add('task_upper_body_pos',     list(msg.task_upper_body_pos))
-    data_saver.add('task_upper_body_vel',     list(msg.task_upper_body_vel))
+    data_saver.add('task_upper_body_pos_des',
+                   list(msg.task_upper_body_pos_des))
+    data_saver.add('task_upper_body_vel_des',
+                   list(msg.task_upper_body_vel_des))
+    data_saver.add('task_upper_body_acc_des',
+                   list(msg.task_upper_body_acc_des))
+    data_saver.add('task_upper_body_pos', list(msg.task_upper_body_pos))
+    data_saver.add('task_upper_body_vel', list(msg.task_upper_body_vel))
 
     data_saver.add('cmd_lfoot_rf', list(msg.cmd_lfoot_rf))
     data_saver.add('cmd_rfoot_rf', list(msg.cmd_rfoot_rf))
@@ -120,4 +124,5 @@ while True:
     vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
     vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
     vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+
     viz.display(vis_q)

@@ -88,10 +88,17 @@ void IHWBC::solve(
     Eigen::MatrixXd Ainv_trc =
         Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_,
                     n_active_ + n_passive_);
+
+    // dynamic pseudo
     util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
                         lmd_sa_ni_trc);
     Eigen::MatrixXd sa_ni_trc_bar =
         Ainv_trc * sa_ni_trc.transpose() * lmd_sa_ni_trc;
+
+    // non dynamic pseudo
+    // Eigen::MatrixXd sa_ni_trc_bar;
+    // util::PseudoInverse(sa_ni_trc, 0.001, sa_ni_trc_bar);
+
     sa_ni_trc_bar_tr = sa_ni_trc_bar.transpose();
   } else {
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_);
@@ -335,6 +342,7 @@ void IHWBC::solve(
   }
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
+
   // util::PrettyPrint(tau_cmd, std::cout, "tau_cmd");
   // util::PrettyPrint(rf_cmd, std::cout, "rf_cmd");
   // std::cout << qddot_result_.transpose() << std::endl;
