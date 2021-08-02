@@ -5,47 +5,81 @@ ip_addr: "tcp://127.0.0.1:5557"
 smoothing_duration: 0.1
 
 wbc:
-    rf_z_max: 1000.0
+    regularization:
+        lambda_q_ddot: 1e-8
+        lambda_rf: 1e-7
 
-    # Task Hierarchy Weights
-    w_com: 20.
-    w_torso_ori: 20.
-    w_upper_body_joint: 20.
-    w_contact_foot: 60.
-    w_swing_foot: 40.
+    contact:
+        rf_z_max: 1000.0
+        w_rf: 0.
 
-    # Reaction Force Weights
-    w_rf: 0.
+    task:
+        com:
+            weight: 20
+            kp: [200, 200, 200]
+            kd: [10, 10, 10]
+        torso_ori:
+            weight: 20
+            kp: [100, 100, 100]
+            kd: [10, 10, 10]
+        upper_body_joint:
+            weight: 20.
+            neck_pitch:
+                kp: 40.
+                kd: 2.
+            l_shoulder_fe:
+                kp: 100.
+                kd: 8.
+            l_shoulder_aa:
+                kp: 100.
+                kd: 8.
+            l_shoulder_ie:
+                kp: 100.
+                kd: 8.
+            l_elbow_fe:
+                kp: 50.
+                kd: 3.
+            l_wrist_ps:
+                kp: 40.
+                kd: 2.
+            l_wrist_pitch:
+                kp: 40.
+                kd: 2.
+            r_shoulder_fe:
+                kp: 100.
+                kd: 8.
+            r_shoulder_aa:
+                kp: 100.
+                kd: 8.
+            r_shoulder_ie:
+                kp: 100.
+                kd: 8.
+            r_elbow_fe:
+                kp: 50.
+                kd: 3.
+            r_wrist_ps:
+                kp: 40.
+                kd: 2.
+            r_wrist_pitch:
+                kp: 40.
+                kd: 2.
+        foot_pos:
+            weight_at_contact: 60.
+            weight_at_swing: 40.
+            kp: [300., 300., 300.]
+            kd: [30., 30., 30.]
+        foot_ori:
+            weight_at_contact: 60.
+            weight_at_swing: 40.
+            kp: [300., 300., 300.]
+            kd: [30., 30., 30.]
 
-    # Regulation
-    lambda_q_ddot: 1e-8
-    lambda_rf: 1e-7
-
-    # Task Gains
-    kp_com: [200., 200., 200.]
-    kd_com: [10., 10., 10.]
-
-    kp_torso_ori: [100., 100., 100.]
-    kd_torso_ori: [10., 10., 10.]
-
-    # ['neck_pitch', 'l_shoulder_fe', 'l_shoulder_aa', 'l_shoulder_ie',
-    # 'l_elbow_fe', 'l_wrist_ps', 'l_wrist_pitch', 'r_shoulder_fe',
-    # 'r_shoulder_aa', 'r_shoulder_ie', 'r_elbow_fe', 'r_wrist_ps',
-    # 'r_wrist_pitch']
-    kp_upper_body_joint: [40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.]
-    kd_upper_body_joint: [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.]
-
-    kp_foot_pos: [300., 300., 300.]
-    kd_foot_pos: [30., 30., 30.]
-    kp_foot_ori: [300., 300., 300.]
-    kd_foot_ori: [30., 30., 30.]
+    joint_integrator:
+        vel_cutoff_freq: 2.0 # Hz
+        pos_cutoff_freq: 1.0 # Hz
+        max_pos_err:     0.2 # rad
 
     b_trq_limit: false
-
-    # Joint integration parameters
-    vel_cutoff_freq: 2.0 # Hz
-    pos_cutoff_freq: 1.0 # Hz
-    max_pos_err: 0.2 # rad
 
 balancing:
     swaying_amp: [0., 0.08, 0.]

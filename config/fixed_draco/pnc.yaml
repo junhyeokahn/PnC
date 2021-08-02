@@ -2,48 +2,77 @@ servo_dt: 0.00125
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
-smoothing_duration: 5.
+#smoothing_duration: 2.
+smoothing_duration: 0.01 #sim
 
 wbc:
-    rf_z_max: 1000.0
+    regularization:
+        lambda_q_ddot: 1e-8
+        lambda_rf: 1e-7
 
-    # Task Hierarchy Weights
-    w_upper_body_joint: 20.
-    w_foot: 40.
+    task:
+        upper_body_joint:
+            weight: 20.
+            neck_pitch:
+                kp: 40.
+                kd: 2.
+            l_shoulder_fe:
+                kp: 100.
+                kd: 8.
+            l_shoulder_aa:
+                kp: 100.
+                kd: 8.
+            l_shoulder_ie:
+                kp: 100.
+                kd: 8.
+            l_elbow_fe:
+                kp: 50.
+                kd: 3.
+            l_wrist_ps:
+                kp: 40.
+                kd: 2.
+            l_wrist_pitch:
+                kp: 40.
+                kd: 2.
+            r_shoulder_fe:
+                kp: 100.
+                kd: 8.
+            r_shoulder_aa:
+                kp: 100.
+                kd: 8.
+            r_shoulder_ie:
+                kp: 100.
+                kd: 8.
+            r_elbow_fe:
+                kp: 50.
+                kd: 3.
+            r_wrist_ps:
+                kp: 40.
+                kd: 2.
+            r_wrist_pitch:
+                kp: 40.
+                kd: 2.
 
-    # Reaction Force Weights
-    w_rf: 0.
+        # sim gain
+        foot_pos:
+            weight: 40.
+            kp: [300, 300, 300]
+            kd: [30, 30, 30]
+            #kp: [10, 10, 10]
+            #kd: [0.1, 0.1, 0.1]
+        foot_ori:
+            weight: 40.
+            kp: [300, 300, 300]
+            kd: [30, 30, 30]
+            #kp: [10., 10., 10.]
+            #kd: [0.1, 0.1, 0.1]
 
-    # Regulation
-    lambda_q_ddot: 1e-8
-    lambda_rf: 1e-7
-
-    # Task Gains
-    # ['neck_pitch', 'l_shoulder_fe', 'l_shoulder_aa', 'l_shoulder_ie',
-    # 'l_elbow_fe', 'l_wrist_ps', 'l_wrist_pitch', 'r_shoulder_fe',
-    # 'r_shoulder_aa', 'r_shoulder_ie', 'r_elbow_fe', 'r_wrist_ps',
-    # 'r_wrist_pitch']
-    kp_upper_body_joint: [40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.]
-    kd_upper_body_joint: [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.]
-
-    kp_foot_pos: [10., 10., 10.]
-    kd_foot_pos: [0.1, 0.1, 0.1]
-    kp_foot_ori: [10., 10., 10.]
-    kd_foot_ori: [0.1, 0.1, 0.1]
-
-    ## TEST : For grav comp
-    #kp_foot_pos: [0., 0., 0.]
-    #kd_foot_pos: [0., 0., 0.]
-    #kp_foot_ori: [0., 0., 0.]
-    #kd_foot_ori: [0., 0., 0.]
-    ## TEST END
+    joint_integrator:
+        vel_cutoff_freq: 2.0 # Hz
+        pos_cutoff_freq: 1.0 # Hz
+        max_pos_err: 0.2     # rad
 
     b_trq_limit: false
-
-    # Joint integration parameters
-    vel_cutoff_freq: 2.0 # Hz
-    pos_cutoff_freq: 1.0 # Hz
-    max_pos_err: 0.2 # rad
 
 ee_swaying:
     ini_joint_dur: 6.

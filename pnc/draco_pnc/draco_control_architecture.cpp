@@ -56,21 +56,34 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   dcm_tm->paramInitialization(cfg["walking"]);
 
   // Initialize Hierarchy Manager
-  double w_contact_foot, w_swing_foot;
-  util::ReadParameter(cfg["wbc"], "w_contact_foot", w_contact_foot);
-  util::ReadParameter(cfg["wbc"], "w_swing_foot", w_swing_foot);
-  rfoot_pos_hm = new TaskHierarchyManager(tci_container->rfoot_pos_task,
-                                          w_contact_foot, w_swing_foot);
-  rfoot_ori_hm = new TaskHierarchyManager(tci_container->rfoot_ori_task,
-                                          w_contact_foot, w_swing_foot);
-  lfoot_pos_hm = new TaskHierarchyManager(tci_container->lfoot_pos_task,
-                                          w_contact_foot, w_swing_foot);
-  lfoot_ori_hm = new TaskHierarchyManager(tci_container->lfoot_ori_task,
-                                          w_contact_foot, w_swing_foot);
+  rfoot_pos_hm = new TaskHierarchyManager(
+      tci_container->rfoot_pos_task,
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
+                                  "weight_at_contact"),
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
+                                  "weight_at_swing"));
+  rfoot_ori_hm = new TaskHierarchyManager(
+      tci_container->rfoot_ori_task,
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
+                                  "weight_at_contact"),
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
+                                  "weight_at_swing"));
+  lfoot_pos_hm = new TaskHierarchyManager(
+      tci_container->lfoot_pos_task,
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
+                                  "weight_at_contact"),
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
+                                  "weight_at_swing"));
+  lfoot_ori_hm = new TaskHierarchyManager(
+      tci_container->lfoot_ori_task,
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
+                                  "weight_at_contact"),
+      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
+                                  "weight_at_swing"));
 
   // Initialize Reaction Force Manager
   double rf_max;
-  util::ReadParameter(cfg["wbc"], "rf_z_max", rf_max);
+  util::ReadParameter(cfg["wbc"]["contact"], "rf_z_max", rf_max);
   rfoot_fm = new ReactionForceManager(tci_container->rfoot_contact, rf_max);
   lfoot_fm = new ReactionForceManager(tci_container->lfoot_contact, rf_max);
 

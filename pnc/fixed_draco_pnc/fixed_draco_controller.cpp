@@ -53,18 +53,19 @@ FixedDracoController::FixedDracoController(
                                 n_q_dot - robot_->n_floating) *
                       robot_->joint_trq_limit;
   }
-  wbc_->lambda_q_ddot =
-      util::ReadParameter<double>(cfg["wbc"], "lambda_q_ddot");
-  wbc_->lambda_rf = util::ReadParameter<double>(cfg["wbc"], "lambda_rf");
+  wbc_->lambda_q_ddot = util::ReadParameter<double>(
+      cfg["wbc"]["regularization"], "lambda_q_ddot");
+  wbc_->lambda_rf =
+      util::ReadParameter<double>(cfg["wbc"]["regularization"], "lambda_rf");
 
   // Initialize Joint Integrator
   joint_integrator_ = new JointIntegrator(robot_->n_a, sp_->servo_dt);
-  joint_integrator_->setVelocityFrequencyCutOff(
-      util::ReadParameter<double>(cfg["wbc"], "vel_cutoff_freq"));
-  joint_integrator_->setPositionFrequencyCutOff(
-      util::ReadParameter<double>(cfg["wbc"], "pos_cutoff_freq"));
-  joint_integrator_->setMaxPositionError(
-      util::ReadParameter<double>(cfg["wbc"], "max_pos_err"));
+  joint_integrator_->setVelocityFrequencyCutOff(util::ReadParameter<double>(
+      cfg["wbc"]["joint_integrator"], "vel_cutoff_freq"));
+  joint_integrator_->setPositionFrequencyCutOff(util::ReadParameter<double>(
+      cfg["wbc"]["joint_integrator"], "pos_cutoff_freq"));
+  joint_integrator_->setMaxPositionError(util::ReadParameter<double>(
+      cfg["wbc"]["joint_integrator"], "max_pos_err"));
   joint_integrator_->setVelocityBounds(robot_->joint_vel_limit.col(0),
                                        robot_->joint_vel_limit.col(1));
   joint_integrator_->setPositionBounds(robot_->joint_pos_limit.col(0),
@@ -143,6 +144,7 @@ void FixedDracoController::getCommand(void *cmd) {
     this->SmoothCommand();
   }
 
+  // TEST
   // For gravity compensation : Disable wbc gains here
   // if (sp_->state == fixed_draco_states::kInitialize) {
   //((FixedDracoCommand *)cmd)->joint_positions =
@@ -167,6 +169,7 @@ void FixedDracoController::getCommand(void *cmd) {
   // robot_->vector_to_map(joint_vel_cmd_);
   //((FixedDracoCommand *)cmd)->joint_torques =
   // robot_->vector_to_map(Eigen::VectorXd::Zero(robot_->n_a));
+  // TEST
 
   // For impednace control
   ((FixedDracoCommand *)cmd)->joint_positions =

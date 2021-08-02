@@ -77,27 +77,22 @@ void IHWBC::solve(
             jidot_qdot, internal_constraint_list[i]->jacobian_dot_q_dot);
       }
     }
-    Eigen::MatrixXd lmd_i;
-    util::PseudoInverse(ji * Ainv_ * ji.transpose(), 0.001, lmd_i);
+    Eigen::MatrixXd lmd_i =
+        util::PseudoInverse(ji * Ainv_ * ji.transpose(), 0.0001);
     Eigen::MatrixXd ji_bar = Ainv_ * ji.transpose() * lmd_i;
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_) - ji_bar * ji;
     jit_lmd_jidot_qdot = ji.transpose() * lmd_i * jidot_qdot;
     Eigen::MatrixXd sa_ni_trc =
         (sa_ * ni).block(0, n_floating_, n_active_, n_active_ + n_passive_);
-    Eigen::MatrixXd lmd_sa_ni_trc;
     Eigen::MatrixXd Ainv_trc =
         Ainv_.block(n_floating_, n_floating_, n_active_ + n_passive_,
                     n_active_ + n_passive_);
 
     // dynamic pseudo
-    util::PseudoInverse(sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.001,
-                        lmd_sa_ni_trc);
+    Eigen::MatrixXd lmd_sa_ni_trc = util::PseudoInverse(
+        sa_ni_trc * Ainv_trc * sa_ni_trc.transpose(), 0.00001);
     Eigen::MatrixXd sa_ni_trc_bar =
         Ainv_trc * sa_ni_trc.transpose() * lmd_sa_ni_trc;
-
-    // non dynamic pseudo
-    // Eigen::MatrixXd sa_ni_trc_bar;
-    // util::PseudoInverse(sa_ni_trc, 0.001, sa_ni_trc_bar);
 
     sa_ni_trc_bar_tr = sa_ni_trc_bar.transpose();
   } else {
