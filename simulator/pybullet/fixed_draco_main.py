@@ -120,10 +120,10 @@ if __name__ == "__main__":
     pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
 
     # Joint Friction
-    pybullet_util.set_joint_friction(robot, joint_id, 0)
+    pybullet_util.set_joint_friction(robot, joint_id, 0.1)
 
     # Construct Interface
-    interface = fixed_draco_interface.FixedDracoInterface(True)
+    interface = fixed_draco_interface.FixedDracoInterface(False)
     sensor_data = fixed_draco_interface.FixedDracoSensorData()
     command = fixed_draco_interface.FixedDracoCommand()
 
@@ -205,8 +205,15 @@ if __name__ == "__main__":
         del command_joint_torques["l_knee_fe_jp"]
         del command_joint_torques["r_knee_fe_jp"]
 
+        command_dict = dict()
+        command_dict["joint_pos"] = command_joint_positions
+        command_dict["joint_vel"] = command_joint_velocities
+        command_dict["joint_trq"] = command_joint_torques
+
         # Apply Command
-        pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
+        # pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
+        pybullet_util.set_motor_impedance(robot, joint_id, command_dict,
+                                          Config.KP, Config.KD)
 
         # Save Image
         if (Config.VIDEO_RECORD) and (count % Config.RECORD_FREQ == 0):

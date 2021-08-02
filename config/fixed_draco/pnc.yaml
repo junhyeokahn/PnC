@@ -56,14 +56,14 @@ wbc:
         # sim gain
         foot_pos:
             weight: 40.
-            kp: [300, 300, 300]
-            kd: [30, 30, 30]
+            kp: [100, 100, 100]
+            kd: [5, 5, 5]
             #kp: [10, 10, 10]
             #kd: [0.1, 0.1, 0.1]
         foot_ori:
             weight: 40.
-            kp: [300, 300, 300]
-            kd: [30, 30, 30]
+            kp: [100, 100, 100]
+            kd: [5, 5, 5]
             #kp: [10., 10., 10.]
             #kd: [0.1, 0.1, 0.1]
 
@@ -75,7 +75,7 @@ wbc:
     b_trq_limit: false
 
 ee_swaying:
-    ini_joint_dur: 6.
+    ini_joint_dur: 3.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57
