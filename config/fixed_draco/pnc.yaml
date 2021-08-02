@@ -26,16 +26,16 @@ wbc:
     kp_upper_body_joint: [40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.]
     kd_upper_body_joint: [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.]
 
-    #kp_foot_pos: [10., 10., 10.]
-    #kd_foot_pos: [0.1, 0.1, 0.1]
-    #kp_foot_ori: [10., 10., 10.]
-    #kd_foot_ori: [0.1, 0.1, 0.1]
+    kp_foot_pos: [10., 10., 10.]
+    kd_foot_pos: [0.1, 0.1, 0.1]
+    kp_foot_ori: [10., 10., 10.]
+    kd_foot_ori: [0.1, 0.1, 0.1]
 
     ## TEST : For grav comp
-    kp_foot_pos: [0., 0., 0.]
-    kd_foot_pos: [0., 0., 0.]
-    kp_foot_ori: [0., 0., 0.]
-    kd_foot_ori: [0., 0., 0.]
+    #kp_foot_pos: [0., 0., 0.]
+    #kd_foot_pos: [0., 0., 0.]
+    #kp_foot_ori: [0., 0., 0.]
+    #kd_foot_ori: [0., 0., 0.]
     ## TEST END
 
     b_trq_limit: false

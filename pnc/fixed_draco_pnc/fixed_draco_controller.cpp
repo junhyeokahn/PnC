@@ -144,21 +144,21 @@ void FixedDracoController::getCommand(void *cmd) {
   }
 
   // For gravity compensation : Disable wbc gains here
-  if (sp_->state == fixed_draco_states::kInitialize) {
-    ((FixedDracoCommand *)cmd)->joint_positions =
-        robot_->vector_to_map(joint_pos_cmd_);
-    ((FixedDracoCommand *)cmd)->joint_velocities =
-        robot_->vector_to_map(joint_vel_cmd_);
-    ((FixedDracoCommand *)cmd)->joint_torques =
-        robot_->vector_to_map(joint_trq_cmd_);
-  } else {
-    ((FixedDracoCommand *)cmd)->joint_positions =
-        robot_->vector_to_map(robot_->joint_positions);
-    ((FixedDracoCommand *)cmd)->joint_velocities =
-        robot_->vector_to_map(robot_->joint_velocities);
-    ((FixedDracoCommand *)cmd)->joint_torques =
-        robot_->vector_to_map(joint_trq_cmd_);
-  }
+  // if (sp_->state == fixed_draco_states::kInitialize) {
+  //((FixedDracoCommand *)cmd)->joint_positions =
+  // robot_->vector_to_map(joint_pos_cmd_);
+  //((FixedDracoCommand *)cmd)->joint_velocities =
+  // robot_->vector_to_map(joint_vel_cmd_);
+  //((FixedDracoCommand *)cmd)->joint_torques =
+  // robot_->vector_to_map(joint_trq_cmd_);
+  //} else {
+  //((FixedDracoCommand *)cmd)->joint_positions =
+  // robot_->vector_to_map(robot_->joint_positions);
+  //((FixedDracoCommand *)cmd)->joint_velocities =
+  // robot_->vector_to_map(robot_->joint_velocities);
+  //((FixedDracoCommand *)cmd)->joint_torques =
+  // robot_->vector_to_map(joint_trq_cmd_);
+  //}
 
   // For admittance control
   //((FixedDracoCommand *)cmd)->joint_positions =
@@ -169,12 +169,12 @@ void FixedDracoController::getCommand(void *cmd) {
   // robot_->vector_to_map(Eigen::VectorXd::Zero(robot_->n_a));
 
   // For impednace control
-  //((FixedDracoCommand *)cmd)->joint_positions =
-  // robot_->vector_to_map(joint_pos_cmd_);
-  //((FixedDracoCommand *)cmd)->joint_velocities =
-  // robot_->vector_to_map(joint_vel_cmd_);
-  //((FixedDracoCommand *)cmd)->joint_torques =
-  // robot_->vector_to_map(joint_trq_cmd_);
+  ((FixedDracoCommand *)cmd)->joint_positions =
+      robot_->vector_to_map(joint_pos_cmd_);
+  ((FixedDracoCommand *)cmd)->joint_velocities =
+      robot_->vector_to_map(joint_vel_cmd_);
+  ((FixedDracoCommand *)cmd)->joint_torques =
+      robot_->vector_to_map(joint_trq_cmd_);
 
   if (sp_->count % sp_->save_freq == 0) {
     this->SaveData();

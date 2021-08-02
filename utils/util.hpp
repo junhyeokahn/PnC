@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include <Eigen/Dense>
+#include <Eigen/QR>
 
 #include "configuration.hpp"
 #include "third_party/yaml/include/yaml/yaml.h"
@@ -101,6 +102,9 @@ double Clamp(const double &s_in, double lo = 0.0, double hi = 1.0);
 void PseudoInverse(Eigen::MatrixXd const &matrix, double sigmaThreshold,
                    Eigen::MatrixXd &invMatrix,
                    Eigen::VectorXd *opt_sigmaOut = 0);
+
+Eigen::MatrixXd PseudoInverse(const Eigen::MatrixXd &matrix,
+                              const double &threshold);
 
 Eigen::MatrixXd NullSpace(const Eigen::MatrixXd &J,
                           const double threshold = 0.00001);

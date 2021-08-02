@@ -398,6 +398,15 @@ void PseudoInverse(Eigen::MatrixXd const &matrix, double sigmaThreshold,
   }
 }
 
+Eigen::MatrixXd PseudoInverse(const Eigen::MatrixXd &matrix,
+                              const double &threshold) {
+  Eigen::CompleteOrthogonalDecomposition<Eigen::MatrixXd> cod(matrix.rows(),
+                                                              matrix.cols());
+  cod.setThreshold(threshold);
+  cod.compute(matrix);
+  return cod.pseudoInverse();
+}
+
 Eigen::MatrixXd getNullSpace(const Eigen::MatrixXd &J, const double threshold) {
 
   Eigen::MatrixXd ret(J.cols(), J.cols());

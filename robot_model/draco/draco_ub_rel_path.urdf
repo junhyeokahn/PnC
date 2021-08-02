@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="draco_ub">
+
+  <material name = "dark_gray">
+    <color rgba="0.3 0.3 0.3 1"/>
+  </material>
+
+  <material name = "gray">
+    <color rgba="0.5 0.5 0.5 1"/>
+  </material>
+
+  <material name = "light_blue">
+    <color rgba="0.52 0.73 1 1"/>
+  </material>
+
+  <material name = "black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <!--=============================== root (torso) ===========================-->
+  <link name="torso_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/torso_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-31.658e-03 -0.03865e-03 125.19e-03"/>
+      <mass value="6.456"/>
+      <inertia ixx="178517.35e-06" ixy="-18.968e-06" ixz="28376.527e-06" iyy="181767.801e-06" iyz="-50.398e-06" izz="37147.31e-06"/>
+    </inertial>
+  </link>
+
+  <!--=============================== neck_pitch (neck_pitch_link) ===========================-->
+  <joint name="neck_pitch" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.0025 0 0.352"/>
+    <parent link="torso_link"/>
+    <child link="neck_pitch_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="8.8" lower="-0.523599" upper="1.309" velocity="76"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="neck_pitch_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/neck_pitch_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0133603 -0.00105814 0.050"/>
+      <mass value="1.394979"/>
+      <inertia ixx="0.0026526" ixy="-2.37226e-05" ixz="-0.000179286" iyy="0.00218170" iyz="-10.85488e-05" izz="0.00312442"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_shoulder_fe (l_shoulder_fe_link) ===========================-->
+  <joint name="l_shoulder_fe" type="revolute">
+    <origin rpy="0.523599 0 0" xyz="-0.05 0.156 0.2625"/>
+    <parent link="torso_link"/>
+    <child link="l_shoulder_fe_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="18" lower="-2.26893" upper="0.698132" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_shoulder_fe_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/l_shoulder_fe_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0825089 -0.0272215 0"/>
+      <mass value="1.02127"/>
+      <inertia ixx="0.003" ixy="0.000188" ixz="-1.077e-04" iyy="0.002" iyz="-4.214e-07" izz="0.002"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_shoulder_aa (l_shoulder_aa_link) ===========================-->
+  <joint name="l_shoulder_aa" type="revolute">
+    <origin rpy="-0.523599 0 0" xyz="0 0 0"/>
+    <parent link="l_shoulder_fe_link"/>
+    <child link="l_shoulder_aa_link"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="18" lower="0" upper="2.0944" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_shoulder_aa_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/l_shoulder_aa_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0189446 0.000135529 0.00688183"/>
+      <mass value="0.880498"/>
+      <inertia ixx="0.00104194" ixy="5.17675e-06" ixz="-0.000110264" iyy="0.00190054" iyz="6.87354e-06" izz="0.00224159"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_shoulder_ie (l_shoulder_ie_link) ===========================-->
+  <joint name="l_shoulder_ie" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="l_shoulder_aa_link"/>
+    <child link="l_shoulder_ie_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="18" lower="-1.55" upper="1.55" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_shoulder_ie_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/l_shoulder_ie_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.00404627 0.029987 -0.137257"/>
+      <mass value="1.21235"/>
+      <inertia ixx="0.00490878" ixy="4.35994e-05" ixz="-6.63613e-05" iyy="0.00459797" iyz="3.61794e-05" izz="0.00207282"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_elbow_fe (l_elbow_fe_link) ===========================-->
+  <joint name="l_elbow_fe" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+    <parent link="l_shoulder_ie_link"/>
+    <child link="l_elbow_fe_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" lower="-2.094" upper="0.0872665" velocity="59.2"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_elbow_fe_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/l_elbow_fe_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0190443 0 -0.0633779"/>
+      <mass value="0.990031"/>
+      <inertia ixx="0.00220347" ixy="-2.91162e-08" ixz="-0.000310918" iyy="0.00297439" iyz="2.27665e-07" izz="0.0021045"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_wrist_ps (l_wrist_ps_link) ===========================-->
+  <joint name="l_wrist_ps" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="l_elbow_fe_link"/>
+    <child link="l_wrist_ps_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="12" lower="-1.571" upper="1.571" velocity="71"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_wrist_ps_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/l_wrist_ps_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000229308 0.0158433 -0.154"/>
+      <mass value="0.64434"/>
+      <inertia ixx="0.001" ixy="1.05504e-05" ixz="-5.41208e-06" iyy="0.001" iyz="4.65277e-05" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!--=============================== l_wrist_pitch (l_wrist_pitch_link) ===========================-->
+  <joint name="l_wrist_pitch" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 -0.1578"/>
+    <parent link="l_wrist_ps_link"/>
+    <child link="l_wrist_pitch_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="8.8" lower="-1.571" upper="1.571" velocity="76"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="l_wrist_pitch_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e-3"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_shoulder_fe (r_shoulder_fe_link) ===========================-->
+  <joint name="r_shoulder_fe" type="revolute">
+    <origin rpy="-0.523599 0 0" xyz="-0.05 -0.156 0.2625"/>
+    <parent link="torso_link"/>
+    <child link="r_shoulder_fe_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="18" lower="-2.26893" upper="0.698132" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_shoulder_fe_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/r_shoulder_fe_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0825089 0.0272215 6.40505e-05"/>
+      <mass value="1.02127"/>
+      <inertia ixx="0.003" ixy="-0.000198378" ixz="3.31293e-05" iyy="0.002" iyz="-3.00004e-06" izz="0.002"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_shoulder_aa (r_shoulder_aa_link) ===========================-->
+  <joint name="r_shoulder_aa" type="revolute">
+    <origin rpy="0.523599 0 0" xyz="0 0 0"/>
+    <parent link="r_shoulder_fe_link"/>
+    <child link="r_shoulder_aa_link"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="18" lower="-2.0944" upper="0" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_shoulder_aa_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/r_shoulder_aa_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0189446 0.000135529 0.00688183"/>
+      <mass value="0.880498"/>
+      <inertia ixx="0.00104194" ixy="5.17675e-06" ixz="-0.000110264" iyy="0.00190054" iyz="6.87354e-06" izz="0.00224159"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_shoulder_ie (r_shoulder_ie_link) ===========================-->
+  <joint name="r_shoulder_ie" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="r_shoulder_aa_link"/>
+    <child link="r_shoulder_ie_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="18" lower="-1.5" upper="1.5" velocity="47"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_shoulder_ie_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/r_shoulder_ie_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.00404627 -0.029987 -0.137257"/>
+      <mass value="1.21235"/>
+      <inertia ixx="0.00490973" ixy="-4.37742e-05" ixz="-6.62765e-05" iyy="0.00459809" iyz="-3.39569e-05" izz="0.002074"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_elbow_fe (r_elbow_fe_link) ===========================-->
+  <joint name="r_elbow_fe" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+    <parent link="r_shoulder_ie_link"/>
+    <child link="r_elbow_fe_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" lower="-2.094" upper="0.0872665" velocity="59.2"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_elbow_fe_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/r_elbow_fe_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0190415 1.75896e-05 -0.0633849"/>
+      <mass value="0.990031"/>
+      <inertia ixx="0.00220407" ixy="-2.9063e-08" ixz="-0.000310786" iyy="0.00297478" iyz="2.27528e-07" izz="0.00210481"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_wrist_ps (r_wrist_ps_link) ===========================-->
+  <joint name="r_wrist_ps" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="r_elbow_fe_link"/>
+    <child link="r_wrist_ps_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="12" lower="-1.571" upper="1.571" velocity="71"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_wrist_ps_link">
+    <visual>
+      <origin rpy="0 -0 0" xyz="0 0 0"/>
+      <geometry>
+        <!--<mesh filename="meshes/r_wrist_ps_link.stl"/>-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000229308 0.0158433 -0.154481"/>
+      <mass value="0.64434"/>
+      <inertia ixx="0.001" ixy="5.23851e-06" ixz="-4.22277e-06" iyy="0.001" iyz="3.40912e-05" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!--=============================== r_wrist_pitch (r_wrist_pitch_link) ===========================-->
+  <joint name="r_wrist_pitch" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 -0.1578"/>
+    <parent link="r_wrist_ps_link"/>
+    <child link="r_wrist_pitch_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="8.8" lower="-1.571" upper="1.571" velocity="76"/>
+    <joint_properties friction="0.0"/>
+  </joint>
+  <link name="r_wrist_pitch_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e-3"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!--=============================== torso_imu_frame (torso_imu) ===========================-->
+  <joint name="torso_imu_frame" type="fixed">
+    <origin rpy="3.14159 0 3.14159" xyz="0 0 -0.09"/>
+    <parent link="torso_link"/>
+    <child link="torso_imu"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <link name="torso_imu">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e-9"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+</robot>
