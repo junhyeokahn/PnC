@@ -118,10 +118,10 @@ plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
 
 plot_joints(joint_label, rfoot_label, time, cmd_joint_positions,
             joint_positions, cmd_joint_velocities, joint_velocities,
-            cmd_joint_torques, phase, "right_foot")
+            cmd_joint_torques, phase, "rfoot")
 
-# plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
-# joint_positions, cmd_joint_velocities, joint_velocities,
-# cmd_joint_torques, phase, "left_foot")
+plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
+            joint_positions, cmd_joint_velocities, joint_velocities,
+            cmd_joint_torques, phase, "lfoot")
 
 plt.show()

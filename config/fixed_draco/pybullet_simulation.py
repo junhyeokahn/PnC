@@ -20,35 +20,35 @@ class Config(object):
     KP["neck_pitch"] = 20.
     KD["neck_pitch"] = 1.
 
-    KP["r_hip_ie"] = 80.
-    KD["r_hip_ie"] = 2.
-    KP["l_hip_ie"] = 80.
-    KD["l_hip_ie"] = 2.
+    KP["r_hip_ie"] = 300
+    KD["r_hip_ie"] = 4
+    KP["l_hip_ie"] = 300
+    KD["l_hip_ie"] = 4
 
-    KP["r_hip_aa"] = 80.
-    KD["r_hip_aa"] = 2.
-    KP["l_hip_aa"] = 80.
-    KD["l_hip_aa"] = 2.
+    KP["r_hip_aa"] = 300
+    KD["r_hip_aa"] = 4
+    KP["l_hip_aa"] = 300
+    KD["l_hip_aa"] = 4
 
-    KP["r_hip_fe"] = 100.
-    KD["r_hip_fe"] = 5.
-    KP["l_hip_fe"] = 100.
-    KD["l_hip_fe"] = 5.
+    KP["r_hip_fe"] = 400
+    KD["r_hip_fe"] = 15
+    KP["l_hip_fe"] = 400
+    KD["l_hip_fe"] = 15
 
-    KP["r_knee_fe_jd"] = 100.
-    KD["r_knee_fe_jd"] = 5.
-    KP["l_knee_fe_jd"] = 100.
-    KD["l_knee_fe_jd"] = 5.
+    KP["r_knee_fe_jd"] = 400
+    KD["r_knee_fe_jd"] = 12
+    KP["l_knee_fe_jd"] = 400
+    KD["l_knee_fe_jd"] = 12
 
-    KP["r_ankle_fe"] = 20.
-    KD["r_ankle_fe"] = 1.
-    KP["l_ankle_fe"] = 20.
-    KD["l_ankle_fe"] = 1.
+    KP["r_ankle_fe"] = 150
+    KD["r_ankle_fe"] = 2
+    KP["l_ankle_fe"] = 150.
+    KD["l_ankle_fe"] = 2
 
-    KP["r_ankle_ie"] = 20.
-    KD["r_ankle_ie"] = 1.
-    KP["l_ankle_ie"] = 20.
-    KD["l_ankle_ie"] = 1.
+    KP["r_ankle_ie"] = 150.
+    KD["r_ankle_ie"] = 2
+    KP["l_ankle_ie"] = 150.
+    KD["l_ankle_ie"] = 2
 
     KP["r_shoulder_fe"] = 50.
     KD["r_shoulder_fe"] = 1.

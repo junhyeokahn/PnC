@@ -335,6 +335,9 @@ void IHWBC::solve(
     tau_cmd = sa_ni_trc_bar_tr * snf_ *
               (A_ * qddot_result_ + ni * (cori_ + grav_) + jit_lmd_jidot_qdot);
   }
+  // TEST (for fixed draco gravity comp)
+  tau_cmd = sa_ni_trc_bar_tr * snf_ * (ni * (cori_ + grav_));
+  // TEST END
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
 

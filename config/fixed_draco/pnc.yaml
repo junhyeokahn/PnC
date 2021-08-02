@@ -3,7 +3,7 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 #smoothing_duration: 2.
-smoothing_duration: 0.01 #sim
+smoothing_duration: 0.5 #sim
 
 wbc:
     regularization:

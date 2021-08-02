@@ -1,6 +1,7 @@
 import zmq
 import sys
 import os
+
 sys.path.append(os.getcwd() + '/build')
 sys.path.append(os.getcwd() + 'plot')
 sys.path.append(os.getcwd())
@@ -15,6 +16,12 @@ import pinocchio as pin
 from plot.data_saver import DataSaver
 
 from messages.fixed_draco_pb2 import *
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--b_visualize", type=bool, default=False)
+args = parser.parse_args()
 
 with open("config/fixed_draco/pnc.yaml", 'r') as stream:
     config = YAML().load(stream)
@@ -31,19 +38,20 @@ pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 data_saver = DataSaver()
 
-model, collision_model, visual_model = pin.buildModelsFromUrdf(
-    "robot_model/draco/draco.urdf", "robot_model/draco")
-viz = MeshcatVisualizer(model, collision_model, visual_model)
-try:
-    viz.initViewer(open=True)
-except ImportError as err:
-    print(
-        "Error while initializing the viewer. It seems you should install python meshcat"
-    )
-    print(err)
-    exit()
-viz.loadViewerModel()
-vis_q = pin.neutral(model)
+if args.b_visualize:
+    model, collision_model, visual_model = pin.buildModelsFromUrdf(
+        "robot_model/draco/draco.urdf", "robot_model/draco")
+    viz = MeshcatVisualizer(model, collision_model, visual_model)
+    try:
+        viz.initViewer(open=True)
+    except ImportError as err:
+        print(
+            "Error while initializing the viewer. It seems you should install python meshcat"
+        )
+        print(err)
+        exit()
+    viz.loadViewerModel()
+    vis_q = pin.neutral(model)
 
 msg = pnc_msg()
 
@@ -102,5 +110,6 @@ while True:
     # pj_socket.send_string(json.dumps(data_saver.history))
 
     # publish joint positions for meshcat
-    vis_q = np.array(msg.joint_positions)  # << joint pos
-    viz.display(vis_q)
+    if args.b_visualize:
+        vis_q = np.array(msg.joint_positions)  # << joint pos
+        viz.display(vis_q)

@@ -145,7 +145,7 @@ void FixedDracoController::getCommand(void *cmd) {
   }
 
   // TEST
-  // For gravity compensation : Disable wbc gains here
+  // For gravity compensation : ** Note ** Disable wbc gains or modify ihwbc
   // if (sp_->state == fixed_draco_states::kInitialize) {
   //((FixedDracoCommand *)cmd)->joint_positions =
   // robot_->vector_to_map(joint_pos_cmd_);
@@ -189,6 +189,9 @@ void FixedDracoController::FirstVisit() {
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
   b_smoothing_cmd_ = true;
+  // TEST (for gravity comp sim)
+  // b_smoothing_cmd_ = false;
+  // TEST
   smoothing_start_time_ = sp_->curr_time;
   smoothing_start_joint_positions_ = robot_->joint_positions;
 }
