@@ -61,4 +61,6 @@ private:
 
   int controller_type_;
   YAML::Node cfg_;
+
+  bool b_first_visit_;
 };

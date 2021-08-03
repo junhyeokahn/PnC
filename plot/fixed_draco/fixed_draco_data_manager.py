@@ -105,6 +105,8 @@ while True:
     data_saver.add('joint_positions', list(msg.joint_positions))
     data_saver.add('joint_velocities', list(msg.joint_velocities))
 
+    data_saver.add('base_joint_quat', list(msg.base_joint_quat))
+
     data_saver.advance()
 
     # publish back for plot juggler
@@ -118,5 +120,6 @@ while True:
         vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
         vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
         vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+        print(msg.base_joint_quat)
 
         viz.display(vis_q)

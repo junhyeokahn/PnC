@@ -79,6 +79,7 @@ FixedDracoController::FixedDracoController(
   joint_vel_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
 
+  b_first_visit_ = true;
   b_smoothing_cmd_ = false;
   smoothing_start_time_ = 0.;
   smoothing_duration =
@@ -97,10 +98,9 @@ void FixedDracoController::getCommand(void *cmd) {
     joint_vel_cmd_ = tci_container_->joint_task->vel_des;
     joint_trq_cmd_.setZero();
   } else {
-    static bool b_first_visit(true);
-    if (b_first_visit) {
+    if (b_first_visit_) {
       FirstVisit();
-      b_first_visit = false;
+      b_first_visit_ = false;
     }
 
     // Dynamics properties
@@ -233,11 +233,6 @@ Eigen::VectorXd FixedDracoController::ComputeGravityCompensationTorques(
       (sa_ * null_i) * mass_inv * (sa_ * null_i).transpose(), 0.00001);
   // dyn pseudo
   Eigen::MatrixXd sa_ni_bar = mass_inv * (sa_ * null_i).transpose() * lmd_sa_ni;
-
-  // pseudo
-  // TEST
-  // sa_ni_bar = util::PseudoInverse(sa_ * null_i, 0.00001);
-  // TEST END
 
   Eigen::MatrixXd sa_ni_bar_trns = sa_ni_bar.transpose();
 

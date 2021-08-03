@@ -56,24 +56,24 @@ wbc:
             weight: 40.
             #kp: [100, 100, 100]
             #kd: [5, 5, 5]
-            kp: [10, 10, 10]
-            kd: [0.1, 0.1, 0.1]
+            kp: [100, 100, 250]
+            kd: [0.1, 0.1, 1.2]
         foot_ori:
             weight: 40.
             #kp: [100, 100, 100]
             #kd: [5, 5, 5]
-            kp: [10., 10., 10.]
+            kp: [20., 20., 20.]
             kd: [0.1, 0.1, 0.1]
 
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz
-        pos_cutoff_freq: 1.0 # Hz
+        pos_cutoff_freq: 0.5 # Hz
         max_pos_err: 0.2     # rad
 
     b_trq_limit: false
 
 behavior:
-    ini_joint_dur: 3.
+    ini_joint_dur: 5.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57
@@ -103,7 +103,7 @@ behavior:
         l_wrist_pitch: 0.
         r_wrist_pitch: 0.
     swaying_amp: [0.02, 0., 0.05]
-    swaying_freq: [0.2, 0., 0.2]
+    swaying_freq: [0.2, 0., 1.0]
 
 controller:
     waiting_count: 10
