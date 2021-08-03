@@ -181,6 +181,8 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_r = True
 
         # Copy sensor_data_dict
+        sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
+        sensor_data.imu_frame_vel = sensor_data_dict['imu_frame_vel']
         sensor_data.joint_positions = sensor_data_dict["joint_pos"]
         sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
 

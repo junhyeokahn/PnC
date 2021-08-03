@@ -30,6 +30,8 @@ PYBIND11_MODULE(fixed_draco_interface, m) {
 
   py::class_<FixedDracoSensorData>(m, "FixedDracoSensorData")
       .def(py::init<>())
+      .def_readwrite("imu_frame_iso", &FixedDracoSensorData::imu_frame_iso)
+      .def_readwrite("imu_frame_vel", &FixedDracoSensorData::imu_frame_vel)
       .def_readwrite("joint_positions", &FixedDracoSensorData::joint_positions)
       .def_readwrite("joint_velocities",
                      &FixedDracoSensorData::joint_velocities);

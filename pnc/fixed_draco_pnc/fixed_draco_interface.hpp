@@ -11,9 +11,14 @@ class FixedDracoStateProvider;
 
 class FixedDracoSensorData {
 public:
-  FixedDracoSensorData() {}
+  FixedDracoSensorData() {
+    imu_frame_iso.setIdentity();
+    imu_frame_vel.setZero();
+  }
   virtual ~FixedDracoSensorData() {}
 
+  Eigen::Matrix<double, 4, 4> imu_frame_iso;
+  Eigen::Matrix<double, 6, 1> imu_frame_vel;
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
 };

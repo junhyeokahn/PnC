@@ -20,5 +20,6 @@ protected:
   FixedDracoStateProvider *sp_;
   RobotSystem *robot_;
 
-  Eigen::Quaternion<double> slack_quat_;
+  Eigen::Isometry3d iso_base_joint_to_imu_;
+  Eigen::Isometry3d iso_base_com_to_imu_;
 };

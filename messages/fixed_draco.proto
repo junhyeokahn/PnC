@@ -49,4 +49,6 @@ message pnc_msg {
 
   // meshcat visualization
   repeated float joint_positions = 32;
+  repeated float base_joint_pos = 33;
+  repeated float base_joint_quat = 34;
 }

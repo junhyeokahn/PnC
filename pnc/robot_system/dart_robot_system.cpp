@@ -172,6 +172,11 @@ void DartRobotSystem::update_system(
     }
   } else {
     // Fixed Base Robot
+    Eigen::Isometry3d base_joint_iso;
+    base_joint_iso.linear() = base_com_quat.normalized().toRotationMatrix();
+    base_joint_iso.translation() = base_joint_pos;
+
+    skel_->getRootJoint()->setTransformFromParentBodyNode(base_joint_iso);
   }
 
   for (std::map<std::string, double>::const_iterator it = joint_pos.begin();

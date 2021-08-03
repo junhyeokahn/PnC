@@ -40,7 +40,8 @@ data_saver = DataSaver()
 
 if args.b_visualize:
     model, collision_model, visual_model = pin.buildModelsFromUrdf(
-        "robot_model/draco/draco.urdf", "robot_model/draco")
+        "robot_model/draco/draco.urdf", "robot_model/draco",
+        pin.JointModelFreeFlyer())
     viz = MeshcatVisualizer(model, collision_model, visual_model)
     try:
         viz.initViewer(open=True)
@@ -111,5 +112,11 @@ while True:
 
     # publish joint positions for meshcat
     if args.b_visualize:
-        vis_q = np.array(msg.joint_positions)  # << joint pos
+        vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
+        vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
+        vis_q[4] = msg.base_joint_quat[2]  # << quaternion y
+        vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
+        vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
+        vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+
         viz.display(vis_q)

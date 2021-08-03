@@ -7,7 +7,8 @@ class Config(object):
     CAMERA_DT = 0.05
 
     INITIAL_POS_WORLD_TO_BASEJOINT = [0, 0, 0]
-    INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0., 1.]
+    # INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0., 1.]
+    INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0.38268, 0.92388]
 
     PRINT_TIME = False
     PRINT_ROBOT_INFO = False

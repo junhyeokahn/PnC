@@ -17,6 +17,12 @@ from plot.data_saver import DataSaver
 
 from messages.draco_pb2 import *
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--b_visualize", type=bool, default=False)
+args = parser.parse_args()
+
 with open("config/draco/pnc.yaml", 'r') as stream:
     config = YAML().load(stream)
     addr = config["ip_addr"]
@@ -32,20 +38,21 @@ pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 data_saver = DataSaver()
 
-model, collision_model, visual_model = pin.buildModelsFromUrdf(
-    "robot_model/draco/draco.urdf", "robot_model/draco",
-    pin.JointModelFreeFlyer())
-viz = MeshcatVisualizer(model, collision_model, visual_model)
-try:
-    viz.initViewer(open=True)
-except ImportError as err:
-    print(
-        "Error while initializing the viewer. It seems you should install python meshcat"
-    )
-    print(err)
-    exit()
-viz.loadViewerModel()
-vis_q = pin.neutral(model)
+if args.b_visualize:
+    model, collision_model, visual_model = pin.buildModelsFromUrdf(
+        "robot_model/draco/draco.urdf", "robot_model/draco",
+        pin.JointModelFreeFlyer())
+    viz = MeshcatVisualizer(model, collision_model, visual_model)
+    try:
+        viz.initViewer(open=True)
+    except ImportError as err:
+        print(
+            "Error while initializing the viewer. It seems you should install python meshcat"
+        )
+        print(err)
+        exit()
+    viz.loadViewerModel()
+    vis_q = pin.neutral(model)
 
 msg = pnc_msg()
 
@@ -118,11 +125,12 @@ while True:
     # pj_socket.send_string(json.dumps(data_saver.history))
 
     # publish joint positions for meshcat
-    vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
-    vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
-    vis_q[4] = msg.base_joint_quat[2]  # << quaternion y
-    vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
-    vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
-    vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+    if args.b_visualize:
+        vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
+        vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
+        vis_q[4] = msg.base_joint_quat[2]  # << quaternion y
+        vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
+        vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
+        vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
 
-    viz.display(vis_q)
+        viz.display(vis_q)
