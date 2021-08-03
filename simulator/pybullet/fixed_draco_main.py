@@ -122,11 +122,11 @@ if __name__ == "__main__":
     pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
 
     # Joint Friction
-    pybullet_util.set_joint_friction(robot, joint_id, 0.)
+    pybullet_util.set_joint_friction(robot, joint_id, 0.5)
 
     # Construct Interface
-    # interface = fixed_draco_interface.FixedDracoInterface(False)
-    interface = fixed_draco_interface.FixedDracoInterface(True)
+    interface = fixed_draco_interface.FixedDracoInterface(False)
+    # interface = fixed_draco_interface.FixedDracoInterface(True)
     sensor_data = fixed_draco_interface.FixedDracoSensorData()
     command = fixed_draco_interface.FixedDracoCommand()
 
