@@ -101,7 +101,7 @@ if __name__ == "__main__":
                            jointAxis=[0, 1, 0],
                            parentFramePosition=[0, 0, 0],
                            childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=5)
+    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=2)
 
     c = p.createConstraint(robot,
                            link_id['r_knee_fe_lp'],
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                            jointAxis=[0, 1, 0],
                            parentFramePosition=[0, 0, 0],
                            childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=5)
+    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=2)
 
     # Initial Config
     set_initial_config(robot, joint_id)
@@ -124,6 +124,7 @@ if __name__ == "__main__":
 
     # Construct Interface
     interface = fixed_draco_interface.FixedDracoInterface(False)
+    # interface = fixed_draco_interface.FixedDracoInterface(True)
     sensor_data = fixed_draco_interface.FixedDracoSensorData()
     command = fixed_draco_interface.FixedDracoCommand()
 

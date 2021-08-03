@@ -7,6 +7,12 @@
 #include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
 #include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
 
+namespace fixed_draco_controller_type {
+constexpr int kGravityCompensation = 0;
+constexpr int kAdmittanceControl = 1;
+constexpr int kImpedanceControl = 2;
+} // namespace fixed_draco_controller_type
+
 class FixedDracoController {
 public:
   FixedDracoController(FixedDracoTCIContainer *_tci_container,
@@ -46,4 +52,13 @@ private:
 
   // Smooth increment of the commands
   void SmoothCommand();
+
+  // compute gravity compensation torques
+  Eigen::VectorXd
+  ComputeGravityCompensationTorques(const Eigen::MatrixXd &mass,
+                                    const Eigen::MatrixXd &mass_inv,
+                                    const Eigen::VectorXd &grav);
+
+  int controller_type_;
+  YAML::Node cfg_;
 };

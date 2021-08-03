@@ -2,8 +2,6 @@ servo_dt: 0.00125
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
-#smoothing_duration: 2.
-smoothing_duration: 0.5 #sim
 
 wbc:
     regularization:
@@ -74,7 +72,7 @@ wbc:
 
     b_trq_limit: false
 
-ee_swaying:
+behavior:
     ini_joint_dur: 3.
     ini_joint_pos:
         l_shoulder_aa: 0.523
@@ -107,3 +105,7 @@ ee_swaying:
     swaying_amp: [0.02, 0., 0.05]
     swaying_freq: [0.2, 0., 0.2]
 
+controller:
+    b_smoothing: true
+    smoothing_duration: 0.5
+    controller_type: 0 # 0: gravity comp, 1: admittance, 2: impedance

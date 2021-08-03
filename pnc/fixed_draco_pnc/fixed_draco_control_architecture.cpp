@@ -21,8 +21,6 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
 
   // Initialize Controller
   controller_ = new FixedDracoController(tci_container, robot_);
-  controller_->smoothing_duration =
-      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   // Initialize Planner
 
@@ -38,8 +36,8 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
   state_machines[fixed_draco_states::kInitialize] =
       new Initialize(fixed_draco_states::kInitialize, this, robot_);
   ((Initialize *)state_machines[fixed_draco_states::kInitialize])->end_time =
-      util::ReadParameter<double>(cfg["ee_swaying"], "ini_joint_dur");
-  YAML::Node ini_jpos_node = cfg["ee_swaying"]["ini_joint_pos"];
+      util::ReadParameter<double>(cfg["behavior"], "ini_joint_dur");
+  YAML::Node ini_jpos_node = cfg["behavior"]["ini_joint_pos"];
   std::map<std::string, double> target_ini_jpos_map;
   for (const auto &kv : ini_jpos_node) {
     target_ini_jpos_map[kv.first.as<std::string>()] = kv.second.as<double>();
@@ -57,19 +55,19 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
                              EndEffector::RFoot, robot_);
   ((EndEffectorSwaying *)state_machines[fixed_draco_states::kRightFootSwaying])
       ->amp =
-      util::ReadParameter<Eigen::Vector3d>(cfg["ee_swaying"], "swaying_amp");
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_amp");
   ((EndEffectorSwaying *)state_machines[fixed_draco_states::kRightFootSwaying])
       ->freq =
-      util::ReadParameter<Eigen::Vector3d>(cfg["ee_swaying"], "swaying_freq");
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_freq");
 
   state_machines[fixed_draco_states::kLeftFootSwaying] = new EndEffectorSwaying(
       fixed_draco_states::kLeftFootSwaying, this, EndEffector::LFoot, robot_);
   ((EndEffectorSwaying *)state_machines[fixed_draco_states::kLeftFootSwaying])
       ->amp =
-      util::ReadParameter<Eigen::Vector3d>(cfg["ee_swaying"], "swaying_amp");
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_amp");
   ((EndEffectorSwaying *)state_machines[fixed_draco_states::kLeftFootSwaying])
       ->freq =
-      util::ReadParameter<Eigen::Vector3d>(cfg["ee_swaying"], "swaying_freq");
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_freq");
 
   state = fixed_draco_states::kHold;
   prev_state = fixed_draco_states::kHold;
