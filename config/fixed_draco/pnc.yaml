@@ -106,6 +106,9 @@ behavior:
     swaying_freq: [0.2, 0., 0.2]
 
 controller:
-    b_smoothing: true
+    ## TEST
+    waiting_count: -10
+    b_smoothing: false
+    ## TEST END
     smoothing_duration: 0.5
     controller_type: 0 # 0: gravity comp, 1: admittance, 2: impedance

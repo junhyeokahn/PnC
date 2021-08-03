@@ -235,7 +235,9 @@ Eigen::VectorXd FixedDracoController::ComputeGravityCompensationTorques(
   Eigen::MatrixXd sa_ni_bar = mass_inv * (sa_ * null_i).transpose() * lmd_sa_ni;
 
   // pseudo
-  // sa_ni_bar = util::PseudoInverse(sa_ * null_i, 0.00001);
+  // TEST
+  sa_ni_bar = util::PseudoInverse(sa_ * null_i, 0.00001);
+  // TEST END
 
   Eigen::MatrixXd sa_ni_bar_trns = sa_ni_bar.transpose();
 

@@ -32,6 +32,8 @@ def set_initial_config(robot, joint_id):
     p.resetJointState(robot, joint_id["l_elbow_fe"], -np.pi / 2, 0.)
     p.resetJointState(robot, joint_id["r_shoulder_aa"], -np.pi / 6, 0.)
     p.resetJointState(robot, joint_id["r_elbow_fe"], -np.pi / 2, 0.)
+    # p.resetJointState(robot, joint_id["l_wrist_ps"], np.pi / 6, 0.)
+    # p.resetJointState(robot, joint_id["r_wrist_ps"], -np.pi / 6, 0.)
 
     # Lowerbody
     hip_yaw_angle = 5
@@ -101,7 +103,7 @@ if __name__ == "__main__":
                            jointAxis=[0, 1, 0],
                            parentFramePosition=[0, 0, 0],
                            childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=2)
+    p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=2)
 
     c = p.createConstraint(robot,
                            link_id['r_knee_fe_lp'],
@@ -111,20 +113,20 @@ if __name__ == "__main__":
                            jointAxis=[0, 1, 0],
                            parentFramePosition=[0, 0, 0],
                            childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=1000, erp=2)
+    p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=2)
 
     # Initial Config
     set_initial_config(robot, joint_id)
 
     # Link Damping
-    # pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
+    pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
 
     # Joint Friction
-    pybullet_util.set_joint_friction(robot, joint_id, 0.5)
+    pybullet_util.set_joint_friction(robot, joint_id, 0.)
 
     # Construct Interface
-    interface = fixed_draco_interface.FixedDracoInterface(False)
-    # interface = fixed_draco_interface.FixedDracoInterface(True)
+    # interface = fixed_draco_interface.FixedDracoInterface(False)
+    interface = fixed_draco_interface.FixedDracoInterface(True)
     sensor_data = fixed_draco_interface.FixedDracoSensorData()
     command = fixed_draco_interface.FixedDracoCommand()
 

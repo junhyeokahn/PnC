@@ -18,7 +18,14 @@
     <color rgba="0 0 0 1"/>
   </material>
 
+  <link name="world"/>
+
   <!--=============================== root (torso) ===========================-->
+  <joint name="world_to_torso" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="torso_link"/>
+  </joint>
   <link name="torso_link">
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>

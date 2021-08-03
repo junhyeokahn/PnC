@@ -28,7 +28,7 @@ FixedDracoInterface::FixedDracoInterface(bool _b_sim) : Interface() {
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
   count_ = 0;
-  waiting_count_ = 10;
+  waiting_count_ = util::ReadParameter<int>(cfg["controller"], "waiting_count");
 
   control_architecture_ = new FixedDracoControlArchitecture(robot_);
   if (_b_sim) {
