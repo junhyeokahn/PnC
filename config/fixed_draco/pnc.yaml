@@ -12,44 +12,44 @@ wbc:
         upper_body_joint:
             weight: 20.
             neck_pitch:
-                kp: 40.
-                kd: 2.
+                kp: 5.
+                kd: 0.
             l_shoulder_fe:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             l_shoulder_aa:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             l_shoulder_ie:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             l_elbow_fe:
-                kp: 50.
-                kd: 3.
+                kp: 7.
+                kd: 0.
             l_wrist_ps:
-                kp: 40.
-                kd: 2.
+                kp: 5.
+                kd: 0.
             l_wrist_pitch:
-                kp: 40.
-                kd: 2.
+                kp: 5.
+                kd: 0.
             r_shoulder_fe:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             r_shoulder_aa:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             r_shoulder_ie:
-                kp: 100.
-                kd: 8.
+                kp: 10.
+                kd: 0.
             r_elbow_fe:
-                kp: 50.
-                kd: 3.
+                kp: 7.
+                kd: 0.
             r_wrist_ps:
-                kp: 40.
-                kd: 2.
+                kp: 5.
+                kd: 0.
             r_wrist_pitch:
-                kp: 40.
-                kd: 2.
+                kp: 5.
+                kd: 0.
 
         # sim gain
         foot_pos:

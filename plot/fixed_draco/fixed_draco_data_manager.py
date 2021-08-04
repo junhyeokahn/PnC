@@ -120,6 +120,5 @@ while True:
         vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
         vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
         vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
-        print(msg.base_joint_quat)
 
         viz.display(vis_q)
