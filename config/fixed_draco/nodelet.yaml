@@ -4,6 +4,8 @@ target_joint: "L_Ankle_IE"
 
 b_measure_computation_time: true
 
+sleep_time: 0.7
+
 # May need to use more at hip_fe
 
 service_call:
@@ -101,10 +103,10 @@ service_call:
         weak_current_limit: 0.1
     l_shoulder_fe:
         kp: 250.
-        kd: 7.
+        kd: 5.
         current_limit: 0.7
         weak_kp: 250.
-        weak_kd: 7.
+        weak_kd: 5.
         weak_current_limit: 0.2
     l_shoulder_aa:
         kp: 300.
@@ -143,10 +145,10 @@ service_call:
         weak_current_limit: 0.03
     r_shoulder_fe:
         kp: 250.
-        kd: 7.
+        kd: 5.
         current_limit: 0.7
         weak_kp: 250.
-        weak_kd: 7.
+        weak_kd: 5.
         weak_current_limit: 0.2
     r_shoulder_aa:
         kp: 300.
