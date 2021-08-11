@@ -20,6 +20,8 @@ public:
 
   bool b_rf_swaying_trigger;
   bool b_lf_swaying_trigger;
+  bool b_rh_swaying_trigger;
+  bool b_lh_swaying_trigger;
 
 protected:
   FixedDracoStateProvider *sp_;
@@ -27,6 +29,8 @@ protected:
 
   Eigen::Isometry3d target_rf_iso_;
   Eigen::Isometry3d target_lf_iso_;
+  Eigen::Isometry3d target_rh_iso_;
+  Eigen::Isometry3d target_lh_iso_;
 
   double ctrl_start_time_;
 };

@@ -23,6 +23,13 @@ void FixedDracoInterruptLogic::processInterrupts() {
 
   if (b_interrupt_button_w) {
     std::cout << "[Interrupt Logic] button w pressed" << std::endl;
+    if (ctrl_arch_->state == fixed_draco_states::kHold) {
+      std::cout << "---------                     ---------" << std::endl;
+      std::cout << "---------   Swing Left Hand   ---------" << std::endl;
+      static_cast<EndEffectorHold *>(
+          ctrl_arch_->state_machines[fixed_draco_states::kHold])
+          ->b_lh_swaying_trigger = true;
+    }
   }
 
   if (b_interrupt_button_a) {
@@ -37,6 +44,13 @@ void FixedDracoInterruptLogic::processInterrupts() {
   }
   if (b_interrupt_button_s) {
     std::cout << "[Interrupt Logic] button s pressed" << std::endl;
+    if (ctrl_arch_->state == fixed_draco_states::kHold) {
+      std::cout << "---------                     ---------" << std::endl;
+      std::cout << "---------   Swing Right Hand   ---------" << std::endl;
+      static_cast<EndEffectorHold *>(
+          ctrl_arch_->state_machines[fixed_draco_states::kHold])
+          ->b_rh_swaying_trigger = true;
+    }
   }
 
   if (b_interrupt_button_d) {

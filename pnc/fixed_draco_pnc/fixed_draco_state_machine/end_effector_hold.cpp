@@ -11,6 +11,8 @@ EndEffectorHold::EndEffectorHold(const StateIdentifier _state_identifier,
 
   b_rf_swaying_trigger = false;
   b_lf_swaying_trigger = false;
+  b_rh_swaying_trigger = false;
+  b_lh_swaying_trigger = false;
 
   sp_ = FixedDracoStateProvider::getStateProvider();
 }
@@ -22,8 +24,12 @@ void EndEffectorHold::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
   target_rf_iso_ = robot_->get_link_iso("r_foot_contact");
   target_lf_iso_ = robot_->get_link_iso("l_foot_contact");
+  target_rh_iso_ = robot_->get_link_iso("r_hand_contact");
+  target_lh_iso_ = robot_->get_link_iso("l_hand_contact");
   b_rf_swaying_trigger = false;
   b_lf_swaying_trigger = false;
+  b_rh_swaying_trigger = false;
+  b_lh_swaying_trigger = false;
 }
 
 void EndEffectorHold::oneStep() {
@@ -31,12 +37,15 @@ void EndEffectorHold::oneStep() {
 
   ctrl_arch_->rf_ee_tm->UpdateDesired(target_rf_iso_);
   ctrl_arch_->lf_ee_tm->UpdateDesired(target_lf_iso_);
+  ctrl_arch_->rh_ee_tm->UpdateDesired(target_rh_iso_);
+  ctrl_arch_->lh_ee_tm->UpdateDesired(target_lh_iso_);
 }
 
 void EndEffectorHold::lastVisit() {}
 
 bool EndEffectorHold::endOfState() {
-  if (b_rf_swaying_trigger || b_lf_swaying_trigger) {
+  if (b_rf_swaying_trigger || b_lf_swaying_trigger || b_rh_swaying_trigger ||
+      b_lh_swaying_trigger) {
     return true;
   } else {
     return false;
@@ -48,6 +57,10 @@ StateIdentifier EndEffectorHold::getNextState() {
     return fixed_draco_states::kRightFootSwaying;
   } else if (b_lf_swaying_trigger) {
     return fixed_draco_states::kLeftFootSwaying;
+  } else if (b_rh_swaying_trigger) {
+    return fixed_draco_states::kRightHandSwaying;
+  } else if (b_lh_swaying_trigger) {
+    return fixed_draco_states::kLeftHandSwaying;
   } else {
     assert(false);
   }

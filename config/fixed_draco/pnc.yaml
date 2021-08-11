@@ -64,6 +64,22 @@ wbc:
             #kd: [5, 5, 5]
             kp: [20., 20., 20.]
             kd: [0.1, 0.1, 0.1]
+        hand_pos:
+            weight: 40.
+            #kp: [100, 100, 100]
+            #kd: [5, 5, 5]
+            kp: [100, 100, 250]
+            kd: [0.1, 0.1, 1.2]
+        hand_ori:
+            weight: 40.
+            #kp: [100, 100, 100]
+            #kd: [5, 5, 5]
+            kp: [20., 20., 20.]
+            kd: [0.1, 0.1, 0.1]
+        neck:
+            weight: 20.
+            kp: 5.
+            kd: 0.
 
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz

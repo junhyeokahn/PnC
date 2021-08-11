@@ -29,8 +29,11 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
       tci_container->rfoot_pos_task, tci_container->rfoot_ori_task, robot_);
   lf_ee_tm = new EndEffectorTrajectoryManager(
       tci_container->lfoot_pos_task, tci_container->lfoot_ori_task, robot_);
-  upper_body_tm =
-      new UpperBodyTrajectoryManager(tci_container->upper_body_task, robot_);
+  rh_ee_tm = new EndEffectorTrajectoryManager(
+      tci_container->rhand_pos_task, tci_container->rhand_ori_task, robot_);
+  lh_ee_tm = new EndEffectorTrajectoryManager(
+      tci_container->lhand_pos_task, tci_container->lhand_ori_task, robot_);
+  neck_tm = new UpperBodyTrajectoryManager(tci_container->neck_task, robot_);
 
   // Initialize State Machine
   state_machines[fixed_draco_states::kInitialize] =
@@ -50,6 +53,7 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
   state_machines[fixed_draco_states::kHold] =
       new EndEffectorHold(fixed_draco_states::kHold, this, robot_);
 
+  // Feet
   state_machines[fixed_draco_states::kRightFootSwaying] =
       new EndEffectorSwaying(fixed_draco_states::kRightFootSwaying, this,
                              EndEffector::RFoot, robot_);
@@ -69,6 +73,25 @@ FixedDracoControlArchitecture::FixedDracoControlArchitecture(
       ->freq =
       util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_freq");
 
+  // Hands
+  state_machines[fixed_draco_states::kRightHandSwaying] =
+      new EndEffectorSwaying(fixed_draco_states::kRightHandSwaying, this,
+                             EndEffector::RHand, robot_);
+  ((EndEffectorSwaying *)state_machines[fixed_draco_states::kRightHandSwaying])
+      ->amp =
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_amp");
+  ((EndEffectorSwaying *)state_machines[fixed_draco_states::kRightHandSwaying])
+      ->freq =
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_freq");
+
+  state_machines[fixed_draco_states::kLeftHandSwaying] = new EndEffectorSwaying(
+      fixed_draco_states::kLeftHandSwaying, this, EndEffector::LHand, robot_);
+  ((EndEffectorSwaying *)state_machines[fixed_draco_states::kLeftHandSwaying])
+      ->amp =
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_amp");
+  ((EndEffectorSwaying *)state_machines[fixed_draco_states::kLeftHandSwaying])
+      ->freq =
+      util::ReadParameter<Eigen::Vector3d>(cfg["behavior"], "swaying_freq");
   state = fixed_draco_states::kHold;
   prev_state = fixed_draco_states::kHold;
 
@@ -80,15 +103,19 @@ FixedDracoControlArchitecture::~FixedDracoControlArchitecture() {
 
   delete controller_;
 
-  delete upper_body_tm;
+  delete neck_tm;
 
   delete rf_ee_tm;
   delete lf_ee_tm;
+  delete rh_ee_tm;
+  delete lh_ee_tm;
 
   delete state_machines[fixed_draco_states::kInitialize];
   delete state_machines[fixed_draco_states::kHold];
   delete state_machines[fixed_draco_states::kRightFootSwaying];
   delete state_machines[fixed_draco_states::kLeftFootSwaying];
+  delete state_machines[fixed_draco_states::kRightHandSwaying];
+  delete state_machines[fixed_draco_states::kLeftHandSwaying];
 }
 
 void FixedDracoControlArchitecture::getCommand(void *_command) {
@@ -101,7 +128,7 @@ void FixedDracoControlArchitecture::getCommand(void *_command) {
   // Update State Machine
   state_machines[state]->oneStep();
   // Update State Machine Independent Trajectories
-  upper_body_tm->UseNominalUpperBodyJointPos(sp_->nominal_joint_pos);
+  neck_tm->UseNominalUpperBodyJointPos(sp_->nominal_joint_pos);
   // Get WBC Commands
   controller_->getCommand(_command);
 
@@ -120,6 +147,7 @@ void FixedDracoControlArchitecture::getCommand(void *_command) {
 void FixedDracoControlArchitecture::SaveData() {
   FixedDracoDataManager *dm = FixedDracoDataManager::GetFixedDracoDataManager();
 
+  // feet
   tci_container->rfoot_pos_task->CopyData(
       dm->data->task_rfoot_pos_des, dm->data->task_rfoot_vel_des,
       dm->data->task_rfoot_acc_des, dm->data->task_rfoot_pos,
@@ -140,8 +168,29 @@ void FixedDracoControlArchitecture::SaveData() {
       dm->data->task_lfoot_ang_acc_des, dm->data->task_lfoot_ori,
       dm->data->task_lfoot_ang_vel);
 
-  tci_container->upper_body_task->CopyData(
-      dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,
-      dm->data->task_upper_body_acc_des, dm->data->task_upper_body_pos,
-      dm->data->task_upper_body_vel);
+  // hands
+  // tci_container->rhand_pos_task->CopyData(
+  // dm->data->task_rhand_pos_des, dm->data->task_rhand_vel_des,
+  // dm->data->task_rhand_acc_des, dm->data->task_rhand_pos,
+  // dm->data->task_rhand_vel);
+
+  // tci_container->rhand_ori_task->CopyData(
+  // dm->data->task_rhand_ori_des, dm->data->task_rhand_ang_vel_des,
+  // dm->data->task_rhand_ang_acc_des, dm->data->task_rhand_ori,
+  // dm->data->task_rhand_ang_vel);
+
+  // tci_container->lhand_pos_task->CopyData(
+  // dm->data->task_lhand_pos_des, dm->data->task_lhand_vel_des,
+  // dm->data->task_lhand_acc_des, dm->data->task_lhand_pos,
+  // dm->data->task_lhand_vel);
+
+  // tci_container->lhand_ori_task->CopyData(
+  // dm->data->task_lhand_ori_des, dm->data->task_lhand_ang_vel_des,
+  // dm->data->task_lhand_ang_acc_des, dm->data->task_lhand_ori,
+  // dm->data->task_lhand_ang_vel);
+
+  // tci_container->neck_task->CopyData(
+  // dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,
+  // dm->data->task_upper_body_acc_des, dm->data->task_upper_body_pos,
+  // dm->data->task_upper_body_vel);
 }

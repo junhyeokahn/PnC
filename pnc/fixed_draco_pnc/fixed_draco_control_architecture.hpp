@@ -14,6 +14,8 @@ constexpr int kInitialize = 0;
 constexpr int kHold = 1;
 constexpr int kRightFootSwaying = 2;
 constexpr int kLeftFootSwaying = 3;
+constexpr int kRightHandSwaying = 4;
+constexpr int kLeftHandSwaying = 5;
 } // namespace fixed_draco_states
 
 class FixedDracoControlArchitecture : public ControlArchitecture {
@@ -25,7 +27,9 @@ public:
 
   EndEffectorTrajectoryManager *rf_ee_tm;
   EndEffectorTrajectoryManager *lf_ee_tm;
-  UpperBodyTrajectoryManager *upper_body_tm;
+  EndEffectorTrajectoryManager *rh_ee_tm;
+  EndEffectorTrajectoryManager *lh_ee_tm;
+  UpperBodyTrajectoryManager *neck_tm;
 
   FixedDracoTCIContainer *tci_container;
 

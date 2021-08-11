@@ -8,8 +8,8 @@
 class EndEffectorSwaying : public StateMachine {
 public:
   EndEffectorSwaying(const StateIdentifier state_identifier_in,
-                     FixedDracoControlArchitecture *_ctrl_arch, int _leg_side,
-                     RobotSystem *_robot);
+                     FixedDracoControlArchitecture *_ctrl_arch,
+                     int _end_eff_side, RobotSystem *_robot);
   ~EndEffectorSwaying();
 
   void oneStep();
@@ -27,7 +27,9 @@ protected:
 
   Eigen::Isometry3d target_rf_iso_;
   Eigen::Isometry3d target_lf_iso_;
+  Eigen::Isometry3d target_rh_iso_;
+  Eigen::Isometry3d target_lh_iso_;
 
   double ctrl_start_time_;
-  int leg_side_;
+  int end_eff_side_;
 };
