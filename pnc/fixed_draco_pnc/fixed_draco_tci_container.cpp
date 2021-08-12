@@ -27,8 +27,14 @@ FixedDracoTCIContainer::FixedDracoTCIContainer(RobotSystem *_robot)
   // cfg["wbc"]["task"]["upper_body_joint"], "weight");
   std::vector<std::string> neck_joint = {"neck_pitch"};
   neck_task = new SelectedJointTask(robot_, neck_joint);
-  neck_task->kp = util::ReadParameter<double>(cfg["wbc"]["task"]["neck"], "kp");
-  neck_task->kd = util::ReadParameter<double>(cfg["wbc"]["task"]["neck"], "kd");
+  neck_task->kp = Eigen::VectorXd::Zero(neck_joint.size()); 
+  neck_task->kd = Eigen::VectorXd::Zero(neck_joint.size());
+  for (int i = 0; i < neck_joint.size(); ++i) {
+      neck_task->kp[i] = util::ReadParameter<double>(cfg["wbc"]["task"]["neck"], "kp");
+  }
+  for (int i = 0; i < neck_joint.size(); ++i) {
+      neck_task->kd[i] = util::ReadParameter<double>(cfg["wbc"]["task"]["neck"], "kd");
+  }
   neck_task->w_hierarchy =
       util::ReadParameter<double>(cfg["wbc"]["task"]["neck"], "weight");
 
