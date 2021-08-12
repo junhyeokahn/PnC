@@ -61,11 +61,41 @@ public:
   Eigen::VectorXd task_lfoot_ori = Eigen::VectorXd::Zero(4);
   Eigen::VectorXd task_lfoot_ang_vel = Eigen::VectorXd::Zero(3);
 
-  Eigen::VectorXd task_upper_body_pos_des = Eigen::VectorXd::Zero(13);
-  Eigen::VectorXd task_upper_body_vel_des = Eigen::VectorXd::Zero(13);
-  Eigen::VectorXd task_upper_body_acc_des = Eigen::VectorXd::Zero(13);
-  Eigen::VectorXd task_upper_body_pos = Eigen::VectorXd::Zero(13);
-  Eigen::VectorXd task_upper_body_vel = Eigen::VectorXd::Zero(13);
+  Eigen::VectorXd task_rhand_pos = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_vel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_rhand_ori_des = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ang_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ang_acc_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ori = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ang_vel = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_pos = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_vel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_ori_des = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ang_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ang_acc_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ori = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ang_vel = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_neck_pos_des = Eigen::VectorXd::Zero(1);
+  Eigen::VectorXd task_neck_vel_des = Eigen::VectorXd::Zero(1);
+  Eigen::VectorXd task_neck_acc_des = Eigen::VectorXd::Zero(1);
+  Eigen::VectorXd task_neck_pos = Eigen::VectorXd::Zero(1);
+  Eigen::VectorXd task_neck_vel = Eigen::VectorXd::Zero(1);
+
+  // Eigen::VectorXd task_upper_body_pos_des = Eigen::VectorXd::Zero(13);
+  // Eigen::VectorXd task_upper_body_vel_des = Eigen::VectorXd::Zero(13);
+  // Eigen::VectorXd task_upper_body_acc_des = Eigen::VectorXd::Zero(13);
+  // Eigen::VectorXd task_upper_body_pos = Eigen::VectorXd::Zero(13);
+  // Eigen::VectorXd task_upper_body_vel = Eigen::VectorXd::Zero(13);
 
   // wbc cmd
   Eigen::VectorXd cmd_joint_positions = Eigen::VectorXd::Zero(27);

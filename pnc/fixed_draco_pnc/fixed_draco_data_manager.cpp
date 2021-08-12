@@ -56,6 +56,30 @@ void FixedDracoDataManager::Send() {
     pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori_des[i]);
     pb_msg.add_task_lfoot_ang_vel_des(data->task_lfoot_ang_vel_des[i]);
     pb_msg.add_task_lfoot_ang_acc_des(data->task_lfoot_ang_acc_des[i]);
+
+    pb_msg.add_task_rhand_pos(data->task_rhand_pos[i]);
+    pb_msg.add_task_rhand_vel(data->task_rhand_vel[i]);
+    pb_msg.add_task_rhand_pos_des(data->task_rhand_pos_des[i]);
+    pb_msg.add_task_rhand_vel_des(data->task_rhand_vel_des[i]);
+    pb_msg.add_task_rhand_acc_des(data->task_rhand_acc_des[i]);
+
+    pb_msg.add_task_rhand_ori(data->task_rhand_ori[i]);
+    pb_msg.add_task_rhand_ang_vel(data->task_rhand_ang_vel[i]);
+    pb_msg.add_task_rhand_ori_des(data->task_rhand_ori_des[i]);
+    pb_msg.add_task_rhand_ang_vel_des(data->task_rhand_ang_vel_des[i]);
+    pb_msg.add_task_rhand_ang_acc_des(data->task_rhand_ang_acc_des[i]);
+
+    pb_msg.add_task_lhand_pos(data->task_lhand_pos[i]);
+    pb_msg.add_task_lhand_vel(data->task_lhand_vel[i]);
+    pb_msg.add_task_lhand_pos_des(data->task_lhand_pos_des[i]);
+    pb_msg.add_task_lhand_vel_des(data->task_lhand_vel_des[i]);
+    pb_msg.add_task_lhand_acc_des(data->task_lhand_acc_des[i]);
+
+    pb_msg.add_task_lhand_ori(data->task_lhand_ori[i]);
+    pb_msg.add_task_lhand_ang_vel(data->task_lhand_ang_vel[i]);
+    pb_msg.add_task_lhand_ori_des(data->task_lhand_ori_des[i]);
+    pb_msg.add_task_lhand_ang_vel_des(data->task_lhand_ang_vel_des[i]);
+    pb_msg.add_task_lhand_ang_acc_des(data->task_lhand_ang_acc_des[i]);
   }
   pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori_des[3]);
   pb_msg.add_task_lfoot_ori(data->task_lfoot_ori[3]);
@@ -63,12 +87,18 @@ void FixedDracoDataManager::Send() {
   pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori_des[3]);
   pb_msg.add_task_rfoot_ori(data->task_rfoot_ori[3]);
 
-  for (int i = 0; i < data->task_upper_body_pos_des.size(); ++i) {
-    pb_msg.add_task_upper_body_pos_des(data->task_upper_body_pos_des[i]);
-    pb_msg.add_task_upper_body_vel_des(data->task_upper_body_vel_des[i]);
-    pb_msg.add_task_upper_body_acc_des(data->task_upper_body_acc_des[i]);
-    pb_msg.add_task_upper_body_pos(data->task_upper_body_pos[i]);
-    pb_msg.add_task_upper_body_vel(data->task_upper_body_vel[i]);
+  pb_msg.add_task_lhand_ori_des(data->task_lhand_ori_des[3]);
+  pb_msg.add_task_lhand_ori(data->task_lhand_ori[3]);
+
+  pb_msg.add_task_rhand_ori_des(data->task_rhand_ori_des[3]);
+  pb_msg.add_task_rhand_ori(data->task_rhand_ori[3]);
+
+  for (int i = 0; i < data->task_neck_pos_des.size(); ++i) {
+    pb_msg.add_task_neck_pos_des(data->task_neck_pos_des[i]);
+    pb_msg.add_task_neck_vel_des(data->task_neck_vel_des[i]);
+    pb_msg.add_task_neck_acc_des(data->task_neck_acc_des[i]);
+    pb_msg.add_task_neck_pos(data->task_neck_pos[i]);
+    pb_msg.add_task_neck_vel(data->task_neck_vel[i]);
   }
 
   for (int i = 0; i < data->joint_positions.size(); ++i) {

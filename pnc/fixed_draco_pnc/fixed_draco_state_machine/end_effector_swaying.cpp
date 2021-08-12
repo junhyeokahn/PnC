@@ -23,21 +23,29 @@ void EndEffectorSwaying::firstVisit() {
     ctrl_arch_->rf_ee_tm->InitializeSwayingTrajectory(ctrl_start_time_, amp,
                                                       freq);
     target_lf_iso_ = robot_->get_link_iso("l_foot_contact");
+    target_rh_iso_ = robot_->get_link_iso("r_hand_contact");
+    target_lh_iso_ = robot_->get_link_iso("l_hand_contact");
   } else if (end_eff_side_ == EndEffector::LFoot) {
     std::cout << "fixed_draco_states::kLeftFootSwaying" << std::endl;
     ctrl_arch_->lf_ee_tm->InitializeSwayingTrajectory(ctrl_start_time_, amp,
                                                       freq);
     target_rf_iso_ = robot_->get_link_iso("r_foot_contact");
+    target_rh_iso_ = robot_->get_link_iso("r_hand_contact");
+    target_lh_iso_ = robot_->get_link_iso("l_hand_contact");
   } else if (end_eff_side_ == EndEffector::RHand) {
     std::cout << "fixed_draco_states::kRightHandSwaying" << std::endl;
     ctrl_arch_->rh_ee_tm->InitializeSwayingTrajectory(ctrl_start_time_, amp,
                                                       freq);
-    target_rh_iso_ = robot_->get_link_iso("r_hand_contact");
+    target_lh_iso_ = robot_->get_link_iso("l_hand_contact");
+    target_rf_iso_ = robot_->get_link_iso("r_foot_contact");
+    target_lf_iso_ = robot_->get_link_iso("l_foot_contact");
   } else if (end_eff_side_ == EndEffector::LHand) {
     std::cout << "fixed_draco_states::kLeftHandSwaying" << std::endl;
     ctrl_arch_->lh_ee_tm->InitializeSwayingTrajectory(ctrl_start_time_, amp,
                                                       freq);
-    target_lh_iso_ = robot_->get_link_iso("l_hand_contact");
+    target_rh_iso_ = robot_->get_link_iso("r_hand_contact");
+    target_rf_iso_ = robot_->get_link_iso("r_foot_contact");
+    target_lf_iso_ = robot_->get_link_iso("l_foot_contact");
   } else {
     std::cout << "Wrong end effector side" << std::endl;
   }

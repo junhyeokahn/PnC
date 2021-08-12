@@ -16,15 +16,12 @@ from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plo
 tasks = [
     'task_rfoot_pos', 'task_rfoot_vel', 'task_rfoot_ori', 'task_rfoot_ang_vel',
     'task_lfoot_pos', 'task_lfoot_vel', 'task_lfoot_ori', 'task_lfoot_ang_vel',
-    'task_upper_body_pos', 'task_upper_body_vel'
+    'task_rhand_pos', 'task_rhand_vel', 'task_rhand_ori', 'task_rhand_ang_vel',
+    'task_lhand_pos', 'task_lhand_vel', 'task_lhand_ori', 'task_lhand_ang_vel',
+    'task_neck_pos', 'task_neck_vel'
 ]
 
-upper_body_pos_label = [
-    "neck_pitch", "l_shoulder_fe", "l_shoulder_aa", "l_shoulder_ie",
-    "l_elbow_fe", "l_wrist_ps", "l_wrist_pitch", "r_shoulder_fe",
-    "r_shoulder_aa", "r_shoulder_ie", "r_elbow_fe", "r_wrist_ps",
-    "r_wrist_pitch"
-]
+neck_pos_label = ["neck_pitch"]
 
 rfoot_label = [
     "r_hip_ie", "r_hip_aa", "r_hip_fe", "r_knee_fe_jp", "r_knee_fe_jd",
@@ -97,20 +94,35 @@ joint_velocities = np.stack(joint_velocities, axis=0)
 ## Plot Task
 ## =============================================================================
 
-plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
-          des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')
+# plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
+# des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')
 
-plot_task(time, des['task_lfoot_ori'], act['task_lfoot_ori'],
-          des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
-          'left foot ori')
+# plot_task(time, des['task_lfoot_ori'], act['task_lfoot_ori'],
+# des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
+# 'left foot ori')
 
-plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
-          des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
-          'right foot lin')
+# plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
+# des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
+# 'right foot lin')
 
-plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
-          des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
-          'right foot ori')
+# plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
+# des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
+# 'right foot ori')
+
+# plot_task(time, des['task_lhand_pos'], act['task_lhand_pos'],
+# des['task_lhand_vel'], act['task_lhand_vel'], phase, 'left hand lin')
+
+# plot_task(time, des['task_lhand_ori'], act['task_lhand_ori'],
+# des['task_lhand_ang_vel'], act['task_lhand_ang_vel'], phase,
+# 'left hand ori')
+
+plot_task(time, des['task_rhand_pos'], act['task_rhand_pos'],
+          des['task_rhand_vel'], act['task_rhand_vel'], phase,
+          'right hand lin')
+
+plot_task(time, des['task_rhand_ori'], act['task_rhand_ori'],
+          des['task_rhand_ang_vel'], act['task_rhand_ang_vel'], phase,
+          'right hand ori')
 
 ## =============================================================================
 ## Plot WBC Solutions
