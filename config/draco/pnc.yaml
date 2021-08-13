@@ -1,7 +1,9 @@
-servo_dt: 0.001
+servo_dt: 0.00125
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
+
+b_exp: false
 
 wbc:
     regularization:
@@ -15,67 +17,101 @@ wbc:
     task:
         com:
             weight: 20
-            kp: [200, 200, 200]
-            kd: [10, 10, 10]
+            sim_kp: [200, 200, 200]
+            sim_kd: [10, 10, 10]
+            exp_kp: [20, 20, 20]
+            exp_kd: [1, 1, 1]
         torso_ori:
             weight: 20
-            kp: [100, 100, 100]
-            kd: [10, 10, 10]
+            sim_kp: [100, 100, 100]
+            sim_kd: [10, 10, 10]
+            exp_kp: [20, 20, 20]
+            exp_kd: [1, 1, 1]
         upper_body_joint:
             weight: 20.
             neck_pitch:
-                kp: 40.
-                kd: 2.
+                sim_kp: 40.
+                sim_kd: 2.
+                exp_kp: 5.
+                exp_kd: 0.
             l_shoulder_fe:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             l_shoulder_aa:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             l_shoulder_ie:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             l_elbow_fe:
-                kp: 50.
-                kd: 3.
+                sim_kp: 50.
+                sim_kd: 3.
+                exp_kp: 7.
+                exp_kd: 0.
             l_wrist_ps:
-                kp: 40.
-                kd: 2.
+                sim_kp: 40.
+                sim_kd: 2.
+                exp_kp: 5.
+                exp_kd: 0.
             l_wrist_pitch:
-                kp: 40.
-                kd: 2.
+                sim_kp: 40.
+                sim_kd: 2.
+                exp_kp: 5.
+                exp_kd: 0.
             r_shoulder_fe:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             r_shoulder_aa:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             r_shoulder_ie:
-                kp: 100.
-                kd: 8.
+                sim_kp: 100.
+                sim_kd: 8.
+                exp_kp: 10.
+                exp_kd: 0.
             r_elbow_fe:
-                kp: 50.
-                kd: 3.
+                sim_kp: 50.
+                sim_kd: 3.
+                exp_kp: 7.
+                exp_kd: 0.
             r_wrist_ps:
-                kp: 40.
-                kd: 2.
+                sim_kp: 40.
+                sim_kd: 2.
+                exp_kp: 5.
+                exp_kd: 0.
             r_wrist_pitch:
-                kp: 40.
-                kd: 2.
+                sim_kp: 40.
+                sim_kd: 2.
+                exp_kp: 5.
+                exp_kd: 0.
         foot_pos:
             weight_at_contact: 60.
             weight_at_swing: 40.
-            kp: [300., 300., 300.]
-            kd: [30., 30., 30.]
+            sim_kp: [300., 300., 300.]
+            sim_kd: [30., 30., 30.]
+            exp_kp: [100, 100, 250]
+            exp_kd: [0.1, 0.1, 1.2]
         foot_ori:
             weight_at_contact: 60.
             weight_at_swing: 40.
-            kp: [300., 300., 300.]
-            kd: [30., 30., 30.]
+            sim_kp: [300., 300., 300.]
+            sim_kd: [30., 30., 30.]
+            exp_kp: [20, 20, 20]
+            exp_kd: [0.1, 0.1, 0.1]
 
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz
-        pos_cutoff_freq: 1.0 # Hz
+        pos_cutoff_freq: 0.5 # Hz
         max_pos_err:     0.2 # rad
 
     b_trq_limit: false

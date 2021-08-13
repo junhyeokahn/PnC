@@ -124,7 +124,7 @@ if __name__ == "__main__":
     pybullet_util.set_joint_friction(robot, joint_id, 0)
 
     # Construct Interface
-    interface = draco_interface.DracoInterface(True)
+    interface = draco_interface.DracoInterface()
     sensor_data = draco_interface.DracoSensorData()
     command = draco_interface.DracoCommand()
 

@@ -11,7 +11,7 @@
 #include "pnc/robot_system/dart_robot_system.hpp"
 #include "utils/util.hpp"
 
-DracoInterface::DracoInterface(bool _b_sim) : Interface() {
+DracoInterface::DracoInterface() : Interface() {
   std::string border = "=";
   for (int i = 0; i < 79; ++i) {
     border += "=";
@@ -32,11 +32,12 @@ DracoInterface::DracoInterface(bool _b_sim) : Interface() {
   waiting_count_ = 10;
 
   control_architecture_ = new DracoControlArchitecture(robot_);
-  if (_b_sim) {
-    control_architecture_->state = draco_states::kStand;
+  bool b_exp = util::ReadParameter<bool>(cfg, "b_exp");
+  if (b_exp) {
+    control_architecture_->state = draco_states::kInitialize;
     sp_->state = control_architecture_->state;
   } else {
-    control_architecture_->state = draco_states::kInitialize;
+    control_architecture_->state = draco_states::kStand;
     sp_->state = control_architecture_->state;
   }
   interrupt = new DracoInterruptLogic(

@@ -25,7 +25,7 @@ PYBIND11_MODULE(draco_interface, m) {
       .def("getCommand", &Interface::getCommand);
 
   py::class_<DracoInterface, Interface>(m, "DracoInterface")
-      .def(py::init<bool>())
+      .def(py::init<>())
       .def_readwrite("interrupt", &DracoInterface::interrupt);
 
   py::class_<DracoSensorData>(m, "DracoSensorData")

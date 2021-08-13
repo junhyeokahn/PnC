@@ -59,7 +59,7 @@ protected:
   void SetSafeCommand(DracoSensorData *data, DracoCommand *cmd);
 
 public:
-  DracoInterface(bool b_sim);
+  DracoInterface();
   virtual ~DracoInterface();
   virtual void getCommand(void *_sensor_data, void *_command_data);
 };
