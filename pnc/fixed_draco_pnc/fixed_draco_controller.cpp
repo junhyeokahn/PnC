@@ -82,7 +82,7 @@ FixedDracoController::FixedDracoController(
   b_first_visit_ = true;
   b_smoothing_cmd_ = false;
   smoothing_start_time_ = 0.;
-  smoothing_duration =
+  smoothing_duration_ =
       util::ReadParameter<double>(cfg_["controller"], "smoothing_duration");
   smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
 }
@@ -203,7 +203,7 @@ void FixedDracoController::SaveData() {
 }
 
 void FixedDracoController::SmoothCommand() {
-  double s = util::SmoothPos(0., 1., smoothing_duration,
+  double s = util::SmoothPos(0., 1., smoothing_duration_,
                              sp_->curr_time - smoothing_start_time_);
 
   for (int i = 0; i < robot_->n_a; ++i) {
@@ -212,7 +212,7 @@ void FixedDracoController::SmoothCommand() {
     joint_vel_cmd_[i] *= s;
     joint_trq_cmd_[i] *= s;
   }
-  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration) {
+  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration_) {
     b_smoothing_cmd_ = false;
   }
 }

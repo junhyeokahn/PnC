@@ -2,7 +2,6 @@ servo_dt: 0.001
 
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
-smoothing_duration: 0.1
 
 wbc:
     regularization:
@@ -136,3 +135,8 @@ walking:
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
+
+controller:
+    waiting_count: 10
+    b_smoothing: true
+    smoothing_duration: 0.1

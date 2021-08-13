@@ -19,8 +19,6 @@ public:
                        RobotSystem *_robot);
   virtual ~FixedDracoController();
 
-  double smoothing_duration;
-
   void getCommand(void *_cmd);
 
   void SaveData();
@@ -44,6 +42,7 @@ private:
   Eigen::MatrixXd sf_;
 
   bool b_smoothing_cmd_;
+  double smoothing_duration_;
   double smoothing_start_time_;
   Eigen::VectorXd smoothing_start_joint_positions_;
 

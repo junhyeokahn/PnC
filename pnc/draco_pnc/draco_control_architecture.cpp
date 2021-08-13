@@ -31,8 +31,6 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 
   // Initialize Controller
   controller_ = new DracoController(tci_container, robot_);
-  controller_->smoothing_duration =
-      util::ReadParameter<double>(cfg, "smoothing_duration");
 
   // Initialize Planner
   dcm_planner_ = new DCMPlanner();

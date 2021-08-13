@@ -12,8 +12,6 @@ public:
   DracoController(DracoTCIContainer *_tci_container, RobotSystem *_robot);
   virtual ~DracoController();
 
-  double smoothing_duration;
-
   void getCommand(void *_cmd);
 
   void SaveData();
@@ -39,6 +37,7 @@ private:
   Eigen::MatrixXd sf_;
 
   bool b_smoothing_cmd_;
+  double smoothing_duration_;
   double smoothing_start_time_;
   Eigen::VectorXd smoothing_start_joint_positions_;
 
@@ -46,4 +45,8 @@ private:
 
   // Smooth increment of the commands
   void SmoothCommand();
+
+  bool b_first_visit_;
+
+  YAML::Node cfg_;
 };

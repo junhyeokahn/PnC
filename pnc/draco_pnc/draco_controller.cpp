@@ -12,7 +12,7 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
 
   sp_ = DracoStateProvider::getStateProvider();
 
-  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+  cfg_ = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
 
   // Initialize WBC
   int l_jp_idx = robot_->get_q_dot_idx("l_knee_fe_jp");
@@ -50,26 +50,26 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   sf_.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
 
   wbc_ = new IHWBC(sf_, sa_, sv_);
-  wbc_->b_trq_limit = util::ReadParameter<bool>(cfg["wbc"], "b_trq_limit");
+  wbc_->b_trq_limit = util::ReadParameter<bool>(cfg_["wbc"], "b_trq_limit");
   if (wbc_->b_trq_limit) {
     wbc_->trq_limit = sa_.block(0, robot_->n_floating, n_active,
                                 n_q_dot - robot_->n_floating) *
                       robot_->joint_trq_limit;
   }
   wbc_->lambda_q_ddot = util::ReadParameter<double>(
-      cfg["wbc"]["regularization"], "lambda_q_ddot");
+      cfg_["wbc"]["regularization"], "lambda_q_ddot");
   wbc_->lambda_rf =
-      util::ReadParameter<double>(cfg["wbc"]["regularization"], "lambda_rf");
-  wbc_->w_rf = util::ReadParameter<double>(cfg["wbc"]["contact"], "w_rf");
+      util::ReadParameter<double>(cfg_["wbc"]["regularization"], "lambda_rf");
+  wbc_->w_rf = util::ReadParameter<double>(cfg_["wbc"]["contact"], "w_rf");
 
   // Initialize Joint Integrator
   joint_integrator_ = new JointIntegrator(robot_->n_a, sp_->servo_dt);
   joint_integrator_->setVelocityFrequencyCutOff(util::ReadParameter<double>(
-      cfg["wbc"]["joint_integrator"], "vel_cutoff_freq"));
+      cfg_["wbc"]["joint_integrator"], "vel_cutoff_freq"));
   joint_integrator_->setPositionFrequencyCutOff(util::ReadParameter<double>(
-      cfg["wbc"]["joint_integrator"], "pos_cutoff_freq"));
+      cfg_["wbc"]["joint_integrator"], "pos_cutoff_freq"));
   joint_integrator_->setMaxPositionError(util::ReadParameter<double>(
-      cfg["wbc"]["joint_integrator"], "max_pos_err"));
+      cfg_["wbc"]["joint_integrator"], "max_pos_err"));
   joint_integrator_->setVelocityBounds(robot_->joint_vel_limit.col(0),
                                        robot_->joint_vel_limit.col(1));
   joint_integrator_->setPositionBounds(robot_->joint_pos_limit.col(0),
@@ -81,9 +81,11 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
   cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
 
+  b_first_visit_ = true;
   b_smoothing_cmd_ = false;
   smoothing_start_time_ = 0.;
-  smoothing_duration = 3.;
+  smoothing_duration_ =
+      util::ReadParameter<double>(cfg_["controller"], "smoothing_duration");
   smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
 }
 
@@ -99,10 +101,9 @@ void DracoController::getCommand(void *cmd) {
     joint_trq_cmd_.setZero();
 
   } else {
-    static bool b_first_visit(true);
-    if (b_first_visit) {
+    if (b_first_visit_) {
       FirstVisit();
-      b_first_visit = false;
+      b_first_visit_ = false;
     }
 
     // Dynamics properties
@@ -163,15 +164,15 @@ void DracoController::getCommand(void *cmd) {
     this->SmoothCommand();
   }
 
-  if (sp_->count % sp_->save_freq == 0) {
-    this->SaveData();
-  }
-
   ((DracoCommand *)cmd)->joint_positions =
       robot_->vector_to_map(joint_pos_cmd_);
   ((DracoCommand *)cmd)->joint_velocities =
       robot_->vector_to_map(joint_vel_cmd_);
   ((DracoCommand *)cmd)->joint_torques = robot_->vector_to_map(joint_trq_cmd_);
+
+  if (sp_->count % sp_->save_freq == 0) {
+    this->SaveData();
+  }
 }
 
 void DracoController::FirstVisit() {
@@ -179,13 +180,14 @@ void DracoController::FirstVisit() {
   joint_integrator_->initializeStates(Eigen::VectorXd::Zero(robot_->n_a),
                                       jpos_ini);
 
-  b_smoothing_cmd_ = true;
+  b_smoothing_cmd_ =
+      util::ReadParameter<bool>(cfg_["controller"], "b_smoothing");
   smoothing_start_time_ = sp_->curr_time;
   smoothing_start_joint_positions_ = robot_->joint_positions;
 }
 
 void DracoController::SmoothCommand() {
-  double s = util::SmoothPos(0., 1., smoothing_duration,
+  double s = util::SmoothPos(0., 1., smoothing_duration_,
                              sp_->curr_time - smoothing_start_time_);
 
   for (int i = 0; i < robot_->n_a; ++i) {
@@ -194,7 +196,7 @@ void DracoController::SmoothCommand() {
     joint_vel_cmd_[i] *= s;
     joint_trq_cmd_[i] *= s;
   }
-  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration) {
+  if (sp_->curr_time >= smoothing_start_time_ + smoothing_duration_) {
     b_smoothing_cmd_ = false;
   }
 }
