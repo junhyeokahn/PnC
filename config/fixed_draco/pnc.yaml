@@ -54,8 +54,8 @@ wbc:
         # sim gain
         foot_pos:
             weight: 40.
-            kp: [100, 100, 250]
-            kd: [0.1, 0.1, 1.2]
+            kp: [100, 100, 330]
+            kd: [0.1, 0.1, 1.5]
         foot_ori:
             weight: 40.
             kp: [20., 20., 20.]
@@ -110,10 +110,10 @@ behavior:
         r_wrist_ps: 0.
         l_wrist_pitch: 0.
         r_wrist_pitch: 0.
-    #swaying_amp: [0.02, 0., 0.05]
-    #swaying_freq: [0.2, 0., 1.0]
-    swaying_amp: [0., 0., 0.05]
-    swaying_freq: [0., 0., 0.7]
+    swaying_amp: [0., 0., 0.07]
+    swaying_freq: [0., 0., 1.5]
+    #swaying_amp: [0., 0., 0.05]
+    #swaying_freq: [0., 0., 0.7]
 
 controller:
     waiting_count: 10

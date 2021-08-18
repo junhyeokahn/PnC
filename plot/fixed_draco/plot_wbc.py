@@ -101,13 +101,13 @@ joint_velocities = np.stack(joint_velocities, axis=0)
 # des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
 # 'left foot ori')
 
-# plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
-# des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
-# 'right foot lin')
+plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
+          des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
+          'right foot lin')
 
-# plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
-# des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
-# 'right foot ori')
+plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
+          des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
+          'right foot ori')
 
 # plot_task(time, des['task_lhand_pos'], act['task_lhand_pos'],
 # des['task_lhand_vel'], act['task_lhand_vel'], phase, 'left hand lin')
@@ -116,13 +116,13 @@ joint_velocities = np.stack(joint_velocities, axis=0)
 # des['task_lhand_ang_vel'], act['task_lhand_ang_vel'], phase,
 # 'left hand ori')
 
-plot_task(time, des['task_rhand_pos'], act['task_rhand_pos'],
-          des['task_rhand_vel'], act['task_rhand_vel'], phase,
-          'right hand lin')
+# plot_task(time, des['task_rhand_pos'], act['task_rhand_pos'],
+# des['task_rhand_vel'], act['task_rhand_vel'], phase,
+# 'right hand lin')
 
-plot_task(time, des['task_rhand_ori'], act['task_rhand_ori'],
-          des['task_rhand_ang_vel'], act['task_rhand_ang_vel'], phase,
-          'right hand ori')
+# plot_task(time, des['task_rhand_ori'], act['task_rhand_ori'],
+# des['task_rhand_ang_vel'], act['task_rhand_ang_vel'], phase,
+# 'right hand ori')
 
 ## =============================================================================
 ## Plot WBC Solutions

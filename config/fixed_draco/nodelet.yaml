@@ -6,8 +6,6 @@ b_measure_computation_time: true
 
 sleep_time: 0.7
 
-# May need to use more at hip_fe
-
 service_call:
     conservative: false
     neck_pitch:

@@ -23,9 +23,21 @@ void DoubleSupportStand::firstVisit() {
   Eigen::Vector3d target_com_pos =
       (lfoot_iso.translation() + rfoot_iso.translation()) / 2.;
   target_com_pos[2] = com_height_des;
-  Eigen::Quaternion<double> target_base_ori =
+  Eigen::Quaternion<double> foot_interpol_quat =
       Eigen::Quaternion<double>(lfoot_iso.linear())
           .slerp(0.5, Eigen::Quaternion<double>(rfoot_iso.linear()));
+
+  Eigen::Matrix3d foot_interpol_SO3 = foot_interpol_quat.toRotationMatrix();
+  Eigen::Vector3d ori_x(0, 0, 0), ori_y(0, 0, 0), ori_z(0, 0, 1);
+  ori_y = foot_interpol_SO3.col(1);
+  ori_x = ori_y.cross(ori_z);
+
+  Eigen::Matrix3d target_base_ori_SO3 = Eigen::Matrix3d::Identity();
+  target_base_ori_SO3.col(0) = ori_x;
+  target_base_ori_SO3.col(1) = ori_y;
+  target_base_ori_SO3.col(2) = ori_z;
+  Eigen::Quaternion<double> target_base_ori =
+      Eigen::Quaternion<double>(target_base_ori_SO3);
 
   ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);

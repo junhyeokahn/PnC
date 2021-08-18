@@ -90,8 +90,8 @@ void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
   Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
   Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
   // TODO (Check this again)
-  // base_ori_des_quat = quat_inc * ini_base_quat_;
-  base_ori_des_quat = ini_base_quat_ * quat_inc;
+  base_ori_des_quat = quat_inc * ini_base_quat_;
+  // base_ori_des_quat = ini_base_quat_ * quat_inc;
   base_ori_des << base_ori_des_quat.w(), base_ori_des_quat.x(),
       base_ori_des_quat.y(), base_ori_des_quat.z();
   base_ang_vel_des = exp_error_ * scaled_tdot;

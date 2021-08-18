@@ -1,21 +1,35 @@
 import os
 import sys
+
 cwd = os.getcwd()
 sys.path.append(cwd)
 import pickle
 
 import numpy as np
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj
+from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj
 
 tasks = [
     'task_com_pos', 'task_com_vel', 'task_torso_ori', 'task_torso_ang_vel',
     'task_rfoot_pos', 'task_rfoot_vel', 'task_rfoot_ori', 'task_rfoot_ang_vel',
     'task_lfoot_pos', 'task_lfoot_vel', 'task_lfoot_ori', 'task_lfoot_ang_vel',
     'task_upper_body_pos', 'task_upper_body_vel'
+]
+
+neck_pos_label = ["neck_pitch"]
+
+rfoot_label = [
+    "r_hip_ie", "r_hip_aa", "r_hip_fe", "r_knee_fe_jp", "r_knee_fe_jd",
+    "r_ankle_fe", "r_ankle_ie"
+]
+
+lfoot_label = [
+    "l_hip_ie", "l_hip_aa", "l_hip_fe", "l_knee_fe_jp", "l_knee_fe_jd",
+    "l_ankle_fe", "l_ankle_ie"
 ]
 
 upper_body_pos_label = [
@@ -105,35 +119,32 @@ for i in range(3):
               act['task_upper_body_vel'][:, slc], phase, 'upper body',
               upper_body_pos_label[slc])
 
-# for i in range(6):
-# slc = slice(5*i, 5*(i+1))
-# plot_vector_traj(time, cmd_joint_torques[:,slc], phase,
-# 'joint torque command', joint_label[slc])
+plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
+          des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')
 
-# for i in range(6):
-# slc = slice(5*i, 5*(i+1))
-# plot_task(time, cmd_joint_positions[:,slc], joint_positions[:,slc],
-# cmd_joint_velocities[:,slc], joint_velocities[:,slc], phase,
-# 'joint', joint_label[slc])
+plot_task(time, des['task_lfoot_ori'], act['task_lfoot_ori'],
+          des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
+          'left foot ori')
 
-# plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
-# des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')
+plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
+          des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
+          'right foot lin')
 
-# plot_task(time, des['task_lfoot_ori'], act['task_lfoot_ori'],
-# des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
-# 'left foot ori')
-
-# plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
-# des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
-# 'right foot lin')
-
-# plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
-# des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
-# 'right foot ori')
+plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
+          des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
+          'right foot ori')
 
 ## =============================================================================
 ## Plot WBC Solutions
 ## =============================================================================
 plot_rf(time, cmd_rf, phase)  # assume top six is right foot
+
+plot_joints(joint_label, rfoot_label, time, cmd_joint_positions,
+            joint_positions, cmd_joint_velocities, joint_velocities,
+            cmd_joint_torques, phase, "rfoot")
+
+plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
+            joint_positions, cmd_joint_velocities, joint_velocities,
+            cmd_joint_torques, phase, "lfoot")
 
 plt.show()
