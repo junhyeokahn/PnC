@@ -4,7 +4,7 @@ target_joint: "R_Ankle_FE"
 
 b_measure_computation_time: true
 
-sleep_time: 0.7
+sleep_time: 0.8
 
 service_call:
     conservative: false

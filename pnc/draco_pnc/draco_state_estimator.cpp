@@ -9,6 +9,8 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
   robot_ = _robot;
   sp_ = DracoStateProvider::getStateProvider();
 
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+
   iso_base_com_to_imu_ = robot_->get_link_iso("torso_link").inverse() *
                          robot_->get_link_iso("torso_imu");
   iso_base_joint_to_imu_.linear() = iso_base_com_to_imu_.linear();
@@ -20,6 +22,13 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
   global_linear_offset_.setZero();
   prev_base_joint_pos_.setZero();
   prev_base_com_pos_.setZero();
+
+  Eigen::VectorXd n_data_com_vel = util::ReadParameter<Eigen::VectorXd>(
+      cfg["state_estimator"], "n_data_com_vel");
+
+  for (int i = 0; i < 3; ++i) {
+    com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
+  }
 }
 
 DracoStateEstimator::~DracoStateEstimator() {}
@@ -114,6 +123,12 @@ void DracoStateEstimator::update(DracoSensorData *data) {
       data->imu_frame_vel.head(3), data->joint_positions,
       data->joint_velocities, true);
 
+  // com vel filtering
+  for (int i = 0; i < 3; ++i) {
+    com_vel_filter_[i].Input(robot_->get_com_lin_vel()[i]);
+    sp_->com_vel_est[i] = com_vel_filter_[i].Output();
+  }
+
   // update dcm
   this->ComputeDCM();
 
@@ -144,6 +159,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
         Eigen::Quaternion<double>(rot_world_to_base);
     dm->data->base_joint_quat =
         Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
+    dm->data->com_vel_est = sp_->com_vel_est;
   }
 }
 

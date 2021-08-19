@@ -33,6 +33,7 @@ public:
     vel_des = Eigen::VectorXd::Zero(dim);
     vel = Eigen::VectorXd::Zero(dim);
     acc_des = Eigen::VectorXd::Zero(dim);
+    rot_world_local_ = Eigen::MatrixXd::Identity(dim, dim);
   };
 
   virtual ~Task(){};
@@ -125,4 +126,5 @@ public:
 
 protected:
   RobotSystem *robot_;
+  Eigen::MatrixXd rot_world_local_;
 };

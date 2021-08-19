@@ -24,6 +24,8 @@ DracoStateProvider::DracoStateProvider() {
   prev_dcm.setZero();
   dcm_vel.setZero();
 
+  com_vel_est.setZero();
+
   // 0: no contact, 1: contact
   b_rf_contact = 0;
   b_lf_contact = 0;

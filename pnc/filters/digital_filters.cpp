@@ -7,14 +7,15 @@
 
 #include "utils/util.hpp"
 
-DigitalFilter::DigitalFilter(void) {}
+DigitalFilter::DigitalFilter() {}
 
-DigitalFilter::~DigitalFilter(void) {}
+DigitalFilter::~DigitalFilter() {}
 
 SimpleMovingAverage::SimpleMovingAverage(int num_data)
     : DigitalFilter(), num_data_(num_data), idx_(0), sum_(0.0) {
-  buffer_ = new double[num_data_];
-  memset((void *)buffer_, 0.0, sizeof(double) * num_data_);
+  // buffer_ = new double[num_data_];
+  // memset((void *)buffer_, 0.0, sizeof(double) * num_data_);
+  buffer_ = Eigen::VectorXd::Zero(num_data_);
 }
 
 void SimpleMovingAverage::Input(double input_value) {
@@ -29,10 +30,13 @@ double SimpleMovingAverage::Output() { return sum_ / num_data_; }
 
 void SimpleMovingAverage::Clear() {
   sum_ = 0.0;
-  memset((void *)buffer_, 0.0, sizeof(double) * num_data_);
+  // memset((void *)buffer_, 0.0, sizeof(double) * num_data_);
+  buffer_ = Eigen::VectorXd::Zero(num_data_);
 }
 
-SimpleMovingAverage::~SimpleMovingAverage() { delete[] buffer_; }
+SimpleMovingAverage::~SimpleMovingAverage() {
+  // delete[] buffer_;
+}
 
 ButterWorthFilter::ButterWorthFilter(int num_sample, double dt,
                                      double cutoff_frequency)

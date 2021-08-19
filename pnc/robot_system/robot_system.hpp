@@ -80,6 +80,9 @@ public:
   /// Get relative pos of base com frame w.r.t. base joint frame
   virtual Eigen::Vector3d get_base_local_com_pos() = 0;
 
+  /// Get base link name
+  virtual std::string get_base_link_name() = 0;
+
   /// Update robot with the sensor data
   //
   /// \param[in] base_com_pos Root link com frame's position with respect to the

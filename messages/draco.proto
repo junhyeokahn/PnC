@@ -68,4 +68,7 @@ message pnc_msg {
   repeated float joint_positions = 44;
   repeated float base_joint_pos = 45;
   repeated float base_joint_quat = 46;
+
+  // filtered data
+  repeated float com_vel_est = 47;
 }

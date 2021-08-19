@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Eigen/Dense>
+
 /// class DigitalFilter
 class DigitalFilter {
 public:
@@ -63,7 +65,7 @@ public:
   virtual void Clear();
 
 private:
-  double *buffer_;
+  Eigen::VectorXd buffer_;
   int num_data_;
   int idx_;
   double sum_;

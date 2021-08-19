@@ -52,6 +52,8 @@ time = []
 
 phase = []
 
+com_vel_est = []
+
 cmd_lfoot_rf = []
 cmd_rfoot_rf = []
 
@@ -76,6 +78,7 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             for topic in tasks:
                 des[topic].append(d[topic + '_des'])
                 act[topic].append(d[topic])
+            com_vel_est.append(d['com_vel_est'])
             cmd_lfoot_rf.append(d['cmd_lfoot_rf'])
             cmd_rfoot_rf.append(d['cmd_rfoot_rf'])
             cmd_joint_positions.append(d['cmd_joint_positions'])
@@ -90,6 +93,7 @@ for k, v in des.items():
     des[k] = np.stack(v, axis=0)
 for k, v in act.items():
     act[k] = np.stack(v, axis=0)
+com_vel_est = np.stack(com_vel_est, axis=0)
 # right foot first
 cmd_rf = np.concatenate((cmd_rfoot_rf, cmd_lfoot_rf), axis=1)
 phase = np.stack(phase, axis=0)
@@ -104,7 +108,7 @@ joint_velocities = np.stack(joint_velocities, axis=0)
 ## =============================================================================
 
 plot_task(time, des['task_com_pos'], act['task_com_pos'], des['task_com_vel'],
-          act['task_com_vel'], phase, 'com lin')
+          act['task_com_vel'], phase, 'com lin', com_vel_est)
 
 plot_task(time, des['task_torso_ori'], act['task_torso_ori'],
           des['task_torso_ang_vel'], act['task_torso_ang_vel'], phase,
@@ -112,12 +116,14 @@ plot_task(time, des['task_torso_ori'], act['task_torso_ori'],
 
 for i in range(3):
     slc = slice(5 * i, 5 * (i + 1))
-    plot_task(time, des['task_upper_body_pos'][:, slc],
-              act['task_upper_body_pos'][:,
-                                         slc], des['task_upper_body_vel'][:,
-                                                                          slc],
-              act['task_upper_body_vel'][:, slc], phase, 'upper body',
-              upper_body_pos_label[slc])
+    plot_task(time,
+              des['task_upper_body_pos'][:, slc],
+              act['task_upper_body_pos'][:, slc],
+              des['task_upper_body_vel'][:, slc],
+              act['task_upper_body_vel'][:, slc],
+              phase,
+              'upper body',
+              label=upper_body_pos_label[slc])
 
 plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
           des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')

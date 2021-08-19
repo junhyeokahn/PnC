@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 
 #include "configuration.hpp"
+#include "pnc/filters/digital_filters.hpp"
 
 class DracoStateProvider;
 class RobotSystem;
@@ -27,6 +28,8 @@ protected:
   Eigen::Vector3d global_linear_offset_;
   Eigen::Vector3d prev_base_joint_pos_;
   Eigen::Vector3d prev_base_com_pos_;
+
+  std::vector<SimpleMovingAverage> com_vel_filter_;
 
   void ComputeDCM();
 };

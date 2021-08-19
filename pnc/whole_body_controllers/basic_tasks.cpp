@@ -65,12 +65,16 @@ void LinkPosTask::update_cmd() {
   for (int i = 0; i < target_ids.size(); ++i) {
     pos.segment(3 * i, 3) = robot_->get_link_iso(target_ids[i]).translation();
     vel.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).tail(3);
+    rot_world_local_.block(3 * i, 3 * i, 3, 3) =
+        robot_->get_link_iso(target_ids[i]).linear();
   }
   pos_err = pos_des - pos;
 
-  for (int i = 0; i < dim; ++i) {
-    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
-  }
+  op_cmd =
+      acc_des +
+      rot_world_local_ *
+          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
+           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
 }
 
 void LinkPosTask::update_jacobian() {
@@ -107,11 +111,14 @@ void LinkOriTask::update_cmd() {
         Eigen::Vector4d(quat.w(), quat.x(), quat.y(), quat.z());
     pos_err.segment(3 * i, 3) = ori_err;
     vel.segment(3 * i, 3) = robot_->get_link_vel(target_ids[i]).head(3);
+    rot_world_local_.block(3 * i, 3 * i, 3, 3) =
+        robot_->get_link_iso(target_ids[i]).linear();
   }
-
-  for (int i = 0; i < dim; ++i) {
-    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
-  }
+  op_cmd =
+      acc_des +
+      rot_world_local_ *
+          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
+           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
 }
 
 void LinkOriTask::update_jacobian() {
@@ -135,9 +142,14 @@ void CenterOfMassTask::update_cmd() {
   pos_err = pos_des - pos;
   vel = robot_->get_com_lin_vel();
 
-  for (int i = 0; i < dim; ++i) {
-    op_cmd[i] = acc_des[i] + kp[i] * pos_err[i] + kd[i] * (vel_des[i] - vel[i]);
-  }
+  rot_world_local_ =
+      robot_->get_link_iso(robot_->get_base_link_name()).linear();
+
+  op_cmd =
+      acc_des +
+      rot_world_local_ *
+          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
+           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
 }
 
 void CenterOfMassTask::update_jacobian() {
