@@ -11,9 +11,11 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 
   base_id_ = base_ori_task_->target_ids[0];
 
-  amp_.setZero();
-  freq_.setZero();
+  local_amp_.setZero();
+  local_freq_.setZero();
   exp_error_.setZero();
+
+  rot_world_local_.setIdentity();
 
   b_swaying_ = false;
 }
@@ -40,13 +42,14 @@ void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
 
 void FloatingBaseTrajectoryManager::InitializeSwayingTrajectory(
     double _start_time, const Eigen::Vector3d &_amp,
-    const Eigen::Vector3d &_freq) {
+    const Eigen::Vector3d &_freq, const Eigen::Matrix3d &_rot_world_local) {
 
   b_swaying_ = true;
 
   start_time_ = _start_time;
-  amp_ = _amp;
-  freq_ = _freq;
+  local_amp_ = _amp;
+  local_freq_ = _freq;
+  rot_world_local_ = _rot_world_local;
 
   ini_com_pos_ = robot_->get_com_pos();
   ini_base_quat_ =
@@ -60,9 +63,23 @@ void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
   Eigen::VectorXd com_vel_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd com_acc_des = Eigen::VectorXd::Zero(3);
 
+  Eigen::VectorXd base_ori_des = Eigen::VectorXd::Zero(4);
+  Eigen::Quaternion<double> base_ori_des_quat;
+  Eigen::VectorXd base_ang_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_ang_acc_des = Eigen::VectorXd::Zero(3);
+
   if (b_swaying_) {
-    util::SinusoidTrajectory(start_time_, ini_com_pos_, amp_, freq_, curr_time,
-                             com_pos_des, com_vel_des, com_acc_des);
+    Eigen::VectorXd local_pos_des, local_vel_des, local_acc_des;
+    util::SinusoidTrajectory(start_time_, Eigen::VectorXd::Zero(3), local_amp_,
+                             local_freq_, curr_time, local_pos_des,
+                             local_vel_des, local_acc_des);
+    com_pos_des = ini_com_pos_ + rot_world_local_ * local_pos_des;
+    com_vel_des = rot_world_local_ * local_vel_des;
+    com_acc_des = rot_world_local_ * local_acc_des;
+    base_ori_des << target_base_quat_.w(), target_base_quat_.x(),
+        target_base_quat_.y(), target_base_quat_.z();
+    base_ang_vel_des = Eigen::VectorXd::Zero(3);
+    base_ang_acc_des = Eigen::VectorXd::Zero(3);
   } else {
     for (int i = 0; i < 3; ++i) {
       com_pos_des[i] = util::SmoothPos(ini_com_pos_[i], target_com_pos_[i],
@@ -72,31 +89,22 @@ void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
       com_acc_des[i] = util::SmoothAcc(ini_com_pos_[i], target_com_pos_[i],
                                        duration_, curr_time - start_time_);
     }
+    double scaled_t = util::SmoothPos(0, 1, duration_, curr_time - start_time_);
+    double scaled_tdot =
+        util::SmoothVel(0, 1, duration_, curr_time - start_time_);
+    double scaled_tddot =
+        util::SmoothAcc(0, 1, duration_, curr_time - start_time_);
+
+    Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
+    Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
+    base_ori_des_quat = quat_inc * ini_base_quat_;
+    base_ori_des << base_ori_des_quat.w(), base_ori_des_quat.x(),
+        base_ori_des_quat.y(), base_ori_des_quat.z();
+    base_ang_vel_des = exp_error_ * scaled_tdot;
+    base_ang_acc_des = exp_error_ * scaled_tddot;
   }
 
   com_task_->update_desired(com_pos_des, com_vel_des, com_acc_des);
-
-  Eigen::VectorXd base_ori_des = Eigen::VectorXd::Zero(4);
-  Eigen::Quaternion<double> base_ori_des_quat;
-  Eigen::VectorXd base_ang_vel_des = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd base_ang_acc_des = Eigen::VectorXd::Zero(3);
-
-  double scaled_t = util::SmoothPos(0, 1, duration_, curr_time - start_time_);
-  double scaled_tdot =
-      util::SmoothVel(0, 1, duration_, curr_time - start_time_);
-  double scaled_tddot =
-      util::SmoothAcc(0, 1, duration_, curr_time - start_time_);
-
-  Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
-  Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
-  // TODO (Check this again)
-  base_ori_des_quat = quat_inc * ini_base_quat_;
-  // base_ori_des_quat = ini_base_quat_ * quat_inc;
-  base_ori_des << base_ori_des_quat.w(), base_ori_des_quat.x(),
-      base_ori_des_quat.y(), base_ori_des_quat.z();
-  base_ang_vel_des = exp_error_ * scaled_tdot;
-  base_ang_acc_des = exp_error_ * scaled_tddot;
-
   base_ori_task_->update_desired(base_ori_des, base_ang_vel_des,
                                  base_ang_acc_des);
 }

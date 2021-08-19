@@ -22,8 +22,9 @@ void DoubleSupportSwaying::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
 
-  ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(sp_->curr_time, amp,
-                                                            freq);
+  ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(
+      sp_->curr_time, amp, freq,
+      robot_->get_link_iso(sp_->stance_foot).linear());
 }
 
 void DoubleSupportSwaying::oneStep() {

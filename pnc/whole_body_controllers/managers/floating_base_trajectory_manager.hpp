@@ -15,15 +15,27 @@ public:
 
   /// Initialize floating base interpolation to _target_com_pos and
   /// _target_base_quat
+  //
+  /// \param[in] _target_com_pos Target com pos in world frame.
+  //
+  /// \param[in] _target_base_quat Target base quat in world frame.
   void InitializeInterpolationTrajectory(
       const double _start_time, const double _duration,
       const Eigen::Vector3d &_target_com_pos,
       const Eigen::Quaternion<double> &_target_base_quat);
 
   /// Initialize swaying trajectory
+  //
+  /// \param[in] _local_amp Swaying amplitude in local contact frame.
+  //
+  /// \param[in] _local_freq Swaying frequency in local contact frame.
+  //
+  /// \param[in] _rot_world_local Rotation matrix of local contact frame w.r.t.
+  /// world frame.
   void InitializeSwayingTrajectory(double _start_time,
-                                   const Eigen::Vector3d &_amp,
-                                   const Eigen::Vector3d &_freq);
+                                   const Eigen::Vector3d &_local_amp,
+                                   const Eigen::Vector3d &_local_freq,
+                                   const Eigen::Matrix3d &_rot_world_local);
 
   /// Update floating base task commands.
   void UpdateDesired(const double current_time);
@@ -31,8 +43,8 @@ public:
 private:
   RobotSystem *robot_;
 
-  Eigen::Vector3d amp_;
-  Eigen::Vector3d freq_;
+  Eigen::Vector3d local_amp_;
+  Eigen::Vector3d local_freq_;
 
   std::string base_id_;
 
@@ -49,4 +61,6 @@ private:
   Eigen::Quaternion<double> ini_base_quat_;
   Eigen::Quaternion<double> target_base_quat_;
   Eigen::Vector3d exp_error_;
+
+  Eigen::Matrix3d rot_world_local_;
 };

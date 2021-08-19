@@ -3,8 +3,8 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-#b_exp: false
-b_exp: true
+b_exp: false
+#b_exp: true
 
 wbc:
     regularization:
@@ -21,7 +21,7 @@ wbc:
             sim_kp: [200, 200, 200]
             sim_kd: [10, 10, 10]
             exp_kp: [20, 20, 20]
-            exp_kd: [0, 0, 0]
+            exp_kd: [0., 0., 0.]
         torso_ori:
             weight: 20
             sim_kp: [100, 100, 100]
@@ -118,10 +118,10 @@ wbc:
     b_trq_limit: false
 
 balancing:
-    swaying_amp: [0., 0.08, 0.]
+    swaying_amp: [0., 0.05, 0.]
     swaying_freq: [0., 0.3, 0.]
 
-    interpolation_local_offset: [0., 0.1, 0.]
+    interpolation_local_offset: [0., 0.05, 0.]
     interpolation_duration: 3.
 
 walking:
@@ -158,7 +158,8 @@ walking:
     ini_stand_dur: 1.
     rf_z_max_time: 0.1
 
-    com_height: 0.73
+    #com_height: 0.73
+    com_height: 0.7
     swing_height: 0.04
 
     t_additional_ini_trans: 0.

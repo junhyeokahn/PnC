@@ -55,9 +55,7 @@ void EndEffectorTrajectoryManager::InitializeInterpolationTrajectory(
   target_pos_ = _target_pos;
   target_quat_ = _target_quat;
 
-  // TODO (Check this)
   Eigen::Quaternion<double> quat_err = target_quat_ * ini_quat_.inverse();
-  // Eigen::Quaternion<double> quat_err = ini_quat_.inverse() * target_quat_;
   exp_error_ = util::QuatToExp(quat_err);
 }
 
@@ -107,9 +105,7 @@ void EndEffectorTrajectoryManager::UpdateDesired(const double &_curr_time) {
         util::SmoothAcc(0, 1, duration_, _curr_time - start_time_);
     Eigen::Vector3d exp_inc = exp_error_ * scaled_t;
     Eigen::Quaternion<double> quat_inc = util::ExpToQuat(exp_inc);
-    // TODO (Check this again)
     ori_des_quat = quat_inc * ini_quat_;
-    // ori_des_quat = ini_quat_ * quat_inc;
     ori_des << ori_des_quat.w(), ori_des_quat.x(), ori_des_quat.y(),
         ori_des_quat.z();
     ang_vel_des = exp_error_ * scaled_tdot;

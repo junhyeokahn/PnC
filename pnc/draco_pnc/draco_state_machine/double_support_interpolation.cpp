@@ -23,7 +23,8 @@ void DoubleSupportInterpolation::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   Eigen::Vector3d target_com_pos = robot_->get_com_pos();
-  target_com_pos += local_offset;
+  target_com_pos +=
+      robot_->get_link_iso(sp_->stance_foot).linear() * local_offset;
 
   Eigen::Quaternion<double> target_base_quat = Eigen::Quaternion<double>(
       robot_->get_link_iso("torso_com_link").linear());
