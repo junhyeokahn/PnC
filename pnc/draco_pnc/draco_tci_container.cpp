@@ -1,4 +1,6 @@
-#include <pnc/draco_pnc/draco_tci_container.hpp>
+#include "pnc/draco_pnc/draco_tci_container.hpp"
+
+#include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
 
 DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
     : TCIContainer(_robot) {
@@ -17,7 +19,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   // Initialize Task
   joint_task = new JointTask(robot_);
 
-  com_task = new CenterOfMassTask(robot_);
+  // com_task = new CenterOfMassTask(robot_);
+  com_task = new DracoCenterOfMassTask(robot_);
   com_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["com"],
                                                       gain_prefix + "kp");
   com_task->kd = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["com"],
@@ -93,9 +96,16 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   task_list.push_back(lfoot_ori_task);
 
   // Initialize Contact
-  rfoot_contact = new SurfaceContact(robot_, "r_foot_contact", 0.08, 0.02, 0.5);
+  double foot_half_width =
+      util::ReadParameter<double>(cfg["wbc"]["contact"], "foot_half_width");
+  double foot_half_length =
+      util::ReadParameter<double>(cfg["wbc"]["contact"], "foot_half_length");
+  double mu = util::ReadParameter<double>(cfg["wbc"]["contact"], "mu");
+  rfoot_contact = new SurfaceContact(robot_, "r_foot_contact", foot_half_length,
+                                     foot_half_width, mu);
   rfoot_contact->rf_z_max = 1e-3;
-  lfoot_contact = new SurfaceContact(robot_, "l_foot_contact", 0.08, 0.02, 0.5);
+  lfoot_contact = new SurfaceContact(robot_, "l_foot_contact", foot_half_length,
+                                     foot_half_width, mu);
   lfoot_contact->rf_z_max = 1e-3;
 
   contact_list.push_back(rfoot_contact);

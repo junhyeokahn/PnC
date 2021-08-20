@@ -69,6 +69,7 @@ void LinkPosTask::update_cmd() {
         robot_->get_link_iso(target_ids[i]).linear();
   }
   pos_err = pos_des - pos;
+  local_pos_err = rot_world_local_.transpose() * pos_err;
 
   op_cmd =
       acc_des +
@@ -114,6 +115,9 @@ void LinkOriTask::update_cmd() {
     rot_world_local_.block(3 * i, 3 * i, 3, 3) =
         robot_->get_link_iso(target_ids[i]).linear();
   }
+
+  local_pos_err = rot_world_local_.transpose() * pos_err;
+
   op_cmd =
       acc_des +
       rot_world_local_ *

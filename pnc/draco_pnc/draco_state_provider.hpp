@@ -35,6 +35,7 @@ public:
   Eigen::Vector3d dcm_vel;
 
   Eigen::Vector3d com_vel_est;
+  Eigen::Vector3d imu_ang_vel_est;
 
   int b_rf_contact;
   int b_lf_contact;

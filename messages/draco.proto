@@ -71,4 +71,11 @@ message pnc_msg {
 
   // filtered data
   repeated float com_vel_est = 47;
+  repeated float com_vel_raw = 48;
+  repeated float imu_ang_vel_est = 49;
+  repeated float imu_ang_vel_raw = 50;
+
+  // task errors at local frame
+  repeated float task_com_local_pos_err = 51;
+  repeated float task_torso_ori_local_pos_err = 52;
 }

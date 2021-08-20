@@ -25,6 +25,7 @@ DracoStateProvider::DracoStateProvider() {
   dcm_vel.setZero();
 
   com_vel_est.setZero();
+  imu_ang_vel_est.setZero();
 
   // 0: no contact, 1: contact
   b_rf_contact = 0;

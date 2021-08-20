@@ -95,4 +95,11 @@ public:
 
   // filtered data
   Eigen::VectorXd com_vel_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd com_vel_raw = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd imu_ang_vel_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd imu_ang_vel_raw = Eigen::VectorXd::Zero(3);
+
+  // task local errors
+  Eigen::VectorXd task_com_local_pos_err = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_torso_ori_local_pos_err = Eigen::VectorXd::Zero(3);
 };

@@ -27,6 +27,7 @@ public:
 
     op_cmd = Eigen::VectorXd::Zero(dim);
     pos_err = Eigen::VectorXd::Zero(dim);
+    local_pos_err = Eigen::VectorXd::Zero(dim);
 
     pos_des = Eigen::VectorXd::Zero(dim);
     pos = Eigen::VectorXd::Zero(dim);
@@ -62,6 +63,9 @@ public:
 
   /// Position error.
   Eigen::VectorXd pos_err;
+
+  /// Local frame position error.
+  Eigen::VectorXd local_pos_err;
 
   /// Desired Position.
   Eigen::VectorXd pos_des;
@@ -105,6 +109,8 @@ public:
     std::cout << pos_des << std::endl;
     std::cout << "pos err" << std::endl;
     std::cout << pos_err << std::endl;
+    std::cout << "local pos err" << std::endl;
+    std::cout << local_pos_err << std::endl;
     std::cout << "vel des" << std::endl;
     std::cout << vel_des << std::endl;
     std::cout << "acc des" << std::endl;

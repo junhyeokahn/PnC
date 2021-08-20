@@ -111,6 +111,15 @@ void DracoDataManager::Send() {
 
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_com_vel_est(data->com_vel_est[i]);
+    pb_msg.add_com_vel_raw(data->com_vel_raw[i]);
+    pb_msg.add_imu_ang_vel_est(data->imu_ang_vel_est[i]);
+    pb_msg.add_imu_ang_vel_raw(data->imu_ang_vel_raw[i]);
+  }
+
+  for (int i = 0; i < 3; ++i) {
+    pb_msg.add_task_com_local_pos_err(data->task_com_local_pos_err[i]);
+    pb_msg.add_task_torso_ori_local_pos_err(
+        data->task_torso_ori_local_pos_err[i]);
   }
 
   // serialize

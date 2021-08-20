@@ -20,15 +20,7 @@ facecolors = 3 * [
 ]
 
 
-def plot_task(time,
-              pos_des,
-              pos,
-              vel_des,
-              vel,
-              phase,
-              suptitle,
-              vel_est=None,
-              label=None):
+def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle, label=None):
 
     if pos_des.shape[1] == 3 and label is None:
         fig, axes = plt.subplots(3, 2)
@@ -50,8 +42,6 @@ def plot_task(time,
             axes[i, 1].plot(time, vel[:, i], color='b', linewidth=2)
             axes[i, 1].grid(True)
             axes[i, 1].set_ylabel(xyz_label[i] + 'dot')
-            if vel_est is not None:
-                axes[i, 1].plot(time, vel_est[:, i], color='g', linewidth=2)
             plot_phase(axes[i, 1], time, phase)
         axes[2, 0].set_xlabel('time')
         axes[2, 1].set_xlabel('time')
@@ -142,19 +132,27 @@ def plot_rf_z_max(time, rf_z_max, phase):
     fig.suptitle('rf_z_max')
 
 
-def plot_vector_traj(time, vector, phase, suptitle, label):
+def plot_vector_traj(time,
+                     vector,
+                     phase,
+                     label,
+                     color,
+                     suptitle=None,
+                     axes=None):
     dim = vector.shape[1]
-    fig, axes = plt.subplots(dim, 1)
+    if axes is None:
+        fig, axes = plt.subplots(dim, 1)
     for i in range(dim):
-        axes[i].plot(time, vector[:, i], color='k', linewidth=3)
+        axes[i].plot(time, vector[:, i], color=color, linewidth=3)
         axes[i].grid(True)
         if label is not None:
             axes[i].set_ylabel(label[i])
         if phase is not None:
             plot_phase(axes[i], time, phase)
     axes[dim - 1].set_xlabel('time')
-    if suptitle is not None:
+    if (suptitle is not None):
         fig.suptitle(suptitle)
+    return axes
 
 
 def plot_rf(time, rfs, phase):
@@ -208,4 +206,4 @@ def plot_joints(full_joint, selected_joint, time, cmd_joint_positions,
               joint_positions[:, idx_list], cmd_joint_velocities[:, idx_list],
               joint_velocities[:, idx_list], phase, title, selected_joint)
     plot_vector_traj(time, cmd_joint_torques[:, idx_list], phase,
-                     title + " torque command", selected_joint)
+                     selected_joint, 'k', title + " torque command")

@@ -30,6 +30,7 @@ protected:
   Eigen::Vector3d prev_base_com_pos_;
 
   std::vector<SimpleMovingAverage> com_vel_filter_;
+  std::vector<SimpleMovingAverage> imu_ang_vel_filter_;
 
   void ComputeDCM();
 };

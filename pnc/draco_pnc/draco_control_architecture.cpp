@@ -220,11 +220,14 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_com_pos_des, dm->data->task_com_vel_des,
       dm->data->task_com_acc_des, dm->data->task_com_pos,
       dm->data->task_com_vel);
+  dm->data->task_com_local_pos_err = tci_container->com_task->local_pos_err;
 
   tci_container->torso_ori_task->CopyData(
       dm->data->task_torso_ori_des, dm->data->task_torso_ang_vel_des,
       dm->data->task_torso_ang_acc_des, dm->data->task_torso_ori,
       dm->data->task_torso_ang_vel);
+  dm->data->task_torso_ori_local_pos_err =
+      tci_container->torso_ori_task->local_pos_err;
 
   tci_container->rfoot_pos_task->CopyData(
       dm->data->task_rfoot_pos_des, dm->data->task_rfoot_vel_des,

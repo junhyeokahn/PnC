@@ -120,6 +120,13 @@ while True:
     data_saver.add('joint_velocities', list(msg.joint_velocities))
 
     data_saver.add('com_vel_est', list(msg.com_vel_est))
+    data_saver.add('com_vel_raw', list(msg.com_vel_raw))
+    data_saver.add('imu_ang_vel_est', list(msg.imu_ang_vel_est))
+    data_saver.add('imu_ang_vel_raw', list(msg.imu_ang_vel_raw))
+
+    data_saver.add('task_com_local_pos_err', list(msg.task_com_local_pos_err))
+    data_saver.add('task_torso_ori_local_pos_err',
+                   list(msg.task_torso_ori_local_pos_err))
 
     data_saver.advance()
 
