@@ -132,6 +132,11 @@ while True:
     data_saver.add('task_upper_body_pos', list(msg.task_upper_body_pos))
     data_saver.add('task_upper_body_vel', list(msg.task_upper_body_vel))
 
+    data_saver.add('task_cam_vel_des', list(msg.task_cam_vel_des))
+    data_saver.add('task_cam_vel', list(msg.task_cam_vel))
+    data_saver.add('task_cam_acc_des', list(msg.task_cam_vel_des))
+    data_saver.add('task_cam_local_vel_err', list(msg.task_cam_local_vel_err))
+
     data_saver.add('cmd_lfoot_rf', list(msg.cmd_lfoot_rf))
     data_saver.add('cmd_rfoot_rf', list(msg.cmd_rfoot_rf))
     data_saver.add('cmd_joint_positions', list(msg.cmd_joint_positions))

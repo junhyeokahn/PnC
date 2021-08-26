@@ -45,6 +45,11 @@ public:
   Eigen::VectorXd task_com_local_pos_err = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_com_local_vel_err = Eigen::VectorXd::Zero(3);
 
+  Eigen::VectorXd task_cam_vel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_cam_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_cam_acc_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_cam_local_vel_err = Eigen::VectorXd::Zero(3);
+
   Eigen::VectorXd task_torso_ori_pos_des = Eigen::VectorXd::Zero(4);
   Eigen::VectorXd task_torso_ori_vel_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_torso_ori_acc_des = Eigen::VectorXd::Zero(3);

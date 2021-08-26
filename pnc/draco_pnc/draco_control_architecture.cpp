@@ -222,6 +222,11 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_com_vel, dm->data->task_com_local_pos_err,
       dm->data->task_com_local_vel_err);
 
+  Eigen::VectorXd dummy = Eigen::VectorXd::Zero(3);
+  tci_container->cam_task->CopyData(
+      dummy, dm->data->task_cam_vel_des, dm->data->task_cam_acc_des, dummy,
+      dm->data->task_cam_vel, dummy, dm->data->task_cam_local_vel_err);
+
   tci_container->torso_ori_task->CopyData(
       dm->data->task_torso_ori_pos_des, dm->data->task_torso_ori_vel_des,
       dm->data->task_torso_ori_acc_des, dm->data->task_torso_ori_pos,

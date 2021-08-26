@@ -42,6 +42,11 @@ void DracoDataManager::Send() {
     pb_msg.add_task_com_local_pos_err(data->task_com_local_pos_err[i]);
     pb_msg.add_task_com_local_vel_err(data->task_com_local_vel_err[i]);
 
+    pb_msg.add_task_cam_vel(data->task_cam_vel[i]);
+    pb_msg.add_task_cam_vel_des(data->task_cam_vel_des[i]);
+    pb_msg.add_task_cam_acc_des(data->task_cam_acc_des[i]);
+    pb_msg.add_task_cam_local_vel_err(data->task_cam_local_vel_err[i]);
+
     pb_msg.add_task_torso_ori_pos(data->task_torso_ori_pos[i]);
     pb_msg.add_task_torso_ori_vel(data->task_torso_ori_vel[i]);
     pb_msg.add_task_torso_ori_pos_des(data->task_torso_ori_pos_des[i]);

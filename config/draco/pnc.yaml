@@ -30,18 +30,25 @@ wbc:
             sim_kd: [10, 10, 10]
             #exp_kp: [12, 20, 20]
             #exp_kd: [6., 5., 2.]
-
             #exp_kp: [10, 15, 15]
             #exp_kd: [2., 2., 2.]
-
             exp_kp: [12, 15, 15]
             exp_kd: [5., 5., 2.]
+
+        cam:
+            weight: 0.02
+            sim_kp: [0., 0., 0.] # will be ignored
+            sim_kd: [50., 50., 50.]
+            exp_kp: [0., 0., 0.] # will be ignored
+            exp_kd: [10., 10., 10.]
+
         torso_ori:
             weight: 20
             sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
             exp_kp: [7, 7, 7]
             exp_kd: [0.1, 0.1, 0.1]
+
         upper_body_joint:
             weight: 20.
             neck_pitch:

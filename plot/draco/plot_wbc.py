@@ -11,14 +11,14 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj
+from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj, plot_momentum_task
 
 tasks = [
-    'task_com_pos', 'task_com_vel', 'task_torso_ori_pos', 'task_torso_ori_vel',
-    'task_rfoot_lin_pos', 'task_rfoot_lin_vel', 'task_rfoot_ori_pos',
-    'task_rfoot_ori_vel', 'task_lfoot_lin_pos', 'task_lfoot_lin_vel',
-    'task_lfoot_ori_pos', 'task_lfoot_ori_vel', 'task_upper_body_pos',
-    'task_upper_body_vel'
+    'task_com_pos', 'task_com_vel', 'task_cam_vel', 'task_torso_ori_pos',
+    'task_torso_ori_vel', 'task_rfoot_lin_pos', 'task_rfoot_lin_vel',
+    'task_rfoot_ori_pos', 'task_rfoot_ori_vel', 'task_lfoot_lin_pos',
+    'task_lfoot_lin_vel', 'task_lfoot_ori_pos', 'task_lfoot_ori_vel',
+    'task_upper_body_pos', 'task_upper_body_vel'
 ]
 
 neck_pos_label = ["neck_pitch"]
@@ -63,7 +63,10 @@ joint_positions = []
 joint_velocities = []
 
 task_com_local_pos_err = []
+task_com_local_vel_err = []
 task_torso_ori_local_pos_err = []
+task_torso_ori_local_vel_err = []
+task_cam_local_vel_err = []
 
 des, act = dict(), dict()
 for topic in tasks:
@@ -88,8 +91,12 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             joint_positions.append(d['joint_positions'])
             joint_velocities.append(d['joint_velocities'])
             task_com_local_pos_err.append(d['task_com_local_pos_err'])
+            task_cam_local_vel_err.append(d['task_cam_local_vel_err'])
+            task_com_local_vel_err.append(d['task_com_local_vel_err'])
             task_torso_ori_local_pos_err.append(
                 d['task_torso_ori_local_pos_err'])
+            task_torso_ori_local_vel_err.append(
+                d['task_torso_ori_local_vel_err'])
         except EOFError:
             break
 
@@ -106,7 +113,10 @@ cmd_joint_torques = np.stack(cmd_joint_torques, axis=0)
 joint_positions = np.stack(joint_positions, axis=0)
 joint_velocities = np.stack(joint_velocities, axis=0)
 task_com_local_pos_err = np.stack(task_com_local_pos_err, axis=0)
+task_com_local_vel_err = np.stack(task_com_local_vel_err, axis=0)
+task_cam_local_vel_err = np.stack(task_cam_local_vel_err, axis=0)
 task_torso_ori_local_pos_err = np.stack(task_torso_ori_local_pos_err, axis=0)
+task_torso_ori_local_vel_err = np.stack(task_torso_ori_local_vel_err, axis=0)
 
 ## =============================================================================
 ## Plot Task
@@ -115,10 +125,19 @@ task_torso_ori_local_pos_err = np.stack(task_torso_ori_local_pos_err, axis=0)
 plot_task(time, des['task_com_pos'], act['task_com_pos'], des['task_com_vel'],
           act['task_com_vel'], phase, 'com lin')
 
+plot_momentum_task(time, des['task_cam_vel'], act['task_cam_vel'], phase,
+                   'cam')
+
 plot_vector_traj(time, task_com_local_pos_err, phase, ['x', 'y', 'z'], 'k',
                  "local com pos err")
+plot_vector_traj(time, task_cam_local_vel_err, phase, ['x', 'y', 'z'], 'k',
+                 "local cam vel err")
+plot_vector_traj(time, task_com_local_vel_err, phase, ['x', 'y', 'z'], 'k',
+                 "local com vel err")
 plot_vector_traj(time, task_torso_ori_local_pos_err, phase, ['x', 'y', 'z'],
                  'k', "local torso ori pos err")
+plot_vector_traj(time, task_torso_ori_local_vel_err, phase, ['x', 'y', 'z'],
+                 'k', "local torso ori vel err")
 
 plot_task(time, des['task_torso_ori_pos'], act['task_torso_ori_pos'],
           des['task_torso_ori_vel'], act['task_torso_ori_vel'], phase,

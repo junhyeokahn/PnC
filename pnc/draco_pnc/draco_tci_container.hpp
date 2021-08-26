@@ -1,15 +1,16 @@
 #pragma once
 
+#include "pnc/draco_pnc/draco_rolling_joint_constraint.hpp"
 #include "pnc/whole_body_controllers/basic_contacts.hpp"
 #include "pnc/whole_body_controllers/basic_tasks.hpp"
 #include "pnc/whole_body_controllers/tci_container.hpp"
-#include "pnc/draco_pnc/draco_rolling_joint_constraint.hpp"
 
 class DracoTCIContainer : public TCIContainer {
 public:
   DracoTCIContainer(RobotSystem *_robot);
   virtual ~DracoTCIContainer();
 
+  Task *cam_task;
   Task *joint_task;
   Task *com_task;
   Task *torso_ori_task;

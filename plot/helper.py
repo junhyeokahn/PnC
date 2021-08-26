@@ -20,6 +20,24 @@ facecolors = 3 * [
 ]
 
 
+def plot_momentum_task(time, vel_des, vel, phase, suptitle, label=None):
+    fig, axes = plt.subplots(3, 1)
+    for i in range(3):
+        axes[i].plot(time,
+                     vel_des[:, i],
+                     color='r',
+                     linestyle='dashed',
+                     linewidth=4)
+        axes[i].plot(time, vel[:, i], color='b', linewidth=2)
+        axes[i].grid(True)
+        axes[i].set_ylabel(xyz_label[i] + 'dot')
+        plot_phase(axes[i], time, phase)
+    axes[2].set_xlabel('time')
+    axes[2].set_xlabel('time')
+
+    fig.suptitle(suptitle)
+
+
 def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle, label=None):
 
     if pos_des.shape[1] == 3 and label is None:

@@ -1,5 +1,6 @@
 #include "pnc/draco_pnc/draco_tci_container.hpp"
 
+#include "pnc/draco_pnc/draco_task/draco_angular_momentum_task.hpp"
 #include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
 
 DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
@@ -19,7 +20,6 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   // Initialize Task
   joint_task = new JointTask(robot_);
 
-  // com_task = new CenterOfMassTask(robot_);
   com_task = new DracoCenterOfMassTask(robot_);
   com_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["com"],
                                                       gain_prefix + "kp");
@@ -27,6 +27,14 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
                                                       gain_prefix + "kd");
   com_task->w_hierarchy =
       util::ReadParameter<double>(cfg["wbc"]["task"]["com"], "weight");
+
+  cam_task = new DracoAngularMomentumTask(robot_);
+  cam_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["cam"],
+                                                      gain_prefix + "kp");
+  cam_task->kd = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["cam"],
+                                                      gain_prefix + "kd");
+  cam_task->w_hierarchy =
+      util::ReadParameter<double>(cfg["wbc"]["task"]["cam"], "weight");
 
   torso_ori_task = new LinkOriTask(robot_, {"torso_com_link"});
   torso_ori_task->kp = util::ReadParameter<Eigen::VectorXd>(
@@ -88,6 +96,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
       cfg["wbc"]["task"]["foot_ori"], "weight_at_swing");
 
   task_list.push_back(com_task);
+  task_list.push_back(cam_task);
   task_list.push_back(torso_ori_task);
   task_list.push_back(upper_body_task);
   task_list.push_back(rfoot_pos_task);
