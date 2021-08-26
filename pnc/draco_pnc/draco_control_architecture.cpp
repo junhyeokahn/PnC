@@ -219,35 +219,38 @@ void DracoControlArchitecture::SaveData() {
   tci_container->com_task->CopyData(
       dm->data->task_com_pos_des, dm->data->task_com_vel_des,
       dm->data->task_com_acc_des, dm->data->task_com_pos,
-      dm->data->task_com_vel);
-  dm->data->task_com_local_pos_err = tci_container->com_task->local_pos_err;
+      dm->data->task_com_vel, dm->data->task_com_local_pos_err,
+      dm->data->task_com_local_vel_err);
 
   tci_container->torso_ori_task->CopyData(
-      dm->data->task_torso_ori_des, dm->data->task_torso_ang_vel_des,
-      dm->data->task_torso_ang_acc_des, dm->data->task_torso_ori,
-      dm->data->task_torso_ang_vel);
-  dm->data->task_torso_ori_local_pos_err =
-      tci_container->torso_ori_task->local_pos_err;
+      dm->data->task_torso_ori_pos_des, dm->data->task_torso_ori_vel_des,
+      dm->data->task_torso_ori_acc_des, dm->data->task_torso_ori_pos,
+      dm->data->task_torso_ori_vel, dm->data->task_torso_ori_local_pos_err,
+      dm->data->task_torso_ori_local_vel_err);
 
   tci_container->rfoot_pos_task->CopyData(
-      dm->data->task_rfoot_pos_des, dm->data->task_rfoot_vel_des,
-      dm->data->task_rfoot_acc_des, dm->data->task_rfoot_pos,
-      dm->data->task_rfoot_vel);
+      dm->data->task_rfoot_lin_pos_des, dm->data->task_rfoot_lin_vel_des,
+      dm->data->task_rfoot_lin_acc_des, dm->data->task_rfoot_lin_pos,
+      dm->data->task_rfoot_lin_vel, dm->data->task_rfoot_lin_local_pos_err,
+      dm->data->task_rfoot_lin_local_vel_err);
 
   tci_container->rfoot_ori_task->CopyData(
-      dm->data->task_rfoot_ori_des, dm->data->task_rfoot_ang_vel_des,
-      dm->data->task_rfoot_ang_acc_des, dm->data->task_rfoot_ori,
-      dm->data->task_rfoot_ang_vel);
+      dm->data->task_rfoot_ori_pos_des, dm->data->task_rfoot_ori_vel_des,
+      dm->data->task_rfoot_ori_acc_des, dm->data->task_rfoot_ori_pos,
+      dm->data->task_rfoot_ori_vel, dm->data->task_rfoot_ori_local_pos_err,
+      dm->data->task_rfoot_ori_local_vel_err);
 
   tci_container->lfoot_pos_task->CopyData(
-      dm->data->task_lfoot_pos_des, dm->data->task_lfoot_vel_des,
-      dm->data->task_lfoot_acc_des, dm->data->task_lfoot_pos,
-      dm->data->task_lfoot_vel);
+      dm->data->task_lfoot_lin_pos_des, dm->data->task_lfoot_lin_vel_des,
+      dm->data->task_lfoot_lin_acc_des, dm->data->task_lfoot_lin_pos,
+      dm->data->task_lfoot_lin_vel, dm->data->task_lfoot_lin_local_pos_err,
+      dm->data->task_lfoot_lin_local_vel_err);
 
   tci_container->lfoot_ori_task->CopyData(
-      dm->data->task_lfoot_ori_des, dm->data->task_lfoot_ang_vel_des,
-      dm->data->task_lfoot_ang_acc_des, dm->data->task_lfoot_ori,
-      dm->data->task_lfoot_ang_vel);
+      dm->data->task_lfoot_ori_pos_des, dm->data->task_lfoot_ori_vel_des,
+      dm->data->task_lfoot_ori_acc_des, dm->data->task_lfoot_ori_pos,
+      dm->data->task_lfoot_ori_vel, dm->data->task_lfoot_ori_local_pos_err,
+      dm->data->task_lfoot_ori_local_vel_err);
 
   tci_container->upper_body_task->CopyData(
       dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,

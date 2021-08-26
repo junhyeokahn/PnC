@@ -39,45 +39,67 @@ void DracoDataManager::Send() {
     pb_msg.add_task_com_pos_des(data->task_com_pos_des[i]);
     pb_msg.add_task_com_vel_des(data->task_com_vel_des[i]);
     pb_msg.add_task_com_acc_des(data->task_com_acc_des[i]);
+    pb_msg.add_task_com_local_pos_err(data->task_com_local_pos_err[i]);
+    pb_msg.add_task_com_local_vel_err(data->task_com_local_vel_err[i]);
 
-    pb_msg.add_task_torso_ori(data->task_torso_ori[i]);
-    pb_msg.add_task_torso_ang_vel(data->task_torso_ang_vel[i]);
-    pb_msg.add_task_torso_ori_des(data->task_torso_ori_des[i]);
-    pb_msg.add_task_torso_ang_vel_des(data->task_torso_ang_vel_des[i]);
-    pb_msg.add_task_torso_ang_acc_des(data->task_torso_ang_acc_des[i]);
+    pb_msg.add_task_torso_ori_pos(data->task_torso_ori_pos[i]);
+    pb_msg.add_task_torso_ori_vel(data->task_torso_ori_vel[i]);
+    pb_msg.add_task_torso_ori_pos_des(data->task_torso_ori_pos_des[i]);
+    pb_msg.add_task_torso_ori_vel_des(data->task_torso_ori_vel_des[i]);
+    pb_msg.add_task_torso_ori_acc_des(data->task_torso_ori_acc_des[i]);
+    pb_msg.add_task_torso_ori_local_pos_err(
+        data->task_torso_ori_local_pos_err[i]);
+    pb_msg.add_task_torso_ori_local_vel_err(
+        data->task_torso_ori_local_vel_err[i]);
 
-    pb_msg.add_task_rfoot_pos(data->task_rfoot_pos[i]);
-    pb_msg.add_task_rfoot_vel(data->task_rfoot_vel[i]);
-    pb_msg.add_task_rfoot_pos_des(data->task_rfoot_pos_des[i]);
-    pb_msg.add_task_rfoot_vel_des(data->task_rfoot_vel_des[i]);
-    pb_msg.add_task_rfoot_acc_des(data->task_rfoot_acc_des[i]);
+    pb_msg.add_task_rfoot_lin_pos(data->task_rfoot_lin_pos[i]);
+    pb_msg.add_task_rfoot_lin_vel(data->task_rfoot_lin_vel[i]);
+    pb_msg.add_task_rfoot_lin_pos_des(data->task_rfoot_lin_pos_des[i]);
+    pb_msg.add_task_rfoot_lin_vel_des(data->task_rfoot_lin_vel_des[i]);
+    pb_msg.add_task_rfoot_lin_acc_des(data->task_rfoot_lin_acc_des[i]);
+    pb_msg.add_task_rfoot_lin_local_pos_err(
+        data->task_rfoot_lin_local_pos_err[i]);
+    pb_msg.add_task_rfoot_lin_local_vel_err(
+        data->task_rfoot_lin_local_vel_err[i]);
 
-    pb_msg.add_task_rfoot_ori(data->task_rfoot_ori[i]);
-    pb_msg.add_task_rfoot_ang_vel(data->task_rfoot_ang_vel[i]);
-    pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori_des[i]);
-    pb_msg.add_task_rfoot_ang_vel_des(data->task_rfoot_ang_vel_des[i]);
-    pb_msg.add_task_rfoot_ang_acc_des(data->task_rfoot_ang_acc_des[i]);
+    pb_msg.add_task_rfoot_ori_pos(data->task_rfoot_ori_pos[i]);
+    pb_msg.add_task_rfoot_ori_vel(data->task_rfoot_ori_vel[i]);
+    pb_msg.add_task_rfoot_ori_pos_des(data->task_rfoot_ori_pos_des[i]);
+    pb_msg.add_task_rfoot_ori_vel_des(data->task_rfoot_ori_vel_des[i]);
+    pb_msg.add_task_rfoot_ori_acc_des(data->task_rfoot_ori_acc_des[i]);
+    pb_msg.add_task_rfoot_ori_local_pos_err(
+        data->task_rfoot_ori_local_pos_err[i]);
+    pb_msg.add_task_rfoot_ori_local_vel_err(
+        data->task_rfoot_ori_local_vel_err[i]);
 
-    pb_msg.add_task_lfoot_pos(data->task_lfoot_pos[i]);
-    pb_msg.add_task_lfoot_vel(data->task_lfoot_vel[i]);
-    pb_msg.add_task_lfoot_pos_des(data->task_lfoot_pos_des[i]);
-    pb_msg.add_task_lfoot_vel_des(data->task_lfoot_vel_des[i]);
-    pb_msg.add_task_lfoot_acc_des(data->task_lfoot_acc_des[i]);
+    pb_msg.add_task_lfoot_lin_pos(data->task_lfoot_lin_pos[i]);
+    pb_msg.add_task_lfoot_lin_vel(data->task_lfoot_lin_vel[i]);
+    pb_msg.add_task_lfoot_lin_pos_des(data->task_lfoot_lin_pos_des[i]);
+    pb_msg.add_task_lfoot_lin_vel_des(data->task_lfoot_lin_vel_des[i]);
+    pb_msg.add_task_lfoot_lin_acc_des(data->task_lfoot_lin_acc_des[i]);
+    pb_msg.add_task_lfoot_lin_local_pos_err(
+        data->task_lfoot_lin_local_pos_err[i]);
+    pb_msg.add_task_lfoot_lin_local_vel_err(
+        data->task_lfoot_lin_local_vel_err[i]);
 
-    pb_msg.add_task_lfoot_ori(data->task_lfoot_ori[i]);
-    pb_msg.add_task_lfoot_ang_vel(data->task_lfoot_ang_vel[i]);
-    pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori_des[i]);
-    pb_msg.add_task_lfoot_ang_vel_des(data->task_lfoot_ang_vel_des[i]);
-    pb_msg.add_task_lfoot_ang_acc_des(data->task_lfoot_ang_acc_des[i]);
+    pb_msg.add_task_lfoot_ori_pos(data->task_lfoot_ori_pos[i]);
+    pb_msg.add_task_lfoot_ori_vel(data->task_lfoot_ori_vel[i]);
+    pb_msg.add_task_lfoot_ori_pos_des(data->task_lfoot_ori_pos_des[i]);
+    pb_msg.add_task_lfoot_ori_vel_des(data->task_lfoot_ori_vel_des[i]);
+    pb_msg.add_task_lfoot_ori_acc_des(data->task_lfoot_ori_acc_des[i]);
+    pb_msg.add_task_lfoot_ori_local_pos_err(
+        data->task_lfoot_ori_local_pos_err[i]);
+    pb_msg.add_task_lfoot_ori_local_vel_err(
+        data->task_lfoot_ori_local_vel_err[i]);
   }
-  pb_msg.add_task_torso_ori_des(data->task_torso_ori_des[3]);
-  pb_msg.add_task_torso_ori(data->task_torso_ori[3]);
+  pb_msg.add_task_torso_ori_pos_des(data->task_torso_ori_pos_des[3]);
+  pb_msg.add_task_torso_ori_pos(data->task_torso_ori_pos[3]);
 
-  pb_msg.add_task_lfoot_ori_des(data->task_lfoot_ori_des[3]);
-  pb_msg.add_task_lfoot_ori(data->task_lfoot_ori[3]);
+  pb_msg.add_task_lfoot_ori_pos_des(data->task_lfoot_ori_pos_des[3]);
+  pb_msg.add_task_lfoot_ori_pos(data->task_lfoot_ori_pos[3]);
 
-  pb_msg.add_task_rfoot_ori_des(data->task_rfoot_ori_des[3]);
-  pb_msg.add_task_rfoot_ori(data->task_rfoot_ori[3]);
+  pb_msg.add_task_rfoot_ori_pos_des(data->task_rfoot_ori_pos_des[3]);
+  pb_msg.add_task_rfoot_ori_pos(data->task_rfoot_ori_pos[3]);
 
   for (int i = 0; i < data->task_upper_body_pos_des.size(); ++i) {
     pb_msg.add_task_upper_body_pos_des(data->task_upper_body_pos_des[i]);
@@ -114,12 +136,8 @@ void DracoDataManager::Send() {
     pb_msg.add_com_vel_raw(data->com_vel_raw[i]);
     pb_msg.add_imu_ang_vel_est(data->imu_ang_vel_est[i]);
     pb_msg.add_imu_ang_vel_raw(data->imu_ang_vel_raw[i]);
-  }
-
-  for (int i = 0; i < 3; ++i) {
-    pb_msg.add_task_com_local_pos_err(data->task_com_local_pos_err[i]);
-    pb_msg.add_task_torso_ori_local_pos_err(
-        data->task_torso_ori_local_pos_err[i]);
+    pb_msg.add_cam_est(data->cam_est[i]);
+    pb_msg.add_cam_raw(data->cam_raw[i]);
   }
 
   // serialize

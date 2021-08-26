@@ -28,6 +28,7 @@ public:
     op_cmd = Eigen::VectorXd::Zero(dim);
     pos_err = Eigen::VectorXd::Zero(dim);
     local_pos_err = Eigen::VectorXd::Zero(dim);
+    local_vel_err = Eigen::VectorXd::Zero(dim);
 
     pos_des = Eigen::VectorXd::Zero(dim);
     pos = Eigen::VectorXd::Zero(dim);
@@ -67,6 +68,9 @@ public:
   /// Local frame position error.
   Eigen::VectorXd local_pos_err;
 
+  /// Local frame velocity error.
+  Eigen::VectorXd local_vel_err;
+
   /// Desired Position.
   Eigen::VectorXd pos_des;
 
@@ -89,6 +93,7 @@ public:
   /// op_cmd
   /// \note For orientation task, _pos_des has 4 dimensional vector that
   /// represents scalar first quaternion.
+  /// \note For the angular momentum task, _pos_des is ignored.
   void update_desired(const Eigen::VectorXd &_pos_des,
                       const Eigen::VectorXd &_vel_des,
                       const Eigen::VectorXd &_acc_des) {
@@ -128,6 +133,20 @@ public:
     _acc_des = acc_des;
     _pos = pos;
     _vel = vel;
+  }
+
+  /// Copies task commands.
+  void CopyData(Eigen::VectorXd &_pos_des, Eigen::VectorXd &_vel_des,
+                Eigen::VectorXd &_acc_des, Eigen::VectorXd &_pos,
+                Eigen::VectorXd &_vel, Eigen::VectorXd &_local_pos_error,
+                Eigen::VectorXd &_local_vel_error) {
+    _pos_des = pos_des;
+    _vel_des = vel_des;
+    _acc_des = acc_des;
+    _pos = pos;
+    _vel = vel;
+    _local_pos_error = local_pos_err;
+    _local_vel_error = local_vel_err;
   }
 
 protected:

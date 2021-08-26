@@ -27,10 +27,13 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
       cfg["state_estimator"], "n_data_com_vel");
   Eigen::VectorXd n_data_ang_vel = util::ReadParameter<Eigen::VectorXd>(
       cfg["state_estimator"], "n_data_ang_vel");
+  Eigen::VectorXd n_data_cam = util::ReadParameter<Eigen::VectorXd>(
+      cfg["state_estimator"], "n_data_cam");
 
   for (int i = 0; i < 3; ++i) {
     com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
     imu_ang_vel_filter_.push_back(SimpleMovingAverage(n_data_ang_vel[i]));
+    cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
   }
 }
 
@@ -132,10 +135,12 @@ void DracoStateEstimator::update(DracoSensorData *data) {
       data->imu_frame_vel.head(3), data->joint_positions,
       data->joint_velocities, true);
 
-  // filter com velocity
+  // filter com velocity, cam
   for (int i = 0; i < 3; ++i) {
     com_vel_filter_[i].Input(robot_->get_com_lin_vel()[i]);
     sp_->com_vel_est[i] = com_vel_filter_[i].Output();
+    cam_filter_[i].Input(robot_->hg[i]);
+    sp_->cam_est[i] = cam_filter_[i].Output();
   }
 
   // update dcm
@@ -172,6 +177,8 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     dm->data->com_vel_raw = robot_->get_com_lin_vel();
     dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;
     dm->data->imu_ang_vel_raw = data->imu_frame_vel.head(3);
+    dm->data->cam_est = sp_->cam_est;
+    dm->data->cam_raw = robot_->hg.head(3);
   }
 }
 

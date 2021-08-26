@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <Eigen/Dense>
 
 #include "configuration.hpp"
@@ -31,6 +33,7 @@ protected:
 
   std::vector<SimpleMovingAverage> com_vel_filter_;
   std::vector<SimpleMovingAverage> imu_ang_vel_filter_;
+  std::vector<SimpleMovingAverage> cam_filter_;
 
   void ComputeDCM();
 };

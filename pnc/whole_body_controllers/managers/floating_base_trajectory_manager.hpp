@@ -16,8 +16,9 @@ public:
   /// Initialize floating base interpolation to _target_com_pos and
   /// _target_base_quat
   //
+  /// \param[in] _start_time Time at initialization.
+  /// \param[in] _duration Duration for the trajectory.
   /// \param[in] _target_com_pos Target com pos in world frame.
-  //
   /// \param[in] _target_base_quat Target base quat in world frame.
   void InitializeInterpolationTrajectory(
       const double _start_time, const double _duration,
@@ -26,10 +27,9 @@ public:
 
   /// Initialize swaying trajectory
   //
+  /// \param[in] _start_time Time at initialization
   /// \param[in] _local_amp Swaying amplitude in local contact frame.
-  //
   /// \param[in] _local_freq Swaying frequency in local contact frame.
-  //
   /// \param[in] _rot_world_local Rotation matrix of local contact frame w.r.t.
   /// world frame.
   void InitializeSwayingTrajectory(double _start_time,

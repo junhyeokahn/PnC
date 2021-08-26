@@ -14,10 +14,11 @@ import matplotlib.pyplot as plt
 from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj
 
 tasks = [
-    'task_com_pos', 'task_com_vel', 'task_torso_ori', 'task_torso_ang_vel',
-    'task_rfoot_pos', 'task_rfoot_vel', 'task_rfoot_ori', 'task_rfoot_ang_vel',
-    'task_lfoot_pos', 'task_lfoot_vel', 'task_lfoot_ori', 'task_lfoot_ang_vel',
-    'task_upper_body_pos', 'task_upper_body_vel'
+    'task_com_pos', 'task_com_vel', 'task_torso_ori_pos', 'task_torso_ori_vel',
+    'task_rfoot_lin_pos', 'task_rfoot_lin_vel', 'task_rfoot_ori_pos',
+    'task_rfoot_ori_vel', 'task_lfoot_lin_pos', 'task_lfoot_lin_vel',
+    'task_lfoot_ori_pos', 'task_lfoot_ori_vel', 'task_upper_body_pos',
+    'task_upper_body_vel'
 ]
 
 neck_pos_label = ["neck_pitch"]
@@ -119,8 +120,8 @@ plot_vector_traj(time, task_com_local_pos_err, phase, ['x', 'y', 'z'], 'k',
 plot_vector_traj(time, task_torso_ori_local_pos_err, phase, ['x', 'y', 'z'],
                  'k', "local torso ori pos err")
 
-plot_task(time, des['task_torso_ori'], act['task_torso_ori'],
-          des['task_torso_ang_vel'], act['task_torso_ang_vel'], phase,
+plot_task(time, des['task_torso_ori_pos'], act['task_torso_ori_pos'],
+          des['task_torso_ori_vel'], act['task_torso_ori_vel'], phase,
           'torso ori')
 
 for i in range(3):
@@ -134,19 +135,20 @@ for i in range(3):
               'upper body',
               label=upper_body_pos_label[slc])
 
-plot_task(time, des['task_lfoot_pos'], act['task_lfoot_pos'],
-          des['task_lfoot_vel'], act['task_lfoot_vel'], phase, 'left foot lin')
+plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
+          des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
+          'left foot lin')
 
-plot_task(time, des['task_lfoot_ori'], act['task_lfoot_ori'],
-          des['task_lfoot_ang_vel'], act['task_lfoot_ang_vel'], phase,
+plot_task(time, des['task_lfoot_ori_pos'], act['task_lfoot_ori_pos'],
+          des['task_lfoot_ori_vel'], act['task_lfoot_ori_vel'], phase,
           'left foot ori')
 
-plot_task(time, des['task_rfoot_pos'], act['task_rfoot_pos'],
-          des['task_rfoot_vel'], act['task_rfoot_vel'], phase,
+plot_task(time, des['task_rfoot_lin_pos'], act['task_rfoot_lin_pos'],
+          des['task_rfoot_lin_vel'], act['task_rfoot_lin_vel'], phase,
           'right foot lin')
 
-plot_task(time, des['task_rfoot_ori'], act['task_rfoot_ori'],
-          des['task_rfoot_ang_vel'], act['task_rfoot_ang_vel'], phase,
+plot_task(time, des['task_rfoot_ori_pos'], act['task_rfoot_ori_pos'],
+          des['task_rfoot_ori_vel'], act['task_rfoot_ori_vel'], phase,
           'right foot ori')
 
 ## =============================================================================

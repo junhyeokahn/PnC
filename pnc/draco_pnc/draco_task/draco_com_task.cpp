@@ -3,7 +3,7 @@
 DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot)
     : Task(_robot, 3) {
 
-  util::PrettyConstructor(3, "DracoCenterOfMassTask ");
+  util::PrettyConstructor(3, "DracoCenterOfMassTask");
   sp_ = DracoStateProvider::getStateProvider();
 }
 
@@ -17,12 +17,10 @@ void DracoCenterOfMassTask::update_cmd() {
       robot_->get_link_iso(robot_->get_base_link_name()).linear();
 
   local_pos_err = rot_world_local_.transpose() * pos_err;
+  local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
 
-  op_cmd =
-      acc_des +
-      rot_world_local_ *
-          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
-           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
+  op_cmd = acc_des + rot_world_local_ * (kp.cwiseProduct(local_pos_err) +
+                                         kd.cwiseProduct(local_vel_err));
 }
 
 void DracoCenterOfMassTask::update_jacobian() {

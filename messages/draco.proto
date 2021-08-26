@@ -5,77 +5,94 @@ package draco;
 message pnc_msg {
   float time = 1;
   uint32 phase = 2;
+
   // com task
   repeated float task_com_pos = 3;
   repeated float task_com_vel = 4;
   repeated float task_com_pos_des = 5;
   repeated float task_com_vel_des = 6;
   repeated float task_com_acc_des = 7;
+  repeated float task_com_local_pos_err = 8;
+  repeated float task_com_local_vel_err = 9;
 
   // base ori
-  repeated float task_torso_ori_des = 8;
-  repeated float task_torso_ang_vel_des = 9;
-  repeated float task_torso_ang_acc_des = 10;
-  repeated float task_torso_ori = 11;
-  repeated float task_torso_ang_vel = 12;
+  repeated float task_torso_ori_pos_des = 10;
+  repeated float task_torso_ori_vel_des = 11;
+  repeated float task_torso_ori_acc_des = 12;
+  repeated float task_torso_ori_pos = 13;
+  repeated float task_torso_ori_vel = 14;
+  repeated float task_torso_ori_local_pos_err = 15;
+  repeated float task_torso_ori_local_vel_err = 16;
 
   // rfoot pos
-  repeated float task_rfoot_pos = 13;
-  repeated float task_rfoot_vel = 14;
-  repeated float task_rfoot_pos_des = 15;
-  repeated float task_rfoot_vel_des = 16;
-  repeated float task_rfoot_acc_des = 17;
+  repeated float task_rfoot_lin_pos = 17;
+  repeated float task_rfoot_lin_vel = 18;
+  repeated float task_rfoot_lin_pos_des = 19;
+  repeated float task_rfoot_lin_vel_des = 20;
+  repeated float task_rfoot_lin_acc_des = 21;
+  repeated float task_rfoot_lin_local_pos_err = 22;
+  repeated float task_rfoot_lin_local_vel_err = 23;
 
   // rfoot ori
-  repeated float task_rfoot_ori_des = 18;
-  repeated float task_rfoot_ang_vel_des = 19;
-  repeated float task_rfoot_ang_acc_des = 20;
-  repeated float task_rfoot_ori = 21;
-  repeated float task_rfoot_ang_vel = 22;
+  repeated float task_rfoot_ori_pos_des = 24;
+  repeated float task_rfoot_ori_vel_des = 25;
+  repeated float task_rfoot_ori_acc_des = 26;
+  repeated float task_rfoot_ori_pos = 27;
+  repeated float task_rfoot_ori_vel = 28;
+  repeated float task_rfoot_ori_local_pos_err = 29;
+  repeated float task_rfoot_ori_local_vel_err = 30;
 
   // lfoot pos
-  repeated float task_lfoot_pos = 23;
-  repeated float task_lfoot_vel = 24;
-  repeated float task_lfoot_pos_des = 25;
-  repeated float task_lfoot_vel_des = 26;
-  repeated float task_lfoot_acc_des = 27;
+  repeated float task_lfoot_lin_pos = 31;
+  repeated float task_lfoot_lin_vel = 32;
+  repeated float task_lfoot_lin_pos_des = 33;
+  repeated float task_lfoot_lin_vel_des = 34;
+  repeated float task_lfoot_lin_acc_des = 35;
+  repeated float task_lfoot_lin_local_pos_err = 36;
+  repeated float task_lfoot_lin_local_vel_err = 37;
 
-  // rfoot ori
-  repeated float task_lfoot_ori_des = 28;
-  repeated float task_lfoot_ang_vel_des = 29;
-  repeated float task_lfoot_ang_acc_des = 30;
-  repeated float task_lfoot_ori = 31;
-  repeated float task_lfoot_ang_vel = 32;
+  // lfoot ori
+  repeated float task_lfoot_ori_pos_des = 38;
+  repeated float task_lfoot_ori_vel_des = 39;
+  repeated float task_lfoot_ori_acc_des = 40;
+  repeated float task_lfoot_ori_pos = 41;
+  repeated float task_lfoot_ori_vel = 42;
+  repeated float task_lfoot_ori_local_pos_err = 43;
+  repeated float task_lfoot_ori_local_vel_err = 44;
+
+  // momentum task
+  repeated float task_cam_vel_des = 45;
+  repeated float task_cam_vel = 46;
+  repeated float task_cam_acc_des = 47;
+  repeated float task_cam_local_vel_err = 48;
 
   // upper body
-  repeated float task_upper_body_pos_des = 33;
-  repeated float task_upper_body_vel_des = 34;
-  repeated float task_upper_body_acc_des = 35;
-  repeated float task_upper_body_pos = 36;
-  repeated float task_upper_body_vel = 37;
+  repeated float task_upper_body_pos_des = 49;
+  repeated float task_upper_body_vel_des = 50;
+  repeated float task_upper_body_acc_des = 51;
+  repeated float task_upper_body_pos = 52;
+  repeated float task_upper_body_vel = 53;
 
   // rf cmd
-  repeated float cmd_lfoot_rf = 38;
-  repeated float cmd_rfoot_rf = 39;
+  repeated float cmd_lfoot_rf = 54;
+  repeated float cmd_rfoot_rf = 55;
 
   // pos, vel, trq cmd
-  repeated float cmd_joint_positions = 40;
-  repeated float cmd_joint_velocities = 41;
-  repeated float cmd_joint_torques = 42;
-  repeated float joint_velocities = 43;
+  repeated float cmd_joint_positions = 56;
+  repeated float cmd_joint_velocities = 57;
+  repeated float cmd_joint_torques = 58;
+  repeated float joint_velocities = 59;
 
   // meshcat visualization
-  repeated float joint_positions = 44;
-  repeated float base_joint_pos = 45;
-  repeated float base_joint_quat = 46;
+  repeated float joint_positions = 60;
+  repeated float base_joint_pos = 61;
+  repeated float base_joint_quat = 62;
 
   // filtered data
-  repeated float com_vel_est = 47;
-  repeated float com_vel_raw = 48;
-  repeated float imu_ang_vel_est = 49;
-  repeated float imu_ang_vel_raw = 50;
-
-  // task errors at local frame
-  repeated float task_com_local_pos_err = 51;
-  repeated float task_torso_ori_local_pos_err = 52;
+  repeated float com_vel_est = 63;
+  repeated float com_vel_raw = 64;
+  repeated float imu_ang_vel_est = 65;
+  repeated float imu_ang_vel_raw = 66;
+  repeated float cam_est = 67;
+  repeated float cam_raw = 68;
 }

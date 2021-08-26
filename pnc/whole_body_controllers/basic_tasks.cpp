@@ -70,12 +70,10 @@ void LinkPosTask::update_cmd() {
   }
   pos_err = pos_des - pos;
   local_pos_err = rot_world_local_.transpose() * pos_err;
+  local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
 
-  op_cmd =
-      acc_des +
-      rot_world_local_ *
-          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
-           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
+  op_cmd = acc_des + rot_world_local_ * (kp.cwiseProduct(local_pos_err) +
+                                         kd.cwiseProduct(local_vel_err));
 }
 
 void LinkPosTask::update_jacobian() {
@@ -117,12 +115,10 @@ void LinkOriTask::update_cmd() {
   }
 
   local_pos_err = rot_world_local_.transpose() * pos_err;
+  local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
 
-  op_cmd =
-      acc_des +
-      rot_world_local_ *
-          (kp.cwiseProduct(rot_world_local_.transpose() * pos_err) +
-           kd.cwiseProduct(rot_world_local_.transpose() * (vel_des - vel)));
+  op_cmd = acc_des + rot_world_local_ * (kp.cwiseProduct(local_pos_err) +
+                                         kd.cwiseProduct(local_vel_err));
 }
 
 void LinkOriTask::update_jacobian() {
