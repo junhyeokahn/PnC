@@ -181,12 +181,13 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     dm->data->cam_est = sp_->cam_est;
     dm->data->cam_raw = robot_->hg.head(3);
     dm->data->icp = sp_->dcm.head(2);
+    dm->data->icp_dot = sp_->dcm_vel.head(2);
   }
 }
 
 void DracoStateEstimator::ComputeDCM() {
   Eigen::Vector3d com_pos = robot_->get_com_pos();
-  Eigen::Vector3d com_vel = robot_->get_com_lin_vel();
+  Eigen::Vector3d com_vel = sp_->com_vel_est;
   double dcm_omega = sqrt(9.81 / com_pos[2]);
 
   sp_->prev_dcm = sp_->dcm;

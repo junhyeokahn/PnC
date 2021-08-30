@@ -147,6 +147,9 @@ void DracoDataManager::Send() {
 
   for (int i = 0; i < 2; ++i) {
     pb_msg.add_icp(data->icp[i]);
+    pb_msg.add_icp_des(data->icp_des[i]);
+    pb_msg.add_icp_dot(data->icp_dot[i]);
+    pb_msg.add_icp_dot_des(data->icp_dot_des[i]);
   }
 
   // serialize

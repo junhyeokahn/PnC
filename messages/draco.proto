@@ -98,4 +98,7 @@ message pnc_msg {
 
   // icp
   repeated float icp = 69;
+  repeated float icp_des = 70;
+  repeated float icp_dot = 71;
+  repeated float icp_dot_des = 72;
 }

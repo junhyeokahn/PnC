@@ -120,4 +120,7 @@ public:
 
   // icp
   Eigen::VectorXd icp = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_des = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_dot = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_dot_des = Eigen::VectorXd::Zero(2);
 };

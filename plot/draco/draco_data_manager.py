@@ -60,8 +60,18 @@ if args.b_visualize:
     icp_viz = MeshcatVisualizer(icp_model, icp_collision_model,
                                 icp_visual_model)
     icp_viz.initViewer(viz.viewer)
-    icp_viz.loadViewerModel(rootNodeName="icp", color=[1., 1., 1., 0.5])
+    icp_viz.loadViewerModel(rootNodeName="icp", color=[0., 0., 1., 0.5])
     icp_viz_q = pin.neutral(icp_model)
+
+    icp_des_model, icp_des_collision_model, icp_des_visual_model = pin.buildModelsFromUrdf(
+        "robot_model/ground/sphere.urdf", "robot_model/ground",
+        pin.JointModelFreeFlyer())
+    icp_des_viz = MeshcatVisualizer(icp_des_model, icp_des_collision_model,
+                                    icp_des_visual_model)
+    icp_des_viz.initViewer(viz.viewer)
+    icp_des_viz.loadViewerModel(rootNodeName="icp_des",
+                                color=[1., 0., 0., 0.5])
+    icp_des_viz_q = pin.neutral(icp_des_model)
 
 msg = pnc_msg()
 
@@ -162,6 +172,11 @@ while True:
     data_saver.add('cam_est', list(msg.cam_est))
     data_saver.add('cam_raw', list(msg.cam_raw))
 
+    data_saver.add('icp_des', list(msg.icp_des))
+    data_saver.add('icp', list(msg.icp))
+    data_saver.add('icp_dot_des', list(msg.icp_dot_des))
+    data_saver.add('icp_dot', list(msg.icp_dot))
+
     data_saver.advance()
 
     # publish back for plot juggler
@@ -180,5 +195,10 @@ while True:
         icp_viz_q[1] = msg.icp[1]
         icp_viz_q[2] = 0.
 
+        icp_des_viz_q[0] = msg.icp_des[0]
+        icp_des_viz_q[1] = msg.icp_des[1]
+        icp_des_viz_q[2] = 0.
+
         viz.display(vis_q)
         icp_viz.display(icp_viz_q)
+        icp_des_viz.display(icp_des_viz_q)
