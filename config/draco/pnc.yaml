@@ -3,13 +3,13 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-b_exp: false
-#b_exp: true
+#b_exp: false
+b_exp: true
 
 state_estimator:
     n_data_com_vel: [100, 100, 100]
-    n_data_ang_vel: [5, 5, 5] # smaller, better
-    n_data_cam: [5, 5, 5]
+    n_data_ang_vel: [5, 5, 5]
+    n_data_cam: [50, 50, 50]
 
 wbc:
     regularization:
@@ -19,8 +19,8 @@ wbc:
     contact:
         rf_z_max: 1000.0
         w_rf: 0.
-        foot_half_width: 0.02 # 0.095 m
-        foot_half_length: 0.05 # 0.055 m
+        foot_half_width: 0.03 # 8.5 / 2 (cm)
+        foot_half_length: 0.08 # 22 / 2 (cm)
         mu: 0.3
 
     task:
@@ -28,15 +28,11 @@ wbc:
             weight: 20
             sim_kp: [200, 200, 200]
             sim_kd: [10, 10, 10]
-            #exp_kp: [12, 20, 20]
-            #exp_kd: [6., 5., 2.]
-            #exp_kp: [10, 15, 15]
-            #exp_kd: [2., 2., 2.]
-            exp_kp: [12, 15, 15]
-            exp_kd: [5., 5., 2.]
+            exp_kp: [10, 22, 10]
+            exp_kd: [1., 1., 1.]
 
         cam:
-            weight: 0.02
+            weight: 0.
             sim_kp: [0., 0., 0.] # will be ignored
             sim_kd: [50., 50., 50.]
             exp_kp: [0., 0., 0.] # will be ignored
@@ -46,7 +42,7 @@ wbc:
             weight: 20
             sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
-            exp_kp: [7, 7, 7]
+            exp_kp: [10, 10, 10]
             exp_kd: [0.1, 0.1, 0.1]
 
         upper_body_joint:
@@ -180,7 +176,7 @@ walking:
     rf_z_max_time: 0.1
 
     #com_height: 0.73
-    com_height: 0.7
+    com_height: 0.72
     swing_height: 0.04
 
     t_additional_ini_trans: 0.
@@ -199,3 +195,4 @@ controller:
     waiting_count: 10
     b_smoothing: true
     smoothing_duration: 0.2
+    #smoothing_duration: 0.02

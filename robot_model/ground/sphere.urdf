@@ -1,0 +1,20 @@
+<?xml version="0.0" ?>
+<robot name="block">
+  <link name="baseLink">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value="0.0001"/>
+       <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <sphere radius="0.03"/>
+      </geometry>
+       <material name="brown">
+           <color rgba="0.68 0.45 0.35 1.0"/>
+      </material>
+    </visual>
+  </link>
+</robot>
+

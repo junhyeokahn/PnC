@@ -162,18 +162,14 @@ void DartRobotSystem::update_system(
     Eigen::Matrix<double, 6, 1> joint_vel_in_world;
     joint_vel_in_world.segment(0, 3) = base_joint_ang_vel;
     joint_vel_in_world.segment(3, 3) = base_joint_lin_vel;
-
+    Eigen::Matrix<double, 6, 1> zero_acc = Eigen::Matrix<double, 6, 1>::Zero();
     dynamic_cast<dart::dynamics::FreeJoint *>(skel_->getRootJoint())
-        ->setTransform(joint_iso, dart::dynamics::Frame::World());
+        ->setSpatialMotion(&joint_iso, dart::dynamics::Frame::World(),
+                           &joint_vel_in_world, dart::dynamics::Frame::World(),
+                           dart::dynamics::Frame::World(), &zero_acc,
+                           dart::dynamics::Frame::World(),
+                           dart::dynamics::Frame::World());
 
-    // TODO: change this to be more generic
-    // Currently, this assumes that the floating joints are in order of Rx, Ry,
-    // Rz, x, y, z
-    for (int i = 0; i < 6; ++i) {
-      dynamic_cast<dart::dynamics::FreeJoint *>(skel_->getRootJoint())
-          ->getDof(i)
-          ->setVelocity(joint_vel_in_world[i]);
-    }
   } else {
     // Fixed Base Robot
     Eigen::Isometry3d base_joint_iso;

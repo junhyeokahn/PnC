@@ -35,6 +35,8 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
     imu_ang_vel_filter_.push_back(SimpleMovingAverage(n_data_ang_vel[i]));
     cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
   }
+
+  b_first_visit_ = true;
 }
 
 DracoStateEstimator::~DracoStateEstimator() {}
@@ -83,7 +85,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
       Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
       Eigen::Vector3d::Zero(), Eigen::Quaternion<double>(rot_world_to_base),
       Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
-      data->joint_positions, data->joint_velocities, true);
+      data->joint_positions, data->joint_velocities, false);
 
   // estimate base linear states
   Eigen::Vector3d foot_pos, foot_vel;
@@ -115,11 +117,10 @@ void DracoStateEstimator::update(DracoSensorData *data) {
   Eigen::Vector3d base_com_pos =
       base_joint_pos + rot_world_to_base * robot_->get_base_local_com_pos();
 
-  static bool b_first_visit(true);
-  if (b_first_visit) {
+  if (b_first_visit_) {
     prev_base_joint_pos_ = base_joint_pos;
     prev_base_com_pos_ = base_com_pos;
-    b_first_visit = false;
+    b_first_visit_ = false;
   }
   Eigen::Vector3d base_joint_lin_vel =
       (base_joint_pos - prev_base_joint_pos_) / sp_->servo_dt;
@@ -179,6 +180,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     dm->data->imu_ang_vel_raw = data->imu_frame_vel.head(3);
     dm->data->cam_est = sp_->cam_est;
     dm->data->cam_raw = robot_->hg.head(3);
+    dm->data->icp = sp_->dcm.head(2);
   }
 }
 

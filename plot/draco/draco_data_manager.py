@@ -54,6 +54,15 @@ if args.b_visualize:
     viz.loadViewerModel()
     vis_q = pin.neutral(model)
 
+    icp_model, icp_collision_model, icp_visual_model = pin.buildModelsFromUrdf(
+        "robot_model/ground/sphere.urdf", "robot_model/ground",
+        pin.JointModelFreeFlyer())
+    icp_viz = MeshcatVisualizer(icp_model, icp_collision_model,
+                                icp_visual_model)
+    icp_viz.initViewer(viz.viewer)
+    icp_viz.loadViewerModel(rootNodeName="icp", color=[1., 1., 1., 0.5])
+    icp_viz_q = pin.neutral(icp_model)
+
 msg = pnc_msg()
 
 while True:
@@ -167,4 +176,9 @@ while True:
         vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
         vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
 
+        icp_viz_q[0] = msg.icp[0]
+        icp_viz_q[1] = msg.icp[1]
+        icp_viz_q[2] = 0.
+
         viz.display(vis_q)
+        icp_viz.display(icp_viz_q)
