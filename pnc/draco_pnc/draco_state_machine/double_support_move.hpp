@@ -5,12 +5,19 @@
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/state_machine.hpp"
 
-class DoubleSupportBalance : public StateMachine {
+namespace com_move_states {
+constexpr int Left = 0;
+constexpr int Right = 1;
+constexpr int Center = 2;
+} // namespace com_states
+
+class DoubleSupportMove : public StateMachine {
 public:
-  DoubleSupportBalance(const StateIdentifier state_identifier_in,
+  DoubleSupportMove(const StateIdentifier state_identifier_in,
                        DracoControlArchitecture *_ctrl_arch,
+                       int _com_states,
                        RobotSystem *_robot);
-  ~DoubleSupportBalance();
+  ~DoubleSupportMove();
 
   void oneStep();
   void firstVisit();
@@ -18,14 +25,13 @@ public:
   bool endOfState();
   StateIdentifier getNextState();
 
-  bool b_walking_trigger;
-  bool b_swaying_trigger;
-  bool b_interpolation_trigger;
-  bool b_static_walking_trigger;
+  double duration_;
 
 protected:
   DracoStateProvider *sp_;
   DracoControlArchitecture *ctrl_arch_;
+
+  int com_move_states_;
 
   double ctrl_start_time_;
 };

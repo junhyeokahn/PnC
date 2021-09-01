@@ -147,7 +147,14 @@ void DracoInterruptLogic::processInterrupts() {
   }
 
   if (b_interrupt_button_j) {
-    std::cout << "[Walking Interrupt Logic] button J pressed" << std::endl;
+    std::cout << "[Static Walking Interrupt Logic] button J pressed" << std::endl;
+    if (ctrl_arch_->state == draco_states::kBalance) {
+        (static_cast<DoubleSupportBalance *>(
+            ctrl_arch_->state_machines[draco_states::kBalance]))
+            ->b_static_walking_trigger = true;
+    } else {
+        //ignore
+    }
   }
 
   if (b_interrupt_button_k) {

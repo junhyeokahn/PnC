@@ -9,6 +9,10 @@
 #include "pnc/draco_pnc/draco_state_machine/double_support_swaying.hpp"
 #include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/double_support_move.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/draco_pnc/draco_tci_container.hpp"
 #include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
@@ -149,6 +153,34 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
       ->end_time =
       util::ReadParameter<double>(cfg["balancing"], "interpolation_duration");
 
+  //For Static Walking
+  state_machines[draco_states::kMoveCoMToLFoot] = new DoubleSupportMove(
+          draco_states::kMoveCoMToLFoot, this, com_move_states::Left, robot_);
+
+  state_machines[draco_states::kMoveCoMToRFoot] = new DoubleSupportMove(
+          draco_states::kMoveCoMToLFoot, this, com_move_states::Right, robot_);
+
+  state_machines[draco_states::kMoveCoMToCenter] = new DoubleSupportMove(
+          draco_states::kMoveCoMToCenter, this, com_move_states::Center, robot_);
+
+  state_machines[draco_states::kLFootLifting] = new FootLifting(
+          draco_states::kLFootSwing, this, EndEffector::LFoot, robot_);
+
+  state_machines[draco_states::kRFootLifting] = new FootLifting(
+          draco_states::kRFootSwing, this, EndEffector::RFoot, robot_);
+
+  state_machines[draco_states::kLFootSwingStatic] = new FootSwing(
+          draco_states::kLFootSwingStatic, this, EndEffector::LFoot, robot_);
+
+  state_machines[draco_states::kRFootSwingStatic] = new FootSwing(
+          draco_states::kRFootSwingStatic, this, EndEffector::RFoot, robot_);
+
+  state_machines[draco_states::kLFootLanding] = new FootLanding(
+          draco_states::kLFootLanding, this, EndEffector::LFoot, robot_);
+
+  state_machines[draco_states::kRFootLanding] = new FootLanding(
+          draco_states::kRFootLanding, this, EndEffector::RFoot, robot_);
+
   state = draco_states::kStand;
   prev_state = draco_states::kStand;
 
@@ -185,6 +217,16 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete state_machines[draco_states::kRFootContactTransitionEnd];
   delete state_machines[draco_states::kRFootSwing];
   delete state_machines[draco_states::kSwaying];
+  delete state_machines[draco_states::kBaseInterpolation];
+  delete state_machines[draco_states::kMoveCoMToLFoot];
+  delete state_machines[draco_states::kMoveCoMToRFoot];
+  delete state_machines[draco_states::kMoveCoMToCenter];
+  delete state_machines[draco_states::kRFootLifting];
+  delete state_machines[draco_states::kLFootLifting];
+  delete state_machines[draco_states::kRFootSwingStatic];
+  delete state_machines[draco_states::kLFootSwingStatic];
+  delete state_machines[draco_states::kRFootLanding];
+  delete state_machines[draco_states::kLFootLanding];
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {

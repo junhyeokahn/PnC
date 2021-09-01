@@ -182,6 +182,8 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_r = True
         elif pybullet_util.is_key_triggered(keys, 'f'):
             interface.interrupt.b_interrupt_button_f = True
+        elif pybullet_util.is_key_triggered(keys, 'j'):
+            interface.interrupt.b_interrupt_button_j = True
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
