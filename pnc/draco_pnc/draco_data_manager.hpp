@@ -117,4 +117,10 @@ public:
   Eigen::VectorXd imu_ang_vel_raw = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd cam_est = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd cam_raw = Eigen::VectorXd::Zero(3);
+
+  // icp
+  Eigen::VectorXd icp = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_des = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_dot = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_dot_des = Eigen::VectorXd::Zero(2);
 };

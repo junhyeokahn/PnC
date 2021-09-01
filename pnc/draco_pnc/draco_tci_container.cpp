@@ -20,13 +20,26 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   // Initialize Task
   joint_task = new JointTask(robot_);
 
-  com_task = new DracoCenterOfMassTask(robot_);
-  com_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["com"],
-                                                      gain_prefix + "kp");
-  com_task->kd = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["com"],
-                                                      gain_prefix + "kd");
-  com_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"]["task"]["com"], "weight");
+  int feedback_source = util::ReadParameter<int>(cfg["wbc"]["task"],
+                                                 "com_control_feedback_source");
+  com_task = new DracoCenterOfMassTask(robot_, feedback_source);
+  if (feedback_source == feedback_source::kCom) {
+    com_task->kp = util::ReadParameter<Eigen::VectorXd>(
+        cfg["wbc"]["task"]["com"], gain_prefix + "kp");
+    com_task->kd = util::ReadParameter<Eigen::VectorXd>(
+        cfg["wbc"]["task"]["com"], gain_prefix + "kd");
+    com_task->w_hierarchy =
+        util::ReadParameter<double>(cfg["wbc"]["task"]["com"], "weight");
+  } else if (feedback_source == feedback_source::kIcp) {
+    com_task->kp = util::ReadParameter<Eigen::VectorXd>(
+        cfg["wbc"]["task"]["icp"], gain_prefix + "kp");
+    com_task->kd = util::ReadParameter<Eigen::VectorXd>(
+        cfg["wbc"]["task"]["icp"], gain_prefix + "kd");
+    com_task->w_hierarchy =
+        util::ReadParameter<double>(cfg["wbc"]["task"]["icp"], "weight");
+  } else {
+    assert(false);
+  }
 
   cam_task = new DracoAngularMomentumTask(robot_);
   cam_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["cam"],

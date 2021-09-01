@@ -34,7 +34,8 @@ def get_robot_config(robot,
     initial_pos = [0., 0., 0.] if initial_pos is None else initial_pos
     initial_quat = [0., 0., 0., 1.] if initial_quat is None else initial_quat
     rot_world_basejoint = util.quat_to_rot(np.array(initial_quat))
-    pos_basejoint_to_basecom = base_pos - np.array(initial_pos)
+    pos_basejoint_to_basecom = np.dot(rot_world_basejoint.transpose(),
+                                      base_pos - np.array(initial_pos))
     rot_basejoint_to_basecom = np.dot(rot_world_basejoint.transpose(),
                                       rot_world_com)
 

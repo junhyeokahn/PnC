@@ -35,5 +35,7 @@ protected:
   std::vector<SimpleMovingAverage> imu_ang_vel_filter_;
   std::vector<SimpleMovingAverage> cam_filter_;
 
+  bool b_first_visit_;
+
   void ComputeDCM();
 };

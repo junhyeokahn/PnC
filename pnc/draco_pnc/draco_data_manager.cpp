@@ -145,6 +145,13 @@ void DracoDataManager::Send() {
     pb_msg.add_cam_raw(data->cam_raw[i]);
   }
 
+  for (int i = 0; i < 2; ++i) {
+    pb_msg.add_icp(data->icp[i]);
+    pb_msg.add_icp_des(data->icp_des[i]);
+    pb_msg.add_icp_dot(data->icp_dot[i]);
+    pb_msg.add_icp_dot_des(data->icp_dot_des[i]);
+  }
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

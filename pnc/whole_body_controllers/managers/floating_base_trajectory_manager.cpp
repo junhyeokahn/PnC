@@ -74,6 +74,7 @@ void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
                              local_freq_, curr_time, local_pos_des,
                              local_vel_des, local_acc_des);
     com_pos_des = ini_com_pos_ + rot_world_local_ * local_pos_des;
+    com_pos_des[2] = ini_com_pos_[2]; // maintain constant height
     com_vel_des = rot_world_local_ * local_vel_des;
     com_acc_des = rot_world_local_ * local_acc_des;
     base_ori_des << target_base_quat_.w(), target_base_quat_.x(),

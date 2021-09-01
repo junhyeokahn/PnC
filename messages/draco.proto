@@ -95,4 +95,10 @@ message pnc_msg {
   repeated float imu_ang_vel_raw = 66;
   repeated float cam_est = 67;
   repeated float cam_raw = 68;
+
+  // icp
+  repeated float icp = 69;
+  repeated float icp_des = 70;
+  repeated float icp_dot = 71;
+  repeated float icp_dot_des = 72;
 }

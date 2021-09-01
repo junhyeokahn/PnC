@@ -52,6 +52,7 @@ bool Initialize::endOfState() {
   } else {
     return false;
   }
+  // return false;
 }
 
 StateIdentifier Initialize::getNextState() { return draco_states::kStand; }

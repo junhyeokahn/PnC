@@ -14,6 +14,7 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
 #include "pnc/draco_pnc/draco_tci_container.hpp"
 #include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
 #include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
@@ -263,6 +264,11 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_com_acc_des, dm->data->task_com_pos,
       dm->data->task_com_vel, dm->data->task_com_local_pos_err,
       dm->data->task_com_local_vel_err);
+  dm->data->icp_des =
+      dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)->icp_des;
+  dm->data->icp_dot_des =
+      dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)
+          ->icp_dot_des;
 
   Eigen::VectorXd dummy = Eigen::VectorXd::Zero(3);
   tci_container->cam_task->CopyData(
