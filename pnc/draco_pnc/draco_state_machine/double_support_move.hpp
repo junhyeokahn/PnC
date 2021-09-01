@@ -9,14 +9,13 @@ namespace com_move_states {
 constexpr int Left = 0;
 constexpr int Right = 1;
 constexpr int Center = 2;
-} // namespace com_states
+} // namespace com_move_states
 
 class DoubleSupportMove : public StateMachine {
 public:
   DoubleSupportMove(const StateIdentifier state_identifier_in,
-                       DracoControlArchitecture *_ctrl_arch,
-                       int _com_states,
-                       RobotSystem *_robot);
+                    DracoControlArchitecture *_ctrl_arch, int _com_states,
+                    RobotSystem *_robot);
   ~DoubleSupportMove();
 
   void oneStep();
@@ -25,7 +24,8 @@ public:
   bool endOfState();
   StateIdentifier getNextState();
 
-  double duration_;
+  double moving_duration_;
+  double des_com_height_;
 
 protected:
   DracoStateProvider *sp_;

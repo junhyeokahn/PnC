@@ -3,8 +3,8 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-#b_exp: false
-b_exp: true # Enable b_smoothing at the bottom
+b_exp: false
+#b_exp: true # Enable b_smoothing at the bottom
 
 state_estimator:
     #n_data_com_vel: [100, 100, 100]
@@ -199,6 +199,15 @@ walking:
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
+
+static_walking:
+    moving_duration: 2.
+    com_height: 0.72
+
+    swing_duration: 3.
+    des_foot_x_inc_local: 0.
+    des_foot_y_inc_local: 0.05
+    des_foot_ori_inc_local: 0. ## degrees
 
 controller:
     waiting_count: 10

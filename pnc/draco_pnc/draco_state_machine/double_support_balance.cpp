@@ -52,7 +52,7 @@ bool DoubleSupportBalance::endOfState() {
   }
 
   if (b_static_walking_trigger) {
-     return true; 
+    return true;
   }
   return false;
 }
@@ -74,15 +74,15 @@ StateIdentifier DoubleSupportBalance::getNextState() {
   if (b_interpolation_trigger) {
     return draco_states::kBaseInterpolation;
   }
-  
-  //Static walking
+
+  // Static walking
   if (b_static_walking_trigger) {
-     if (sp_->stance_foot == "l_foot_contact") {
-        return draco_states::kMoveCoMToLFoot; 
-     } else if (sp_->stance_foot == "r_foot_contact") {
-        return draco_states::kMoveCoMToRFoot; 
-     } else {
-        assert(false);
-     }
+    if (sp_->stance_foot == "l_foot_contact") {
+      return draco_states::kMoveCoMToLFoot;
+    } else if (sp_->stance_foot == "r_foot_contact") {
+      return draco_states::kMoveCoMToRFoot;
+    } else {
+      assert(false);
+    }
   }
 }

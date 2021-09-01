@@ -5,14 +5,14 @@
 #include "pnc/draco_pnc/draco_state_machine/contact_transition_start.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_balance.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_interpolation.hpp"
+#include "pnc/draco_pnc/draco_state_machine/double_support_move.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_stand.hpp"
 #include "pnc/draco_pnc/draco_state_machine/double_support_swaying.hpp"
-#include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
-#include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
-#include "pnc/draco_pnc/draco_state_machine/double_support_move.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
-#include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
+#include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
 #include "pnc/draco_pnc/draco_tci_container.hpp"
@@ -154,33 +154,75 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
       ->end_time =
       util::ReadParameter<double>(cfg["balancing"], "interpolation_duration");
 
-  //For Static Walking
+  // For Static Walking
   state_machines[draco_states::kMoveCoMToLFoot] = new DoubleSupportMove(
-          draco_states::kMoveCoMToLFoot, this, com_move_states::Left, robot_);
+      draco_states::kMoveCoMToLFoot, this, com_move_states::Left, robot_);
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToLFoot])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_walking"], "moving_duration");
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToLFoot])
+      ->des_com_height_ =
+      util::ReadParameter<double>(cfg["static_walking"], "com_height");
 
   state_machines[draco_states::kMoveCoMToRFoot] = new DoubleSupportMove(
-          draco_states::kMoveCoMToLFoot, this, com_move_states::Right, robot_);
+      draco_states::kMoveCoMToRFoot, this, com_move_states::Right, robot_);
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToRFoot])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_walking"], "moving_duration");
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToRFoot])
+      ->des_com_height_ =
+      util::ReadParameter<double>(cfg["static_walking"], "com_height");
 
   state_machines[draco_states::kMoveCoMToCenter] = new DoubleSupportMove(
-          draco_states::kMoveCoMToCenter, this, com_move_states::Center, robot_);
+      draco_states::kMoveCoMToCenter, this, com_move_states::Center, robot_);
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToCenter])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_walking"], "moving_duration");
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToCenter])
+      ->des_com_height_ =
+      util::ReadParameter<double>(cfg["static_walking"], "com_height");
 
   state_machines[draco_states::kLFootLifting] = new FootLifting(
-          draco_states::kLFootSwing, this, EndEffector::LFoot, robot_);
+      draco_states::kLFootSwing, this, EndEffector::LFoot, robot_);
 
   state_machines[draco_states::kRFootLifting] = new FootLifting(
-          draco_states::kRFootSwing, this, EndEffector::RFoot, robot_);
+      draco_states::kRFootSwing, this, EndEffector::RFoot, robot_);
 
   state_machines[draco_states::kLFootSwingStatic] = new FootSwing(
-          draco_states::kLFootSwingStatic, this, EndEffector::LFoot, robot_);
+      draco_states::kLFootSwingStatic, this, EndEffector::LFoot, robot_);
+  ((FootSwing *)state_machines[draco_states::kLFootSwingStatic])
+      ->swing_duration_ =
+      util::ReadParameter<double>(cfg["static_walking"], "swing_duration");
+  ((FootSwing *)state_machines[draco_states::kLFootSwingStatic])
+      ->des_foot_x_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_x_inc_local");
+  ((FootSwing *)state_machines[draco_states::kLFootSwingStatic])
+      ->des_foot_y_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_y_inc_local");
+  ((FootSwing *)state_machines[draco_states::kLFootSwingStatic])
+      ->des_foot_ori_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_ori_inc_local");
 
   state_machines[draco_states::kRFootSwingStatic] = new FootSwing(
-          draco_states::kRFootSwingStatic, this, EndEffector::RFoot, robot_);
+      draco_states::kRFootSwingStatic, this, EndEffector::RFoot, robot_);
+  ((FootSwing *)state_machines[draco_states::kRFootSwingStatic])
+      ->swing_duration_ =
+      util::ReadParameter<double>(cfg["static_walking"], "swing_duration");
+  ((FootSwing *)state_machines[draco_states::kRFootSwingStatic])
+      ->des_foot_x_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_x_inc_local");
+  ((FootSwing *)state_machines[draco_states::kRFootSwingStatic])
+      ->des_foot_y_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_y_inc_local");
+  ((FootSwing *)state_machines[draco_states::kRFootSwingStatic])
+      ->des_foot_ori_increment_ = util::ReadParameter<double>(
+      cfg["static_walking"], "des_foot_ori_inc_local");
 
   state_machines[draco_states::kLFootLanding] = new FootLanding(
-          draco_states::kLFootLanding, this, EndEffector::LFoot, robot_);
+      draco_states::kLFootLanding, this, EndEffector::LFoot, robot_);
 
   state_machines[draco_states::kRFootLanding] = new FootLanding(
-          draco_states::kRFootLanding, this, EndEffector::RFoot, robot_);
+      draco_states::kRFootLanding, this, EndEffector::RFoot, robot_);
 
   state = draco_states::kStand;
   prev_state = draco_states::kStand;

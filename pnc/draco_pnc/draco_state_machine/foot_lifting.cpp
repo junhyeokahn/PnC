@@ -1,8 +1,8 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
 
-FootLifting::FootLifting(
-    const StateIdentifier _state_identifier,
-    DracoControlArchitecture *_ctrl_arch, int _leg_side, RobotSystem *_robot)
+FootLifting::FootLifting(const StateIdentifier _state_identifier,
+                         DracoControlArchitecture *_ctrl_arch, int _leg_side,
+                         RobotSystem *_robot)
     : StateMachine(_state_identifier, _robot) {
 
   util::PrettyConstructor(2, "FootLifting");
@@ -20,72 +20,58 @@ void FootLifting::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   if (leg_side_ == EndEffector::RFoot) {
-      std::cout << "draco_states::kRFootLifting" << std::endl;
+    std::cout << "draco_states::kRFootLifting" << std::endl;
 
-      //force manager
-      ctrl_arch_->rfoot_fm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_fm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
+    // force manager
+    ctrl_arch_->rfoot_fm->InitializeRampToMin(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_fm->InitializeRampToMax(sp_->curr_time, ramp_time_);
 
-      //hierarchy manager
-      ctrl_arch_->rfoot_pos_hm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->rfoot_ori_hm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_pos_hm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_ori_hm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
+    // hierarchy manager
+    ctrl_arch_->rfoot_pos_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
+    ctrl_arch_->rfoot_ori_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_pos_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_ori_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
   } else {
-      std::cout << "draco_states::kLFootLifting" << std::endl;
+    std::cout << "draco_states::kLFootLifting" << std::endl;
 
-      //force manager
-      ctrl_arch_->rfoot_fm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_fm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
+    // force manager
+    ctrl_arch_->rfoot_fm->InitializeRampToMax(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_fm->InitializeRampToMin(sp_->curr_time, ramp_time_);
 
-      //hierarchy manager
-      ctrl_arch_->rfoot_pos_hm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->rfoot_ori_hm->InitializeRampToMax(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_pos_hm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
-      ctrl_arch_->lfoot_ori_hm->InitializeRampToMin(
-              sp_->curr_time, ramp_time_);
+    // hierarchy manager
+    ctrl_arch_->rfoot_pos_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
+    ctrl_arch_->rfoot_ori_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_pos_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
+    ctrl_arch_->lfoot_ori_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
   }
-
-
 }
 
 void FootLifting::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   if (leg_side_ == EndEffector::RFoot) {
-      // Update max normal reaction forces
-      ctrl_arch_->rfoot_fm->UpdateRampToMin(sp_->curr_time);
-      ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);
+    // Update max normal reaction forces
+    ctrl_arch_->rfoot_fm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);
 
-      // Update task hierarchy
-      ctrl_arch_->rfoot_pos_hm->UpdateRampToMin(sp_->curr_time);
-      ctrl_arch_->rfoot_ori_hm->UpdateRampToMin(sp_->curr_time);
-      ctrl_arch_->lfoot_pos_hm->UpdateRampToMax(sp_->curr_time);
-      ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
+    // Update task hierarchy
+    ctrl_arch_->rfoot_pos_hm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->rfoot_ori_hm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->lfoot_pos_hm->UpdateRampToMax(sp_->curr_time);
+    ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   } else if (leg_side_ == EndEffector::LFoot) {
-      // Update max normal reaction forces
-      ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
-      ctrl_arch_->lfoot_fm->UpdateRampToMin(sp_->curr_time);
+    // Update max normal reaction forces
+    ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
+    ctrl_arch_->lfoot_fm->UpdateRampToMin(sp_->curr_time);
 
-      // Update task hierarchy
-      ctrl_arch_->rfoot_pos_hm->UpdateRampToMax(sp_->curr_time);
-      ctrl_arch_->rfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
-      ctrl_arch_->lfoot_pos_hm->UpdateRampToMin(sp_->curr_time);
-      ctrl_arch_->lfoot_ori_hm->UpdateRampToMin(sp_->curr_time);
+    // Update task hierarchy
+    ctrl_arch_->rfoot_pos_hm->UpdateRampToMax(sp_->curr_time);
+    ctrl_arch_->rfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
+    ctrl_arch_->lfoot_pos_hm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->lfoot_ori_hm->UpdateRampToMin(sp_->curr_time);
   } else {
-      assert(false);
+    assert(false);
   }
 
   // Update Foot Task
@@ -93,7 +79,6 @@ void FootLifting::oneStep() {
   ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update floating base traj
-
 }
 
 void FootLifting::lastVisit() {}
@@ -108,9 +93,9 @@ bool FootLifting::endOfState() {
 }
 
 StateIdentifier FootLifting::getNextState() {
-    if (leg_side_ == EndEffector::LFoot) {
-        return draco_states::kLFootSwingStatic;
-    } else if (leg_side_ == EndEffector::RFoot) {
-        return draco_states::kRFootSwingStatic;
-    }
+  if (leg_side_ == EndEffector::LFoot) {
+    return draco_states::kLFootSwingStatic;
+  } else if (leg_side_ == EndEffector::RFoot) {
+    return draco_states::kRFootSwingStatic;
+  }
 }
