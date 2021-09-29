@@ -44,7 +44,7 @@ include_directories(${DART_INCLUDE_DIRS})
 
 # eigen
 if(NOT EIGEN_FOUND)
-  find_package(Eigen)
+    find_package(Eigen 3.3 REQUIRED)
 endif()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
