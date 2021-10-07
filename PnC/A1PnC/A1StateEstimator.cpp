@@ -6,6 +6,7 @@
 #include <PnC/A1PnC/A1StateProvider.hpp>
 // #include <PnC/Filter/Basic/filter.hpp>
 #include <Utils/IO/IOUtilities.hpp>
+#include <Utils/Math/MathUtilities.hpp>
 
 
 
@@ -33,8 +34,29 @@ void AverageFilter::input(double input) {
 double AverageFilter::output() { return est_value_; }
 
 
+Eigen::VectorXd _so3_to_euler_zyx_dot(
+  const Eigen::VectorXd& _global_ori_ypr,
+  const Eigen::VectorXd& _global_ang_vel) {
+  Eigen::MatrixXd so3_to_euler_zyx_dot_map(3, 3);
+  double x(_global_ori_ypr[2]);
+  double y(_global_ori_ypr[1]);
+  double z(_global_ori_ypr[0]);
+
+  if (y == M_PI / 2.0) {
+    std::cout << "Singular at mapping from euler zyx to so3" << std::endl;
+    exit(0);
+  }
+
+  so3_to_euler_zyx_dot_map << cos(z) * sin(y) / cos(y),
+  sin(y) * sin(z) / cos(y), 1, -sin(z), cos(z), 0, cos(z) / cos(y),
+  sin(z) / cos(y), 0;
+  return so3_to_euler_zyx_dot_map * _global_ang_vel;
+}
+
+
 A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
   myUtils::pretty_constructor(1, "A1 State Estimator");
+  robot_ = robot;
 
   iso_base_com_to_imu_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).inverse() *
                          robot_->getBodyNodeIsometry(A1BodyNode::imu_link);
@@ -43,8 +65,9 @@ A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
                          iso_base_com_to_imu_.translation() +
                          robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear() *
                          robot_->getBaseLocalCOMPos();
+  // .linear() is the 3x3 rot matrix
+  // .translation() is a 3D vector/location
 
-  robot_ = robot;
   sp_ = A1StateProvider::getStateProvider(robot_);
 
   curr_config_ = Eigen::VectorXd::Zero(robot_->getNumDofs());
@@ -71,7 +94,9 @@ A1StateEstimator::A1StateEstimator(RobotSystem* robot) {
   x_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.15);
   y_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.4);
   z_vel_est_ = new AverageFilter(A1Aux::servo_rate, 0.030, 0.2);
+
 }
+
 
 A1StateEstimator::~A1StateEstimator() {
   delete x_vel_est_;
@@ -94,48 +119,72 @@ void A1StateEstimator::Initialization(A1SensorData* data) {
 }
 
 void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
-    // TODO: 1) NED->Robot World Frame
-    //       2) imu_link->trunk (This step is done in the lines 
-    //          following _JointUpdate
-  /*global_body_euler_zyx_[0] = data->imu_rpy[2];
-  global_body_euler_zyx_[1] = data->imu_rpy[1];
-  global_body_euler_zyx_[2] = data->imu_rpy[0];
 
-  global_body_euler_zyx_dot_[0] = data->imu_ang_vel[2];
-  global_body_euler_zyx_dot_[1] = data->imu_ang_vel[1];
-  global_body_euler_zyx_dot_[2] = data->imu_ang_vel[0];
+  // - convert imu rpy to R_rpy
+  Eigen::Quaternion<double> rpy_quat = myUtils::EulerZYXtoQuat(data->imu_rpy[0], data->imu_rpy[1], data->imu_rpy[2]);
+  Eigen::MatrixXd R_rpy = rpy_quat.toRotationMatrix();
+  // - define local transform from root joint to imu R_(in constructor, it is a const) --> iso_base_joint_to_imu_.linear()
+  // - R_rpy * R_.inverse()
+  Eigen::Matrix3d R_world_robot = R_rpy * iso_base_joint_to_imu_.linear().inverse();
+
+  // - result is a rotation matrix from world to root joint R_world_root
+  // - convert this matrix to ZYX again and put in global ... _zyx
+  Eigen::Quaternion<double> quat_world_robot  = Eigen::Quaternion<double>(R_world_robot);
+  global_body_euler_zyx_ = myUtils::QuatToEulerZYX(quat_world_robot); // yaw, pitch, roll
+
+//////////////////////////////////////////////////////////////////////////////////
+  Eigen::MatrixXd tmp_ryan_todo = R_world_robot;
+  // myUtils::pretty_print(R_world_robot, std::cout, "R world frame to robot torso frame");
+  myUtils::pretty_print(tmp_ryan_todo, std::cout, "R_world_robot");
+  Eigen::MatrixXd tmp_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear();
+  myUtils::pretty_print(tmp_, std::cout, "Sim R_world robot");
+
+
+  Eigen::VectorXd tmp_body_ang_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).head(3);
+
+  double r, p, y; r = data->virtual_q[3]; p = data->virtual_q[4]; y = data->virtual_q[5];
+  Eigen::MatrixXd sim_R_wr;
+  // sim_R_wr << 
+//////////////////////////////////////////////////////////////////////////////////
+
+  // - local_imu = R_ * imu_ang_vel
+  // - result is the local ang vel to root joint
+  Eigen::Vector3d local_robot_root_ang_vel_ = iso_base_joint_to_imu_.linear() * data->imu_ang_vel;
+  // - R_world_root * local_imu -> global angular velocity
+  Eigen::Vector3d global_ang_vel_ = R_world_robot * local_robot_root_ang_vel_;
+  myUtils::pretty_print(tmp_body_ang_vel, std::cout, "sim global ang vel");
+  myUtils::pretty_print(global_ang_vel_, std::cout, "global_ang_vel_");
+  std::cout << "-----------------------------------------------------" << std::endl;
+
+// - convert to euler zyx from there
+  global_body_euler_zyx_dot_ = _so3_to_euler_zyx_dot(global_body_euler_zyx_, global_ang_vel_);
 
   global_body_quat_ = Eigen::Quaternion<double> (
-        dart::math::eulerZYXToMatrix(global_body_euler_zyx_));*/
+        dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
+
+  // Update curr_config [3,4,5], curr_qdot[3,4,5]
+  curr_config_[3] = global_body_euler_zyx_[0];
+  curr_config_[4] = global_body_euler_zyx_[1];
+  curr_config_[5] = global_body_euler_zyx_[2];
+
+  // myUtils::pretty_print(curr_config_, std::cout, "current configuration");
+  // myUtils::pretty_print(data->virtual_q, std::cout, "virtual q");
+
+  curr_qdot_[3] = global_body_euler_zyx_dot_[0];
+  curr_qdot_[4] = global_body_euler_zyx_dot_[1];
+  curr_qdot_[5] = global_body_euler_zyx_dot_[2];
+
+  // myUtils::pretty_print(curr_qdot_, std::cout, "current config dot");
+  // myUtils::pretty_print(data->virtual_qdot, std::cout, "virtual q dot");
 
 }
 
 void A1StateEstimator::Update(A1SensorData* data) {
-  // TODO: NED->RobotWorld then IMU->trunk
-  // _COMAngularUpdate(data);
-
   _JointUpdate(data);
 
-  // estimate base angular state from imu data
-  // TODO: The second line needs to be replaced after we
-  // can generate the imu frame wrt world
-  Eigen::Matrix<double, 3, 3> rot_world_to_base =
-      robot_->getBodyNodeIsometry(A1BodyNode::imu_link).linear() *
-      iso_base_joint_to_imu_.inverse().linear();
-
-
-  std::vector<double> trunk_acc(3), trunk_ang_vel(3);
+  _COMAngularUpdate(data);
 
   _ConfigurationAndModelUpdate(data);
-
-  // TODO: Below Block Taken from DraceStateEstimator, what is phase_copy == 2?
-  // static bool visit_once(false);
-  // if ((sp_->phase_copy == 2) && (!visit_once)) {
-  //   ((AverageFilter*)x_vel_est_)->initialization(sp_->com_vel[0]);
-  //   ((AverageFilter*)y_vel_est_)->initialization(sp_->com_vel[1]);
-  //   ((AverageFilter*)z_vel_est_)->initialization(sp_->com_vel[2]);
-  //   visit_once = true;
-  // }
 
   x_vel_est_->input(sp_->com_vel[0]);
   sp_->est_com_vel[0] = x_vel_est_->output();
@@ -168,10 +217,12 @@ void A1StateEstimator::_JointUpdate(A1SensorData* data) {
   curr_qdot_.setZero();
 
   // TODO: Remove once we implement COMAngular
-  for (int i = 0; i < A1::n_vdof; ++i) {
+  // These are the vals we can compare with
+  // But remember there may be offset because our estimator considers the foot at 0,0,0 instead of the torso
+  /*for (int i = 0; i < A1::n_vdof; ++i) {
     curr_config_[i] = data->virtual_q[i];
     curr_qdot_[i] = data->virtual_qdot[i];
-  }
+  }*/
   for (int i(0); i < A1::n_adof; ++i) {
     curr_config_[A1::n_vdof + i] = data->q[i];
     curr_qdot_[A1::n_vdof + i] = data->qdot[i];
@@ -180,14 +231,6 @@ void A1StateEstimator::_JointUpdate(A1SensorData* data) {
 }
 
 void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
-  robot_->updateSystem(curr_config_, curr_qdot_, true);
-
-  // estimate base angular state from imu data
-    Eigen::Matrix<double, 3, 3> rot_world_to_base =
-          robot_->getBodyNodeIsometry(A1BodyNode::imu_link).linear() *
-          iso_base_joint_to_imu_.inverse().linear();
-
-  // for (int i(0); i < 3; ++i) curr_qdot_[i + 3] = global_body_euler_zyx_dot_[i];
 
   robot_->updateSystem(curr_config_, curr_qdot_, false); // update robot as is correct ori but 0,0,0 floating base
   Eigen::VectorXd foot_pos;
@@ -226,24 +269,6 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
     // myUtils::pretty_print(offset_update, std::cout, "offset_update");
 
   }
-  Eigen::Vector3d base_joint_pos = global_linear_offset_ - foot_pos;
-  Eigen::Vector3d base_com_pos =
-      base_joint_pos + rot_world_to_base * robot_->getBaseLocalCOMPos();
-/////////////////////////////////////////////////////////////////////////
-  /*static bool b_first_visit(true);
-  if (b_first_visit) {
-    prev_base_joint_pos_ = base_joint_pos;
-    prev_base_com_pos_ = base_com_pos;
-    b_first_visit = false;
-  }
-
-
-  Eigen::Vector3d base_joint_lin_vel =
-      (base_joint_pos - prev_base_joint_pos_) / (A1Aux::servo_rate);
-  Eigen::Vector3d base_com_lin_vel =
-      (base_com_pos - prev_base_com_pos_) / (A1Aux::servo_rate);*/
-////////////////////////////////////////////////////////////////////////
-  // TODO: See June version.. some rotation pieces missing
   // Perform Base update using kinematics
   curr_config_[0] = global_linear_offset_[0] - foot_pos[0];// pushing the base upwards to put our contact feet on the ground
   curr_config_[1] = global_linear_offset_[1] - foot_pos[1];// i.e contact foot position is on ground
@@ -258,11 +283,6 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   sp_->qdot = curr_qdot_;
   sp_->com_pos = robot_->getCoMPosition();
   sp_->com_vel = robot_->getCoMVelocity();
-
-  // TODO
-  /*curr_config_[3] = global_body_euler_zyx_[0];
-  curr_config_[4] = global_body_euler_zyx_[1];
-  curr_config_[5] = global_body_euler_zyx_[2];*/
 
   // update previous stance foot.
   sp_->prev_front_stance_foot = sp_->front_stance_foot;
@@ -301,31 +321,5 @@ double A1StateEstimator::computeAlphaGivenBreakFrequency(double hz,
   return alpha;
 }
 
-
-// TODO needs to be added, but I dont think we need it all?
-void A1StateEstimator::MapToTorso_(const Eigen::VectorXd& imu_acc,
-                                   const Eigen::VectorXd& imu_angvel,
-                                   std::vector<double>& trunk_acc,
-                                   std::vector<double>& trunk_angvel) {
-
-  Eigen::MatrixXd R_world_imu = Eigen::MatrixXd::Zero(3, 3);
-  Eigen::MatrixXd R_world_trunk = Eigen::MatrixXd::Zero(3, 3);
-  Eigen::MatrixXd R_trunk_imu = Eigen::MatrixXd::Zero(3, 3);
-
-  Eigen::VectorXd t_acc_local = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd t_angvel_local = Eigen::VectorXd::Zero(3);
-
-  R_world_imu = robot_->getBodyNodeIsometry(A1BodyNode::imu_link).linear();
-  R_world_trunk = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear();
-  R_trunk_imu = R_world_trunk.transpose() * R_world_imu;
-
-  t_acc_local = R_trunk_imu * imu_acc;
-  t_angvel_local = R_trunk_imu * imu_angvel;
-
-  for(int i=0; i<3; ++i) {
-    trunk_acc[i] = t_acc_local[i];
-    trunk_angvel[i] = t_angvel_local[i];
-  }
-}
 
 

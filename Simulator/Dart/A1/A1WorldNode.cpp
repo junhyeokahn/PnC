@@ -133,9 +133,11 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
   Eigen::Vector3d global_grav(0, 0, 9.81);
   // acc = R_world_imu.transpose() * (global_grav + linear_imu_acc);
   acc = R_world_imu.transpose() * (global_grav);
-  // TODO: Is this correct?
-  // rpy
-  Eigen::Vector3d robot_xyzrpy = skel_->getPositions().head(6);
+
+  // Convert R_world_imu to rpy and then feed that as teh imu data
+
+  // rpy // This is the ground truth
+  Eigen::VectorXd robot_xyzrpy = skel_->getPositions().head(6);
   rpy[0] = robot_xyzrpy[3];
   rpy[1] = robot_xyzrpy[4];
   rpy[2] = robot_xyzrpy[5];

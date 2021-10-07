@@ -21,7 +21,7 @@ void displayJointFrames(const dart::simulation::WorldPtr& world,
       for (const auto type : {dart::gui::osg::InteractiveTool::ANGULAR,
                               dart::gui::osg::InteractiveTool::PLANAR})
         for (std::size_t i = 0; i < 3; ++i)
-          frame->getTool(type, i)->setEnabled(false);
+          frame->getTool(type, i)->setEnabled(true);
 
       world->addSimpleFrame(frame);
     }
