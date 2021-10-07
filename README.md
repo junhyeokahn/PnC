@@ -15,8 +15,6 @@ and stabilizing the system over the trajectories.
 ```source scripts/install/install_plotjuggler.sh```
 - Install [dart](http://dartsim.github.io/):<br/>
 ```source scripts/install/install_dart.sh```
-- Install [pinocchio](https://github.com/stack-of-tasks/pinocchio):<br/>
-```source scripts/install/install_pinocchio.sh```
 - Install [anaconda](https://docs.anaconda.com/anaconda/install/)
 - Install python dependancies:<br/>
 ```conda env create -f pnc.yml```
