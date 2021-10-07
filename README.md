@@ -36,3 +36,14 @@ and stabilizing the system over the trajectories.
 ## API documentation
 - Create doxygen:<br/>
 ```mkdir build && cd build && cmake.. && make view_docs ```
+
+## Citation
+```
+@article{10.3389/frobt.2021.712239,
+	author = {Ahn, Junhyeok and Jorgensen, Steven Jens and Bang, Seung Hyeon and Sentis, Luis},
+	journal = {Frontiers in Robotics and AI},
+	pages = {257},
+	title = {Versatile Locomotion Planning and Control for Humanoid Robots},
+	volume = {8},
+	year = {2021}}
+```
