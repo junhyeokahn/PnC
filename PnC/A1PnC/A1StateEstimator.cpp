@@ -123,6 +123,7 @@ void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
   // - convert imu rpy to R_rpy
   Eigen::Quaternion<double> rpy_quat = myUtils::EulerZYXtoQuat(data->imu_rpy[0], data->imu_rpy[1], data->imu_rpy[2]);
   Eigen::MatrixXd R_rpy = rpy_quat.toRotationMatrix();
+  // myUtils::pretty_print(R_rpy, std::cout, "R_rpy");
   // - define local transform from root joint to imu R_(in constructor, it is a const) --> iso_base_joint_to_imu_.linear()
   // - R_rpy * R_.inverse()
   Eigen::Matrix3d R_world_robot = R_rpy * iso_base_joint_to_imu_.linear().inverse();
@@ -135,9 +136,9 @@ void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
 //////////////////////////////////////////////////////////////////////////////////
   Eigen::MatrixXd tmp_ryan_todo = R_world_robot;
   // myUtils::pretty_print(R_world_robot, std::cout, "R world frame to robot torso frame");
-  myUtils::pretty_print(tmp_ryan_todo, std::cout, "R_world_robot");
+  // myUtils::pretty_print(tmp_ryan_todo, std::cout, "R_world_robot");
   Eigen::MatrixXd tmp_ = robot_->getBodyNodeIsometry(A1BodyNode::trunk).linear();
-  myUtils::pretty_print(tmp_, std::cout, "Sim R_world robot");
+  // myUtils::pretty_print(tmp_, std::cout, "Sim R_world robot");
 
 
   Eigen::VectorXd tmp_body_ang_vel = robot_->getBodyNodeSpatialVelocity(A1BodyNode::trunk).head(3);
@@ -152,9 +153,8 @@ void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
   Eigen::Vector3d local_robot_root_ang_vel_ = iso_base_joint_to_imu_.linear() * data->imu_ang_vel;
   // - R_world_root * local_imu -> global angular velocity
   Eigen::Vector3d global_ang_vel_ = R_world_robot * local_robot_root_ang_vel_;
-  myUtils::pretty_print(tmp_body_ang_vel, std::cout, "sim global ang vel");
-  myUtils::pretty_print(global_ang_vel_, std::cout, "global_ang_vel_");
-  std::cout << "-----------------------------------------------------" << std::endl;
+  // myUtils::pretty_print(tmp_body_ang_vel, std::cout, "sim global ang vel");
+  // myUtils::pretty_print(global_ang_vel_, std::cout, "global_ang_vel_");
 
 // - convert to euler zyx from there
   global_body_euler_zyx_dot_ = _so3_to_euler_zyx_dot(global_body_euler_zyx_, global_ang_vel_);
@@ -162,7 +162,13 @@ void A1StateEstimator::_COMAngularUpdate(A1SensorData* data) {
   global_body_quat_ = Eigen::Quaternion<double> (
         dart::math::eulerZYXToMatrix(global_body_euler_zyx_));
 
-  // Update curr_config [3,4,5], curr_qdot[3,4,5]
+  curr_config_[3] = data->virtual_q[3];
+  curr_config_[4] = data->virtual_q[4];
+  curr_config_[5] = data->virtual_q[5];
+  curr_qdot_[3] = data->virtual_qdot[3];
+  curr_qdot_[4] = data->virtual_qdot[4];
+  curr_qdot_[5] = data->virtual_qdot[5];
+// Update curr_config [3,4,5], curr_qdot[3,4,5]
   curr_config_[3] = global_body_euler_zyx_[0];
   curr_config_[4] = global_body_euler_zyx_[1];
   curr_config_[5] = global_body_euler_zyx_[2];
@@ -186,14 +192,26 @@ void A1StateEstimator::Update(A1SensorData* data) {
 
   _ConfigurationAndModelUpdate(data);
 
+  // TODO: What values are in sp_->com_vel / Who sets them?
   x_vel_est_->input(sp_->com_vel[0]);
   sp_->est_com_vel[0] = x_vel_est_->output();
+  // sp_->est_com_vel[0] = data->virtual_qdot[0];
 
   y_vel_est_->input(sp_->com_vel[1]);
   sp_->est_com_vel[1] = y_vel_est_->output();
+  // sp_->est_com_vel[1] = data->virtual_qdot[1];
 
   z_vel_est_->input(sp_->com_vel[2]);
   sp_->est_com_vel[2] = z_vel_est_->output();
+  // sp_->est_com_vel[2] = data->virtual_qdot[2];
+
+
+  /*myUtils::pretty_print(sp_->est_com_vel, std::cout, "estimated com vel");
+  Eigen::VectorXd tmp = data->virtual_qdot;
+  Eigen::VectorXd tmp2 = data->virtual_q;
+  myUtils::pretty_print(tmp2, std::cout, "Sim com pos");
+  myUtils::pretty_print(tmp, std::cout, "Sim com vel");*/
+  // std::cout << "-----------------------------------------------------" << std::endl;
 
   _FootContactUpdate(data);
 
@@ -219,10 +237,10 @@ void A1StateEstimator::_JointUpdate(A1SensorData* data) {
   // TODO: Remove once we implement COMAngular
   // These are the vals we can compare with
   // But remember there may be offset because our estimator considers the foot at 0,0,0 instead of the torso
-  /*for (int i = 0; i < A1::n_vdof; ++i) {
-    curr_config_[i] = data->virtual_q[i];
-    curr_qdot_[i] = data->virtual_qdot[i];
-  }*/
+  // for (int i = 0; i < A1::n_vdof; ++i) {
+  //   curr_config_[i] = data->virtual_q[i];
+  //   curr_qdot_[i] = data->virtual_qdot[i];
+  // }
   for (int i(0); i < A1::n_adof; ++i) {
     curr_config_[A1::n_vdof + i] = data->q[i];
     curr_qdot_[A1::n_vdof + i] = data->qdot[i];
@@ -284,10 +302,19 @@ void A1StateEstimator::_ConfigurationAndModelUpdate(A1SensorData* data) {
   sp_->com_pos = robot_->getCoMPosition();
   sp_->com_vel = robot_->getCoMVelocity();
 
+  // myUtils::pretty_print(sp_->com_pos, std::cout, "sp_->com_pos should = kinematics pos");
+  // myUtils::pretty_print(sp_->com_vel, std::cout, "sp_->com_vel should = kinematics vel");
+
   // update previous stance foot.
   sp_->prev_front_stance_foot = sp_->front_stance_foot;
   // update previous config:
   prev_config_ = curr_config_;
+
+
+  Eigen::VectorXd body_pos_kinematics = curr_config_.head(3);
+  Eigen::VectorXd body_vel_kinematics = curr_qdot_.head(3);
+  // myUtils::pretty_print(body_pos_kinematics, std::cout, "body_pos_kinematics");
+  // myUtils::pretty_print(body_vel_kinematics, std::cout, "body_vel_kinematics");
 }
 
 void A1StateEstimator::_FootContactUpdate(A1SensorData* data) {

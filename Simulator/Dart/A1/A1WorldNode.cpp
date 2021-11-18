@@ -3,7 +3,7 @@
 #include <Simulator/Dart/A1/A1WorldNode.hpp>
 #include <Utils/IO/DataManager.hpp>
 #include <Utils/IO/IOUtilities.hpp>
-
+#include <Utils/Math/MathUtilities.hpp>
 A1WorldNode::A1WorldNode(const dart::simulation::WorldPtr& _world)
     : dart::gui::osg::WorldNode(_world),
       count_(0),
@@ -125,7 +125,7 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
           ->getSpatialVelocity(dart::dynamics::Frame::World(),
                                skel_->getBodyNode("imu_link")).head(3);
   ang_vel = ang_vel_local;
-  Eigen::MatrixXd R_world_imu(3, 3);
+  Eigen::Matrix3d R_world_imu;
   R_world_imu = skel_->getBodyNode("imu_link")->getWorldTransform().linear();
   // acc
   Eigen::Vector3d linear_imu_acc =
@@ -136,11 +136,15 @@ void A1WorldNode::get_imu_data_(Eigen::VectorXd& ang_vel,
 
   // Convert R_world_imu to rpy and then feed that as teh imu data
 
-  // rpy // This is the ground truth
-  Eigen::VectorXd robot_xyzrpy = skel_->getPositions().head(6);
-  rpy[0] = robot_xyzrpy[3];
-  rpy[1] = robot_xyzrpy[4];
-  rpy[2] = robot_xyzrpy[5];
+  // myUtils::pretty_print(R_world_imu, std::cout, "R_world_imu");
+  // std::cout << "R_world_imu = " << R_world_imu << std::endl;
+  // Convert this to RPY and save as rpy
+  Eigen::Quaternion<double> rpy_quat = Eigen::Quaternion<double>(R_world_imu);
+  Eigen::Vector3d tmp = myUtils::QuatToEulerZYX(rpy_quat);
+  rpy[0] = tmp[2];
+  rpy[1] = tmp[1];
+  rpy[2] = tmp[0];
+
 
 
 }

@@ -193,7 +193,7 @@ void A1ControlArchitecture::solveMPC() {
         foot_contact_states[2] = 0;
         foot_contact_states[3] = 1;
     }*/
-    std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
+    // std::cout << "foot_contact_states = " << foot_contact_states[0] << ", " << foot_contact_states[1] << ", " << foot_contact_states[2] << ", " << foot_contact_states[3] << std::endl;
 
     Eigen::Vector3d com_pos_des, com_pos;
     // CoM Position // TODO STATE ESTIMATOR
