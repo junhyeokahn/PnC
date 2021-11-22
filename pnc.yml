@@ -20,4 +20,3 @@ dependencies:
       - tqdm==4.61.1
       - wheel==0.36.2
       - zmq==0.0.0
-prefix: /home/apptronik/anaconda3/envs/pnc

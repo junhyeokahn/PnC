@@ -25,6 +25,9 @@ import util
 
 import draco_interface
 
+from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin
+
 
 def set_initial_config(robot, joint_id):
     # Upperbody
@@ -66,11 +69,14 @@ signal.signal(signal.SIGINT, signal_handler)
 if __name__ == "__main__":
 
     # Environment Setup
-    p.connect(p.GUI)
-    p.resetDebugVisualizerCamera(cameraDistance=1.0,
-                                 cameraYaw=120,
-                                 cameraPitch=-30,
-                                 cameraTargetPosition=[1, 0.5, 1.0])
+    if Config.B_USE_MESHCAT:
+        p.connect(p.DIRECT)
+    else:
+        p.connect(p.GUI)
+        p.resetDebugVisualizerCamera(cameraDistance=1.0,
+                                     cameraYaw=120,
+                                     cameraPitch=-30,
+                                     cameraTargetPosition=[1, 0.5, 1.0])
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=Config.CONTROLLER_DT,
                                 numSubSteps=Config.N_SUBSTEP)
@@ -114,6 +120,23 @@ if __name__ == "__main__":
                            childFramePosition=[0, 0, 0])
     p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
+    if Config.B_USE_MESHCAT:
+        # Create Robot for Meshcat Visualization
+        model, collision_model, visual_model = pin.buildModelsFromUrdf(
+            cwd + "/robot_model/draco/draco.urdf", cwd + "/robot_model/draco",
+            pin.JointModelFreeFlyer())
+        viz = MeshcatVisualizer(model, collision_model, visual_model)
+        try:
+            viz.initViewer(open=True)
+        except ImportError as err:
+            print(
+                "Error while initializing the viewer. It seems you should install Python meshcat"
+            )
+            print(err)
+            sys.exit(0)
+        viz.loadViewerModel()
+        vis_q = pin.neutral(model)
+
     # Initial Config
     set_initial_config(robot, joint_id)
 
@@ -139,6 +162,8 @@ if __name__ == "__main__":
         rot_basejoint_to_basecom)
 
     while (1):
+
+        # while_start = time.time()
 
         # Get SensorData
         if Config.SIMULATE_CAMERA and count % (Config.CAMERA_DT /
@@ -239,8 +264,22 @@ if __name__ == "__main__":
             cv2.imwrite(filename, frame)
             jpg_count += 1
 
+        if Config.B_USE_MESHCAT:
+            #TODO: match idx to joint_pos
+            vis_q[0:3] = sensor_data_dict['base_joint_pos']
+            vis_q[3:7] = sensor_data_dict['base_joint_quat']
+            for i, (k, v) in enumerate(sensor_data_dict['joint_pos'].items()):
+                idx = interface._robot.get_q_idx(k)
+                vis_q[idx] = v
+            viz.display(vis_q)
+
         p.stepSimulation()
 
         time.sleep(dt)
         t += dt
         count += 1
+
+        # while_end = time.time()
+        # while_loop_time = while_end - while_start
+        # print("while_loop_time:", while_loop_time)
+        # exit()

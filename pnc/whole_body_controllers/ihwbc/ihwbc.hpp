@@ -147,4 +147,6 @@ private:
 
   /// Solve QP.
   void solveQP();
+
+  Eigen::MatrixXd ji_bar_global_;
 };

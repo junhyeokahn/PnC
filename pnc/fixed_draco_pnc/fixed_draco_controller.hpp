@@ -37,6 +37,8 @@ private:
   Eigen::VectorXd joint_pos_cmd_;
   Eigen::VectorXd joint_vel_cmd_;
 
+  Eigen::VectorXd f_int_;
+
   Eigen::MatrixXd sa_;
   Eigen::MatrixXd sv_;
   Eigen::MatrixXd sf_;

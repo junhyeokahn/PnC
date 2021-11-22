@@ -75,8 +75,11 @@ message pnc_msg {
   repeated float cmd_joint_torques = 50;
   repeated float joint_velocities = 51;
 
+  // f_int
+  repeated float f_int = 52;
+
   // meshcat visualization
-  repeated float joint_positions = 52;
-  repeated float base_joint_pos = 53;
-  repeated float base_joint_quat = 54;
+  repeated float joint_positions = 53;
+  repeated float base_joint_pos = 54;
+  repeated float base_joint_quat = 55;
 }

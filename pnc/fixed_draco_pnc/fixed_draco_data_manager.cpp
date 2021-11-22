@@ -111,6 +111,9 @@ void FixedDracoDataManager::Send() {
     pb_msg.add_cmd_joint_velocities(data->cmd_joint_velocities[i]);
     pb_msg.add_cmd_joint_torques(data->cmd_joint_torques[i]);
   }
+  for (int i = 0; i < data->f_int.size(); ++i) {
+     pb_msg.add_f_int(data->f_int[i]); 
+  }
 
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_base_joint_pos(data->base_joint_pos[i]);
