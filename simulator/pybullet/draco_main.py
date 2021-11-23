@@ -25,8 +25,9 @@ import util
 
 import draco_interface
 
-from pinocchio.visualize import MeshcatVisualizer
-import pinocchio as pin
+if Config.B_USE_MESHCAT:
+    from pinocchio.visualize import MeshcatVisualizer
+    import pinocchio as pin
 
 
 def set_initial_config(robot, joint_id):

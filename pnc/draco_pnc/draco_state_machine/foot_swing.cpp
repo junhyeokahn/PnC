@@ -89,10 +89,8 @@ void FootSwing::oneStep() {
 void FootSwing::lastVisit() {}
 
 bool FootSwing::endOfState() {
-  //if (state_machine_time_ >= swing_duration_) {
-    //return true;
-  if(b_static_walking_trigger){
-      return true;
+  if (state_machine_time_ >= swing_duration_) {
+    return true;
   } else {
     return false;
   }

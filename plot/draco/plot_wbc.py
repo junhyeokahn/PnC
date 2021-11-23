@@ -125,11 +125,11 @@ task_torso_ori_local_vel_err = np.stack(task_torso_ori_local_vel_err, axis=0)
 plot_task(time, des['task_com_pos'], act['task_com_pos'], des['task_com_vel'],
           act['task_com_vel'], phase, 'com lin')
 
-plot_task(time, des['icp'], act['icp'], des['icp_dot'], act['icp_dot'], phase,
-          'icp')
+# plot_task(time, des['icp'], act['icp'], des['icp_dot'], act['icp_dot'], phase,
+# 'icp')
 
-plot_momentum_task(time, des['task_cam_vel'], act['task_cam_vel'], phase,
-                   'cam')
+# plot_momentum_task(time, des['task_cam_vel'], act['task_cam_vel'], phase,
+# 'cam')
 
 plot_vector_traj(time, task_com_local_pos_err, phase, ['x', 'y', 'z'], 'k',
                  "local com pos err")
@@ -156,7 +156,6 @@ plot_task(time, des['task_torso_ori_pos'], act['task_torso_ori_pos'],
 # phase,
 # 'upper body',
 # label=upper_body_pos_label[slc])
-"""
 plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
           des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
           'left foot lin')
@@ -172,7 +171,6 @@ plot_task(time, des['task_rfoot_lin_pos'], act['task_rfoot_lin_pos'],
 plot_task(time, des['task_rfoot_ori_pos'], act['task_rfoot_ori_pos'],
           des['task_rfoot_ori_vel'], act['task_rfoot_ori_vel'], phase,
           'right foot ori')
-"""
 
 ## =============================================================================
 ## Plot WBC Solutions

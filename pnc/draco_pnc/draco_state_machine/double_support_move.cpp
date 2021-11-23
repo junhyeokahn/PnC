@@ -23,8 +23,7 @@ void DoubleSupportMove::firstVisit() {
     Eigen::Vector3d target_com_pos =
         robot_->get_link_iso("l_foot_contact").translation();
     target_com_pos[2] = des_com_height_;
-    Eigen::Quaternion<double> target_base_quat = Eigen::Quaternion<double>(
-        robot_->get_link_iso("torso_com_link").linear());
+    Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
@@ -35,8 +34,7 @@ void DoubleSupportMove::firstVisit() {
     Eigen::Vector3d target_com_pos =
         robot_->get_link_iso("r_foot_contact").translation();
     target_com_pos[2] = des_com_height_;
-    Eigen::Quaternion<double> target_base_quat = Eigen::Quaternion<double>(
-        robot_->get_link_iso("torso_com_link").linear());
+    Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
@@ -47,12 +45,13 @@ void DoubleSupportMove::firstVisit() {
         0.5 * (robot_->get_link_iso("l_foot_contact").translation() +
                robot_->get_link_iso("r_foot_contact").translation());
     target_com_pos[2] = des_com_height_;
-    Eigen::Quaternion<double> left_foot_ori(
-        robot_->get_link_iso("l_foot_contact").linear());
-    Eigen::Quaternion<double> right_foot_ori(
-        robot_->get_link_iso("r_foot_contact").linear());
-    Eigen::Quaternion<double> target_base_quat =
-        left_foot_ori.slerp(0.5, right_foot_ori);
+    // Eigen::Quaternion<double> left_foot_ori(
+    // robot_->get_link_iso("l_foot_contact").linear());
+    // Eigen::Quaternion<double> right_foot_ori(
+    // robot_->get_link_iso("r_foot_contact").linear());
+    // Eigen::Quaternion<double> target_base_quat =
+    // left_foot_ori.slerp(0.5, right_foot_ori);
+    Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
@@ -78,11 +77,11 @@ void DoubleSupportMove::lastVisit() {}
 
 bool DoubleSupportMove::endOfState() {
 
-  //if (state_machine_time_ > moving_duration_) {
-    //return true;
+  // if (state_machine_time_ > moving_duration_) {
+  // return true;
   //}
-  if (b_static_walking_trigger){
-  return true;
+  if (b_static_walking_trigger) {
+    return true;
   }
   return false;
 }

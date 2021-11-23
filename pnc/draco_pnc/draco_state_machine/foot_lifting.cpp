@@ -86,11 +86,8 @@ void FootLifting::oneStep() {
 void FootLifting::lastVisit() {}
 
 bool FootLifting::endOfState() {
-
-  //if (state_machine_time_ >= ramp_time_) {
-    //return true;
- if (b_static_walking_trigger) {
-    return true; 
+  if (state_machine_time_ >= ramp_time_) {
+    return true;
   } else {
     return false;
   }

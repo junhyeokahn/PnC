@@ -39,6 +39,8 @@ void DoubleSupportStand::firstVisit() {
   Eigen::Quaternion<double> target_base_ori =
       Eigen::Quaternion<double>(target_base_ori_SO3);
 
+  sp_->nominal_base_quat = target_base_ori;
+
   ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
 

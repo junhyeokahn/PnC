@@ -38,6 +38,8 @@ public:
   Eigen::Vector3d imu_ang_vel_est;
   Eigen::Vector3d cam_est;
 
+  Eigen::Quaternion<double> nominal_base_quat;
+
   int b_rf_contact;
   int b_lf_contact;
 
