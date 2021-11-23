@@ -45,7 +45,8 @@ void IHWBC::solve(
     const std::vector<Contact *> &contact_list,
     const std::vector<InternalConstraint *> &internal_constraint_list,
     const Eigen::VectorXd &rf_des, Eigen::VectorXd &tau_cmd,
-    Eigen::VectorXd &qddot_cmd, Eigen::VectorXd &rf_cmd) {
+    Eigen::VectorXd &qddot_cmd, Eigen::VectorXd &rf_cmd,
+    Eigen::VectorXd &f_int) {
 
   assert(task_list.size() > 0);
   if (contact_list.size() > 0)
@@ -66,6 +67,7 @@ void IHWBC::solve(
 
   Eigen::MatrixXd ji;
   Eigen::VectorXd jidot_qdot;
+  Eigen::MatrixXd ji_bar;
   if (b_internal_constraint_) {
     for (int i = 0; i < internal_constraint_list.size(); ++i) {
       if (i == 0) {
@@ -79,8 +81,7 @@ void IHWBC::solve(
     }
     Eigen::MatrixXd lmd_i =
         util::PseudoInverse(ji * Ainv_ * ji.transpose(), 0.0001);
-    Eigen::MatrixXd ji_bar = Ainv_ * ji.transpose() * lmd_i;
-    ji_bar_global_ = ji_bar;
+    ji_bar = Ainv_ * ji.transpose() * lmd_i;
     ni = Eigen::MatrixXd::Identity(n_q_dot_, n_q_dot_) - ji_bar * ji;
     jit_lmd_jidot_qdot = ji.transpose() * lmd_i * jidot_qdot;
     Eigen::MatrixXd sa_ni_trc =
@@ -333,33 +334,22 @@ void IHWBC::solve(
               (A_ * qddot_result_ + ni.transpose() * (cori_ + grav_) -
                (jc * ni).transpose() * fr_result_ + jit_lmd_jidot_qdot);
 
-    if (b_internal_constraint_){
-    Eigen::VectorXd f_int = Eigen::VectorXd::Zero(2);
-    f_int = ji_bar_global_.transpose() * (cori_ + grav_ - sa_.transpose() * tau_cmd - jc.transpose() * fr_result_); 
-
-    //std::cout << "====================" << std::endl;
-    //std::cout << "f_int: "  << std::endl;
-    //std::cout << f_int[0]  << std::endl;
-    //std::cout << f_int[1]  << std::endl;
+    if (b_internal_constraint_) {
+      f_int = Eigen::VectorXd::Zero(ji.rows());
+      f_int = ji_bar.transpose() * (cori_ + grav_ - sa_.transpose() * tau_cmd -
+                                    jc.transpose() * fr_result_);
     }
   } else {
     tau_cmd = sa_ni_trc_bar_tr * snf_ *
               (A_ * qddot_result_ + ni * (cori_ + grav_) + jit_lmd_jidot_qdot);
 
-    if (b_internal_constraint_){
-    Eigen::VectorXd f_int = Eigen::VectorXd::Zero(2);
-    f_int = ji_bar_global_.transpose() * (cori_ + grav_ - sa_.transpose() * tau_cmd); 
-
-    //std::cout << "====================" << std::endl;
-    //std::cout << "f_int: "  << std::endl;
-    //std::cout << f_int[0]  << std::endl;
-    //std::cout << f_int[1]  << std::endl;
+    if (b_internal_constraint_) {
+      f_int = Eigen::VectorXd::Zero(ji.rows());
+      f_int = ji_bar.transpose() * (cori_ + grav_ - sa_.transpose() * tau_cmd);
     }
   }
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
-
-
 
   // util::PrettyPrint(tau_cmd, std::cout, "tau_cmd");
   // util::PrettyPrint(rf_cmd, std::cout, "rf_cmd");

@@ -32,6 +32,9 @@ private:
   Eigen::VectorXd joint_pos_cmd_;
   Eigen::VectorXd joint_vel_cmd_;
 
+  double l_knee_int_frc_cmd_;
+  double r_knee_int_frc_cmd_;
+
   Eigen::MatrixXd sa_;
   Eigen::MatrixXd sv_;
   Eigen::MatrixXd sf_;

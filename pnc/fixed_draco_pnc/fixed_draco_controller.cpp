@@ -141,7 +141,7 @@ void FixedDracoController::getCommand(void *cmd) {
     } else {
       wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
                   tci_container_->internal_constraint_list, rf_des,
-                  wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_cmd);
+                  wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_cmd, f_int_);
     }
     joint_trq_cmd_ = sa_.transpose() * wbc_joint_trq_cmd;
     Eigen::VectorXd joint_acc_cmd = sa_.transpose() * wbc_joint_acc_cmd;
@@ -162,6 +162,10 @@ void FixedDracoController::getCommand(void *cmd) {
         robot_->vector_to_map(robot_->joint_velocities);
     ((FixedDracoCommand *)cmd)->joint_torques =
         robot_->vector_to_map(joint_trq_cmd_);
+
+    ((FixedDracoCommand *)cmd)->l_knee_int_frc = f_int_[0];
+    ((FixedDracoCommand *)cmd)->r_knee_int_frc = f_int_[1];
+
   } else if (controller_type_ ==
              fixed_draco_controller_type::kAdmittanceControl) {
     ((FixedDracoCommand *)cmd)->joint_positions =
@@ -170,6 +174,10 @@ void FixedDracoController::getCommand(void *cmd) {
         robot_->vector_to_map(joint_vel_cmd_);
     ((FixedDracoCommand *)cmd)->joint_torques =
         robot_->vector_to_map(Eigen::VectorXd::Zero(robot_->n_a));
+
+    ((FixedDracoCommand *)cmd)->l_knee_int_frc = 0.;
+    ((FixedDracoCommand *)cmd)->r_knee_int_frc = 0.;
+
   } else if (controller_type_ ==
              fixed_draco_controller_type::kImpedanceControl) {
     ((FixedDracoCommand *)cmd)->joint_positions =
@@ -178,13 +186,16 @@ void FixedDracoController::getCommand(void *cmd) {
         robot_->vector_to_map(joint_vel_cmd_);
     ((FixedDracoCommand *)cmd)->joint_torques =
         robot_->vector_to_map(joint_trq_cmd_);
+
+    ((FixedDracoCommand *)cmd)->l_knee_int_frc = f_int_[0];
+    ((FixedDracoCommand *)cmd)->r_knee_int_frc = f_int_[1];
   }
 
-  //std::cout << "1/2 l_knee_distal torque" << std::endl;
-  //std::cout << 0.5*((FixedDracoCommand *)cmd)->joint_torques["l_knee_fe_jd"] << std::endl;
-  //std::cout << "1/2 r_knee_distal torque" << std::endl;
-  //std::cout << 0.5*((FixedDracoCommand *)cmd)->joint_torques["r_knee_fe_jd"] << std::endl;
-  //std::cout << "====================" << std::endl;
+  // std::cout << "1/2 l_knee_distal torque" << std::endl;
+  // std::cout << 0.5*((FixedDracoCommand *)cmd)->joint_torques["l_knee_fe_jd"]
+  // << std::endl; std::cout << "1/2 r_knee_distal torque" << std::endl;
+  // std::cout << 0.5*((FixedDracoCommand *)cmd)->joint_torques["r_knee_fe_jd"]
+  // << std::endl; std::cout << "====================" << std::endl;
 
   if (sp_->count % sp_->save_freq == 0) {
     this->SaveData();
@@ -209,7 +220,7 @@ void FixedDracoController::SaveData() {
   dm->data->cmd_joint_velocities = joint_vel_cmd_;
   dm->data->cmd_joint_torques = joint_trq_cmd_;
 
-  dm->data->f_int = f_int_; 
+  dm->data->f_int = f_int_;
 }
 
 void FixedDracoController::SmoothCommand() {
@@ -239,9 +250,6 @@ Eigen::VectorXd FixedDracoController::ComputeGravityCompensationTorques(
       Eigen::MatrixXd::Identity(robot_->n_q_dot, robot_->n_q_dot) -
       jac_i_bar * jac_i;
 
-
-
-
   Eigen::MatrixXd lmd_sa_ni = util::PseudoInverse(
       (sa_ * null_i) * mass_inv * (sa_ * null_i).transpose(), 0.00001);
   // dyn pseudo
@@ -249,8 +257,9 @@ Eigen::VectorXd FixedDracoController::ComputeGravityCompensationTorques(
 
   Eigen::MatrixXd sa_ni_bar_trns = sa_ni_bar.transpose();
 
-  //f internal force calulation
-  f_int_ = jac_i_bar.transpose() * (grav - sa_.transpose() * sa_ni_bar_trns * null_i.transpose() * grav); 
+  // f internal force calulation
+  f_int_ = jac_i_bar.transpose() * (grav - sa_.transpose() * sa_ni_bar_trns *
+                                               null_i.transpose() * grav);
 
   return sa_ni_bar_trns * null_i.transpose() * grav;
 }

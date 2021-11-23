@@ -81,6 +81,9 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
   cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
 
+  l_knee_int_frc_cmd_ = 0.;
+  r_knee_int_frc_cmd_ = 0.;
+
   b_first_visit_ = true;
   b_smoothing_cmd_ = false;
   smoothing_start_time_ = 0.;
@@ -99,6 +102,9 @@ void DracoController::getCommand(void *cmd) {
     joint_pos_cmd_ = tci_container_->joint_task->pos_des;
     joint_vel_cmd_ = tci_container_->joint_task->vel_des;
     joint_trq_cmd_.setZero();
+
+    l_knee_int_frc_cmd_ = 0.;
+    r_knee_int_frc_cmd_ = 0.;
 
   } else {
     if (b_first_visit_) {
@@ -135,9 +141,12 @@ void DracoController::getCommand(void *cmd) {
     Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
     Eigen::VectorXd wbc_joint_trq_cmd = Eigen::VectorXd::Zero(sa_.rows());
     Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(sa_.rows());
+    Eigen::VectorXd wbc_int_frc_cmd;
     wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
                 tci_container_->internal_constraint_list, rf_des,
-                wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des);
+                wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des, wbc_int_frc_cmd);
+    l_knee_int_frc_cmd_ = wbc_int_frc_cmd[0];
+    r_knee_int_frc_cmd_ = wbc_int_frc_cmd[1];
     joint_trq_cmd_ = (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
                      wbc_joint_trq_cmd;
     Eigen::VectorXd joint_acc_cmd =
@@ -169,6 +178,9 @@ void DracoController::getCommand(void *cmd) {
   ((DracoCommand *)cmd)->joint_velocities =
       robot_->vector_to_map(joint_vel_cmd_);
   ((DracoCommand *)cmd)->joint_torques = robot_->vector_to_map(joint_trq_cmd_);
+
+  ((DracoCommand *)cmd)->l_knee_int_frc = l_knee_int_frc_cmd_;
+  ((DracoCommand *)cmd)->r_knee_int_frc = r_knee_int_frc_cmd_;
 
   if (sp_->count % sp_->save_freq == 0) {
     this->SaveData();

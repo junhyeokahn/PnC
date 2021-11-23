@@ -156,7 +156,7 @@ plot_task(time, des['task_torso_ori_pos'], act['task_torso_ori_pos'],
 # phase,
 # 'upper body',
 # label=upper_body_pos_label[slc])
-
+"""
 plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
           des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
           'left foot lin')
@@ -172,6 +172,7 @@ plot_task(time, des['task_rfoot_lin_pos'], act['task_rfoot_lin_pos'],
 plot_task(time, des['task_rfoot_ori_pos'], act['task_rfoot_ori_pos'],
           des['task_rfoot_ori_vel'], act['task_rfoot_ori_vel'], phase,
           'right foot ori')
+"""
 
 ## =============================================================================
 ## Plot WBC Solutions

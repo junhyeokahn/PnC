@@ -49,6 +49,8 @@ phase = []
 cmd_lfoot_rf = []
 cmd_rfoot_rf = []
 
+f_int = []
+
 cmd_joint_positions = []
 cmd_joint_velocities = []
 cmd_joint_torques = []
@@ -75,6 +77,7 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             cmd_joint_torques.append(d['cmd_joint_torques'])
             joint_positions.append(d['joint_positions'])
             joint_velocities.append(d['joint_velocities'])
+            f_int.append(d['f_int'])
         except EOFError:
             break
 
@@ -89,6 +92,7 @@ cmd_joint_velocities = np.stack(cmd_joint_velocities, axis=0)
 cmd_joint_torques = np.stack(cmd_joint_torques, axis=0)
 joint_positions = np.stack(joint_positions, axis=0)
 joint_velocities = np.stack(joint_velocities, axis=0)
+f_int = np.stack(f_int, axis=0)
 
 ## =============================================================================
 ## Plot Task
@@ -135,5 +139,18 @@ plot_joints(joint_label, rfoot_label, time, cmd_joint_positions,
 plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
             joint_positions, cmd_joint_velocities, joint_velocities,
             cmd_joint_torques, phase, "lfoot")
+
+l_knee_jd_idx = joint_label.index("l_knee_fe_jd")
+r_knee_jd_idx = joint_label.index("r_knee_fe_jd")
+
+fig, axes = plt.subplots(2, 1)
+axes[0].set_title('left knee')
+axes[1].set_title('right knee')
+axes[0].grid(True)
+axes[1].grid(True)
+axes[0].plot(time, cmd_joint_torques[:, l_knee_jd_idx] / 2., 'r')
+axes[0].plot(time, f_int[:, 0], 'b')
+axes[1].plot(time, cmd_joint_torques[:, r_knee_jd_idx] / 2., 'r')
+axes[1].plot(time, f_int[:, 1], 'b')
 
 plt.show()

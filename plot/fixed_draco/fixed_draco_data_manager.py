@@ -127,6 +127,7 @@ while True:
     data_saver.add('joint_velocities', list(msg.joint_velocities))
 
     data_saver.add('base_joint_quat', list(msg.base_joint_quat))
+    data_saver.add('f_int', list(msg.f_int))
 
     data_saver.advance()
 

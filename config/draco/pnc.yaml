@@ -3,8 +3,8 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-b_exp: false
-#b_exp: true # Enable b_smoothing at the bottom
+#b_exp: false
+b_exp: true # Enable b_smoothing at the bottom
 
 state_estimator:
     #n_data_com_vel: [100, 100, 100]
@@ -185,7 +185,7 @@ walking:
     rf_z_max_time: 0.1
 
     #com_height: 0.73
-    com_height: 0.72
+    com_height: 0.7
     swing_height: 0.04
 
     t_additional_ini_trans: 0.
@@ -202,7 +202,7 @@ walking:
 
 static_walking:
     moving_duration: 2.
-    com_height: 0.72
+    com_height: 0.7
 
     swing_duration: 3.
     des_foot_x_inc_local: 0.

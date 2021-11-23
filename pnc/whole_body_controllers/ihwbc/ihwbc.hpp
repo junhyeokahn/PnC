@@ -45,7 +45,8 @@ public:
              const std::vector<Contact *> &_contact_list,
              const std::vector<InternalConstraint *> &_internal_constraint_list,
              const Eigen::VectorXd &_rf_des, Eigen::VectorXd &tau_cmd,
-             Eigen::VectorXd &qddot_cmd, Eigen::VectorXd &rf_cmd);
+             Eigen::VectorXd &qddot_cmd, Eigen::VectorXd &rf_cmd,
+             Eigen::VectorXd &f_int);
 
 private:
   /// Number of qdot.
@@ -147,6 +148,4 @@ private:
 
   /// Solve QP.
   void solveQP();
-
-  Eigen::MatrixXd ji_bar_global_;
 };

@@ -110,9 +110,10 @@ void AtlasController::getCommand(void *cmd) {
   // WBC commands
   Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
   Eigen::VectorXd joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_a);
+  Eigen::VectorXd wbc_int_frc_cmd;
   wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
               tci_container_->internal_constraint_list, rf_des, joint_trq_cmd_,
-              joint_acc_cmd, rf_des);
+              joint_acc_cmd, rf_des, wbc_int_frc_cmd);
   if (sp_->state == AtlasStates::LFootSwing) {
     l_rf_cmd_ = Eigen::VectorXd::Zero(6);
     r_rf_cmd_ = rf_des;

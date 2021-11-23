@@ -31,6 +31,9 @@ public:
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
   std::map<std::string, double> joint_torques;
+
+  double l_knee_int_frc = 0.;
+  double r_knee_int_frc = 0.;
 };
 
 class FixedDracoInterface : public Interface {

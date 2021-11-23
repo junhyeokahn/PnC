@@ -3,6 +3,7 @@ contact_threshold: 30. # TODO (JH) : Need to be tuned
 target_joint: "L_Ankle_IE"
 
 b_measure_computation_time: true
+b_use_int_frc_command: false
 
 sleep_time: 0.7
 
