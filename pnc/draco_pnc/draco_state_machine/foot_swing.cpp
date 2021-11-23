@@ -10,6 +10,8 @@ FootSwing::FootSwing(const StateIdentifier _state_identifier,
   ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
+
+  b_static_walking_trigger = false;
 }
 
 FootSwing::~FootSwing() {}
@@ -87,30 +89,10 @@ void FootSwing::oneStep() {
 void FootSwing::lastVisit() {}
 
 bool FootSwing::endOfState() {
-
-  // if (state_machine_time_ >= swing_duration_) {
-  // return true;
-  //} else {
-  // if (state_machine_time_ >= 0.5 * swing_duration_) {
-  // if (leg_side_ == EndEffector::LFoot) {
-  // if (sp_->b_lf_contact) {
-  // printf("Early left foot contact at %f/%f\n", state_machine_time_,
-  // swing_duration_);
-  // return true;
-  //}
-  //} else {
-  // if (sp_->b_rf_contact) {
-  // printf("Early right foot contact at %f/%f\n", state_machine_time_,
-  // swing_duration_);
-  // return true;
-  //}
-  //}
-  //}
-  // return false;
-  //}
-
-  if (state_machine_time_ >= swing_duration_) {
-    return true;
+  //if (state_machine_time_ >= swing_duration_) {
+    //return true;
+  if(b_static_walking_trigger){
+      return true;
   } else {
     return false;
   }

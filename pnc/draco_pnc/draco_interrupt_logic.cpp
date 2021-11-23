@@ -1,5 +1,9 @@
 #include <pnc/draco_pnc/draco_interrupt_logic.hpp>
 #include <pnc/draco_pnc/draco_state_machine/double_support_balance.hpp>
+#include "pnc/draco_pnc/draco_state_machine/double_support_move.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
+#include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
 
 DracoInterruptLogic::DracoInterruptLogic(DracoControlArchitecture *_ctrl_arch)
     : InterruptLogic() {
@@ -154,13 +158,53 @@ void DracoInterruptLogic::processInterrupts() {
            ctrl_arch_->state_machines[draco_states::kBalance]))
           ->b_static_walking_trigger = true;
     } else {
-      // ignore
     }
   }
 
   if (b_interrupt_button_k) {
-    std::cout << "[Walking Interrupt Logic] button K pressed" << std::endl;
-  }
+    std::cout << "[Static Walking Interrupt Logic] button K pressed" << std::endl;
+    //int state = ctrl_arch_->state;
+    //int prev_state = ctrl_arch_->prev_state;
+    //ctrl_arch_->state_machines[state]->b_static_walking_trigger=true;
+    //if (prev_state != draco_states::kStand ) {
+        //ctrl_arch_->state_machines[prev_state]->b_static_walking_trigger=false;
+    //} else {
+    //}
+    if (ctrl_arch_->state == draco_states::kBalance) {
+      (static_cast<DoubleSupportBalance *>(
+           ctrl_arch_->state_machines[draco_states::kBalance]))
+          ->b_static_walking_trigger = true;
+    } else if (ctrl_arch_->state == draco_states::kMoveCoMToLFoot ) {
+        (static_cast<DoubleSupportMove*>(ctrl_arch_->state_machines[draco_states::kMoveCoMToLFoot]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kMoveCoMToRFoot ) {
+        (static_cast<DoubleSupportMove*>(ctrl_arch_->state_machines[draco_states::kMoveCoMToRFoot]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kMoveCoMToCenter ) {
+        (static_cast<DoubleSupportMove*>(ctrl_arch_->state_machines[draco_states::kMoveCoMToCenter]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kLFootLifting ) {
+        (static_cast<FootLifting*>(ctrl_arch_->state_machines[draco_states::kLFootLifting]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kRFootLifting ) {
+        (static_cast<FootLifting*>(ctrl_arch_->state_machines[draco_states::kRFootLifting]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kLFootSwingStatic ) {
+        (static_cast<FootSwing*>(ctrl_arch_->state_machines[draco_states::kLFootSwingStatic]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kRFootSwingStatic ) {
+        (static_cast<FootSwing*>(ctrl_arch_->state_machines[draco_states::kRFootSwingStatic]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kLFootLanding ) {
+        (static_cast<FootLanding*>(ctrl_arch_->state_machines[draco_states::kLFootLanding]))
+            ->b_static_walking_trigger = true;
+    }  else if (ctrl_arch_->state == draco_states::kRFootLanding ) {
+        (static_cast<FootLanding*>(ctrl_arch_->state_machines[draco_states::kRFootLanding]))
+            ->b_static_walking_trigger = true;
+    } else{
+        std::cout << "[Error] No Matching Interruption Method" << std::endl;
 
+    }
+  }
   resetFlags();
 }

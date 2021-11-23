@@ -11,6 +11,8 @@ FootLanding::FootLanding(const StateIdentifier _state_identifier,
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
   ramp_time_ = 0.5;
+
+  b_static_walking_trigger = false;
 }
 
 FootLanding::~FootLanding() {}
@@ -59,8 +61,10 @@ void FootLanding::lastVisit() {}
 
 bool FootLanding::endOfState() {
 
-  if (state_machine_time_ >= ramp_time_) {
-    return true;
+  //if (state_machine_time_ >= ramp_time_) {
+    //return true;
+ if(b_static_walking_trigger){
+     return true;
   } else {
     return false;
   }

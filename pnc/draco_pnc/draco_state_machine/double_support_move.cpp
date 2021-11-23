@@ -10,6 +10,7 @@ DoubleSupportMove::DoubleSupportMove(const StateIdentifier _state_identifier,
   ctrl_arch_ = _ctrl_arch;
   sp_ = DracoStateProvider::getStateProvider();
   com_move_states_ = _com_move_states;
+  b_static_walking_trigger = false;
 }
 
 DoubleSupportMove::~DoubleSupportMove() {}
@@ -77,8 +78,11 @@ void DoubleSupportMove::lastVisit() {}
 
 bool DoubleSupportMove::endOfState() {
 
-  if (state_machine_time_ > moving_duration_) {
-    return true;
+  //if (state_machine_time_ > moving_duration_) {
+    //return true;
+  //}
+  if (b_static_walking_trigger){
+  return true;
   }
   return false;
 }

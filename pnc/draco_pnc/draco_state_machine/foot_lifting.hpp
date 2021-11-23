@@ -19,6 +19,8 @@ public:
   StateIdentifier getNextState();
   double ramp_time_;
 
+  bool b_static_walking_trigger;
+
 protected:
   DracoStateProvider *sp_;
   DracoControlArchitecture *ctrl_arch_;

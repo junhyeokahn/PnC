@@ -23,6 +23,8 @@ public:
   double des_foot_y_increment_; //local value
   double des_foot_ori_increment_; //local yaw value (in degree)
 
+  bool b_static_walking_trigger;
+
 protected:
   DracoStateProvider *sp_;
   DracoControlArchitecture *ctrl_arch_;

@@ -27,6 +27,8 @@ public:
   double moving_duration_;
   double des_com_height_;
 
+  bool b_static_walking_trigger;
+
 protected:
   DracoStateProvider *sp_;
   DracoControlArchitecture *ctrl_arch_;

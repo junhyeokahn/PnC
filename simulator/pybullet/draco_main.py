@@ -209,6 +209,8 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_f = True
         elif pybullet_util.is_key_triggered(keys, 'j'):
             interface.interrupt.b_interrupt_button_j = True
+        elif pybullet_util.is_key_triggered(keys, 'k'):
+            interface.interrupt.b_interrupt_button_k = True
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']
@@ -264,14 +266,14 @@ if __name__ == "__main__":
             cv2.imwrite(filename, frame)
             jpg_count += 1
 
-        if Config.B_USE_MESHCAT:
-            #TODO: match idx to joint_pos
-            vis_q[0:3] = sensor_data_dict['base_joint_pos']
-            vis_q[3:7] = sensor_data_dict['base_joint_quat']
-            for i, (k, v) in enumerate(sensor_data_dict['joint_pos'].items()):
-                idx = interface._robot.get_q_idx(k)
-                vis_q[idx] = v
-            viz.display(vis_q)
+        # if Config.B_USE_MESHCAT:
+        # TODO: match idx to joint_pos
+        # vis_q[0:3] = sensor_data_dict['base_joint_pos']
+        # vis_q[3:7] = sensor_data_dict['base_joint_quat']
+        # for i, (k, v) in enumerate(sensor_data_dict['joint_pos'].items()):
+        # idx = interface._robot.get_q_idx(k)
+        # vis_q[idx] = v
+        # viz.display(vis_q)
 
         p.stepSimulation()
 
