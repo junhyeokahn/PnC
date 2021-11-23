@@ -7,8 +7,8 @@ ip_addr: "tcp://127.0.0.1:5557"
 b_exp: true # Enable b_smoothing at the bottom
 
 state_estimator:
-    #n_data_com_vel: [100, 100, 100]
-    n_data_com_vel: [20, 20, 20]
+    n_data_com_vel: [100, 100, 100]
+    #n_data_com_vel: [20, 20, 20]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -41,7 +41,7 @@ wbc:
             exp_kd: [0., 0., 1.2]
 
         cam:
-            weight: 0.02
+            weight: 0.
             sim_kp: [0., 0., 0.] # will be ignored
             sim_kd: [50., 50., 50.]
             exp_kp: [0., 0., 0.] # will be ignored
