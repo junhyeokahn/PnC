@@ -47,12 +47,12 @@ void Initialize::oneStep() {
 void Initialize::lastVisit() {}
 
 bool Initialize::endOfState() {
-  if (state_machine_time_ >= end_time) {
-    return true;
-  } else {
-    return false;
-  }
+  // if (state_machine_time_ >= end_time) {
+  // return true;
+  //} else {
   // return false;
+  //}
+  return false;
 }
 
 StateIdentifier Initialize::getNextState() { return draco_states::kStand; }

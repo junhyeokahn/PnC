@@ -25,6 +25,8 @@ void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
     const Eigen::Vector3d &_target_com_pos,
     const Eigen::Quaternion<double> &_target_base_quat) {
 
+  b_swaying_ = false;
+
   start_time_ = _start_time;
   duration_ = _duration;
 
