@@ -21,6 +21,7 @@ public:
 
     kp = Eigen::VectorXd::Zero(dim);
     kd = Eigen::VectorXd::Zero(dim);
+    ki = Eigen::VectorXd::Zero(dim);
 
     jacobian = Eigen::MatrixXd::Zero(dim, robot_->n_q_dot);
     jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
@@ -52,6 +53,9 @@ public:
 
   /// Task D gain.
   Eigen::VectorXd kd;
+
+  /// Task I gain.
+  Eigen::VectorXd ki;
 
   /// Task jacobian.
   Eigen::MatrixXd jacobian;

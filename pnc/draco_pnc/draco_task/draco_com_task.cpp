@@ -9,6 +9,17 @@ DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot,
   feedback_source_ = _feedback_source;
   icp_des.setZero();
   icp_dot_des.setZero();
+
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+
+  double time_constant =
+      util::ReadParameter<double>(cfg["wbc"]["task"]["icp"], "time_constant");
+
+  Eigen::VectorXd icp_err_lim = Eigen::VectorXd::Zero(2);
+  icp_err_lim << 0.03, 0.03;
+  icp_err_integrator_ = new ExponentialMovingAverageFilter(
+      sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(2), -icp_err_lim,
+      icp_err_lim);
 }
 
 void DracoCenterOfMassTask::update_cmd() {
@@ -40,6 +51,8 @@ void DracoCenterOfMassTask::update_cmd() {
     Eigen::Vector3d com_vel = sp_->com_vel_est;
     Eigen::Vector2d icp = sp_->dcm.head(2);
 
+    icp_err_integrator_->Input(icp_des - icp);
+
     pos = com_pos;
     vel = com_vel;
     pos_err = pos_des - pos;
@@ -53,7 +66,8 @@ void DracoCenterOfMassTask::update_cmd() {
 
     // TODO : add integral gain
     Eigen::Vector2d cmp_des =
-        icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp);
+        icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -
+        ki.head(2).cwiseProduct(icp_err_integrator_->Output());
 
     op_cmd.head(2) = (9.81 / z_des) * (com_pos.head(2) - cmp_des);
     op_cmd[2] = kp[2] * (z_des - com_pos[2]) + kd[2] * (z_dot_des - com_vel[2]);

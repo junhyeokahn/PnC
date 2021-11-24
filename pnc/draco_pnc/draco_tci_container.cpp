@@ -35,6 +35,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
         cfg["wbc"]["task"]["icp"], gain_prefix + "kp");
     com_task->kd = util::ReadParameter<Eigen::VectorXd>(
         cfg["wbc"]["task"]["icp"], gain_prefix + "kd");
+    com_task->ki = util::ReadParameter<Eigen::VectorXd>(
+        cfg["wbc"]["task"]["icp"], gain_prefix + "ki");
     com_task->w_hierarchy =
         util::ReadParameter<double>(cfg["wbc"]["task"]["icp"], "weight");
   } else {

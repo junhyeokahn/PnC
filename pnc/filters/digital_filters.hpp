@@ -86,3 +86,27 @@ private:
   double Lpf_in1, Lpf_in2, Lpf_in3, Lpf_out1, Lpf_out2;
   double lpf_out;
 };
+
+/// class ExponentialMovingAverageFilter
+// https://github.com/stephane-caron/lipm_walking_controller/blob/29b3583e3be91ed6336df25434b6baea1fc9f650/include/lipm_walking/utils/ExponentialMovingAverage.h
+class ExponentialMovingAverageFilter {
+public:
+  ExponentialMovingAverageFilter(double dt, double time_constant,
+                                 Eigen::VectorXd init_value,
+                                 Eigen::VectorXd min_crop,
+                                 Eigen::VectorXd max_crop);
+  ~ExponentialMovingAverageFilter();
+  void Input(Eigen::VectorXd input_value);
+  Eigen::VectorXd Output();
+  void Clear();
+
+private:
+  double dt_;
+  double time_constant_;
+  double alpha_;
+  Eigen::VectorXd init_value_;
+  Eigen::VectorXd average_;
+  Eigen::VectorXd raw_value_;
+  Eigen::VectorXd min_crop_;
+  Eigen::VectorXd max_crop_;
+};

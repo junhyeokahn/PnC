@@ -157,3 +157,36 @@ void DerivativeLowPassFilter::Clear() {
   Lpf_out_prev[1] = 0;
   Lpf_out_prev[0] = 0;
 }
+
+ExponentialMovingAverageFilter::ExponentialMovingAverageFilter(
+    double dt, double time_constant, Eigen::VectorXd init_value,
+    Eigen::VectorXd min_crop, Eigen::VectorXd max_crop) {
+  dt_ = dt;
+  init_value_ = init_value;
+  double T =
+      std::max(time_constant, 2 * dt_); // Nyquist-Shannon sampling theorem
+  time_constant_ = T;
+  alpha_ = 1. - std::exp(-dt_ / T);
+  min_crop_ = min_crop;
+  max_crop_ = max_crop;
+
+  average_ = init_value_;
+}
+
+ExponentialMovingAverageFilter::~ExponentialMovingAverageFilter() {}
+
+void ExponentialMovingAverageFilter::Input(Eigen::VectorXd input_value) {
+  average_ += alpha_ * (input_value - average_);
+  raw_value_ = input_value;
+
+  for (int i = 0; i < average_.size(); ++i) {
+    if (average_[i] < min_crop_[i])
+      average_[i] = min_crop_[i];
+    if (average_[i] > max_crop_[i])
+      average_[i] = max_crop_[i];
+  }
+}
+
+Eigen::VectorXd ExponentialMovingAverageFilter::Output() { return average_; }
+
+void ExponentialMovingAverageFilter::Clear() { average_ = init_value_; }
