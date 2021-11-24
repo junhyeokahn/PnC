@@ -125,8 +125,8 @@ task_torso_ori_local_vel_err = np.stack(task_torso_ori_local_vel_err, axis=0)
 plot_task(time, des['task_com_pos'], act['task_com_pos'], des['task_com_vel'],
           act['task_com_vel'], phase, 'com lin')
 
-# plot_task(time, des['icp'], act['icp'], des['icp_dot'], act['icp_dot'], phase,
-# 'icp')
+plot_task(time, des['icp'], act['icp'], des['icp_dot'], act['icp_dot'], phase,
+          'icp')
 
 # plot_momentum_task(time, des['task_cam_vel'], act['task_cam_vel'], phase,
 # 'cam')
