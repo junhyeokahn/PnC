@@ -3,12 +3,12 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-b_exp: false
-#b_exp: true # Enable b_smoothing at the bottom
+#b_exp: false
+b_exp: true # Enable b_smoothing at the bottom
 
 state_estimator:
-    #n_data_com_vel: [100, 100, 100]
-    n_data_com_vel: [20, 20, 20]
+    n_data_com_vel: [200, 200, 200]
+    #n_data_com_vel: [20, 20, 20]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -25,7 +25,7 @@ wbc:
         mu: 0.3
 
     task:
-        com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
+        com_control_feedback_source: 0 # 0: com feedback, 1: icp feedback
         com:
             weight: 20
             sim_kp: [200, 200, 200]
@@ -219,6 +219,6 @@ static_walking:
 
 controller:
     waiting_count: 10
-    #b_smoothing: true
-    b_smoothing: false
+    b_smoothing: true
+    #b_smoothing: false
     smoothing_duration: 0.2

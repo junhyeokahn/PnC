@@ -40,6 +40,9 @@ public:
 
   Eigen::Quaternion<double> nominal_base_quat;
 
+  Eigen::Isometry3d nominal_lfoot_iso;
+  Eigen::Isometry3d nominal_rfoot_iso;
+
   int b_rf_contact;
   int b_lf_contact;
 

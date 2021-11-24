@@ -35,6 +35,9 @@ void FootLanding::firstVisit() {
   ctrl_arch_->rfoot_ori_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
   ctrl_arch_->lfoot_pos_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
   ctrl_arch_->lfoot_ori_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
+
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 }
 
 void FootLanding::oneStep() {
@@ -51,8 +54,8 @@ void FootLanding::oneStep() {
   ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  //ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  //ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update floating base traj
 }

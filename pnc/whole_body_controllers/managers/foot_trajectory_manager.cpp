@@ -32,6 +32,22 @@ void FootTrajectoryManager::UpdateZeroAccCmd() {
   foot_ori_task_->update_desired(foot_ori_des, foot_ang_vel_des, foot_acc_des);
 }
 
+void FootTrajectoryManager::useNominalPoseCmd(const Eigen::Isometry3d& nominal_foot_iso) {
+  Eigen::VectorXd foot_pos_des = nominal_foot_iso.translation();
+  Eigen::VectorXd foot_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd foot_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::Quaternion<double> foot_quat_des =
+      Eigen::Quaternion<double>(nominal_foot_iso.linear());
+  Eigen::VectorXd foot_ori_des(4);
+  foot_ori_des << foot_quat_des.w(), foot_quat_des.x(), foot_quat_des.y(),
+      foot_quat_des.z();
+  Eigen::VectorXd foot_ang_vel_des = Eigen::VectorXd::Zero(3);
+
+  foot_pos_task_->update_desired(foot_pos_des, foot_vel_des, foot_acc_des);
+  foot_ori_task_->update_desired(foot_ori_des, foot_ang_vel_des, foot_acc_des);
+}
+
 void FootTrajectoryManager::InitializeSwingTrajectory(
     const double _start_time, const double _swing_duration,
     const Footstep &_landing_foot) {
