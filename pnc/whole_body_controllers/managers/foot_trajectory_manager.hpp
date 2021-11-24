@@ -20,6 +20,8 @@ public:
   /// Use current pose and vel to set zero acceleration command.
   void UpdateZeroAccCmd();
 
+  void useNominalPoseCmd(const Eigen::Isometry3d& nominal_foot_iso); 
+
   /// Initialize the swing foot trajectory
   void InitializeSwingTrajectory(const double _start_time,
                                  const double _swing_duration,
