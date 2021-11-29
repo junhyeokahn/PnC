@@ -52,9 +52,9 @@ void DracoCenterOfMassTask::update_cmd() {
     Eigen::Vector2d icp = sp_->dcm.head(2);
 
     // TESTING
-    util::SaveVector(icp_des - icp, "icp_err.txt");
+    util::SaveVector(icp_des - icp, "icp_err");
     icp_err_integrator_->Input(icp_des - icp);
-    util::SaveVector(icp_err_integrator_->Output(), "icp_int_output.txt");
+    util::SaveVector(icp_err_integrator_->Output(), "icp_int_output");
 
     pos = com_pos;
     vel = com_vel;
