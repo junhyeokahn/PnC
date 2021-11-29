@@ -51,8 +51,16 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
       util::ReadParameter<double>(cfg["walking"], "swing_height");
   upper_body_tm =
       new UpperBodyTrajectoryManager(tci_container->upper_body_task, robot_);
+
+  int com_control_feedback_height_target = util::ReadParameter<int>(
+      cfg["wbc"]["task"], "com_control_feedback_height_target");
+  bool b_use_base_height = false;
+  if (com_control_feedback_height_target == 1) {
+    b_use_base_height = true;
+  }
   floating_base_tm = new FloatingBaseTrajectoryManager(
-      tci_container->com_task, tci_container->torso_ori_task, robot_);
+      tci_container->com_task, tci_container->torso_ori_task, robot_,
+      b_use_base_height);
   dcm_tm = new DCMTrajectoryManager(dcm_planner_, tci_container->com_task,
                                     tci_container->torso_ori_task, robot_,
                                     "l_foot_contact", "r_foot_contact");
@@ -163,6 +171,9 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToLFoot])
       ->des_com_height_ =
       util::ReadParameter<double>(cfg["static_walking"], "com_height");
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToLFoot])
+      ->com_offset =
+      util::ReadParameter<Eigen::Vector2d>(cfg["static_walking"], "com_offset");
 
   state_machines[draco_states::kMoveCoMToRFoot] = new DoubleSupportMove(
       draco_states::kMoveCoMToRFoot, this, com_move_states::Right, robot_);

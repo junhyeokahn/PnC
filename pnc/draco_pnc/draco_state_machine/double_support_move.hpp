@@ -26,6 +26,7 @@ public:
 
   double moving_duration_;
   double des_com_height_;
+  Eigen::Vector2d com_offset;
 
   bool b_static_walking_trigger;
 

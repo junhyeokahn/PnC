@@ -118,16 +118,6 @@ task_cam_local_vel_err = np.stack(task_cam_local_vel_err, axis=0)
 task_torso_ori_local_pos_err = np.stack(task_torso_ori_local_pos_err, axis=0)
 task_torso_ori_local_vel_err = np.stack(task_torso_ori_local_vel_err, axis=0)
 
-icp_err = np.genfromtxt("experiment_data/icp_err.txt")
-icp_err_avg = np.genfromtxt("experiment_data/icp_int_output.txt")
-
-fig, axes = plt.subplots(2, 2)
-for i in range(2):
-    axes[i, 0].plot(icp_err[:, i])
-    axes[i, 1].plot(icp_err_avg[:, i])
-    axes[i, 0].grid(True)
-    axes[i, 1].grid(True)
-
 ## =============================================================================
 ## Plot Task
 ## =============================================================================

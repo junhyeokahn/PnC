@@ -1,7 +1,8 @@
 #include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
 
 FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
-    Task *_com_task, Task *_base_ori_task, RobotSystem *_robot) {
+    Task *_com_task, Task *_base_ori_task, RobotSystem *_robot,
+    bool _b_use_base_height) {
   util::PrettyConstructor(2, "TrajectoryManager: Floating Base");
 
   robot_ = _robot;
@@ -18,6 +19,7 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
   rot_world_local_.setIdentity();
 
   b_swaying_ = false;
+  b_use_base_height_ = _b_use_base_height;
 }
 
 void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
@@ -31,6 +33,9 @@ void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
   duration_ = _duration;
 
   ini_com_pos_ = robot_->get_com_pos();
+  if (b_use_base_height_) {
+    ini_com_pos_[2] = robot_->get_link_iso(base_id_).translation()[2];
+  }
   ini_base_quat_ =
       Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
 
@@ -54,6 +59,10 @@ void FloatingBaseTrajectoryManager::InitializeSwayingTrajectory(
   rot_world_local_ = _rot_world_local;
 
   ini_com_pos_ = robot_->get_com_pos();
+  if (b_use_base_height_) {
+    ini_com_pos_[2] = robot_->get_link_iso(base_id_).translation()[2];
+  }
+
   ini_base_quat_ =
       Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
   target_base_quat_ = ini_base_quat_;

@@ -26,23 +26,22 @@ wbc:
 
     task:
         com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
+        com_control_feedback_height_target: 1 # 0: com height, 1: base height
         com:
             weight: 20
-            sim_kp: [200, 200, 200]
-            sim_kd: [10, 10, 10]
+            sim_kp: [200, 200, 100]
+            sim_kd: [10, 10, 5]
             exp_kp: [15, 30, 20]
             exp_kd: [4.0, 3.0, 1.5]
-
         icp:
             weight: 20
-            sim_kp: [10, 10, 200]
-            sim_kd: [0, 0, 10] # x, y will be ignored
+            sim_kp: [10, 10, 100]
+            sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
             exp_kp: [0.6, 0.6, 20]
             exp_kd: [0., 0., 1.5]
-            exp_ki: [0., 0., 0.]
+            exp_ki: [0.2, 0.2, 0.]
             time_constant: 4.
-
         cam:
             weight: 0.
             sim_kp: [0., 0., 0.] # will be ignored
@@ -124,13 +123,14 @@ wbc:
                 sim_kd: 2.
                 exp_kp: 5.
                 exp_kd: 0.
+        b_foot_ignore_floating: true
         foot_pos:
             weight_at_contact: 40.
             weight_at_swing: 20.
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
-            exp_kp: [20, 20, 20]
-            exp_kd: [0.1, 0.1, 0.1]
+            exp_kp: [100, 100, 250]
+            exp_kd: [0.1, 0.1, 1.2]
         foot_ori:
             weight_at_contact: 40.
             weight_at_swing: 20.
@@ -191,8 +191,9 @@ walking:
     ini_stand_dur: 1.
     rf_z_max_time: 0.1
 
-    #com_height: 0.73
-    com_height: 0.68
+    #com_height: 0.68
+    com_height: 0.92
+
     swing_height: 0.03
 
     t_additional_ini_trans: 0.
@@ -209,8 +210,9 @@ walking:
 
 static_walking:
     moving_duration: 5.
-    #com_height: 0.73
-    com_height: 0.68
+    #com_height: 0.68
+    com_height: 0.92
+    com_offset: [0., 0.04]
 
     swing_duration: 5.
     des_foot_x_inc_local: 0.

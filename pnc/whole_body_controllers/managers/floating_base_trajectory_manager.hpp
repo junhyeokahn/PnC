@@ -9,7 +9,8 @@ class FloatingBaseTrajectoryManager {
 public:
   /// \{ \name Constructor and Destructor
   FloatingBaseTrajectoryManager(Task *_com_task, Task *_base_ori_task,
-                                RobotSystem *_robot);
+                                RobotSystem *_robot,
+                                const bool b_use_base_height = false);
   ~FloatingBaseTrajectoryManager(){};
   /// \}
 
@@ -63,4 +64,6 @@ private:
   Eigen::Vector3d exp_error_;
 
   Eigen::Matrix3d rot_world_local_;
+
+  bool b_use_base_height_;
 };

@@ -25,6 +25,11 @@ void DoubleSupportMove::firstVisit() {
     target_com_pos[2] = des_com_height_;
     Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
+    Eigen::Vector2d global_com_offset =
+        target_base_quat.toRotationMatrix().block(0, 0, 2, 2) * com_offset;
+    target_com_pos[0] += global_com_offset[0];
+    target_com_pos[1] -= global_com_offset[1];
+
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
 
@@ -33,8 +38,14 @@ void DoubleSupportMove::firstVisit() {
 
     Eigen::Vector3d target_com_pos =
         robot_->get_link_iso("r_foot_contact").translation();
+
     target_com_pos[2] = des_com_height_;
     Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
+
+    Eigen::Vector2d global_com_offset =
+        target_base_quat.toRotationMatrix().block(0, 0, 2, 2) * com_offset;
+    target_com_pos[0] += global_com_offset[0];
+    target_com_pos[1] += global_com_offset[1];
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);

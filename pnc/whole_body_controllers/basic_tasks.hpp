@@ -36,7 +36,8 @@ private:
 class LinkPosTask : public Task {
 public:
   /// \{ \name Constructor and Destructor
-  LinkPosTask(RobotSystem *_robot, std::vector<std::string> _target_ids);
+  LinkPosTask(RobotSystem *_robot, std::vector<std::string> _target_ids,
+              bool b_ignore_floating = false);
 
   virtual ~LinkPosTask(){};
   /// \}
@@ -44,13 +45,16 @@ public:
 private:
   void update_cmd();
   void update_jacobian();
+
+  bool b_ignore_floating_;
 };
 
 /// class LinkOriTask
 class LinkOriTask : public Task {
 public:
   /// \{ \name Constructor and Destructor
-  LinkOriTask(RobotSystem *_robot, std::vector<std::string> _target_ids);
+  LinkOriTask(RobotSystem *_robot, std::vector<std::string> _target_ids,
+              bool b_ignore_floating = false);
 
   virtual ~LinkOriTask(){};
   /// \}
@@ -58,6 +62,8 @@ public:
 private:
   void update_cmd();
   void update_jacobian();
+
+  bool b_ignore_floating_;
 };
 
 /// class CenterOfMassTask

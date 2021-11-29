@@ -12,9 +12,15 @@ constexpr int kCom = 0;
 constexpr int kIcp = 1;
 } // namespace feedback_source
 
+namespace feedback_height_target {
+constexpr int kComHeight = 0;
+constexpr int kBaseHeight = 1;
+} // namespace feedback_height_target
+
 class DracoCenterOfMassTask : public Task {
 public:
-  DracoCenterOfMassTask(RobotSystem *_robot, int _feedback_source);
+  DracoCenterOfMassTask(RobotSystem *_robot, int _feedback_source,
+                        int _feedback_height_target);
 
   virtual ~DracoCenterOfMassTask() { delete icp_err_integrator_; };
 
@@ -28,6 +34,7 @@ private:
   DracoStateProvider *sp_;
 
   int feedback_source_;
+  int feedback_height_target_;
 
   ExponentialMovingAverageFilter *icp_err_integrator_;
 };

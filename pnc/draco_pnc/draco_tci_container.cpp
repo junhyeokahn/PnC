@@ -22,7 +22,10 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
 
   int feedback_source = util::ReadParameter<int>(cfg["wbc"]["task"],
                                                  "com_control_feedback_source");
-  com_task = new DracoCenterOfMassTask(robot_, feedback_source);
+  int feedback_height_target = util::ReadParameter<int>(
+      cfg["wbc"]["task"], "com_control_feedback_height_target");
+  com_task = new DracoCenterOfMassTask(robot_, feedback_source,
+                                       feedback_height_target);
   if (feedback_source == feedback_source::kCom) {
     com_task->kp = util::ReadParameter<Eigen::VectorXd>(
         cfg["wbc"]["task"]["com"], gain_prefix + "kp");
@@ -78,7 +81,10 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   upper_body_task->w_hierarchy = util::ReadParameter<double>(
       cfg["wbc"]["task"]["upper_body_joint"], "weight");
 
-  rfoot_pos_task = new LinkPosTask(robot_, {"r_foot_contact"});
+  bool b_ignore_floating =
+      util::ReadParameter<bool>(cfg["wbc"]["task"], "b_foot_ignore_floating");
+  rfoot_pos_task =
+      new LinkPosTask(robot_, {"r_foot_contact"}, b_ignore_floating);
   rfoot_pos_task->kp = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"]["task"]["foot_pos"], gain_prefix + "kp");
   rfoot_pos_task->kd = util::ReadParameter<Eigen::VectorXd>(
@@ -86,7 +92,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   rfoot_pos_task->w_hierarchy = util::ReadParameter<double>(
       cfg["wbc"]["task"]["foot_pos"], "weight_at_swing");
 
-  rfoot_ori_task = new LinkOriTask(robot_, {"r_foot_contact"});
+  rfoot_ori_task =
+      new LinkOriTask(robot_, {"r_foot_contact"}, b_ignore_floating);
   rfoot_ori_task->kp = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"]["task"]["foot_ori"], gain_prefix + "kp");
   rfoot_ori_task->kd = util::ReadParameter<Eigen::VectorXd>(
@@ -94,7 +101,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   rfoot_ori_task->w_hierarchy = util::ReadParameter<double>(
       cfg["wbc"]["task"]["foot_ori"], "weight_at_swing");
 
-  lfoot_pos_task = new LinkPosTask(robot_, {"l_foot_contact"});
+  lfoot_pos_task =
+      new LinkPosTask(robot_, {"l_foot_contact"}, b_ignore_floating);
   lfoot_pos_task->kp = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"]["task"]["foot_pos"], gain_prefix + "kp");
   lfoot_pos_task->kd = util::ReadParameter<Eigen::VectorXd>(
@@ -102,7 +110,8 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   lfoot_pos_task->w_hierarchy = util::ReadParameter<double>(
       cfg["wbc"]["task"]["foot_pos"], "weight_at_swing");
 
-  lfoot_ori_task = new LinkOriTask(robot_, {"l_foot_contact"});
+  lfoot_ori_task =
+      new LinkOriTask(robot_, {"l_foot_contact"}, b_ignore_floating);
   lfoot_ori_task->kp = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"]["task"]["foot_ori"], gain_prefix + "kp");
   lfoot_ori_task->kd = util::ReadParameter<Eigen::VectorXd>(

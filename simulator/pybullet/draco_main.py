@@ -277,6 +277,8 @@ if __name__ == "__main__":
         # viz.display(vis_q)
 
         p.stepSimulation()
+        # if count % 100 == 0:
+        # __import__('ipdb').set_trace()
 
         time.sleep(dt)
         t += dt

@@ -53,9 +53,12 @@ void SelectedJointTask::update_jacobian() {
 }
 
 LinkPosTask::LinkPosTask(RobotSystem *_robot,
-                         std::vector<std::string> _target_ids)
+                         std::vector<std::string> _target_ids,
+                         bool _b_ignore_floating)
     : Task(_robot, 3 * _target_ids.size(), _target_ids) {
   assert(dim == 3 * _target_ids.size());
+
+  b_ignore_floating_ = _b_ignore_floating;
 
   util::PrettyConstructor(3, "LinkPosTask ");
 }
@@ -84,14 +87,22 @@ void LinkPosTask::update_jacobian() {
     jacobian_dot_q_dot.segment(3 * i, 3) =
         robot_->get_link_jacobian_dot_times_qdot(target_ids[i]).tail(3);
   }
+  if (b_ignore_floating_) {
+    jacobian.block(0, 0, dim, robot_->n_floating) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_floating);
+    jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
+  }
 }
 
 LinkOriTask::LinkOriTask(RobotSystem *_robot,
-                         std::vector<std::string> _target_ids)
+                         std::vector<std::string> _target_ids,
+                         bool _b_ignore_floating)
     : Task(_robot, 3 * _target_ids.size(), _target_ids) {
   assert(dim == 3 * _target_ids.size());
   pos_des = Eigen::VectorXd::Zero(4 * _target_ids.size());
   pos = Eigen::VectorXd::Zero(4 * _target_ids.size());
+
+  b_ignore_floating_ = _b_ignore_floating;
 
   util::PrettyConstructor(3, "LinkOriTask ");
 }
@@ -128,6 +139,11 @@ void LinkOriTask::update_jacobian() {
             .block(0, 0, 3, robot_->n_q_dot);
     jacobian_dot_q_dot.segment(3 * i, 3) =
         robot_->get_link_jacobian_dot_times_qdot(target_ids[i]).head(3);
+  }
+  if (b_ignore_floating_) {
+    jacobian.block(0, 0, dim, robot_->n_floating) =
+        Eigen::MatrixXd::Zero(dim, robot_->n_floating);
+    jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
   }
 }
 

@@ -39,7 +39,12 @@ void DoubleSupportBalance::oneStep() {
   ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 }
 
-void DoubleSupportBalance::lastVisit() {}
+void DoubleSupportBalance::lastVisit() {
+
+  std::cout << "Base height" << std::endl;
+  std::cout << robot_->get_link_iso("torso_com_link").translation()[2]
+            << std::endl;
+}
 
 bool DoubleSupportBalance::endOfState() {
 
