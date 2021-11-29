@@ -123,7 +123,6 @@ wbc:
                 sim_kd: 2.
                 exp_kp: 5.
                 exp_kd: 0.
-        b_foot_ignore_floating: true
         foot_pos:
             weight_at_contact: 40.
             weight_at_swing: 20.
@@ -212,7 +211,7 @@ static_walking:
     moving_duration: 5.
     #com_height: 0.68
     com_height: 0.92
-    com_offset: [0., 0.04]
+    com_offset: [0., 0.10]
 
     swing_duration: 5.
     des_foot_x_inc_local: 0.

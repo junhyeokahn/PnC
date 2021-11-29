@@ -40,10 +40,14 @@ public:
 
   Eigen::Quaternion<double> nominal_base_quat;
 
-  int b_rf_contact;
-  int b_lf_contact;
+  bool b_rf_contact;
+  bool b_lf_contact;
 
   int planning_id = 0;
+
+  std::vector<int> lfoot_jidx;
+  std::vector<int> rfoot_jidx;
+  std::vector<int> floating_jidx;
 
 private:
   DracoStateProvider();

@@ -27,6 +27,10 @@ void FootSwing::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   if (leg_side_ == EndEffector::RFoot) {
+
+    sp_->b_rf_contact = false;
+    sp_->b_lf_contact = true;
+
     Eigen::Vector3d local_des_foot_pos(des_foot_x_increment_,
                                        des_foot_y_increment_, 0.);
     Eigen::Vector3d des_foot_pos =
@@ -50,6 +54,10 @@ void FootSwing::firstVisit() {
         sp_->curr_time, swing_duration_, landing_foot);
 
   } else if (leg_side_ == EndEffector::LFoot) {
+
+    sp_->b_rf_contact = true;
+    sp_->b_lf_contact = false;
+
     Eigen::Vector3d local_des_foot_pos(des_foot_x_increment_,
                                        des_foot_y_increment_, 0.);
     Eigen::Vector3d des_foot_pos =
@@ -91,7 +99,10 @@ void FootSwing::oneStep() {
   // Update floating base task
 }
 
-void FootSwing::lastVisit() {}
+void FootSwing::lastVisit() {
+  sp_->b_rf_contact = true;
+  sp_->b_lf_contact = true;
+}
 
 bool FootSwing::endOfState() {
   if (state_machine_time_ >= swing_duration_) {

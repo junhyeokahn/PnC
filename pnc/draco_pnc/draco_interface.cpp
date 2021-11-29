@@ -30,6 +30,25 @@ DracoInterface::DracoInterface() : Interface() {
   sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
+  sp_->lfoot_jidx.clear();
+  std::vector<std::string> lfoot_jnames = {
+      "l_hip_ie",     "l_hip_aa",   "l_hip_fe",  "l_knee_fe_jp",
+      "l_knee_fe_jd", "l_ankle_fe", "l_ankle_ie"};
+  for (int i = 0; i < lfoot_jnames.size(); ++i) {
+    sp_->lfoot_jidx.push_back(robot_->get_q_dot_idx(lfoot_jnames[i]));
+  }
+
+  sp_->rfoot_jidx.clear();
+  std::vector<std::string> rfoot_jnames = {
+      "r_hip_ie",     "r_hip_aa",   "r_hip_fe",  "r_knee_fe_jp",
+      "r_knee_fe_jd", "r_ankle_fe", "r_ankle_ie"};
+  for (int i = 0; i < rfoot_jnames.size(); ++i) {
+    sp_->rfoot_jidx.push_back(robot_->get_q_dot_idx(rfoot_jnames[i]));
+  }
+
+  sp_->b_rf_contact = true;
+  sp_->b_lf_contact = true;
+
   count_ = 0;
   waiting_count_ = 10;
 

@@ -31,6 +31,8 @@ DracoStateProvider::DracoStateProvider() {
   imu_ang_vel_est.setZero();
 
   // 0: no contact, 1: contact
-  b_rf_contact = 0;
-  b_lf_contact = 0;
+  b_rf_contact = true;
+  b_lf_contact = true;
+
+  floating_jidx = {0, 1, 2, 3, 4, 5};
 }

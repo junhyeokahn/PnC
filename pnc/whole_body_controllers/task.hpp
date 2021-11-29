@@ -112,6 +112,14 @@ public:
   /// Update task jacobian.
   virtual void update_jacobian() = 0;
 
+  void ignore_jacobian(std::vector<int> idx) {
+    for (int col_id = 0; col_id < idx.size(); ++col_id) {
+      for (int row_id = 0; row_id < jacobian.rows(); ++row_id) {
+        jacobian(row_id, col_id) = 0.;
+      }
+    }
+  }
+
   /// Print outs for debugging purpose.
   void Debug() {
     std::cout << "pos des" << std::endl;
