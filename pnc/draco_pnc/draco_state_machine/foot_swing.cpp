@@ -10,6 +10,7 @@ FootSwing::FootSwing(const StateIdentifier _state_identifier,
   ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
+  des_foot_iso_.setIdentity();
 
   b_static_walking_trigger = false;
 }
@@ -42,6 +43,8 @@ void FootSwing::firstVisit() {
         robot_->get_link_iso("r_foot_contact").linear() * local_des_foot_ori);
 
     Footstep landing_foot(des_foot_pos, des_foot_ori, EndEffector::RFoot);
+    des_foot_iso_.translation() = des_foot_pos;
+    des_foot_iso_.linear() = des_foot_ori.toRotationMatrix();
 
     ctrl_arch_->rfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, swing_duration_, landing_foot);
@@ -62,6 +65,8 @@ void FootSwing::firstVisit() {
         robot_->get_link_iso("l_foot_contact").linear() * local_des_foot_ori);
 
     Footstep landing_foot(des_foot_pos, des_foot_ori, EndEffector::RFoot);
+    des_foot_iso_.translation() = des_foot_pos;
+    des_foot_iso_.linear() = des_foot_ori.toRotationMatrix();
 
     ctrl_arch_->lfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, swing_duration_, landing_foot);
@@ -69,13 +74,6 @@ void FootSwing::firstVisit() {
   } else {
     assert(false);
   }
-
-  if (leg_side_ == EndEffector::LFoot) {
-    ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  } else {
-    ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
-  }
-
 }
 
 void FootSwing::oneStep() {
@@ -84,21 +82,16 @@ void FootSwing::oneStep() {
   // Update Foot Task
   if (leg_side_ == EndEffector::LFoot) {
     ctrl_arch_->lfoot_tm->UpdateDesired(sp_->curr_time);
-    //ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
   } else {
     ctrl_arch_->rfoot_tm->UpdateDesired(sp_->curr_time);
-    //ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   }
 
   // Update floating base task
 }
 
-void FootSwing::lastVisit() {
-  Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
-  Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
-  sp_->nominal_lfoot_iso = lfoot_iso;
-  sp_->nominal_rfoot_iso = rfoot_iso;
-}
+void FootSwing::lastVisit() {}
 
 bool FootSwing::endOfState() {
   if (state_machine_time_ >= swing_duration_) {

@@ -18,10 +18,6 @@ DracoStateProvider::DracoStateProvider() {
 
   nominal_base_quat = Eigen::Quaternion<double>::Identity();
 
-  nominal_lfoot_iso = Eigen::Isometry3d::Identity();
-  nominal_rfoot_iso = Eigen::Isometry3d::Identity();
-
-
   save_freq = 50;
   count = 0;
   curr_time = 0.;

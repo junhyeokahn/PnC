@@ -29,21 +29,14 @@ void DoubleSupportBalance::firstVisit() {
 
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
   Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
-
-  // Save nominal foot_iso
-  sp_->nominal_lfoot_iso = lfoot_iso;
-  sp_->nominal_rfoot_iso = rfoot_iso;
-
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 }
 
 void DoubleSupportBalance::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  //ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  //ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 }
 
 void DoubleSupportBalance::lastVisit() {}

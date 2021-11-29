@@ -46,8 +46,6 @@ void FootLifting::firstVisit() {
     ctrl_arch_->lfoot_pos_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
     ctrl_arch_->lfoot_ori_hm->InitializeRampToMin(sp_->curr_time, ramp_time_);
   }
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 }
 
 void FootLifting::oneStep() {
@@ -79,8 +77,8 @@ void FootLifting::oneStep() {
   }
 
   // Update Foot Task
-  //ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  //ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update floating base traj
 }

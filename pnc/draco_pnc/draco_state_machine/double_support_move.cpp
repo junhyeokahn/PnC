@@ -45,12 +45,6 @@ void DoubleSupportMove::firstVisit() {
         0.5 * (robot_->get_link_iso("l_foot_contact").translation() +
                robot_->get_link_iso("r_foot_contact").translation());
     target_com_pos[2] = des_com_height_;
-    // Eigen::Quaternion<double> left_foot_ori(
-    // robot_->get_link_iso("l_foot_contact").linear());
-    // Eigen::Quaternion<double> right_foot_ori(
-    // robot_->get_link_iso("r_foot_contact").linear());
-    // Eigen::Quaternion<double> target_base_quat =
-    // left_foot_ori.slerp(0.5, right_foot_ori);
     Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
@@ -60,17 +54,14 @@ void DoubleSupportMove::firstVisit() {
   }
 
   ctrl_start_time_ = sp_->curr_time;
-
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 }
 
 void DoubleSupportMove::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  //ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  //ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
 
   // Update Floating Base
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
