@@ -351,6 +351,15 @@ void IHWBC::solve(
   qddot_cmd = sa_ * qddot_result_;
   rf_cmd = fr_result_;
 
+  // TEST
+  // for (int i = 4; i < 8; ++i) {
+  // Eigen::MatrixXd j = task_list[i]->jacobian;
+  // Eigen::MatrixXd jdot_qdot = task_list[i]->jacobian_dot_q_dot;
+  // Eigen::VectorXd xddot_res = j * qddot_result_ + jdot_qdot;
+  // util::SaveVector(xddot_res, std::to_string(i) + "_xddot_res");
+  //}
+  // TEST END
+
   // util::PrettyPrint(tau_cmd, std::cout, "tau_cmd");
   // util::PrettyPrint(rf_cmd, std::cout, "rf_cmd");
   // std::cout << qddot_result_.transpose() << std::endl;

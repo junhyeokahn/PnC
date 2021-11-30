@@ -197,7 +197,7 @@ walking:
 
     t_additional_ini_trans: 0.
     t_contact_trans: 0.45
-    t_swing: 0.55
+    t_swing: 0.5
     percentage_settle: 0.9
     alpha_ds: 0.5
 
@@ -211,7 +211,7 @@ static_walking:
     moving_duration: 5.
     #com_height: 0.68
     com_height: 0.92
-    com_offset: [0., 0.10]
+    com_offset: [0., 0.04]
 
     swing_duration: 5.
     des_foot_x_inc_local: 0.
