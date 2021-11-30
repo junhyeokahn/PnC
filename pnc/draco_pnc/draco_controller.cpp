@@ -123,26 +123,27 @@ void DracoController::getCommand(void *cmd) {
     wbc_->w_hierarchy = Eigen::VectorXd::Zero(tci_container_->task_list.size());
     for (int i = 0; i < tci_container_->task_list.size(); ++i) {
       tci_container_->task_list[i]->update_jacobian();
-      tci_container_->task_list[i]->update_cmd();
+      tci_container_->task_list[i]->update_cmd(
+          sp_->nominal_stance_foot_iso.linear());
       wbc_->w_hierarchy[i] = tci_container_->task_list[i]->w_hierarchy;
     }
 
     // ignore jacobian cols depending on the state
     if (!sp_->b_rf_contact) {
       // ignore right foot joints for com task
-      // tci_container_->task_list[0]->ignore_jacobian(sp_->rfoot_jidx);
-      // tci_container_->task_list[2]->ignore_jacobian(sp_->rfoot_jidx);
+      // tci_container_->task_list[0]->ignore_jacobian_row(sp_->rfoot_jidx);
+      // tci_container_->task_list[2]->ignore_jacobian_row(sp_->rfoot_jidx);
       // ignore floating joints for swing foot task
-      tci_container_->task_list[4]->ignore_jacobian(sp_->floating_jidx);
-      tci_container_->task_list[5]->ignore_jacobian(sp_->floating_jidx);
+      tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
+      tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
     }
     if (!sp_->b_lf_contact) {
       // ignore left foot joints for com task
-      // tci_container_->task_list[0]->ignore_jacobian(sp_->lfoot_jidx);
-      // tci_container_->task_list[2]->ignore_jacobian(sp_->lfoot_jidx);
+      // tci_container_->task_list[0]->ignore_jacobian_row(sp_->lfoot_jidx);
+      // tci_container_->task_list[2]->ignore_jacobian_row(sp_->lfoot_jidx);
       // ignore floating joints for swing foot task
-      tci_container_->task_list[6]->ignore_jacobian(sp_->floating_jidx);
-      tci_container_->task_list[7]->ignore_jacobian(sp_->floating_jidx);
+      tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
+      tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
     }
 
     int rf_dim(0);

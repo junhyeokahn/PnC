@@ -42,8 +42,19 @@ void DoubleSupportStand::firstVisit() {
 
   sp_->nominal_base_quat = target_base_ori;
 
+  ori_y << lfoot_iso.linear().col(1);
+  ori_x = ori_y.cross(ori_z);
+  sp_->nominal_stance_foot_iso.linear().col(0) = ori_x;
+  sp_->nominal_stance_foot_iso.linear().col(1) = ori_y;
+  sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
+
   ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
+
+  std::cout << "[Nominal Base SO3]" << std::endl;
+  std::cout << sp_->nominal_base_quat.toRotationMatrix() << std::endl;
+  std::cout << "[Nominal Stance Foot SO3]" << std::endl;
+  std::cout << sp_->nominal_stance_foot_iso.linear() << std::endl;
 
   // Initialize Reaction Force Ramp to Max
   ctrl_arch_->rfoot_fm->InitializeRampToMax(sp_->curr_time, rf_z_max_time);

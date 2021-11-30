@@ -12,7 +12,8 @@ public:
   virtual ~DracoAngularMomentumTask(){};
 
 private:
-  void update_cmd();
+  void
+  update_cmd(Eigen::Matrix3d rot_world_local = Eigen::Matrix3d::Identity());
   void update_jacobian();
 
   DracoStateProvider *sp_;

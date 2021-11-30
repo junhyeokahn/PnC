@@ -35,4 +35,6 @@ DracoStateProvider::DracoStateProvider() {
   b_lf_contact = true;
 
   floating_jidx = {0, 1, 2, 3, 4, 5};
+
+  nominal_stance_foot_iso.setIdentity();
 }

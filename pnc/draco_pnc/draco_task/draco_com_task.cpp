@@ -24,29 +24,38 @@ DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot,
       icp_err_lim);
 }
 
-void DracoCenterOfMassTask::update_cmd() {
+void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
 
   if (feedback_source_ == feedback_source::kCom) {
+    local_pos_des = rot_world_local.transpose() * pos_des;
+    local_vel_des = rot_world_local.transpose() * vel_des;
+
     pos = robot_->get_com_pos();
     if (feedback_height_target_ == feedback_height_target::kBaseHeight) {
       pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
     }
+    local_pos = rot_world_local.transpose() * pos;
+
     pos_err = pos_des - pos;
+    vel_err = vel_des - vel;
+    local_pos_err = rot_world_local.transpose() * pos_err;
+
     vel = sp_->com_vel_est;
     if (feedback_height_target_ == feedback_height_target::kBaseHeight) {
       vel[2] = robot_->get_link_vel("torso_com_link")[5];
     }
+    local_vel = rot_world_local.transpose() * vel;
 
-    rot_world_local_ =
-        robot_->get_link_iso(robot_->get_base_link_name()).linear();
+    local_pos_err = local_pos_des - local_pos;
+    local_vel_err = local_vel_des - local_vel;
 
-    local_pos_err = rot_world_local_.transpose() * pos_err;
-    local_pos_err[2] = pos_des[2] - pos[2]; // assume z axis is upright
-    local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
-
-    op_cmd = acc_des + rot_world_local_ * (kp.cwiseProduct(local_pos_err) +
-                                           kd.cwiseProduct(local_vel_err));
+    op_cmd = acc_des + rot_world_local * (kp.cwiseProduct(local_pos_err) +
+                                          kd.cwiseProduct(local_vel_err));
   } else if (feedback_source_ == feedback_source::kIcp) {
+
+    local_pos_des = rot_world_local.transpose() * pos_des;
+    local_vel_des = rot_world_local.transpose() * vel_des;
+    local_acc_des = rot_world_local.transpose() * acc_des;
 
     Eigen::Vector3d com_pos = robot_->get_com_pos();
     Eigen::Vector3d com_vel = sp_->com_vel_est;
@@ -66,18 +75,19 @@ void DracoCenterOfMassTask::update_cmd() {
     if (feedback_height_target_ == feedback_height_target::kBaseHeight) {
       pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
     }
+    local_pos = rot_world_local.transpose() * pos;
+
     vel = com_vel;
     if (feedback_height_target_ == feedback_height_target::kBaseHeight) {
       vel[2] = robot_->get_link_vel("torso_com_link")[5];
     }
+    local_vel = rot_world_local.transpose() * vel;
+
     pos_err = pos_des - pos;
+    vel_err = vel_des - vel;
 
-    rot_world_local_ =
-        robot_->get_link_iso(robot_->get_base_link_name()).linear();
-
-    local_pos_err = rot_world_local_.transpose() * pos_err;
-    local_pos_err[2] = pos_des[2] - pos[2]; // assume z axis is upright
-    local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
+    local_pos_err = rot_world_local.transpose() * pos_err;
+    local_vel_err = rot_world_local.transpose() * vel_err;
 
     Eigen::Vector2d cmp_des =
         icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -

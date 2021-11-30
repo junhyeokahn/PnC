@@ -12,93 +12,118 @@ message pnc_msg {
   repeated float task_com_pos_des = 5;
   repeated float task_com_vel_des = 6;
   repeated float task_com_acc_des = 7;
-  repeated float task_com_local_pos_err = 8;
-  repeated float task_com_local_vel_err = 9;
+
+  repeated float task_com_pos_local = 8;
+  repeated float task_com_vel_local = 9;
+  repeated float task_com_pos_des_local = 10;
+  repeated float task_com_vel_des_local = 11;
+  repeated float task_com_acc_des_local = 12;
 
   // base ori
-  repeated float task_torso_ori_pos_des = 10;
-  repeated float task_torso_ori_vel_des = 11;
-  repeated float task_torso_ori_acc_des = 12;
-  repeated float task_torso_ori_pos = 13;
-  repeated float task_torso_ori_vel = 14;
-  repeated float task_torso_ori_local_pos_err = 15;
-  repeated float task_torso_ori_local_vel_err = 16;
+
+  repeated float task_torso_ori_pos_des = 13;
+  repeated float task_torso_ori_vel_des = 14;
+  repeated float task_torso_ori_acc_des = 15;
+  repeated float task_torso_ori_pos = 16;
+  repeated float task_torso_ori_vel = 17;
+
+  repeated float task_torso_ori_pos_des_local = 18;
+  repeated float task_torso_ori_vel_des_local = 19;
+  repeated float task_torso_ori_acc_des_local = 20;
+  repeated float task_torso_ori_pos_local = 21;
+  repeated float task_torso_ori_vel_local = 22;
 
   // rfoot pos
-  repeated float task_rfoot_lin_pos = 17;
-  repeated float task_rfoot_lin_vel = 18;
-  repeated float task_rfoot_lin_pos_des = 19;
-  repeated float task_rfoot_lin_vel_des = 20;
-  repeated float task_rfoot_lin_acc_des = 21;
-  repeated float task_rfoot_lin_local_pos_err = 22;
-  repeated float task_rfoot_lin_local_vel_err = 23;
+  repeated float task_rfoot_lin_pos = 23;
+  repeated float task_rfoot_lin_vel = 24;
+  repeated float task_rfoot_lin_pos_des = 25;
+  repeated float task_rfoot_lin_vel_des = 26;
+  repeated float task_rfoot_lin_acc_des = 27;
+
+  repeated float task_rfoot_lin_pos_local = 28;
+  repeated float task_rfoot_lin_vel_local = 29;
+  repeated float task_rfoot_lin_pos_des_local = 30;
+  repeated float task_rfoot_lin_vel_des_local = 31;
+  repeated float task_rfoot_lin_acc_des_local = 32;
 
   // rfoot ori
-  repeated float task_rfoot_ori_pos_des = 24;
-  repeated float task_rfoot_ori_vel_des = 25;
-  repeated float task_rfoot_ori_acc_des = 26;
-  repeated float task_rfoot_ori_pos = 27;
-  repeated float task_rfoot_ori_vel = 28;
-  repeated float task_rfoot_ori_local_pos_err = 29;
-  repeated float task_rfoot_ori_local_vel_err = 30;
+  repeated float task_rfoot_ori_pos_des = 33;
+  repeated float task_rfoot_ori_vel_des = 34;
+  repeated float task_rfoot_ori_acc_des = 35;
+  repeated float task_rfoot_ori_pos = 36;
+  repeated float task_rfoot_ori_vel = 37;
+
+  repeated float task_rfoot_ori_pos_des_local = 38;
+  repeated float task_rfoot_ori_vel_des_local = 39;
+  repeated float task_rfoot_ori_acc_des_local = 40;
+  repeated float task_rfoot_ori_pos_local = 41;
+  repeated float task_rfoot_ori_vel_local = 42;
 
   // lfoot pos
-  repeated float task_lfoot_lin_pos = 31;
-  repeated float task_lfoot_lin_vel = 32;
-  repeated float task_lfoot_lin_pos_des = 33;
-  repeated float task_lfoot_lin_vel_des = 34;
-  repeated float task_lfoot_lin_acc_des = 35;
-  repeated float task_lfoot_lin_local_pos_err = 36;
-  repeated float task_lfoot_lin_local_vel_err = 37;
+  repeated float task_lfoot_lin_pos = 43;
+  repeated float task_lfoot_lin_vel = 44;
+  repeated float task_lfoot_lin_pos_des = 45;
+  repeated float task_lfoot_lin_vel_des = 46;
+  repeated float task_lfoot_lin_acc_des = 47;
+
+  repeated float task_lfoot_lin_pos_local = 48;
+  repeated float task_lfoot_lin_vel_local = 49;
+  repeated float task_lfoot_lin_pos_des_local = 50;
+  repeated float task_lfoot_lin_vel_des_local = 51;
+  repeated float task_lfoot_lin_acc_des_local = 52;
 
   // lfoot ori
-  repeated float task_lfoot_ori_pos_des = 38;
-  repeated float task_lfoot_ori_vel_des = 39;
-  repeated float task_lfoot_ori_acc_des = 40;
-  repeated float task_lfoot_ori_pos = 41;
-  repeated float task_lfoot_ori_vel = 42;
-  repeated float task_lfoot_ori_local_pos_err = 43;
-  repeated float task_lfoot_ori_local_vel_err = 44;
+  repeated float task_lfoot_ori_pos_des = 53;
+  repeated float task_lfoot_ori_vel_des = 54;
+  repeated float task_lfoot_ori_acc_des = 55;
+  repeated float task_lfoot_ori_pos = 56;
+  repeated float task_lfoot_ori_vel = 57;
+
+  repeated float task_lfoot_ori_pos_des_local = 58;
+  repeated float task_lfoot_ori_vel_des_local = 59;
+  repeated float task_lfoot_ori_acc_des_local = 60;
+  repeated float task_lfoot_ori_pos_local = 61;
+  repeated float task_lfoot_ori_vel_local = 62;
 
   // momentum task
-  repeated float task_cam_vel_des = 45;
-  repeated float task_cam_vel = 46;
-  repeated float task_cam_acc_des = 47;
-  repeated float task_cam_local_vel_err = 48;
+  repeated float task_cam_vel_des = 63;
+  repeated float task_cam_vel = 64;
+  repeated float task_cam_acc_des = 65;
+  repeated float task_cam_local_vel_err = 66;
 
   // upper body
-  repeated float task_upper_body_pos_des = 49;
-  repeated float task_upper_body_vel_des = 50;
-  repeated float task_upper_body_acc_des = 51;
-  repeated float task_upper_body_pos = 52;
-  repeated float task_upper_body_vel = 53;
+  repeated float task_upper_body_pos_des = 67;
+  repeated float task_upper_body_vel_des = 68;
+  repeated float task_upper_body_acc_des = 69;
+  repeated float task_upper_body_pos = 70;
+  repeated float task_upper_body_vel = 71;
 
   // rf cmd
-  repeated float cmd_lfoot_rf = 54;
-  repeated float cmd_rfoot_rf = 55;
+  repeated float cmd_lfoot_rf = 72;
+  repeated float cmd_rfoot_rf = 73;
 
   // pos, vel, trq cmd
-  repeated float cmd_joint_positions = 56;
-  repeated float cmd_joint_velocities = 57;
-  repeated float cmd_joint_torques = 58;
-  repeated float joint_velocities = 59;
+  repeated float cmd_joint_positions = 74;
+  repeated float cmd_joint_velocities = 75;
+  repeated float cmd_joint_torques = 76;
+  repeated float joint_velocities = 77;
 
   // meshcat visualization
-  repeated float joint_positions = 60;
-  repeated float base_joint_pos = 61;
-  repeated float base_joint_quat = 62;
+  repeated float joint_positions = 78;
+  repeated float base_joint_pos = 79;
+  repeated float base_joint_quat = 80;
 
   // filtered data
-  repeated float com_vel_est = 63;
-  repeated float com_vel_raw = 64;
-  repeated float imu_ang_vel_est = 65;
-  repeated float imu_ang_vel_raw = 66;
-  repeated float cam_est = 67;
-  repeated float cam_raw = 68;
+  repeated float com_vel_est = 81;
+  repeated float com_vel_raw = 82;
+  repeated float imu_ang_vel_est = 83;
+  repeated float imu_ang_vel_raw = 84;
+  repeated float cam_est = 85;
+  repeated float cam_raw = 86;
 
   // icp
-  repeated float icp = 69;
-  repeated float icp_des = 70;
-  repeated float icp_dot = 71;
-  repeated float icp_dot_des = 72;
+  repeated float icp = 87;
+  repeated float icp_des = 88;
+  repeated float icp_dot = 89;
+  repeated float icp_dot_des = 90;
 }

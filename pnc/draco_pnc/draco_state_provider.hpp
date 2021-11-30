@@ -49,6 +49,8 @@ public:
   std::vector<int> rfoot_jidx;
   std::vector<int> floating_jidx;
 
+  Eigen::Isometry3d nominal_stance_foot_iso;
+
 private:
   DracoStateProvider();
 };

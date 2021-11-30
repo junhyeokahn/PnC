@@ -315,8 +315,10 @@ void DracoControlArchitecture::SaveData() {
   tci_container->com_task->CopyData(
       dm->data->task_com_pos_des, dm->data->task_com_vel_des,
       dm->data->task_com_acc_des, dm->data->task_com_pos,
-      dm->data->task_com_vel, dm->data->task_com_local_pos_err,
-      dm->data->task_com_local_vel_err);
+      dm->data->task_com_vel, dm->data->task_com_pos_des_local,
+      dm->data->task_com_vel_des_local, dm->data->task_com_acc_des_local,
+      dm->data->task_com_pos_local, dm->data->task_com_vel_local);
+
   dm->data->icp_des =
       dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)->icp_des;
   dm->data->icp_dot_des =
@@ -326,37 +328,48 @@ void DracoControlArchitecture::SaveData() {
   Eigen::VectorXd dummy = Eigen::VectorXd::Zero(3);
   tci_container->cam_task->CopyData(
       dummy, dm->data->task_cam_vel_des, dm->data->task_cam_acc_des, dummy,
-      dm->data->task_cam_vel, dummy, dm->data->task_cam_local_vel_err);
+      dm->data->task_cam_vel, dummy, dm->data->task_cam_vel_des_local,
+      dm->data->task_cam_acc_des_local, dummy, dm->data->task_cam_vel_local);
 
   tci_container->torso_ori_task->CopyData(
       dm->data->task_torso_ori_pos_des, dm->data->task_torso_ori_vel_des,
       dm->data->task_torso_ori_acc_des, dm->data->task_torso_ori_pos,
-      dm->data->task_torso_ori_vel, dm->data->task_torso_ori_local_pos_err,
-      dm->data->task_torso_ori_local_vel_err);
+      dm->data->task_torso_ori_vel, dm->data->task_torso_ori_pos_des_local,
+      dm->data->task_torso_ori_vel_des_local,
+      dm->data->task_torso_ori_acc_des_local,
+      dm->data->task_torso_ori_pos_local, dm->data->task_torso_ori_vel_local);
 
   tci_container->rfoot_pos_task->CopyData(
       dm->data->task_rfoot_lin_pos_des, dm->data->task_rfoot_lin_vel_des,
       dm->data->task_rfoot_lin_acc_des, dm->data->task_rfoot_lin_pos,
-      dm->data->task_rfoot_lin_vel, dm->data->task_rfoot_lin_local_pos_err,
-      dm->data->task_rfoot_lin_local_vel_err);
+      dm->data->task_rfoot_lin_vel, dm->data->task_rfoot_lin_pos_des_local,
+      dm->data->task_rfoot_lin_vel_des_local,
+      dm->data->task_rfoot_lin_acc_des_local,
+      dm->data->task_rfoot_lin_pos_local, dm->data->task_rfoot_lin_vel_local);
 
   tci_container->rfoot_ori_task->CopyData(
       dm->data->task_rfoot_ori_pos_des, dm->data->task_rfoot_ori_vel_des,
       dm->data->task_rfoot_ori_acc_des, dm->data->task_rfoot_ori_pos,
-      dm->data->task_rfoot_ori_vel, dm->data->task_rfoot_ori_local_pos_err,
-      dm->data->task_rfoot_ori_local_vel_err);
+      dm->data->task_rfoot_ori_vel, dm->data->task_rfoot_ori_pos_des_local,
+      dm->data->task_rfoot_ori_vel_des_local,
+      dm->data->task_rfoot_ori_acc_des_local,
+      dm->data->task_rfoot_ori_pos_local, dm->data->task_rfoot_ori_vel_local);
 
   tci_container->lfoot_pos_task->CopyData(
       dm->data->task_lfoot_lin_pos_des, dm->data->task_lfoot_lin_vel_des,
       dm->data->task_lfoot_lin_acc_des, dm->data->task_lfoot_lin_pos,
-      dm->data->task_lfoot_lin_vel, dm->data->task_lfoot_lin_local_pos_err,
-      dm->data->task_lfoot_lin_local_vel_err);
+      dm->data->task_lfoot_lin_vel, dm->data->task_lfoot_lin_pos_des_local,
+      dm->data->task_lfoot_lin_vel_des_local,
+      dm->data->task_lfoot_lin_acc_des_local,
+      dm->data->task_lfoot_lin_pos_local, dm->data->task_lfoot_lin_vel_local);
 
   tci_container->lfoot_ori_task->CopyData(
       dm->data->task_lfoot_ori_pos_des, dm->data->task_lfoot_ori_vel_des,
       dm->data->task_lfoot_ori_acc_des, dm->data->task_lfoot_ori_pos,
-      dm->data->task_lfoot_ori_vel, dm->data->task_lfoot_ori_local_pos_err,
-      dm->data->task_lfoot_ori_local_vel_err);
+      dm->data->task_lfoot_ori_vel, dm->data->task_lfoot_ori_pos_des_local,
+      dm->data->task_lfoot_ori_vel_des_local,
+      dm->data->task_lfoot_ori_acc_des_local,
+      dm->data->task_lfoot_ori_pos_local, dm->data->task_lfoot_ori_vel_local);
 
   tci_container->upper_body_task->CopyData(
       dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,

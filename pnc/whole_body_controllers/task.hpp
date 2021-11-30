@@ -27,16 +27,27 @@ public:
     jacobian_dot_q_dot = Eigen::VectorXd::Zero(dim);
 
     op_cmd = Eigen::VectorXd::Zero(dim);
+
     pos_err = Eigen::VectorXd::Zero(dim);
     local_pos_err = Eigen::VectorXd::Zero(dim);
+
+    vel_err = Eigen::VectorXd::Zero(dim);
     local_vel_err = Eigen::VectorXd::Zero(dim);
 
     pos_des = Eigen::VectorXd::Zero(dim);
+    local_pos_des = Eigen::VectorXd::Zero(dim);
+
     pos = Eigen::VectorXd::Zero(dim);
+    local_pos = Eigen::VectorXd::Zero(dim);
+
     vel_des = Eigen::VectorXd::Zero(dim);
+    local_vel_des = Eigen::VectorXd::Zero(dim);
+
     vel = Eigen::VectorXd::Zero(dim);
+    local_vel = Eigen::VectorXd::Zero(dim);
+
     acc_des = Eigen::VectorXd::Zero(dim);
-    rot_world_local_ = Eigen::MatrixXd::Identity(dim, dim);
+    local_acc_des = Eigen::VectorXd::Zero(dim);
   };
 
   virtual ~Task(){};
@@ -72,6 +83,9 @@ public:
   /// Local frame position error.
   Eigen::VectorXd local_pos_err;
 
+  /// Position error.
+  Eigen::VectorXd vel_err;
+
   /// Local frame velocity error.
   Eigen::VectorXd local_vel_err;
 
@@ -90,6 +104,21 @@ public:
   /// Desired acceleration.
   Eigen::VectorXd acc_des;
 
+  /// Desired Position.
+  Eigen::VectorXd local_pos_des;
+
+  /// Measured position.
+  Eigen::VectorXd local_pos;
+
+  /// Desired velocity.
+  Eigen::VectorXd local_vel_des;
+
+  /// Measured velocity.
+  Eigen::VectorXd local_vel;
+
+  /// Desired acceleration.
+  Eigen::VectorXd local_acc_des;
+
   /// Task target ids.
   std::vector<std::string> target_ids;
 
@@ -107,12 +136,13 @@ public:
   }
 
   /// Update task command.
-  virtual void update_cmd() = 0;
+  virtual void
+  update_cmd(Eigen::Matrix3d rot_world_local = Eigen::Matrix3d::Identity()) = 0;
 
   /// Update task jacobian.
   virtual void update_jacobian() = 0;
 
-  void ignore_jacobian(std::vector<int> idx) {
+  void ignore_jacobian_row(std::vector<int> idx) {
     for (int col_id = 0; col_id < idx.size(); ++col_id) {
       for (int row_id = 0; row_id < jacobian.rows(); ++row_id) {
         jacobian(row_id, col_id) = 0.;
@@ -150,18 +180,23 @@ public:
   /// Copies task commands.
   void CopyData(Eigen::VectorXd &_pos_des, Eigen::VectorXd &_vel_des,
                 Eigen::VectorXd &_acc_des, Eigen::VectorXd &_pos,
-                Eigen::VectorXd &_vel, Eigen::VectorXd &_local_pos_error,
-                Eigen::VectorXd &_local_vel_error) {
+                Eigen::VectorXd &_vel, Eigen::VectorXd &_local_pos_des,
+                Eigen::VectorXd &_local_vel_des,
+                Eigen::VectorXd &_local_acc_des, Eigen::VectorXd &_local_pos,
+                Eigen::VectorXd &_local_vel) {
     _pos_des = pos_des;
     _vel_des = vel_des;
     _acc_des = acc_des;
     _pos = pos;
     _vel = vel;
-    _local_pos_error = local_pos_err;
-    _local_vel_error = local_vel_err;
+
+    _local_pos_des = local_pos_des;
+    _local_vel_des = local_vel_des;
+    _local_acc_des = local_acc_des;
+    _local_pos = local_pos;
+    _local_vel = local_vel;
   }
 
 protected:
   RobotSystem *robot_;
-  Eigen::MatrixXd rot_world_local_;
 };

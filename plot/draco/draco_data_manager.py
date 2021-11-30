@@ -89,58 +89,97 @@ while True:
     data_saver.add('task_com_acc_des', list(msg.task_com_acc_des))
     data_saver.add('task_com_pos', list(msg.task_com_pos))
     data_saver.add('task_com_vel', list(msg.task_com_vel))
-    data_saver.add('task_com_local_pos_err', list(msg.task_com_local_pos_err))
-    data_saver.add('task_com_local_vel_err', list(msg.task_com_local_vel_err))
+
+    data_saver.add('task_com_pos_des_local', list(msg.task_com_pos_des_local))
+    data_saver.add('task_com_vel_des_local', list(msg.task_com_vel_des_local))
+    data_saver.add('task_com_acc_des_local', list(msg.task_com_acc_des_local))
+    data_saver.add('task_com_pos_local', list(msg.task_com_pos_local))
+    data_saver.add('task_com_vel_local', list(msg.task_com_vel_local))
 
     data_saver.add('task_torso_ori_pos_des', list(msg.task_torso_ori_pos_des))
     data_saver.add('task_torso_ori_vel_des', list(msg.task_torso_ori_vel_des))
     data_saver.add('task_torso_ori_acc_des', list(msg.task_torso_ori_acc_des))
     data_saver.add('task_torso_ori_pos', list(msg.task_torso_ori_pos))
     data_saver.add('task_torso_ori_vel', list(msg.task_torso_ori_vel))
-    data_saver.add('task_torso_ori_local_pos_err',
-                   list(msg.task_torso_ori_local_pos_err))
-    data_saver.add('task_torso_ori_local_vel_err',
-                   list(msg.task_torso_ori_local_vel_err))
+
+    data_saver.add('task_torso_ori_pos_des_local',
+                   list(msg.task_torso_ori_pos_des_local))
+    data_saver.add('task_torso_ori_vel_des_local',
+                   list(msg.task_torso_ori_vel_des_local))
+    data_saver.add('task_torso_ori_acc_des_local',
+                   list(msg.task_torso_ori_acc_des_local))
+    data_saver.add('task_torso_ori_pos_local',
+                   list(msg.task_torso_ori_pos_local))
+    data_saver.add('task_torso_ori_vel_local',
+                   list(msg.task_torso_ori_vel_local))
 
     data_saver.add('task_rfoot_lin_pos_des', list(msg.task_rfoot_lin_pos_des))
     data_saver.add('task_rfoot_lin_vel_des', list(msg.task_rfoot_lin_vel_des))
     data_saver.add('task_rfoot_lin_acc_des', list(msg.task_rfoot_lin_acc_des))
     data_saver.add('task_rfoot_lin_pos', list(msg.task_rfoot_lin_pos))
     data_saver.add('task_rfoot_lin_vel', list(msg.task_rfoot_lin_vel))
-    data_saver.add('task_rfoot_lin_local_pos_err',
-                   list(msg.task_rfoot_lin_local_pos_err))
-    data_saver.add('task_rfoot_lin_local_vel_err',
-                   list(msg.task_rfoot_lin_local_vel_err))
+
+    data_saver.add('task_rfoot_lin_pos_des_local',
+                   list(msg.task_rfoot_lin_pos_des_local))
+    data_saver.add('task_rfoot_lin_vel_des_local',
+                   list(msg.task_rfoot_lin_vel_des_local))
+    data_saver.add('task_rfoot_lin_acc_des_local',
+                   list(msg.task_rfoot_lin_acc_des_local))
+    data_saver.add('task_rfoot_lin_pos_local',
+                   list(msg.task_rfoot_lin_pos_local))
+    data_saver.add('task_rfoot_lin_vel_local',
+                   list(msg.task_rfoot_lin_vel_local))
 
     data_saver.add('task_rfoot_ori_pos_des', list(msg.task_rfoot_ori_pos_des))
     data_saver.add('task_rfoot_ori_vel_des', list(msg.task_rfoot_ori_vel_des))
     data_saver.add('task_rfoot_ori_acc_des', list(msg.task_rfoot_ori_acc_des))
     data_saver.add('task_rfoot_ori_pos', list(msg.task_rfoot_ori_pos))
     data_saver.add('task_rfoot_ori_vel', list(msg.task_rfoot_ori_vel))
-    data_saver.add('task_rfoot_ori_local_pos_err',
-                   list(msg.task_rfoot_ori_local_pos_err))
-    data_saver.add('task_rfoot_ori_local_vel_err',
-                   list(msg.task_rfoot_ori_local_vel_err))
+
+    data_saver.add('task_rfoot_ori_pos_des_local',
+                   list(msg.task_rfoot_ori_pos_des_local))
+    data_saver.add('task_rfoot_ori_vel_des_local',
+                   list(msg.task_rfoot_ori_vel_des_local))
+    data_saver.add('task_rfoot_ori_acc_des_local',
+                   list(msg.task_rfoot_ori_acc_des_local))
+    data_saver.add('task_rfoot_ori_pos_local',
+                   list(msg.task_rfoot_ori_pos_local))
+    data_saver.add('task_rfoot_ori_vel_local',
+                   list(msg.task_rfoot_ori_vel_local))
 
     data_saver.add('task_lfoot_lin_pos_des', list(msg.task_lfoot_lin_pos_des))
     data_saver.add('task_lfoot_lin_vel_des', list(msg.task_lfoot_lin_vel_des))
     data_saver.add('task_lfoot_lin_acc_des', list(msg.task_lfoot_lin_acc_des))
     data_saver.add('task_lfoot_lin_pos', list(msg.task_lfoot_lin_pos))
     data_saver.add('task_lfoot_lin_vel', list(msg.task_lfoot_lin_vel))
-    data_saver.add('task_lfoot_lin_local_pos_err',
-                   list(msg.task_lfoot_lin_local_pos_err))
-    data_saver.add('task_lfoot_lin_local_vel_err',
-                   list(msg.task_lfoot_lin_local_vel_err))
+
+    data_saver.add('task_lfoot_lin_pos_des_local',
+                   list(msg.task_lfoot_lin_pos_des_local))
+    data_saver.add('task_lfoot_lin_vel_des_local',
+                   list(msg.task_lfoot_lin_vel_des_local))
+    data_saver.add('task_lfoot_lin_acc_des_local',
+                   list(msg.task_lfoot_lin_acc_des_local))
+    data_saver.add('task_lfoot_lin_pos_local',
+                   list(msg.task_lfoot_lin_pos_local))
+    data_saver.add('task_lfoot_lin_vel_local',
+                   list(msg.task_lfoot_lin_vel_local))
 
     data_saver.add('task_lfoot_ori_pos_des', list(msg.task_lfoot_ori_pos_des))
     data_saver.add('task_lfoot_ori_vel_des', list(msg.task_lfoot_ori_vel_des))
     data_saver.add('task_lfoot_ori_acc_des', list(msg.task_lfoot_ori_acc_des))
     data_saver.add('task_lfoot_ori_pos', list(msg.task_lfoot_ori_pos))
     data_saver.add('task_lfoot_ori_vel', list(msg.task_lfoot_ori_vel))
-    data_saver.add('task_lfoot_ori_local_pos_err',
-                   list(msg.task_lfoot_ori_local_pos_err))
-    data_saver.add('task_lfoot_ori_local_vel_err',
-                   list(msg.task_lfoot_ori_local_vel_err))
+
+    data_saver.add('task_lfoot_ori_pos_des_local',
+                   list(msg.task_lfoot_ori_pos_des_local))
+    data_saver.add('task_lfoot_ori_vel_des_local',
+                   list(msg.task_lfoot_ori_vel_des_local))
+    data_saver.add('task_lfoot_ori_acc_des_local',
+                   list(msg.task_lfoot_ori_acc_des_local))
+    data_saver.add('task_lfoot_ori_pos_local',
+                   list(msg.task_lfoot_ori_pos_local))
+    data_saver.add('task_lfoot_ori_vel_local',
+                   list(msg.task_lfoot_ori_vel_local))
 
     data_saver.add('task_upper_body_pos_des',
                    list(msg.task_upper_body_pos_des))
@@ -154,7 +193,6 @@ while True:
     data_saver.add('task_cam_vel_des', list(msg.task_cam_vel_des))
     data_saver.add('task_cam_vel', list(msg.task_cam_vel))
     data_saver.add('task_cam_acc_des', list(msg.task_cam_vel_des))
-    data_saver.add('task_cam_local_vel_err', list(msg.task_cam_local_vel_err))
 
     data_saver.add('cmd_lfoot_rf', list(msg.cmd_lfoot_rf))
     data_saver.add('cmd_rfoot_rf', list(msg.cmd_rfoot_rf))

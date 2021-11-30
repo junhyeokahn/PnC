@@ -7,15 +7,13 @@ DracoAngularMomentumTask::DracoAngularMomentumTask(RobotSystem *_robot)
   sp_ = DracoStateProvider::getStateProvider();
 }
 
-void DracoAngularMomentumTask::update_cmd() {
+void DracoAngularMomentumTask::update_cmd(Eigen::Matrix3d rot_world_local) {
 
   vel = sp_->cam_est;
-  rot_world_local_ =
-      robot_->get_link_iso(robot_->get_base_link_name()).linear();
 
-  local_vel_err = rot_world_local_.transpose() * (vel_des - vel);
+  local_vel_err = rot_world_local.transpose() * (vel_des - vel);
 
-  op_cmd = acc_des + rot_world_local_ * kd.cwiseProduct(local_vel_err);
+  op_cmd = acc_des + rot_world_local * kd.cwiseProduct(local_vel_err);
 }
 
 void DracoAngularMomentumTask::update_jacobian() {

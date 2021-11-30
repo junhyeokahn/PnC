@@ -27,6 +27,7 @@ DracoInterface::DracoInterface() : Interface() {
   sp_ = DracoStateProvider::getStateProvider();
   sp_->stance_foot = "l_foot_contact";
   sp_->prev_stance_foot = "l_foot_contact";
+  sp_->nominal_stance_foot_iso.setIdentity();
   sp_->servo_dt = util::ReadParameter<double>(cfg, "servo_dt");
   sp_->save_freq = util::ReadParameter<int>(cfg, "save_freq");
 
