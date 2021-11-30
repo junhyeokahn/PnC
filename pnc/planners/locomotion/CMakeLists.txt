@@ -1,1 +1,3 @@
 add_subdirectory(dcm_planner)
+add_subdirectory(centroid_planner)
+add_subdirectory(contact_sequence_generator)
