@@ -10,6 +10,8 @@ ContactTransitionStart::ContactTransitionStart(
   ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
+
+  sp_->planning_id = 0;
 }
 
 ContactTransitionStart::~ContactTransitionStart() {}
@@ -90,7 +92,6 @@ void ContactTransitionStart::oneStep() {
 void ContactTransitionStart::lastVisit() {}
 
 bool ContactTransitionStart::endOfState() {
-
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {

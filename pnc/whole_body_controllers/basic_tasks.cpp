@@ -119,6 +119,9 @@ LinkOriTask::LinkOriTask(RobotSystem *_robot,
   pos_des = Eigen::VectorXd::Zero(4 * _target_ids.size());
   pos = Eigen::VectorXd::Zero(4 * _target_ids.size());
 
+  local_pos_des = Eigen::VectorXd::Zero(4 * _target_ids.size());
+  local_pos = Eigen::VectorXd::Zero(4 * _target_ids.size());
+
   util::PrettyConstructor(3, "LinkOriTask ");
 }
 

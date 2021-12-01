@@ -27,13 +27,19 @@ void SingleSupportSwing::firstVisit() {
   int footstep_idx = ctrl_arch_->dcm_tm->current_footstep_idx;
 
   if (leg_side_ == EndEffector::RFoot) {
+    // rfoot swing
     ctrl_arch_->rfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
+    sp_->b_rf_contact = false;
+    sp_->b_lf_contact = true;
   } else if (leg_side_ == EndEffector::LFoot) {
+    // lfoot swing
     ctrl_arch_->lfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
+    sp_->b_rf_contact = true;
+    sp_->b_lf_contact = false;
   } else {
     assert(false);
   }
@@ -57,9 +63,44 @@ void SingleSupportSwing::oneStep() {
 
 void SingleSupportSwing::lastVisit() {
   ctrl_arch_->dcm_tm->incrementStepIndex();
+
+  sp_->b_rf_contact = true;
+  sp_->b_lf_contact = true;
 }
 
 bool SingleSupportSwing::endOfState() {
+
+  if (b_early_termination) {
+    if (state_machine_time_ >= 0.5 * end_time_) {
+      // use foot position
+      if (leg_side_ == EndEffector::RFoot) {
+        double rfoot_height =
+            robot_->get_link_iso("r_foot_contact").translation()[2];
+        if (rfoot_height <= foot_height_threshold) {
+          std::cout << "[Early Termination]: Rfoot contact happen at "
+                    << state_machine_time_ << " / " << end_time_ << std::endl;
+          return true;
+        }
+      } else if (leg_side_ == EndEffector::LFoot) {
+        double lfoot_height =
+            robot_->get_link_iso("l_foot_contact").translation()[2];
+        if (lfoot_height <= foot_height_threshold) {
+          std::cout << "[Early Termination]: Lfoot contact happen at "
+                    << state_machine_time_ << " / " << end_time_ << std::endl;
+          return true;
+        }
+      } else {
+        assert(false);
+      }
+      // TODO : use force sensor
+    }
+  }
+
+  if (state_machine_time_ >= end_time_) {
+    return true;
+  } else {
+    return false;
+  }
 
   // if (state_machine_time_ >= end_time_) {
   // return true;
@@ -81,12 +122,6 @@ bool SingleSupportSwing::endOfState() {
   //}
   // return false;
   //}
-
-  if (state_machine_time_ >= end_time_) {
-    return true;
-  } else {
-    return false;
-  }
 }
 
 StateIdentifier SingleSupportSwing::getNextState() {

@@ -133,6 +133,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
                                EndEffector::LFoot, robot_);
   state_machines[draco_states::kLFootSwing] = new SingleSupportSwing(
       draco_states::kLFootSwing, this, EndEffector::LFoot, robot_);
+  ((SingleSupportSwing *)state_machines[draco_states::kLFootSwing])
+      ->b_early_termination =
+      util::ReadParameter<bool>(cfg["walking"], "b_early_termination");
+  ((SingleSupportSwing *)state_machines[draco_states::kLFootSwing])
+      ->foot_height_threshold =
+      util::ReadParameter<double>(cfg["walking"], "foot_height_threshold");
 
   state_machines[draco_states::kRFootContactTransitionStart] =
       new ContactTransitionStart(draco_states::kRFootContactTransitionStart,
@@ -142,6 +148,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
                                EndEffector::RFoot, robot_);
   state_machines[draco_states::kRFootSwing] = new SingleSupportSwing(
       draco_states::kRFootSwing, this, EndEffector::RFoot, robot_);
+  ((SingleSupportSwing *)state_machines[draco_states::kRFootSwing])
+      ->b_early_termination =
+      util::ReadParameter<bool>(cfg["walking"], "b_early_termination");
+  ((SingleSupportSwing *)state_machines[draco_states::kRFootSwing])
+      ->foot_height_threshold =
+      util::ReadParameter<double>(cfg["walking"], "foot_height_threshold");
 
   state_machines[draco_states::kSwaying] =
       new DoubleSupportSwaying(draco_states::kSwaying, this, robot_);

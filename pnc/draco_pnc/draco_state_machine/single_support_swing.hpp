@@ -1,9 +1,9 @@
 #pragma once
 
-#include "pnc/state_machine.hpp"
 #include "pnc/draco_pnc/draco_control_architecture.hpp"
 #include "pnc/draco_pnc/draco_controller.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/state_machine.hpp"
 
 class SingleSupportSwing : public StateMachine {
 public:
@@ -17,6 +17,9 @@ public:
   void lastVisit();
   bool endOfState();
   StateIdentifier getNextState();
+
+  bool b_early_termination = false;
+  double foot_height_threshold = 0.01;
 
 protected:
   DracoStateProvider *sp_;

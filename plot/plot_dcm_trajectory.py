@@ -51,14 +51,39 @@ def quat2mat(quat):
     ]])
 
 
+# def plot_foot(ax, pos, ori, color, text):
+# if text:
+# ax.text(pos[0], pos[1] + 0.03, pos[2] + 0.05, text, color=color)
+# rmat = quat2mat(ori)
+# normal = np.array([rmat[0, 2], rmat[1, 2], rmat[2, 2]])
+# d = -pos.dot(normal)
+# xx, yy = np.meshgrid(np.linspace(pos[0] - 0.11, pos[0] + 0.11, 2),
+# np.linspace(pos[1] - 0.04, pos[1] + 0.04, 2))
+# z = (-normal[0] * xx - normal[1] * yy - d) * 1. / normal[2]
+# ax.plot_wireframe(xx, yy, z, color=color, linewidth=1.5)
+# ax.plot_surface(xx, yy, z, edgecolors=color, color=color, alpha=0.5)
+# ax.scatter(xs=pos[0],
+# ys=pos[1],
+# zs=pos[2],
+# zdir='z',
+# s=50,
+# c=color,
+# depthshade=True)
+
+
 def plot_foot(ax, pos, ori, color, text):
+    foot_half_len = 0.11
+    foot_half_wid = 0.04
     if text:
         ax.text(pos[0], pos[1] + 0.03, pos[2] + 0.05, text, color=color)
     rmat = quat2mat(ori)
     normal = np.array([rmat[0, 2], rmat[1, 2], rmat[2, 2]])
     d = -pos.dot(normal)
-    xx, yy = np.meshgrid(np.linspace(pos[0] - 0.06, pos[0] + 0.06, 2),
-                         np.linspace(pos[1] - 0.01, pos[1] + 0.01, 2))
+    xx, yy = np.meshgrid(np.linspace(-foot_half_len, foot_half_len, 2),
+                         np.linspace(-foot_half_wid, foot_half_wid, 2))
+    xx, yy = np.einsum('ji, mni->jmn', rmat[0:2, 0:2], np.dstack([xx, yy]))
+    xx += pos[0]
+    yy += pos[1]
     z = (-normal[0] * xx - normal[1] * yy - d) * 1. / normal[2]
     ax.plot_wireframe(xx, yy, z, color=color, linewidth=1.5)
     ax.plot_surface(xx, yy, z, edgecolors=color, color=color, alpha=0.5)

@@ -241,4 +241,7 @@ void DracoController::SaveData() {
   dm->data->cmd_joint_positions = joint_pos_cmd_;
   dm->data->cmd_joint_velocities = joint_vel_cmd_;
   dm->data->cmd_joint_torques = joint_trq_cmd_;
+
+  dm->data->l_knee_int_frc_cmd = l_knee_int_frc_cmd_;
+  dm->data->r_knee_int_frc_cmd = r_knee_int_frc_cmd_;
 }

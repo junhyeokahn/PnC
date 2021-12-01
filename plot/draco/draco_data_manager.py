@@ -84,6 +84,9 @@ while True:
     data_saver.add('time', msg.time)
     data_saver.add('phase', msg.phase)
 
+    data_saver.add('l_knee_int_frc_cmd', msg.l_knee_int_frc_cmd)
+    data_saver.add('r_knee_int_frc_cmd', msg.r_knee_int_frc_cmd)
+
     data_saver.add('task_com_pos_des', list(msg.task_com_pos_des))
     data_saver.add('task_com_vel_des', list(msg.task_com_vel_des))
     data_saver.add('task_com_acc_des', list(msg.task_com_acc_des))

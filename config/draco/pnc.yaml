@@ -25,23 +25,27 @@ wbc:
         mu: 0.3
 
     task:
-        com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
+        com_control_feedback_source: 0 # 0: com feedback, 1: icp feedback
         com_control_feedback_height_target: 1 # 0: com height, 1: base height
         com:
             weight: 20
             sim_kp: [200, 200, 100]
             sim_kd: [10, 10, 5]
-            exp_kp: [15, 30, 20]
-            exp_kd: [4.0, 3.0, 1.5]
+            ## Good until balancing
+            #exp_kp: [15, 30, 20]
+            #exp_kd: [4.0, 3.0, 1.5]
+            ## Seeking for walking
+            exp_kp: [15, 33, 25]
+            exp_kd: [4.0, 3.3, 1.5]
         icp:
             weight: 20
             sim_kp: [10, 10, 100]
             sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
-            exp_kp: [0.6, 0.6, 20]
+            exp_kp: [1.4, 1.4, 20]
             exp_kd: [0., 0., 1.5]
-            exp_ki: [0.2, 0.2, 0.]
-            time_constant: 4.
+            exp_ki: [0.4, 0.4, 0.]
+            time_constant: 3.
         cam:
             weight: 0.
             sim_kp: [0., 0., 0.] # will be ignored
@@ -190,12 +194,16 @@ walking:
     ini_stand_dur: 1.
     rf_z_max_time: 0.1
 
+
+    b_early_termination: true
+    foot_height_threshold: 0.01
+
     #com_height: 0.68
     com_height: 0.92
 
     swing_height: 0.03
 
-    t_additional_ini_trans: 0.
+    t_additional_ini_trans: 0.6
     t_contact_trans: 0.45
     t_swing: 0.5
     percentage_settle: 0.9

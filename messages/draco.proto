@@ -126,4 +126,7 @@ message pnc_msg {
   repeated float icp_des = 88;
   repeated float icp_dot = 89;
   repeated float icp_dot_des = 90;
+
+  float l_knee_int_frc_cmd = 91;
+  float r_knee_int_frc_cmd = 92;
 }

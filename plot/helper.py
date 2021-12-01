@@ -15,8 +15,8 @@ markers = ['*', '+', 'h', 'x', 'o', 'v', 'd']
 # ]
 
 facecolors = 3 * [
-    'gray', 'brown', 'orange', 'green', 'blue', 'yellow', 'purple', 'crimson',
-    'red'
+    'gray', 'brown', 'cornflowerblue', 'red', 'blue', 'yellow', 'purple',
+    'crimson', 'red'
 ]
 
 

@@ -64,7 +64,6 @@ void ContactTransitionEnd::oneStep() {
 void ContactTransitionEnd::lastVisit() {}
 
 bool ContactTransitionEnd::endOfState() {
-
   if (state_machine_time_ >= end_time_) {
     return true;
   } else {
