@@ -55,9 +55,11 @@ void ContactTransitionStart::firstVisit() {
 
       // TODO : Replanning
       Eigen::Vector3d ini_pos = sp_->dcm;
-      ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
       Eigen::Vector3d ini_vel = sp_->dcm_vel;
-      ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
+      if (b_use_base_height) {
+        ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
+        ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
+      }
       Eigen::Quaternion<double> torso_quat(
           robot_->get_link_iso("torso_link").linear());
       ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type, torso_quat,

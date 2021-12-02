@@ -11,7 +11,9 @@ void DracoAngularMomentumTask::update_cmd(Eigen::Matrix3d rot_world_local) {
 
   vel = sp_->cam_est;
 
-  local_vel_err = rot_world_local.transpose() * (vel_des - vel);
+  local_vel_des = rot_world_local.transpose() * vel_des;
+  local_vel = rot_world_local.transpose() * vel;
+  local_vel_err = local_vel_des - local_vel;
 
   op_cmd = acc_des + rot_world_local * kd.cwiseProduct(local_vel_err);
 }

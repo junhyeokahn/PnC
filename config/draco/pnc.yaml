@@ -8,6 +8,7 @@ b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel
 
 state_estimator:
     n_data_com_vel: [200, 200, 200]
+    #n_data_com_vel: [100, 100, 100]
     #n_data_com_vel: [20, 20, 20]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
@@ -15,17 +16,20 @@ state_estimator:
 wbc:
     regularization:
         lambda_q_ddot: 1e-7
-        lambda_rf: 1e-6
+        #lambda_rf: 1e-6
+        lambda_rf: 1e-8
 
     contact:
         rf_z_max: 1000.0
         w_rf: 0.
         foot_half_width: 0.03 # 8.5 / 2 (cm)
-        foot_half_length: 0.05 # 22 / 2 (cm)
-        mu: 0.3
+        #foot_half_length: 0.05 # 22 / 2 (cm)
+        foot_half_length: 0.08 # 22 / 2 (cm)
+        #mu: 0.3
+        mu: 0.5
 
     task:
-        com_control_feedback_source: 0 # 0: com feedback, 1: icp feedback
+        com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
         com_control_feedback_height_target: 1 # 0: com height, 1: base height
         com:
             weight: 20
@@ -203,9 +207,9 @@ walking:
 
     swing_height: 0.03
 
-    t_additional_ini_trans: 0.6
-    t_contact_trans: 0.45
-    t_swing: 0.5
+    t_additional_ini_trans: 0.5
+    t_contact_trans: 0.3
+    t_swing: 0.4
     percentage_settle: 0.9
     alpha_ds: 0.5
 

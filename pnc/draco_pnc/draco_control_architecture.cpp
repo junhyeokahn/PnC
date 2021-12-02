@@ -128,9 +128,14 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   state_machines[draco_states::kLFootContactTransitionStart] =
       new ContactTransitionStart(draco_states::kLFootContactTransitionStart,
                                  this, EndEffector::LFoot, robot_);
+  ((ContactTransitionStart *)
+       state_machines[draco_states::kLFootContactTransitionStart])
+      ->b_use_base_height = b_use_base_height;
+
   state_machines[draco_states::kLFootContactTransitionEnd] =
       new ContactTransitionEnd(draco_states::kLFootContactTransitionEnd, this,
                                EndEffector::LFoot, robot_);
+
   state_machines[draco_states::kLFootSwing] = new SingleSupportSwing(
       draco_states::kLFootSwing, this, EndEffector::LFoot, robot_);
   ((SingleSupportSwing *)state_machines[draco_states::kLFootSwing])
@@ -143,6 +148,10 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   state_machines[draco_states::kRFootContactTransitionStart] =
       new ContactTransitionStart(draco_states::kRFootContactTransitionStart,
                                  this, EndEffector::RFoot, robot_);
+  ((ContactTransitionStart *)
+       state_machines[draco_states::kRFootContactTransitionStart])
+      ->b_use_base_height = b_use_base_height;
+
   state_machines[draco_states::kRFootContactTransitionEnd] =
       new ContactTransitionEnd(draco_states::kRFootContactTransitionEnd, this,
                                EndEffector::RFoot, robot_);
