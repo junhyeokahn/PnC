@@ -10,7 +10,8 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   com_task = new CenterOfMassTask(robot_);
   com_task->kp = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kp_com");
   com_task->kd = util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_com");
-  com_task->w_hierarchy = util::ReadParameter<double>(cfg["wbc"], "w_com");
+  com_task->w_hierarchy =
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_com");
 
   pelvis_ori_task = new LinkOriTask(robot_, {"pelvis_com"});
   pelvis_ori_task->kp =
@@ -18,7 +19,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   pelvis_ori_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_pelvis_ori");
   pelvis_ori_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_pelvis_ori");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_pelvis_ori");
 
   std::vector<std::string> upper_body_joint = {
       "back_bkx",  "back_bky",  "back_bkz",  "l_arm_elx", "l_arm_ely",
@@ -31,7 +32,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   upper_body_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_upper_body_joint");
   upper_body_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_upper_body_joint");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_upper_body_joint");
 
   rfoot_pos_task = new LinkPosTask(robot_, {"r_sole"});
   rfoot_pos_task->kp =
@@ -39,7 +40,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   rfoot_pos_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
   rfoot_pos_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_contact_foot");
 
   rfoot_ori_task = new LinkOriTask(robot_, {"r_sole"});
   rfoot_ori_task->kp =
@@ -47,7 +48,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   rfoot_ori_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
   rfoot_ori_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_contact_foot");
 
   lfoot_pos_task = new LinkPosTask(robot_, {"l_sole"});
   lfoot_pos_task->kp =
@@ -55,7 +56,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   lfoot_pos_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_pos");
   lfoot_pos_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_contact_foot");
 
   lfoot_ori_task = new LinkOriTask(robot_, {"l_sole"});
   lfoot_ori_task->kp =
@@ -63,7 +64,7 @@ AtlasTCIContainer::AtlasTCIContainer(RobotSystem *_robot)
   lfoot_ori_task->kd =
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "kd_foot_ori");
   lfoot_ori_task->w_hierarchy =
-      util::ReadParameter<double>(cfg["wbc"], "w_contact_foot");
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"], "w_contact_foot");
 
   task_list.push_back(com_task);
   task_list.push_back(pelvis_ori_task);

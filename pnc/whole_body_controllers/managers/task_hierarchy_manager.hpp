@@ -6,7 +6,8 @@
 class TaskHierarchyManager {
 public:
   /// \{ \name Constructor and Destructor
-  TaskHierarchyManager(Task *_task, double _w_max, double _w_min);
+  TaskHierarchyManager(Task *_task, Eigen::VectorXd _w_max,
+                       Eigen::VectorXd _w_min);
   ~TaskHierarchyManager();
   /// \}
 
@@ -24,9 +25,9 @@ public:
 
 protected:
   Task *task_;
-  double w_max_;
-  double w_min_;
-  double w_starting_;
+  Eigen::VectorXd w_max_;
+  Eigen::VectorXd w_min_;
+  Eigen::VectorXd w_starting_;
   double start_time_;
   double duration_;
 };

@@ -3,8 +3,8 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-#b_exp: false
-b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel
+b_exp: false
+#b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel
 
 state_estimator:
     n_data_com_vel: [200, 200, 200]
@@ -32,7 +32,7 @@ wbc:
         com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
         com_control_feedback_height_target: 1 # 0: com height, 1: base height
         com:
-            weight: 20
+            weight: [20, 20, 20]
             sim_kp: [200, 200, 100]
             sim_kd: [10, 10, 5]
             ## Good until balancing
@@ -42,7 +42,7 @@ wbc:
             exp_kp: [15, 33, 25]
             exp_kd: [4.0, 3.3, 1.5]
         icp:
-            weight: 20
+            weight: [20, 20, 20]
             sim_kp: [10, 10, 100]
             sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
@@ -51,21 +51,21 @@ wbc:
             exp_ki: [0.4, 0.4, 0.]
             time_constant: 3.
         cam:
-            weight: 0.
+            weight: [0., 0., 0.]
             sim_kp: [0., 0., 0.] # will be ignored
             sim_kd: [50., 50., 50.]
             exp_kp: [0., 0., 0.] # will be ignored
             exp_kd: [15., 15., 15.]
 
         torso_ori:
-            weight: 20
+            weight: [20., 20., 20.]
             sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
             exp_kp: [15, 15, 10]
             exp_kd: [0.2, 0.2, 0.1]
 
         upper_body_joint:
-            weight: 20.
+            weight: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
             neck_pitch:
                 sim_kp: 40.
                 sim_kd: 2.
@@ -132,15 +132,15 @@ wbc:
                 exp_kp: 5.
                 exp_kd: 0.
         foot_pos:
-            weight_at_contact: 40.
-            weight_at_swing: 20.
+            weight_at_contact: [40., 40., 40.]
+            weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
             exp_kp: [100, 100, 250]
             exp_kd: [0.1, 0.1, 1.2]
         foot_ori:
-            weight_at_contact: 40.
-            weight_at_swing: 20.
+            weight_at_contact: [40., 40., 40.]
+            weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
             exp_kp: [20, 20, 20]
@@ -207,9 +207,9 @@ walking:
 
     swing_height: 0.03
 
-    t_additional_ini_trans: 0.5
-    t_contact_trans: 0.3
-    t_swing: 0.4
+    t_additional_ini_trans: 0.
+    t_contact_trans: 0.45
+    t_swing: 0.55
     percentage_settle: 0.9
     alpha_ds: 0.5
 

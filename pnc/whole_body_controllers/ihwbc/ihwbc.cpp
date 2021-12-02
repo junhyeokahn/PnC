@@ -124,8 +124,13 @@ void IHWBC::solve(
     // std::cout << i << " th task" << std::endl;
     // task_list[i]->Debug();
 
-    cost_t_mat += (w_hierarchy[i] * (jt.transpose() * jt));
-    cost_t_vec += (w_hierarchy[i] * ((jt_dot_q_dot - x_ddot).transpose() * jt));
+    Eigen::MatrixXd w_hierarchy_mat =
+        Eigen::MatrixXd::Zero(task_list[i]->dim, task_list[i]->dim);
+    for (int j = 0; j < task_list[i]->dim; ++j) {
+      w_hierarchy_mat(j, j) = task_list[i]->w_hierarchy[j];
+    }
+    cost_t_mat += jt.transpose() * w_hierarchy_mat * jt;
+    cost_t_vec += (jt_dot_q_dot - x_ddot).transpose() * w_hierarchy_mat * jt;
   }
   cost_t_mat += lambda_q_ddot * A_;
 

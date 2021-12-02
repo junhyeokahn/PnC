@@ -17,7 +17,7 @@ public:
     dim = _dim;
     target_ids = _target_ids;
 
-    w_hierarchy = 1.0;
+    w_hierarchy = Eigen::VectorXd::Ones(dim);
 
     kp = Eigen::VectorXd::Zero(dim);
     kd = Eigen::VectorXd::Zero(dim);
@@ -57,7 +57,7 @@ public:
   int dim;
 
   /// Task hierarchy weight.
-  double w_hierarchy;
+  Eigen::VectorXd w_hierarchy;
 
   /// Task P gain.
   Eigen::VectorXd kp;

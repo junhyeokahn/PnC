@@ -1,7 +1,7 @@
 #include <pnc/whole_body_controllers/managers/task_hierarchy_manager.hpp>
 
-TaskHierarchyManager::TaskHierarchyManager(Task *_task, double _w_max,
-                                           double _w_min) {
+TaskHierarchyManager::TaskHierarchyManager(Task *_task, Eigen::VectorXd _w_max,
+                                           Eigen::VectorXd _w_min) {
   util::PrettyConstructor(2, "TaskHierarchyManager");
 
   task_ = _task;

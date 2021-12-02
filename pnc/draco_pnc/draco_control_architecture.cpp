@@ -69,28 +69,28 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   // Initialize Hierarchy Manager
   rfoot_pos_hm = new TaskHierarchyManager(
       tci_container->rfoot_pos_task,
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
-                                  "weight_at_contact"),
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
-                                  "weight_at_swing"));
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_pos"],
+                                           "weight_at_contact"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_pos"],
+                                           "weight_at_swing"));
   rfoot_ori_hm = new TaskHierarchyManager(
       tci_container->rfoot_ori_task,
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
-                                  "weight_at_contact"),
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
-                                  "weight_at_swing"));
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_ori"],
+                                           "weight_at_contact"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_ori"],
+                                           "weight_at_swing"));
   lfoot_pos_hm = new TaskHierarchyManager(
       tci_container->lfoot_pos_task,
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
-                                  "weight_at_contact"),
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_pos"],
-                                  "weight_at_swing"));
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_pos"],
+                                           "weight_at_contact"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_pos"],
+                                           "weight_at_swing"));
   lfoot_ori_hm = new TaskHierarchyManager(
       tci_container->lfoot_ori_task,
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
-                                  "weight_at_contact"),
-      util::ReadParameter<double>(cfg["wbc"]["task"]["foot_ori"],
-                                  "weight_at_swing"));
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_ori"],
+                                           "weight_at_contact"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_ori"],
+                                           "weight_at_swing"));
 
   // Initialize Reaction Force Manager
   double rf_max;

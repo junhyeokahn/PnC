@@ -120,12 +120,10 @@ void DracoController::getCommand(void *cmd) {
     wbc_->update_setting(A, Ainv, cori, grav);
 
     // Task, Contact, Internal Constraint Setup
-    wbc_->w_hierarchy = Eigen::VectorXd::Zero(tci_container_->task_list.size());
     for (int i = 0; i < tci_container_->task_list.size(); ++i) {
       tci_container_->task_list[i]->update_jacobian();
       tci_container_->task_list[i]->update_cmd(
           sp_->nominal_stance_foot_iso.linear());
-      wbc_->w_hierarchy[i] = tci_container_->task_list[i]->w_hierarchy;
     }
 
     // ignore jacobian cols depending on the state

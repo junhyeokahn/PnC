@@ -90,11 +90,9 @@ void AtlasController::getCommand(void *cmd) {
   wbc_->update_setting(A, Ainv, cori, grav);
 
   // Task, Contact, Internal Constraint Setup
-  wbc_->w_hierarchy = Eigen::VectorXd::Zero(tci_container_->task_list.size());
   for (int i = 0; i < tci_container_->task_list.size(); ++i) {
     tci_container_->task_list[i]->update_jacobian();
     tci_container_->task_list[i]->update_cmd();
-    wbc_->w_hierarchy[i] = tci_container_->task_list[i]->w_hierarchy;
   }
 
   int rf_dim(0);

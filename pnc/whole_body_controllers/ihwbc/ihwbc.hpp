@@ -32,9 +32,6 @@ public:
   /// Weight for reaction force tracking.
   double w_rf;
 
-  /// Weights for task hierarchy.
-  Eigen::VectorXd w_hierarchy;
-
   /// Update mass matrix, inverse of mass matrix, coriolis forces, gravity
   /// forces.
   void update_setting(const Eigen::MatrixXd &A, const Eigen::MatrixXd &Ainv,

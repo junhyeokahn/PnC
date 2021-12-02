@@ -49,7 +49,7 @@ AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
   dcm_tm->paramInitialization(cfg["walking"]);
 
   // Initialize Hierarchy Manager
-  double w_contact_foot, w_swing_foot;
+  Eigen::VectorXd w_contact_foot, w_swing_foot;
   util::ReadParameter(cfg["wbc"], "w_contact_foot", w_contact_foot);
   util::ReadParameter(cfg["wbc"], "w_swing_foot", w_swing_foot);
   rfoot_pos_hm = new TaskHierarchyManager(tci_container_->rfoot_pos_task,

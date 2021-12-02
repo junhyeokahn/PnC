@@ -4,11 +4,11 @@ wbc:
     rf_z_max: 2000.0
 
     # Task Hierarchy Weights
-    w_com: 10.
-    w_pelvis_ori: 20.
-    w_upper_body_joint: 20.
-    w_contact_foot: 60.
-    w_swing_foot: 40.
+    w_com: [10., 10., 10.]
+    w_pelvis_ori: [20., 20., 20.]
+    w_upper_body_joint: [20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.]
+    w_contact_foot: [60., 60., 60.]
+    w_swing_foot: [40., 40., 40.]
 
     # Reaction Force Weights
     w_rf: 0.
