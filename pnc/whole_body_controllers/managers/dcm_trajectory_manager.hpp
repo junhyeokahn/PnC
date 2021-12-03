@@ -140,6 +140,8 @@ public:
   /// Update tasks command.
   void updateDCMTasksDesired(double current_time);
 
+  int n_steps = 3;
+
 private:
   RobotSystem *robot_;
   std::string lfoot_id_;

@@ -129,6 +129,7 @@ void IHWBC::solve(
     for (int j = 0; j < task_list[i]->dim; ++j) {
       w_hierarchy_mat(j, j) = task_list[i]->w_hierarchy[j];
     }
+
     cost_t_mat += jt.transpose() * w_hierarchy_mat * jt;
     cost_t_vec += (jt_dot_q_dot - x_ddot).transpose() * w_hierarchy_mat * jt;
   }

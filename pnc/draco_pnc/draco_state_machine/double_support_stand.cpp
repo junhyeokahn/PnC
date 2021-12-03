@@ -52,6 +52,7 @@ void DoubleSupportStand::firstVisit() {
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
 
   std::cout << "[Nominal Base SO3]" << std::endl;
+  std::cout << target_base_ori_SO3 << std::endl;
   std::cout << sp_->nominal_base_quat.toRotationMatrix() << std::endl;
   std::cout << "[Nominal Stance Foot SO3]" << std::endl;
   std::cout << sp_->nominal_stance_foot_iso.linear() << std::endl;

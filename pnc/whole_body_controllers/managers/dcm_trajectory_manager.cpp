@@ -225,34 +225,34 @@ void DCMTrajectoryManager::resetIndexAndClearFootsteps() {
 
 void DCMTrajectoryManager::walkInPlace() {
   resetIndexAndClearFootsteps();
-  populateStepInPlace(1, robot_side_first_);
+  populateStepInPlace(n_steps, robot_side_first_);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(5, nominal_forward_step);
+  populateWalkForward(n_steps, nominal_forward_step);
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {
   resetIndexAndClearFootsteps();
-  populateWalkForward(5, nominal_backward_step);
+  populateWalkForward(n_steps, nominal_backward_step);
   alternateLeg();
 }
 void DCMTrajectoryManager::strafeLeft() {
   resetIndexAndClearFootsteps();
-  populateStrafe(nominal_strafe_distance, 2);
+  populateStrafe(nominal_strafe_distance, n_steps);
 }
 void DCMTrajectoryManager::strafeRight() {
   resetIndexAndClearFootsteps();
-  populateStrafe(-nominal_strafe_distance, 2);
+  populateStrafe(-nominal_strafe_distance, n_steps);
 }
 void DCMTrajectoryManager::turnLeft() {
   resetIndexAndClearFootsteps();
-  populateRotateTurn(nominal_turn_radians, 2);
+  populateRotateTurn(nominal_turn_radians, n_steps);
 }
 void DCMTrajectoryManager::turnRight() {
   resetIndexAndClearFootsteps();
-  populateRotateTurn(-nominal_turn_radians, 2);
+  populateRotateTurn(-nominal_turn_radians, n_steps);
 }
 
 // Footstep sequence primitives
@@ -432,6 +432,7 @@ void DCMTrajectoryManager::paramInitialization(const YAML::Node &node) {
     util::ReadParameter(node, "nominal_turn_radians", nominal_turn_radians);
     util::ReadParameter(node, "nominal_strafe_distance",
                         nominal_strafe_distance);
+    util::ReadParameter(node, "n_steps", n_steps);
 
   } catch (std::runtime_error &e) {
     std::cout << "Error reading parameter [" << e.what() << "] at file: ["

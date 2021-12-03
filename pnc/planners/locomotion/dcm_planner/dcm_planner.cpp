@@ -998,6 +998,9 @@ void DCMPlanner::get_ref_ori_ang_vel_acc(const double t,
   pelvis_ori_quat_curves[step_index].GetAngularVelocity(s, ang_vel_out);
   pelvis_ori_quat_curves[step_index].GetAngularAcceleration(s, ang_acc_out);
 
+  ang_vel_out /= traj_duration;
+  ang_acc_out /= traj_duration;
+
   // std::cout << "t:" << time << " s:" << s << " ang_vel_out = " <<
   // ang_vel_out.transpose() << std::endl;
 }

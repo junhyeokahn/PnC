@@ -61,9 +61,9 @@ void ContactTransitionStart::firstVisit() {
         ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
       }
       Eigen::Quaternion<double> torso_quat(
-          robot_->get_link_iso("torso_link").linear());
-      ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type, torso_quat,
-                                     ini_pos, ini_vel);
+          robot_->get_link_iso("torso_com_link").linear());
+      ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,
+                                     torso_quat.normalized(), ini_pos, ini_vel);
       ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
       sp_->planning_id += 1;
     }
