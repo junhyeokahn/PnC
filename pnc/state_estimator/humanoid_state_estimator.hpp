@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pnc/robot_system/robot_system.hpp"
-#include "pnc/humanoid_sensor_data.h"
+#include "pnc/humanoid_sensor_data.hpp"
 
 //TODO convert includes to forward declarations
 
