@@ -5,6 +5,7 @@ add_subdirectory(filters)
 add_subdirectory(atlas_pnc)
 add_subdirectory(draco_pnc)
 add_subdirectory(fixed_draco_pnc)
+add_subdirectory(state_estimator)
 
 file(GLOB pnc_headers "*.hpp")
 install(FILES ${pnc_headers} DESTINATION "${INSTALL_INCLUDE_DIR}/pnc")
