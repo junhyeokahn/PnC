@@ -13,7 +13,7 @@ public:
     virtual void initialize(HumanoidSensorData *sensorData) = 0;
     virtual void update(HumanoidSensorData *sensorData) = 0;
 
-//protected:
+protected:
     RobotSystem *robot_;
 
     bool b_first_visit_;
