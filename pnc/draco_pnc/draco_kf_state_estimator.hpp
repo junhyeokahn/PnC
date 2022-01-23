@@ -27,14 +27,15 @@ public:
   DracoKFStateEstimator(RobotSystem *robot);
   ~DracoKFStateEstimator();
 
-  void initialize(DracoSensorData *);
-  void update(DracoSensorData *);
+  void initialize(HumanoidSensorData *) override;
+  void update(HumanoidSensorData *) override;
 
 protected:
   DracoStateProvider *sp_;
 
-  MARGFilter margFilter;
+//  MARGFilter *margFilter_;
 
+  Eigen::Matrix<double, 3, 3> rot_world_to_base;
   Eigen::Isometry3d iso_base_joint_to_imu_;
   Eigen::Isometry3d iso_base_com_to_imu_;
 
