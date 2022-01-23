@@ -24,6 +24,8 @@ DracoInterface::DracoInterface() : Interface() {
   robot_ = new DartRobotSystem(THIS_COM "robot_model/draco/draco_rel_path.urdf",
                                false, false);
   se_ = new DracoStateEstimator(robot_);
+//  sekf_ = new DracoKFfStateEstimator(robot_);
+
   sp_ = DracoStateProvider::getStateProvider();
   sp_->stance_foot = "l_foot_contact";
   sp_->prev_stance_foot = "l_foot_contact";
@@ -90,6 +92,7 @@ void DracoInterface::getCommand(void *_data, void *_command) {
 
   if (count_ <= waiting_count_) {
     se_->initialize(data);
+//    sekf_->initialize(data); TODO
     this->SetSafeCommand(data, cmd);
   } else {
     se_->update(data);
