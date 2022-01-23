@@ -1,4 +1,14 @@
+#include <Eigen/Geometry>
 #include "MARGFilter.hpp"
+
+MARGFilter::MARGFilter() {
+
+  // initial conditions
+  SEq_1 = 1.0; SEq_2 = 0; SEq_3 = 0; SEq_4 = 0;
+  b_x = 1; b_z = 0;
+  w_bx = 0; w_by = 0; w_bz = 0;
+  quat.setIdentity();
+}
 
 void MARGFilter::filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z, float m_x, float m_y, float m_z) {
 
@@ -143,4 +153,14 @@ void MARGFilter::filterUpdate(float w_x, float w_y, float w_z, float a_x, float 
     // normalise the flux vector to have only components in the x and z
     b_x = sqrt((h_x * h_x) + (h_y * h_y));
     b_z = h_z;
+
+    // update quaternion
+    quat.w() = SEq_1;
+    quat.x() = SEq_2;
+    quat.y() = SEq_3;
+    quat.z() = SEq_4;
+}
+
+Eigen::Matrix3d MARGFilter::getBaseRotation() {
+  return quat.normalized().toRotationMatrix();
 }

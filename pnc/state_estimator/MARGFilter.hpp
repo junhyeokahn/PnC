@@ -12,6 +12,7 @@
  */
 
 #include <math.h>
+#include <Eigen/Core>
 
 // System constants
 const float deltat = 0.001f; // sampling period in seconds (shown as 1 ms)
@@ -29,7 +30,7 @@ public:
                       float a_x, float a_y, float a_z,
                       float m_x, float m_y, float m_z);
 
-
+    Eigen::Matrix3d getBaseRotation(void);
 
 private:
 
@@ -37,8 +38,10 @@ private:
     float a_x, a_y, a_z; // accelerometer measurements
     float w_x, w_y, w_z; // gyroscope measurements in rad/s
     float m_x, m_y, m_z; // magnetometer measurements
-    float SEq_1 = 1, SEq_2 = 0, SEq_3 = 0, SEq_4 = 0; // estimated orientation quaternion elements with initial conditions
-    float b_x = 1, b_z = 0; // reference direction of flux in earth frame
-    float w_bx = 0, w_by = 0, w_bz = 0; // estimate gyroscope biases error
+    float SEq_1, SEq_2, SEq_3, SEq_4;     // estimated orientation quaternion elements
+    float b_x, b_z;                       // reference direction of flux in earth frame
+    float w_bx, w_by, w_bz;               // estimate gyroscope biases error
+
+    Eigen::Quaterniond quat;              // estimated quaternion
 
 };
