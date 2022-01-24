@@ -48,10 +48,10 @@ void DracoKFStateEstimator::initialize(HumanoidSensorData *data) {
 void DracoKFStateEstimator::update(HumanoidSensorData *data) {
 
   // estimate 0_R_b
-//  margFilter_->filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
-//                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2],
-//                            data->imu_magnet[0], data->imu_magnet[1], data->imu_magnet[2]);
-//  rot_world_to_base = margFilter_->getBaseRotation();
+  margFilter_->filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
+                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2],
+                            data->imu_magnet[0], data->imu_magnet[1], data->imu_magnet[2]);
+  rot_world_to_base = margFilter_->getBaseRotation();
 
   // Kalman process model
 
