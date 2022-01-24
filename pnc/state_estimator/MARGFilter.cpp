@@ -10,6 +10,8 @@ MARGFilter::MARGFilter() {
   quat.setIdentity();
 }
 
+MARGFilter::~MARGFilter() {}
+
 void MARGFilter::filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z, float m_x, float m_y, float m_z) {
 
     // local system variables

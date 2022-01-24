@@ -33,7 +33,7 @@ public:
 protected:
   DracoStateProvider *sp_;
 
-//  MARGFilter *margFilter_;
+  MARGFilter *margFilter_;
 
   Eigen::Matrix<double, 3, 3> rot_world_to_base;
   Eigen::Isometry3d iso_base_joint_to_imu_;

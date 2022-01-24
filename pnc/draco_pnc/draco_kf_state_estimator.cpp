@@ -6,7 +6,7 @@ HumanoidStateEstimator(_robot) {
   sp_ = DracoStateProvider::getStateProvider();
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
-//   initialize margFilter_
+   margFilter_ = new MARGFilter();
 
   rot_world_to_base.setZero();
   iso_base_com_to_imu_ = robot_->get_link_iso("torso_link").inverse() *
@@ -37,7 +37,9 @@ HumanoidStateEstimator(_robot) {
   b_first_visit_ = true;
 }
 
-DracoKFStateEstimator::~DracoKFStateEstimator() {}
+DracoKFStateEstimator::~DracoKFStateEstimator() {
+  delete margFilter_;
+}
 
 void DracoKFStateEstimator::initialize(HumanoidSensorData *data) {
     this->update(data);
