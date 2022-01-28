@@ -6,7 +6,10 @@ HumanoidStateEstimator(_robot) {
   sp_ = DracoStateProvider::getStateProvider();
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
-   margFilter_ = new MARGFilter();
+  margFilter_ = new MARGFilter();
+  x_hat_.setZero();
+  system_model_.initialize(deltat);
+  base_pose_model_.initialize(robot_->get_gravity());
 
   rot_world_to_base.setZero();
   iso_base_com_to_imu_ = robot_->get_link_iso("torso_link").inverse() *
@@ -53,9 +56,18 @@ void DracoKFStateEstimator::update(HumanoidSensorData *data) {
                             data->imu_magnet[0], data->imu_magnet[1], data->imu_magnet[2]);
   rot_world_to_base = margFilter_->getBaseRotation();
 
-  // Kalman process model
+  // use Kalman filter to estimate
+  // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
+  if (b_first_visit_) {
+    kalman_filter_->init(x_hat_);
+    b_first_visit_ = false;
+  }
+  base_pose_model_.packAccelerationInput(rot_world_to_base, data->imu_accel, accelerometer_input_);
+  x_hat_ = kalman_filter_->predict(system_model_, accelerometer_input_);
+//    base_estimate_.base_pose_lfoot() = fwd_kin_lfoot(q);
+//    base_estimate_.base_pose_rfoot() = fwd_kin_rfoot(q);
+  x_hat_ = kalman_filter_->update(base_pose_model_, base_estimate_);
 
-  // Kalman measurement model
 
   if (data->b_rf_contact) {
       sp_->b_rf_contact = true;

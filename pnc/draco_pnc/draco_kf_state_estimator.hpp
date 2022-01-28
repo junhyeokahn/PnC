@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * Linear KF State Estimation Approach
+ * Linear KF State Estimator
  *
  * Approach taken from second method in:
  *
@@ -18,9 +18,14 @@
 #include "pnc/filters/digital_filters.hpp"
 #include "pnc/state_estimator/humanoid_state_estimator.hpp"
 #include "utils/util.hpp"
-#include "draco_state_provider.hpp"
+#include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/state_estimator/MARGFilter.hpp"
-#include "draco_interface.hpp"
+#include "pnc/draco_pnc/draco_interface.hpp"
+
+// kalman filter files
+#include "pnc/state_estimator/FloatingBaseSystemModel.hpp"
+#include "pnc/state_estimator/PoseMeasurementModel.hpp"
+#include "third_party/kalman_filters/ExtendedKalmanFilter.hpp"
 
 class DracoKFStateEstimator : HumanoidStateEstimator {
 public:
@@ -34,6 +39,14 @@ protected:
   DracoStateProvider *sp_;
 
   MARGFilter *margFilter_;
+
+  // stuff needed for the kalman filter
+  State x_hat_;
+  Control accelerometer_input_;
+  FloatingBaseSystemModel system_model_;
+  PoseMeasurement base_estimate_;
+  PoseMeasurementModel base_pose_model_;
+  Kalman::ExtendedKalmanFilter<State> *kalman_filter_;
 
   Eigen::Matrix<double, 3, 3> rot_world_to_base;
   Eigen::Isometry3d iso_base_joint_to_imu_;
