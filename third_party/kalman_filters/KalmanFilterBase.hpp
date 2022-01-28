@@ -22,8 +22,8 @@
 #ifndef KALMAN_KALMANFILTERBASE_HPP_
 #define KALMAN_KALMANFILTERBASE_HPP_
 
-#include "pnc/Filters/Kalman/Matrix.hpp"
-#include "pnc/Filters/Kalman/Types.hpp"
+#include "Matrix.hpp"
+#include "Types.hpp"
 
 namespace Kalman {
     

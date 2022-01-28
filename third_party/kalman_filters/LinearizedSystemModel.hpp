@@ -22,7 +22,7 @@
 #ifndef KALMAN_LINEARIZEDSYSTEMMODEL_HPP_
 #define KALMAN_LINEARIZEDSYSTEMMODEL_HPP_
 
-#include "pnc/Filters/Kalman/SystemModel.hpp"
+#include "SystemModel.hpp"
 
 namespace Kalman {
     template<class StateType>

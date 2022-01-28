@@ -22,7 +22,7 @@
 #ifndef KALMAN_STANDARDFILTERBASE_HPP_
 #define KALMAN_STANDARDFILTERBASE_HPP_
 
-#include "pnc/Filters/Kalman/StandardBase.hpp"
+#include "StandardBase.hpp"
 
 namespace Kalman {
     

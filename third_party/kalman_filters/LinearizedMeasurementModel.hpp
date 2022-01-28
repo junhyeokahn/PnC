@@ -22,7 +22,7 @@
 #ifndef KALMAN_LINEARIZEDMEASUREMENTMODEL_HPP_
 #define KALMAN_LINEARIZEDMEASUREMENTMODEL_HPP_
 
-#include "pnc/Filters/Kalman/MeasurementModel.hpp"
+#include "MeasurementModel.hpp"
 
 namespace Kalman {
     template<class StateType>

@@ -24,8 +24,8 @@
 
 #include <type_traits>
 
-#include "pnc/Filters/Kalman/Matrix.hpp"
-#include "pnc/Filters/Kalman/StandardBase.hpp"
+#include "Matrix.hpp"
+#include "StandardBase.hpp"
 
 namespace Kalman {
 /**
