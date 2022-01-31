@@ -64,8 +64,14 @@ void DracoKFStateEstimator::update(HumanoidSensorData *data) {
   }
   base_pose_model_.packAccelerationInput(rot_world_to_base, data->imu_accel, accelerometer_input_);
   x_hat_ = kalman_filter_->predict(system_model_, accelerometer_input_);
-//    base_estimate_.base_pose_lfoot() = fwd_kin_lfoot(q);
-//    base_estimate_.base_pose_rfoot() = fwd_kin_rfoot(q);
+
+  // Note: this assumes at least one foot is on the ground
+  if (data->b_lf_contact) {
+    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_imu", base_estimate_);
+  }
+  if (data->b_rf_contact) {
+    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_imu", base_estimate_);
+  }
   x_hat_ = kalman_filter_->update(base_pose_model_, base_estimate_);
 
 

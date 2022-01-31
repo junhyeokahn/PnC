@@ -53,6 +53,33 @@ public:
       u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer + gravity;
     }
 
+    void update_position_from_lfoot(RobotSystem *robot,
+                                   const std::string contact_frame,
+                                   const std::string reference_frame,
+                                   PoseMeasurement &measurementToUpdate)
+    {
+      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(contact_frame).translation() -
+              robot->get_link_iso(reference_frame).translation();
+
+      measurementToUpdate.base_pose_lfoot_x() = contact_to_ref_translation.x();
+      measurementToUpdate.base_pose_lfoot_y() = contact_to_ref_translation.y();
+      measurementToUpdate.base_pose_lfoot_z() = contact_to_ref_translation.z();
+    }
+
+    void update_position_from_rfoot(RobotSystem *robot,
+                                    const std::string contact_frame,
+                                    const std::string reference_frame,
+                                    PoseMeasurement &measurementToUpdate)
+    {
+      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(contact_frame).translation() -
+                                                   robot->get_link_iso(reference_frame).translation();
+
+      measurementToUpdate.base_pose_rfoot_x() = contact_to_ref_translation.x();
+      measurementToUpdate.base_pose_rfoot_y() = contact_to_ref_translation.y();
+      measurementToUpdate.base_pose_rfoot_z() = contact_to_ref_translation.z();
+    }
+
+
     PoseMeasurement h(const State& x) const
     {
       PoseMeasurement y_next;
