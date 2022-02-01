@@ -1,4 +1,3 @@
-#include <Eigen/Geometry>
 #include "MARGFilter.hpp"
 
 MARGFilter::MARGFilter() {
@@ -250,4 +249,8 @@ void MARGFilter::filterUpdate(float w_x, float w_y, float w_z, float a_x, float 
 
 Eigen::Matrix3d MARGFilter::getBaseRotation() {
   return quat.normalized().toRotationMatrix();
+}
+
+Eigen::Quaterniond MARGFilter::getQuaternion() {
+  return quat;
 }

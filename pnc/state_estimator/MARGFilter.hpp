@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 // System constants
 const float deltat = 0.001f; // sampling period in seconds (shown as 1 ms)
@@ -36,6 +37,8 @@ public:
                       float m_x, float m_y, float m_z);
 
     Eigen::Matrix3d getBaseRotation(void);
+
+    Eigen::Quaterniond getQuaternion(void);
 
 private:
 
