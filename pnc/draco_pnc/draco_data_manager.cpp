@@ -193,6 +193,15 @@ void DracoDataManager::Send() {
     pb_msg.add_icp_dot_des(data->icp_dot_des[i]);
   }
 
+  for (int i = 0; i < 3; ++i) {
+    pb_msg.add_base_pos_est(data->base_pos_est[i]);
+    pb_msg.add_base_vel_est(data->base_vel_est[i]);
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    pb_msg.add_base_quat_est(data->base_quat_est[i]);
+  }
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

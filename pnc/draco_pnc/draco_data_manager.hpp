@@ -154,4 +154,9 @@ public:
   // internal frc
   double l_knee_int_frc_cmd = 0.;
   double r_knee_int_frc_cmd = 0.;
+
+  // state estimator
+  Eigen::VectorXd base_quat_est = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd base_pos_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_vel_est = Eigen::VectorXd::Zero(3);
 };

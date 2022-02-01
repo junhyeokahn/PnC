@@ -88,4 +88,14 @@ void DracoKFStateEstimator::update(HumanoidSensorData *data) {
   }
 
 //    this->_update_dcm();
+  // save current time step data
+  if (sp_->count % sp_->save_freq == 0) {
+    DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+    dm->data->base_pos_est = base_position_estimate;
+    dm->data->base_vel_est = base_velocity_estimate;
+    dm->data->base_quat_est = Eigen::Vector4d(margFilter_.getQuaternion().w(),
+                                              margFilter_.getQuaternion().x(),
+                                              margFilter_.getQuaternion().y(),
+                                              margFilter_.getQuaternion().z()) ;
+  }
 }

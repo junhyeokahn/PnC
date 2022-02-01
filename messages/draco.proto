@@ -129,4 +129,9 @@ message pnc_msg {
 
   float l_knee_int_frc_cmd = 91;
   float r_knee_int_frc_cmd = 92;
+
+  // state estimator
+  repeated float base_quat_est = 93;
+  repeated float base_pos_est = 94;
+  repeated float base_vel_est = 95;
 }

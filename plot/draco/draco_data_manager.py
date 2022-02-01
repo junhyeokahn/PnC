@@ -218,6 +218,10 @@ while True:
     data_saver.add('icp_dot_des', list(msg.icp_dot_des))
     data_saver.add('icp_dot', list(msg.icp_dot))
 
+    data_saver.add('base_quat_est', list(msg.base_quat_est))
+    data_saver.add('base_pos_est', list(msg.base_pos_est))
+    data_saver.add('base_vel_est', list(msg.base_vel_est))
+
     data_saver.advance()
 
     # publish back for plot juggler
