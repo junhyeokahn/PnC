@@ -64,6 +64,18 @@ add_subdirectory(Utils)
 add_subdirectory(ExternalSource)
 add_subdirectory(PnC)
 
+set(USE_PYBIND11 True)
+if(USE_PYBIND11)
+    message("--Enable Pybind11--")
+    find_package(PythonAnaconda)
+    find_package(pybind11 CONFIG REQUIRED)
+    include_directories(/home/knapsack/software/anaconda3/envs/mingyo/include)
+        include_directories(/home/knapsack/software/anaconda3/envs/mingyo/include/pybind11)
+    add_subdirectory(Bindings)
+else()
+    message("--Disable Pybind11--")
+endif()
+
 ##=============================================================================
 ## Configuration File
 ##=============================================================================
