@@ -4,13 +4,20 @@
 MARGFilter::MARGFilter() {
 
   // initial conditions
-  SEq_1 = 1.0; SEq_2 = 0; SEq_3 = 0; SEq_4 = 0;
+  this->initialize(1.0, 0., 0., 0.);
   b_x = 1; b_z = 0;
   w_bx = 0; w_by = 0; w_bz = 0;
   quat.setIdentity();
 }
 
 MARGFilter::~MARGFilter() {}
+
+void MARGFilter::initialize(float q1, float q2, float q3, float q4) {
+  SEq_1 = q1;
+  SEq_2 = q2;
+  SEq_3 = q3;
+  SEq_4 = q4;
+}
 
 void MARGFilter::filterUpdate(float w_x, float w_y, float w_z, float a_x, float a_y, float a_z) {
 
