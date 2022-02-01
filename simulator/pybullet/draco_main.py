@@ -187,6 +187,8 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
+        sensor_data_dict['imu_accel'] = np.transpose(pybullet_util.get_link_iso(
+            robot, link_id['torso_imu'])[0:3, 0:3])[0:3, 2] * -9.81
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
@@ -220,6 +222,7 @@ if __name__ == "__main__":
         sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
         sensor_data.b_rf_contact = sensor_data_dict["b_rf_contact"]
         sensor_data.b_lf_contact = sensor_data_dict["b_lf_contact"]
+        sensor_data.imu_accel = sensor_data_dict['imu_accel']
 
         # TODO : Debugging purpose
         # Copy Base

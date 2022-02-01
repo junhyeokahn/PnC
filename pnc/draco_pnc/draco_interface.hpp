@@ -14,6 +14,7 @@ public:
   DracoSensorData() {
     imu_frame_iso.setIdentity();
     imu_frame_vel.setZero();
+    imu_accel << 0., 0., 9.8;
     b_rf_contact = false;
     b_lf_contact = false;
   }
@@ -37,6 +38,9 @@ public:
   Eigen::Vector4d base_joint_quat;
   Eigen::Vector3d base_joint_lin_vel;
   Eigen::Vector3d base_joint_ang_vel;
+
+  // added for Kalman filter
+  Eigen::Vector3d imu_accel;
 };
 
 class DracoCommand {
