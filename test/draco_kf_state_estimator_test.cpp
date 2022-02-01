@@ -86,8 +86,8 @@ TEST(DracoKFStateEstimatorTest, linearKFZeroNoise)
 {
   // parameters used for testing
   Eigen::Matrix3d rot_world_to_base = Eigen::Matrix3d::Identity();
-  Eigen::Vector3d gravity, imu_accel;
-  gravity << 0.0, 0.0, -9.81;
+  Eigen::Vector3d imu_accel;
+  double gravity = -9.81;
   imu_accel << 0.0, 0.0, 9.81;
 
   // stuff needed for the kalman filter

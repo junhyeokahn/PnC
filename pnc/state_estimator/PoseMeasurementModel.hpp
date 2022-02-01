@@ -33,7 +33,7 @@ public:
       C.setZero();
     }
 
-    void initialize(const Eigen::Vector3d &gravity)
+    void initialize(const double &gravity)
     {
       // assign values to LTI matrix C
       C.block(0, 0, 3, 3) = I;
@@ -41,7 +41,7 @@ public:
       C.block(3, 0, 3, 3) = I;
       C.block(3, 9, 3, 3) = -I;
 
-      this->gravity = gravity(2);
+      this->gravity = gravity;
     }
 
     void packAccelerationInput(const Eigen::Matrix3d &rot_world_to_base,
