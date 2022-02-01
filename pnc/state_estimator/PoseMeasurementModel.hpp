@@ -30,16 +30,18 @@ public:
 
     PoseMeasurementModel()
     {
-      C.setZero();
+      H.setZero();
+      V.setIdentity();
+      V = V * 0.001;
     }
 
     void initialize(const double &gravity)
     {
       // assign values to LTI matrix C
-      C.block(0, 0, 3, 3) = I;
-      C.block(0, 6, 3, 3) = -I;
-      C.block(3, 0, 3, 3) = I;
-      C.block(3, 9, 3, 3) = -I;
+      H.block(0, 0, 3, 3) = I;
+      H.block(0, 6, 3, 3) = -I;
+      H.block(3, 0, 3, 3) = I;
+      H.block(3, 9, 3, 3) = -I;
 
       this->gravity = gravity;
     }
@@ -84,22 +86,21 @@ public:
     {
       PoseMeasurement y_next;
 
-      y_next.base_pose_lfoot_x() = C(0, 0) * x.base_pos_x() + C(0, 6) * x.lfoot_pos_x();
-      y_next.base_pose_lfoot_y() = C(1, 1) * x.base_pos_y() + C(1, 7) * x.lfoot_pos_y();
-      y_next.base_pose_lfoot_z() = C(2, 2) * x.base_pos_z() + C(2, 8) * x.lfoot_pos_z();
-      y_next.base_pose_rfoot_x() = C(3, 0) * x.base_pos_x() + C(3, 9) * x.rfoot_pos_x();
-      y_next.base_pose_rfoot_y() = C(4, 1) * x.base_pos_y() + C(4, 10) * x.rfoot_pos_y();
-      y_next.base_pose_rfoot_z() = C(5, 2) * x.base_pos_z() + C(5, 11) * x.rfoot_pos_z();
+      y_next.base_pose_lfoot_x() = H(0, 0) * x.base_pos_x() + H(0, 6) * x.lfoot_pos_x();
+      y_next.base_pose_lfoot_y() = H(1, 1) * x.base_pos_y() + H(1, 7) * x.lfoot_pos_y();
+      y_next.base_pose_lfoot_z() = H(2, 2) * x.base_pos_z() + H(2, 8) * x.lfoot_pos_z();
+      y_next.base_pose_rfoot_x() = H(3, 0) * x.base_pos_x() + H(3, 9) * x.rfoot_pos_x();
+      y_next.base_pose_rfoot_y() = H(4, 1) * x.base_pos_y() + H(4, 10) * x.rfoot_pos_y();
+      y_next.base_pose_rfoot_z() = H(5, 2) * x.base_pos_z() + H(5, 11) * x.rfoot_pos_z();
 
       return y_next;
     }
 
     void updateJacobians( const State& x)
     {
-      H = C; // TODO rename C -> H for clarity
+
     }
 
-    Eigen::Matrix<double, 6, 12> C;
     double gravity;
 
     const Eigen::Matrix3d I = Eigen::Matrix3d::Identity();
