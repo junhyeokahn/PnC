@@ -35,14 +35,14 @@ task_parameters:
 
     # Task hierarchy weights
     w_task_base_ori: 100
-    w_task_com: 100.
+    w_task_com: 200.
     w_task_foot_pos: 20.
     max_w_task_com: 20.
     min_w_task_com: 10.
 
     # Task Gains
     # COM
-    kp_com: [100, 100, 100]
+    kp_com: [100, 100, 200]
     kd_com: [10, 10, 10]
     # Base Orientation
     kp_base_ori: [100, 100, 100]

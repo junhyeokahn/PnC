@@ -1,6 +1,11 @@
+pybind11_add_module(ConvexMPC ConvexMPCPy.cpp)
+target_link_libraries(ConvexMPC PRIVATE A1PnC)
+set_target_properties(A1PnC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 pybind11_add_module(A1Interface A1InterfacePy.cpp)
 target_link_libraries(A1Interface PRIVATE A1PnC)
 set_target_properties(A1PnC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 
 #pybind11_add_module(FixedAtlasInterface FixedAtlasInterfacePy.cpp)
 #target_link_libraries(FixedAtlasInterface PRIVATE FixedAtlasPnC)
