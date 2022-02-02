@@ -1,80 +1,44 @@
 #include "draco_kf_state_estimator.hpp"
 
-DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) :
-HumanoidStateEstimator(_robot) {
+DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   util::PrettyConstructor(1, "DracoKFStateEstimator");
+  robot_ = _robot;
   sp_ = DracoStateProvider::getStateProvider();
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
-  margFilter_ = new MARGFilter();
   x_hat_.setZero();
   system_model_.initialize(deltat);
-  base_pose_model_.initialize(robot_->get_gravity());
-
+  double gravity = -9.81; //TODO get from somewhere else
+  base_pose_model_.initialize(gravity);
   rot_world_to_base.setZero();
-  iso_base_com_to_imu_ = robot_->get_link_iso("torso_link").inverse() *
-                         robot_->get_link_iso("torso_imu");
-  iso_base_joint_to_imu_.linear() = iso_base_com_to_imu_.linear();
-  iso_base_joint_to_imu_.translation() =
-          iso_base_com_to_imu_.translation() +
-          robot_->get_link_iso("torso_link").linear() *
-          robot_->get_base_local_com_pos();
-
-  global_linear_offset_.setZero();
-  prev_base_joint_pos_.setZero();
-  prev_base_com_pos_.setZero();
-
-  Eigen::VectorXd n_data_com_vel = util::ReadParameter<Eigen::VectorXd>(
-          cfg["state_estimator"], "n_data_com_vel");
-  Eigen::VectorXd n_data_ang_vel = util::ReadParameter<Eigen::VectorXd>(
-          cfg["state_estimator"], "n_data_ang_vel");
-  Eigen::VectorXd n_data_cam = util::ReadParameter<Eigen::VectorXd>(
-          cfg["state_estimator"], "n_data_cam");
-
-  for (int i = 0; i < 3; ++i) {
-      com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
-      imu_ang_vel_filter_.push_back(SimpleMovingAverage(n_data_ang_vel[i]));
-      cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
-  }
 
   b_first_visit_ = true;
 }
 
 DracoKFStateEstimator::~DracoKFStateEstimator() {
-  delete margFilter_;
 }
 
-void DracoKFStateEstimator::initialize(HumanoidSensorData *data) {
+void DracoKFStateEstimator::initialize(DracoSensorData *data) {
     this->update(data);
 }
 
-void DracoKFStateEstimator::update(HumanoidSensorData *data) {
+void DracoKFStateEstimator::update(DracoSensorData *data) {
 
   // estimate 0_R_b
-  margFilter_->filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
-                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2],
-                            data->imu_magnet[0], data->imu_magnet[1], data->imu_magnet[2]);
-  rot_world_to_base = margFilter_->getBaseRotation();
+  margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
+                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
+  rot_world_to_base = margFilter_.getBaseRotation();
 
   // use Kalman filter to estimate
   // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
-    kalman_filter_->init(x_hat_);
+    kalman_filter_.init(x_hat_);
     b_first_visit_ = false;
   }
   base_pose_model_.packAccelerationInput(rot_world_to_base, data->imu_accel, accelerometer_input_);
-  x_hat_ = kalman_filter_->predict(system_model_, accelerometer_input_);
+  x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
 
-  // Note: this assumes at least one foot is on the ground
-  if (data->b_lf_contact) {
-    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_imu", base_estimate_);
-  }
-  if (data->b_rf_contact) {
-    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_imu", base_estimate_);
-  }
-  x_hat_ = kalman_filter_->update(base_pose_model_, base_estimate_);
-
-
+  // update contact
   if (data->b_rf_contact) {
       sp_->b_rf_contact = true;
   } else {
@@ -88,6 +52,34 @@ void DracoKFStateEstimator::update(HumanoidSensorData *data) {
   }
 
 //    this->_update_dcm();
+  // Note: update estimator assuming at least one foot is on the ground
+  if (data->b_lf_contact) {
+    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_imu", base_estimate_);
+  }
+  if (data->b_rf_contact) {
+    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_imu", base_estimate_);
+  }
+  x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
+  // values computed by linear KF estimator
+  Eigen::Vector3d base_position_estimate( x_hat_.base_pos_x(),  x_hat_.base_pos_y(),  x_hat_.base_pos_z());
+  Eigen::Vector3d base_velocity_estimate( x_hat_.base_vel_x(),  x_hat_.base_vel_y(),  x_hat_.base_vel_z());
+
+//  Eigen::Vector3d base_com_pos =
+//          base_position_estimate + rot_world_to_base * robot_->get_base_local_com_pos();
+
+//  data->base_com_quat = Eigen::Vector4d(margFilter_.getQuaternion().w(),
+//                                        margFilter_.getQuaternion().x(),
+//                                        margFilter_.getQuaternion().y(),
+//                                        margFilter_.getQuaternion().z());
+
+//  robot_->update_system(
+//          base_com_pos, margFilter_.getQuaternion(),
+//          base_velocity_estimate, data->imu_frame_vel.head(3), base_position_estimate,
+//          margFilter_.getQuaternion(), base_velocity_estimate,
+//          data->imu_frame_vel.head(3), data->joint_positions,
+//          data->joint_velocities, true);
+
+
   // save current time step data
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
