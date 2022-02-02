@@ -6,8 +6,12 @@
 #include "pnc/draco_pnc/draco_data_manager.hpp"
 #include "pnc/interface.hpp"
 
+// testing kf state estimator
+#include "draco_kf_state_estimator.hpp"
+
 class DracoStateProvider;
 class DracoStateEstimator;
+class DracoKFStateEstimator;
 
 class DracoSensorData {
 public:
@@ -41,6 +45,7 @@ public:
 
   // added for Kalman filter
   Eigen::Vector3d imu_accel;
+//  Eigen::Vector3d imu_magnet;
 };
 
 class DracoCommand {
@@ -59,6 +64,7 @@ public:
 class DracoInterface : public Interface {
 protected:
   DracoStateEstimator *se_;
+  DracoKFStateEstimator *sekf_;
   DracoStateProvider *sp_;
 
   int waiting_count_;
