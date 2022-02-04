@@ -132,6 +132,7 @@ message pnc_msg {
 
   // state estimator
   repeated float base_quat_est = 93;
-  repeated float base_pos_est = 94;
-  repeated float base_vel_est = 95;
+  repeated float base_euler_est = 94;
+  repeated float base_pos_est = 95;
+  repeated float base_vel_est = 96;
 }

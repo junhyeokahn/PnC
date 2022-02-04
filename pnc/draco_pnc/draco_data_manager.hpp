@@ -157,6 +157,7 @@ public:
 
   // state estimator
   Eigen::VectorXd base_quat_est = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd base_euler_est = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd base_pos_est = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd base_vel_est = Eigen::VectorXd::Zero(3);
 };

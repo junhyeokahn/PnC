@@ -196,6 +196,7 @@ void DracoDataManager::Send() {
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_base_pos_est(data->base_pos_est[i]);
     pb_msg.add_base_vel_est(data->base_vel_est[i]);
+    pb_msg.add_base_euler_est(data->base_euler_est[i]);
   }
 
   for (int i = 0; i < 4; ++i) {

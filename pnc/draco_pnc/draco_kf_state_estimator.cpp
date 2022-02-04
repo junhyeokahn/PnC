@@ -94,6 +94,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
     dm->data->base_pos_est = base_position_estimate;
     dm->data->base_vel_est = base_velocity_estimate;
+    dm->data->base_euler_est = util::QuatToEulerZYX(margFilter_.getQuaternion());
     dm->data->base_quat_est = Eigen::Vector4d(margFilter_.getQuaternion().w(),
                                               margFilter_.getQuaternion().x(),
                                               margFilter_.getQuaternion().y(),
