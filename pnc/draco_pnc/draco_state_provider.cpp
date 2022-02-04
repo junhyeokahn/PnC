@@ -37,4 +37,10 @@ DracoStateProvider::DracoStateProvider() {
   floating_jidx = {0, 1, 2, 3, 4, 5};
 
   nominal_stance_foot_iso.setIdentity();
+
+  b_state_estimator_on = false;
 }
+
+void DracoStateProvider::setStateEstimator(bool flag) { this->b_state_estimator_on = flag; }
+
+bool DracoStateProvider::isStateEstimatorOn() { return b_state_estimator_on; }

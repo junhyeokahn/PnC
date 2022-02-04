@@ -24,6 +24,10 @@ void DracoKFStateEstimator::initialize(DracoSensorData *data) {
 
 void DracoKFStateEstimator::update(DracoSensorData *data) {
 
+  // continue only when state estimator is on
+  if (!(sp_->isStateEstimatorOn()))
+    return;
+
   // estimate 0_R_b
   margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
                             data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);

@@ -29,6 +29,8 @@ void DoubleSupportBalance::firstVisit() {
 
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
   Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
+
+  sp_->setStateEstimator(true);
 }
 
 void DoubleSupportBalance::oneStep() {

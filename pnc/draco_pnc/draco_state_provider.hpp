@@ -11,6 +11,9 @@ public:
   static DracoStateProvider *getStateProvider();
   ~DracoStateProvider() {}
 
+  void setStateEstimator(bool flag);
+  bool isStateEstimatorOn();
+
   // should be set outside
   std::map<std::string, double> nominal_joint_pos;
 
@@ -53,4 +56,6 @@ public:
 
 private:
   DracoStateProvider();
+
+  bool b_state_estimator_on;
 };
