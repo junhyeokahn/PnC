@@ -10,8 +10,8 @@ import time
 import json
 from ruamel.yaml import YAML
 import numpy as np
-from pinocchio.visualize import MeshcatVisualizer
-import pinocchio as pin
+# from pinocchio.visualize import MeshcatVisualizer
+# import pinocchio as pin
 
 from plot.data_saver import DataSaver
 
@@ -32,9 +32,9 @@ pnc_socket = context.socket(zmq.SUB)
 pnc_socket.connect(addr)
 pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
-# pj_context = zmq.Context()
-# pj_socket = pj_context.socket(zmq.PUB)
-# pj_socket.bind("tcp://*:9872")
+pj_context = zmq.Context()
+pj_socket = pj_context.socket(zmq.PUB)
+pj_socket.bind("tcp://*:9872")
 
 data_saver = DataSaver()
 
@@ -236,7 +236,7 @@ while True:
     data_saver.advance()
 
     # publish back for plot juggler
-    # pj_socket.send_string(json.dumps(data_saver.history))
+    pj_socket.send_string(json.dumps(data_saver.history))
 
     # publish joint positions for meshcat
     if args.b_visualize:
