@@ -32,6 +32,11 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // use Kalman filter to estimate
   // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
+    x_hat_.initialize(robot_->get_link_iso("torso_link"),
+                      robot_->get_link_iso("l_foot_contact"),
+                      robot_->get_link_iso("r_foot_contact"));
+    std::cout << "Initial pose estimate:" << x_hat_.transpose() << std::endl;
+    std::cout << "Initial rotation matrix: " << std::endl << margFilter_.getBaseRotation() << std::endl;
     kalman_filter_.init(x_hat_);
     b_first_visit_ = false;
   }
