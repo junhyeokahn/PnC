@@ -227,6 +227,12 @@ while True:
     # kinematics-based state estimator
     data_saver.add('base_joint_pos', list(msg.base_joint_pos))
     data_saver.add('base_joint_quat', list(msg.base_joint_quat))
+    data_saver.add('base_joint_euler', list(msg.base_joint_euler))
+
+    # ground truth from pybullet
+    data_saver.add('base_com_pos', list(msg.base_com_pos))
+    data_saver.add('base_com_quat', list(msg.base_com_quat))
+
     data_saver.advance()
 
     # publish back for plot juggler

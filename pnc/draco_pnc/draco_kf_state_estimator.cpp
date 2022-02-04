@@ -39,8 +39,6 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     x_hat_.initialize(robot_->get_link_iso("torso_link"),
                       robot_->get_link_iso("l_foot_contact"),
                       robot_->get_link_iso("r_foot_contact"));
-    std::cout << "Initial pose estimate:" << x_hat_.transpose() << std::endl;
-    std::cout << "Initial rotation matrix: " << std::endl << margFilter_.getBaseRotation() << std::endl;
     kalman_filter_.init(x_hat_);
     b_first_visit_ = false;
   }
@@ -99,5 +97,8 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
                                               margFilter_.getQuaternion().x(),
                                               margFilter_.getQuaternion().y(),
                                               margFilter_.getQuaternion().z()) ;
+
+    dm->data->base_com_pos = data->base_com_pos;
+    dm->data->base_com_quat = data->base_com_quat;
   }
 }

@@ -167,6 +167,7 @@ void DracoDataManager::Send() {
 
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_base_joint_pos(data->base_joint_pos[i]);
+    pb_msg.add_base_joint_euler(data->base_joint_euler[i]);
     pb_msg.add_base_joint_quat(data->base_joint_quat[i]);
   }
   pb_msg.add_base_joint_quat(data->base_joint_quat[3]);
@@ -203,6 +204,13 @@ void DracoDataManager::Send() {
     pb_msg.add_base_quat_est(data->base_quat_est[i]);
   }
 
+  for (int i = 0; i < 3; ++i) {
+    pb_msg.add_base_com_pos(data->base_com_pos[i]);
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    pb_msg.add_base_com_quat(data->base_com_quat[i]);
+  }
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);
