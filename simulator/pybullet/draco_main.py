@@ -29,6 +29,13 @@ if Config.B_USE_MESHCAT:
     from pinocchio.visualize import MeshcatVisualizer
     import pinocchio as pin
 
+if Config.B_SIMULATE_SENSOR_NOISE:
+    noisy_sensors = {
+        'imu_frame_vel': 0.0035,
+        'joint_pos': 0.00001,
+        'joint_vel': 0.00001}
+else:
+    noisy_sensors = {}
 
 def set_initial_config(robot, joint_id):
     # Upperbody
@@ -190,6 +197,8 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_accel'] = pybullet_util.simulate_accelerometer_data(
             robot, link_id, previous_torso_velocity, dt)
+
+        pybullet_util.add_sensor_noise(sensor_data_dict, noisy_sensors)
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()

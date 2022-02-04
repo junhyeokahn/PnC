@@ -22,6 +22,8 @@ class Config(object):
 
     B_USE_MESHCAT = False
 
+    B_SIMULATE_SENSOR_NOISE = False
+
     KP, KD = dict(), dict()
 
     KP["neck_pitch"] = 20.
