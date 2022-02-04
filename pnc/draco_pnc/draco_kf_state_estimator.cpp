@@ -63,10 +63,10 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //    this->_update_dcm();
   // Note: update estimator assuming at least one foot is on the ground
   if (data->b_lf_contact) {
-    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_imu", base_estimate_);
+    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_link", base_estimate_);
   }
   if (data->b_rf_contact) {
-    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_imu", base_estimate_);
+    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_link", base_estimate_);
   }
   x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
   // values computed by linear KF estimator
