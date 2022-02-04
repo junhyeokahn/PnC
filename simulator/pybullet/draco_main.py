@@ -162,6 +162,7 @@ if __name__ == "__main__":
         robot, joint_id, link_id, pos_basejoint_to_basecom,
         rot_basejoint_to_basecom)
 
+    previous_torso_velocity = np.array([0., 0., 0.])
     while (1):
 
         # while_start = time.time()
@@ -187,8 +188,8 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
-        sensor_data_dict['imu_accel'] = np.transpose(pybullet_util.get_link_iso(
-            robot, link_id['torso_imu'])[0:3, 0:3])[0:3, 2] * -9.81
+        sensor_data_dict['imu_accel'] = pybullet_util.simulate_accelerometer_data(
+            robot, link_id, previous_torso_velocity, dt)
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
@@ -235,6 +236,7 @@ if __name__ == "__main__":
         sensor_data.base_joint_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
+        previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
 
         # Compute Command
         if Config.PRINT_TIME:
