@@ -224,6 +224,9 @@ while True:
     data_saver.add('base_pos_est', list(msg.base_pos_est))
     data_saver.add('base_vel_est', list(msg.base_vel_est))
 
+    # kinematics-based state estimator
+    data_saver.add('base_joint_pos', list(msg.base_joint_pos))
+    data_saver.add('base_joint_quat', list(msg.base_joint_quat))
     data_saver.advance()
 
     # publish back for plot juggler
