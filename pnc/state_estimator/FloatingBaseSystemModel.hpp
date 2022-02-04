@@ -68,18 +68,21 @@ class FloatingBaseSystemModel : public Kalman::LinearizedSystemModel<State, Cont
 public:
     FloatingBaseSystemModel()
     {
-      A.setZero();
+      F.setZero();
       B.setZero();
+
+      W.setIdentity();  // TODO assign based on better noise model
+      W = W * 0.001;
     }
 
     void initialize(const double &delta_t)
     {
       // assign non-zero elements to A and B matrices
-      A.block(0, 0, 3, 3) = I;
-      A.block(0, 3, 3, 3) = delta_t * I;
-      A.block(3, 3, 3, 3) = I;
-      A.block(6, 6, 3, 3) = I;
-      A.block(9, 9, 3, 3) = I;
+      F.block(0, 0, 3, 3) = I;
+      F.block(0, 3, 3, 3) = delta_t * I;
+      F.block(3, 3, 3, 3) = I;
+      F.block(6, 6, 3, 3) = I;
+      F.block(9, 9, 3, 3) = I;
       B.block(0, 0, 3, 3) = 0.5 * delta_t * delta_t * I;
       B.block(3, 0, 3, 3) = delta_t * I;
     }
@@ -89,29 +92,27 @@ public:
       State x_next;
 
       // We perform the state prediction taking advantage of sparsity in A and B
-      x_next.base_pos_x() =  A(0,0) * x.base_pos_x() + A(0,3) * x.base_vel_x() + B(0,0) * u.accel_meas_x();
-      x_next.base_pos_y() =  A(1,1) * x.base_pos_y() + A(1,4) * x.base_vel_y() + B(1,1) * u.accel_meas_y();
-      x_next.base_pos_z() =  A(2,2) * x.base_pos_z() + A(2,5) * x.base_vel_z() + B(2,2) * u.accel_meas_z();
-      x_next.base_vel_x() = A(3, 3) * x.base_vel_x() + B(3,0) * u.accel_meas_x();
-      x_next.base_vel_y() = A(4, 4) * x.base_vel_y() + B(4,1) * u.accel_meas_y();
-      x_next.base_vel_z() = A(5, 5) * x.base_vel_z() + B(5,2) * u.accel_meas_z();
-      x_next.lfoot_pos_x() = A(6, 6) * x.lfoot_pos_x();
-      x_next.lfoot_pos_y() = A(7, 7) * x.lfoot_pos_y();
-      x_next.lfoot_pos_z() = A(8, 8) * x.lfoot_pos_z();
-      x_next.rfoot_pos_x() = A(9, 9) * x.rfoot_pos_x();
-      x_next.rfoot_pos_y() = A(10, 10) * x.rfoot_pos_y();
-      x_next.rfoot_pos_z() = A(11, 11) * x.rfoot_pos_z();
+      x_next.base_pos_x() =  F(0,0) * x.base_pos_x() + F(0,3) * x.base_vel_x() + B(0,0) * u.accel_meas_x();
+      x_next.base_pos_y() =  F(1,1) * x.base_pos_y() + F(1,4) * x.base_vel_y() + B(1,1) * u.accel_meas_y();
+      x_next.base_pos_z() =  F(2,2) * x.base_pos_z() + F(2,5) * x.base_vel_z() + B(2,2) * u.accel_meas_z();
+      x_next.base_vel_x() = F(3, 3) * x.base_vel_x() + B(3,0) * u.accel_meas_x();
+      x_next.base_vel_y() = F(4, 4) * x.base_vel_y() + B(4,1) * u.accel_meas_y();
+      x_next.base_vel_z() = F(5, 5) * x.base_vel_z() + B(5,2) * u.accel_meas_z();
+      x_next.lfoot_pos_x() = F(6, 6) * x.lfoot_pos_x();
+      x_next.lfoot_pos_y() = F(7, 7) * x.lfoot_pos_y();
+      x_next.lfoot_pos_z() = F(8, 8) * x.lfoot_pos_z();
+      x_next.rfoot_pos_x() = F(9, 9) * x.rfoot_pos_x();
+      x_next.rfoot_pos_y() = F(10, 10) * x.rfoot_pos_y();
+      x_next.rfoot_pos_z() = F(11, 11) * x.rfoot_pos_z();
 
       return x_next;
     }
 
     void updateJacobians(State &x, const Control &u)
     {
-      F = A; // TODO rename A -> F
-      W.setIdentity();  // TODO assign based on better noise model
+
     }
 
-    Eigen::Matrix<double, 12, 12> A;
     Eigen::Matrix<double, 12, 3> B;
 
     Eigen::Matrix3d I = Eigen::Matrix3d::Identity();
