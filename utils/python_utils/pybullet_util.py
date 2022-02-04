@@ -305,6 +305,21 @@ def simulate_accelerometer_data(robot, link_id, previous_link_velocity, dt):
 
     return accelerometer_measurement
 
+
+def add_sensor_noise(sensors_dictionary, noisy_sensors):
+    # go through each sensor in the noisy_sensors dictionary
+    for n_sensor in noisy_sensors:
+        for element in range(len(sensors_dictionary[n_sensor])):
+            noise = np.random.normal(0, noisy_sensors[n_sensor])
+
+            # deal with the case where the sensor is a dictionary (e.g., joint positions)
+            if (isinstance(sensors_dictionary[n_sensor], dict)):
+                for val in sensors_dictionary[n_sensor]:
+                    sensors_dictionary[n_sensor][val] += noise
+            else:
+                sensors_dictionary[n_sensor][element] += noise
+
+
 def get_camera_image_from_link(robot, link, pic_width, pic_height, fov,
                                nearval, farval):
     aspect = pic_width / pic_height
