@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root version="2.3.8">
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab tab_name="BasePosition" containers="1">
+   <Container>
+    <DockSplitter sizes="0.333919;0.332162;0.333919" count="3" orientation="-">
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="0.079602" left="1426.246156" right="1436.191224" top="0.211716"/>
+       <limitY/>
+       <curve color="#ff0009" name="/base_pos_est[0]"/>
+       <curve color="#9c0000" name="/base_joint_pos[0]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.074749" left="1426.246156" right="1436.191224" top="-0.040953"/>
+       <limitY/>
+       <curve color="#057100" name="/base_pos_est[1]"/>
+       <curve color="#00ff00" name="/base_joint_pos[1]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="0.791842" left="1426.246156" right="1436.191224" top="0.923087"/>
+       <limitY/>
+       <curve color="#0033ff" name="/base_pos_est[2]"/>
+       <curve color="#0a0b85" name="/base_joint_pos[2]"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="BaseEuler" containers="1">
+   <Container>
+    <DockSplitter sizes="0.333919;0.332162;0.333919" count="3" orientation="-">
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="0.000159" left="1370.419978" right="1380.383041" top="0.000956"/>
+       <limitY/>
+       <curve color="#0017ff" name="/base_euler_est[0]"/>
+       <curve color="#ff0b00" name="/base_joint_euler[0]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.001559" left="1370.419978" right="1380.383041" top="0.049103"/>
+       <limitY/>
+       <curve color="#0003ff" name="/base_euler_est[1]"/>
+       <curve color="#ff0015" name="/base_joint_euler[1]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.000400" left="1370.419978" right="1380.383041" top="0.008135"/>
+       <limitY/>
+       <curve color="#0800ff" name="/base_euler_est[2]"/>
+       <curve color="#ff001d" name="/base_joint_euler[2]"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="IMU_raw" containers="1">
+   <Container>
+    <DockSplitter sizes="0.333919;0.332162;0.333919" count="3" orientation="-">
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.009715" left="-18.966645" right="-9.079026" top="0.008112"/>
+       <limitY/>
+       <curve color="#bcbd22" name="/imu_ang_vel_raw[0]"/>
+       <curve color="#1ac938" name="/imu_ang_vel_est[0]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.011711" left="-18.966645" right="-9.079026" top="0.008823"/>
+       <limitY/>
+       <curve color="#1f77b4" name="/imu_ang_vel_raw[1]"/>
+       <curve color="#ff7f0e" name="/imu_ang_vel_est[1]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range bottom="-0.006433" left="-18.966645" right="-9.079026" top="0.010971"/>
+       <limitY/>
+       <curve color="#d62728" name="/imu_ang_vel_raw[2]"/>
+       <curve color="#f14cc1" name="/imu_ang_vel_est[2]"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <default time_axis=""/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin ID="CSV Exporter" status="idle"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ZMQ Subscriber"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+
