@@ -6,6 +6,10 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   sp_ = DracoStateProvider::getStateProvider();
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+
+  iso_imu_to_base_com_ = robot_->get_link_iso("torso_imu").inverse() *
+                        robot_->get_link_iso("torso_link");
+
   x_hat_.setZero();
   system_model_.initialize(deltat);
   double gravity = -9.81; //TODO get from somewhere else
@@ -31,7 +35,9 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // estimate 0_R_b
   margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
                             data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
-  rot_world_to_base = margFilter_.getBaseRotation();
+//  rot_world_to_base = margFilter_.getBaseRotation();
+  rot_world_to_base = data->imu_frame_iso.block(0, 0, 3, 3) *
+          iso_imu_to_base_com_.linear();
 
   // use Kalman filter to estimate
   // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
