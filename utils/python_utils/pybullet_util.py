@@ -250,6 +250,7 @@ def get_sensor_data(robot, joint_id, link_id, pos_basejoint_to_basecom,
     # Handle Base Frame Quantities
     base_com_pos, base_com_quat = p.getBasePositionAndOrientation(robot)
     sensor_data['base_com_pos'] = np.asarray(base_com_pos)
+    sensor_data['base_com_pos_py'] = np.asarray(base_com_pos)
     sensor_data['base_com_quat'] = np.asarray(base_com_quat)
 
     base_com_lin_vel, base_com_ang_vel = p.getBaseVelocity(robot)
