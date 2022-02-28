@@ -90,13 +90,13 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // save current time step data
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
-    dm->data->base_pos_est = base_position_estimate;
-    dm->data->base_vel_est = base_velocity_estimate;
-    dm->data->base_euler_est = util::QuatToEulerZYX(margFilter_.getQuaternion());
-    dm->data->base_quat_est = Eigen::Vector4d(margFilter_.getQuaternion().w(),
-                                              margFilter_.getQuaternion().x(),
-                                              margFilter_.getQuaternion().y(),
-                                              margFilter_.getQuaternion().z()) ;
+    dm->data->base_pos_kf = base_position_estimate;
+    dm->data->base_vel_kf = base_velocity_estimate;
+    dm->data->base_euler_kf = util::QuatToEulerZYX(Eigen::Quaterniond(rot_world_to_base));
+    dm->data->base_quat_kf = Eigen::Vector4d(margFilter_.getQuaternion().w(),
+                                             margFilter_.getQuaternion().x(),
+                                             margFilter_.getQuaternion().y(),
+                                             margFilter_.getQuaternion().z()) ;
 
     dm->data->base_com_pos = data->base_com_pos;
     dm->data->base_com_quat = data->base_com_quat;

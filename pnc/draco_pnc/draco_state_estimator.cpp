@@ -166,20 +166,15 @@ void DracoStateEstimator::update(DracoSensorData *data) {
   prev_base_com_pos_ = base_com_pos;
 
   if (sp_->count % sp_->save_freq == 0) {
-    Eigen::Matrix3d tmp_rotation_z;
-    tmp_rotation_z << 0., 1.0, 0.,
-                   -1., 0., 0.,
-                   0., 0., 1.;
-
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
     dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
     dm->data->joint_velocities = robot_->get_q_dot().tail(robot_->n_a);
-    dm->data->base_joint_pos = base_joint_pos;
+    dm->data->base_joint_pos_est = base_joint_pos;
     Eigen::Quaternion<double> quat =
-        Eigen::Quaternion<double>(rot_world_to_base * tmp_rotation_z);
-    dm->data->base_joint_quat =
+        Eigen::Quaternion<double>(rot_world_to_base);
+    dm->data->base_joint_quat_est =
         Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
-    dm->data->base_joint_euler = util::QuatToEulerZYX(quat);
+    dm->data->base_joint_euler_est = util::QuatToEulerZYX(quat);
     dm->data->com_vel_est = sp_->com_vel_est;
     dm->data->com_vel_raw = robot_->get_com_lin_vel();
     dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;

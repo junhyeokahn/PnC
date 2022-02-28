@@ -219,15 +219,15 @@ while True:
     data_saver.add('icp_dot', list(msg.icp_dot))
 
     # values from KF state estimator
-    data_saver.add('base_quat_est', list(msg.base_quat_est))
-    data_saver.add('base_euler_est', list(msg.base_euler_est))
-    data_saver.add('base_pos_est', list(msg.base_pos_est))
-    data_saver.add('base_vel_est', list(msg.base_vel_est))
+    data_saver.add('base_quat_kf', list(msg.base_quat_kf))
+    data_saver.add('base_euler_kf', list(msg.base_euler_kf))
+    data_saver.add('base_pos_kf', list(msg.base_pos_kf))
+    data_saver.add('base_vel_kf', list(msg.base_vel_kf))
 
     # kinematics-based state estimator
-    data_saver.add('base_joint_pos', list(msg.base_joint_pos))
-    data_saver.add('base_joint_quat', list(msg.base_joint_quat))
-    data_saver.add('base_joint_euler', list(msg.base_joint_euler))
+    data_saver.add('base_joint_pos_est', list(msg.base_joint_pos_est))
+    data_saver.add('base_joint_quat_est', list(msg.base_joint_quat_est))
+    data_saver.add('base_joint_euler_est', list(msg.base_joint_euler_est))
 
     # ground truth from pybullet
     data_saver.add('base_com_pos', list(msg.base_com_pos))

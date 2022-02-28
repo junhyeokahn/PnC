@@ -134,9 +134,9 @@ public:
 
   // for meshcat visualization
   Eigen::VectorXd joint_positions = Eigen::VectorXd::Zero(27);
-  Eigen::VectorXd base_joint_pos = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd base_joint_quat = Eigen::VectorXd::Zero(4);
-  Eigen::VectorXd base_joint_euler = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_joint_pos_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_joint_quat_est = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd base_joint_euler_est = Eigen::VectorXd::Zero(3);
 
   // filtered data
   Eigen::VectorXd com_vel_est = Eigen::VectorXd::Zero(3);
@@ -157,10 +157,10 @@ public:
   double r_knee_int_frc_cmd = 0.;
 
   // state estimator
-  Eigen::VectorXd base_quat_est = Eigen::VectorXd::Zero(4);
-  Eigen::VectorXd base_euler_est = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd base_pos_est = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd base_vel_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_quat_kf = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd base_euler_kf = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_pos_kf = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_vel_kf = Eigen::VectorXd::Zero(3);
 
   Eigen::VectorXd base_com_pos = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd base_com_quat = Eigen::VectorXd::Zero(4);

@@ -107,8 +107,8 @@ public:
 
   // for meshcat visualization
   Eigen::VectorXd joint_positions = Eigen::VectorXd::Zero(27);
-  Eigen::VectorXd base_joint_pos = Eigen::VectorXd::Zero(3);
-  Eigen::VectorXd base_joint_quat = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd base_joint_pos_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd base_joint_quat_est = Eigen::VectorXd::Zero(4);
 
 
 };

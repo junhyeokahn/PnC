@@ -110,8 +110,8 @@ message pnc_msg {
 
   // meshcat visualization
   repeated float joint_positions = 78;
-  repeated float base_joint_pos = 79;
-  repeated float base_joint_quat = 80;
+  repeated float base_joint_pos_est = 79;
+  repeated float base_joint_quat_est = 80;
 
   // filtered data
   repeated float com_vel_est = 81;
@@ -131,12 +131,12 @@ message pnc_msg {
   float r_knee_int_frc_cmd = 92;
 
   // state estimator
-  repeated float base_quat_est = 93;
-  repeated float base_euler_est = 94;
-  repeated float base_pos_est = 95;
-  repeated float base_vel_est = 96;
+  repeated float base_quat_kf = 93;
+  repeated float base_euler_kf = 94;
+  repeated float base_pos_kf = 95;
+  repeated float base_vel_kf = 96;
 
   repeated float base_com_pos = 97;
   repeated float base_com_quat = 98;
-  repeated float base_joint_euler = 99;
+  repeated float base_joint_euler_est = 99;
 }

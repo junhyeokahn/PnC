@@ -166,11 +166,11 @@ void DracoDataManager::Send() {
   }
 
   for (int i = 0; i < 3; ++i) {
-    pb_msg.add_base_joint_pos(data->base_joint_pos[i]);
-    pb_msg.add_base_joint_euler(data->base_joint_euler[i]);
-    pb_msg.add_base_joint_quat(data->base_joint_quat[i]);
+    pb_msg.add_base_joint_pos_est(data->base_joint_pos_est[i]);
+    pb_msg.add_base_joint_euler_est(data->base_joint_euler_est[i]);
+    pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[i]);
   }
-  pb_msg.add_base_joint_quat(data->base_joint_quat[3]);
+  pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[3]);
 
   for (int i = 0; i < data->cmd_joint_positions.size(); ++i) {
     pb_msg.add_cmd_joint_positions(data->cmd_joint_positions[i]);
@@ -195,13 +195,13 @@ void DracoDataManager::Send() {
   }
 
   for (int i = 0; i < 3; ++i) {
-    pb_msg.add_base_pos_est(data->base_pos_est[i]);
-    pb_msg.add_base_vel_est(data->base_vel_est[i]);
-    pb_msg.add_base_euler_est(data->base_euler_est[i]);
+    pb_msg.add_base_pos_kf(data->base_pos_kf[i]);
+    pb_msg.add_base_vel_kf(data->base_vel_kf[i]);
+    pb_msg.add_base_euler_kf(data->base_euler_kf[i]);
   }
 
   for (int i = 0; i < 4; ++i) {
-    pb_msg.add_base_quat_est(data->base_quat_est[i]);
+    pb_msg.add_base_quat_kf(data->base_quat_kf[i]);
   }
 
   for (int i = 0; i < 3; ++i) {

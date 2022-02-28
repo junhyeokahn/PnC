@@ -46,8 +46,8 @@ void FixedDracoStateEstimator::update(FixedDracoSensorData *_data) {
         FixedDracoDataManager::GetFixedDracoDataManager();
     dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
     dm->data->joint_velocities = robot_->get_q_dot().tail(robot_->n_a);
-    dm->data->base_joint_pos = Eigen::VectorXd::Zero(3);
-    dm->data->base_joint_quat = Eigen::Matrix<double, 4, 1>(
+    dm->data->base_joint_pos_est = Eigen::VectorXd::Zero(3);
+    dm->data->base_joint_quat_est = Eigen::Matrix<double, 4, 1>(
         quat_world_to_base.w(), quat_world_to_base.x(), quat_world_to_base.y(),
         quat_world_to_base.z());
   }

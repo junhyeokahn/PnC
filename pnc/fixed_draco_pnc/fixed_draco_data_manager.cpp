@@ -116,10 +116,10 @@ void FixedDracoDataManager::Send() {
   }
 
   for (int i = 0; i < 3; ++i) {
-    pb_msg.add_base_joint_pos(data->base_joint_pos[i]);
-    pb_msg.add_base_joint_quat(data->base_joint_quat[i]);
+    pb_msg.add_base_joint_pos_est(data->base_joint_pos_est[i]);
+    pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[i]);
   }
-  pb_msg.add_base_joint_quat(data->base_joint_quat[3]);
+  pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[3]);
 
   // serialize
   std::string serialized_str;
