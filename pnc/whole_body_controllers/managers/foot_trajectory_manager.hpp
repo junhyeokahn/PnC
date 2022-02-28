@@ -20,7 +20,7 @@ public:
   /// Use current pose and vel to set zero acceleration command.
   void UpdateZeroAccCmd();
 
-  void useNominalPoseCmd(const Eigen::Isometry3d& nominal_foot_iso); 
+  void useNominalPoseCmd(const Eigen::Isometry3d &nominal_foot_iso);
 
   /// Initialize the swing foot trajectory
   void InitializeSwingTrajectory(const double _start_time,
@@ -32,12 +32,24 @@ public:
 
   double swing_height;
 
+  void InitializeInterpolationTrajectory(
+      const double &_start_time, const double &_duration,
+      const Eigen::Vector3d &_target_pos,
+      const Eigen::Quaternion<double> &_target_quat);
+  void UpdateInterpolationDesired(const double &_curr_time);
+
 private:
   void convertQuatDesToOriDes();
   RobotSystem *robot_;
 
   double start_time_;
   double duration_;
+
+  Eigen::Vector3d ini_pos_;
+  Eigen::Vector3d target_pos_;
+  Eigen::Quaternion<double> ini_quat_;
+  Eigen::Quaternion<double> target_quat_;
+  Eigen::Vector3d exp_error_;
 
   Task *foot_pos_task_;
   Task *foot_ori_task_;

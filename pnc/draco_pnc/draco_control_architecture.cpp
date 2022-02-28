@@ -12,6 +12,8 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
+#include "pnc/draco_pnc/draco_state_machine/single_support_landing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/single_support_lifting.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
@@ -255,6 +257,46 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 
   state_machines[draco_states::kRFootLanding] = new FootLanding(
       draco_states::kRFootLanding, this, EndEffector::RFoot, robot_);
+
+  state_machines[draco_states::kRFootSingleSupportLifting] =
+      new SingleSupportLifting(draco_states::kRFootSingleSupportLifting, this,
+                               EndEffector::RFoot, robot_);
+  ((SingleSupportLifting *)
+       state_machines[draco_states::kRFootSingleSupportLifting])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "lifting_duration");
+  ((SingleSupportLifting *)
+       state_machines[draco_states::kRFootSingleSupportLifting])
+      ->des_foot_z_pos_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "des_foot_height");
+
+  state_machines[draco_states::kLFootSingleSupportLifting] =
+      new SingleSupportLifting(draco_states::kRFootSingleSupportLifting, this,
+                               EndEffector::LFoot, robot_);
+  ((SingleSupportLifting *)
+       state_machines[draco_states::kLFootSingleSupportLifting])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "lifting_duration");
+  ((SingleSupportLifting *)
+       state_machines[draco_states::kLFootSingleSupportLifting])
+      ->des_foot_z_pos_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "des_foot_height");
+
+  state_machines[draco_states::kRFootSingleSupportLanding] =
+      new SingleSupportLanding(draco_states::kRFootSingleSupportLanding, this,
+                               EndEffector::RFoot, robot_);
+  ((SingleSupportLanding *)
+       state_machines[draco_states::kRFootSingleSupportLanding])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "landing_duration");
+
+  state_machines[draco_states::kLFootSingleSupportLanding] =
+      new SingleSupportLanding(draco_states::kRFootSingleSupportLanding, this,
+                               EndEffector::LFoot, robot_);
+  ((SingleSupportLanding *)
+       state_machines[draco_states::kLFootSingleSupportLanding])
+      ->moving_duration_ =
+      util::ReadParameter<double>(cfg["static_balancing"], "landing_duration");
 
   state = draco_states::kStand;
   prev_state = draco_states::kStand;
