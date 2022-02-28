@@ -17,7 +17,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     sudo apt-get install liburdfdom-dev &&
     sudo apt-get install libxi-dev libxmu-dev freeglut3-dev &&
     sudo apt-get install libopenscenegraph-dev &&
-    sudo apt-get install liboctomap-dev 
+    sudo apt-get install liboctomap-dev
 else
     echo "[error] os not detected"
 fi
@@ -28,8 +28,8 @@ cd dart &&
 git checkout release-6.11 &&
 mkdir build &&
 cd build &&
-cmake .. && make -j4
-&& sudo make install
+cmake .. && make -j4 &&
+sudo make install
 
 
 cd ${PATH_PACKAGE}
