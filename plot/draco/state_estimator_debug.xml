@@ -8,24 +8,24 @@
       <plot mode="TimeSeries" style="Lines">
        <range bottom="0.079602" left="1426.246156" right="1436.191224" top="0.211716"/>
        <limitY/>
-       <curve color="#ff0009" name="/base_pos_est[0]"/>
-       <curve color="#9c0000" name="/base_joint_pos[0]"/>
+       <curve color="#ff0009" name="/base_pos_kf[0]"/>
+       <curve color="#9c0000" name="/base_joint_pos_est[0]"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
        <range bottom="-0.074749" left="1426.246156" right="1436.191224" top="-0.040953"/>
        <limitY/>
-       <curve color="#057100" name="/base_pos_est[1]"/>
-       <curve color="#00ff00" name="/base_joint_pos[1]"/>
+       <curve color="#057100" name="/base_pos_kf[1]"/>
+       <curve color="#00ff00" name="/base_joint_pos_est[1]"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
        <range bottom="0.791842" left="1426.246156" right="1436.191224" top="0.923087"/>
        <limitY/>
-       <curve color="#0033ff" name="/base_pos_est[2]"/>
-       <curve color="#0a0b85" name="/base_joint_pos[2]"/>
+       <curve color="#0033ff" name="/base_pos_kf[2]"/>
+       <curve color="#0a0b85" name="/base_joint_pos_est[2]"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -38,24 +38,24 @@
       <plot mode="TimeSeries" style="Lines">
        <range bottom="0.000159" left="1370.419978" right="1380.383041" top="0.000956"/>
        <limitY/>
-       <curve color="#0017ff" name="/base_euler_est[0]"/>
-       <curve color="#ff0b00" name="/base_joint_euler[0]"/>
+       <curve color="#0017ff" name="/base_euler_kf[0]"/>
+       <curve color="#ff0b00" name="/base_joint_euler_est[0]"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
        <range bottom="-0.001559" left="1370.419978" right="1380.383041" top="0.049103"/>
        <limitY/>
-       <curve color="#0003ff" name="/base_euler_est[1]"/>
-       <curve color="#ff0015" name="/base_joint_euler[1]"/>
+       <curve color="#0003ff" name="/base_euler_kf[1]"/>
+       <curve color="#ff0015" name="/base_joint_euler_est[1]"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
        <range bottom="-0.000400" left="1370.419978" right="1380.383041" top="0.008135"/>
        <limitY/>
-       <curve color="#0800ff" name="/base_euler_est[2]"/>
-       <curve color="#ff001d" name="/base_joint_euler[2]"/>
+       <curve color="#0800ff" name="/base_euler_kf[2]"/>
+       <curve color="#ff001d" name="/base_joint_euler_est[2]"/>
       </plot>
      </DockArea>
     </DockSplitter>
