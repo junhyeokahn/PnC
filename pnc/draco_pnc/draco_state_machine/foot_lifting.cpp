@@ -18,11 +18,13 @@ FootLifting::FootLifting(const StateIdentifier _state_identifier,
 FootLifting::~FootLifting() {}
 
 void FootLifting::firstVisit() {
+  sp_->b_lf_contact = true;
+  sp_->b_rf_contact = true;
 
   ctrl_start_time_ = sp_->curr_time;
 
   if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootLifting" << std::endl;
+    std::cout << "draco_states::kRFootLifting[transition]" << std::endl;
 
     // force manager
     ctrl_arch_->rfoot_fm->InitializeRampToMin(sp_->curr_time, ramp_time_);
@@ -34,7 +36,7 @@ void FootLifting::firstVisit() {
     ctrl_arch_->lfoot_pos_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
     ctrl_arch_->lfoot_ori_hm->InitializeRampToMax(sp_->curr_time, ramp_time_);
   } else {
-    std::cout << "draco_states::kLFootLifting" << std::endl;
+    std::cout << "draco_states::kLFootLifting[transition]" << std::endl;
 
     // force manager
     ctrl_arch_->rfoot_fm->InitializeRampToMax(sp_->curr_time, ramp_time_);
@@ -94,9 +96,17 @@ bool FootLifting::endOfState() {
 }
 
 StateIdentifier FootLifting::getNextState() {
+  // For Static Stepping
+  // if (leg_side_ == EndEffector::LFoot) {
+  // return draco_states::kLFootSwingStatic;
+  //} else if (leg_side_ == EndEffector::RFoot) {
+  // return draco_states::kRFootSwingStatic;
+  //}
+
+  // For static one-leg balancing
   if (leg_side_ == EndEffector::LFoot) {
-    return draco_states::kLFootSwingStatic;
+    return draco_states::kLFootSingleSupportLifting;
   } else if (leg_side_ == EndEffector::RFoot) {
-    return draco_states::kRFootSwingStatic;
+    return draco_states::kRFootSingleSupportLifting;
   }
 }

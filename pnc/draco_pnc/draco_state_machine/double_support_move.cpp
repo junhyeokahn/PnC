@@ -17,6 +17,11 @@ DoubleSupportMove::~DoubleSupportMove() {}
 
 void DoubleSupportMove::firstVisit() {
 
+  ctrl_start_time_ = sp_->curr_time;
+
+  sp_->b_lf_contact = true;
+  sp_->b_rf_contact = true;
+
   if (com_move_states_ == com_move_states::Left) {
     std::cout << "draco_states::kMoveCoMToLFoot" << std::endl;
 
@@ -47,6 +52,13 @@ void DoubleSupportMove::firstVisit() {
     target_com_pos[0] += global_com_offset[0];
     target_com_pos[1] += global_com_offset[1];
 
+    // std::cout << "r_foot_contact pos: "
+    //<< robot_->get_link_iso("r_foot_contact").translation()
+    //<< std::endl;
+    // std::cout << "target com pos: " << target_com_pos << std::endl;
+    // std::cout << "target_base_quat: " << target_base_quat.toRotationMatrix()
+    //<< std::endl;
+
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
         sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
 
@@ -63,8 +75,6 @@ void DoubleSupportMove::firstVisit() {
   } else {
     std::cout << "invalid draco_states" << std::endl;
   }
-
-  ctrl_start_time_ = sp_->curr_time;
 }
 
 void DoubleSupportMove::oneStep() {
@@ -85,7 +95,7 @@ bool DoubleSupportMove::endOfState() {
   // if (state_machine_time_ > moving_duration_) {
   // return true;
   //}
-  if (b_static_walking_trigger) {
+  if (state_machine_time_ > moving_duration_ && b_static_walking_trigger) {
     return true;
   }
   return false;
