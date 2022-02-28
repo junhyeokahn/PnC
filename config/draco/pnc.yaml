@@ -225,12 +225,12 @@ walking:
     n_steps: 1
 
 static_walking:
-    moving_duration: 5.
+    moving_duration: 2
     #com_height: 0.68
     com_height: 0.92
     com_offset: [0., 0.]
 
-    swing_duration: 5.
+    swing_duration: 2
     des_foot_x_inc_local: 0.
     des_foot_y_inc_local: 0.0
     des_foot_ori_inc_local: 0. ## degrees

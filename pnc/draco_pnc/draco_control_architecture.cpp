@@ -206,6 +206,9 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToRFoot])
       ->des_com_height_ =
       util::ReadParameter<double>(cfg["static_walking"], "com_height");
+  ((DoubleSupportMove *)state_machines[draco_states::kMoveCoMToRFoot])
+      ->com_offset =
+      util::ReadParameter<Eigen::Vector2d>(cfg["static_walking"], "com_offset");
 
   state_machines[draco_states::kMoveCoMToCenter] = new DoubleSupportMove(
       draco_states::kMoveCoMToCenter, this, com_move_states::Center, robot_);
