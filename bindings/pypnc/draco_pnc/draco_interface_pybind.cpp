@@ -40,8 +40,8 @@ PYBIND11_MODULE(draco_interface, m) {
       .def_readwrite("base_com_quat", &DracoSensorData::base_com_quat)
       .def_readwrite("base_com_lin_vel", &DracoSensorData::base_com_lin_vel)
       .def_readwrite("base_com_ang_vel", &DracoSensorData::base_com_ang_vel)
-      .def_readwrite("base_joint_pos", &DracoSensorData::base_joint_pos)
-      .def_readwrite("base_joint_quat", &DracoSensorData::base_joint_quat)
+//      .def_readwrite("base_joint_pos", &DracoSensorData::base_joint_pos)
+//      .def_readwrite("base_joint_quat", &DracoSensorData::base_joint_quat)
       .def_readwrite("base_joint_lin_vel", &DracoSensorData::base_joint_lin_vel)
       .def_readwrite("base_joint_ang_vel", &DracoSensorData::base_joint_ang_vel)
       .def_readwrite("imu_accel", &DracoSensorData::imu_accel);

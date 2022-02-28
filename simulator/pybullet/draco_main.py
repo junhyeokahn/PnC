@@ -257,8 +257,8 @@ if __name__ == "__main__":
         sensor_data.base_com_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_com_lin_vel = sensor_data_dict["base_com_lin_vel"]
         sensor_data.base_com_ang_vel = sensor_data_dict["base_com_ang_vel"]
-        sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
-        sensor_data.base_joint_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
+        # sensor_data.base_joint_pos = sensor_data_dict['base_joint_pos']
+        # sensor_data.base_joint_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
         previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
