@@ -50,9 +50,10 @@ void DracoStateEstimator::update_debug(DracoSensorData *_data) {
       _data->base_com_quat[0], _data->base_com_quat[1], _data->base_com_quat[2],
       _data->base_com_quat[3]);
 
+  Eigen::Vector3d dummy = Eigen::Vector3d::Zero();
   robot_->update_system(_data->base_com_pos, base_com_quat,
                         _data->base_com_lin_vel, _data->base_com_ang_vel,
-                        _data->base_joint_pos, base_com_quat,
+                        dummy, base_com_quat,
                         _data->base_joint_lin_vel, _data->base_joint_ang_vel,
                         _data->joint_positions, _data->joint_velocities, true);
 
@@ -60,8 +61,8 @@ void DracoStateEstimator::update_debug(DracoSensorData *_data) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
     dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
     dm->data->joint_velocities = robot_->get_q_dot().tail(robot_->n_a);
-    dm->data->base_joint_pos = _data->base_joint_pos;
-    dm->data->base_joint_quat = _data->base_com_quat;
+    dm->data->base_joint_pos_est = dummy;
+    dm->data->base_joint_quat_est = _data->base_com_quat;
   }
   this->ComputeDCM();
 }
