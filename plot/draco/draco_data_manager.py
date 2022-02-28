@@ -16,6 +16,7 @@ import numpy as np
 from plot.data_saver import DataSaver
 
 from messages.draco_pb2 import *
+from messages.draco_pybullet_sensors_pb2 import *
 
 import argparse
 
@@ -31,6 +32,12 @@ context = zmq.Context()
 pnc_socket = context.socket(zmq.SUB)
 pnc_socket.connect(addr)
 pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+
+if not config["b_exp"]:
+    gt_socket = context.socket(zmq.SUB)
+    gt_socket.connect("tcp://localhost:5558")       # match to PUB address from sim, e.g., from pybullet_simulation.py
+    gt_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+    gt_msg = bullet_gt_msg()   # messages that live only within python
 
 pj_context = zmq.Context()
 pj_socket = pj_context.socket(zmq.PUB)
@@ -79,6 +86,11 @@ while True:
 
     encoded_msg = pnc_socket.recv()
     msg.ParseFromString(encoded_msg)
+
+    # receive ground truth data (if in simulation)
+    if not config["b_exp"]:
+        encoded_gt_msg = gt_socket.recv()
+        gt_msg.ParseFromString(encoded_gt_msg)
 
     # save pkl
     data_saver.add('time', msg.time)
@@ -229,9 +241,14 @@ while True:
     data_saver.add('base_joint_quat_est', list(msg.base_joint_quat_est))
     data_saver.add('base_joint_euler_est', list(msg.base_joint_euler_est))
 
-    # ground truth from pybullet
     data_saver.add('base_com_pos', list(msg.base_com_pos))
     data_saver.add('base_com_quat', list(msg.base_com_quat))
+
+    # ground truth from pybullet
+    if not config["b_exp"]:
+        data_saver.add('base_joint_pos', list(gt_msg.base_joint_pos))
+        data_saver.add('base_com_pos_py', list(gt_msg.base_com_pos_py))
+        data_saver.add('base_joint_quat', list(gt_msg.base_joint_quat))
 
     data_saver.advance()
 
