@@ -32,7 +32,7 @@ public:
     {
       H.setZero();
       V.setIdentity();
-      V = V * 0.001;
+      V = V * 0.005;
     }
 
     void initialize(const double &gravity)
@@ -60,7 +60,7 @@ public:
                                    const std::string reference_frame,
                                    PoseMeasurement &measurementToUpdate)
     {
-      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() -
+      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() - robot->get_base_local_com_pos() -
               robot->get_link_iso(contact_frame).translation();
 
       measurementToUpdate.base_pose_lfoot_x() = contact_to_ref_translation.x();
@@ -73,7 +73,7 @@ public:
                                     const std::string reference_frame,
                                     PoseMeasurement &measurementToUpdate)
     {
-      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() -
+      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() - robot->get_base_local_com_pos() -
               robot->get_link_iso(contact_frame).translation();
 
       measurementToUpdate.base_pose_rfoot_x() = contact_to_ref_translation.x();
