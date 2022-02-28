@@ -23,6 +23,7 @@ class Config(object):
     B_USE_MESHCAT = False
 
     B_SIMULATE_SENSOR_NOISE = False
+    IP_PUB_ADDRESS = "tcp://127.0.0.1:5558"
 
     KP, KD = dict(), dict()
 

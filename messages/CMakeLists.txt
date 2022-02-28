@@ -12,6 +12,9 @@ target_include_directories(pnc-msg-fixed-draco PUBLIC ${CMAKE_CURRENT_BINARY_DIR
 PROTOBUF_GENERATE_PYTHON(pnc-msg-fixed-draco-py fixed_draco.proto)
 add_custom_target(pnc-msg-fixed-draco-py-target ALL DEPENDS ${pnc-msg-fixed-draco-py})
 
+PROTOBUF_GENERATE_PYTHON(pnc-msg-draco-bullet-sensors-py draco_pybullet_sensors.proto)
+add_custom_target(pnc-msg-draco-bullet-sensors-py-target ALL DEPENDS ${pnc-msg-draco-bullet-sensors-py})
+
 install(TARGETS pnc-msg-draco DESTINATION "${INSTALL_LIB_DIR}")
 install(TARGETS pnc-msg-fixed-draco DESTINATION "${INSTALL_LIB_DIR}")
 

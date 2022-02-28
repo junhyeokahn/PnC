@@ -6,6 +6,7 @@ sys.path.append(cwd)
 sys.path.append(cwd + '/utils/python_utils')
 sys.path.append(cwd + '/simulator/pybullet')
 sys.path.append(cwd + '/build/lib')
+sys.path.append(os.getcwd() + '/build')
 
 import time, math
 from collections import OrderedDict
@@ -24,6 +25,21 @@ import pybullet_util
 import util
 
 import draco_interface
+
+import zmq
+from ruamel.yaml import YAML
+from messages.draco_pybullet_sensors_pb2 import *
+
+# load PnC config settings for syncing
+with open("config/draco/pnc.yaml", 'r') as stream:
+    config = YAML().load(stream)
+    SAVE_FREQ = config["save_freq"]
+
+# create publisher of ground truth data (from pybullet)
+context = zmq.Context()
+estimator_gt_socket = context.socket(zmq.PUB)
+estimator_gt_socket.bind(Config.IP_PUB_ADDRESS)
+bullet_msg = bullet_gt_msg()
 
 if Config.B_USE_MESHCAT:
     from pinocchio.visualize import MeshcatVisualizer
@@ -247,6 +263,16 @@ if __name__ == "__main__":
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
         previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
 
+        # ground truth
+        del bullet_msg.base_joint_pos[:]
+        del bullet_msg.base_com_pos_py[:]
+        del bullet_msg.base_joint_quat[:]
+        for i in range(3):
+            bullet_msg.base_joint_pos.append(sensor_data_dict['base_joint_pos'][i])
+            bullet_msg.base_com_pos_py.append(sensor_data_dict['base_com_pos_py'][i])
+            bullet_msg.base_joint_quat.append(qt[i])
+        bullet_msg.base_joint_quat.append(qt[3])
+
         # Compute Command
         if Config.PRINT_TIME:
             start_time = time.time()
@@ -270,6 +296,11 @@ if __name__ == "__main__":
 
         # Apply Command
         pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
+
+        # Send ground truth data
+        if(count % SAVE_FREQ == 0):
+            serialized_msg = bullet_msg.SerializeToString()
+            estimator_gt_socket.send(serialized_msg)
 
         # Save Image
         if (Config.VIDEO_RECORD) and (count % Config.RECORD_FREQ == 0):

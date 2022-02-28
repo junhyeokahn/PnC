@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package draco_pybullet_sensors;
+
+message bullet_gt_msg {
+
+  // data from simulator (no sensors available on real robot)
+  repeated float base_joint_pos = 1;
+  repeated float base_com_pos_py = 2;
+  repeated float base_joint_quat = 3;
+}
