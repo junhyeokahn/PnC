@@ -42,7 +42,9 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // use Kalman filter to estimate
   // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
-    x_hat_.initialize(robot_->get_link_iso("torso_link"),
+    Eigen::Vector3d torso_frame = Eigen::Vector3d::Zero();
+    torso_frame = robot_->get_link_iso("torso_link").translation() - rot_world_to_base * robot_->get_base_local_com_pos();
+    x_hat_.initialize(torso_frame,
                       robot_->get_link_iso("l_foot_contact"),
                       robot_->get_link_iso("r_foot_contact"));
     kalman_filter_.init(x_hat_);
@@ -76,9 +78,6 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // values computed by linear KF estimator
   Eigen::Vector3d base_position_estimate( x_hat_.base_pos_x(),  x_hat_.base_pos_y(),  x_hat_.base_pos_z());
   Eigen::Vector3d base_velocity_estimate( x_hat_.base_vel_x(),  x_hat_.base_vel_y(),  x_hat_.base_vel_z());
-
-//  Eigen::Vector3d base_com_pos =
-//          base_position_estimate + rot_world_to_base * robot_->get_base_local_com_pos();
 
 //  data->base_com_quat = Eigen::Vector4d(margFilter_.getQuaternion().w(),
 //                                        margFilter_.getQuaternion().x(),

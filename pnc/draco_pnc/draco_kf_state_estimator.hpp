@@ -41,6 +41,8 @@ protected:
   RobotSystem *robot_;
   DracoStateProvider *sp_;
 
+  Eigen::Isometry3d iso_imu_to_base_com_;
+
   // stuff needed for the kalman filter
   State x_hat_;
   Control accelerometer_input_;

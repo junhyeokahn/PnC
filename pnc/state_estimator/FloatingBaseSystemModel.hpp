@@ -33,12 +33,12 @@ public:
     double& rfoot_pos_y() {return (*this) [rfoot_position_y]; }
     double& rfoot_pos_z() {return (*this) [rfoot_position_z]; }
 
-    void initialize(const Eigen::Isometry3d &base_transform,
+    void initialize(const Eigen::Vector3d &base_transform,
                     const Eigen::Isometry3d &lfoot_transform,
                     const Eigen::Isometry3d &rfoot_transform) {
-    base_pos_x() = base_transform.translation().x();
-    base_pos_y() = base_transform.translation().y();
-    base_pos_z() = base_transform.translation().z();
+    base_pos_x() = base_transform.x();
+    base_pos_y() = base_transform.y();
+    base_pos_z() = base_transform.z();
 
     lfoot_pos_x() = lfoot_transform.translation().x();
     lfoot_pos_y() = lfoot_transform.translation().y();
