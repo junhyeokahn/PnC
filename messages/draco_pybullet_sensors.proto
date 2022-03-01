@@ -8,4 +8,6 @@ message bullet_gt_msg {
   repeated float base_joint_pos = 1;
   repeated float base_com_pos_py = 2;
   repeated float base_joint_quat = 3;
+  repeated float base_joint_lin_vel = 4;
+  repeated float base_joint_ang_vel = 5;
 }

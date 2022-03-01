@@ -249,6 +249,8 @@ while True:
         data_saver.add('base_joint_pos', list(gt_msg.base_joint_pos))
         data_saver.add('base_com_pos_py', list(gt_msg.base_com_pos_py))
         data_saver.add('base_joint_quat', list(gt_msg.base_joint_quat))
+        data_saver.add('base_joint_lin_vel', list(gt_msg.base_joint_lin_vel))
+        data_saver.add('base_joint_ang_vel', list(gt_msg.base_joint_ang_vel))
 
     data_saver.advance()
 

@@ -267,10 +267,14 @@ if __name__ == "__main__":
         del bullet_msg.base_joint_pos[:]
         del bullet_msg.base_com_pos_py[:]
         del bullet_msg.base_joint_quat[:]
+        del bullet_msg.base_joint_lin_vel[:]
+        del bullet_msg.base_joint_ang_vel[:]
         for i in range(3):
             bullet_msg.base_joint_pos.append(sensor_data_dict['base_joint_pos'][i])
             bullet_msg.base_com_pos_py.append(sensor_data_dict['base_com_pos_py'][i])
             bullet_msg.base_joint_quat.append(qt[i])
+            bullet_msg.base_joint_lin_vel.append(sensor_data_dict['base_joint_lin_vel'][i])
+            bullet_msg.base_joint_ang_vel.append(sensor_data_dict['base_joint_ang_vel'][i])
         bullet_msg.base_joint_quat.append(qt[3])
 
         # Compute Command
