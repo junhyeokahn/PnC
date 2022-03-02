@@ -6,7 +6,7 @@
     <DockSplitter sizes="0.333707;0.332587;0.333707" orientation="-" count="3">
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-3.329568" right="16.571089" top="0.215060" bottom="-0.070612"/>
+       <range left="-83.893838" right="-63.950698" top="0.150252" bottom="-0.002970"/>
        <limitY/>
        <curve color="#ff0009" name="/base_pos_kf[0]"/>
        <curve color="#9c0000" name="/base_joint_pos_est[0]"/>
@@ -15,7 +15,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-3.329568" right="16.571089" top="0.012863" bottom="-0.074939"/>
+       <range left="-83.893838" right="-63.950698" top="0.012580" bottom="-0.077070"/>
        <limitY/>
        <curve color="#057100" name="/base_pos_kf[1]"/>
        <curve color="#00ff00" name="/base_joint_pos_est[1]"/>
@@ -24,7 +24,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-3.329568" right="16.571089" top="0.795081" bottom="0.794490"/>
+       <range left="-83.893838" right="-63.950698" top="0.794987" bottom="0.794405"/>
        <limitY/>
        <curve color="#0033ff" name="/base_pos_kf[2]"/>
        <curve color="#0a0b85" name="/base_joint_pos_est[2]"/>
@@ -39,30 +39,34 @@
     <DockSplitter sizes="0.333707;0.332587;0.333707" orientation="-" count="3">
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="0.000000" right="19.957659" top="0.169006" bottom="-0.168951"/>
+       <range left="24.151393" right="44.088101" top="0.206763" bottom="-0.206934"/>
        <limitY/>
-       <curve color="#bcbd22" name="/base_vel_kf[0]"/>
-       <curve color="#1ac938" name="/com_vel_est[0]"/>
+       <curve color="#002fff" name="/base_vel_kf[0]"/>
+       <curve color="#000000" name="/base_joint_lin_vel[0]"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="0.000000" right="19.957659" top="0.003845" bottom="-0.000780"/>
+       <range left="24.151393" right="44.088101" top="0.001556" bottom="-0.005642"/>
        <limitY/>
-       <curve color="#1f77b4" name="/base_vel_kf[1]"/>
-       <curve color="#ff7f0e" name="/com_vel_est[1]"/>
-      </plot>
-     </DockArea>
-     <DockArea name="...">
-      <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="0.000000" right="19.957659" top="0.000653" bottom="-0.011466"/>
-       <limitY/>
-       <curve color="#d62728" name="/base_vel_kf[2]">
-        <transform alias="/base_vel_kf[2][Scale/Offset]" name="Scale/Offset">
-         <options value_offset="0" value_scale="1" time_offset="0"/>
+       <curve color="#0026ff" name="/base_vel_kf[1]">
+        <transform alias="/base_vel_kf[1][Scale/Offset]" name="Scale/Offset">
+         <options value_offset="0" value_scale="-1.0" time_offset="0"/>
         </transform>
        </curve>
-       <curve color="#f14cc1" name="/com_vel_est[2]"/>
+       <curve color="#000000" name="/base_joint_lin_vel[1]"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
+       <range left="24.151393" right="44.088101" top="-0.000663" bottom="-0.004240"/>
+       <limitY/>
+       <curve color="#0019ff" name="/base_vel_kf[2]">
+        <transform alias="/base_vel_kf[2][Scale/Offset]" name="Scale/Offset">
+         <options value_offset="-0.012" value_scale="-1.0" time_offset="0"/>
+        </transform>
+       </curve>
+       <curve color="#000000" name="/base_joint_lin_vel[2]"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -70,10 +74,10 @@
   </Tab>
   <Tab tab_name="BaseEuler" containers="1">
    <Container>
-    <DockSplitter sizes="0.334104;0.331792;0.334104" orientation="-" count="3">
+    <DockSplitter sizes="0.333707;0.332587;0.333707" orientation="-" count="3">
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="1.570933" bottom="1.570924"/>
+       <range left="-83.893838" right="-63.950698" top="1.570797" bottom="1.570794"/>
        <limitY/>
        <curve color="#0017ff" name="/base_euler_kf[0]"/>
        <curve color="#ff0b00" name="/base_joint_euler_est[0]"/>
@@ -81,7 +85,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="0.000035" bottom="0.000030"/>
+       <range left="-83.893838" right="-63.950698" top="0.000076" bottom="-0.000160"/>
        <limitY/>
        <curve color="#0003ff" name="/base_euler_kf[1]"/>
        <curve color="#ff0015" name="/base_joint_euler_est[1]"/>
@@ -89,7 +93,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="-0.000001" bottom="-0.000001"/>
+       <range left="-83.893838" right="-63.950698" top="0.000002" bottom="-0.000008"/>
        <limitY/>
        <curve color="#0800ff" name="/base_euler_kf[2]"/>
        <curve color="#ff001d" name="/base_joint_euler_est[2]"/>
@@ -103,7 +107,7 @@
     <DockSplitter sizes="0.334104;0.331792;0.334104" orientation="-" count="3">
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="-0.002330" bottom="-0.013661"/>
+       <range left="-83.893838" right="-63.950698" top="0.002796" bottom="-0.003396"/>
        <limitY/>
        <curve color="#bcbd22" name="/imu_ang_vel_raw[0]"/>
        <curve color="#1ac938" name="/imu_ang_vel_est[0]"/>
@@ -111,7 +115,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="-0.000654" bottom="-0.003908"/>
+       <range left="-83.893838" right="-63.950698" top="0.000118" bottom="-0.000131"/>
        <limitY/>
        <curve color="#1f77b4" name="/imu_ang_vel_raw[1]"/>
        <curve color="#ff7f0e" name="/imu_ang_vel_est[1]"/>
@@ -119,7 +123,7 @@
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" flip_x="false" style="Lines" flip_y="false">
-       <range left="-227.023734" right="-207.075313" top="0.011431" bottom="0.001902"/>
+       <range left="-83.893838" right="-63.950698" top="0.000021" bottom="-0.000113"/>
        <limitY/>
        <curve color="#d62728" name="/imu_ang_vel_raw[2]"/>
        <curve color="#f14cc1" name="/imu_ang_vel_est[2]"/>
