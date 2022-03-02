@@ -12,7 +12,7 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
 
   x_hat_.setZero();
   system_model_.initialize(deltat);
-  double gravity = -9.81; //TODO get from somewhere else
+  double gravity = 9.81; //TODO get from somewhere else
   base_pose_model_.initialize(gravity);
   rot_world_to_base.setZero();
 
@@ -51,7 +51,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     kalman_filter_.init(x_hat_);
     b_first_visit_ = false;
   }
-  base_pose_model_.packAccelerationInput(rot_world_to_base, data->imu_accel, accelerometer_input_);
+  base_pose_model_.packAccelerationInput(data->imu_frame_iso.block(0,0,3,3).transpose(), data->imu_accel, accelerometer_input_);
   x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
 
   // update contact
