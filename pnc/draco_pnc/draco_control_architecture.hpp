@@ -26,6 +26,7 @@ constexpr int kRFootContactTransitionEnd = 7;
 constexpr int kRFootSwing = 8;
 constexpr int kSwaying = 10;
 constexpr int kBaseInterpolation = 11;
+// Static stepping
 constexpr int kMoveCoMToLFoot = 12;
 constexpr int kRFootLifting = 13;
 constexpr int kRFootSwingStatic = 14;
@@ -35,6 +36,11 @@ constexpr int kMoveCoMToRFoot = 17;
 constexpr int kLFootLifting = 18;
 constexpr int kLFootSwingStatic = 19;
 constexpr int kLFootLanding = 20;
+// static balancing
+constexpr int kRFootSingleSupportLifting = 21;
+constexpr int kLFootSingleSupportLifting = 22;
+constexpr int kRFootSingleSupportLanding = 23;
+constexpr int kLFootSingleSupportLanding = 24;
 } // namespace draco_states
 
 class DracoControlArchitecture : public ControlArchitecture {

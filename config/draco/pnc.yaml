@@ -7,9 +7,9 @@ b_exp: false
 #b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
 
 state_estimator:
-#    n_data_com_vel: [200, 200, 200]
-#    n_data_com_vel: [20, 20, 20]
-    n_data_com_vel: [100, 100, 100]
+    #n_data_com_vel: [200, 200, 200]
+    n_data_com_vel: [20, 20, 20]
+    #n_data_com_vel: [100, 100, 100]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -225,18 +225,23 @@ walking:
     n_steps: 1
 
 static_walking:
-    moving_duration: 5.
+    moving_duration: 2
     #com_height: 0.68
     com_height: 0.92
-    com_offset: [0., 0.04]
+    com_offset: [0., 0.]
 
-    swing_duration: 5.
+    swing_duration: 2
     des_foot_x_inc_local: 0.
-    des_foot_y_inc_local: 0.05
+    des_foot_y_inc_local: 0.0
     des_foot_ori_inc_local: 0. ## degrees
+
+static_balancing:
+    lifting_duration: 2.
+    des_foot_height: 0.05
+    landing_duration: 2.
 
 controller:
     waiting_count: 10
-    b_smoothing: true
-    #b_smoothing: false
+    #b_smoothing: true
+    b_smoothing: false
     smoothing_duration: 0.2
