@@ -43,7 +43,8 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
     Eigen::Vector3d torso_frame = Eigen::Vector3d::Zero();
-    torso_frame = robot_->get_link_iso("torso_link").translation() - rot_world_to_base * robot_->get_base_local_com_pos();
+    Eigen::Vector3d world_to_base = robot_->get_link_iso("torso_link").translation() + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos();
+    torso_frame = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
     x_hat_.initialize(torso_frame,
                       robot_->get_link_iso("l_foot_contact"),
                       robot_->get_link_iso("r_foot_contact"));
@@ -69,10 +70,16 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //    this->_update_dcm();
   // Note: update estimator assuming at least one foot is on the ground
   if (data->b_lf_contact) {
-    base_pose_model_.update_position_from_lfoot(robot_,"l_foot_contact", "torso_link", base_estimate_);
+    Eigen::Vector3d contact_to_ref_translation = robot_->get_link_iso("torso_link").translation()
+                + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos()
+                - robot_->get_link_iso("l_foot_contact").translation();
+    base_pose_model_.update_position_from_lfoot(contact_to_ref_translation, base_estimate_);
   }
   if (data->b_rf_contact) {
-    base_pose_model_.update_position_from_rfoot(robot_,"r_foot_contact", "torso_link", base_estimate_);
+    Eigen::Vector3d contact_to_ref_translation = robot_->get_link_iso("torso_link").translation()
+                                                 + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos()
+                                                 - robot_->get_link_iso("r_foot_contact").translation();
+    base_pose_model_.update_position_from_rfoot(contact_to_ref_translation, base_estimate_);
   }
   x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
   // values computed by linear KF estimator
@@ -103,7 +110,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
                                              margFilter_.getQuaternion().y(),
                                              margFilter_.getQuaternion().z()) ;
 
-    dm->data->base_com_pos = data->base_com_pos;
-    dm->data->base_com_quat = data->base_com_quat;
+    dm->data->base_com_pos = data->base_com_pos;    //TODO remove and pass directly from python
+    dm->data->base_com_quat = data->base_com_quat;  //TODO remove and pass directly from python
   }
 }

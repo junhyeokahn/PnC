@@ -32,7 +32,7 @@ public:
     {
       H.setZero();
       V.setIdentity();
-      V = V * 0.005;
+      V = V * 0.001;
     }
 
     void initialize(const double &gravity)
@@ -55,30 +55,20 @@ public:
       u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer + gravity;
     }
 
-    void update_position_from_lfoot(RobotSystem *robot,
-                                   const std::string contact_frame,
-                                   const std::string reference_frame,
-                                   PoseMeasurement &measurementToUpdate)
-    {
-      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() - robot->get_base_local_com_pos() -
-              robot->get_link_iso(contact_frame).translation();
-
-      measurementToUpdate.base_pose_lfoot_x() = contact_to_ref_translation.x();
-      measurementToUpdate.base_pose_lfoot_y() = contact_to_ref_translation.y();
-      measurementToUpdate.base_pose_lfoot_z() = contact_to_ref_translation.z();
-    }
-
-    void update_position_from_rfoot(RobotSystem *robot,
-                                    const std::string contact_frame,
-                                    const std::string reference_frame,
+    void update_position_from_lfoot(const Eigen::Vector3d& lfoot_wrt_world,
                                     PoseMeasurement &measurementToUpdate)
     {
-      Eigen::Vector3d contact_to_ref_translation = robot->get_link_iso(reference_frame).translation() - robot->get_base_local_com_pos() -
-              robot->get_link_iso(contact_frame).translation();
+      measurementToUpdate.base_pose_lfoot_x() = lfoot_wrt_world.x();
+      measurementToUpdate.base_pose_lfoot_y() = lfoot_wrt_world.y();
+      measurementToUpdate.base_pose_lfoot_z() = lfoot_wrt_world.z();
+    }
 
-      measurementToUpdate.base_pose_rfoot_x() = contact_to_ref_translation.x();
-      measurementToUpdate.base_pose_rfoot_y() = contact_to_ref_translation.y();
-      measurementToUpdate.base_pose_rfoot_z() = contact_to_ref_translation.z();
+    void update_position_from_rfoot(const Eigen::Vector3d& rfoot_wrt_world,
+                                    PoseMeasurement &measurementToUpdate)
+    {
+      measurementToUpdate.base_pose_rfoot_x() = rfoot_wrt_world.x();
+      measurementToUpdate.base_pose_rfoot_y() = rfoot_wrt_world.y();
+      measurementToUpdate.base_pose_rfoot_z() = rfoot_wrt_world.z();
     }
 
 
