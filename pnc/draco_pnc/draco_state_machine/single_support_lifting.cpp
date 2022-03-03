@@ -70,7 +70,7 @@ void SingleSupportLifting::oneStep() {
   }
 }
 
-void SingleSupportLifting::lastVisit() {}
+void SingleSupportLifting::lastVisit() { b_static_balancing_trigger = false; }
 
 bool SingleSupportLifting::endOfState() {
   if (state_machine_time_ >= moving_duration_ && b_static_balancing_trigger) {

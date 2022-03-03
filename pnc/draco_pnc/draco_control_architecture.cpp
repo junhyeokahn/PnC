@@ -257,9 +257,13 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 
   state_machines[draco_states::kLFootLanding] = new FootLanding(
       draco_states::kLFootLanding, this, EndEffector::LFoot, robot_);
+  ((FootLanding *)state_machines[draco_states::kLFootLanding])->ramp_time_ =
+      util::ReadParameter<double>(cfg["static_walking"], "transition_time");
 
   state_machines[draco_states::kRFootLanding] = new FootLanding(
       draco_states::kRFootLanding, this, EndEffector::RFoot, robot_);
+  ((FootLanding *)state_machines[draco_states::kRFootLanding])->ramp_time_ =
+      util::ReadParameter<double>(cfg["static_walking"], "transition_time");
 
   state_machines[draco_states::kRFootSingleSupportLifting] =
       new SingleSupportLifting(draco_states::kRFootSingleSupportLifting, this,

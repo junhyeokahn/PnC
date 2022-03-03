@@ -11,8 +11,6 @@ FootLifting::FootLifting(const StateIdentifier _state_identifier,
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
   ramp_time_ = 0.5;
-
-  b_static_walking_trigger = false;
 }
 
 FootLifting::~FootLifting() {}
@@ -96,17 +94,17 @@ bool FootLifting::endOfState() {
 }
 
 StateIdentifier FootLifting::getNextState() {
-  // For Static Stepping
-  // if (leg_side_ == EndEffector::LFoot) {
-  // return draco_states::kLFootSwingStatic;
-  //} else if (leg_side_ == EndEffector::RFoot) {
-  // return draco_states::kRFootSwingStatic;
-  //}
-
-  // For static one-leg balancing
-  if (leg_side_ == EndEffector::LFoot) {
-    return draco_states::kLFootSingleSupportLifting;
-  } else if (leg_side_ == EndEffector::RFoot) {
-    return draco_states::kRFootSingleSupportLifting;
+  if (b_step_by_step) {
+    if (leg_side_ == EndEffector::LFoot) {
+      return draco_states::kLFootSingleSupportLifting;
+    } else if (leg_side_ == EndEffector::RFoot) {
+      return draco_states::kRFootSingleSupportLifting;
+    }
+  } else {
+    if (leg_side_ == EndEffector::LFoot) {
+      return draco_states::kLFootSwingStatic;
+    } else if (leg_side_ == EndEffector::RFoot) {
+      return draco_states::kRFootSwingStatic;
+    }
   }
 }
