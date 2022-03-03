@@ -1,6 +1,7 @@
 FILE(GLOB_RECURSE sources *.cpp)
 FILE(GLOB wbc_headers "*.hpp")
 FILE(GLOB ihwbc_headers "ihwbc/*.hpp")
+FILE(GLOB kin_wbc_headers "kin_wbc/*.hpp")
 FILE(GLOB manager_headers "managers/*.hpp")
 
 add_library(pnc-wbc ${sources})
@@ -15,5 +16,7 @@ install(FILES ${wbc_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/pnc/whole_body_controllers")
 install(FILES ${ihwbc_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/pnc/whole_body_controllers/ihwbc")
+install(FILES ${kin_wbc_headers} DESTINATION
+    "${INSTALL_INCLUDE_DIR}/pnc/whole_body_controllers/kin_wbc")
 install(FILES ${manager_headers} DESTINATION
     "${INSTALL_INCLUDE_DIR}/pnc/whole_body_controllers/managers")
