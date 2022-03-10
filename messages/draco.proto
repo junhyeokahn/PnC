@@ -139,4 +139,10 @@ message pnc_msg {
   repeated float base_com_pos = 97;
   repeated float base_com_quat = 98;
   repeated float base_joint_euler_est = 99;
+
+  // feet contact
+  repeated bool lfoot_contact = 100;
+  repeated bool rfoot_contact = 101;
+  repeated bool lf_contact = 102;
+  repeated bool rf_contact = 103;
 }

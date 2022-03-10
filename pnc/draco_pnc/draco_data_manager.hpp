@@ -164,4 +164,10 @@ public:
 
   Eigen::VectorXd base_com_pos = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd base_com_quat = Eigen::VectorXd::Zero(4);
+
+  // feet contact status
+  bool lfoot_contact = false;
+  bool rfoot_contact = false;
+  bool lf_contact = false;
+  bool rf_contact = false;
 };

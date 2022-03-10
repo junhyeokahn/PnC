@@ -211,6 +211,12 @@ void DracoDataManager::Send() {
   for (int i = 0; i < 4; ++i) {
     pb_msg.add_base_com_quat(data->base_com_quat[i]);
   }
+
+  pb_msg.add_lfoot_contact(data->lfoot_contact);
+  pb_msg.add_rfoot_contact(data->rfoot_contact);
+  pb_msg.add_lf_contact(data->lf_contact);
+  pb_msg.add_rf_contact(data->rf_contact);
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

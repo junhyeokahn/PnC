@@ -244,6 +244,12 @@ while True:
     data_saver.add('base_com_pos', list(msg.base_com_pos))
     data_saver.add('base_com_quat', list(msg.base_com_quat))
 
+    # update feet contacts
+    data_saver.add('lfoot_contact', list(msg.lfoot_contact))
+    data_saver.add('rfoot_contact', list(msg.rfoot_contact))
+    data_saver.add('lf_contact', list(msg.lf_contact))
+    data_saver.add('rf_contact', list(msg.rf_contact))
+
     # ground truth from pybullet
     if not config["b_exp"]:
         data_saver.add('base_joint_pos', list(gt_msg.base_joint_pos))

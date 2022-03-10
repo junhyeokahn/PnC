@@ -145,6 +145,12 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
                                              margFilter_.getQuaternion().y(),
                                              margFilter_.getQuaternion().z()) ;
 
+    // save feet contact information
+    dm->data->lfoot_contact = sp_->stance_foot == "l_foot_contact";
+    dm->data->rfoot_contact = sp_->stance_foot == "r_foot_contact";
+    dm->data->lf_contact = sp_->b_lf_contact;
+    dm->data->rf_contact = sp_->b_rf_contact;
+
     dm->data->base_com_pos = data->base_com_pos;    //TODO remove and pass directly from python
     dm->data->base_com_quat = data->base_com_quat;  //TODO remove and pass directly from python
   }
