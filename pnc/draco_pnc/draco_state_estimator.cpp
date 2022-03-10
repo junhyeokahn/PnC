@@ -149,17 +149,17 @@ void DracoStateEstimator::update(DracoSensorData *data) {
   this->ComputeDCM();
 
   // update contact
-  // if (data->b_rf_contact) {
-  // sp_->b_rf_contact = 1;
-  //} else {
-  // sp_->b_rf_contact = 0;
-  //}
+   if (data->b_rf_contact) {
+   sp_->b_rf_contact = 1;
+  } else {
+   sp_->b_rf_contact = 0;
+  }
 
-  // if (data->b_lf_contact) {
-  // sp_->b_lf_contact = 1;
-  //} else {
-  // sp_->b_lf_contact = 0;
-  //}
+   if (data->b_lf_contact) {
+   sp_->b_lf_contact = 1;
+  } else {
+   sp_->b_lf_contact = 0;
+  }
 
   // save current time step data
   sp_->prev_stance_foot = sp_->stance_foot;

@@ -18,8 +18,8 @@ FootLanding::FootLanding(const StateIdentifier _state_identifier,
 FootLanding::~FootLanding() {}
 
 void FootLanding::firstVisit() {
-  sp_->b_lf_contact = true;
-  sp_->b_rf_contact = true;
+//  sp_->b_lf_contact = true;
+//  sp_->b_rf_contact = true;
 
   ctrl_start_time_ = sp_->curr_time;
 

@@ -28,8 +28,8 @@ void FootSwing::firstVisit() {
 
   if (leg_side_ == EndEffector::RFoot) {
 
-    sp_->b_rf_contact = false;
-    sp_->b_lf_contact = true;
+//    sp_->b_rf_contact = false;
+//    sp_->b_lf_contact = true;
 
     Eigen::Vector3d local_des_foot_pos(des_foot_x_increment_,
                                        des_foot_y_increment_, 0.);
@@ -55,8 +55,8 @@ void FootSwing::firstVisit() {
 
   } else if (leg_side_ == EndEffector::LFoot) {
 
-    sp_->b_rf_contact = true;
-    sp_->b_lf_contact = false;
+//    sp_->b_rf_contact = true;
+//    sp_->b_lf_contact = false;
 
     Eigen::Vector3d local_des_foot_pos(des_foot_x_increment_,
                                        des_foot_y_increment_, 0.);
@@ -100,8 +100,8 @@ void FootSwing::oneStep() {
 }
 
 void FootSwing::lastVisit() {
-  sp_->b_rf_contact = true;
-  sp_->b_lf_contact = true;
+//  sp_->b_rf_contact = true;
+//  sp_->b_lf_contact = true;
 }
 
 bool FootSwing::endOfState() {

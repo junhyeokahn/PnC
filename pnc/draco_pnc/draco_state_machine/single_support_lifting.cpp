@@ -24,8 +24,8 @@ void SingleSupportLifting::firstVisit() {
   if (leg_side_ == EndEffector::RFoot) {
     std::cout << "draco_states::kRFootSingleSupportLifting" << std::endl;
 
-    sp_->b_rf_contact = false;
-    sp_->b_lf_contact = true;
+//    sp_->b_rf_contact = false;
+//    sp_->b_lf_contact = true;
 
     Eigen::Vector3d des_foot_pos =
         robot_->get_link_iso("r_foot_contact").translation();
@@ -40,8 +40,8 @@ void SingleSupportLifting::firstVisit() {
   } else if (leg_side_ == EndEffector::LFoot) {
     std::cout << "draco_states::kLFootSingleSupportLifting" << std::endl;
 
-    sp_->b_rf_contact = true;
-    sp_->b_lf_contact = false;
+//    sp_->b_rf_contact = true;
+//    sp_->b_lf_contact = false;
 
     Eigen::Vector3d des_foot_pos =
         robot_->get_link_iso("l_foot_contact").translation();

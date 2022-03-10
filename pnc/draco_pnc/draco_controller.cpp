@@ -132,16 +132,16 @@ void DracoController::getCommand(void *cmd) {
       // tci_container_->task_list[0]->ignore_jacobian_row(sp_->rfoot_jidx);
       // tci_container_->task_list[2]->ignore_jacobian_row(sp_->rfoot_jidx);
       // ignore floating joints for swing foot task
-      tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
-      tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
+//      tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
+//      tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
     }
     if (!sp_->b_lf_contact) {
       // ignore left foot joints for com task
       // tci_container_->task_list[0]->ignore_jacobian_row(sp_->lfoot_jidx);
       // tci_container_->task_list[2]->ignore_jacobian_row(sp_->lfoot_jidx);
       // ignore floating joints for swing foot task
-      tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
-      tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
+//      tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
+//      tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
     }
 
     int rf_dim(0);
