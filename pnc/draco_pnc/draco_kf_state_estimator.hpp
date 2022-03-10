@@ -31,17 +31,27 @@ class DracoSensorData;
 
 class DracoKFStateEstimator {
 public:
-  DracoKFStateEstimator(RobotSystem *robot);
+    enum SupportState {LEFT, RIGHT, DOUBLE};
+
+    DracoKFStateEstimator(RobotSystem *robot);
   ~DracoKFStateEstimator();
 
   void initialize(DracoSensorData *);
   void update(DracoSensorData *);
 
+private:
+  void updateSupportState(DracoStateProvider* sp, SupportState& support_state);
+
 protected:
   RobotSystem *robot_;
   DracoStateProvider *sp_;
+  SupportState current_support_state_;
+  SupportState prev_support_state_;
+  Eigen::Vector3d foot_pos_from_base_pre_transition;
+  Eigen::Vector3d foot_pos_from_base_post_transition;
 
   Eigen::Isometry3d iso_imu_to_base_com_;
+  Eigen::Vector3d global_linear_offset_;
 
   // stuff needed for the kalman filter
   State x_hat_;
@@ -54,5 +64,6 @@ protected:
 
   Eigen::Matrix3d rot_world_to_base;
 
-    bool b_first_visit_;
+  bool b_first_visit_;
+  bool b_skip_prediction;
 };

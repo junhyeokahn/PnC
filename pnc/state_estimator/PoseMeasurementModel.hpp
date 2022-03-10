@@ -63,6 +63,14 @@ public:
       measurementToUpdate.base_pose_lfoot_z() = lfoot_wrt_world.z();
     }
 
+    void update_position_from_lfoot(const State& xhat,
+                                    PoseMeasurement &measurementToUpdate)
+    {
+      measurementToUpdate.base_pose_lfoot_x() = xhat.base_pos_x() - xhat.lfoot_pos_x();
+      measurementToUpdate.base_pose_lfoot_y() = xhat.base_pos_y() - xhat.lfoot_pos_y();
+      measurementToUpdate.base_pose_lfoot_z() = xhat.base_pos_z() - xhat.lfoot_pos_z();
+    }
+
     void update_position_from_rfoot(const Eigen::Vector3d& rfoot_wrt_world,
                                     PoseMeasurement &measurementToUpdate)
     {
@@ -71,6 +79,13 @@ public:
       measurementToUpdate.base_pose_rfoot_z() = rfoot_wrt_world.z();
     }
 
+    void update_position_from_rfoot(const State& xhat,
+                                    PoseMeasurement &measurementToUpdate)
+    {
+      measurementToUpdate.base_pose_rfoot_x() = xhat.base_pos_x() - xhat.rfoot_pos_x();
+      measurementToUpdate.base_pose_rfoot_y() = xhat.base_pos_y() - xhat.rfoot_pos_y();
+      measurementToUpdate.base_pose_rfoot_z() = xhat.base_pos_z() - xhat.rfoot_pos_z();
+    }
 
     PoseMeasurement h(const State& x) const
     {

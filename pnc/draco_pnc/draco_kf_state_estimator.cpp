@@ -15,8 +15,14 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   double gravity = 9.81; //TODO get from somewhere else
   base_pose_model_.initialize(gravity);
   rot_world_to_base.setZero();
+  global_linear_offset_.setZero();
+  current_support_state_ = DOUBLE;
+  prev_support_state_ = DOUBLE;
+  foot_pos_from_base_pre_transition.setZero();
+  foot_pos_from_base_post_transition(0) = NAN;
 
   b_first_visit_ = true;
+  b_skip_prediction = false;
 }
 
 DracoKFStateEstimator::~DracoKFStateEstimator() {
@@ -33,63 +39,91 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     return;
 
   // estimate 0_R_b
-  margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
-                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
+//  margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
+//                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
 //  rot_world_to_base = margFilter_.getBaseRotation();
-  rot_world_to_base = data->imu_frame_iso.block(0, 0, 3, 3) *
-          iso_imu_to_base_com_.linear();
+  Eigen::Matrix3d rot_world_to_imu = data->imu_frame_iso.block(0, 0, 3, 3);
+  rot_world_to_base = rot_world_to_imu * iso_imu_to_base_com_.linear();
+  base_pose_model_.packAccelerationInput(rot_world_to_imu.transpose(), data->imu_accel, accelerometer_input_);
 
-  // use Kalman filter to estimate
-  // [0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
+  Eigen::Vector3d world_to_base = robot_->get_link_iso("torso_link").translation()
+                                  + rot_world_to_imu * robot_->get_base_local_com_pos();
+  // initialize Kalman filter state xhat =[0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
-    Eigen::Vector3d torso_frame = Eigen::Vector3d::Zero();
-    Eigen::Vector3d world_to_base = robot_->get_link_iso("torso_link").translation() + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos();
-    torso_frame = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
-    x_hat_.initialize(torso_frame,
+    x_hat_.initialize(world_to_base,
                       robot_->get_link_iso("l_foot_contact"),
                       robot_->get_link_iso("r_foot_contact"));
     kalman_filter_.init(x_hat_);
     b_first_visit_ = false;
   }
-  base_pose_model_.packAccelerationInput(data->imu_frame_iso.block(0,0,3,3).transpose(), data->imu_accel, accelerometer_input_);
-  x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
 
   // update contact
   if (data->b_rf_contact) {
-      sp_->b_rf_contact = true;
+    sp_->b_rf_contact = true;
+    system_model_.update_leg_covariance(FloatingBaseSystemModel::RIGHT, COV_LEVEL_LOW);
   } else {
-      sp_->b_rf_contact = false;
+    sp_->b_rf_contact = false;
+    system_model_.update_leg_covariance(FloatingBaseSystemModel::RIGHT, COV_LEVEL_HIGH);
   }
 
   if (data->b_lf_contact) {
-      sp_->b_lf_contact = true;
+    sp_->b_lf_contact = true;
+    system_model_.update_leg_covariance(FloatingBaseSystemModel::LEFT, COV_LEVEL_LOW);
   } else {
-      sp_->b_lf_contact = false;
+    sp_->b_lf_contact = false;
+    system_model_.update_leg_covariance(FloatingBaseSystemModel::LEFT, COV_LEVEL_HIGH);
   }
+  this->updateSupportState(sp_, current_support_state_);
+
+  // at stance foot change, update global offset
+  if (current_support_state_ != prev_support_state_) {
+
+    // from double to right support and viceversa
+    if ((prev_support_state_ == DOUBLE) && (current_support_state_ == RIGHT)) {
+      foot_pos_from_base_pre_transition = x_hat_.tail(6).head(3);
+    } else if ((prev_support_state_ == RIGHT) && (current_support_state_ == DOUBLE)) {
+      foot_pos_from_base_post_transition = robot_->get_link_iso("l_foot_contact").translation();
+      global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
+      global_linear_offset_.z() = 0.0;    // TODO make more robust later for non-flat ground
+      system_model_.update_rfoot_offset(global_linear_offset_);
+    } else if ((prev_support_state_ == DOUBLE) && (current_support_state_ == LEFT)) {
+      // from double support to left support and viceversa
+      foot_pos_from_base_pre_transition = x_hat_.tail(3);
+    } else if ((prev_support_state_ == LEFT) && (current_support_state_ == DOUBLE)) {
+      foot_pos_from_base_post_transition = robot_->get_link_iso("r_foot_contact").translation();
+      global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
+      global_linear_offset_.z() = 0.0;  // TODO make more robust later for non-flat ground
+      system_model_.update_lfoot_offset(global_linear_offset_);
+    }
+    if (!foot_pos_from_base_post_transition.hasNaN()) {
+      x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
+      global_linear_offset_.setZero();
+      system_model_.update_lfoot_offset(global_linear_offset_);
+      system_model_.update_rfoot_offset(global_linear_offset_);
+      b_skip_prediction = true;
+    }
+  }
+  if(!b_skip_prediction)
+    x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
+  else
+    b_skip_prediction = false;
 
 //    this->_update_dcm();
-  // Note: update estimator assuming at least one foot is on the ground
+  // update measurement assuming at least one foot is on the ground
   if (data->b_lf_contact) {
-    Eigen::Vector3d contact_to_ref_translation = robot_->get_link_iso("torso_link").translation()
-                + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos()
-                - robot_->get_link_iso("l_foot_contact").translation();
-    base_pose_model_.update_position_from_lfoot(contact_to_ref_translation, base_estimate_);
+    Eigen::Vector3d pos_base_from_lfoot = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
+    base_pose_model_.update_position_from_lfoot(pos_base_from_lfoot, base_estimate_);
   }
   if (data->b_rf_contact) {
-    Eigen::Vector3d contact_to_ref_translation = robot_->get_link_iso("torso_link").translation()
-                                                 + data->imu_frame_iso.block(0, 0, 3, 3) * robot_->get_base_local_com_pos()
-                                                 - robot_->get_link_iso("r_foot_contact").translation();
-    base_pose_model_.update_position_from_rfoot(contact_to_ref_translation, base_estimate_);
+    Eigen::Vector3d pos_base_from_rfoot = world_to_base - robot_->get_link_iso("r_foot_contact").translation();
+    base_pose_model_.update_position_from_rfoot(pos_base_from_rfoot, base_estimate_);
   }
   x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
+
   // values computed by linear KF estimator
   Eigen::Vector3d base_position_estimate( x_hat_.base_pos_x(),  x_hat_.base_pos_y(),  x_hat_.base_pos_z());
   Eigen::Vector3d base_velocity_estimate( x_hat_.base_vel_x(),  x_hat_.base_vel_y(),  x_hat_.base_vel_z());
 
-//  data->base_com_quat = Eigen::Vector4d(margFilter_.getQuaternion().w(),
-//                                        margFilter_.getQuaternion().x(),
-//                                        margFilter_.getQuaternion().y(),
-//                                        margFilter_.getQuaternion().z());
 
 //  robot_->update_system(
 //          base_com_pos, margFilter_.getQuaternion(),
@@ -99,6 +133,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //          data->joint_velocities, true);
 
 
+  prev_support_state_ = current_support_state_;
   // save current time step data
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
@@ -114,3 +149,19 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     dm->data->base_com_quat = data->base_com_quat;  //TODO remove and pass directly from python
   }
 }
+
+void DracoKFStateEstimator::updateSupportState(DracoStateProvider* sp, SupportState& support_state)
+{
+  if (sp->b_rf_contact && sp->b_lf_contact){
+    support_state = DOUBLE;
+    return;
+  }
+
+  if (sp->b_lf_contact) {
+    support_state = LEFT;
+    return;
+  }
+
+  support_state = RIGHT;
+}
+
