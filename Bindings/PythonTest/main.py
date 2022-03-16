@@ -14,9 +14,9 @@ def main():
   # MPC Constructor Inputs
   mass = float(11.7)
   num_legs = int(4)
-  body_inertia = np.ndarray([0.07335, 0.0, 0.0, 0.0, 0.25068, 0.0, 0.0, 0.0, 0.25447], dtype=float)
-  _MPC_WEIGHTS = np.ndarray([5, 5, 0.2, 0, 0, 50, 0.5, 0.5, 0.2, 10, 5., 0.1, 0], dtype=float)
-  _PLANNING_HORIZON_STEPS = float(10)
+  body_inertia = (0.07335, 0.0, 0.0, 0.0, 0.25068, 0.0, 0.0, 0.0, 0.25447)
+  _MPC_WEIGHTS = (5., 5., 0.2, 0., 0., 50, 0.5, 0.5, 0.2, 10., 5., 0.1, 0.)
+  _PLANNING_HORIZON_STEPS = int(10)
   _PLANNING_TIMESTEP = float(0.025)
   qp_solver = ConvexMPC.OSQP
 
