@@ -1,5 +1,6 @@
 pybind11_add_module(ConvexMPC ConvexMPCPy.cpp)
-target_link_libraries(ConvexMPC PRIVATE A1PnC)
+target_link_libraries(ConvexMPC PRIVATE myMPC A1PnC)
+set_target_properties(myMPC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(A1PnC PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(A1Interface A1InterfacePy.cpp)
