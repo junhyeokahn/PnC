@@ -79,14 +79,12 @@ public:
 };
 
 static double COV_LEVEL_LOW = 0.001;
-static double COV_LEVEL_HIGH = 0.001;
+static double COV_LEVEL_HIGH = 100000.0;
 
 //template<typename Vector3, template<class> class CovarianceBase = Kalman::StandardBase>
 class FloatingBaseSystemModel : public Kalman::LinearizedSystemModel<State, Control, Kalman::StandardBase>
 {
 public:
-
-    enum LEG {LEFT = 0, RIGHT};
 
     FloatingBaseSystemModel()
     {
@@ -110,18 +108,6 @@ public:
       F.block(9, 9, 3, 3) = I;
       B.block(0, 0, 3, 3) = 0.5 * delta_t * delta_t * I;
       B.block(3, 0, 3, 3) = delta_t * I;
-    }
-
-    void update_leg_covariance(LEG leg, double& level)
-    {
-      switch (leg) {
-        case LEFT:
-          W.block(6, 6, 3, 3) = level * I;
-          break;
-        case RIGHT:
-          W.block(9, 9, 3, 3) = level * I;
-          break;
-      }
     }
 
     void update_base_offset(const Eigen::Vector3d& offset)

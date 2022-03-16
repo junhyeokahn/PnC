@@ -27,6 +27,7 @@ public:
 class PoseMeasurementModel : public Kalman::LinearizedMeasurementModel<State, PoseMeasurement, Kalman::StandardBase>
 {
 public:
+    enum LEG {LEFT = 0, RIGHT};
 
     PoseMeasurementModel()
     {
@@ -62,6 +63,19 @@ public:
       measurementToUpdate.base_pose_lfoot_y() = lfoot_wrt_world.y();
       measurementToUpdate.base_pose_lfoot_z() = lfoot_wrt_world.z();
     }
+
+    void update_leg_covariance(LEG leg, double& level)
+    {
+      switch (leg) {
+        case LEFT:
+          V.block(0, 0, 3, 3) = level * I;
+          break;
+        case RIGHT:
+          V.block(3, 3, 3, 3) = level * I;
+          break;
+      }
+    }
+
 
     void update_position_from_lfoot(const State& xhat,
                                     PoseMeasurement &measurementToUpdate)
