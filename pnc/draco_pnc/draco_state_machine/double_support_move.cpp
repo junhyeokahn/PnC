@@ -83,13 +83,10 @@ void DoubleSupportMove::oneStep() {
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
 }
 
-void DoubleSupportMove::lastVisit() {}
+void DoubleSupportMove::lastVisit() { b_static_walking_trigger = false; }
 
 bool DoubleSupportMove::endOfState() {
 
-  // if (state_machine_time_ > moving_duration_) {
-  // return true;
-  //}
   if (state_machine_time_ > moving_duration_ && b_static_walking_trigger) {
     return true;
   }

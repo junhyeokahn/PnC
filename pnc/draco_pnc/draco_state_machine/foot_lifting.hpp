@@ -19,7 +19,7 @@ public:
   StateIdentifier getNextState();
   double ramp_time_;
 
-  bool b_static_walking_trigger;
+  bool b_step_by_step = true;
 
 protected:
   DracoStateProvider *sp_;

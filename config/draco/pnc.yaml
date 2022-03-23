@@ -9,7 +9,6 @@ b_exp: false
 state_estimator:
     #n_data_com_vel: [200, 200, 200]
     n_data_com_vel: [20, 20, 20]
-    #n_data_com_vel: [100, 100, 100]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -22,7 +21,7 @@ wbc:
     contact:
         rf_z_max: 1000.0
         w_rf: 0.
-        foot_half_width: 0.03 # 8.5 / 2 (cm)
+        foot_half_width: 0.04 # 8.5 / 2 (cm)
         #foot_half_length: 0.05 # 22 / 2 (cm)
         foot_half_length: 0.08 # 22 / 2 (cm)
         #mu: 0.3
@@ -62,7 +61,9 @@ wbc:
 
         torso_ori:
             weight: [20., 20., 2.]
+            #weight: [0.0002, 0.0002, 0.02]
             sim_kp: [100, 100, 100]
+            #sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
             exp_kp: [15, 15, 10]
             exp_kd: [0.2, 0.2, 0.1]
@@ -170,22 +171,22 @@ walking:
         l_elbow_fe: -1.57
         r_shoulder_aa: -0.523
         r_elbow_fe: -1.57
-        #l_hip_aa: 0.087
-        l_hip_aa: 0.047
+        l_hip_aa: 0.
+        #l_hip_aa: 0.047
         l_hip_fe: -0.785
         l_knee_fe_jp: 0.785
         l_knee_fe_jd: 0.785
         l_ankle_fe: -0.785
-        #l_ankle_ie: -0.087
-        l_ankle_ie: -0.047
-        #r_hip_aa: -0.087
-        r_hip_aa: -0.047
+        l_ankle_ie: 0.
+        #l_ankle_ie: -0.047
+        r_hip_aa: 0.
+        #r_hip_aa: -0.047
         r_hip_fe: -0.785
         r_knee_fe_jp: 0.785
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
-        #r_ankle_ie: 0.087
-        r_ankle_ie: 0.047
+        r_ankle_ie: 0.
+        #r_ankle_ie: 0.047
         neck_pitch: 0.
         r_hip_ie: 0.
         l_hip_ie: 0.
@@ -206,7 +207,8 @@ walking:
     foot_height_threshold: 0.01
 
     #com_height: 0.68
-    com_height: 0.92
+    #com_height: 0.92
+    com_height: 1.
 
     swing_height: 0.03
 
@@ -225,23 +227,26 @@ walking:
     n_steps: 1
 
 static_walking:
-    moving_duration: 2
+    moving_duration: 3
     #com_height: 0.68
-    com_height: 0.92
+    #com_height: 0.92
+    com_height: 1.
     com_offset: [0., 0.]
 
-    swing_duration: 2
+    swing_duration: 1
     des_foot_x_inc_local: 0.
     des_foot_y_inc_local: 0.0
     des_foot_ori_inc_local: 0. ## degrees
 
+    transition_time: 0.5
+
 static_balancing:
-    lifting_duration: 2.
+    lifting_duration: 1.
     des_foot_height: 0.05
-    landing_duration: 2.
+    landing_duration: 1.
 
 controller:
     waiting_count: 10
-    #b_smoothing: true
-    b_smoothing: false
+    b_smoothing: true
+    #b_smoothing: false
     smoothing_duration: 0.2
