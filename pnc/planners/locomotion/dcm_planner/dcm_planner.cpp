@@ -946,9 +946,11 @@ void DCMPlanner::compute_reference_pelvis_ori() {
       // Find the midfeet
       midfeet.computeMidfeet(stance_step, target_step, midfeet);
       // Create the hermite quaternion curve object
-      pelvis_ori_quat_curves.push_back(
-          HermiteQuaternionCurve(current_pelvis_ori, Eigen::Vector3d::Zero(),
-                                 midfeet.orientation, Eigen::Vector3d::Zero()));
+      pelvis_ori_quat_curves.push_back(HermiteQuaternionCurve(
+          current_pelvis_ori, Eigen::Vector3d::Zero(), midfeet.orientation,
+          Eigen::Vector3d::Zero(), t_ss));
+      // TODO:swing_dur
+      //
       // Update the pelvis orientation
       current_pelvis_ori = midfeet.orientation;
       // Increment the step counter
@@ -957,9 +959,10 @@ void DCMPlanner::compute_reference_pelvis_ori() {
       // Orientation is constant during transfers
       midfeet.computeMidfeet(prev_left_stance, prev_right_stance, midfeet);
       current_pelvis_ori = midfeet.orientation;
-      pelvis_ori_quat_curves.push_back(
-          HermiteQuaternionCurve(current_pelvis_ori, Eigen::Vector3d::Zero(),
-                                 current_pelvis_ori, Eigen::Vector3d::Zero()));
+      pelvis_ori_quat_curves.push_back(HermiteQuaternionCurve(
+          current_pelvis_ori, Eigen::Vector3d::Zero(), current_pelvis_ori,
+          Eigen::Vector3d::Zero(), t_ds));
+      // TODO:transfer_dur
     }
   }
 }
@@ -977,29 +980,26 @@ void DCMPlanner::get_ref_ori_ang_vel_acc(const double t,
   int step_index = which_step_index(time);
   double t_traj_start = get_t_step_start(step_index);
   double t_traj_end = get_t_step(step_index);
-  double traj_duration = t_traj_end - t_traj_start;
+  // double traj_duration = t_traj_end - t_traj_start;
 
   // Clamp the time query for general VRP types that are still in transfer
   double time_query = clampDOUBLE(time, t_traj_start, t_traj_end);
   // Initialize interpolation variable s.
-  double s = (time_query - t_traj_start) / traj_duration;
+  double s = time_query - t_traj_start;
 
   // If it is a swing step, update the trjaectory start times and end.
   if (get_t_swing_start_end(step_index, t_traj_start, t_traj_end)) {
     // Clamp the time query for swing VRP types that are still in transfer
     time_query = clampDOUBLE(time, t_traj_start, t_traj_end);
     // Update trajectory duration and interpolation variable
-    traj_duration = t_traj_end - t_traj_start;
-    s = (time_query - t_traj_start) / traj_duration;
+    // traj_duration = t_traj_end - t_traj_start;
+    s = time_query - t_traj_start;
   }
 
   // Obtain the reference values
-  pelvis_ori_quat_curves[step_index].Evaluate(s, quat_out);
-  pelvis_ori_quat_curves[step_index].GetAngularVelocity(s, ang_vel_out);
-  pelvis_ori_quat_curves[step_index].GetAngularAcceleration(s, ang_acc_out);
-
-  ang_vel_out /= traj_duration;
-  ang_acc_out /= traj_duration;
+  pelvis_ori_quat_curves[step_index].evaluate(s, quat_out);
+  pelvis_ori_quat_curves[step_index].getAngularVelocity(s, ang_vel_out);
+  pelvis_ori_quat_curves[step_index].getAngularAcceleration(s, ang_acc_out);
 
   // std::cout << "t:" << time << " s:" << s << " ang_vel_out = " <<
   // ang_vel_out.transpose() << std::endl;

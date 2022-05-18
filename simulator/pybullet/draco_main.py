@@ -74,10 +74,10 @@ if __name__ == "__main__":
         p.connect(p.DIRECT)
     else:
         p.connect(p.GUI)
-        p.resetDebugVisualizerCamera(cameraDistance=1.5,
-                                     cameraYaw=180,
-                                     cameraPitch=0,
-                                     cameraTargetPosition=[0, 0, 0.8])
+        p.resetDebugVisualizerCamera(cameraDistance=2.5,
+                                     cameraYaw=210,
+                                     cameraPitch=-30,
+                                     cameraTargetPosition=[0, 0, 0.5])
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=Config.CONTROLLER_DT,
                                 numSubSteps=Config.N_SUBSTEP)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/robot_model/draco/draco.urdf",
+    robot = p.loadURDF(cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
                        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
                        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
