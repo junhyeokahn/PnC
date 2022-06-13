@@ -67,6 +67,25 @@ void ContactTransitionStart::firstVisit() {
       ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
       sp_->planning_id += 1;
     }
+    else
+    {
+        Eigen::Vector3d ini_pos = sp_->dcm;
+        Eigen::Vector3d ini_vel = sp_->dcm_vel;
+        if (b_use_base_height) {
+          ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
+          ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
+        }
+
+        std::cout << "current footstep" << std::endl;
+        ctrl_arch_->dcm_tm->footstep_list[ctrl_arch_->dcm_tm->getStepIndex()-1].printInfo();
+        std::cout << "dcm init" << ini_pos.transpose() << std::endl;
+        Eigen::Quaternion<double> torso_quat(
+            robot_->get_link_iso("torso_com_link").linear());
+        ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,
+                                       torso_quat, ini_pos, ini_vel);
+        ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
+        sp_->planning_id += 1;
+    }
   }
 }
 

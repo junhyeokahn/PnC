@@ -9,7 +9,8 @@ add_library(pnc-wbc ${sources})
 target_link_libraries(pnc-wbc pnc-utils
                               pnc-goldfarb
                               pnc-robot-system
-                              pnc-dcm-planner)
+                              pnc-dcm-planner
+                              ${muvt_core_LIBRARIES})
 
 install(TARGETS pnc-wbc DESTINATION "${INSTALL_LIB_DIR}")
 install(FILES ${wbc_headers} DESTINATION

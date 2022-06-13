@@ -59,4 +59,4 @@ walking:
     nominal_turn_radians: 0.52
     nominal_strafe_distance: 0.05
     
-    n_steps: 2
+    n_steps: 10

@@ -17,6 +17,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+option(BUILD_LOCAL_PLANNER "Build muvt local planner" ON)
+
 
 ##=============================================================================
 ## Build Setup
@@ -131,6 +133,12 @@ if(PYTHON_BINDING)
   find_package(pybind11 CONFIG REQUIRED)
   include_directories(${pybind11_INCLUDE_DIRS})
   add_subdirectory(bindings)
+endif()
+
+# muvt
+if(BUILD_LOCAL_PLANNER)
+  find_package(muvt_core REQUIRED)
+  include_directories(${muvt_core_INCLUDE_DIRS})
 endif()
 
 

@@ -45,6 +45,7 @@ public:
 
 private:
   /* data */
+  unsigned int counter_;
   RobotSystem *robot_;
   DCMPlanner *dcm_planner_;
 

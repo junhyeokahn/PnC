@@ -1,8 +1,13 @@
 #include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
+#include <chrono>
+
+using namespace Muvt::HyperGraph;
 
 DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
-    RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx) {
+    RobotSystem *_robot, std::string _lfoot_idx, std::string _rfoot_idx):
+optimizer_(new OptimizerContact())
+{
   util::PrettyConstructor(2, "DCMTrajectoryManager");
 
   dcm_planner_ = _dcm_planner;
@@ -107,6 +112,7 @@ void DCMTrajectoryManager::updateStartingStance() {
 
   mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
                                   mid_foot_stance_);
+
 }
 
 // Updates the local footstep list (ie: footstep preview) for trajectory
@@ -151,6 +157,8 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   // std::cout << dcm_pos_start_in << std::endl;
   // std::cout << "dcm vel" << std::endl;
   // std::cout << dcm_vel_start_in << std::endl;
+
+  std::cout << "starting time: " << t_walk_start_in << std::endl;
 
   // Set DCM reference
   dcm_planner_->setRobotMass(robot_->total_mass);
@@ -231,6 +239,7 @@ void DCMTrajectoryManager::walkInPlace() {
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
   populateWalkForward(n_steps, nominal_forward_step);
+  init_local_planner();
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {
@@ -594,4 +603,120 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
   } catch (YAML::ParserException &e) {
     std::cout << e.what() << std::endl;
   }
+}
+
+void DCMTrajectoryManager::init_local_planner()
+{
+    optimizer_->clear();
+
+    int index = 2;
+    std::vector<g2o::OptimizableGraph::Vertex*> vertices;
+
+    // first add current initial footsteps
+    Contact contact_init_left;
+    contact_init_left.state.pose.translation() = left_foot_stance_.position;
+    contact_init_left.state.pose.linear() = left_foot_stance_.orientation.toRotationMatrix();
+    VertexContact* v_init_left = new VertexContact();
+    v_init_left->setId(1);
+    v_init_left->setEstimate(contact_init_left);
+    v_init_left->setFixed(true);
+    auto vertex_init_left = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_left);
+    vertices.push_back(vertex_init_left);
+
+    Contact contact_init_right;
+    contact_init_right.state.pose.translation() = right_foot_stance_.position;
+    contact_init_right.state.pose.linear() = right_foot_stance_.orientation.toRotationMatrix();
+    VertexContact* v_init_right = new VertexContact();
+    v_init_right->setId(0);
+    v_init_right->setEstimate(contact_init_right);
+    v_init_right->setFixed(true);
+    auto vertex_init_right = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_right);
+    vertices.push_back(vertex_init_right);
+
+    for (auto footstep : footstep_list)
+    {
+        Contact contact;
+        contact.state.pose.translation() = footstep.position;
+        contact.state.pose.linear() = footstep.orientation.toRotationMatrix();
+        if (footstep.robot_side == EndEffector::LFoot)
+            contact.setDistalLink("l_foot");
+        else if (footstep.robot_side == EndEffector::RFoot)
+            contact.setDistalLink("r_foot");
+
+        VertexContact* v = new VertexContact();
+        v->setId(index);
+        v->setEstimate(contact);
+
+        auto vertex = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v);
+        vertices.push_back(vertex);
+        index++;
+    }
+
+    optimizer_->setVertices(vertices);
+
+    std::vector<g2o::OptimizableGraph::Edge*> edges;
+    for (int i = 0; i < vertices.size(); i++)
+    {
+      int m = 5;
+      EdgeCollision* edge = new EdgeCollision(m);
+      Eigen::MatrixXd info(m, m);
+      info.setIdentity(); // info *= 100;
+      edge->setInformation(info);
+      std::map<std::string, Eigen::Vector3d> obstacles;
+      obstacles["obstacle_0"] = Eigen::Vector3d(1.0, 0.5, 0.0);
+//      obstacles["obstacle_1"] = Eigen::Vector3d(2.0, 0.0, 0.0);
+      edge->setObstacles(obstacles);
+      edge->vertices()[0] = vertices[i];
+      auto e = dynamic_cast<g2o::OptimizableGraph::Edge*>(edge);
+      edges.push_back(e);
+    }
+
+    for (int i = 0; i < vertices.size() - 1; i++)
+    {
+      EdgeRelativePose* edge_succ = new EdgeRelativePose();
+      Eigen::MatrixXd info_succ(3, 3);
+      info_succ.setIdentity(); // info_succ *= 100;
+      edge_succ->setInformation(info_succ);
+      edge_succ->setLimits({0.1, 0.1}, {nominal_forward_step*1.5, 0.3});
+      edge_succ->vertices()[0] = vertices[i];
+      edge_succ->vertices()[1] = vertices[i+1];
+      auto e = dynamic_cast<g2o::OptimizableGraph::Edge*>(edge_succ);
+      edges.push_back(e);
+    }
+
+    for (unsigned int i = 2; i < vertices.size(); i++)
+    {
+        EdgeSteering* edge = new EdgeSteering();
+        Eigen::MatrixXd info(3, 3);
+        info.setIdentity();
+        edge->setInformation(info);
+        edge->setPreviousContact(vertices[i-2]);
+        edge->vertices()[0] = vertices[i];
+        auto e = dynamic_cast<g2o::OptimizableGraph::Edge*>(edge);
+        edges.push_back(e);
+    }
+
+    optimizer_->setEdges(edges);
+    optimizer_->update();
+
+    localPlan();
+}
+
+void DCMTrajectoryManager::localPlan()
+{
+    auto tic = std::chrono::high_resolution_clock::now();
+    optimizer_->solve();
+    auto toc = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> fsec = toc - tic;
+
+    std::vector<Contact> solution;
+    optimizer_->getFootsteps(solution);
+    Eigen::Quaterniond q0(solution[0].state.pose.linear());
+    Eigen::Quaterniond q1(solution[0].state.pose.linear());
+
+    for (int i = 2; i < solution.size(); i++)
+    {
+        Eigen::Quaterniond q(solution[i].state.pose.linear());
+        footstep_list[i-2].setPosOri(solution[i].state.pose.translation(), q);
+    }
 }

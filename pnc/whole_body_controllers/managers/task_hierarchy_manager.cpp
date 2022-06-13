@@ -18,14 +18,16 @@ void TaskHierarchyManager::InitializeRampToMin(double _start_time,
                                                double _duration) {
   start_time_ = _start_time;
   duration_ = _duration;
-  w_starting_ = task_->w_hierarchy;
+//  w_starting_ = task_->w_hierarchy;
+  w_starting_ = w_max_;
 }
 
 void TaskHierarchyManager::InitializeRampToMax(double _start_time,
                                                double _duration) {
   start_time_ = _start_time;
   duration_ = _duration;
-  w_starting_ = task_->w_hierarchy;
+//  w_starting_ = task_->w_hierarchy;
+  w_starting_ = w_min_;
 }
 
 void TaskHierarchyManager::UpdateRampToMin(double _curr_time) {

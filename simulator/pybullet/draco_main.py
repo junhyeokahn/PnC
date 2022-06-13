@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 cwd = os.getcwd()
 sys.path.append(cwd)
@@ -16,11 +17,13 @@ import shutil
 import cv2
 import pybullet as p
 import numpy as np
+import matplotlib.pyplot as plt
 
 np.set_printoptions(precision=2)
 
 from config.draco.pybullet_simulation import Config
 import pybullet_util
+import pybullet_camera_util
 import util
 
 import draco_interface
@@ -73,9 +76,12 @@ if __name__ == "__main__":
     if Config.B_USE_MESHCAT:
         p.connect(p.DIRECT)
     else:
-        p.connect(p.GUI)
+        # render_width = 850
+        # render_height = 760
+        # optionstring = '--width={} --height={}'.format(render_width, render_height)
+        p.connect(p.GUI) #, options=optionstring)
         p.resetDebugVisualizerCamera(cameraDistance=2.5,
-                                     cameraYaw=210,
+                                     cameraYaw=120,
                                      cameraPitch=-30,
                                      cameraTargetPosition=[0, 0, 0.5])
     p.setGravity(0, 0, -9.8)
@@ -95,6 +101,18 @@ if __name__ == "__main__":
 
     p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0],
                useFixedBase=1)
+
+    # Add visual objects
+    visualObstacle = p.createVisualShape(p.GEOM_SPHERE, radius=0.5)
+    p.createMultiBody(baseMass=0,
+                      baseVisualShapeIndex=visualObstacle,
+                      basePosition=[1.0, 0.5, 0.0])
+
+    # visualObstacle = p.createVisualShape(p.GEOM_SPHERE, radius=0.25)
+    # p.createMultiBody(baseMass=0,
+    #                   baseVisualShapeIndex=visualObstacle,
+    #                   basePosition=[2.0, 0.0, 0.0])
+
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(
         robot, Config.INITIAL_POS_WORLD_TO_BASEJOINT,
@@ -162,6 +180,23 @@ if __name__ == "__main__":
         robot, joint_id, link_id, pos_basejoint_to_basecom,
         rot_basejoint_to_basecom)
 
+    # configure camera
+    camera = pybullet_camera_util.Camera(100, 100)
+    camera.set_view_matrix_from_robot_link(robot, 2)
+    camera.set_projection_matrix(fovy=80, aspect=1., near=0.1, far=2.)
+    rgb_img, depth_img, seg_img = camera.get_pybullet_image()
+
+    # fig = plt.figure()
+    # ax = plt.axes(projection='3d')
+    # ax.scatter3D(list(pointcloud[0, :]), list(pointcloud[1, :]), list(pointcloud[2, :]))#, cdata=list(pointcloud[2, :]), cmap='Greens')
+    # plt.show()
+
+    counter = 0
+    # fig1 = plt.figure(num=1)
+    # ax = plt.axes(projection='3d')
+    # plt.ion()
+    # plt.show()
+
     while (1):
 
         # while_start = time.time()
@@ -169,7 +204,36 @@ if __name__ == "__main__":
         # Get SensorData
         if Config.SIMULATE_CAMERA and count % (Config.CAMERA_DT /
                                                Config.CONTROLLER_DT) == 0:
-            pass
+            camera.set_view_matrix_from_robot_link(robot, 2)
+            camera.get_pybullet_image()
+
+            # if counter == 1000:
+            # pointcloud, colors = camera.unproject_canvas_to_pointcloud(rgb_img, depth_img)
+            # transform in world frame
+            # link_info = p.getLinkState(robot, 2)
+            # link_ori = link_info[1]
+            # rot = p.getMatrixFromQuaternion(link_ori)
+            # rot = np.array(rot).reshape(3, 3)
+
+            # pointcloud_x_world = list()
+            # pointcloud_y_world = list()
+            # pointcloud_z_world = list()
+            # for point in pointcloud.transpose():
+            #     point_world = np.dot(np.linalg.inv(rot), point)
+            #     pointcloud_x_world.append(point_world[0])
+            #     pointcloud_y_world.append(point_world[1])
+            #     pointcloud_z_world.append(point_world[2])
+            #
+            # ax.cla()
+            # ax.set_xlim3d([0, 1])
+            # ax.set_ylim3d([-0.5, 0.5])
+            # ax.set_zlim3d([0.5, 1.5])
+            # ax.scatter3D(pointcloud_x_world, pointcloud_y_world, pointcloud_z_world, s=0.01)
+            # plt.draw()
+            # plt.pause(0.001)
+
+        counter += 1
+
         sensor_data_dict = pybullet_util.get_sensor_data(
             robot, joint_id, link_id, pos_basejoint_to_basecom,
             rot_basejoint_to_basecom)
@@ -197,7 +261,7 @@ if __name__ == "__main__":
         elif pybullet_util.is_key_triggered(keys, 'a'):
             interface.interrupt.b_interrupt_button_a = True
         elif pybullet_util.is_key_triggered(keys, 's'):
-            interface.interrupt.b_interrupt_button_s = True
+            interface.interrupt.b_interrupti_button_s = True
         elif pybullet_util.is_key_triggered(keys, 'd'):
             interface.interrupt.b_interrupt_button_d = True
         elif pybullet_util.is_key_triggered(keys, 'q'):

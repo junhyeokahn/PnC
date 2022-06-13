@@ -6,6 +6,7 @@ dependencies:
   - python=3.9.5
   - ruamel.yaml=0.17.10
   - pip
+  - pinocchio
   - pip:
       - certifi==2021.5.30
       - imageio==2.9.0
@@ -19,3 +20,4 @@ dependencies:
       - tqdm==4.61.1
       - wheel==0.36.2
       - zmq==0.0.0
+      - open3d==0.15.2

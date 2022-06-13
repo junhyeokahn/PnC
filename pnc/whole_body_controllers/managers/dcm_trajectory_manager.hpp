@@ -5,6 +5,13 @@
 #include "pnc/robot_system/robot_system.hpp"
 #include "pnc/whole_body_controllers/basic_tasks.hpp"
 
+#include <g2o/core/optimizable_graph.h>
+#include <muvt_core/optimizer/optimizer.h>
+#include <muvt_core/environment/contact/vertex_contact.h>
+#include <muvt_core/environment/contact/edge_collision.h>
+#include <muvt_core/environment/contact/edge_relative_pose.h>
+#include <muvt_core/environment/contact/edge_steering.h>
+
 /// namespace dcm_transfer_type
 namespace dcm_transfer_type {
 constexpr int kInitial = 0;
@@ -15,8 +22,9 @@ constexpr int kMidStep = 1;
 class DCMTrajectoryManager {
 public:
   /// \{ \name Constructor and Destructor
-  DCMTrajectoryManager(DCMPlanner *_dcm_planner, Task *_com_task,
-                       Task *_base_ori_task, RobotSystem *_robot,
+  DCMTrajectoryManager(DCMPlanner *_dcm_planner,
+                       Task *_com_task, Task *_base_ori_task,
+                       RobotSystem *_robot,
                        std::string _lfoot_idx, std::string _rfoot_idx);
   ~DCMTrajectoryManager();
   void paramInitialization(const YAML::Node &node);
@@ -86,6 +94,9 @@ public:
   /// Create footsteps for side walking.
   void populateStrafe(const double strafe_distance, const int num_times);
 
+  /// Local Footsteps Plan
+  void localPlan();
+
   /// Save solution file
   void saveSolution(const std::string &);
 
@@ -143,11 +154,15 @@ public:
   int n_steps = 3;
 
 private:
+
+  void init_local_planner();
+
   RobotSystem *robot_;
   std::string lfoot_id_;
   std::string rfoot_id_;
 
   DCMPlanner *dcm_planner_;
+  Muvt::HyperGraph::OptimizerContact *optimizer_;
 
   std::vector<Footstep> footstep_preview_list_;
 

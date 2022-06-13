@@ -15,7 +15,9 @@
 #include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 
 AtlasControlArchitecture::AtlasControlArchitecture(RobotSystem *_robot)
-    : ControlArchitecture(_robot) {
+    : ControlArchitecture(_robot),
+counter_(0)
+{
   util::PrettyConstructor(1, "AtlasControlArchitecture");
   robot_ = _robot;
 
@@ -135,8 +137,21 @@ AtlasControlArchitecture::~AtlasControlArchitecture() {
 }
 
 void AtlasControlArchitecture::getCommand(void *_command) {
-  // Initialize Staet
+  // Update Footstep List using the Local Planner
+//  if (!dcm_tm->footstep_list.empty())
+//  {
+//    if (counter_ % 500 == 0)
+//    {
+//      std::cout << "--------------------------------" << std::endl;
+//      for (auto footstep : dcm_tm->footstep_list)
+//        footstep.printInfo();
+//      dcm_tm->localPlan();
+//    }
+//  }
+  // Initialize State
   if (b_state_first_visit_) {
+//    if (!dcm_tm->footstep_list.empty())
+//      dcm_tm->localPlan();
     state_machines[state]->firstVisit();
     b_state_first_visit_ = false;
   }
@@ -154,4 +169,5 @@ void AtlasControlArchitecture::getCommand(void *_command) {
     state = state_machines[state]->getNextState();
     b_state_first_visit_ = true;
   }
+  counter_++;
 }

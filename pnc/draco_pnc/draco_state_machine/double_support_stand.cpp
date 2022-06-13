@@ -40,7 +40,13 @@ void DoubleSupportStand::firstVisit() {
   Eigen::Quaternion<double> target_base_ori =
       Eigen::Quaternion<double>(target_base_ori_SO3);
 
+  std::cout << "rotation matrix: \n " << target_base_ori_SO3 << std::endl;
+  std::cout << "quaternion before normalization: " << target_base_ori.coeffs().transpose() << std::endl;
+
+  target_base_ori.normalize();
   sp_->nominal_base_quat = target_base_ori;
+  std::cout << "quaternion after normalization: " << target_base_ori.coeffs().transpose() << std::endl;
+
 
   ori_y << lfoot_iso.linear().col(1);
   ori_x = ori_y.cross(ori_z);

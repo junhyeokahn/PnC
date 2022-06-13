@@ -187,7 +187,7 @@ walking:
         r_ankle_fe: -0.785
         r_ankle_ie: 0.
         #r_ankle_ie: 0.047
-        neck_pitch: 0.
+        neck_pitch: 0.3
         r_hip_ie: 0.
         l_hip_ie: 0.
         l_shoulder_fe: 0.
@@ -210,22 +210,22 @@ walking:
     com_height: 0.92
     #com_height: 1.
 
-    swing_height: 0.03
+    swing_height: 0.02
 
     t_additional_ini_trans: 0.
-    t_contact_trans: 0.45
-    t_swing: 0.55
+    t_contact_trans: 0.15
+    t_swing: 0.45
     percentage_settle: 0.9
     alpha_ds: 0.5
 
     #nominal_footwidth: 0.28
-    nominal_footwidth: 0.20
-    nominal_forward_step: 0.1
+    nominal_footwidth: 0.2
+    nominal_forward_step: 0.2
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
 
-    n_steps: 5
+    n_steps: 10
 
 static_walking:
     moving_duration: 3

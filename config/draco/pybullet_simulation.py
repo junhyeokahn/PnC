@@ -11,14 +11,14 @@ class Config(object):
 
     INITIAL_POS_WORLD_TO_BASEJOINT = [0, 0, 1.5 - 0.757]
     # INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0., 1.]
-    INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0.7071, 0.7071]
+    INITIAL_QUAT_WORLD_TO_BASEJOINT = [0., 0., 0., 1.0]
 
     PRINT_TIME = False
     # PRINT_ROBOT_INFO = False
     PRINT_ROBOT_INFO = True
     VIDEO_RECORD = False
     RECORD_FREQ = 10
-    SIMULATE_CAMERA = False
+    SIMULATE_CAMERA = True
 
     B_USE_MESHCAT = False
 

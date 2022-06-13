@@ -11,6 +11,8 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
+import sys
+
 from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj, plot_momentum_task
 
 tasks = [
@@ -83,7 +85,9 @@ for topic in local_tasks:
 
 w = dict()
 
-with open('experiment_data/pnc.pkl', 'rb') as file:
+file_name = sys.argv[1]
+
+with open('experiment_data/' + file_name +'.pkl', 'rb') as file:
     while True:
         try:
             d = pickle.load(file)

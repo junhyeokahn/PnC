@@ -357,11 +357,17 @@ void DracoControlArchitecture::getCommand(void *_command) {
   // Initialize Staet
   if (b_state_first_visit_) {
     state_machines[state]->firstVisit();
+    // Update Footsteps through Local Planner
+    if (!dcm_tm->footstep_list.empty())
+      dcm_tm->localPlan();
+//    for (auto footstep : dcm_tm->footstep_list)
+//        footstep.printInfo();
     b_state_first_visit_ = false;
   }
 
   // Update State Machine
   state_machines[state]->oneStep();
+
   // Update State Machine Independent Trajectories
   upper_body_tm->UseNominalUpperBodyJointPos(sp_->nominal_joint_pos);
   // Get WBC Commands
