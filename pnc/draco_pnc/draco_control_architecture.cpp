@@ -360,8 +360,8 @@ void DracoControlArchitecture::getCommand(void *_command) {
     // Update Footsteps through Local Planner
     if (!dcm_tm->footstep_list.empty())
       dcm_tm->localPlan();
-//    for (auto footstep : dcm_tm->footstep_list)
-//        footstep.printInfo();
+    for (auto footstep : dcm_tm->footstep_list)
+        footstep.printInfo();
     b_state_first_visit_ = false;
   }
 
