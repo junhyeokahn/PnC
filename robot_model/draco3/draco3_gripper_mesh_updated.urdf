@@ -907,6 +907,30 @@
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>
+  <joint name="l_foot_contact_frame_upper_left" type="fixed">
+    <origin rpy="0 0 0" xyz="0.1 0.05 0.0"/>
+    <parent link="l_foot_contact"/>
+    <child link="l_foot_contact_upper_left"/>
+  </joint>
+  <link name="l_foot_contact_upper_left"/>
+  <joint name="l_foot_contact_frame_upper_right" type="fixed">
+    <origin rpy="0 0 0" xyz="0.1 -0.05 0.0"/>
+    <parent link="l_foot_contact"/>
+    <child link="l_foot_contact_upper_right"/>
+  </joint>
+  <link name="l_foot_contact_upper_right"/>
+  <joint name="l_foot_contact_frame_lower_left" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.1 0.05 0.0"/>
+    <parent link="l_foot_contact"/>
+    <child link="l_foot_contact_lower_left"/>
+  </joint>
+  <link name="l_foot_contact_lower_left"/>
+  <joint name="l_foot_contact_frame_lower_right" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.1 -0.05 0.0"/>
+    <parent link="l_foot_contact"/>
+    <child link="l_foot_contact_lower_right"/>
+  </joint>
+  <link name="l_foot_contact_lower_right"/>
 
   <!--=============================== r_hip_ie (r_hip_ie_link) ===========================-->
   <joint name="r_hip_ie" type="revolute">
@@ -1125,6 +1149,31 @@
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>
+  <joint name="r_foot_contact_frame_upper_left" type="fixed">
+    <origin rpy="0 0 0" xyz="0.1 0.05 0.0"/>
+    <parent link="r_foot_contact"/>
+    <child link="r_foot_contact_upper_left"/>
+  </joint>
+  <link name="r_foot_contact_upper_left"/>
+  <joint name="r_foot_contact_frame_upper_right" type="fixed">
+    <origin rpy="0 0 0" xyz="0.1 -0.05 0.0"/>
+    <parent link="r_foot_contact"/>
+    <child link="r_foot_contact_upper_right"/>
+  </joint>
+  <link name="r_foot_contact_upper_right"/>
+  <joint name="r_foot_contact_frame_lower_left" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.1 0.05 0.0"/>
+    <parent link="r_foot_contact"/>
+    <child link="r_foot_contact_lower_left"/>
+  </joint>
+  <link name="r_foot_contact_lower_left"/>
+  <joint name="r_foot_contact_frame_lower_right" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.1 -0.05 0.0"/>
+    <parent link="r_foot_contact"/>
+    <child link="r_foot_contact_lower_right"/>
+  </joint>
+  <link name="r_foot_contact_lower_right"/>
+
   <!--=============================== torso_imu_frame (torso_imu) ===========================-->
   <joint name="torso_imu_frame" type="fixed">
     <origin rpy="3.14159 0 3.14159" xyz="0 0 -0.09"/>
