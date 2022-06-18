@@ -116,21 +116,17 @@ class steps_phase:
 
         self.action = ""
 
-    def setContactPositions(self, current_contacts, next_contacts = []):
+    def setContactPositions(self, current_contacts, next_contacts):
         # current_contacts and next_contacts MUST be filled with the first left foot
         number_of_contacts = self.number_of_legs * self.contact_model
         if len(current_contacts) != 3*number_of_contacts:
             print(bcolors.FAIL + f"current_contacts must have size: {3*number_of_contacts}" + bcolors.ENDC)
             exit()
-        # elif len(next_contacts) != 3*number_of_contacts:
-        #     print(bcolors.FAIL + f"next_contacts must have size: {3*number_of_contacts}" + bcolors.ENDC)
-        #     exit()
+        elif len(next_contacts) != 3*number_of_contacts:
+            print(bcolors.FAIL + f"next_contacts must have size: {3*number_of_contacts}" + bcolors.ENDC)
+            exit()
 
-        # print('SETTING CURRENT CONTACT:')
-        # print(current_contacts)
-        # print('SETTING NEXT CONTACTS:')
-        # print(next_contacts)
-        # self.contact_positions = []
+        self.contact_positions = []
         for k in range(0, 2):  # 2 nodes down
             self.contact_positions.append(current_contacts)
         for k in range(0, 8):  # 8 nodes left footstep
@@ -140,11 +136,6 @@ class steps_phase:
         for k in range(0, 8):  # 8 nodes step
             self.contact_positions.append(next_contacts)
         self.contact_positions.append(next_contacts)
-
-        # print('SELF.CONTACT_POSTIONS:')
-        # for i in range(0,len(self.contact_positions)):
-        #     print(self.contact_positions[i])
-        # input('click')
 
         self.stance_contact_position = []
         for k in range(0, self.nodes):
@@ -191,14 +182,7 @@ class steps_phase:
             del self.r_f_bounds[0]
             del self.l_f_bounds[0]
 
-            # elif self.action == "jump":
-            #     for i in range(0, len(c)):
-            #         self.c_ref[i].assign(self.jump_c[ref_id], nodes = k)
-            #         self.cdot[i].setBounds(-1. * np.array(self.jump_cdot_bounds[ref_id]), np.array(self.jump_cdot_bounds[ref_id]), nodes=k)
-            #         if k < self.nodes:
-            #             self.f[i].setBounds(-1. * np.array(self.jump_f_bounds[ref_id]), np.array(self.jump_f_bounds[ref_id]), nodes=k)
-
-        else:
+        elif self.action == 'stand':
             for i in range(0, len(c)):
                 c_dict['c' + str(i)] = self.stance_contact_position[0][(i*3):(i*3+3)]
                 self.c[i].assign(self.stance_contact_position[0][(i*3):(i*3+3)], nodes=self.nodes)
@@ -624,14 +608,14 @@ rdot.setBounds([0., 0., 0.], [0., 0., 0.], 0)
 o.setBounds(joint_init[3:7], joint_init[3:7], 0)
 w.setBounds([0., 0., 0.], [0., 0., 0.], 0)
 
-Wo.assign(1e5, nodes=range(0, ns+1))
+Wo.assign(1e0, nodes=range(0, ns+1))
 
-# solver.solve()
-# solution = solver.getSolutionDict()
-# solution['r'][:, 1] = [com[0], com[1], com[2]]
-# solution['rdot'][:, 1] = [0., 0., 0.]
-# solution['o'][:, 1] = joint_init[3:7]
-# solution['w'][:, 1] = [0., 0., 0.]
+solver.solve()
+solution = solver.getSolutionDict()
+solution['r'][:, 1] = [com[0], com[1], com[2]]
+solution['rdot'][:, 1] = [0., 0., 0.]
+solution['o'][:, 1] = joint_init[3:7]
+solution['w'][:, 1] = [0., 0., 0.]
 
 """
 Walking patter generator and scheduler
@@ -645,33 +629,33 @@ while not rospy.is_shutdown():
     Initialize solution
     """
     # if index != 0:
-    #     r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
-    #     rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
-    #     o.setBounds(solution['o'][:, 1], solution['o'][:, 1], 0)
-    #     w.setBounds(solution['w'][:, 1], solution['w'][:, 1], 0)
-    #
-    # rdot_ref.assign([0, 0., 0.], nodes=range(0, ns+1))
-    # w_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
-    #
-    # current_positions = fromContactSequenceToFrames(initial_foot_dict[list(initial_foot_dict)[0]]) + \
-    #                     fromContactSequenceToFrames(initial_foot_dict[list(initial_foot_dict)[1]])
-    # wpg.setContactPositions(current_positions)
-    # wpg.set('stand')
-    #
-    # solver.solve()
-    # solution = solver.getSolutionDict()
-    #
+    r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
+    rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
+    o.setBounds(solution['o'][:, 1], solution['o'][:, 1], 0)
+    w.setBounds(solution['w'][:, 1], solution['w'][:, 1], 0)
+
+    rdot_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
+    w_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
+
+    current_positions = fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[0]]) + \
+                        fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[1]])
+    wpg.setContactPositions(current_positions, current_positions)
+    wpg.set('stand')
+
+    solver.solve()
+    solution = solver.getSolutionDict()
+
     publishFootsteps(initial_foot_dict, initial_foot_position[0][2])
 
-    while contact_sequence: # and start_bool:
+    while contact_sequence and start_bool:
         """
         Set previous first element solution as bound for the variables to guarantee continuity
         """
-        if index != 0:
-            r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
-            rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
-            o.setBounds(solution['o'][:, 1], solution['o'][:, 1], 0)
-            w.setBounds(solution['w'][:, 1], solution['w'][:, 1], 0)
+        # if index != 0:
+        r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
+        rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
+        o.setBounds(solution['o'][:, 1], solution['o'][:, 1], 0)
+        w.setBounds(solution['w'][:, 1], solution['w'][:, 1], 0)
 
         rdot_ref.assign([0.4, 0.0, 0.0], nodes=range(0, ns+1))
         w_ref.assign([0.0, 0.0, 0.0], nodes=range(0, ns+1))
@@ -680,10 +664,13 @@ while not rospy.is_shutdown():
         Set contact positions every ns iterations
         """
         if index % (ns+1) == 0:
-            current_positions = fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[0]]) + \
-                                fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[1]])
-            next_positions = fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[2]]) + \
-                             fromContactSequenceToFrames(contact_sequence[list(contact_sequence)[3]])
+            print(index)
+            current_positions = fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[1]])
+            next_positions = fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[2]]) + fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[3]])
             wpg.setContactPositions(current_positions, next_positions)
 
             del contact_sequence[list(contact_sequence)[0]]
@@ -753,5 +740,7 @@ while not rospy.is_shutdown():
     srbd_msg.wrench.torque.y = srbd_0[4]
     srbd_msg.wrench.torque.z = srbd_0[5]
     srbd_pub.publish(srbd_msg)
+
+    # index += 1
 
     rate.sleep()
