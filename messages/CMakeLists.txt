@@ -12,6 +12,10 @@ target_include_directories(pnc-msg-fixed-draco PUBLIC ${CMAKE_CURRENT_BINARY_DIR
 PROTOBUF_GENERATE_PYTHON(pnc-msg-fixed-draco-py fixed_draco.proto)
 add_custom_target(pnc-msg-fixed-draco-py-target ALL DEPENDS ${pnc-msg-fixed-draco-py})
 
+PROTOBUF_GENERATE_CPP(pnc-to-horizon-src pnc-to-horizon-header pnc_to_horizon.proto)
+add_library(pnc_to_horizon ${pnc-to-horizon-src} ${pnc-to-horizon-header})
+target_include_directories(pnc_to_horizon PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
 install(TARGETS pnc-msg-draco DESTINATION "${INSTALL_LIB_DIR}")
 install(TARGETS pnc-msg-fixed-draco DESTINATION "${INSTALL_LIB_DIR}")
 

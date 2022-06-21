@@ -153,6 +153,8 @@ public:
 
   int n_steps = 3;
 
+  std::vector<Footstep> getRemainingSteps() const { return footstep_preview_list_; }
+
 private:
 
   void init_local_planner();

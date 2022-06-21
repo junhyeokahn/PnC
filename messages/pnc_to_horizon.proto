@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package MPC_MSG;
+
+message Contact {
+    string name = 1;
+    repeated float pos = 2;
+    repeated float ori = 3;
+}
+
+message ContactSequence {
+    repeated Contact contacts= 1;
+}
