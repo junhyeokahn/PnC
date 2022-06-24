@@ -74,4 +74,9 @@ private:
   DracoStateProvider *sp_;
 
   void SaveData();
+
+  int footstep_list_index_;
+  std::vector<Footstep> footstep_to_publish_;
+  zmq::context_t* context_;
+  zmq::socket_t* publisher_;
 };

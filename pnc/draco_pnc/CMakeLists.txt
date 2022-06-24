@@ -13,6 +13,7 @@ target_link_libraries(pnc-draco-pnc ${DART_LIBRARIES}
                                     pnc-filters
                                     pnc-dcm-planner
                                     pnc-wbc
+                                    pnc-to-horizon
                                     )
 
 install(TARGETS pnc-draco-pnc DESTINATION "${INSTALL_LIB_DIR}")

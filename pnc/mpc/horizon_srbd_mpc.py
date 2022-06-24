@@ -8,6 +8,7 @@ from horizon.transcriptions.transcriptor import Transcriptor
 from horizon.solvers import solver
 from horizon.ros.replay_trajectory import *
 from ttictoc import tic, toc
+import timeit
 import tf
 from geometry_msgs.msg import WrenchStamped, Point
 from visualization_msgs.msg import Marker, MarkerArray
@@ -16,12 +17,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 from matlogger2 import matlogger
+import zmq
 
 cwd = os.getcwd()
 sys.path.append(cwd)
-sys.path.append(cwd + '/utils/python_utils')
-sys.path.append(cwd + '/simulator/pybullet')
-sys.path.append(cwd + '/build/lib')
+sys.path.append(cwd + '/build/messages')
+from pnc_to_horizon_pb2 import *
 
 global start_bool
 
@@ -56,18 +57,29 @@ contact_sequence = {
     # 7: {'name': 'l_foot_contact', 'pos': [0.815904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 8: {'name': 'l_foot_contact', 'pos': [0.915904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 9: {'name': 'l_foot_contact', 'pos': [1.015904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]}
-    0: {'name': 'l_foot_contact', 'pos': [0.215904, -0.0395778, -3.38305e-07], 'ori': [1.94791e-06, 8.42233e-07, -0.08949, 0.995988]},
-    1: {'name': 'r_foot_contact', 'pos': [0.410509, -0.276642, -1.37213e-06], 'ori': [2.18896e-08, 7.54643e-07, -0.0463577, 0.998925]},
-    2: {'name': 'l_foot_contact', 'pos': [0.604699, -0.113649, -9.42198e-07], 'ori': [1.9716e-06, 8.60281e-07, -0.0972253, 0.995262]},
-    3: {'name': 'r_foot_contact', 'pos': [0.829269, -0.350677, -1.90514e-06], 'ori': [4.33844e-08, 7.54694e-07, -0.0716339, 0.997431]},
-    4: {'name': 'l_foot_contact', 'pos': [1.13052, -0.187717, -0.000509611], 'ori': [1.95986e-06, 8.11842e-07, -0.073243, 0.997314]},
-    5: {'name': 'r_foot_contact', 'pos': [1.30234, -0.369171, -2.43946e-06], 'ori': [1.92667e-06, 6.9898e-07, -0.0163611, 0.999866]},
-    6: {'name': 'l_foot_contact', 'pos': [1.47579, -0.150112, -2.03872e-06], 'ori': [1.8735e-06, 5.57682e-07, 0.0587137, 0.998275]},
-    7: {'name': 'r_foot_contact', 'pos': [1.6498, -0.33243, -2.97334e-06], 'ori': [1.87578e-06, 5.62706e-07, 0.0560531, 0.998428]},
-    8: {'name': 'l_foot_contact', 'pos': [1.82564, -0.116004, -2.47358e-06], 'ori': [1.87968e-06, 5.72166e-07, 0.0508041, 0.998709]},
-    9: {'name': 'r_foot_contact', 'pos': [2.00342, -0.300662, -3.50697e-06], 'ori': [1.88557e-06, 5.86759e-07, 0.0429647, 0.999077]},
+    # 0: {'name': 'l_foot_contact', 'pos': [0.215904, -0.0395778, -3.38305e-07], 'ori': [1.94791e-06, 8.42233e-07, -0.08949, 0.995988]},
+    # 1: {'name': 'r_foot_contact', 'pos': [0.410509, -0.276642, -1.37213e-06], 'ori': [2.18896e-08, 7.54643e-07, -0.0463577, 0.998925]},
+    # 2: {'name': 'l_foot_contact', 'pos': [0.604699, -0.113649, -9.42198e-07], 'ori': [1.9716e-06, 8.60281e-07, -0.0972253, 0.995262]},
+    # 3: {'name': 'r_foot_contact', 'pos': [0.829269, -0.350677, -1.90514e-06], 'ori': [4.33844e-08, 7.54694e-07, -0.0716339, 0.997431]},
+    # 4: {'name': 'l_foot_contact', 'pos': [1.13052, -0.187717, -0.000509611], 'ori': [1.95986e-06, 8.11842e-07, -0.073243, 0.997314]},
+    # 5: {'name': 'r_foot_contact', 'pos': [1.30234, -0.369171, -2.43946e-06], 'ori': [1.92667e-06, 6.9898e-07, -0.0163611, 0.999866]},
+    # 6: {'name': 'l_foot_contact', 'pos': [1.47579, -0.150112, -2.03872e-06], 'ori': [1.8735e-06, 5.57682e-07, 0.0587137, 0.998275]},
+    # 7: {'name': 'r_foot_contact', 'pos': [1.6498, -0.33243, -2.97334e-06], 'ori': [1.87578e-06, 5.62706e-07, 0.0560531, 0.998428]},
+    # 8: {'name': 'l_foot_contact', 'pos': [1.82564, -0.116004, -2.47358e-06], 'ori': [1.87968e-06, 5.72166e-07, 0.0508041, 0.998709]},
+    # 9: {'name': 'r_foot_contact', 'pos': [2.00342, -0.300662, -3.50697e-06], 'ori': [1.88557e-06, 5.86759e-07, 0.0429647, 0.999077]},
     # 10: {'name': 'l_foot_contact', 'pos': [2.18472, -0.0884594, -2.74052e-06], 'ori': [1.89213e-06, 6.03083e-07, 0.0341195, 0.999418]},
     }
+
+def callback(contact_sequence, msg):
+    contact_sequence.clear()
+    index = 0
+    for contact in msg.contacts:
+        contact_sequence[index] = {'name': contact.name,
+                                   'pos': [contact.pos_x, contact.pos_y, contact.pos_z],
+                                   'ori': [contact.ori_x, contact.ori_y, contact.ori_z, contact.ori_w]}
+        index += 1
+
+    print(contact_sequence)
 
 def fromContactSequenceToFrames(contact):
     rot = R.from_quat(contact['ori'])
@@ -145,7 +157,7 @@ class steps_phase:
         self.contact_positions = []
         for k in range(0, 2):  # 2 nodes down
             self.contact_positions.append(current_contacts)
-        for k in range(0, 8):  # 8 nodes left footstep
+        for k in range(0, 8):  # 8 nodes step with left foot
             self.contact_positions.append(next_contacts[0:3*self.contact_model] + current_contacts[3*self.contact_model:])
         for k in range(0, 2):  # 2 nodes down
             self.contact_positions.append(next_contacts[0:3*self.contact_model] + current_contacts[3*self.contact_model:])
@@ -522,7 +534,7 @@ initial_foot_dict[-1] = {'name': 'r_foot_contact', 'pos': p, 'ori': quat_rot.tol
 init_pose_foot_dict[1] = {'name': 'r_foot_contact', 'pos': p, 'ori': quat_rot.tolist()}
 
 initial_foot_dict.update(contact_sequence)
-contact_sequence = initial_foot_dict
+# contact_sequence = initial_foot_dict
 
 """
 Initialize com state and com velocity
@@ -565,7 +577,7 @@ rdot_tracking is used to track a desired velocity of the CoM
 """
 rdot_tracking_gain = 1e2
 print(f"rdot_tracking_gain: {rdot_tracking_gain}")
-prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot), nodes=range(1, ns+1))
+prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot - rdot_ref), nodes=range(1, ns+1))
 
 """
 w_tracking is used to track a desired angular velocity of the base
@@ -623,7 +635,7 @@ prb.createConstraint("SRBD", SRBD, bounds=dict(lb=np.zeros(6), ub=np.zeros(6)), 
 """
 online_solver
 """
-hz = 10
+hz = 20
 print(f"hz: {hz}")
 rate = rospy.Rate(hz)  # 10hz
 
@@ -682,7 +694,30 @@ wpg = steps_phase(f, c, ns, number_of_legs=number_of_legs, contact_model=contact
 index = 0
 start_bool = False
 
+"""
+Initialize socket
+"""
+context = zmq.Context()
+socket = context.socket(zmq.SUB)
+socket.connect("tcp://127.0.0.2:5557")
+socket.setsockopt_string(zmq.SUBSCRIBE, "")
+time.sleep(1)
+
+msg = ContactSequence()
+
+contact_sequence_index = 0
+
 while not rospy.is_shutdown():
+    """
+    Socket test
+    """
+    try:
+        encoded_msg = socket.recv(flags=zmq.NOBLOCK)
+        msg.ParseFromString(encoded_msg)
+        callback(contact_sequence, msg)
+    except zmq.Again as e:
+        print(bcolors.WARNING + 'No message received yet...' + bcolors.ENDC)
+
     """
     Initialize solution
     """
@@ -699,17 +734,19 @@ while not rospy.is_shutdown():
     rdot_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
     w_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
 
+    # current_positions = fromContactSequenceToFrames(init_pose_foot_dict[0]) + \
+    #                     fromContactSequenceToFrames(init_pose_foot_dict[1])
     current_positions = fromContactSequenceToFrames(init_pose_foot_dict[0]) + \
                         fromContactSequenceToFrames(init_pose_foot_dict[1])
     wpg.setContactPositions(current_positions, current_positions)
     wpg.set('stand')
-    # print(c[0].getValues())
-    # input('stand')
 
-    tic()
+    # tic()
+    t = time.time()
     solver.solve()
-    time = toc()
-    logger.add('time', time)
+    elapsed = time.time() - t
+    # time = toc()
+    logger.add('time', elapsed)
     solution = solver.getSolutionDict()
 
     logger.add('r', solution['r'][:, 0])
@@ -722,7 +759,7 @@ while not rospy.is_shutdown():
         logger.add('c' + str(j), c[j].getValues(0))
         logger.add('f' + str(j), solution['f' + str(j)][:, 0])
 
-    while contact_sequence and start_bool:
+    while contact_sequence_index <= len(contact_sequence) - 2 and start_bool:
         """
         Set previous first element solution as bound for the variables to guarantee continuity
         """
@@ -743,27 +780,38 @@ while not rospy.is_shutdown():
         Set contact positions every ns iterations
         """
         if index % (ns+1) == 0:
-            if len(contact_sequence) == 2:
-                init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[0]]
-                init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[1]]
+            # if len(contact_sequence) == 2:
+            if contact_sequence_index == len(contact_sequence) - 2:
+                # init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[0]]
+                # init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[1]]
+                init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[contact_sequence_index]]
+                init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[contact_sequence_index + 1]]
                 current_positions = fromContactSequenceToFrames(
                     contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
                     contact_sequence[list(contact_sequence)[1]])
                 wpg.setContactPositions(current_positions, current_positions)
-                del contact_sequence[list(contact_sequence)[0]]
-                del contact_sequence[list(contact_sequence)[0]]
+                # del contact_sequence[list(contact_sequence)[0]]
+                # del contact_sequence[list(contact_sequence)[0]]
+                contact_sequence_index += 2
                 break
 
+            # current_positions = fromContactSequenceToFrames(
+            #     contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
+            #     contact_sequence[list(contact_sequence)[1]])
+            # next_positions = fromContactSequenceToFrames(
+            #     contact_sequence[list(contact_sequence)[2]]) + fromContactSequenceToFrames(
+            #     contact_sequence[list(contact_sequence)[3]])
             current_positions = fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[1]])
+                contact_sequence[list(contact_sequence)[contact_sequence_index]]) + fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[contact_sequence_index + 1]])
             next_positions = fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[2]]) + fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[3]])
+                contact_sequence[list(contact_sequence)[contact_sequence_index + 2]]) + fromContactSequenceToFrames(
+                contact_sequence[list(contact_sequence)[contact_sequence_index + 3]])
             wpg.setContactPositions(current_positions, next_positions)
 
-            del contact_sequence[list(contact_sequence)[0]]
-            del contact_sequence[list(contact_sequence)[0]]
+            # del contact_sequence[list(contact_sequence)[0]]
+            # del contact_sequence[list(contact_sequence)[0]]
+            contact_sequence_index += 2
 
         wpg.set('step')
         # print(c[0].getValues()[0])
@@ -773,10 +821,12 @@ while not rospy.is_shutdown():
         """
         Solve
         """
-        tic()
+        # tic()
+        t = time.time()
         solver.solve()
-        time = toc()
-        logger.add('time', time)
+        # time = toc()
+        elapsed = time.time() - t
+        logger.add('time', elapsed)
         solution = solver.getSolutionDict()
 
         """
@@ -841,7 +891,5 @@ while not rospy.is_shutdown():
     srbd_msg.wrench.torque.y = srbd_0[4]
     srbd_msg.wrench.torque.z = srbd_0[5]
     srbd_pub.publish(srbd_msg)
-
-    # index += 1
 
     rate.sleep()

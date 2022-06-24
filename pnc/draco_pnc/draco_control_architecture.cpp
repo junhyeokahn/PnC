@@ -24,6 +24,10 @@
 #include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
 #include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 
+#include <zmq.hpp>
+#include <thread>
+#include "build/messages/pnc_to_horizon.pb.h"
+
 DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
   util::PrettyConstructor(1, "DracoControlArchitecture");
@@ -309,6 +313,11 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   prev_state = draco_states::kStand;
 
   b_state_first_visit_ = true;
+
+  context_ = new zmq::context_t(1);
+  publisher_ = new zmq::socket_t(*context_, ZMQ_PUB);
+  publisher_->bind("tcp://127.0.0.2:5557");
+  footstep_list_index_ = -2;
 }
 
 DracoControlArchitecture::~DracoControlArchitecture() {
@@ -354,19 +363,75 @@ DracoControlArchitecture::~DracoControlArchitecture() {
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {
-  // Initialize Staet
+  // Initialize State
   if (b_state_first_visit_) {
     state_machines[state]->firstVisit();
     // Update Footsteps through Local Planner
     if (!dcm_tm->footstep_list.empty())
       dcm_tm->localPlan();
-    for (auto footstep : dcm_tm->getRemainingSteps())
-        footstep.printInfo();
     b_state_first_visit_ = false;
   }
+  if(!dcm_tm->footstep_list.empty())
+  {
+    if(sp_->count % 800 == 0)
+      footstep_list_index_ += 2;
 
-  // Create Protobuf message
+    // Create Protobuf message
+    std::cout << "count: " << sp_->count << std::endl;
+    if (sp_->count % 10 == 0 && footstep_list_index_ >= 0)
+    {
+      footstep_to_publish_.clear();
+      if (footstep_list_index_ == 0)
+      {
+        Footstep initial_footstep_left, initial_footstep_right;
+        initial_footstep_left.setLeftSide();
+        Eigen::Quaternion<double> q_left(robot_->get_link_iso("l_foot_contact").linear());
+        initial_footstep_left.setPosOri(robot_->get_link_iso("l_foot_contact").translation(), q_left);
 
+        initial_footstep_right.setRightSide();
+        Eigen::Quaternion<double> q_right(robot_->get_link_iso("r_foot_contact").linear());
+        initial_footstep_right.setPosOri(robot_->get_link_iso("r_foot_contact").translation(), q_right);
+
+        footstep_to_publish_.push_back(initial_footstep_left);
+        footstep_to_publish_.push_back(initial_footstep_right);
+        footstep_to_publish_.push_back(dcm_tm->footstep_list[0]);
+        footstep_to_publish_.push_back(dcm_tm->footstep_list[1]);
+      }
+      else
+      {
+        auto init_it = dcm_tm->footstep_list.begin() + footstep_list_index_;
+        auto end_it = dcm_tm->footstep_list.begin() + footstep_list_index_ + 4;
+        while (init_it != end_it)
+          footstep_to_publish_.push_back(*init_it);
+      }
+    std::string encoded_msg;
+    MPC_MSG::ContactSequence contact_sequence_msg;
+    std::cout << "footstep_to_publish.size(): " << footstep_to_publish_.size() << std::endl;
+    for (auto footstep : footstep_to_publish_)
+    {
+      MPC_MSG::Contact* contact_msg = contact_sequence_msg.add_contacts();
+      if (footstep.robot_side == EndEffector::LFoot)
+        contact_msg->set_name("l_foot_contact");
+      else
+        contact_msg->set_name("r_foot_contact");
+      contact_msg->set_pos_x(footstep.position(0));
+      contact_msg->set_pos_y(footstep.position(1));
+      contact_msg->set_pos_z(footstep.position(2));
+      contact_msg->set_ori_x(footstep.orientation.x());
+      contact_msg->set_ori_y(footstep.orientation.y());
+      contact_msg->set_ori_z(footstep.orientation.z());
+      contact_msg->set_ori_w(footstep.orientation.w());
+      std::cout << "FOOTSTEP: " << std::endl;
+      std::cout << "name: " << contact_msg->name() << std::endl;
+      std::cout << "position: " << contact_msg->pos_x() << " " << contact_msg->pos_y() << " " << contact_msg->pos_z() << std::endl;
+      std::cout << "orientation: " << contact_msg->ori_x() << " " << contact_msg->ori_y() << " " << contact_msg->ori_z() << " " << contact_msg->ori_w() << std::endl;
+    }
+    contact_sequence_msg.SerializeToString(&encoded_msg);
+    zmq::message_t zmq_msg(encoded_msg.size());
+    memcpy ((void *) zmq_msg.data(), encoded_msg.c_str(), encoded_msg.size());
+    publisher_->send(zmq_msg, zmq::send_flags::none);
+    }
+  }
 
   // Update State Machine
   state_machines[state]->oneStep();
