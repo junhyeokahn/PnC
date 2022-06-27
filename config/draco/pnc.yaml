@@ -24,8 +24,8 @@ wbc:
         foot_half_width: 0.04 # 8.5 / 2 (cm)
         #foot_half_length: 0.05 # 22 / 2 (cm)
         foot_half_length: 0.08 # 22 / 2 (cm)
-        #mu: 0.3
-        mu: 0.5
+        mu: 0.3
+        #mu: 0.5
 
     task:
         com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
@@ -71,8 +71,8 @@ wbc:
         upper_body_joint:
             weight: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
             neck_pitch:
-                sim_kp: 40.
-                sim_kd: 2.
+                sim_kp: 100.
+                sim_kd: 10.
                 exp_kp: 5.
                 exp_kd: 0.
             l_shoulder_fe:
@@ -203,12 +203,12 @@ walking:
     rf_z_max_time: 0.1
 
 
-    b_early_termination: true
+    b_early_termination: false
     foot_height_threshold: 0.01
 
     #com_height: 0.68
-    #com_height: 0.92
-    com_height: 1.
+    com_height: 0.92
+    #com_height: 1.
 
     swing_height: 0.03
 
@@ -218,13 +218,14 @@ walking:
     percentage_settle: 0.9
     alpha_ds: 0.5
 
-    nominal_footwidth: 0.28
+    #nominal_footwidth: 0.28
+    nominal_footwidth: 0.20
     nominal_forward_step: 0.1
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
 
-    n_steps: 1
+    n_steps: 5
 
 static_walking:
     moving_duration: 3
@@ -247,6 +248,6 @@ static_balancing:
 
 controller:
     waiting_count: 10
-    b_smoothing: true
-    #b_smoothing: false
+    #b_smoothing: true
+    b_smoothing: false
     smoothing_duration: 0.2

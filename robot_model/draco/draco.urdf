@@ -23,7 +23,8 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://meshes/torso_link.stl"/>
+        <!--<mesh filename="package://meshes/torso_link.stl"/>-->
+        <mesh filename="package://meshes/torso_link.obj"/>
       </geometry>
       <material name="gray"/>
     </visual>
@@ -62,7 +63,8 @@
 <!--      <origin rpy="0 0 0" xyz="0 0 0"/>-->
       <origin rpy="0 0 0" xyz="0 0 -0.35"/>
       <geometry>
-        <mesh filename="package://meshes/neck_pitch_link.stl"/>
+        <!--<mesh filename="package://meshes/neck_pitch_link.stl"/>-->
+        <mesh filename="package://meshes/neck_pitch_link.obj"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
