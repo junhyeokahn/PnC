@@ -98,8 +98,11 @@ public:
       lfoot_offset.setZero();
       rfoot_offset.setZero();
 
-      W.setIdentity();  // TODO assign based on better noise model
-      W = W * 0.001;
+      W.setZero();
+      W.block(0,0,3,3) = 0.001 * I;
+      W.block(3,3,3,3) = 0.5 * I;
+      W.block(6,6,3,3) = 0.0001 * I;
+      W.block(9,9,3,3) = 0.0001 * I;
     }
 
     void initialize(const double &delta_t)
