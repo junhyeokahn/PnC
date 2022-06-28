@@ -294,17 +294,20 @@ def get_sensor_data(robot, joint_id, link_id, pos_basejoint_to_basecom,
     return sensor_data
 
 
-def simulate_accelerometer_data(robot, link_id, previous_link_velocity, dt):
+def simulate_accelerometer_data(robot, link_id, previous_link_velocity,
+                                previous_torso_acceleration, dt):
     gravity_vector = np.array([0., 0., -9.8])
 
     # calculate imu acceleration in world frame by numerical differentiation
     torso_acceleration = (get_link_vel(robot, link_id['torso_imu'])[3:6] - previous_link_velocity) / dt
 
+    avg_acceleration = (torso_acceleration + previous_torso_acceleration) / 2.0
+
     # map acceleration to IMU frame and add gravity constant
     imu_R_world = np.transpose(get_link_iso(robot, link_id['torso_imu']))[0:3, 0:3]
-    accelerometer_measurement = np.dot(imu_R_world, (torso_acceleration + gravity_vector))
+    accelerometer_measurement = np.dot(imu_R_world, (avg_acceleration + gravity_vector))
 
-    return accelerometer_measurement
+    return accelerometer_measurement, torso_acceleration
 
 
 def add_sensor_noise(sensors_dictionary, noisy_sensors):
