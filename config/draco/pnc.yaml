@@ -6,6 +6,8 @@ ip_addr: "tcp://127.0.0.1:5557"
 b_exp: false
 #b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
 
+expected_weight: 37 # [kg]
+
 state_estimator:
     #n_data_com_vel: [200, 200, 200]
     n_data_com_vel: [20, 20, 20]
