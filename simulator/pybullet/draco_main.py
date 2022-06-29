@@ -34,6 +34,7 @@ from messages.draco_pybullet_sensors_pb2 import *
 with open("config/draco/pnc.yaml", 'r') as stream:
     config = YAML().load(stream)
     SAVE_FREQ = config["save_freq"]
+    robot_weight = config["expected_weight"]
 
 # create publisher of ground truth data (from pybullet)
 context = zmq.Context()
@@ -187,6 +188,8 @@ if __name__ == "__main__":
 
     previous_torso_velocity = np.array([0., 0., 0.])
     previous_torso_acceleration = np.array([0., 0., 0.])
+    b_previous_lf_contact = False
+    b_previous_rf_contact = False
     while (1):
 
         # while_start = time.time()
@@ -203,10 +206,18 @@ if __name__ == "__main__":
                                                link_id['r_foot_contact'])[2, 3]
         lf_height = pybullet_util.get_link_iso(robot,
                                                link_id['l_foot_contact'])[2, 3]
+
+        # use schmitt trigger for contact estimation
+        b_lf_force_contact, b_rf_force_contact = pybullet_util.evaluate_force_contact(
+                            sensor_data_dict['lf_normal_force'], sensor_data_dict['rf_normal_force'],
+                            b_previous_lf_contact, b_previous_rf_contact, robot_weight)
+
         sensor_data_dict[
             'b_rf_contact'] = True if rf_height <= 0.005 else False
         sensor_data_dict[
             'b_lf_contact'] = True if lf_height <= 0.005 else False
+        sensor_data_dict['b_lf_contact'] = b_lf_force_contact
+        sensor_data_dict['b_rf_contact'] = b_rf_force_contact
 
         sensor_data_dict['imu_frame_iso'] = pybullet_util.get_link_iso(
             robot, link_id['torso_imu'])
