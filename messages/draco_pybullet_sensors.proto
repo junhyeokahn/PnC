@@ -10,4 +10,10 @@ message bullet_gt_msg {
   repeated float base_joint_quat = 3;
   repeated float base_joint_lin_vel = 4;
   repeated float base_joint_ang_vel = 5;
+
+  // normal contact force sensors
+  repeated float lf_normal_force = 6;
+  repeated float rf_normal_force = 7;
+  repeated float b_lf_force_contact = 8;
+  repeated float b_rf_force_contact = 9;
 }

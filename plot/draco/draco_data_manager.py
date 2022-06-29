@@ -257,6 +257,10 @@ while True:
         data_saver.add('base_joint_quat', list(gt_msg.base_joint_quat))
         data_saver.add('base_joint_lin_vel', list(gt_msg.base_joint_lin_vel))
         data_saver.add('base_joint_ang_vel', list(gt_msg.base_joint_ang_vel))
+        data_saver.add('lf_normal_force', list(gt_msg.lf_normal_force))
+        data_saver.add('rf_normal_force', list(gt_msg.rf_normal_force))
+        data_saver.add('b_lf_force_contact', list(gt_msg.b_lf_force_contact))
+        data_saver.add('b_rf_force_contact', list(gt_msg.b_rf_force_contact))
 
     data_saver.advance()
 

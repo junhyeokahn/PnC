@@ -283,6 +283,10 @@ if __name__ == "__main__":
         del bullet_msg.base_joint_quat[:]
         del bullet_msg.base_joint_lin_vel[:]
         del bullet_msg.base_joint_ang_vel[:]
+        del bullet_msg.lf_normal_force[:]
+        del bullet_msg.rf_normal_force[:]
+        del bullet_msg.b_lf_force_contact[:]
+        del bullet_msg.b_rf_force_contact[:]
         for i in range(3):
             bullet_msg.base_joint_pos.append(sensor_data_dict['base_joint_pos'][i])
             bullet_msg.base_com_pos_py.append(sensor_data_dict['base_com_pos_py'][i])
@@ -290,6 +294,10 @@ if __name__ == "__main__":
             bullet_msg.base_joint_lin_vel.append(sensor_data_dict['base_joint_lin_vel'][i])
             bullet_msg.base_joint_ang_vel.append(sensor_data_dict['base_joint_ang_vel'][i])
         bullet_msg.base_joint_quat.append(qt[3])
+        bullet_msg.lf_normal_force.append(sensor_data_dict['lf_normal_force'])
+        bullet_msg.rf_normal_force.append(sensor_data_dict['rf_normal_force'])
+        bullet_msg.b_lf_force_contact.append(b_lf_force_contact)
+        bullet_msg.b_rf_force_contact.append(b_rf_force_contact)
 
         # Compute Command
         if Config.PRINT_TIME:

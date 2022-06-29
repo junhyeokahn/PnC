@@ -3,36 +3,36 @@
  <tabbed_widget name="Main Window" parent="main_window">
   <Tab containers="1" tab_name="BasePosition">
    <Container>
-    <DockSplitter count="5" orientation="-" sizes="0.199776;0.223345;0.244669;0.166105;0.166105">
+    <DockSplitter orientation="-" sizes="0.166485;0.166485;0.166485;0.167573;0.166485;0.166485" count="6">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="0.114856" right="9.949611" top="0.117099"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.240724" bottom="0.015209" left="18.172187"/>
        <limitY/>
        <curve name="/base_pos_kf[0]" color="#ff0009"/>
        <curve name="/base_joint_pos_est[0]" color="#9c0000"/>
        <curve name="/base_joint_pos[0]" color="#000000">
         <transform name="Scale/Offset" alias="/base_joint_pos[0][Scale/Offset]">
-         <options value_offset="0.1465" value_scale="1.0" time_offset="0"/>
+         <options value_scale="1.0" time_offset="0" value_offset="0.1465"/>
         </transform>
        </curve>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="1.239408" right="9.949611" top="1.241393"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.120048" bottom="-0.044507" left="18.172187"/>
        <limitY/>
        <curve name="/base_pos_kf[1]" color="#057100"/>
        <curve name="/base_joint_pos_est[1]" color="#00ff00"/>
        <curve name="/base_joint_pos[1]" color="#000000">
         <transform name="Scale/Offset" alias="/base_joint_pos[1][Scale/Offset]">
-         <options value_offset="-0.05378" value_scale="1.0" time_offset="0"/>
+         <options value_scale="1.0" time_offset="0" value_offset="-0.05378"/>
         </transform>
        </curve>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="0.794441" right="9.949611" top="0.794926"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.802761" bottom="0.794787" left="18.172187"/>
        <limitY/>
        <curve name="/base_pos_kf[2]" color="#0033ff"/>
        <curve name="/base_joint_pos_est[2]" color="#0a0b85"/>
@@ -40,19 +40,27 @@
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="-0.025000" right="9.949611" top="1.025000"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="1.025000" bottom="-0.025000" left="18.172187"/>
        <limitY/>
        <curve name="/lfoot_contact[0]" color="#1f77b4"/>
        <curve name="/rfoot_contact[0]" color="#d62728"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" bottom="0.900000" right="9.949611" top="1.100000"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="1.025000" bottom="-0.025000" left="18.172187"/>
        <limitY/>
        <curve name="/lf_contact[0]" color="#1ac938"/>
        <curve name="/rf_contact[0]" color="#ff7f0e"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="1.025000" bottom="-0.025000" left="18.172187"/>
+       <limitY/>
+       <curve name="/b_lf_force_contact[0]" color="#1f77b4"/>
+       <curve name="/b_rf_force_contact[0]" color="#d62728"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -60,26 +68,26 @@
   </Tab>
   <Tab containers="1" tab_name="BaseVelocity">
    <Container>
-    <DockSplitter count="3" orientation="-" sizes="0.333707;0.332587;0.333707">
+    <DockSplitter orientation="-" sizes="0.333707;0.332587;0.333707" count="3">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="-0.001131" right="-3846.817338" top="0.000021"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.374549" bottom="-0.380763" left="18.172187"/>
        <limitY/>
        <curve name="/base_vel_kf[0]" color="#002fff"/>
        <curve name="/base_joint_lin_vel[0]" color="#000000"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="-0.000317" right="-3846.817338" top="0.000677"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.222869" bottom="-0.066054" left="18.172187"/>
        <limitY/>
        <curve name="/base_vel_kf[1]" color="#0026ff"/>
        <curve name="/base_joint_lin_vel[1]" color="#000000"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="0.000605" right="-3846.817338" top="0.013169"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.024731" bottom="-0.072501" left="18.172187"/>
        <limitY/>
        <curve name="/base_vel_kf[2]" color="#0019ff"/>
        <curve name="/base_joint_lin_vel[2]" color="#000000"/>
@@ -90,26 +98,26 @@
   </Tab>
   <Tab containers="1" tab_name="BaseEuler">
    <Container>
-    <DockSplitter count="3" orientation="-" sizes="0.333707;0.332587;0.333707">
+    <DockSplitter orientation="-" sizes="0.333707;0.332587;0.333707" count="3">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="1.570789" right="-3846.817338" top="1.570789"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="1.561178" bottom="1.551008" left="18.172187"/>
        <limitY/>
        <curve name="/base_euler_kf[0]" color="#0017ff"/>
        <curve name="/base_joint_euler_est[0]" color="#ff0b00"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="-0.000100" right="-3846.817338" top="-0.000100"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.012075" bottom="0.000835" left="18.172187"/>
        <limitY/>
        <curve name="/base_euler_kf[1]" color="#0003ff"/>
        <curve name="/base_joint_euler_est[1]" color="#ff0015"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="-0.000000" right="-3846.817338" top="-0.000000"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.006120" bottom="0.000264" left="18.172187"/>
        <limitY/>
        <curve name="/base_euler_kf[2]" color="#0800ff"/>
        <curve name="/base_joint_euler_est[2]" color="#ff001d"/>
@@ -120,26 +128,26 @@
   </Tab>
   <Tab containers="1" tab_name="IMU_raw">
    <Container>
-    <DockSplitter count="3" orientation="-" sizes="0.334826;0.330347;0.334826">
+    <DockSplitter orientation="-" sizes="0.334826;0.330347;0.334826" count="3">
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="0.000746" right="-3846.817338" top="0.004398"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.059281" bottom="-0.126300" left="18.172187"/>
        <limitY/>
        <curve name="/imu_ang_vel_raw[0]" color="#bcbd22"/>
        <curve name="/imu_ang_vel_est[0]" color="#1ac938"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="-0.000283" right="-3846.817338" top="-0.000049"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.085240" bottom="-0.019682" left="18.172187"/>
        <limitY/>
        <curve name="/imu_ang_vel_raw[1]" color="#1f77b4"/>
        <curve name="/imu_ang_vel_est[1]" color="#ff7f0e"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_x="false" flip_y="false" style="Lines" mode="TimeSeries">
-       <range left="-3849.631874" bottom="0.000142" right="-3846.817338" top="0.000818"/>
+      <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+       <range right="23.052337" top="0.161656" bottom="-0.140696" left="18.172187"/>
        <limitY/>
        <curve name="/imu_ang_vel_raw[2]" color="#d62728"/>
        <curve name="/imu_ang_vel_est[2]" color="#f14cc1"/>
