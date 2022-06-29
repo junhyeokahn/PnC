@@ -291,6 +291,19 @@ def get_sensor_data(robot, joint_id, link_id, pos_basejoint_to_basecom,
         sensor_data['joint_pos'][k] = js[0]
         sensor_data['joint_vel'][k] = js[1]
 
+    # store normal force measured on each foot
+    normal_force = 0
+    contacts = p.getContactPoints(bodyA=robot, linkIndexA=link_id['l_ankle_ie_link'])
+    for contact in contacts:
+        normal_force += contact[9]
+    sensor_data['lf_normal_force'] = normal_force
+
+    normal_force = 0
+    contacts = p.getContactPoints(bodyA=robot, linkIndexA=link_id['r_ankle_ie_link'])
+    for contact in contacts:
+        normal_force += contact[9]
+    sensor_data['rf_normal_force'] = normal_force
+
     return sensor_data
 
 
