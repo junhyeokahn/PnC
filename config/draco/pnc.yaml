@@ -210,7 +210,7 @@ walking:
     com_height: 0.92
     #com_height: 1.
 
-    swing_height: 0.02
+    swing_height: 0.04
 
     t_additional_ini_trans: 0.
     t_contact_trans: 0.15

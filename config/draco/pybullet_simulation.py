@@ -18,7 +18,7 @@ class Config(object):
     PRINT_ROBOT_INFO = True
     VIDEO_RECORD = False
     RECORD_FREQ = 10
-    SIMULATE_CAMERA = True
+    SIMULATE_CAMERA = False
 
     B_USE_MESHCAT = False
 
