@@ -22,7 +22,7 @@ void FootLifting::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
 
   if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootLifting[transition]" << std::endl;
+//    std::cout << "draco_states::kRFootLifting[transition]" << std::endl;
 
     // force manager
     ctrl_arch_->rfoot_fm->InitializeRampToMin(sp_->curr_time, ramp_time_);

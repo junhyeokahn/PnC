@@ -22,7 +22,7 @@ SingleSupportLifting::~SingleSupportLifting() {}
 void SingleSupportLifting::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
   if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootSingleSupportLifting" << std::endl;
+//    std::cout << "draco_states::kRFootSingleSupportLifting" << std::endl;
 
     sp_->b_rf_contact = false;
     sp_->b_lf_contact = true;

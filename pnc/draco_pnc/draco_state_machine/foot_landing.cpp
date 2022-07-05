@@ -23,11 +23,11 @@ void FootLanding::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
 
-  if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootLanding" << std::endl;
-  } else {
-    std::cout << "draco_states::kLFootLanding" << std::endl;
-  }
+//  if (leg_side_ == EndEffector::RFoot) {
+//    std::cout << "draco_states::kRFootLanding" << std::endl;
+//  } else {
+//    std::cout << "draco_states::kLFootLanding" << std::endl;
+//  }
   // force manager
   ctrl_arch_->rfoot_fm->InitializeRampToMax(sp_->curr_time, ramp_time_);
   ctrl_arch_->lfoot_fm->InitializeRampToMax(sp_->curr_time, ramp_time_);

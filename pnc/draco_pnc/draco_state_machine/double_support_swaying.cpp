@@ -18,7 +18,7 @@ DoubleSupportSwaying::DoubleSupportSwaying(
 DoubleSupportSwaying::~DoubleSupportSwaying() {}
 
 void DoubleSupportSwaying::firstVisit() {
-  std::cout << "draco_states::kSwaying " << std::endl;
+//  std::cout << "draco_states::kSwaying " << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
 

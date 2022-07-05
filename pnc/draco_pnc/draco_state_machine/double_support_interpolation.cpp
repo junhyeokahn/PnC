@@ -18,7 +18,7 @@ DoubleSupportInterpolation::DoubleSupportInterpolation(
 DoubleSupportInterpolation::~DoubleSupportInterpolation() {}
 
 void DoubleSupportInterpolation::firstVisit() {
-  std::cout << "draco_states::kBaseInterpolation" << std::endl;
+//  std::cout << "draco_states::kBaseInterpolation" << std::endl;
 
   ctrl_start_time_ = sp_->curr_time;
 

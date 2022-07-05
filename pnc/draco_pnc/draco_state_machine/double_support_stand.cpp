@@ -14,7 +14,7 @@ DoubleSupportStand::DoubleSupportStand(const StateIdentifier _state_identifier,
 DoubleSupportStand::~DoubleSupportStand() {}
 
 void DoubleSupportStand::firstVisit() {
-  std::cout << "draco_states::kDoubleSupportStand" << std::endl;
+//  std::cout << "draco_states::kDoubleSupportStand" << std::endl;
   ctrl_start_time_ = sp_->curr_time;
 
   // Initialize CoM Trajectory

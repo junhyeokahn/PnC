@@ -18,11 +18,11 @@ FootSwing::FootSwing(const StateIdentifier _state_identifier,
 FootSwing::~FootSwing() {}
 
 void FootSwing::firstVisit() {
-  if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootSwingStatic" << std::endl;
-  } else {
-    std::cout << "draco_states::kLFootSwingStatic" << std::endl;
-  }
+//  if (leg_side_ == EndEffector::RFoot) {
+//    std::cout << "draco_states::kRFootSwingStatic" << std::endl;
+//  } else {
+//    std::cout << "draco_states::kLFootSwingStatic" << std::endl;
+//  }
 
   ctrl_start_time_ = sp_->curr_time;
 

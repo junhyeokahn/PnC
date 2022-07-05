@@ -19,7 +19,7 @@ SingleSupportLanding::~SingleSupportLanding() {}
 void SingleSupportLanding::firstVisit() {
   ctrl_start_time_ = sp_->curr_time;
   if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootSingleSupportLanding" << std::endl;
+//    std::cout << "draco_states::kRFootSingleSupportLanding" << std::endl;
 
     Eigen::Vector3d des_foot_pos =
         robot_->get_link_iso("r_foot_contact").translation();

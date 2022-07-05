@@ -23,7 +23,7 @@ void DoubleSupportMove::firstVisit() {
   sp_->b_rf_contact = true;
 
   if (com_move_states_ == com_move_states::Left) {
-    std::cout << "draco_states::kMoveCoMToLFoot" << std::endl;
+//    std::cout << "draco_states::kMoveCoMToLFoot" << std::endl;
 
     Eigen::Vector3d target_com_pos =
         robot_->get_link_iso("l_foot_contact").translation();

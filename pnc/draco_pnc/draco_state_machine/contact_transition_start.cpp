@@ -17,11 +17,11 @@ ContactTransitionStart::ContactTransitionStart(
 ContactTransitionStart::~ContactTransitionStart() {}
 
 void ContactTransitionStart::firstVisit() {
-  if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootContactTransitionStart" << std::endl;
-  } else {
-    std::cout << "draco_states::kLFootContactTransitionStart" << std::endl;
-  }
+//  if (leg_side_ == EndEffector::RFoot) {
+//    std::cout << "draco_states::kRFootContactTransitionStart" << std::endl;
+//  } else {
+//    std::cout << "draco_states::kLFootContactTransitionStart" << std::endl;
+//  }
 
   ctrl_start_time_ = sp_->curr_time;
 
@@ -75,10 +75,6 @@ void ContactTransitionStart::firstVisit() {
           ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
           ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
         }
-
-        std::cout << "current footstep" << std::endl;
-        ctrl_arch_->dcm_tm->footstep_list[ctrl_arch_->dcm_tm->getStepIndex()-1].printInfo();
-        std::cout << "dcm init" << ini_pos.transpose() << std::endl;
         Eigen::Quaternion<double> torso_quat(
             robot_->get_link_iso("torso_com_link").linear());
         ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,

@@ -15,11 +15,11 @@ ContactTransitionEnd::ContactTransitionEnd(
 ContactTransitionEnd::~ContactTransitionEnd() {}
 
 void ContactTransitionEnd::firstVisit() {
-  if (leg_side_ == EndEffector::RFoot) {
-    std::cout << "draco_states::kRFootContactTransitionEnd" << std::endl;
-  } else {
-    std::cout << "draco_states::kLFootContactTransitionEnd" << std::endl;
-  }
+//  if (leg_side_ == EndEffector::RFoot) {
+//    std::cout << "draco_states::kRFootContactTransitionEnd" << std::endl;
+//  } else {
+//    std::cout << "draco_states::kLFootContactTransitionEnd" << std::endl;
+//  }
 
   ctrl_start_time_ = sp_->curr_time;
   end_time_ = ctrl_arch_->dcm_tm->getNormalForceRampDownTime();
