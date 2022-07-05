@@ -15,4 +15,5 @@ message Contact {
 
 message ContactSequence {
     repeated Contact contacts = 1;
+    bool is_new = 2;
 }
