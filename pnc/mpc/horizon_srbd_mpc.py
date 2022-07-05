@@ -48,15 +48,15 @@ def start_service(EmptyRequest):
 
 contact_sequence = {
     # 0: {'name': 'l_foot_contact', 'pos': [0.115904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 1: {'name': 'l_foot_contact', 'pos': [0.215904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
+    # 1: {'name': 'r_foot_contact', 'pos': [0.215904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 2: {'name': 'l_foot_contact', 'pos': [0.315904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 3: {'name': 'l_foot_contact', 'pos': [0.415904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
+    # 3: {'name': 'r_foot_contact', 'pos': [0.415904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 4: {'name': 'l_foot_contact', 'pos': [0.515904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 5: {'name': 'l_foot_contact', 'pos': [0.615904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
+    # 5: {'name': 'r_foot_contact', 'pos': [0.615904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 6: {'name': 'l_foot_contact', 'pos': [0.715904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 7: {'name': 'l_foot_contact', 'pos': [0.815904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
+    # 7: {'name': 'r_foot_contact', 'pos': [0.815904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
     # 8: {'name': 'l_foot_contact', 'pos': [0.915904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 9: {'name': 'l_foot_contact', 'pos': [1.015904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]}
+    # 9: {'name': 'r_foot_contact', 'pos': [1.015904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]}
     # 0: {'name': 'l_foot_contact', 'pos': [0.215904, -0.0395778, -3.38305e-07], 'ori': [1.94791e-06, 8.42233e-07, -0.08949, 0.995988]},
     # 1: {'name': 'r_foot_contact', 'pos': [0.410509, -0.276642, -1.37213e-06], 'ori': [2.18896e-08, 7.54643e-07, -0.0463577, 0.998925]},
     # 2: {'name': 'l_foot_contact', 'pos': [0.604699, -0.113649, -9.42198e-07], 'ori': [1.9716e-06, 8.60281e-07, -0.0972253, 0.995262]},
@@ -77,9 +77,10 @@ def callback(contact_sequence, msg):
         contact_sequence[index] = {'name': contact.name,
                                    'pos': [contact.pos_x, contact.pos_y, contact.pos_z],
                                    'ori': [contact.ori_x, contact.ori_y, contact.ori_z, contact.ori_w]}
-        index += 1
 
-    print(contact_sequence)
+        index += 1
+    global start_bool
+    start_bool = msg.is_new
 
 def fromContactSequenceToFrames(contact):
     rot = R.from_quat(contact['ori'])
@@ -391,6 +392,7 @@ def setWorld(frame, kindyn, q, base_link="base_link"):
 rospy.init_node('srbd_mpc_test', anonymous=True)
 cpp_args = list()
 
+rospy.set_param("use_sim_time", True)
 start_srv = rospy.Service('start_service', Empty, start_service)
 
 '''
@@ -577,7 +579,7 @@ rdot_tracking is used to track a desired velocity of the CoM
 """
 rdot_tracking_gain = 1e2
 print(f"rdot_tracking_gain: {rdot_tracking_gain}")
-prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot - rdot_ref), nodes=range(1, ns+1))
+prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot), nodes=range(1, ns+1))
 
 """
 w_tracking is used to track a desired angular velocity of the base
@@ -708,9 +710,6 @@ msg = ContactSequence()
 contact_sequence_index = 0
 
 while not rospy.is_shutdown():
-    """
-    Socket test
-    """
     try:
         encoded_msg = socket.recv(flags=zmq.NOBLOCK)
         msg.ParseFromString(encoded_msg)
@@ -718,8 +717,12 @@ while not rospy.is_shutdown():
     except zmq.Again as e:
         print(bcolors.WARNING + 'No message received yet...' + bcolors.ENDC)
 
+    if not contact_sequence:
+        rate.sleep()
+        continue
+
     """
-    Initialize solution
+    Set previous first element solution as bound for the variables to guarantee continuity
     """
     r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
     rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
@@ -731,148 +734,44 @@ while not rospy.is_shutdown():
     o.setInitialGuess(solution['o'])
     w.setInitialGuess(solution['w'])
 
-    rdot_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
-    w_ref.assign([0., 0., 0.], nodes=range(0, ns+1))
+    # rdot_ref.assign([0.0, 0.0, 0.0], nodes=range(0, ns+1))
+    # w_ref.assign([0.0, 0.0, 0.0], nodes=range(0, ns+1))
 
-    # current_positions = fromContactSequenceToFrames(init_pose_foot_dict[0]) + \
-    #                     fromContactSequenceToFrames(init_pose_foot_dict[1])
-    current_positions = fromContactSequenceToFrames(init_pose_foot_dict[0]) + \
-                        fromContactSequenceToFrames(init_pose_foot_dict[1])
-    wpg.setContactPositions(current_positions, current_positions)
-    wpg.set('stand')
+    if len(contact_sequence) == 2:
+        init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[0]]
+        init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[1]]
+        current_positions = fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[1]])
+        if start_bool or index == 0:
+            wpg.setContactPositions(current_positions, current_positions)
+        wpg.set('stand')
+    else:
+        for contact in contact_sequence.values():
+            print(contact)
+        current_positions = fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[1]])
+        next_positions = fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[2]]) + fromContactSequenceToFrames(
+            contact_sequence[list(contact_sequence)[3]])
 
-    # tic()
-    t = time.time()
-    solver.solve()
-    elapsed = time.time() - t
-    # time = toc()
-    logger.add('time', elapsed)
-    solution = solver.getSolutionDict()
-
-    logger.add('r', solution['r'][:, 0])
-    logger.add('rdot', solution['rdot'][:, 0])
-    logger.add('rdot_ref', rdot_ref.getValues(0))
-    logger.add('o', solution['o'][:, 0])
-    logger.add('w', solution['w'][:, 0])
-    logger.add('w_ref', w_ref.getValues(0))
-    for j in range(nc):
-        logger.add('c' + str(j), c[j].getValues(0))
-        logger.add('f' + str(j), solution['f' + str(j)][:, 0])
-
-    while contact_sequence_index <= len(contact_sequence) - 2 and start_bool:
-        """
-        Set previous first element solution as bound for the variables to guarantee continuity
-        """
-        r.setBounds(solution['r'][:, 1], solution['r'][:, 1], 0)
-        rdot.setBounds(solution['rdot'][:, 1], solution['rdot'][:, 1], 0)
-        o.setBounds(solution['o'][:, 1], solution['o'][:, 1], 0)
-        w.setBounds(solution['w'][:, 1], solution['w'][:, 1], 0)
-
-        r.setInitialGuess(solution['r'])
-        rdot.setInitialGuess(solution['rdot'])
-        o.setInitialGuess(solution['o'])
-        w.setInitialGuess(solution['w'])
-
-        rdot_ref.assign([0.0, 0.0, 0.0], nodes=range(0, ns+1))
-        w_ref.assign([0.0, 0.0, 0.0], nodes=range(0, ns+1))
-
-        """
-        Set contact positions every ns iterations
-        """
-        if index % (ns+1) == 0:
-            # if len(contact_sequence) == 2:
-            if contact_sequence_index == len(contact_sequence) - 2:
-                # init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[0]]
-                # init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[1]]
-                init_pose_foot_dict[0] = contact_sequence[list(contact_sequence)[contact_sequence_index]]
-                init_pose_foot_dict[1] = contact_sequence[list(contact_sequence)[contact_sequence_index + 1]]
-                current_positions = fromContactSequenceToFrames(
-                    contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
-                    contact_sequence[list(contact_sequence)[1]])
-                wpg.setContactPositions(current_positions, current_positions)
-                # del contact_sequence[list(contact_sequence)[0]]
-                # del contact_sequence[list(contact_sequence)[0]]
-                contact_sequence_index += 2
-                break
-
-            # current_positions = fromContactSequenceToFrames(
-            #     contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
-            #     contact_sequence[list(contact_sequence)[1]])
-            # next_positions = fromContactSequenceToFrames(
-            #     contact_sequence[list(contact_sequence)[2]]) + fromContactSequenceToFrames(
-            #     contact_sequence[list(contact_sequence)[3]])
-            current_positions = fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[contact_sequence_index]]) + fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[contact_sequence_index + 1]])
-            next_positions = fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[contact_sequence_index + 2]]) + fromContactSequenceToFrames(
-                contact_sequence[list(contact_sequence)[contact_sequence_index + 3]])
+        if start_bool or index == 0:
             wpg.setContactPositions(current_positions, next_positions)
-
-            # del contact_sequence[list(contact_sequence)[0]]
-            # del contact_sequence[list(contact_sequence)[0]]
-            contact_sequence_index += 2
-
         wpg.set('step')
-        # print(c[0].getValues()[0])
-        # print(f[0].getBounds()[1][0])
-        # input('step')
 
-        """
-        Solve
-        """
-        # tic()
-        t = time.time()
-        solver.solve()
-        # time = toc()
-        elapsed = time.time() - t
-        logger.add('time', elapsed)
-        solution = solver.getSolutionDict()
-
-        """
-        Marker Publishers
-        """
-        t = rospy.Time.now()
-        SRBDTfBroadcaster(solution['r'][:, 0], solution['o'][:, 0], t)
-        publishFootsteps(contact_sequence, initial_foot_position[0][2])
-        SRBDViewer(I, "SRB", t, nc)
-        publishPointTrj(solution["r"], t, "SRB", "world")
-        for i in range(0, nc):
-            publishContactForce(t, solution['f' + str(i)][:, 0], 'c' + str(i))
-
-        ff = dict()
-        for i in range(0, nc):
-            ff[i] = solution["f" + str(i)][:, 0]
-        srbd_0 = kin_dyn.SRBD(m, I, ff, solution["r"][:, 0], solution["rddot"][:, 0], c, solution["w"][:, 0],
-                              solution["wdot"][:, 0])
-        srbd_msg.header.stamp = t
-        srbd_msg.wrench.force.x = srbd_0[0]
-        srbd_msg.wrench.force.y = srbd_0[1]
-        srbd_msg.wrench.force.z = srbd_0[2]
-        srbd_msg.wrench.torque.x = srbd_0[3]
-        srbd_msg.wrench.torque.y = srbd_0[4]
-        srbd_msg.wrench.torque.z = srbd_0[5]
-        srbd_pub.publish(srbd_msg)
-
-        logger.add('r', solution['r'][:, 0])
-        logger.add('rdot', solution['rdot'][:, 0])
-        logger.add('rdot_ref', rdot_ref.getValues(0))
-        logger.add('o', solution['o'][:, 0])
-        logger.add('w', solution['w'][:, 0])
-        logger.add('w_ref', w_ref.getValues(0))
-        for j in range(nc):
-            logger.add('c' + str(j), c[j].getValues(0))
-            logger.add('f' + str(j), solution['f' + str(j)][:, 0])
-
-        index += 1
-        rate.sleep()
+    """
+    Solve
+    """
+    solver.solve()
+    solution = solver.getSolutionDict()
 
     """
     Marker Publishers
     """
     t = rospy.Time.now()
     SRBDTfBroadcaster(solution['r'][:, 0], solution['o'][:, 0], t)
-    publishFootsteps(initial_foot_dict, initial_foot_position[0][2])
+    publishFootsteps(contact_sequence, initial_foot_position[0][2])
     SRBDViewer(I, "SRB", t, nc)
     publishPointTrj(solution["r"], t, "SRB", "world")
     for i in range(0, nc):
@@ -892,4 +791,15 @@ while not rospy.is_shutdown():
     srbd_msg.wrench.torque.z = srbd_0[5]
     srbd_pub.publish(srbd_msg)
 
+    logger.add('r', solution['r'][:, 0])
+    logger.add('rdot', solution['rdot'][:, 0])
+    logger.add('rdot_ref', rdot_ref.getValues(0))
+    logger.add('o', solution['o'][:, 0])
+    logger.add('w', solution['w'][:, 0])
+    logger.add('w_ref', w_ref.getValues(0))
+    for j in range(nc):
+        logger.add('c' + str(j), c[j].getValues(0))
+        logger.add('f' + str(j), solution['f' + str(j)][:, 0])
+
+    index += 1
     rate.sleep()
