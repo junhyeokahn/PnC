@@ -158,8 +158,6 @@ bool DCMTrajectoryManager::initialize(const double t_walk_start_in,
   // std::cout << "dcm vel" << std::endl;
   // std::cout << dcm_vel_start_in << std::endl;
 
-  std::cout << "starting time: " << t_walk_start_in << std::endl;
-
   // Set DCM reference
   dcm_planner_->setRobotMass(robot_->total_mass);
   dcm_planner_->setCoMHeight(nominal_com_height_);
@@ -306,6 +304,10 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
   Footstep new_footstep;
   Footstep mid_footstep = mid_foot_stance_;
 
+  // add initial footsteps
+  footstep_list.push_back(left_foot_stance_);
+  footstep_list.push_back(right_foot_stance_);
+
   int robot_side = EndEffector::LFoot;
   for (int i = 0; i < num_steps; i++) {
     if (robot_side == EndEffector::LFoot) {
@@ -327,20 +329,20 @@ void DCMTrajectoryManager::populateWalkForward(const int num_steps,
   }
 
   // Add additional step forward to square the feet.
-  if (robot_side == EndEffector::LFoot) {
-    Eigen::Vector3d translate(num_steps * forward_distance,
-                              nominal_footwidth / 2.0, 0);
-    new_footstep.setPosOriSide(mid_footstep.position +
-                                   mid_footstep.R_ori * translate,
-                               mid_footstep.orientation, EndEffector::LFoot);
-  } else {
-    Eigen::Vector3d translate(num_steps * forward_distance,
-                              -nominal_footwidth / 2.0, 0);
-    new_footstep.setPosOriSide(mid_footstep.position +
-                                   mid_footstep.R_ori * translate,
-                               mid_footstep.orientation, EndEffector::RFoot);
-  }
-  footstep_list.push_back(new_footstep);
+//  if (robot_side == EndEffector::LFoot) {
+//    Eigen::Vector3d translate(num_steps * forward_distance,
+//                              nominal_footwidth / 2.0, 0);
+//    new_footstep.setPosOriSide(mid_footstep.position +
+//                                   mid_footstep.R_ori * translate,
+//                               mid_footstep.orientation, EndEffector::LFoot);
+//  } else {
+//    Eigen::Vector3d translate(num_steps * forward_distance,
+//                              -nominal_footwidth / 2.0, 0);
+//    new_footstep.setPosOriSide(mid_footstep.position +
+//                                   mid_footstep.R_ori * translate,
+//                               mid_footstep.orientation, EndEffector::RFoot);
+//  }
+//  footstep_list.push_back(new_footstep);
 }
 
 // Take two steps to rotate at the specified radians. Repeat num_times
@@ -699,7 +701,7 @@ void DCMTrajectoryManager::init_local_planner()
     optimizer_->setEdges(edges);
     optimizer_->update();
 
-    localPlan();
+//    localPlan();
 }
 
 void DCMTrajectoryManager::localPlan()
