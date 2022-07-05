@@ -76,7 +76,7 @@ private:
   void SaveData();
 
   int footstep_list_index_;
-  std::vector<Footstep> footstep_to_publish_;
+  std::vector<Footstep>::iterator init_it, end_it;
   zmq::context_t* context_;
   zmq::socket_t* publisher_;
 };

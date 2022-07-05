@@ -363,75 +363,113 @@ DracoControlArchitecture::~DracoControlArchitecture() {
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {
+
   // Initialize State
+    std::cout << "footstep_list.size(): " << dcm_tm->footstep_list.size() << std::endl;
   if (b_state_first_visit_) {
     state_machines[state]->firstVisit();
     // Update Footsteps through Local Planner
     if (!dcm_tm->footstep_list.empty())
       dcm_tm->localPlan();
+//    for (auto footstep : dcm_tm->footstep_list)
+//        footstep.printInfo();
     b_state_first_visit_ = false;
   }
-  if(!dcm_tm->footstep_list.empty())
-  {
-    if(sp_->count % 800 == 0)
-      footstep_list_index_ += 2;
 
-    // Create Protobuf message
-    std::cout << "count: " << sp_->count << std::endl;
-    if (sp_->count % 10 == 0 && footstep_list_index_ >= 0)
+    if(!dcm_tm->footstep_list.empty())
     {
-      footstep_to_publish_.clear();
-      if (footstep_list_index_ == 0)
-      {
-        Footstep initial_footstep_left, initial_footstep_right;
-        initial_footstep_left.setLeftSide();
-        Eigen::Quaternion<double> q_left(robot_->get_link_iso("l_foot_contact").linear());
-        initial_footstep_left.setPosOri(robot_->get_link_iso("l_foot_contact").translation(), q_left);
+        bool is_new = true;
+        // Update the next footstep reference every T = 1s
+        /// Problem: simulation time is slower than actual time!
+        if(sp_->count % 800 == 0 && footstep_list_index_ < int(dcm_tm->footstep_list.size() - 4))
+        {
+            std::cout << "COUNT A: " << sp_->count << std::endl;
+            footstep_list_index_ += 2;
+            std::cout << "Taking footsteps from " << footstep_list_index_ << " to " << footstep_list_index_ + 3 << " in a vector size of " << dcm_tm->footstep_list.size() << std::endl;
+            init_it = dcm_tm->footstep_list.begin() + footstep_list_index_;
+            end_it = dcm_tm->footstep_list.begin() + footstep_list_index_ + 4;
+            for (auto it = init_it; it != end_it; it++)
+                std::cout << it->position.transpose() << std::endl;
+        }
+        else if(sp_->count % 800 == 0 && footstep_list_index_ >= int(dcm_tm->footstep_list.size() - 4) && footstep_list_index_ < int(dcm_tm->footstep_list.size() - 2))
+        {
+            std::cout << "COUNT B: " << sp_->count << std::endl;
+            footstep_list_index_ += 2;
+            std::cout << "Taking footsteps from " << footstep_list_index_ << " to " << footstep_list_index_ + 1 << " in a vector size of " << dcm_tm->footstep_list.size() << std::endl;
+            init_it = dcm_tm->footstep_list.begin() + footstep_list_index_;
+            end_it = dcm_tm->footstep_list.begin() + footstep_list_index_ + 2;
+            for (auto it = init_it; it != end_it; it++)
+                std::cout << it->position.transpose() << std::endl;
+        }
 
-        initial_footstep_right.setRightSide();
-        Eigen::Quaternion<double> q_right(robot_->get_link_iso("r_foot_contact").linear());
-        initial_footstep_right.setPosOri(robot_->get_link_iso("r_foot_contact").translation(), q_right);
-
-        footstep_to_publish_.push_back(initial_footstep_left);
-        footstep_to_publish_.push_back(initial_footstep_right);
-        footstep_to_publish_.push_back(dcm_tm->footstep_list[0]);
-        footstep_to_publish_.push_back(dcm_tm->footstep_list[1]);
-      }
-      else
-      {
-        auto init_it = dcm_tm->footstep_list.begin() + footstep_list_index_;
-        auto end_it = dcm_tm->footstep_list.begin() + footstep_list_index_ + 4;
-        while (init_it != end_it)
-          footstep_to_publish_.push_back(*init_it);
-      }
-    std::string encoded_msg;
-    MPC_MSG::ContactSequence contact_sequence_msg;
-    std::cout << "footstep_to_publish.size(): " << footstep_to_publish_.size() << std::endl;
-    for (auto footstep : footstep_to_publish_)
+        // Create Protobuf message
+        if (sp_->count % 40 == 0) // && footstep_list_index_ >= 0)
+        {
+            if (sp_->count % 800 != 0)
+                is_new = false;
+            std::vector<Footstep> footstep_to_publish;
+            std::vector<Footstep> fs(init_it, end_it);
+            footstep_to_publish = fs;
+            std::string encoded_msg;
+            MPC_MSG::ContactSequence contact_sequence_msg;
+            for (auto footstep : footstep_to_publish)
+            {
+              MPC_MSG::Contact* contact_msg = contact_sequence_msg.add_contacts();
+              if (footstep.robot_side == EndEffector::LFoot)
+                contact_msg->set_name("l_foot_contact");
+              else
+                contact_msg->set_name("r_foot_contact");
+              contact_msg->set_pos_x(footstep.position(0));
+              contact_msg->set_pos_y(footstep.position(1));
+              contact_msg->set_pos_z(footstep.position(2));
+              contact_msg->set_ori_x(footstep.orientation.x());
+              contact_msg->set_ori_y(footstep.orientation.y());
+              contact_msg->set_ori_z(footstep.orientation.z());
+              contact_msg->set_ori_w(footstep.orientation.w());
+            }
+            contact_sequence_msg.set_is_new(is_new);
+            contact_sequence_msg.SerializeToString(&encoded_msg);
+            zmq::message_t zmq_msg(encoded_msg.size());
+            memcpy ((void *) zmq_msg.data(), encoded_msg.c_str(), encoded_msg.size());
+            publisher_->send(zmq_msg, zmq::send_flags::none);
+        }
+    }
+    else
     {
-      MPC_MSG::Contact* contact_msg = contact_sequence_msg.add_contacts();
-      if (footstep.robot_side == EndEffector::LFoot)
-        contact_msg->set_name("l_foot_contact");
-      else
-        contact_msg->set_name("r_foot_contact");
-      contact_msg->set_pos_x(footstep.position(0));
-      contact_msg->set_pos_y(footstep.position(1));
-      contact_msg->set_pos_z(footstep.position(2));
-      contact_msg->set_ori_x(footstep.orientation.x());
-      contact_msg->set_ori_y(footstep.orientation.y());
-      contact_msg->set_ori_z(footstep.orientation.z());
-      contact_msg->set_ori_w(footstep.orientation.w());
-      std::cout << "FOOTSTEP: " << std::endl;
-      std::cout << "name: " << contact_msg->name() << std::endl;
-      std::cout << "position: " << contact_msg->pos_x() << " " << contact_msg->pos_y() << " " << contact_msg->pos_z() << std::endl;
-      std::cout << "orientation: " << contact_msg->ori_x() << " " << contact_msg->ori_y() << " " << contact_msg->ori_z() << " " << contact_msg->ori_w() << std::endl;
+        if(sp_->count % 40 == 0)
+        {
+            Footstep initial_footstep_left, initial_footstep_right;
+            initial_footstep_left.setLeftSide();
+            Eigen::Quaternion<double> q_left(robot_->get_link_iso("l_foot_contact").linear());
+            initial_footstep_left.setPosOri(robot_->get_link_iso("l_foot_contact").translation(), q_left);
+            initial_footstep_right.setRightSide();
+            Eigen::Quaternion<double> q_right(robot_->get_link_iso("r_foot_contact").linear());
+            initial_footstep_left.setPosOri(robot_->get_link_iso("r_foot_contact").translation(), q_right);
+
+            std::vector<Footstep> footstep_to_publish{initial_footstep_left, initial_footstep_right};
+            std::string encoded_msg;
+            MPC_MSG::ContactSequence contact_sequence_msg;
+            for (auto footstep : footstep_to_publish)
+            {
+              MPC_MSG::Contact* contact_msg = contact_sequence_msg.add_contacts();
+              if (footstep.robot_side == EndEffector::LFoot)
+                contact_msg->set_name("l_foot_contact");
+              else
+                contact_msg->set_name("r_foot_contact");
+              contact_msg->set_pos_x(footstep.position(0));
+              contact_msg->set_pos_y(footstep.position(1));
+              contact_msg->set_pos_z(footstep.position(2));
+              contact_msg->set_ori_x(footstep.orientation.x());
+              contact_msg->set_ori_y(footstep.orientation.y());
+              contact_msg->set_ori_z(footstep.orientation.z());
+              contact_msg->set_ori_w(footstep.orientation.w());
+            }
+            contact_sequence_msg.SerializeToString(&encoded_msg);
+            zmq::message_t zmq_msg(encoded_msg.size());
+            memcpy ((void *) zmq_msg.data(), encoded_msg.c_str(), encoded_msg.size());
+            publisher_->send(zmq_msg, zmq::send_flags::none);
+        }
     }
-    contact_sequence_msg.SerializeToString(&encoded_msg);
-    zmq::message_t zmq_msg(encoded_msg.size());
-    memcpy ((void *) zmq_msg.data(), encoded_msg.c_str(), encoded_msg.size());
-    publisher_->send(zmq_msg, zmq::send_flags::none);
-    }
-  }
 
   // Update State Machine
   state_machines[state]->oneStep();
