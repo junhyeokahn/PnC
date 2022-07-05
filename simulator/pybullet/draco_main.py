@@ -28,6 +28,9 @@ import util
 
 import draco_interface
 
+import rospy
+from rosgraph_msgs.msg import Clock
+
 if Config.B_USE_MESHCAT:
     from pinocchio.visualize import MeshcatVisualizer
     import pinocchio as pin
@@ -181,10 +184,11 @@ if __name__ == "__main__":
         rot_basejoint_to_basecom)
 
     # configure camera
-    camera = pybullet_camera_util.Camera(100, 100)
-    camera.set_view_matrix_from_robot_link(robot, 2)
-    camera.set_projection_matrix(fovy=80, aspect=1., near=0.1, far=2.)
-    rgb_img, depth_img, seg_img = camera.get_pybullet_image()
+    if Config.SIMULATE_CAMERA:
+        camera = pybullet_camera_util.Camera(100, 100)
+        camera.set_view_matrix_from_robot_link(robot, 2)
+        camera.set_projection_matrix(fovy=80, aspect=1., near=0.1, far=2.)
+        rgb_img, depth_img, seg_img = camera.get_pybullet_image()
 
     # fig = plt.figure()
     # ax = plt.axes(projection='3d')
@@ -196,6 +200,10 @@ if __name__ == "__main__":
     # ax = plt.axes(projection='3d')
     # plt.ion()
     # plt.show()
+
+    # publisher for simulation time
+    rospy.init_node('draco_main')
+    sim_time_pub = rospy.Publisher('/clock', Clock, queue_size=10)
 
     while (1):
 
@@ -347,6 +355,9 @@ if __name__ == "__main__":
         time.sleep(dt)
         t += dt
         count += 1
+        sim_time = Clock()
+        sim_time.clock = rospy.Time(t)
+        sim_time_pub.publish(sim_time)
 
         # while_end = time.time()
         # while_loop_time = while_end - while_start
