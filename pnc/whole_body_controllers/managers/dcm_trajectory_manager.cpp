@@ -611,29 +611,30 @@ void DCMTrajectoryManager::init_local_planner()
 {
     optimizer_->clear();
 
-    int index = 2;
+//    int index = 2;
+    int index = 0;
     std::vector<g2o::OptimizableGraph::Vertex*> vertices;
 
     // first add current initial footsteps
-    Contact contact_init_left;
-    contact_init_left.state.pose.translation() = left_foot_stance_.position;
-    contact_init_left.state.pose.linear() = left_foot_stance_.orientation.toRotationMatrix();
-    VertexContact* v_init_left = new VertexContact();
-    v_init_left->setId(1);
-    v_init_left->setEstimate(contact_init_left);
-    v_init_left->setFixed(true);
-    auto vertex_init_left = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_left);
-    vertices.push_back(vertex_init_left);
+//    Contact contact_init_left;
+//    contact_init_left.state.pose.translation() = left_foot_stance_.position;
+//    contact_init_left.state.pose.linear() = left_foot_stance_.orientation.toRotationMatrix();
+//    VertexContact* v_init_left = new VertexContact();
+//    v_init_left->setId(1);
+//    v_init_left->setEstimate(contact_init_left);
+//    v_init_left->setFixed(true);
+//    auto vertex_init_left = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_left);
+//    vertices.push_back(vertex_init_left);
 
-    Contact contact_init_right;
-    contact_init_right.state.pose.translation() = right_foot_stance_.position;
-    contact_init_right.state.pose.linear() = right_foot_stance_.orientation.toRotationMatrix();
-    VertexContact* v_init_right = new VertexContact();
-    v_init_right->setId(0);
-    v_init_right->setEstimate(contact_init_right);
-    v_init_right->setFixed(true);
-    auto vertex_init_right = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_right);
-    vertices.push_back(vertex_init_right);
+//    Contact contact_init_right;
+//    contact_init_right.state.pose.translation() = right_foot_stance_.position;
+//    contact_init_right.state.pose.linear() = right_foot_stance_.orientation.toRotationMatrix();
+//    VertexContact* v_init_right = new VertexContact();
+//    v_init_right->setId(0);
+//    v_init_right->setEstimate(contact_init_right);
+//    v_init_right->setFixed(true);
+//    auto vertex_init_right = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_right);
+//    vertices.push_back(vertex_init_right);
 
     for (auto footstep : footstep_list)
     {
@@ -648,6 +649,8 @@ void DCMTrajectoryManager::init_local_planner()
         VertexContact* v = new VertexContact();
         v->setId(index);
         v->setEstimate(contact);
+        if(index == 0 || index == 1)
+            v->setFixed(true);
 
         auto vertex = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v);
         vertices.push_back(vertex);
@@ -701,24 +704,19 @@ void DCMTrajectoryManager::init_local_planner()
     optimizer_->setEdges(edges);
     optimizer_->update();
 
-//    localPlan();
+    localPlan();
 }
 
 void DCMTrajectoryManager::localPlan()
 {
-    auto tic = std::chrono::high_resolution_clock::now();
     optimizer_->solve();
-    auto toc = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> fsec = toc - tic;
 
     std::vector<Contact> solution;
     optimizer_->getFootsteps(solution);
-    Eigen::Quaterniond q0(solution[0].state.pose.linear());
-    Eigen::Quaterniond q1(solution[0].state.pose.linear());
 
-    for (int i = 2; i < solution.size(); i++)
+    for (int i = 0; i < solution.size(); i++)
     {
         Eigen::Quaterniond q(solution[i].state.pose.linear());
-        footstep_list[i-2].setPosOri(solution[i].state.pose.translation(), q);
+        footstep_list[i].setPosOri(solution[i].state.pose.translation(), q);
     }
 }

@@ -24,9 +24,7 @@
 #include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
 #include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
 
-#include <zmq.hpp>
-#include <thread>
-#include "build/messages/pnc_to_horizon.pb.h"
+using namespace google::protobuf::io;
 
 DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
     : ControlArchitecture(_robot) {
@@ -314,10 +312,15 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
 
   b_state_first_visit_ = true;
 
-  context_ = new zmq::context_t(1);
-  publisher_ = new zmq::socket_t(*context_, ZMQ_PUB);
+  context_pub_ = new zmq::context_t(1);
+  publisher_ = new zmq::socket_t(*context_pub_, ZMQ_PUB);
   publisher_->bind("tcp://127.0.0.2:5557");
   footstep_list_index_ = -2;
+
+  context_sub_ = new zmq::context_t(1);
+  subscriber_ = new zmq::socket_t(*context_sub_, ZMQ_SUB);
+  subscriber_->connect("tcp://127.0.0.3:5557");
+  subscriber_->setsockopt(ZMQ_SUBSCRIBE, NULL, 0);
 }
 
 DracoControlArchitecture::~DracoControlArchitecture() {
@@ -365,7 +368,6 @@ DracoControlArchitecture::~DracoControlArchitecture() {
 void DracoControlArchitecture::getCommand(void *_command) {
 
   // Initialize State
-    std::cout << "footstep_list.size(): " << dcm_tm->footstep_list.size() << std::endl;
   if (b_state_first_visit_) {
     state_machines[state]->firstVisit();
     // Update Footsteps through Local Planner
@@ -470,6 +472,54 @@ void DracoControlArchitecture::getCommand(void *_command) {
             publisher_->send(zmq_msg, zmq::send_flags::none);
         }
     }
+
+    // Retrieve MPC result
+    zmq::message_t update;
+    try {
+        /* Try to receive */
+        subscriber_->recv(&update, ZMQ_NOBLOCK);
+        ZeroCopyInputStream* raw_input = new ArrayInputStream(update.data(), update.size());
+        CodedInputStream* coded_input = new CodedInputStream(raw_input);
+
+        std::string serialized_update;
+        uint32_t serialized_size;
+
+        coded_input->ReadVarint32(&serialized_size);
+        coded_input->ReadString(&serialized_update, serialized_size);
+
+        mpc_res.ParseFromArray(update.data(), update.size());
+    }
+    catch (zmq::error_t &e)
+    {
+        /* EAGAIN means that the operation would have blocked, retry */
+        std::cout << e.what() << std::endl;
+    }
+//    subscriber_->recv(&update, EAGAIN);
+
+//    ZeroCopyInputStream* raw_input = new ArrayInputStream(update.data(), update.size());
+//    CodedInputStream* coded_input = new CodedInputStream(raw_input);
+
+//    uint32_t num_updates;
+//    coded_input->ReadLittleEndian32(&num_updates);
+
+//    std::string serialized_update;
+//    uint32_t serialized_size;
+
+//    coded_input->ReadVarint32(&serialized_size);
+//    coded_input->ReadString(&serialized_update, serialized_size);
+
+//    mpc_res.ParseFromString(serialized_update);
+
+//    std::cout << mpc_res.com().size() << std::endl;
+    if (mpc_res.com().size() > 0)
+    {
+        std::cout << "com_size: " << mpc_res.com().size() << std::endl;
+        std::cout << "base_orientation_size: " << mpc_res.ori().size() << std::endl;
+        std::cout << "force_left_size: " << mpc_res.force_left().size() << std::endl;
+        std::cout << "force_right_size: " << mpc_res.force_right().size() << std::endl;
+
+    }
+//        std::cout << "size: " << mpc_res.com().size() << "   -   " << mpc_res.com(0).com_x() << "  " << mpc_res.com(0).com_y() << "  " << mpc_res.com(0).com_z() << std::endl;
 
   // Update State Machine
   state_machines[state]->oneStep();

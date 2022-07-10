@@ -14,6 +14,13 @@
 #include "pnc/whole_body_controllers/managers/task_hierarchy_manager.hpp"
 #include "pnc/whole_body_controllers/managers/upper_body_trajectory_manager.hpp"
 
+#include <zmq.hpp>
+#include <thread>
+#include "build/messages/pnc_to_horizon.pb.h"
+#include "build/messages/horizon_to_pnc.pb.h"
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+
 namespace draco_states {
 constexpr int kInitialize = 0;
 constexpr int kStand = 1;
@@ -77,6 +84,11 @@ private:
 
   int footstep_list_index_;
   std::vector<Footstep>::iterator init_it, end_it;
-  zmq::context_t* context_;
+  zmq::context_t* context_pub_;
+  zmq::context_t* context_sub_;
   zmq::socket_t* publisher_;
+  zmq::socket_t* subscriber_;
+
+  zmq::message_t update;
+  HORIZON_TO_PNC::MPCResult mpc_res;
 };

@@ -2,6 +2,7 @@ import os
 import sys
 
 import rospy
+import ttictoc
 from horizon import problem, variables
 from horizon.utils import utils, kin_dyn, mat_storer
 from horizon.transcriptions.transcriptor import Transcriptor
@@ -23,6 +24,7 @@ cwd = os.getcwd()
 sys.path.append(cwd)
 sys.path.append(cwd + '/build/messages')
 from pnc_to_horizon_pb2 import *
+from horizon_to_pnc_pb2 import *
 
 global start_bool
 
@@ -122,9 +124,9 @@ class steps_phase:
 
         #STEP
         self.l_f_bounds = []
-        for k in range(0, 1):  # 2 nodes down
+        for k in range(0, 2):  # 2 nodes down
             self.l_f_bounds.append([max_force, max_force, max_force])
-        for k in range(0, 9):  # 8 nodes step
+        for k in range(0, 8):  # 8 nodes step
             self.l_f_bounds.append([0., 0., 0.])
         for k in range(0, 2):  # 2 nodes down
             self.l_f_bounds.append([max_force, max_force, max_force])
@@ -405,7 +407,7 @@ Creates HORIZON problem.
 These parameters can not be tuned at the moment.
 """
 ns = 20
-prb = problem.Problem(ns)
+prb = problem.Problem(ns, casadi_type=cs.SX)
 T = 1.
 
 urdf_file = open(cwd + '/robot_model/draco/draco.urdf')
@@ -415,7 +417,7 @@ urdf_file.close()
 contact_model = 4
 number_of_legs = 2
 nc = number_of_legs * contact_model
-max_iteration = 8
+max_iteration = 15
 foot_frames = ["l_foot_contact_upper_left", "l_foot_contact_upper_right", "l_foot_contact_lower_left", "l_foot_contact_lower_right",
                "r_foot_contact_upper_left", "r_foot_contact_upper_right", "r_foot_contact_lower_left", "r_foot_contact_lower_right"]
 joint_init = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
@@ -705,6 +707,10 @@ socket.connect("tcp://127.0.0.2:5557")
 socket.setsockopt_string(zmq.SUBSCRIBE, "")
 time.sleep(1)
 
+context_pub = zmq.Context()
+socket_pub = context_pub.socket(zmq.PUB)
+socket_pub.bind("tcp://127.0.0.3:5557")
+
 msg = ContactSequence()
 
 contact_sequence_index = 0
@@ -747,8 +753,6 @@ while not rospy.is_shutdown():
             wpg.setContactPositions(current_positions, current_positions)
         wpg.set('stand')
     else:
-        for contact in contact_sequence.values():
-            print(contact)
         current_positions = fromContactSequenceToFrames(
             contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
             contact_sequence[list(contact_sequence)[1]])
@@ -763,7 +767,11 @@ while not rospy.is_shutdown():
     """
     Solve
     """
+    # tic = ttictoc.tic
     solver.solve()
+    # toc = ttictoc.toc
+    # elapsed = toc - tic
+    # logger.add('time', elapsed)
     solution = solver.getSolutionDict()
 
     """
@@ -800,6 +808,46 @@ while not rospy.is_shutdown():
     for j in range(nc):
         logger.add('c' + str(j), c[j].getValues(0))
         logger.add('f' + str(j), solution['f' + str(j)][:, 0])
+
+    '''
+    Send MPC solution to pnc
+    '''
+    res_msg = MPCResult()
+
+    for i in range(prb.getNNodes()):
+        print(i)
+        com = res_msg.com.add()
+        com.com_x = solution['r'][0, i]
+        com.com_y = solution['r'][1, i]
+        com.com_z = solution['r'][2, i]
+        print(solution['r'][:, 1])
+
+        base_ori = res_msg.ori.add()
+        base_ori.ori_x = solution['o'][0, i]
+        base_ori.ori_y = solution['o'][1, i]
+        base_ori.ori_z = solution['o'][2, i]
+        base_ori.ori_w = solution['o'][3, i]
+        print(solution['o'][:, i])
+
+        if i != prb.getNNodes() - 1:
+            force_left = res_msg.force_left.add()
+            for j in range(0, contact_model):
+                force = force_left.force.add()
+                force.link_name = foot_frames[j]
+                force.f_x = solution['f' + str(j)][0, i]
+                force.f_y = solution['f' + str(j)][1, i]
+                force.f_z = solution['f' + str(j)][2, i]
+
+            force_right = res_msg.force_right.add()
+            for j in range(contact_model, nc):
+                force = force_right.force.add()
+                force.link_name = foot_frames[j]
+                force.f_x = solution['f' + str(j)][0, i]
+                force.f_y = solution['f' + str(j)][1, i]
+                force.f_z = solution['f' + str(j)][2, i]
+
+    serialized_msg = res_msg.SerializeToString()
+    socket_pub.send(serialized_msg) #, flags=zmq.EAGAIN)
 
     index += 1
     rate.sleep()

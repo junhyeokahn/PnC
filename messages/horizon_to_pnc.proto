@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package HORIZON_TO_PNC;
+
+message Com {
+    float com_x = 1;
+    float com_y = 2;
+    float com_z = 3;
+}
+
+message ComTrj {
+    repeated Com com = 1;
+}
+
+message BaseOrientation {
+    float ori_x = 1;
+    float ori_y = 2;
+    float ori_z = 3;
+    float ori_w = 4;
+}
+
+message BaseOrientationTrj {
+    repeated BaseOrientation ori = 1;
+}
+
+message Force {
+    string link_name = 1;
+    float f_x = 2;
+    float f_y = 3;
+    float f_z = 4;
+}
+
+message ForceLeft {
+    repeated Force force = 1;
+}
+
+message ForceRight {
+    repeated Force force = 1;
+}
+
+message MPCResult {
+    repeated Com com = 1;
+    repeated BaseOrientation ori = 2;
+    repeated ForceRight force_right = 3;
+    repeated ForceLeft force_left = 4;
+}
