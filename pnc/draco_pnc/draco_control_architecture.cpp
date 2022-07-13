@@ -475,51 +475,18 @@ void DracoControlArchitecture::getCommand(void *_command) {
 
     // Retrieve MPC result
     zmq::message_t update;
-    try {
-        /* Try to receive */
-        subscriber_->recv(&update, ZMQ_NOBLOCK);
-        ZeroCopyInputStream* raw_input = new ArrayInputStream(update.data(), update.size());
-        CodedInputStream* coded_input = new CodedInputStream(raw_input);
 
-        std::string serialized_update;
-        uint32_t serialized_size;
+    subscriber_->recv(&update, ZMQ_NOBLOCK);
+    ZeroCopyInputStream* raw_input = new ArrayInputStream(update.data(), update.size());
+    CodedInputStream* coded_input = new CodedInputStream(raw_input);
 
-        coded_input->ReadVarint32(&serialized_size);
-        coded_input->ReadString(&serialized_update, serialized_size);
+    std::string serialized_update;
+    uint32_t serialized_size;
 
-        mpc_res.ParseFromArray(update.data(), update.size());
-    }
-    catch (zmq::error_t &e)
-    {
-        /* EAGAIN means that the operation would have blocked, retry */
-        std::cout << e.what() << std::endl;
-    }
-//    subscriber_->recv(&update, EAGAIN);
+    coded_input->ReadVarint32(&serialized_size);
+    coded_input->ReadString(&serialized_update, serialized_size);
 
-//    ZeroCopyInputStream* raw_input = new ArrayInputStream(update.data(), update.size());
-//    CodedInputStream* coded_input = new CodedInputStream(raw_input);
-
-//    uint32_t num_updates;
-//    coded_input->ReadLittleEndian32(&num_updates);
-
-//    std::string serialized_update;
-//    uint32_t serialized_size;
-
-//    coded_input->ReadVarint32(&serialized_size);
-//    coded_input->ReadString(&serialized_update, serialized_size);
-
-//    mpc_res.ParseFromString(serialized_update);
-
-//    std::cout << mpc_res.com().size() << std::endl;
-    if (mpc_res.com().size() > 0)
-    {
-        std::cout << "com_size: " << mpc_res.com().size() << std::endl;
-        std::cout << "base_orientation_size: " << mpc_res.ori().size() << std::endl;
-        std::cout << "force_left_size: " << mpc_res.force_left().size() << std::endl;
-        std::cout << "force_right_size: " << mpc_res.force_right().size() << std::endl;
-
-    }
-//        std::cout << "size: " << mpc_res.com().size() << "   -   " << mpc_res.com(0).com_x() << "  " << mpc_res.com(0).com_y() << "  " << mpc_res.com(0).com_z() << std::endl;
+    mpc_res.ParseFromArray(update.data(), update.size());
 
   // Update State Machine
   state_machines[state]->oneStep();
