@@ -371,8 +371,8 @@ void DracoControlArchitecture::getCommand(void *_command) {
   if (b_state_first_visit_) {
     state_machines[state]->firstVisit();
     // Update Footsteps through Local Planner
-    if (!dcm_tm->footstep_list.empty())
-      dcm_tm->localPlan();
+//    if (!dcm_tm->footstp_list.empty())
+//      dcm_tm->localPlan();
 //    for (auto footstep : dcm_tm->footstep_list)
 //        footstep.printInfo();
     b_state_first_visit_ = false;
@@ -438,7 +438,7 @@ void DracoControlArchitecture::getCommand(void *_command) {
     }
     else
     {
-        if(sp_->count % 40 == 0)
+        if(sp_->count % 60 == 0)
         {
             Footstep initial_footstep_left, initial_footstep_right;
             initial_footstep_left.setLeftSide();
@@ -446,7 +446,7 @@ void DracoControlArchitecture::getCommand(void *_command) {
             initial_footstep_left.setPosOri(robot_->get_link_iso("l_foot_contact").translation(), q_left);
             initial_footstep_right.setRightSide();
             Eigen::Quaternion<double> q_right(robot_->get_link_iso("r_foot_contact").linear());
-            initial_footstep_left.setPosOri(robot_->get_link_iso("r_foot_contact").translation(), q_right);
+            initial_footstep_right.setPosOri(robot_->get_link_iso("r_foot_contact").translation(), q_right);
 
             std::vector<Footstep> footstep_to_publish{initial_footstep_left, initial_footstep_right};
             std::string encoded_msg;

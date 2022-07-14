@@ -27,6 +27,7 @@ from pnc_to_horizon_pb2 import *
 from horizon_to_pnc_pb2 import *
 
 global set_bool
+global is_callback_done
 
 class bcolors:
     HEADER = '\033[95m'
@@ -82,7 +83,9 @@ def callback(contact_sequence, msg):
 
         index += 1
     global set_bool
+    global is_callback_done
     set_bool = msg.is_new
+    is_callback_done = True
 
 def fromContactSequenceToFrames(contact):
     rot = R.from_quat(contact['ori'])
@@ -138,8 +141,8 @@ class steps_phase:
         for k in range(0, 8):  # 8 nodes down (other step)
             self.l_f_bounds.append([max_force, max_force, max_force])
             self.l_cdot_bounds.append([0., 0., 0.])
-        self.l_f_bounds.append([max_force, max_force, max_force])
-        self.l_cdot_bounds.append([0., 0., 0.])
+        # self.l_f_bounds.append([max_force, max_force, max_force])
+        # self.l_cdot_bounds.append([0., 0., 0.])
 
         self.r_f_bounds = []
         self.r_cdot_bounds = []
@@ -155,8 +158,8 @@ class steps_phase:
         for k in range(0, 9):  # 8 nodes step
             self.r_f_bounds.append([0., 0., 0.])
             self.r_cdot_bounds.append([max_velocity, max_velocity, max_velocity])
-        self.r_f_bounds.append([max_force, max_force, max_force])
-        self.r_cdot_bounds.append([0., 0., 0.])
+        # self.r_f_bounds.append([max_force, max_force, max_force])
+        # self.r_cdot_bounds.append([0., 0., 0.])
 
         self.action = ""
 
@@ -171,27 +174,28 @@ class steps_phase:
             exit()
 
         self.contact_positions = []
-        sin = 0.1 * np.sin(np.linspace(0, np.pi, 8))
+        sin = 0.1 * np.sin(np.linspace(0, np.pi, 10))
         for k in range(0, 2):  # 2 nodes down
             self.contact_positions.append(current_contacts)
             self.contact_positions[-1][2::3] = [0] * number_of_contacts
         for k in range(0, 8):  # 8 nodes step with left foot
             self.contact_positions.append(next_contacts[0:3*self.contact_model] + current_contacts[3*self.contact_model:])
-            self.contact_positions[-1][2::3] = [sin[k]] * self.contact_model + [0] * self.contact_model
+            self.contact_positions[-1][2::3] = [sin[k+1]] * self.contact_model + [0] * self.contact_model
         for k in range(0, 2):  # 2 nodes down
             self.contact_positions.append(next_contacts[0:3*self.contact_model] + current_contacts[3*self.contact_model:])
             self.contact_positions[-1][2::3] = [0] * number_of_contacts
         for k in range(0, 8):  # 8 nodes step
-            self.contact_positions.append(next_contacts)
-            self.contact_positions[-1][2::3] = [0] * self.contact_model + [sin[k]] * self.contact_model
+            self.contact_positions.append(next_contacts[:])
+            self.contact_positions[-1][2::3] = [0] * self.contact_model + [sin[k+1]] * self.contact_model
+
         self.contact_positions.append(next_contacts)
 
         self.stance_contact_position = []
         self.stance_contact_velocity = []
         for k in range(0, self.nodes+1):
             self.stance_contact_position.append(current_contacts)
-            # self.stance_contact_velocity.append([0., 0., 0.])
-            self.stance_contact_velocity.append([1.0, 1.0, 1.0])
+            self.stance_contact_velocity.append([0., 0., 0.])
+            # self.stance_contact_velocity.append([1.0, 1.0, 1.0])
 
     """
     This function moves values on the left 
@@ -212,9 +216,8 @@ class steps_phase:
             ctrl.setBounds(bounds[0], bounds[1], nodes=i)
 
     def set(self, action):
-        c_dict = dict()
         self.action = action
-
+        # print(self.contact_positions)
         if self.action == 'step':
             for i in range(0, contact_model):
                 self.c[i].assign(self.contact_positions[0][(i * 3):(i * 3 + 3)], nodes=self.nodes)
@@ -225,9 +228,9 @@ class steps_phase:
                 self.moveLeftControl(self.f[i])
 
             for i in range(contact_model, contact_model * number_of_legs):
-                self.c[i].assign(self.contact_positions[0][(i*3):(i * 3 + 3)], nodes=self.nodes)
+                self.c[i].assign(self.contact_positions[0][(i * 3):(i * 3 + 3)], nodes=self.nodes)
                 self.moveLeftParam(self.c[i])
-                self.f[i].setBounds(-1. * np.array(self.r_f_bounds[0]), np.array(self.r_f_bounds[0]), nodes=self.nodes-1)
+                self.f[i].setBounds(-1. * np.array(self.r_f_bounds[0]), np.array(self.r_f_bounds[0]), nodes=self.nodes - 1)
                 self.cdot[i].setBounds(-1 * np.array(self.r_cdot_bounds[0]), np.array(self.r_cdot_bounds[0]), nodes=self.nodes)
                 self.moveLeftInput(self.cdot[i])
                 self.moveLeftControl(self.f[i])
@@ -246,14 +249,12 @@ class steps_phase:
             for i in range(0, contact_model):
                 self.moveLeftParam(self.c[i])
                 self.c[i].assign(self.contact_positions[0][(i*3):(i * 3 + 3)], nodes=self.nodes)
-                c_dict['c' + str(i)] = self.c[i].getValues()[:, 0]
                 self.moveLeftControl(self.f[i])
                 self.f[i].setBounds(-1 * np.array(self.l_f_bounds[0]), np.array(self.l_f_bounds[0]), nodes=self.nodes-1)
 
             for i in range(contact_model, contact_model * number_of_legs):
                 self.moveLeftParam(self.c[i])
                 self.c[i].assign(self.contact_positions[0][(i*3):(i*3 + 3)], nodes=self.nodes)
-                c_dict['c' + str(i)] = self.c[i].getValues()[:, 0]
                 self.moveLeftControl(self.f[i])
                 self.f[i].setBounds(-1. * np.array(self.f_bounds[0]), np.array(self.f_bounds[0]), nodes=self.nodes)
 
@@ -265,14 +266,12 @@ class steps_phase:
             for i in range(0, contact_model):
                 self.moveLeftParam(self.c[i])
                 self.c[i].assign(self.contact_positions[0][(i * 3):(1 * 3 + 3)], nodes=self.nodes)
-                c_dict['c' + str(i)] = self.c[i].getValues()[:, 0]
                 self.moveLeftControl(f[i])
                 self.f[i].setBounds(-1. * np.array(self.f_bounds[0]), np.array(self.f_bounds[0]), nodes=self.nodes)
 
             for i in range(contact_model, contact_model * number_of_legs):
                 self.moveLeftParam(self.c[i])
                 self.c[i].assign(self.contact_positions[0][(i * 3):(i * 3 + 3)], nodes=self.nodes)
-                c_dict['c' + str(i)] = self.c[i].getValues()[:, 0]
                 self.moveLeftControl(self.f[i])
                 self.f[i].setBounds(-1 * np.array(self.r_f_bounds[0]), np.array(self.r_f_bounds[0]), nodes=self.nodes-1)
 
@@ -441,7 +440,7 @@ These parameters can not be tuned at the moment.
 """
 ns = 20
 prb = problem.Problem(ns, casadi_type=cs.SX)
-T = 1.
+T = 1.5
 
 urdf_file = open(cwd + '/robot_model/draco/draco.urdf')
 urdf = urdf_file.read()
@@ -560,7 +559,7 @@ for frame in foot_frames:
     p = FK(q=joint_init)['ee_pos']
     print(f"{frame}: {p}")
 
-    initial_foot_position[i] = p
+    # initial_foot_position[i] = p
     c[i].setInitialGuess(p)
     c_ref[i].assign(p, nodes=range(0, ns+1))
     f[i].setBounds([-max_contact_force, -max_contact_force, -max_contact_force], [max_contact_force, max_contact_force, max_contact_force])
@@ -617,7 +616,7 @@ Set up some therms of the COST FUNCTION
 """
 rz_tracking is used to keep the com height around the initial value
 """
-rz_tracking_gain = 1e3
+rz_tracking_gain = 1e2
 print(f"rz_tracking_gain: {rz_tracking_gain}")
 prb.createCost("rz_tracking", rz_tracking_gain * cs.sumsqr(r[2] - com[2]), nodes=range(1, ns+1))
 
@@ -633,7 +632,7 @@ rdot_tracking is used to track a desired velocity of the CoM
 """
 rdot_tracking_gain = 1e2
 print(f"rdot_tracking_gain: {rdot_tracking_gain}")
-prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot), nodes=range(1, ns+1))
+prb.createCost("rdot_tracking", rdot_tracking_gain * cs.sumsqr(rdot - rdot_ref), nodes=range(1, ns+1))
 
 """
 w_tracking is used to track a desired angular velocity of the base
@@ -645,9 +644,9 @@ prb.createCost("w_tracking", w_tracking_gain * cs.sumsqr(w - w_ref), nodes=range
 """
 min_qddot is to minimize the acceleration control effort
 """
-# min_qddot_gain = 1e-6
-# print(f"min_qddot_gain: {min_qddot_gain}")
-# prb.createCost("min_qddot", min_qddot_gain * cs.sumsqr(qddot.getVars()), nodes=list(range(0, ns)))
+min_qddot_gain = 1e-2
+print(f"min_qddot_gain: {min_qddot_gain}")
+prb.createCost("min_qddot", min_qddot_gain * cs.sumsqr(qddot.getVars()), nodes=list(range(0, ns)))
 
 """
 Set up som CONSTRAINTS
@@ -697,7 +696,7 @@ prb.createConstraint("SRBD", SRBD, bounds=dict(lb=np.zeros(6), ub=np.zeros(6)), 
 """
 online_solver
 """
-hz = 20
+hz = int(ns/T)
 print(f"hz: {hz}")
 rate = rospy.Rate(hz)  # 10hz
 
@@ -752,9 +751,10 @@ solution['w'][:, 1] = [0., 0., 0.]
 """
 Walking patter generator and scheduler
 """
-wpg = steps_phase(f, c_ref, cdot, ns, number_of_legs=number_of_legs, contact_model=contact_model, max_force=max_contact_force, max_velocity=1.)
+wpg = steps_phase(f, c_ref, cdot, ns, number_of_legs=number_of_legs, contact_model=contact_model, max_force=max_contact_force, max_velocity=5.0)
 index = 0
 set_bool = False
+is_callback_done = False
 
 """
 Initialize socket
@@ -782,6 +782,8 @@ while not rospy.is_shutdown():
     if not contact_sequence:
         rate.sleep()
         continue
+
+
 
     """
     Set previous first element solution as bound for the variables to guarantee continuity
@@ -812,6 +814,7 @@ while not rospy.is_shutdown():
             wpg.setContactPositions(current_positions, current_positions)
         wpg.set('stand')
     else:
+        # rdot_ref.assign([0.4, 0.0, 0.0], nodes=range(0, ns))
         current_positions = fromContactSequenceToFrames(
             contact_sequence[list(contact_sequence)[0]]) + fromContactSequenceToFrames(
             contact_sequence[list(contact_sequence)[1]])
@@ -826,11 +829,9 @@ while not rospy.is_shutdown():
     """
     Solve
     """
-    # tic = ttictoc.tic
+    tic()
     solver.solve()
-    # toc = ttictoc.toc
-    # elapsed = toc - tic
-    # logger.add('time', elapsed)
+    logger.add('time', toc())
     solution = solver.getSolutionDict()
 
     """

@@ -237,7 +237,7 @@ void DCMTrajectoryManager::walkInPlace() {
 void DCMTrajectoryManager::walkForward() {
   resetIndexAndClearFootsteps();
   populateWalkForward(n_steps, nominal_forward_step);
-  init_local_planner();
+//  init_local_planner();
   alternateLeg();
 }
 void DCMTrajectoryManager::walkBackward() {
@@ -272,6 +272,10 @@ void DCMTrajectoryManager::populateStepInPlace(const int num_steps,
   Footstep left_footstep = left_foot_stance_;
   Footstep right_footstep = right_foot_stance_;
   Footstep mid_footstep = mid_foot_stance_;
+
+  // add initial footsteps
+  footstep_list.push_back(left_foot_stance_);
+  footstep_list.push_back(right_foot_stance_);
 
   int robot_side = robot_side_first;
   for (int i = 0; i < num_steps; i++) {
@@ -615,27 +619,6 @@ void DCMTrajectoryManager::init_local_planner()
     int index = 0;
     std::vector<g2o::OptimizableGraph::Vertex*> vertices;
 
-    // first add current initial footsteps
-//    Contact contact_init_left;
-//    contact_init_left.state.pose.translation() = left_foot_stance_.position;
-//    contact_init_left.state.pose.linear() = left_foot_stance_.orientation.toRotationMatrix();
-//    VertexContact* v_init_left = new VertexContact();
-//    v_init_left->setId(1);
-//    v_init_left->setEstimate(contact_init_left);
-//    v_init_left->setFixed(true);
-//    auto vertex_init_left = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_left);
-//    vertices.push_back(vertex_init_left);
-
-//    Contact contact_init_right;
-//    contact_init_right.state.pose.translation() = right_foot_stance_.position;
-//    contact_init_right.state.pose.linear() = right_foot_stance_.orientation.toRotationMatrix();
-//    VertexContact* v_init_right = new VertexContact();
-//    v_init_right->setId(0);
-//    v_init_right->setEstimate(contact_init_right);
-//    v_init_right->setFixed(true);
-//    auto vertex_init_right = dynamic_cast<g2o::OptimizableGraph::Vertex*>(v_init_right);
-//    vertices.push_back(vertex_init_right);
-
     for (auto footstep : footstep_list)
     {
         Contact contact;
@@ -665,7 +648,7 @@ void DCMTrajectoryManager::init_local_planner()
       int m = 5;
       EdgeCollision* edge = new EdgeCollision(m);
       Eigen::MatrixXd info(m, m);
-      info.setIdentity(); // info *= 100;
+      info.setIdentity(); info *= 100;
       edge->setInformation(info);
       std::map<std::string, Eigen::Vector3d> obstacles;
       obstacles["obstacle_0"] = Eigen::Vector3d(1.0, 0.5, 0.0);
@@ -682,7 +665,7 @@ void DCMTrajectoryManager::init_local_planner()
       Eigen::MatrixXd info_succ(3, 3);
       info_succ.setIdentity(); // info_succ *= 100;
       edge_succ->setInformation(info_succ);
-      edge_succ->setLimits({0.1, 0.1}, {nominal_forward_step*1.5, 0.3});
+      edge_succ->setLimits({0.1, 0.15}, {nominal_forward_step*1.5, 0.25});
       edge_succ->vertices()[0] = vertices[i];
       edge_succ->vertices()[1] = vertices[i+1];
       auto e = dynamic_cast<g2o::OptimizableGraph::Edge*>(edge_succ);
@@ -693,7 +676,7 @@ void DCMTrajectoryManager::init_local_planner()
     {
         EdgeSteering* edge = new EdgeSteering();
         Eigen::MatrixXd info(3, 3);
-        info.setIdentity();
+        info.setIdentity(); info *= 10;
         edge->setInformation(info);
         edge->setPreviousContact(vertices[i-2]);
         edge->vertices()[0] = vertices[i];
