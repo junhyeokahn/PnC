@@ -49,29 +49,7 @@ def start_service(EmptyRequest):
     # contact_sequence[3] = {'name': 'l_foot_contact', 'pos': [0.415904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]}
     return EmptyResponse()
 
-contact_sequence = {
-    # 0: {'name': 'l_foot_contact', 'pos': [0.115904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 1: {'name': 'r_foot_contact', 'pos': [0.215904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 2: {'name': 'l_foot_contact', 'pos': [0.315904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 3: {'name': 'r_foot_contact', 'pos': [0.415904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 4: {'name': 'l_foot_contact', 'pos': [0.515904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 5: {'name': 'r_foot_contact', 'pos': [0.615904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 6: {'name': 'l_foot_contact', 'pos': [0.715904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 7: {'name': 'r_foot_contact', 'pos': [0.815904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 8: {'name': 'l_foot_contact', 'pos': [0.915904, 0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]},
-    # 9: {'name': 'r_foot_contact', 'pos': [1.015904, -0.1, -3.38305e-07], 'ori': [0, 0, 0, 1]}
-    # 0: {'name': 'l_foot_contact', 'pos': [0.215904, -0.0395778, -3.38305e-07], 'ori': [1.94791e-06, 8.42233e-07, -0.08949, 0.995988]},
-    # 1: {'name': 'r_foot_contact', 'pos': [0.410509, -0.276642, -1.37213e-06], 'ori': [2.18896e-08, 7.54643e-07, -0.0463577, 0.998925]},
-    # 2: {'name': 'l_foot_contact', 'pos': [0.604699, -0.113649, -9.42198e-07], 'ori': [1.9716e-06, 8.60281e-07, -0.0972253, 0.995262]},
-    # 3: {'name': 'r_foot_contact', 'pos': [0.829269, -0.350677, -1.90514e-06], 'ori': [4.33844e-08, 7.54694e-07, -0.0716339, 0.997431]},
-    # 4: {'name': 'l_foot_contact', 'pos': [1.13052, -0.187717, -0.000509611], 'ori': [1.95986e-06, 8.11842e-07, -0.073243, 0.997314]},
-    # 5: {'name': 'r_foot_contact', 'pos': [1.30234, -0.369171, -2.43946e-06], 'ori': [1.92667e-06, 6.9898e-07, -0.0163611, 0.999866]},
-    # 6: {'name': 'l_foot_contact', 'pos': [1.47579, -0.150112, -2.03872e-06], 'ori': [1.8735e-06, 5.57682e-07, 0.0587137, 0.998275]},
-    # 7: {'name': 'r_foot_contact', 'pos': [1.6498, -0.33243, -2.97334e-06], 'ori': [1.87578e-06, 5.62706e-07, 0.0560531, 0.998428]},
-    # 8: {'name': 'l_foot_contact', 'pos': [1.82564, -0.116004, -2.47358e-06], 'ori': [1.87968e-06, 5.72166e-07, 0.0508041, 0.998709]},
-    # 9: {'name': 'r_foot_contact', 'pos': [2.00342, -0.300662, -3.50697e-06], 'ori': [1.88557e-06, 5.86759e-07, 0.0429647, 0.999077]},
-    # 10: {'name': 'l_foot_contact', 'pos': [2.18472, -0.0884594, -2.74052e-06], 'ori': [1.89213e-06, 6.03083e-07, 0.0341195, 0.999418]},
-    }
+contact_sequence = {}
 
 def callback(contact_sequence, msg):
     contact_sequence.clear()
@@ -152,10 +130,10 @@ class steps_phase:
         for k in range(0, 8):  # 8 nodes down (other step)
             self.r_f_bounds.append([max_force, max_force, max_force])
             self.r_cdot_bounds.append([0., 0., 0.])
-        for k in range(0, 1):  # 2 nodes down
+        for k in range(0, 2):  # 2 nodes down
             self.r_f_bounds.append([max_force, max_force, max_force])
             self.r_cdot_bounds.append([0., 0., 0.])
-        for k in range(0, 9):  # 8 nodes step
+        for k in range(0, 8):  # 8 nodes step
             self.r_f_bounds.append([0., 0., 0.])
             self.r_cdot_bounds.append([max_velocity, max_velocity, max_velocity])
         # self.r_f_bounds.append([max_force, max_force, max_force])
@@ -187,7 +165,6 @@ class steps_phase:
         for k in range(0, 8):  # 8 nodes step
             self.contact_positions.append(next_contacts[:])
             self.contact_positions[-1][2::3] = [0] * self.contact_model + [sin[k+1]] * self.contact_model
-
         self.contact_positions.append(next_contacts)
 
         self.stance_contact_position = []
@@ -440,7 +417,7 @@ These parameters can not be tuned at the moment.
 """
 ns = 20
 prb = problem.Problem(ns, casadi_type=cs.SX)
-T = 1.5
+T = 1.
 
 urdf_file = open(cwd + '/robot_model/draco/draco.urdf')
 urdf = urdf_file.read()
@@ -830,7 +807,8 @@ while not rospy.is_shutdown():
     Solve
     """
     tic()
-    solver.solve()
+    if not solver.solve():
+        print(bcolors.FAIL + "Unable to solve!" + bcolors.ENDC)
     logger.add('time', toc())
     solution = solver.getSolutionDict()
 

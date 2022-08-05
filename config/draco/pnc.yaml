@@ -202,7 +202,6 @@ walking:
     ini_stand_dur: 1.
     rf_z_max_time: 0.1
 
-
     b_early_termination: false
     foot_height_threshold: 0.01
 
@@ -210,17 +209,17 @@ walking:
     com_height: 0.92
     #com_height: 1.
 
-    swing_height: 0.04
+    swing_height: 0.03
 
     t_additional_ini_trans: 0.
-    t_contact_trans: 0.15
-    t_swing: 0.45
+    t_contact_trans: 0.45
+    t_swing: 0.55
     percentage_settle: 0.9
     alpha_ds: 0.5
 
     #nominal_footwidth: 0.28
-    nominal_footwidth: 0.2
-    nominal_forward_step: 0.2
+    nominal_footwidth: 0.20
+    nominal_forward_step: 0.15
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02

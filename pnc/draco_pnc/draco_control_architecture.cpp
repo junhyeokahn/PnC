@@ -487,6 +487,7 @@ void DracoControlArchitecture::getCommand(void *_command) {
     coded_input->ReadString(&serialized_update, serialized_size);
 
     mpc_res.ParseFromArray(update.data(), update.size());
+    std::cout << mpc_res.com_size() << std::endl;
 
   // Update State Machine
   state_machines[state]->oneStep();

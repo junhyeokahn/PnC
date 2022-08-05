@@ -4,6 +4,8 @@
 #include "pnc/whole_body_controllers/ihwbc/ihwbc.hpp"
 #include "pnc/whole_body_controllers/ihwbc/joint_integrator.hpp"
 
+#include <chrono>
+
 DracoController::DracoController(DracoTCIContainer *_tci_container,
                                  RobotSystem *_robot) {
   util::PrettyConstructor(2, "DracoController");
@@ -98,6 +100,7 @@ DracoController::~DracoController() {
 }
 
 void DracoController::getCommand(void *cmd) {
+    auto tic = std::chrono::high_resolution_clock::now();
   if (sp_->state == draco_states::kInitialize) {
     joint_pos_cmd_ = tci_container_->joint_task->pos_des;
     joint_vel_cmd_ = tci_container_->joint_task->vel_des;
@@ -153,6 +156,10 @@ void DracoController::getCommand(void *cmd) {
     for (int i = 0; i < tci_container_->internal_constraint_list.size(); ++i) {
       tci_container_->internal_constraint_list[i]->update_internal_constraint();
     }
+
+    auto toc = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> fsec = toc - tic;
+    std::cout << fsec.count() << std::endl;
 
     // WBC commands
     Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);

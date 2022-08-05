@@ -42,6 +42,7 @@ void DracoInterruptLogic::processInterrupts() {
     std::cout << "[Walking Interrupt Logic] button W pressed" << std::endl;
     if (ctrl_arch_->state == draco_states::kBalance) {
       ctrl_arch_->dcm_tm->walkForward();
+//      ctrl_arch_->mpc_tm->walkForward();
       std::cout << "---------                    ---------" << std::endl;
       std::cout << "---------   Walking Forward  ---------" << std::endl;
       (static_cast<DoubleSupportBalance *>(
