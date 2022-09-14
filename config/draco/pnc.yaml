@@ -6,6 +6,8 @@ ip_addr: "tcp://127.0.0.1:5557"
 b_exp: false
 #b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
 
+b_joint_pos_test: false
+
 state_estimator:
     #n_data_com_vel: [200, 200, 200]
     n_data_com_vel: [20, 20, 20]
@@ -140,15 +142,22 @@ wbc:
             weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
-            exp_kp: [100, 100, 250]
-            exp_kd: [0.1, 0.1, 1.2]
+            #exp_kp: [100, 100, 250]
+            #exp_kp: [50, 50, 100]
+            exp_kp: [25, 25, 50]
+            #exp_kd: [0.1, 0.1, 1.2]
+            exp_kd: [0.5, 0.5, 1.5]
         foot_ori:
             weight_at_contact: [40., 40., 40.]
             weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
-            exp_kp: [20, 20, 20]
-            exp_kd: [0.1, 0.1, 0.1]
+            #exp_kp: [20, 20, 20]
+            #exp_kp: [10, 10, 10]
+            exp_kp: [5., 5., 5.]
+            #exp_kd: [0.1, 0.1, 0.1]
+            #exp_kd: [0.3, 0.3, 0.3]
+            exp_kd: [1.5, 1.5, 1.5]
 
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz
@@ -158,8 +167,10 @@ wbc:
     b_trq_limit: false
 
 balancing:
-    swaying_amp: [0., 0.05, 0.]
-    swaying_freq: [0., 0.5, 0.]
+    #swaying_amp: [0., 0.05, 0.]
+    #swaying_freq: [0., 0.5, 0.]
+    swaying_amp: [0., 0., 0.05]
+    swaying_freq: [0., 0., 0.2]
 
     interpolation_local_offset: [0., 0.05, 0.]
     interpolation_duration: 3.
@@ -203,37 +214,39 @@ walking:
     rf_z_max_time: 0.1
 
 
-    b_early_termination: true
+    b_early_termination: false
     foot_height_threshold: 0.01
 
     #com_height: 0.68
-    #com_height: 0.92
-    com_height: 1.
+    com_height: 0.92
+    #com_height: 0.85
+    #com_height: 1.
 
     swing_height: 0.03
 
     t_additional_ini_trans: 0.
     t_contact_trans: 0.45
-    t_swing: 0.55
+    t_swing: 0.45
     percentage_settle: 0.9
     alpha_ds: 0.5
 
-    nominal_footwidth: 0.28
-    nominal_forward_step: 0.1
+    nominal_footwidth: 0.24
+    nominal_forward_step: 0.15
     nominal_backward_step: -0.1
     nominal_turn_radians: 0.3
     nominal_strafe_distance: 0.02
 
-    n_steps: 1
+    n_steps: 3
 
 static_walking:
     moving_duration: 3
     #com_height: 0.68
-    #com_height: 0.92
-    com_height: 1.
+    com_height: 0.92
+    #com_height: 0.85
+    #com_height: 1.
     com_offset: [0., 0.]
 
-    swing_duration: 1
+    swing_duration: 3
     des_foot_x_inc_local: 0.
     des_foot_y_inc_local: 0.0
     des_foot_ori_inc_local: 0. ## degrees
@@ -247,6 +260,6 @@ static_balancing:
 
 controller:
     waiting_count: 10
-    b_smoothing: true
-    #b_smoothing: false
+    #b_smoothing: true
+    b_smoothing: false
     smoothing_duration: 0.2

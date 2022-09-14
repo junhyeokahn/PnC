@@ -212,6 +212,10 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_j = True
         elif pybullet_util.is_key_triggered(keys, 'k'):
             interface.interrupt.b_interrupt_button_k = True
+        elif pybullet_util.is_key_triggered(keys, 'p'):
+            force = [500, 0, 0]
+            pos = [0, 0, 0]
+            p.applyExternalForce(robot, -1, force, pos, p.WORLD_FRAME)
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "pnc/state_machine.hpp"
 #include "pnc/draco_pnc/draco_control_architecture.hpp"
 #include "pnc/draco_pnc/draco_controller.hpp"
 #include "pnc/draco_pnc/draco_state_provider.hpp"
+#include "pnc/state_machine.hpp"
 
 class Initialize : public StateMachine {
 public:
@@ -28,4 +28,6 @@ protected:
   double ctrl_start_time_;
 
   Eigen::VectorXd initial_jpos_;
+
+  bool b_joint_pos_test_;
 };

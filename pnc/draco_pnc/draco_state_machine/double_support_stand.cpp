@@ -21,9 +21,13 @@ void DoubleSupportStand::firstVisit() {
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
   Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
 
+  sp_->nominal_lfoot_iso = lfoot_iso;
+  sp_->nominal_rfoot_iso = rfoot_iso;
+
   Eigen::Vector3d target_com_pos =
       (lfoot_iso.translation() + rfoot_iso.translation()) / 2.;
   target_com_pos[2] = com_height_des;
+  sp_->des_com_pos_in_standup = target_com_pos;
   Eigen::Quaternion<double> foot_interpol_quat =
       Eigen::Quaternion<double>(lfoot_iso.linear())
           .slerp(0.5, Eigen::Quaternion<double>(rfoot_iso.linear()));
@@ -68,8 +72,10 @@ void DoubleSupportStand::oneStep() {
   // Update Floating Base Task
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
   // Update Max Normal Reaction Force
   ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
   ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);

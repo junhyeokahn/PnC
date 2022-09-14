@@ -36,7 +36,9 @@ public:
   void InitializeSwayingTrajectory(double _start_time,
                                    const Eigen::Vector3d &_local_amp,
                                    const Eigen::Vector3d &_local_freq,
-                                   const Eigen::Matrix3d &_rot_world_local);
+                                   const Eigen::Matrix3d &_rot_world_local,
+                                   const Eigen::Vector3d &des_com_pos,
+                                   const Eigen::Quaternion<double> &des_quat);
 
   /// Update floating base task commands.
   void UpdateDesired(const double current_time);

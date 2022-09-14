@@ -218,6 +218,10 @@ while True:
     data_saver.add('icp_dot_des', list(msg.icp_dot_des))
     data_saver.add('icp_dot', list(msg.icp_dot))
 
+    data_saver.add('base_joint_position', list(msg.base_joint_pos))
+    data_saver.add('base_joint_quat',
+                   list(msg.base_joint_quat))  # (w, x, y, z) order
+
     data_saver.advance()
 
     # publish back for plot juggler

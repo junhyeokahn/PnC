@@ -37,4 +37,9 @@ DracoStateProvider::DracoStateProvider() {
   floating_jidx = {0, 1, 2, 3, 4, 5};
 
   nominal_stance_foot_iso.setIdentity();
+
+  des_com_pos_in_standup.setZero();
+
+  nominal_lfoot_iso.setIdentity();
+  nominal_rfoot_iso.setIdentity();
 }

@@ -3,7 +3,7 @@
 Initialize::Initialize(const StateIdentifier _state_identifier,
                        DracoControlArchitecture *_ctrl_arch,
                        RobotSystem *_robot)
-    : StateMachine(_state_identifier, _robot) {
+    : StateMachine(_state_identifier, _robot), b_joint_pos_test_(false) {
 
   util::PrettyConstructor(2, "Initialize");
 
@@ -13,6 +13,9 @@ Initialize::Initialize(const StateIdentifier _state_identifier,
 
   target_jpos = Eigen::VectorXd::Zero(robot_->n_a);
   initial_jpos_ = Eigen::VectorXd::Zero(robot_->n_a);
+
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+  b_joint_pos_test_ = util::ReadParameter<bool>(cfg, "b_joint_pos_test");
 }
 
 Initialize::~Initialize() {}
@@ -47,12 +50,15 @@ void Initialize::oneStep() {
 void Initialize::lastVisit() {}
 
 bool Initialize::endOfState() {
-  if (state_machine_time_ >= end_time) {
-    return true;
-  } else {
+  if (b_joint_pos_test_) {
     return false;
+  } else {
+    if (state_machine_time_ >= end_time) {
+      return true;
+    } else {
+      return false;
+    }
   }
-  // return false;
 }
 
 StateIdentifier Initialize::getNextState() { return draco_states::kStand; }
