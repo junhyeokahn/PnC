@@ -53,6 +53,20 @@ void DoubleSupportStand::firstVisit() {
   // sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
   sp_->nominal_stance_foot_iso.linear() = lfoot_iso.linear();
 
+  Eigen::Quaternion<double> nominal_stance_foot_quat =
+      Eigen::Quaternion<double>(sp_->nominal_stance_foot_iso.linear());
+
+  // TEST TODO
+  std::cout << "===========nominal_stance_foot_iso in standup state========="
+            << std::endl;
+  std::cout << sp_->nominal_stance_foot_iso.linear() << std::endl;
+
+  DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+  dm->data->stance_foot_quat << nominal_stance_foot_quat.w(),
+      nominal_stance_foot_quat.x(), nominal_stance_foot_quat.y(),
+      nominal_stance_foot_quat.z();
+  // TEST TODO
+
   ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
 

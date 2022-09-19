@@ -72,6 +72,8 @@ joint_velocities = []
 l_knee_int_frc_cmd = []
 r_knee_int_frc_cmd = []
 
+stance_foot_quat = []
+
 des, act = dict(), dict()
 local_des, local_act = dict(), dict()
 for topic in tasks:
@@ -83,8 +85,7 @@ for topic in local_tasks:
 
 w = dict()
 
-with open('experiment_data/2022-09-14-110601_DisturbanceRejectionInYKd1p5.pkl',
-          'rb') as file:
+with open('experiment_data/pnc.pkl', 'rb') as file:
     while True:
         try:
             d = pickle.load(file)

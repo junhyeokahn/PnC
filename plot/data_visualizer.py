@@ -20,6 +20,7 @@ joint_positions = []
 base_position = []
 base_orientation = []
 base_orientation_shift = []
+icp_des, icp_act = [], []
 
 # Create Robot for Meshcat Visualization
 model, collision_model, visual_model = pin.buildModelsFromUrdf(
@@ -36,6 +37,23 @@ except ImportError as err:
     sys.exit(0)
 viz.loadViewerModel()
 vis_q = pin.neutral(model)
+
+icp_model, icp_collision_model, icp_visual_model = pin.buildModelsFromUrdf(
+    "robot_model/ground/sphere.urdf", "robot_model/ground",
+    pin.JointModelFreeFlyer())
+icp_viz = MeshcatVisualizer(icp_model, icp_collision_model, icp_visual_model)
+icp_viz.initViewer(viz.viewer)
+icp_viz.loadViewerModel(rootNodeName="icp", color=[0., 0., 1., 0.5])
+icp_viz_q = pin.neutral(icp_model)
+
+icp_des_model, icp_des_collision_model, icp_des_visual_model = pin.buildModelsFromUrdf(
+    "robot_model/ground/sphere.urdf", "robot_model/ground",
+    pin.JointModelFreeFlyer())
+icp_des_viz = MeshcatVisualizer(icp_des_model, icp_des_collision_model,
+                                icp_des_visual_model)
+icp_des_viz.initViewer(viz.viewer)
+icp_des_viz.loadViewerModel(rootNodeName="icp_des", color=[1., 0., 0., 0.5])
+icp_des_viz_q = pin.neutral(icp_des_model)
 
 with open(cwd + '/experiment_data/pnc.pkl', 'rb') as file:
     while True:
@@ -54,6 +72,9 @@ with open(cwd + '/experiment_data/pnc.pkl', 'rb') as file:
                 d['base_joint_quat'][3], d['base_joint_quat'][0]
             ] + d['joint_positions'])
 
+            icp_des.append(d['icp_des'])
+            icp_act.append(d['icp'])
+
         except EOFError:
             break
 
@@ -63,4 +84,11 @@ with open(cwd + '/experiment_data/pnc.pkl', 'rb') as file:
 save_freq = 20  # hertz
 for ti in range(len(exp_time)):
     viz.display(np.array(joint_positions[ti]))
+    icp_des_viz_q[0] = icp_des[ti][0]
+    icp_des_viz_q[1] = icp_des[ti][1]
+    icp_viz_q[0] = icp_act[ti][0]
+    icp_viz_q[1] = icp_act[ti][1]
+
+    icp_viz.display(icp_viz_q)
+    icp_des_viz.display(icp_des_viz_q)
     time.sleep(1.0 / save_freq)

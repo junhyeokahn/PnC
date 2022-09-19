@@ -129,4 +129,7 @@ message pnc_msg {
 
   float l_knee_int_frc_cmd = 91;
   float r_knee_int_frc_cmd = 92;
+
+  // stance foot quat
+  repeated float stance_foot_quat = 93;
 }

@@ -3,14 +3,14 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-b_exp: false
-#b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
+#b_exp: false
+b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
 
 b_joint_pos_test: false
 
 state_estimator:
-    #n_data_com_vel: [200, 200, 200]
-    n_data_com_vel: [20, 20, 20]
+    n_data_com_vel: [200, 200, 200]
+    #n_data_com_vel: [20, 20, 20]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -33,7 +33,8 @@ wbc:
         com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
         com_control_feedback_height_target: 1 # 0: com height, 1: base height
         com:
-            weight: [20, 20, 20]
+            #weight: [20, 20, 20]
+            weight: [60, 60, 60]
             sim_kp: [200, 200, 100]
             sim_kd: [10, 10, 5]
             ## Good until balancing
@@ -47,12 +48,13 @@ wbc:
             sim_kp: [10, 10, 100]
             sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
+            exp_kp: [0.88, 0.88, 20]
+            exp_kd: [0.06, 0.06, 1.5]
+            exp_ki: [0.0, 0.0, 0.]
+            # Gains for squatting
             #exp_kp: [1.2, 1.2, 20]
-            #exp_kd: [0., 0., 1.5]
-            #exp_ki: [0.4, 0.4, 0.]
-            exp_kp: [0.6, 0.6, 20]
-            exp_kd: [0., 0., 1.5]
-            exp_ki: [1.0, 1.0, 0.]
+            #exp_kd: [0.02, 0.02, 1.5]
+            #exp_ki: [1.0, 1.0, 0.]
             time_constant: 5.
         cam:
             weight: [0., 0., 0.]
@@ -145,8 +147,8 @@ wbc:
             #exp_kp: [100, 100, 250]
             #exp_kp: [50, 50, 100]
             exp_kp: [25, 25, 50]
-            #exp_kd: [0.1, 0.1, 1.2]
-            exp_kd: [0.5, 0.5, 1.5]
+            exp_kd: [0.1, 0.1, 1.2]
+            #exp_kd: [0.5, 0.5, 1.5]
         foot_ori:
             weight_at_contact: [40., 40., 40.]
             weight_at_swing: [20., 20., 20.]
@@ -167,10 +169,10 @@ wbc:
     b_trq_limit: false
 
 balancing:
-    #swaying_amp: [0., 0.05, 0.]
-    #swaying_freq: [0., 0.5, 0.]
-    swaying_amp: [0., 0., 0.05]
-    swaying_freq: [0., 0., 0.2]
+    swaying_amp: [0., 0.05, 0.]
+    swaying_freq: [0., 0.2, 0.]
+    #swaying_amp: [0., 0., 0.05]
+    #swaying_freq: [0., 0., 0.1]
 
     interpolation_local_offset: [0., 0.05, 0.]
     interpolation_duration: 3.
@@ -182,22 +184,22 @@ walking:
         l_elbow_fe: -1.57
         r_shoulder_aa: -0.523
         r_elbow_fe: -1.57
-        l_hip_aa: 0.
-        #l_hip_aa: 0.047
+        #l_hip_aa: 0.
+        l_hip_aa: 0.047
         l_hip_fe: -0.785
         l_knee_fe_jp: 0.785
         l_knee_fe_jd: 0.785
         l_ankle_fe: -0.785
-        l_ankle_ie: 0.
-        #l_ankle_ie: -0.047
-        r_hip_aa: 0.
-        #r_hip_aa: -0.047
+        #l_ankle_ie: 0.
+        l_ankle_ie: -0.047
+        #r_hip_aa: 0.
+        r_hip_aa: -0.047
         r_hip_fe: -0.785
         r_knee_fe_jp: 0.785
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
-        r_ankle_ie: 0.
-        #r_ankle_ie: 0.047
+        #r_ankle_ie: 0.
+        r_ankle_ie: 0.047
         neck_pitch: 0.
         r_hip_ie: 0.
         l_hip_ie: 0.
@@ -240,8 +242,8 @@ walking:
 
 static_walking:
     moving_duration: 3
-    #com_height: 0.68
-    com_height: 0.92
+    com_height: 0.68
+    #com_height: 0.92
     #com_height: 0.85
     #com_height: 1.
     com_offset: [0., 0.]
@@ -260,6 +262,6 @@ static_balancing:
 
 controller:
     waiting_count: 10
-    #b_smoothing: true
-    b_smoothing: false
+    b_smoothing: true
+    #b_smoothing: false
     smoothing_duration: 0.2
