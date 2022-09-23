@@ -9,7 +9,7 @@ b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_terminat
 b_joint_pos_test: false
 
 state_estimator:
-    n_data_com_vel: [200, 200, 200]
+    n_data_com_vel: [200, 200, 250]
     #n_data_com_vel: [20, 20, 20]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
@@ -23,6 +23,7 @@ wbc:
     contact:
         rf_z_max: 1000.0
         w_rf: 0.
+        #foot_half_width: 0.04 # 8.5 / 2 (cm)
         foot_half_width: 0.04 # 8.5 / 2 (cm)
         #foot_half_length: 0.05 # 22 / 2 (cm)
         foot_half_length: 0.08 # 22 / 2 (cm)
@@ -44,17 +45,17 @@ wbc:
             exp_kp: [12, 25, 20]
             exp_kd: [3.0, 2.0, 1.5]
         icp:
-            weight: [20, 20, 20]
+            weight: [40, 40, 20]
             sim_kp: [10, 10, 100]
             sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
-            exp_kp: [0.88, 0.88, 20]
-            exp_kd: [0.06, 0.06, 1.5]
-            exp_ki: [0.0, 0.0, 0.]
+            #exp_kp: [0.88, 0.88, 20]
+            #exp_kd: [0.06, 0.06, 1.5]
+            #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
-            #exp_kp: [1.2, 1.2, 20]
-            #exp_kd: [0.02, 0.02, 1.5]
-            #exp_ki: [1.0, 1.0, 0.]
+            exp_kp: [0.2, 0.1, 25]
+            exp_kd: [0.04, 0.04, 1.5]
+            exp_ki: [1.0, 1.0, 0.]
             time_constant: 5.
         cam:
             weight: [0., 0., 0.]
@@ -150,7 +151,7 @@ wbc:
             exp_kd: [0.1, 0.1, 1.2]
             #exp_kd: [0.5, 0.5, 1.5]
         foot_ori:
-            weight_at_contact: [40., 40., 40.]
+            weight_at_contact: [20., 20., 20.]
             weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
@@ -169,37 +170,42 @@ wbc:
     b_trq_limit: false
 
 balancing:
-    swaying_amp: [0., 0.05, 0.]
-    swaying_freq: [0., 0.2, 0.]
-    #swaying_amp: [0., 0., 0.05]
-    #swaying_freq: [0., 0., 0.1]
+    #swaying_amp: [0., 0.05, 0.]
+    #swaying_freq: [0., 0.2, 0.]
+    swaying_amp: [0., 0., 0.10]  # squatting behaviour
+    swaying_freq: [0., 0., 0.15]
 
     interpolation_local_offset: [0., 0.05, 0.]
     interpolation_duration: 3.
 
 walking:
     ini_joint_dur: 4.
+    ini_transition_dur: 30.
     ini_joint_pos:
         l_shoulder_aa: 0.523
         l_elbow_fe: -1.57
         r_shoulder_aa: -0.523
         r_elbow_fe: -1.57
         #l_hip_aa: 0.
-        l_hip_aa: 0.047
+        #l_hip_aa: 0.047
+        l_hip_aa: 0.060
         l_hip_fe: -0.785
         l_knee_fe_jp: 0.785
         l_knee_fe_jd: 0.785
         l_ankle_fe: -0.785
         #l_ankle_ie: 0.
-        l_ankle_ie: -0.047
+        #l_ankle_ie: -0.047
+        l_ankle_ie: -0.060
         #r_hip_aa: 0.
-        r_hip_aa: -0.047
+        #r_hip_aa: -0.047
+        r_hip_aa: -0.060
         r_hip_fe: -0.785
         r_knee_fe_jp: 0.785
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
         #r_ankle_ie: 0.
-        r_ankle_ie: 0.047
+        #r_ankle_ie: 0.047
+        r_ankle_ie: 0.060
         neck_pitch: 0.
         r_hip_ie: 0.
         l_hip_ie: 0.
@@ -220,7 +226,8 @@ walking:
     foot_height_threshold: 0.01
 
     #com_height: 0.68
-    com_height: 0.92
+    #com_height: 0.92
+    com_height: 0.90
     #com_height: 0.85
     #com_height: 1.
 
