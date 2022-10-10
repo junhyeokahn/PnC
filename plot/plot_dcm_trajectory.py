@@ -81,7 +81,7 @@ def main(args):
 
     with open(file, 'r') as stream:
         try:
-            cfg = yaml.load(stream)
+            cfg = yaml.load(stream, Loader=yaml.FullLoader)
             initial_time = cfg["temporal_parameters"]["initial_time"]
             final_time = cfg["temporal_parameters"]["final_time"]
             time_step = cfg["temporal_parameters"]["time_step"]

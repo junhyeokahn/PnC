@@ -64,7 +64,7 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
   duration_ = _swing_duration;
   swing_land_foot_ = _landing_foot;
 
-  // Initialize swing foot starting pose
+  // initialize swing foot starting pose
   Eigen::Vector3d start_foot_pos =
       robot_->get_link_iso(link_idx_).translation();
   Eigen::Quaterniond start_foot_ori(robot_->get_link_iso(link_idx_).linear());
@@ -86,12 +86,12 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
       (swing_land_foot_.position - swing_init_foot_.position) / duration_;
 
   // Construct Position trajectories
-  pos_traj_init_to_mid_.Initialize(swing_init_foot_.position,
+  pos_traj_init_to_mid_.initialize(swing_init_foot_.position,
                                    Eigen::Vector3d::Zero(3), mid_swing_position,
-                                   mid_swing_velocity);
-  pos_traj_mid_to_end_.Initialize(mid_swing_position, mid_swing_velocity,
+                                   mid_swing_velocity, 0.5 * duration_);
+  pos_traj_mid_to_end_.initialize(mid_swing_position, mid_swing_velocity,
                                   swing_land_foot_.position,
-                                  Eigen::Vector3d::Zero(3));
+                                  Eigen::Vector3d::Zero(3), 0.5 * duration_);
 
   // Construct Quaternion trajectory
   Eigen::Vector3d ang_vel_start;
@@ -99,8 +99,9 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
   Eigen::Vector3d ang_vel_end;
   ang_vel_end.setZero();
 
-  quat_hermite_curve_.Initialize(swing_init_foot_.orientation, ang_vel_start,
-                                 swing_land_foot_.orientation, ang_vel_end);
+  quat_hermite_curve_.initialize(swing_init_foot_.orientation, ang_vel_start,
+                                 swing_land_foot_.orientation, ang_vel_end,
+                                 duration_);
 }
 
 void FootTrajectoryManager::UpdateDesired(const double current_time) {
@@ -114,32 +115,47 @@ void FootTrajectoryManager::UpdateDesired(const double current_time) {
   Eigen::Vector3d ang_vel_des;
   Eigen::Vector3d ang_acc_des;
 
-  double s = (current_time - start_time_) / duration_;
+  // double s = (current_time - start_time_) / duration_;
 
-  if (s <= 0.5) {
-    s = 2.0 * s;
-    pos_des = pos_traj_init_to_mid_.Evaluate(s);
-    vel_des =
-        pos_traj_init_to_mid_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
-    acc_des =
-        pos_traj_init_to_mid_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
+  // if (s <= 0.5) {
+  // s = 2.0 * s;
+  // pos_des = pos_traj_init_to_mid_.Evaluate(s);
+  // vel_des =
+  // pos_traj_init_to_mid_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
+  // acc_des =
+  // pos_traj_init_to_mid_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
+  //} else {
+  // s = 2.0 * (s - 0.5);
+  // pos_des = pos_traj_mid_to_end_.Evaluate(s);
+  // vel_des =
+  // pos_traj_mid_to_end_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
+  // acc_des =
+  // pos_traj_mid_to_end_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
+  //}
+
+  // s = (current_time - start_time_) / duration_;
+
+  // quat_hermite_curve_.Evaluate(s, quat_des);
+  // ori_des << quat_des.w(), quat_des.x(), quat_des.y(), quat_des.z();
+  // quat_hermite_curve_.GetAngularVelocity(s, ang_vel_des);
+  // quat_hermite_curve_.GetAngularAcceleration(s, ang_acc_des);
+  // ang_vel_des /= duration_;
+  // ang_acc_des /= duration_;
+  double s = current_time - start_time_;
+  if (s < 0.5 * duration_) {
+    pos_des = pos_traj_init_to_mid_.evaluate(s);
+    vel_des = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
+    acc_des = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
   } else {
-    s = 2.0 * (s - 0.5);
-    pos_des = pos_traj_mid_to_end_.Evaluate(s);
-    vel_des =
-        pos_traj_mid_to_end_.EvaluateFirstDerivative(s) / (duration_ * 0.5);
-    acc_des =
-        pos_traj_mid_to_end_.EvaluateSecondDerivative(s) / (duration_ * 0.5);
+    pos_des = pos_traj_mid_to_end_.evaluate(s);
+    vel_des = pos_traj_mid_to_end_.evaluateFirstDerivative(s);
+    acc_des = pos_traj_mid_to_end_.evaluateSecondDerivative(s);
   }
 
-  s = (current_time - start_time_) / duration_;
-
-  quat_hermite_curve_.Evaluate(s, quat_des);
+  quat_hermite_curve_.evaluate(s, quat_des);
   ori_des << quat_des.w(), quat_des.x(), quat_des.y(), quat_des.z();
-  quat_hermite_curve_.GetAngularVelocity(s, ang_vel_des);
-  quat_hermite_curve_.GetAngularAcceleration(s, ang_acc_des);
-  ang_vel_des /= duration_;
-  ang_acc_des /= duration_;
+  quat_hermite_curve_.getAngularVelocity(s, ang_vel_des);
+  quat_hermite_curve_.getAngularAcceleration(s, ang_acc_des);
 
   foot_pos_task_->update_desired(pos_des, vel_des, acc_des);
   foot_ori_task_->update_desired(ori_des, ang_vel_des, ang_acc_des);
