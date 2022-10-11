@@ -148,4 +148,6 @@ message pnc_msg {
 
   // stance foot quat
   repeated float stance_foot_quat = 104;
+
+  float kf_time_ms = 105;
 }

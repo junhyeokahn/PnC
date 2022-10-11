@@ -32,6 +32,7 @@ void DracoDataManager::Send() {
 
   pb_msg.set_time(data->time);
   pb_msg.set_phase(data->phase);
+  pb_msg.set_kf_time_ms(data->kf_time_ms);
 
   pb_msg.set_l_knee_int_frc_cmd(data->l_knee_int_frc_cmd);
   pb_msg.set_r_knee_int_frc_cmd(data->r_knee_int_frc_cmd);

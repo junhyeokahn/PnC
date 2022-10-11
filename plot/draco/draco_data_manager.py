@@ -250,6 +250,8 @@ while True:
     data_saver.add('lf_contact', list(msg.lf_contact))
     data_saver.add('rf_contact', list(msg.rf_contact))
 
+    data_saver.add('kf_time_ms', msg.kf_time_ms)
+
     # ground truth from pybullet
     if not config["b_exp"]:
         data_saver.add('base_joint_pos', list(gt_msg.base_joint_pos))

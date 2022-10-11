@@ -11,6 +11,8 @@
 #include "pnc/robot_system/dart_robot_system.hpp"
 #include "utils/util.hpp"
 
+#include <chrono>
+
 DracoInterface::DracoInterface() : Interface() {
   std::string border = "=";
   for (int i = 0; i < 79; ++i) {
@@ -96,13 +98,20 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   DracoCommand *cmd = ((DracoCommand *)_command);
   DracoSensorData *data = ((DracoSensorData *)_data);
 
+  std::chrono::duration<double> compute_time_kf_estimator;
   if (count_ <= waiting_count_) {
     se_->initialize(data);
+    auto start = std::chrono::high_resolution_clock::now();
     sekf_->initialize(data);
+    auto end = std::chrono::high_resolution_clock::now();
+    compute_time_kf_estimator = std::chrono::duration_cast<std::chrono::duration<double>>(end-start);
     this->SetSafeCommand(data, cmd);
   } else {
     se_->update(data);
+    auto start = std::chrono::high_resolution_clock::now();
     sekf_->update(data);
+    auto end = std::chrono::high_resolution_clock::now();
+    compute_time_kf_estimator = std::chrono::duration_cast<std::chrono::duration<double>>(end-start);
     interrupt->processInterrupts();
     control_architecture_->getCommand(cmd);
   }
@@ -110,6 +119,7 @@ void DracoInterface::getCommand(void *_data, void *_command) {
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager::GetDracoDataManager()->data->time = sp_->curr_time;
     DracoDataManager::GetDracoDataManager()->data->phase = sp_->state;
+    DracoDataManager::GetDracoDataManager()->data->kf_time_ms = 1000. * compute_time_kf_estimator.count();
     DracoDataManager::GetDracoDataManager()->Send();
   }
 

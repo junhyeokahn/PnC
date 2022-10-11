@@ -36,6 +36,7 @@ public:
   // should be matching with protobuf msg
   double time = 0.;
   int phase = 0;
+  double kf_time_ms = 0.;
 
   Eigen::VectorXd task_com_pos = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_com_vel = Eigen::VectorXd::Zero(3);
