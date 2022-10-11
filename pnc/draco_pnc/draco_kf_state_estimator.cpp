@@ -45,7 +45,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   rot_world_to_base = compute_world_to_base_rot(data, rot_world_to_imu, b_use_marg_filter);
 
   // compute estimator (control) input, u_n
-  base_pose_model_.packAccelerationInput(rot_world_to_imu.transpose(),
+  base_pose_model_.packAccelerationInput(rot_world_to_imu,
                                          data->imu_accel, accelerometer_input_);
 
   // get initial base estimate
