@@ -31,9 +31,9 @@ class DracoSensorData;
 
 class DracoKFStateEstimator {
 public:
-    enum SupportState {LEFT, RIGHT, DOUBLE};
+  enum SupportState {LEFT, RIGHT, DOUBLE};
 
-    DracoKFStateEstimator(RobotSystem *robot);
+  DracoKFStateEstimator(RobotSystem *robot);
   ~DracoKFStateEstimator();
 
   void initialize(DracoSensorData *);
@@ -41,6 +41,9 @@ public:
 
 private:
   void updateSupportState(DracoStateProvider* sp, SupportState& support_state);
+  Eigen::Matrix3d compute_world_to_base_rot(DracoSensorData *data,
+                                            Eigen::Matrix3d rot_world_to_imu,
+                                            bool use_marg_filter);
 
 protected:
   RobotSystem *robot_;
@@ -66,4 +69,5 @@ protected:
 
   bool b_first_visit_;
   bool b_skip_prediction;
+  bool b_use_marg_filter;
 };

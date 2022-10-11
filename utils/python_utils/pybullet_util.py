@@ -291,20 +291,60 @@ def get_sensor_data(robot, joint_id, link_id, pos_basejoint_to_basecom,
         sensor_data['joint_pos'][k] = js[0]
         sensor_data['joint_vel'][k] = js[1]
 
+    # store normal force measured on each foot
+    normal_force = 0
+    contacts = p.getContactPoints(bodyA=robot, linkIndexA=link_id['l_ankle_ie_link'])
+    for contact in contacts:
+        normal_force += contact[9]
+    sensor_data['lf_normal_force'] = normal_force
+
+    normal_force = 0
+    contacts = p.getContactPoints(bodyA=robot, linkIndexA=link_id['r_ankle_ie_link'])
+    for contact in contacts:
+        normal_force += contact[9]
+    sensor_data['rf_normal_force'] = normal_force
+
     return sensor_data
 
 
-def simulate_accelerometer_data(robot, link_id, previous_link_velocity, dt):
+def evaluate_force_contact(lf_normal_force, rf_normal_force,
+                           b_prev_lf_contact, b_prev_rf_contact, robot_weight):
+    """
+    Determine whether the {left, right} foot is in contact.
+    Currently, this is done by using a Schmitt trigger with thresholds determined
+    as a percentage of the robot's weight.
+    """
+
+    on_threshold = 0.2 * (robot_weight * 9.8)
+    off_threshold = 0.1 * (robot_weight * 9.8)
+
+    if b_prev_lf_contact:
+        b_lf_contact = lf_normal_force >= off_threshold
+    else:
+        b_lf_contact = lf_normal_force >= on_threshold
+
+    if b_prev_rf_contact:
+        b_rf_contact = rf_normal_force >= off_threshold
+    else:
+        b_rf_contact = rf_normal_force >= on_threshold
+
+    return b_lf_contact, b_rf_contact
+
+
+def simulate_accelerometer_data(robot, link_id, previous_link_velocity,
+                                previous_torso_acceleration, dt):
     gravity_vector = np.array([0., 0., -9.8])
 
     # calculate imu acceleration in world frame by numerical differentiation
     torso_acceleration = (get_link_vel(robot, link_id['torso_imu'])[3:6] - previous_link_velocity) / dt
 
+    avg_acceleration = (torso_acceleration + previous_torso_acceleration) / 2.0
+
     # map acceleration to IMU frame and add gravity constant
     imu_R_world = np.transpose(get_link_iso(robot, link_id['torso_imu']))[0:3, 0:3]
-    accelerometer_measurement = np.dot(imu_R_world, (torso_acceleration + gravity_vector))
+    accelerometer_measurement = np.dot(imu_R_world, (avg_acceleration + gravity_vector))
 
-    return accelerometer_measurement
+    return accelerometer_measurement, torso_acceleration
 
 
 def add_sensor_noise(sensors_dictionary, noisy_sensors):

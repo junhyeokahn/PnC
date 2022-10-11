@@ -8,6 +8,8 @@ b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_terminat
 
 b_joint_pos_test: false
 
+expected_weight: 37 # [kg]
+
 state_estimator:
     n_data_com_vel: [200, 200, 250]
     #n_data_com_vel: [20, 20, 20]

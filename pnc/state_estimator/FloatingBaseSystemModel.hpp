@@ -40,6 +40,10 @@ public:
     base_pos_y() = base_transform.y();
     base_pos_z() = base_transform.z();
 
+    base_vel_x() = 0.0;
+    base_vel_y() = 0.0;
+    base_vel_z() = 0.0;
+
     lfoot_pos_x() = lfoot_transform.translation().x();
     lfoot_pos_y() = lfoot_transform.translation().y();
     lfoot_pos_z() = lfoot_transform.translation().z();
@@ -94,8 +98,11 @@ public:
       lfoot_offset.setZero();
       rfoot_offset.setZero();
 
-      W.setIdentity();  // TODO assign based on better noise model
-      W = W * 0.001;
+      W.setZero();
+      W.block(0,0,3,3) = 0.001 * I;
+      W.block(3,3,3,3) = 0.5 * I;
+      W.block(6,6,3,3) = 0.0001 * I;
+      W.block(9,9,3,3) = 0.0001 * I;
     }
 
     void initialize(const double &delta_t)

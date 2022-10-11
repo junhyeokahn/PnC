@@ -21,8 +21,10 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   foot_pos_from_base_pre_transition.setZero();
   foot_pos_from_base_post_transition(0) = NAN;
 
+  //TODO move settings to config/draco/pnc.yaml
   b_first_visit_ = true;
   b_skip_prediction = false;
+  b_use_marg_filter = false;
 }
 
 DracoKFStateEstimator::~DracoKFStateEstimator() {
@@ -39,15 +41,17 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     return;
 
   // estimate 0_R_b
-//  margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
-//                            data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
-//  rot_world_to_base = margFilter_.getBaseRotation();
   Eigen::Matrix3d rot_world_to_imu = data->imu_frame_iso.block(0, 0, 3, 3);
-  rot_world_to_base = rot_world_to_imu * iso_imu_to_base_com_.linear();
-  base_pose_model_.packAccelerationInput(rot_world_to_imu.transpose(), data->imu_accel, accelerometer_input_);
+  rot_world_to_base = compute_world_to_base_rot(data, rot_world_to_imu, b_use_marg_filter);
 
+  // compute estimator (control) input, u_n
+  base_pose_model_.packAccelerationInput(rot_world_to_imu.transpose(),
+                                         data->imu_accel, accelerometer_input_);
+
+  // get initial base estimate
   Eigen::Vector3d world_to_base = robot_->get_link_iso("torso_link").translation()
                                   + rot_world_to_imu * robot_->get_base_local_com_pos();
+
   // initialize Kalman filter state xhat =[0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
     x_hat_.initialize(world_to_base,
@@ -69,9 +73,9 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   } else {
     sp_->b_lf_contact = false;
   }
-  this->updateSupportState(sp_, current_support_state_);
+  updateSupportState(sp_, current_support_state_);
 
-  // at stance foot change, update global offset
+  // at support state change, update global offset and covariance gains
   if (current_support_state_ != prev_support_state_) {
 
     // from double to right support and viceversa
@@ -169,5 +173,22 @@ void DracoKFStateEstimator::updateSupportState(DracoStateProvider* sp, SupportSt
   }
 
   support_state = RIGHT;
+}
+
+Eigen::Matrix3d DracoKFStateEstimator::compute_world_to_base_rot(DracoSensorData *data,
+                                                                 Eigen::Matrix3d rot_world_to_imu,
+                                                                 bool use_marg_filter)
+{
+  if(use_marg_filter)
+  {
+    margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
+                              data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
+    return margFilter_.getBaseRotation();
+  }
+  else
+  {
+    return rot_world_to_imu * iso_imu_to_base_com_.linear();
+  }
+
 }
 

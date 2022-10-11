@@ -34,6 +34,7 @@ from messages.draco_pybullet_sensors_pb2 import *
 with open("config/draco/pnc.yaml", 'r') as stream:
     config = YAML().load(stream)
     SAVE_FREQ = config["save_freq"]
+    robot_weight = config["expected_weight"]
 
 # create publisher of ground truth data (from pybullet)
 context = zmq.Context()
@@ -186,6 +187,9 @@ if __name__ == "__main__":
         rot_basejoint_to_basecom)
 
     previous_torso_velocity = np.array([0., 0., 0.])
+    previous_torso_acceleration = np.array([0., 0., 0.])
+    b_previous_lf_contact = False
+    b_previous_rf_contact = False
     while (1):
 
         # while_start = time.time()
@@ -202,17 +206,26 @@ if __name__ == "__main__":
                                                link_id['r_foot_contact'])[2, 3]
         lf_height = pybullet_util.get_link_iso(robot,
                                                link_id['l_foot_contact'])[2, 3]
+
+        # use schmitt trigger for contact estimation
+        b_lf_force_contact, b_rf_force_contact = pybullet_util.evaluate_force_contact(
+                            sensor_data_dict['lf_normal_force'], sensor_data_dict['rf_normal_force'],
+                            b_previous_lf_contact, b_previous_rf_contact, robot_weight)
+
         sensor_data_dict[
             'b_rf_contact'] = True if rf_height <= 0.005 else False
         sensor_data_dict[
             'b_lf_contact'] = True if lf_height <= 0.005 else False
+        sensor_data_dict['b_lf_contact'] = b_lf_force_contact
+        sensor_data_dict['b_rf_contact'] = b_rf_force_contact
 
         sensor_data_dict['imu_frame_iso'] = pybullet_util.get_link_iso(
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
-        sensor_data_dict['imu_accel'] = pybullet_util.simulate_accelerometer_data(
-            robot, link_id, previous_torso_velocity, dt)
+        sensor_data_dict['imu_accel'], current_torso_acceleration = \
+            pybullet_util.simulate_accelerometer_data(
+            robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
 
         pybullet_util.add_sensor_noise(sensor_data_dict, noisy_sensors)
 
@@ -266,6 +279,7 @@ if __name__ == "__main__":
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
         previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
+        previous_torso_acceleration = current_torso_acceleration
 
         # ground truth
         del bullet_msg.base_joint_pos[:]
@@ -273,6 +287,10 @@ if __name__ == "__main__":
         del bullet_msg.base_joint_quat[:]
         del bullet_msg.base_joint_lin_vel[:]
         del bullet_msg.base_joint_ang_vel[:]
+        del bullet_msg.lf_normal_force[:]
+        del bullet_msg.rf_normal_force[:]
+        del bullet_msg.b_lf_force_contact[:]
+        del bullet_msg.b_rf_force_contact[:]
         for i in range(3):
             bullet_msg.base_joint_pos.append(sensor_data_dict['base_joint_pos'][i])
             bullet_msg.base_com_pos_py.append(sensor_data_dict['base_com_pos_py'][i])
@@ -280,6 +298,10 @@ if __name__ == "__main__":
             bullet_msg.base_joint_lin_vel.append(sensor_data_dict['base_joint_lin_vel'][i])
             bullet_msg.base_joint_ang_vel.append(sensor_data_dict['base_joint_ang_vel'][i])
         bullet_msg.base_joint_quat.append(qt[3])
+        bullet_msg.lf_normal_force.append(sensor_data_dict['lf_normal_force'])
+        bullet_msg.rf_normal_force.append(sensor_data_dict['rf_normal_force'])
+        bullet_msg.b_lf_force_contact.append(b_lf_force_contact)
+        bullet_msg.b_rf_force_contact.append(b_rf_force_contact)
 
         # Compute Command
         if Config.PRINT_TIME:
