@@ -20,6 +20,7 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 
   b_swaying_ = false;
   b_use_base_height_ = _b_use_base_height;
+  ini_base_quat_.setIdentity();
 }
 
 void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
@@ -49,7 +50,9 @@ void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
 
 void FloatingBaseTrajectoryManager::InitializeSwayingTrajectory(
     double _start_time, const Eigen::Vector3d &_amp,
-    const Eigen::Vector3d &_freq, const Eigen::Matrix3d &_rot_world_local) {
+    const Eigen::Vector3d &_freq, const Eigen::Matrix3d &_rot_world_local,
+    const Eigen::Vector3d &des_com_pos,
+    const Eigen::Quaternion<double> &des_quat) {
 
   b_swaying_ = true;
 
@@ -58,14 +61,15 @@ void FloatingBaseTrajectoryManager::InitializeSwayingTrajectory(
   local_freq_ = _freq;
   rot_world_local_ = _rot_world_local;
 
-  ini_com_pos_ = robot_->get_com_pos();
-  if (b_use_base_height_) {
-    ini_com_pos_[2] = robot_->get_link_iso(base_id_).translation()[2];
-  }
+  // ini_com_pos_ = robot_->get_com_pos();
+  // if (b_use_base_height_) {
+  // ini_com_pos_[2] = robot_->get_link_iso(base_id_).translation()[2];
+  //}
+  ini_com_pos_ = des_com_pos;
 
-  ini_base_quat_ =
-      Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
-  target_base_quat_ = ini_base_quat_;
+  // ini_base_quat_ =
+  // Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
+  target_base_quat_ = des_quat;
 }
 
 void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
@@ -85,7 +89,7 @@ void FloatingBaseTrajectoryManager::UpdateDesired(const double curr_time) {
                              local_freq_, curr_time, local_pos_des,
                              local_vel_des, local_acc_des);
     com_pos_des = ini_com_pos_ + rot_world_local_ * local_pos_des;
-    com_pos_des[2] = ini_com_pos_[2]; // maintain constant height
+    // com_pos_des[2] = ini_com_pos_[2]; // maintain constant height
     com_vel_des = rot_world_local_ * local_vel_des;
     com_acc_des = rot_world_local_ * local_acc_des;
     base_ori_des << target_base_quat_.w(), target_base_quat_.x(),

@@ -110,7 +110,6 @@ public:
   Eigen::VectorXd task_lfoot_ori_acc_des = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_lfoot_ori_pos = Eigen::VectorXd::Zero(4);
   Eigen::VectorXd task_lfoot_ori_vel = Eigen::VectorXd::Zero(3);
-
   Eigen::VectorXd task_lfoot_ori_pos_des_local = Eigen::VectorXd::Zero(4);
   Eigen::VectorXd task_lfoot_ori_vel_des_local = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_lfoot_ori_acc_des_local = Eigen::VectorXd::Zero(3);
@@ -170,4 +169,7 @@ public:
   bool rfoot_contact = false;
   bool lf_contact = false;
   bool rf_contact = false;
+
+  // stance foot quat
+  Eigen::VectorXd stance_foot_quat = Eigen::VectorXd::Zero(4);
 };

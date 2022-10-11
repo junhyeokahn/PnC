@@ -72,6 +72,8 @@ joint_velocities = []
 l_knee_int_frc_cmd = []
 r_knee_int_frc_cmd = []
 
+stance_foot_quat = []
+
 des, act = dict(), dict()
 local_des, local_act = dict(), dict()
 for topic in tasks:
@@ -160,9 +162,9 @@ plot_task(time, local_des['task_torso_ori_pos'],
 # phase,
 # 'upper body',
 # label=upper_body_pos_label[slc])
-plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
-          des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
-          'left foot lin')
+# plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
+# des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
+# 'left foot lin')
 
 plot_task(time, des['task_lfoot_ori_pos'], act['task_lfoot_ori_pos'],
           des['task_lfoot_ori_vel'], act['task_lfoot_ori_vel'], phase,
@@ -205,17 +207,17 @@ plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
             joint_positions, cmd_joint_velocities, joint_velocities,
             cmd_joint_torques, phase, "lfoot")
 
-l_knee_jd_idx = joint_label.index("l_knee_fe_jd")
-r_knee_jd_idx = joint_label.index("r_knee_fe_jd")
+# l_knee_jd_idx = joint_label.index("l_knee_fe_jd")
+# r_knee_jd_idx = joint_label.index("r_knee_fe_jd")
 
-fig, axes = plt.subplots(2, 1)
-axes[0].set_title('left knee')
-axes[1].set_title('right knee')
-axes[0].grid(True)
-axes[1].grid(True)
-axes[0].plot(time, cmd_joint_torques[:, l_knee_jd_idx] / 2., 'r')
-axes[0].plot(time, l_knee_int_frc_cmd, 'b')
-axes[1].plot(time, cmd_joint_torques[:, r_knee_jd_idx] / 2., 'r')
-axes[1].plot(time, r_knee_int_frc_cmd, 'b')
+# fig, axes = plt.subplots(2, 1)
+# axes[0].set_title('left knee')
+# axes[1].set_title('right knee')
+# axes[0].grid(True)
+# axes[1].grid(True)
+# axes[0].plot(time, cmd_joint_torques[:, l_knee_jd_idx] / 2., 'r')
+# axes[0].plot(time, l_knee_int_frc_cmd, 'b')
+# axes[1].plot(time, cmd_joint_torques[:, r_knee_jd_idx] / 2., 'r')
+# axes[1].plot(time, r_knee_int_frc_cmd, 'b')
 
 plt.show()

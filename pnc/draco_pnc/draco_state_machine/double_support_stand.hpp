@@ -1,9 +1,9 @@
 #pragma once
 
-#include <pnc/state_machine.hpp>
 #include <pnc/draco_pnc/draco_control_architecture.hpp>
 #include <pnc/draco_pnc/draco_controller.hpp>
 #include <pnc/draco_pnc/draco_state_provider.hpp>
+#include <pnc/state_machine.hpp>
 
 class DoubleSupportStand : public StateMachine {
 public:

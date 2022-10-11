@@ -61,7 +61,7 @@ def set_initial_config(robot, joint_id):
     p.resetJointState(robot, joint_id["r_elbow_fe"], -np.pi / 2, 0.)
 
     # Lowerbody
-    hip_yaw_angle = 5
+    hip_yaw_angle = 0
     p.resetJointState(robot, joint_id["l_hip_aa"], np.radians(hip_yaw_angle),
                       0.)
     p.resetJointState(robot, joint_id["l_hip_fe"], -np.pi / 4, 0.)
@@ -71,8 +71,8 @@ def set_initial_config(robot, joint_id):
     p.resetJointState(robot, joint_id["l_ankle_ie"],
                       np.radians(-hip_yaw_angle), 0.)
 
-    p.resetJointState(robot, joint_id["r_hip_aa"], np.radians(-hip_yaw_angle),
-                      0.)
+    # p.resetJointState(robot, joint_id["r_hip_aa"], np.radians(-hip_yaw_angle),
+    # 0.)
     p.resetJointState(robot, joint_id["r_hip_fe"], -np.pi / 4, 0.)
     p.resetJointState(robot, joint_id["r_knee_fe_jp"], np.pi / 4, 0.)
     p.resetJointState(robot, joint_id["r_knee_fe_jd"], np.pi / 4, 0.)
@@ -97,10 +97,10 @@ if __name__ == "__main__":
         p.connect(p.DIRECT)
     else:
         p.connect(p.GUI)
-        p.resetDebugVisualizerCamera(cameraDistance=1.5,
-                                     cameraYaw=180,
-                                     cameraPitch=0,
-                                     cameraTargetPosition=[0, 0, 0.8])
+        p.resetDebugVisualizerCamera(cameraDistance=2.5,
+                                     cameraYaw=210,
+                                     cameraPitch=-30,
+                                     cameraTargetPosition=[0, 0, 0.5])
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=Config.CONTROLLER_DT,
                                 numSubSteps=Config.N_SUBSTEP)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/robot_model/draco/draco.urdf",
+    robot = p.loadURDF(cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
                        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
                        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
@@ -240,6 +240,10 @@ if __name__ == "__main__":
             interface.interrupt.b_interrupt_button_j = True
         elif pybullet_util.is_key_triggered(keys, 'k'):
             interface.interrupt.b_interrupt_button_k = True
+        elif pybullet_util.is_key_triggered(keys, 'p'):
+            force = [500, 0, 0]
+            pos = [0, 0, 0]
+            p.applyExternalForce(robot, -1, force, pos, p.WORLD_FRAME)
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']

@@ -35,6 +35,8 @@ void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
       pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
     }
     local_pos = rot_world_local.transpose() * pos;
+    std::cout << "local target com pos: " << std::endl;
+    std::cout << local_pos.transpose() << std::endl;
 
     pos_err = pos_des - pos;
     vel_err = vel_des - vel;

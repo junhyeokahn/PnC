@@ -59,13 +59,11 @@ void FootLanding::oneStep() {
   // Update floating base traj
 }
 
-void FootLanding::lastVisit() {}
+void FootLanding::lastVisit() { b_static_walking_trigger = false; }
 
 bool FootLanding::endOfState() {
 
-  // if (state_machine_time_ >= ramp_time_) {
-  // return true;
-  if (b_static_walking_trigger) {
+  if (state_machine_time_ >= ramp_time_ && b_static_walking_trigger) {
     return true;
   } else {
     return false;

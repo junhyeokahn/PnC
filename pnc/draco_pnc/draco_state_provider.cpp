@@ -39,6 +39,10 @@ DracoStateProvider::DracoStateProvider() {
   nominal_stance_foot_iso.setIdentity();
 
   b_state_estimator_on = false;
+  des_com_pos_in_standup.setZero();
+
+  nominal_lfoot_iso.setIdentity();
+  nominal_rfoot_iso.setIdentity();
 }
 
 void DracoStateProvider::setStateEstimator(bool flag) { this->b_state_estimator_on = flag; }

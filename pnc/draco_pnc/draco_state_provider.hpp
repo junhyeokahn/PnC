@@ -54,6 +54,11 @@ public:
 
   Eigen::Isometry3d nominal_stance_foot_iso;
 
+  Eigen::Vector3d des_com_pos_in_standup;
+
+  Eigen::Isometry3d nominal_lfoot_iso;
+  Eigen::Isometry3d nominal_rfoot_iso;
+
 private:
   DracoStateProvider();
 

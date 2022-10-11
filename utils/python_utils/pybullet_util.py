@@ -391,6 +391,7 @@ def is_key_triggered(keys, key):
     o = ord(key)
     if o in keys:
         return keys[ord(key)] & p.KEY_WAS_TRIGGERED
+        # return keys[ord(key)]
     return False
 
 

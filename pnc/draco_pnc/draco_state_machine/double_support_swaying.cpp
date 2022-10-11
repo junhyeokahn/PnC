@@ -24,15 +24,18 @@ void DoubleSupportSwaying::firstVisit() {
 
   ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(
       sp_->curr_time, amp, freq,
-      robot_->get_link_iso(sp_->stance_foot).linear());
+      robot_->get_link_iso(sp_->stance_foot).linear(),
+      sp_->des_com_pos_in_standup, sp_->nominal_base_quat);
 }
 
 void DoubleSupportSwaying::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update Floating Base
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);

@@ -49,8 +49,39 @@ public:
   /// Return footstep side.
   int getSide();
 
+  Eigen::Vector3d getPos() const { return position; }
+  Eigen::Matrix3d getRotMat() const { return R_ori; }
+  Eigen::Quaterniond getOrientation() const { return orientation; }
+
+  void setPos(const Eigen::Vector3d pos) { position = pos; }
+  void setOri(const Eigen::Quaterniond &ori) {
+    orientation = ori;
+    R_ori = ori.toRotationMatrix();
+  }
+
   /// Print out this footstep information.
   void printInfo();
+
+  // Footstep generation static method for utility function
+  static std::vector<Footstep>
+  getFwdWalkFootStep(const int n_steps, const double forward_step_length,
+                     const double nominal_footwidth, const int first_swing_leg,
+                     const Footstep &current_mid_foot);
+
+  static std::vector<Footstep>
+  getInPlaceWalkFootStep(const int n_steps, const double nominal_footwidth,
+                         const int first_swing_leg,
+                         const Footstep &current_mid_foot);
+
+  static std::vector<Footstep>
+  getTurningFootStep(const int n_steps, const double turn_radians_per_step,
+                     const double nominal_footwidth,
+                     const Footstep &current_mid_foot);
+
+  static std::vector<Footstep>
+  getStrafeFootStep(const int n_steps, const double strafe_distance,
+                    const double nominal_footwidth,
+                    const Footstep &current_mid_foot);
 
 private:
   void common_initialization();

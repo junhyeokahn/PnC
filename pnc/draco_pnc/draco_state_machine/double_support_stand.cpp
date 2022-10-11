@@ -21,9 +21,13 @@ void DoubleSupportStand::firstVisit() {
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
   Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
 
+  sp_->nominal_lfoot_iso = lfoot_iso;
+  sp_->nominal_rfoot_iso = rfoot_iso;
+
   Eigen::Vector3d target_com_pos =
       (lfoot_iso.translation() + rfoot_iso.translation()) / 2.;
   target_com_pos[2] = com_height_des;
+  sp_->des_com_pos_in_standup = target_com_pos;
   Eigen::Quaternion<double> foot_interpol_quat =
       Eigen::Quaternion<double>(lfoot_iso.linear())
           .slerp(0.5, Eigen::Quaternion<double>(rfoot_iso.linear()));
@@ -42,11 +46,26 @@ void DoubleSupportStand::firstVisit() {
 
   sp_->nominal_base_quat = target_base_ori;
 
-  ori_y << lfoot_iso.linear().col(1);
-  ori_x = ori_y.cross(ori_z);
-  sp_->nominal_stance_foot_iso.linear().col(0) = ori_x;
-  sp_->nominal_stance_foot_iso.linear().col(1) = ori_y;
-  sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
+  // ori_y << lfoot_iso.linear().col(1);
+  // ori_x = ori_y.cross(ori_z);
+  // sp_->nominal_stance_foot_iso.linear().col(0) = ori_x;
+  // sp_->nominal_stance_foot_iso.linear().col(1) = ori_y;
+  // sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
+  sp_->nominal_stance_foot_iso.linear() = lfoot_iso.linear();
+
+  Eigen::Quaternion<double> nominal_stance_foot_quat =
+      Eigen::Quaternion<double>(sp_->nominal_stance_foot_iso.linear());
+
+  // TEST TODO
+  std::cout << "===========nominal_stance_foot_iso in standup state========="
+            << std::endl;
+  std::cout << sp_->nominal_stance_foot_iso.linear() << std::endl;
+
+  DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+  dm->data->stance_foot_quat << nominal_stance_foot_quat.w(),
+      nominal_stance_foot_quat.x(), nominal_stance_foot_quat.y(),
+      nominal_stance_foot_quat.z();
+  // TEST TODO
 
   ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
       sp_->curr_time, end_time, target_com_pos, target_base_ori);
@@ -68,8 +87,10 @@ void DoubleSupportStand::oneStep() {
   // Update Floating Base Task
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
   // Update Max Normal Reaction Force
   ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
   ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);

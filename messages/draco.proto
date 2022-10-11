@@ -145,4 +145,7 @@ message pnc_msg {
   repeated bool rfoot_contact = 101;
   repeated bool lf_contact = 102;
   repeated bool rf_contact = 103;
+
+  // stance foot quat
+  repeated float stance_foot_quat = 104;
 }
