@@ -1,4 +1,5 @@
 #include "pnc/draco_pnc/draco_task/draco_com_task.hpp"
+#include "pnc/draco_pnc/draco_data_manager.hpp"
 
 DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot,
                                              int _feedback_source,
@@ -94,6 +95,9 @@ void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
     Eigen::Vector2d cmp_des =
         icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -
         ki.head(2).cwiseProduct(icp_err_integrator_->Output());
+
+    DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+    dm->data->des_cmp << cmp_des[0], cmp_des[1];
 
     op_cmd.head(2) = (9.81 / z_des) * (com_pos.head(2) - cmp_des);
     op_cmd[2] = kp[2] * (z_des - pos[2]) + kd[2] * (z_dot_des - vel[2]);

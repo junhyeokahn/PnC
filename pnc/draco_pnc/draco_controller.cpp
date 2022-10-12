@@ -122,8 +122,10 @@ void DracoController::getCommand(void *cmd) {
     // Task, Contact, Internal Constraint Setup
     for (int i = 0; i < tci_container_->task_list.size(); ++i) {
       tci_container_->task_list[i]->update_jacobian();
+      // tci_container_->task_list[i]->update_cmd(
+      // sp_->nominal_stance_foot_iso.linear());
       tci_container_->task_list[i]->update_cmd(
-          sp_->nominal_stance_foot_iso.linear());
+          sp_->nominal_base_quat.toRotationMatrix());
     }
 
     // ignore jacobian cols depending on the state

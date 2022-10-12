@@ -44,6 +44,16 @@ def quat_to_rot(quat):
     return np.copy((R.from_quat(quat)).as_matrix())
 
 
+def quat_to_rpy(quat):
+    if np.linalg.norm(quat) > 1.e-2:
+        quat_copy = np.copy(quat)
+        quat_copy[0:3] = quat_copy[1:]
+        quat_copy[3] = quat[0]
+        return np.copy((R.from_quat(quat_copy)).as_euler('xyz'))
+    else:
+        return np.array([0, 0, 0])
+
+
 def rot_to_quat(rot):
     """
     Parameters

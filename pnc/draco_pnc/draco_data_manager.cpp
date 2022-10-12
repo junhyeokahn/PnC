@@ -199,6 +199,10 @@ void DracoDataManager::Send() {
   pb_msg.add_stance_foot_quat(data->base_joint_quat[2]);
   pb_msg.add_stance_foot_quat(data->base_joint_quat[3]);
 
+  // add cmp
+  pb_msg.add_des_cmp(data->des_cmp[0]);
+  pb_msg.add_des_cmp(data->des_cmp[1]);
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

@@ -3,7 +3,8 @@
 Initialize::Initialize(const StateIdentifier _state_identifier,
                        DracoControlArchitecture *_ctrl_arch,
                        RobotSystem *_robot)
-    : StateMachine(_state_identifier, _robot), b_joint_pos_test_(false) {
+    : StateMachine(_state_identifier, _robot), b_joint_pos_test_(false),
+      transition_dur_(0.) {
 
   util::PrettyConstructor(2, "Initialize");
 
@@ -16,6 +17,8 @@ Initialize::Initialize(const StateIdentifier _state_identifier,
 
   YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
   b_joint_pos_test_ = util::ReadParameter<bool>(cfg, "b_joint_pos_test");
+  transition_dur_ =
+      util::ReadParameter<double>(cfg["walking"], "ini_transition_dur");
 }
 
 Initialize::~Initialize() {}
@@ -53,7 +56,7 @@ bool Initialize::endOfState() {
   if (b_joint_pos_test_) {
     return false;
   } else {
-    if (state_machine_time_ >= end_time) {
+    if (state_machine_time_ >= end_time + transition_dur_) {
       return true;
     } else {
       return false;

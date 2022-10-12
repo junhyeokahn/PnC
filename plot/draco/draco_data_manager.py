@@ -13,6 +13,8 @@ import numpy as np
 from pinocchio.visualize import MeshcatVisualizer
 import pinocchio as pin
 
+from utils.python_utils import util
+
 from plot.data_saver import DataSaver
 
 from messages.draco_pb2 import *
@@ -73,6 +75,14 @@ if args.b_visualize:
                                 color=[1., 0., 0., 0.5])
     icp_des_viz_q = pin.neutral(icp_des_model)
 
+    cmp_model, cmp_col, cmp_vis = pin.buildModelsFromUrdf(
+        "robot_model/ground/sphere.urdf", "robot_model/ground",
+        pin.JointModelFreeFlyer())
+    cmp_viz = MeshcatVisualizer(cmp_model, cmp_col, cmp_vis)
+    cmp_viz.initViewer(viz.viewer)
+    cmp_viz.loadViewerModel(rootNodeName="cmp_des", color=[0., 1., 0., 0.5])
+    cmp_des_q = pin.neutral(cmp_model)
+
 msg = pnc_msg()
 
 while True:
@@ -105,6 +115,11 @@ while True:
     data_saver.add('task_torso_ori_pos', list(msg.task_torso_ori_pos))
     data_saver.add('task_torso_ori_vel', list(msg.task_torso_ori_vel))
 
+    data_saver.add('task_torso_rpy_pos_des',
+                   list(util.quat_to_rpy(msg.task_torso_ori_pos_des)))
+    data_saver.add('task_torso_rpy_pos',
+                   list(util.quat_to_rpy(msg.task_torso_ori_pos)))
+
     data_saver.add('task_torso_ori_pos_des_local',
                    list(msg.task_torso_ori_pos_des_local))
     data_saver.add('task_torso_ori_vel_des_local',
@@ -115,6 +130,11 @@ while True:
                    list(msg.task_torso_ori_pos_local))
     data_saver.add('task_torso_ori_vel_local',
                    list(msg.task_torso_ori_vel_local))
+
+    data_saver.add('task_torso_rpy_pos_des_local',
+                   list(util.quat_to_rpy(msg.task_torso_ori_pos_des_local)))
+    data_saver.add('task_torso_rpy_pos_local',
+                   list(util.quat_to_rpy(msg.task_torso_ori_pos_local)))
 
     data_saver.add('task_rfoot_lin_pos_des', list(msg.task_rfoot_lin_pos_des))
     data_saver.add('task_rfoot_lin_vel_des', list(msg.task_rfoot_lin_vel_des))
@@ -139,6 +159,11 @@ while True:
     data_saver.add('task_rfoot_ori_pos', list(msg.task_rfoot_ori_pos))
     data_saver.add('task_rfoot_ori_vel', list(msg.task_rfoot_ori_vel))
 
+    data_saver.add('task_rfoot_rpy_pos_des',
+                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_des)))
+    data_saver.add('task_rfoot_rpy_pos',
+                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos)))
+
     data_saver.add('task_rfoot_ori_pos_des_local',
                    list(msg.task_rfoot_ori_pos_des_local))
     data_saver.add('task_rfoot_ori_vel_des_local',
@@ -149,6 +174,11 @@ while True:
                    list(msg.task_rfoot_ori_pos_local))
     data_saver.add('task_rfoot_ori_vel_local',
                    list(msg.task_rfoot_ori_vel_local))
+
+    data_saver.add('task_rfoot_rpy_pos_des_local',
+                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_des_local)))
+    data_saver.add('task_rfoot_rpy_pos_local',
+                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_local)))
 
     data_saver.add('task_lfoot_lin_pos_des', list(msg.task_lfoot_lin_pos_des))
     data_saver.add('task_lfoot_lin_vel_des', list(msg.task_lfoot_lin_vel_des))
@@ -173,6 +203,11 @@ while True:
     data_saver.add('task_lfoot_ori_pos', list(msg.task_lfoot_ori_pos))
     data_saver.add('task_lfoot_ori_vel', list(msg.task_lfoot_ori_vel))
 
+    data_saver.add('task_lfoot_rpy_pos_des',
+                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_des)))
+    data_saver.add('task_lfoot_rpy_pos',
+                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos)))
+
     data_saver.add('task_lfoot_ori_pos_des_local',
                    list(msg.task_lfoot_ori_pos_des_local))
     data_saver.add('task_lfoot_ori_vel_des_local',
@@ -183,6 +218,11 @@ while True:
                    list(msg.task_lfoot_ori_pos_local))
     data_saver.add('task_lfoot_ori_vel_local',
                    list(msg.task_lfoot_ori_vel_local))
+
+    data_saver.add('task_lfoot_rpy_pos_des_local',
+                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_des_local)))
+    data_saver.add('task_lfoot_rpy_pos_local',
+                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_local)))
 
     data_saver.add('task_upper_body_pos_des',
                    list(msg.task_upper_body_pos_des))
@@ -222,6 +262,8 @@ while True:
     data_saver.add('base_joint_quat',
                    list(msg.base_joint_quat))  # (w, x, y, z) order
 
+    data_saver.add('des_cmp', list(msg.des_cmp))
+
     data_saver.advance()
 
     # publish back for plot juggler
@@ -244,6 +286,11 @@ while True:
         icp_des_viz_q[1] = msg.icp_des[1]
         icp_des_viz_q[2] = 0.
 
+        cmp_des_q[0] = msg.des_cmp[0]
+        cmp_des_q[1] = msg.des_cmp[1]
+        cmp_des_q[2] = 0.
+
         viz.display(vis_q)
         icp_viz.display(icp_viz_q)
         icp_des_viz.display(icp_des_viz_q)
+        cmp_viz.display(cmp_des_q)

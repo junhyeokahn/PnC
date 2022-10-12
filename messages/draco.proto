@@ -132,4 +132,7 @@ message pnc_msg {
 
   // stance foot quat
   repeated float stance_foot_quat = 93;
+
+  // cmp
+  repeated float des_cmp = 94;
 }

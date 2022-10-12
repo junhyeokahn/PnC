@@ -30,4 +30,5 @@ protected:
   Eigen::VectorXd initial_jpos_;
 
   bool b_joint_pos_test_;
+  double transition_dur_;
 };

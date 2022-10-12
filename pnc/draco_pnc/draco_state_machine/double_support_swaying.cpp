@@ -22,9 +22,12 @@ void DoubleSupportSwaying::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
 
+  // ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(
+  // sp_->curr_time, amp, freq,
+  // robot_->get_link_iso(sp_->stance_foot).linear(),
+  // sp_->des_com_pos_in_standup, sp_->nominal_base_quat);
   ctrl_arch_->floating_base_tm->InitializeSwayingTrajectory(
-      sp_->curr_time, amp, freq,
-      robot_->get_link_iso(sp_->stance_foot).linear(),
+      sp_->curr_time, amp, freq, (sp_->nominal_base_quat).toRotationMatrix(),
       sp_->des_com_pos_in_standup, sp_->nominal_base_quat);
 }
 

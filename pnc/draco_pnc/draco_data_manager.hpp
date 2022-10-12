@@ -150,6 +150,9 @@ public:
   Eigen::VectorXd icp_dot = Eigen::VectorXd::Zero(2);
   Eigen::VectorXd icp_dot_des = Eigen::VectorXd::Zero(2);
 
+  // cmp
+  Eigen::VectorXd des_cmp = Eigen::VectorXd::Zero(2);
+
   // internal frc
   double l_knee_int_frc_cmd = 0.;
   double r_knee_int_frc_cmd = 0.;
