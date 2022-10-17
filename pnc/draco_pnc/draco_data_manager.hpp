@@ -159,4 +159,7 @@ public:
 
   // stance foot quat
   Eigen::VectorXd stance_foot_quat = Eigen::VectorXd::Zero(4);
+
+  // imu accel
+  Eigen::VectorXd imu_accel = Eigen::VectorXd::Zero(3);
 };

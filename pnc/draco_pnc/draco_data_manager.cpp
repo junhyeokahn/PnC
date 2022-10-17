@@ -203,6 +203,11 @@ void DracoDataManager::Send() {
   pb_msg.add_des_cmp(data->des_cmp[0]);
   pb_msg.add_des_cmp(data->des_cmp[1]);
 
+  // add imu accel data
+  for (int i = 0; i < 3; ++i) {
+    pb_msg.add_imu_accel(data->imu_accel[i]);
+  }
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

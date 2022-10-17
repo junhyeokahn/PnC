@@ -261,6 +261,7 @@ while True:
     data_saver.add('base_joint_position', list(msg.base_joint_pos))
     data_saver.add('base_joint_quat',
                    list(msg.base_joint_quat))  # (w, x, y, z) order
+    data_saver.add('imu_accel', list(msg.imu_accel))
 
     data_saver.add('des_cmp', list(msg.des_cmp))
 

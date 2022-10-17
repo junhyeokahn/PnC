@@ -135,4 +135,7 @@ message pnc_msg {
 
   // cmp
   repeated float des_cmp = 94;
+
+  // imu accel
+  repeated float imu_accel = 95;
 }
