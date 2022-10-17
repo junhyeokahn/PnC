@@ -25,7 +25,10 @@ cmp_des = []
 
 # Create Robot for Meshcat Visualization
 model, collision_model, visual_model = pin.buildModelsFromUrdf(
-    cwd + "/robot_model/draco/draco.urdf", cwd + "/robot_model/draco",
+    cwd + "/robot_model/draco/draco.urdf",
+    cwd + "/robot_model/draco",
+    # "/home/apptronik/catkin_ws/src/draco_3/models/draco_3_model/urdf/draco_3_model.urdf",
+    # "/home/apptronik/catkin_ws/src/draco_3/models",
     pin.JointModelFreeFlyer())
 viz = MeshcatVisualizer(model, collision_model, visual_model)
 try:
