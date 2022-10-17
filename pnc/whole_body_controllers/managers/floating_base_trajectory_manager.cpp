@@ -25,6 +25,34 @@ FloatingBaseTrajectoryManager::FloatingBaseTrajectoryManager(
 
 void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
     const double _start_time, const double _duration,
+    const Eigen::Vector3d &_target_com_pos, const Eigen::Vector3d &des_com_pos,
+    const Eigen::Quaternion<double> &_target_base_quat,
+    const Eigen::Quaternion<double> &des_ini_base_quat) {
+
+  b_swaying_ = false;
+
+  start_time_ = _start_time;
+  duration_ = _duration;
+
+  // ini_com_pos_ = robot_->get_com_pos();
+  // if (b_use_base_height_) {
+  // ini_com_pos_[2] = robot_->get_link_iso(base_id_).translation()[2];
+  //}
+  ini_com_pos_ = des_com_pos;
+  // ini_base_quat_ =
+  // Eigen::Quaternion<double>(robot_->get_link_iso(base_id_).linear());
+  ini_base_quat_ = des_ini_base_quat;
+
+  target_com_pos_ = _target_com_pos;
+  target_base_quat_ = _target_base_quat;
+
+  Eigen::Quaternion<double> quat_err =
+      target_base_quat_ * ini_base_quat_.inverse();
+  exp_error_ = util::QuatToExp(quat_err);
+}
+
+void FloatingBaseTrajectoryManager::InitializeInterpolationTrajectory(
+    const double _start_time, const double _duration,
     const Eigen::Vector3d &_target_com_pos,
     const Eigen::Quaternion<double> &_target_base_quat) {
 

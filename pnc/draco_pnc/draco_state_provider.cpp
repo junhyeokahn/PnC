@@ -42,4 +42,12 @@ DracoStateProvider::DracoStateProvider() {
 
   nominal_lfoot_iso.setIdentity();
   nominal_rfoot_iso.setIdentity();
+
+  des_com_pos_in_ds_move.setZero();
+
+  des_rfoot_in_foot_lifting.setZero();
+  des_lfoot_in_foot_lifting.setZero();
+
+  des_rfoot_ori_foot_lifting.setIdentity();
+  des_lfoot_ori_foot_lifting.setIdentity();
 }

@@ -56,6 +56,14 @@ public:
   Eigen::Isometry3d nominal_lfoot_iso;
   Eigen::Isometry3d nominal_rfoot_iso;
 
+  Eigen::Vector3d des_com_pos_in_ds_move;
+
+  Eigen::Vector3d des_rfoot_in_foot_lifting;
+  Eigen::Vector3d des_lfoot_in_foot_lifting;
+
+  Eigen::Quaternion<double> des_rfoot_ori_foot_lifting;
+  Eigen::Quaternion<double> des_lfoot_ori_foot_lifting;
+
 private:
   DracoStateProvider();
 };

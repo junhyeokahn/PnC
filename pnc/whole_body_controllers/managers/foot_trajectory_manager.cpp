@@ -180,6 +180,23 @@ void FootTrajectoryManager::InitializeInterpolationTrajectory(
   exp_error_ = util::QuatToExp(quat_err);
 }
 
+void FootTrajectoryManager::InitializeInterpolationTrajectory(
+    const double &_start_time, const double &_duration,
+    const Eigen::Vector3d &_target_pos, const Eigen::Vector3d &_init_pos,
+    const Eigen::Quaternion<double> &_target_quat,
+    const Eigen::Quaternion<double> &_init_quat) {
+  start_time_ = _start_time;
+  duration_ = _duration;
+
+  ini_pos_ = _init_pos;
+  ini_quat_ = _init_quat;
+
+  target_pos_ = _target_pos;
+  target_quat_ = _target_quat;
+
+  Eigen::Quaternion<double> quat_err = target_quat_ * ini_quat_.inverse();
+  exp_error_ = util::QuatToExp(quat_err);
+}
 void FootTrajectoryManager::UpdateInterpolationDesired(
     const double &_curr_time) {
   Eigen::VectorXd pos_des = Eigen::VectorXd::Zero(3);
