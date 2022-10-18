@@ -19,6 +19,7 @@ public:
     imu_frame_iso.setIdentity();
     imu_frame_vel.setZero();
     imu_accel << 0., 0., 9.8;
+    imu_dvel.setZero();
     b_rf_contact = false;
     b_lf_contact = false;
   }
@@ -26,6 +27,7 @@ public:
 
   Eigen::Matrix<double, 4, 4> imu_frame_iso;
   Eigen::Matrix<double, 6, 1> imu_frame_vel;
+  Eigen::Vector3d imu_dvel;
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
 

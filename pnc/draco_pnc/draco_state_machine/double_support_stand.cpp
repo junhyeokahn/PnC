@@ -24,6 +24,52 @@ void DoubleSupportStand::firstVisit() {
   sp_->nominal_lfoot_iso = lfoot_iso;
   sp_->nominal_rfoot_iso = rfoot_iso;
 
+  // std::cout << "===================Before===================" << std::endl;
+  // std::cout << "nominal_lfoot_iso linear:" << std::endl;
+  // std::cout << sp_->nominal_lfoot_iso.linear() << std::endl;
+  // std::cout << "nominal_lfoot_iso trans:" << std::endl;
+  // std::cout << sp_->nominal_lfoot_iso.translation().transpose() << std::endl;
+  // std::cout << "nominal_rfoot_iso linear:" << std::endl;
+  // std::cout << sp_->nominal_rfoot_iso.linear() << std::endl;
+  // std::cout << "nominal_rfoot_iso trans:" << std::endl;
+  // std::cout << sp_->nominal_rfoot_iso.translation().transpose() << std::endl;
+
+  // TEST TODO
+  // Eigen::Vector3d lf_ori_x(0, 0, 0), lf_ori_y(0, 0, 0), rf_ori_x(0, 0, 0),
+  // rf_ori_y(0, 0, 0), foot_ori_z(0, 0, 1);
+
+  // lf_ori_x = lfoot_iso.linear().col(0);
+  // lf_ori_x[2] = 0;
+  // lf_ori_x.normalize();
+  // lf_ori_y = foot_ori_z.cross(lf_ori_x);
+
+  // sp_->nominal_lfoot_iso.linear().col(0) = lf_ori_x;
+  // sp_->nominal_lfoot_iso.linear().col(1) = lf_ori_y;
+  // sp_->nominal_lfoot_iso.linear().col(2) = foot_ori_z;
+  // sp_->nominal_lfoot_iso.translation() = lfoot_iso.translation();
+
+  // rf_ori_x = rfoot_iso.linear().col(0);
+  // rf_ori_x[2] = 0;
+  // rf_ori_x.normalize();
+  // rf_ori_y = foot_ori_z.cross(rf_ori_x);
+
+  // sp_->nominal_rfoot_iso.linear().col(0) = rf_ori_x;
+  // sp_->nominal_rfoot_iso.linear().col(1) = rf_ori_y;
+  // sp_->nominal_rfoot_iso.linear().col(2) = foot_ori_z;
+  // sp_->nominal_rfoot_iso.translation() = rfoot_iso.translation();
+  // sp_->nominal_rfoot_iso.translation()[2] = 0.;
+
+  // std::cout << "===================After===================" << std::endl;
+  // std::cout << "nominal_lfoot_iso linear:" << std::endl;
+  // std::cout << sp_->nominal_lfoot_iso.linear() << std::endl;
+  // std::cout << "nominal_lfoot_iso trans:" << std::endl;
+  // std::cout << sp_->nominal_lfoot_iso.translation().transpose() << std::endl;
+  // std::cout << "nominal_rfoot_iso linear:" << std::endl;
+  // std::cout << sp_->nominal_rfoot_iso.linear() << std::endl;
+  // std::cout << "nominal_rfoot_iso trans:" << std::endl;
+  // std::cout << sp_->nominal_rfoot_iso.translation().transpose() << std::endl;
+  // TEST TODO
+
   Eigen::Vector3d target_com_pos =
       (lfoot_iso.translation() + rfoot_iso.translation()) / 2.;
   target_com_pos[2] = com_height_des;
@@ -34,8 +80,13 @@ void DoubleSupportStand::firstVisit() {
 
   Eigen::Matrix3d foot_interpol_SO3 = foot_interpol_quat.toRotationMatrix();
   Eigen::Vector3d ori_x(0, 0, 0), ori_y(0, 0, 0), ori_z(0, 0, 1);
-  ori_y = foot_interpol_SO3.col(1);
-  ori_x = ori_y.cross(ori_z);
+  // ori_y = foot_interpol_SO3.col(1);
+  // ori_x = ori_y.cross(ori_z);
+
+  ori_x = foot_interpol_SO3.col(0);
+  ori_x[2] = 0;
+  ori_x.normalize();
+  ori_y = ori_z.cross(ori_x);
 
   Eigen::Matrix3d target_base_ori_SO3 = Eigen::Matrix3d::Identity();
   target_base_ori_SO3.col(0) = ori_x;
@@ -48,10 +99,15 @@ void DoubleSupportStand::firstVisit() {
 
   // ori_y << lfoot_iso.linear().col(1);
   // ori_x = ori_y.cross(ori_z);
-  // sp_->nominal_stance_foot_iso.linear().col(0) = ori_x;
-  // sp_->nominal_stance_foot_iso.linear().col(1) = ori_y;
-  // sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
-  sp_->nominal_stance_foot_iso.linear() = lfoot_iso.linear();
+  ori_x << lfoot_iso.linear().col(0);
+  ori_x[2] = 0.;
+  ori_x.normalize();
+  ori_y = ori_z.cross(ori_x);
+
+  sp_->nominal_stance_foot_iso.linear().col(0) = ori_x;
+  sp_->nominal_stance_foot_iso.linear().col(1) = ori_y;
+  sp_->nominal_stance_foot_iso.linear().col(2) = ori_z;
+  // sp_->nominal_stance_foot_iso.linear() = lfoot_iso.linear();
 
   Eigen::Quaternion<double> nominal_stance_foot_quat =
       Eigen::Quaternion<double>(sp_->nominal_stance_foot_iso.linear());

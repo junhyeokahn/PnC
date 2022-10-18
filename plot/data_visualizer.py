@@ -21,10 +21,14 @@ base_position = []
 base_orientation = []
 base_orientation_shift = []
 icp_des, icp_act = [], []
+cmp_des = []
 
 # Create Robot for Meshcat Visualization
 model, collision_model, visual_model = pin.buildModelsFromUrdf(
-    cwd + "/robot_model/draco/draco.urdf", cwd + "/robot_model/draco",
+    cwd + "/robot_model/draco/draco.urdf",
+    cwd + "/robot_model/draco",
+    # "/home/apptronik/catkin_ws/src/draco_3/models/draco_3_model/urdf/draco_3_model.urdf",
+    # "/home/apptronik/catkin_ws/src/draco_3/models",
     pin.JointModelFreeFlyer())
 viz = MeshcatVisualizer(model, collision_model, visual_model)
 try:
@@ -55,6 +59,14 @@ icp_des_viz.initViewer(viz.viewer)
 icp_des_viz.loadViewerModel(rootNodeName="icp_des", color=[1., 0., 0., 0.5])
 icp_des_viz_q = pin.neutral(icp_des_model)
 
+cmp_model, cmp_col, cmp_vis = pin.buildModelsFromUrdf(
+    "robot_model/ground/sphere.urdf", "robot_model/ground",
+    pin.JointModelFreeFlyer())
+cmp_viz = MeshcatVisualizer(cmp_model, cmp_col, cmp_vis)
+cmp_viz.initViewer(viz.viewer)
+cmp_viz.loadViewerModel(rootNodeName="cmp_des", color=[0., 1., 0., 0.5])
+cmp_des_q = pin.neutral(cmp_model)
+
 with open(cwd + '/experiment_data/pnc.pkl', 'rb') as file:
     while True:
         try:
@@ -74,6 +86,7 @@ with open(cwd + '/experiment_data/pnc.pkl', 'rb') as file:
 
             icp_des.append(d['icp_des'])
             icp_act.append(d['icp'])
+            cmp_des.append(d['des_cmp'])
 
         except EOFError:
             break
@@ -91,4 +104,8 @@ for ti in range(len(exp_time)):
 
     icp_viz.display(icp_viz_q)
     icp_des_viz.display(icp_des_viz_q)
+
+    cmp_des_q[0] = cmp_des[ti][0]
+    cmp_des_q[1] = cmp_des[ti][1]
+    cmp_viz.display(cmp_des_q)
     time.sleep(1.0 / save_freq)

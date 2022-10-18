@@ -150,4 +150,10 @@ message pnc_msg {
   repeated float stance_foot_quat = 104;
 
   float kf_time_ms = 105;
+
+  // cmp
+  repeated float des_cmp = 106;
+
+  // imu accel
+  repeated float imu_accel = 107;
 }

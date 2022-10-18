@@ -26,6 +26,13 @@ public:
       const Eigen::Vector3d &_target_com_pos,
       const Eigen::Quaternion<double> &_target_base_quat);
 
+  void InitializeInterpolationTrajectory(
+      const double _start_time, const double _duration,
+      const Eigen::Vector3d &_target_com_pos,
+      const Eigen::Vector3d &des_com_pos,
+      const Eigen::Quaternion<double> &_target_base_quat,
+      const Eigen::Quaternion<double> &des_ini_base_quat);
+
   /// Initialize swaying trajectory
   //
   /// \param[in] _start_time Time at initialization

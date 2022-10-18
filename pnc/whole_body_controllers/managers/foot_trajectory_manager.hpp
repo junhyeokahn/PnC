@@ -36,6 +36,11 @@ public:
       const double &_start_time, const double &_duration,
       const Eigen::Vector3d &_target_pos,
       const Eigen::Quaternion<double> &_target_quat);
+  void InitializeInterpolationTrajectory(
+      const double &_start_time, const double &_duration,
+      const Eigen::Vector3d &_target_pos, const Eigen::Vector3d &_init_pos,
+      const Eigen::Quaternion<double> &_target_quat,
+      const Eigen::Quaternion<double> &_init_quat);
   void UpdateInterpolationDesired(const double &_curr_time);
 
 private:

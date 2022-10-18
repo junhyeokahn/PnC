@@ -37,7 +37,10 @@ void DoubleSupportMove::firstVisit() {
     target_com_pos[1] += global_com_offset[1];
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
-        sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
+        sp_->curr_time, moving_duration_, target_com_pos,
+        sp_->des_com_pos_in_standup, target_base_quat, sp_->nominal_base_quat);
+
+    sp_->des_com_pos_in_ds_move = target_com_pos;
 
   } else if (com_move_states_ == com_move_states::Right) {
     std::cout << "draco_states::kMoveCoMToRFoot" << std::endl;
@@ -55,18 +58,27 @@ void DoubleSupportMove::firstVisit() {
     target_com_pos[1] += global_com_offset[1];
 
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
-        sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
+        sp_->curr_time, moving_duration_, target_com_pos,
+        sp_->des_com_pos_in_standup, target_base_quat, sp_->nominal_base_quat);
+
+    sp_->des_com_pos_in_ds_move = target_com_pos;
 
   } else if (com_move_states_ == com_move_states::Center) {
     std::cout << "draco_states::kMoveComToCenter" << std::endl;
+
+    // calculate desired base SE3
     Eigen::Vector3d target_com_pos =
         0.5 * (robot_->get_link_iso("l_foot_contact").translation() +
                robot_->get_link_iso("r_foot_contact").translation());
     target_com_pos[2] = des_com_height_;
     Eigen::Quaternion<double> target_base_quat = sp_->nominal_base_quat;
 
+    // ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
+    // sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
     ctrl_arch_->floating_base_tm->InitializeInterpolationTrajectory(
-        sp_->curr_time, moving_duration_, target_com_pos, target_base_quat);
+        sp_->curr_time, moving_duration_, target_com_pos,
+        sp_->des_com_pos_in_ds_move, target_base_quat, sp_->nominal_base_quat);
+    sp_->des_com_pos_in_standup = target_com_pos;
   } else {
     std::cout << "invalid draco_states" << std::endl;
   }
@@ -76,8 +88,10 @@ void DoubleSupportMove::oneStep() {
   state_machine_time_ = sp_->curr_time - ctrl_start_time_;
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update Floating Base
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);

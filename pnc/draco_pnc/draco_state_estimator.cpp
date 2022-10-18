@@ -184,6 +184,9 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     dm->data->cam_raw = robot_->hg.head(3);
     dm->data->icp = sp_->dcm.head(2);
     dm->data->icp_dot = sp_->dcm_vel.head(2);
+
+    // saving imu accel
+    dm->data->imu_accel = data->imu_dvel / sp_->servo_dt;
   }
 }
 

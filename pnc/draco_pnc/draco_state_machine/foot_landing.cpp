@@ -53,8 +53,10 @@ void FootLanding::oneStep() {
   ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update floating base traj
 }
@@ -62,7 +64,6 @@ void FootLanding::oneStep() {
 void FootLanding::lastVisit() { b_static_walking_trigger = false; }
 
 bool FootLanding::endOfState() {
-
   if (state_machine_time_ >= ramp_time_ && b_static_walking_trigger) {
     return true;
   } else {

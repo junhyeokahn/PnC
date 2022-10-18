@@ -13,6 +13,7 @@ expected_weight: 37 # [kg]
 state_estimator:
     n_data_com_vel: [200, 200, 250]
     #n_data_com_vel: [20, 20, 20]
+    #n_data_com_vel: [100, 100, 250]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
 
@@ -55,7 +56,8 @@ wbc:
             #exp_kd: [0.06, 0.06, 1.5]
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
-            exp_kp: [0.2, 0.1, 25]
+            #exp_kp: [0.2, 0.1, 25]
+            exp_kp: [0.2, 0.8, 25]
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]
             time_constant: 5.
@@ -172,9 +174,11 @@ wbc:
     b_trq_limit: false
 
 balancing:
-    #swaying_amp: [0., 0.05, 0.]
+    #swaying_amp: [0., 0.08, 0.]
     #swaying_freq: [0., 0.2, 0.]
-    swaying_amp: [0., 0., 0.10]  # squatting behaviour
+    #swaying_amp: [0., 0., 0.10]  # squatting behaviour
+    #swaying_freq: [0., 0., 0.15]
+    swaying_amp: [0., 0., 0.05]  # squatting behaviour
     swaying_freq: [0., 0., 0.15]
 
     interpolation_local_offset: [0., 0.05, 0.]
@@ -189,25 +193,29 @@ walking:
         r_shoulder_aa: -0.523
         r_elbow_fe: -1.57
         #l_hip_aa: 0.
-        #l_hip_aa: 0.047
-        l_hip_aa: 0.060
+        l_hip_aa: 0.047
+        #l_hip_aa: 0.060
+        #l_hip_aa: 0.160
         l_hip_fe: -0.785
         l_knee_fe_jp: 0.785
         l_knee_fe_jd: 0.785
         l_ankle_fe: -0.785
         #l_ankle_ie: 0.
-        #l_ankle_ie: -0.047
-        l_ankle_ie: -0.060
+        l_ankle_ie: -0.047
+        #l_ankle_ie: -0.060
+        #l_ankle_ie: -0.160
         #r_hip_aa: 0.
-        #r_hip_aa: -0.047
-        r_hip_aa: -0.060
+        r_hip_aa: -0.047
+        #r_hip_aa: -0.060
+        #r_hip_aa: -0.160
         r_hip_fe: -0.785
         r_knee_fe_jp: 0.785
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
         #r_ankle_ie: 0.
-        #r_ankle_ie: 0.047
-        r_ankle_ie: 0.060
+        r_ankle_ie: 0.047
+        #r_ankle_ie: 0.060
+        #r_ankle_ie: 0.160
         neck_pitch: 0.
         r_hip_ie: 0.
         l_hip_ie: 0.
@@ -229,6 +237,7 @@ walking:
 
     #com_height: 0.68
     #com_height: 0.92
+    #com_height: 0.90
     com_height: 0.90
     #com_height: 0.85
     #com_height: 1.
@@ -252,8 +261,9 @@ walking:
 
 static_walking:
     moving_duration: 3
-    com_height: 0.68
+    #com_height: 0.68
     #com_height: 0.92
+    com_height: 0.90
     #com_height: 0.85
     #com_height: 1.
     com_offset: [0., 0.]
@@ -263,7 +273,7 @@ static_walking:
     des_foot_y_inc_local: 0.0
     des_foot_ori_inc_local: 0. ## degrees
 
-    transition_time: 0.5
+    transition_time: 1.
 
 static_balancing:
     lifting_duration: 1.
@@ -272,6 +282,6 @@ static_balancing:
 
 controller:
     waiting_count: 10
-    #b_smoothing: true
-    b_smoothing: false
+    b_smoothing: true
+    #b_smoothing: false
     smoothing_duration: 0.2

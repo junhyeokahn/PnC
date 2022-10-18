@@ -27,15 +27,24 @@ void SingleSupportLifting::firstVisit() {
 //    sp_->b_rf_contact = false;
 //    sp_->b_lf_contact = true;
 
-    Eigen::Vector3d des_foot_pos =
-        robot_->get_link_iso("r_foot_contact").translation();
+    // Eigen::Vector3d des_foot_pos =
+    // robot_->get_link_iso("r_foot_contact").translation();
+    Eigen::Vector3d des_foot_pos = sp_->nominal_rfoot_iso.translation();
     des_foot_pos[2] = des_foot_z_pos_;
 
-    Eigen::Quaternion<double> des_foot_ori(
-        robot_->get_link_iso("r_foot_contact").linear());
+    // Eigen::Quaternion<double> des_foot_ori(
+    // robot_->get_link_iso("r_foot_contact").linear());
+    Eigen::Quaternion<double> des_foot_ori(sp_->nominal_rfoot_iso.linear());
 
+    // ctrl_arch_->rfoot_tm->InitializeInterpolationTrajectory(
+    // sp_->curr_time, moving_duration_, des_foot_pos, des_foot_ori);
     ctrl_arch_->rfoot_tm->InitializeInterpolationTrajectory(
-        sp_->curr_time, moving_duration_, des_foot_pos, des_foot_ori);
+        sp_->curr_time, moving_duration_, des_foot_pos,
+        sp_->nominal_rfoot_iso.translation(), des_foot_ori,
+        Eigen::Quaternion<double>(sp_->nominal_rfoot_iso.linear()));
+
+    sp_->des_rfoot_in_foot_lifting = des_foot_pos;
+    sp_->des_rfoot_ori_foot_lifting = des_foot_ori;
 
   } else if (leg_side_ == EndEffector::LFoot) {
     std::cout << "draco_states::kLFootSingleSupportLifting" << std::endl;
@@ -43,15 +52,24 @@ void SingleSupportLifting::firstVisit() {
 //    sp_->b_rf_contact = true;
 //    sp_->b_lf_contact = false;
 
-    Eigen::Vector3d des_foot_pos =
-        robot_->get_link_iso("l_foot_contact").translation();
+    // Eigen::Vector3d des_foot_pos =
+    // robot_->get_link_iso("l_foot_contact").translation();
+    Eigen::Vector3d des_foot_pos = sp_->nominal_lfoot_iso.translation();
     des_foot_pos[2] = des_foot_z_pos_;
 
-    Eigen::Quaternion<double> des_foot_ori(
-        robot_->get_link_iso("l_foot_contact").linear());
+    // Eigen::Quaternion<double> des_foot_ori(
+    // robot_->get_link_iso("l_foot_contact").linear());
+    Eigen::Quaternion<double> des_foot_ori(sp_->nominal_lfoot_iso.linear());
 
+    // ctrl_arch_->lfoot_tm->InitializeInterpolationTrajectory(
+    // sp_->curr_time, moving_duration_, des_foot_pos, des_foot_ori);
     ctrl_arch_->lfoot_tm->InitializeInterpolationTrajectory(
-        sp_->curr_time, moving_duration_, des_foot_pos, des_foot_ori);
+        sp_->curr_time, moving_duration_, des_foot_pos,
+        sp_->nominal_lfoot_iso.translation(), des_foot_ori,
+        Eigen::Quaternion<double>(sp_->nominal_lfoot_iso.linear()));
+
+    sp_->des_lfoot_in_foot_lifting = des_foot_pos;
+    sp_->des_lfoot_ori_foot_lifting = des_foot_ori;
   } else {
     assert(false);
   }
@@ -63,10 +81,12 @@ void SingleSupportLifting::oneStep() {
   // Update Foot Task
   if (leg_side_ == EndEffector::LFoot) {
     ctrl_arch_->lfoot_tm->UpdateInterpolationDesired(sp_->curr_time);
-    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
   } else {
     ctrl_arch_->rfoot_tm->UpdateInterpolationDesired(sp_->curr_time);
-    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+    // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
   }
 }
 
