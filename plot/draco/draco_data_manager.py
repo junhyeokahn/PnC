@@ -10,8 +10,8 @@ import time
 import json
 from ruamel.yaml import YAML
 import numpy as np
-# from pinocchio.visualize import MeshcatVisualizer
-# import pinocchio as pin
+from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin
 
 from plot.data_saver import DataSaver
 
@@ -50,6 +50,12 @@ if args.b_visualize:
         "robot_model/draco/draco.urdf", "robot_model/draco",
         pin.JointModelFreeFlyer())
     viz = MeshcatVisualizer(model, collision_model, visual_model)
+
+    # add KF model
+    model_kf, collision_model_kf, visual_model_kf = pin.buildModelsFromUrdf(
+        "robot_model/draco/draco.urdf", "robot_model/draco",
+        pin.JointModelFreeFlyer())
+    viz_kf = MeshcatVisualizer(model_kf, collision_model_kf, visual_model_kf)
     try:
         viz.initViewer(open=True)
     except ImportError as err:
@@ -60,7 +66,10 @@ if args.b_visualize:
         exit()
     viz.loadViewerModel()
     vis_q = pin.neutral(model)
+    vis_q_kf = pin.neutral(model_kf)
 
+    viz_kf.initViewer(viz.viewer)
+    viz_kf.loadViewerModel(rootNodeName="kf_model", color=[0.2, 0.2, 0.2, 0.3])
     icp_model, icp_collision_model, icp_visual_model = pin.buildModelsFromUrdf(
         "robot_model/ground/sphere.urdf", "robot_model/ground",
         pin.JointModelFreeFlyer())
@@ -271,12 +280,19 @@ while True:
 
     # publish joint positions for meshcat
     if args.b_visualize:
-        vis_q[0:3] = np.array(msg.base_joint_pos)  # << base pos
-        vis_q[3] = msg.base_joint_quat[1]  # << quaternion x
-        vis_q[4] = msg.base_joint_quat[2]  # << quaternion y
-        vis_q[5] = msg.base_joint_quat[3]  # << quaternion z
-        vis_q[6] = msg.base_joint_quat[0]  # << quaternion w
+        vis_q[0:3] = np.array(msg.base_joint_pos_est)  # << base pos
+        vis_q[3] = msg.base_joint_quat_est[1]  # << quaternion x
+        vis_q[4] = msg.base_joint_quat_est[2]  # << quaternion y
+        vis_q[5] = msg.base_joint_quat_est[3]  # << quaternion z
+        vis_q[6] = msg.base_joint_quat_est[0]  # << quaternion w
         vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+
+        vis_q_kf[0:3] = np.array(msg.base_pos_kf)
+        vis_q_kf[3] = np.array(msg.base_quat_kf[1])
+        vis_q_kf[4] = np.array(msg.base_quat_kf[2])
+        vis_q_kf[5] = np.array(msg.base_quat_kf[3])
+        vis_q_kf[6] = np.array(msg.base_quat_kf[0])
+        vis_q_kf[7:] = np.array(msg.joint_positions)  # << joint pos
 
         icp_viz_q[0] = msg.icp[0]
         icp_viz_q[1] = msg.icp[1]
@@ -287,5 +303,6 @@ while True:
         icp_des_viz_q[2] = 0.
 
         viz.display(vis_q)
+        viz_kf.display(vis_q_kf)
         icp_viz.display(icp_viz_q)
         icp_des_viz.display(icp_des_viz_q)

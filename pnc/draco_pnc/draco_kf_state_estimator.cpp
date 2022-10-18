@@ -115,11 +115,17 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //    this->_update_dcm();
   // update measurement assuming at least one foot is on the ground
   if (data->b_lf_contact) {
-    Eigen::Vector3d pos_base_from_lfoot = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
+//    Eigen::Vector3d pos_base_from_lfoot = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
+    Eigen::Vector3d pos_base_from_lfoot;
+    pos_base_from_lfoot << x_hat_.base_pos_x(), x_hat_.base_pos_y(), x_hat_.base_pos_z();
+    pos_base_from_lfoot -= robot_->get_link_iso("l_foot_contact").translation();
     base_pose_model_.update_position_from_lfoot(pos_base_from_lfoot, base_estimate_);
   }
   if (data->b_rf_contact) {
-    Eigen::Vector3d pos_base_from_rfoot = world_to_base - robot_->get_link_iso("r_foot_contact").translation();
+//    Eigen::Vector3d pos_base_from_rfoot = world_to_base - robot_->get_link_iso("r_foot_contact").translation();
+    Eigen::Vector3d pos_base_from_rfoot;
+    pos_base_from_rfoot << x_hat_.base_pos_x(), x_hat_.base_pos_y(), x_hat_.base_pos_z();
+    pos_base_from_rfoot -= robot_->get_link_iso("r_foot_contact").translation();
     base_pose_model_.update_position_from_rfoot(pos_base_from_rfoot, base_estimate_);
   }
   x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
@@ -144,10 +150,12 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     dm->data->base_pos_kf = base_position_estimate;
     dm->data->base_vel_kf = base_velocity_estimate;
     dm->data->base_euler_kf = util::QuatToEulerZYX(Eigen::Quaterniond(rot_world_to_base));
-    dm->data->base_quat_kf = Eigen::Vector4d(margFilter_.getQuaternion().w(),
-                                             margFilter_.getQuaternion().x(),
-                                             margFilter_.getQuaternion().y(),
-                                             margFilter_.getQuaternion().z()) ;
+    Eigen::Quaternion<double> quat = Eigen::Quaternion<double>(rot_world_to_base);
+    dm->data->base_quat_kf = Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
+//    dm->data->base_quat_kf = Eigen::Vector4d(margFilter_.getQuaternion().w(),
+//                                             margFilter_.getQuaternion().x(),
+//                                             margFilter_.getQuaternion().y(),
+//                                             margFilter_.getQuaternion().z()) ;
 
     // save feet contact information
     dm->data->lfoot_contact = sp_->stance_foot == "l_foot_contact";
