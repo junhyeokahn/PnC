@@ -39,6 +39,8 @@ public:
   void initialize(DracoSensorData *);
   void update(DracoSensorData *);
 
+  void ComputeDCM();
+
 private:
   void updateSupportState(DracoStateProvider* sp, SupportState& support_state);
   Eigen::Matrix3d compute_world_to_base_rot(DracoSensorData *data,
@@ -50,6 +52,7 @@ protected:
   DracoStateProvider *sp_;
   SupportState current_support_state_;
   SupportState prev_support_state_;
+  Eigen::Vector3d prev_base_com_pos_;
   Eigen::Vector3d foot_pos_from_base_pre_transition;
   Eigen::Vector3d foot_pos_from_base_post_transition;
 
@@ -66,6 +69,9 @@ protected:
   MARGFilter margFilter_;
 
   Eigen::Matrix3d rot_world_to_base;
+
+  std::vector<SimpleMovingAverage> com_vel_filter_;
+  std::vector<SimpleMovingAverage> cam_filter_;
 
   bool b_first_visit_;
   bool b_skip_prediction;

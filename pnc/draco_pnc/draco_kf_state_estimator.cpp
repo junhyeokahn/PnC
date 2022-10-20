@@ -16,10 +16,21 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   base_pose_model_.initialize(gravity);
   rot_world_to_base.setZero();
   global_linear_offset_.setZero();
+  prev_base_com_pos_.setZero();
   current_support_state_ = DOUBLE;
   prev_support_state_ = DOUBLE;
   foot_pos_from_base_pre_transition.setZero();
   foot_pos_from_base_post_transition(0) = NAN;
+
+  Eigen::VectorXd n_data_com_vel = util::ReadParameter<Eigen::VectorXd>(
+          cfg["state_estimator"], "n_data_com_vel");
+  Eigen::VectorXd n_data_cam = util::ReadParameter<Eigen::VectorXd>(
+          cfg["state_estimator"], "n_data_cam");
+
+  for (int i = 0; i < 3; ++i) {
+    com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
+    cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
+  }
 
   //TODO move settings to config/draco/pnc.yaml
   b_first_visit_ = true;
@@ -48,17 +59,27 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   base_pose_model_.packAccelerationInput(rot_world_to_imu,
                                          data->imu_accel, accelerometer_input_);
 
-  // get initial base estimate
-  Eigen::Vector3d world_to_base = robot_->get_link_iso("torso_link").translation()
-                                  + rot_world_to_imu * robot_->get_base_local_com_pos();
+  // update system without base linear states
+  robot_->update_system(
+          Eigen::Vector3d::Zero(), Eigen::Quaternion<double>(rot_world_to_base),
+          Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
+          Eigen::Vector3d::Zero(), Eigen::Quaternion<double>(rot_world_to_base),
+          Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
+          data->joint_positions, data->joint_velocities, false);
 
+
+  // get initial base estimate
+  Eigen::Vector3d world_to_base;
   // initialize Kalman filter state xhat =[0_pos_b, 0_vel_b, 0_pos_LF, 0_pos_RF]
   if (b_first_visit_) {
+    world_to_base = global_linear_offset_ - robot_->get_link_iso("l_foot_contact").translation();
+
     x_hat_.initialize(world_to_base,
                       robot_->get_link_iso("l_foot_contact"),
                       robot_->get_link_iso("r_foot_contact"));
     kalman_filter_.init(x_hat_);
-    b_first_visit_ = false;
+  } else {
+    world_to_base << x_hat_.base_pos_x(), x_hat_.base_pos_y(), x_hat_.base_pos_z();
   }
 
   // update contact
@@ -112,20 +133,13 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   else
     b_skip_prediction = false;
 
-//    this->_update_dcm();
   // update measurement assuming at least one foot is on the ground
   if (data->b_lf_contact) {
-//    Eigen::Vector3d pos_base_from_lfoot = world_to_base - robot_->get_link_iso("l_foot_contact").translation();
-    Eigen::Vector3d pos_base_from_lfoot;
-    pos_base_from_lfoot << x_hat_.base_pos_x(), x_hat_.base_pos_y(), x_hat_.base_pos_z();
-    pos_base_from_lfoot -= robot_->get_link_iso("l_foot_contact").translation();
+    Eigen::Vector3d pos_base_from_lfoot = -robot_->get_link_iso("l_foot_contact").translation();
     base_pose_model_.update_position_from_lfoot(pos_base_from_lfoot, base_estimate_);
   }
   if (data->b_rf_contact) {
-//    Eigen::Vector3d pos_base_from_rfoot = world_to_base - robot_->get_link_iso("r_foot_contact").translation();
-    Eigen::Vector3d pos_base_from_rfoot;
-    pos_base_from_rfoot << x_hat_.base_pos_x(), x_hat_.base_pos_y(), x_hat_.base_pos_z();
-    pos_base_from_rfoot -= robot_->get_link_iso("r_foot_contact").translation();
+    Eigen::Vector3d pos_base_from_rfoot = -robot_->get_link_iso("r_foot_contact").translation();
     base_pose_model_.update_position_from_rfoot(pos_base_from_rfoot, base_estimate_);
   }
   x_hat_ = kalman_filter_.update(base_pose_model_, base_estimate_);
@@ -134,14 +148,34 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   Eigen::Vector3d base_position_estimate( x_hat_.base_pos_x(),  x_hat_.base_pos_y(),  x_hat_.base_pos_z());
   Eigen::Vector3d base_velocity_estimate( x_hat_.base_vel_x(),  x_hat_.base_vel_y(),  x_hat_.base_vel_z());
 
+  Eigen::Vector3d base_com_pos =
+          base_position_estimate + rot_world_to_base * robot_->get_base_local_com_pos();
+  if (b_first_visit_) {
+    prev_base_com_pos_ = base_com_pos;
+    b_first_visit_ = false;
+  }
 
-//  robot_->update_system(
+  Eigen::Vector3d base_com_lin_vel =
+          (base_com_pos - prev_base_com_pos_) / sp_->servo_dt;
+
+  robot_->update_system(
 //          base_com_pos, margFilter_.getQuaternion(),
-//          base_velocity_estimate, data->imu_frame_vel.head(3), base_position_estimate,
+          base_com_pos, Eigen::Quaternion<double>(rot_world_to_base),
+          base_com_lin_vel, data->imu_frame_vel.head(3), base_position_estimate,
 //          margFilter_.getQuaternion(), base_velocity_estimate,
-//          data->imu_frame_vel.head(3), data->joint_positions,
-//          data->joint_velocities, true);
+          Eigen::Quaternion<double>(rot_world_to_base), base_velocity_estimate,
+          data->imu_frame_vel.head(3), data->joint_positions,
+          data->joint_velocities, true);
 
+  // filter com velocity, cam
+  for (int i = 0; i < 3; ++i) {
+    com_vel_filter_[i].Input(robot_->get_com_lin_vel()[i]);
+    sp_->com_vel_est[i] = com_vel_filter_[i].Output();
+    cam_filter_[i].Input(robot_->hg[i]);
+    sp_->cam_est[i] = cam_filter_[i].Output();
+  }
+
+  this->ComputeDCM();
 
   prev_support_state_ = current_support_state_;
   // save current time step data
@@ -156,6 +190,9 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //                                             margFilter_.getQuaternion().x(),
 //                                             margFilter_.getQuaternion().y(),
 //                                             margFilter_.getQuaternion().z()) ;
+
+    dm->data->icp = sp_->dcm.head(2);
+    dm->data->icp_dot = sp_->dcm_vel.head(2);
 
     // save feet contact information
     dm->data->lfoot_contact = sp_->stance_foot == "l_foot_contact";
@@ -198,5 +235,18 @@ Eigen::Matrix3d DracoKFStateEstimator::compute_world_to_base_rot(DracoSensorData
     return rot_world_to_imu * iso_imu_to_base_com_.linear();
   }
 
+}
+
+void DracoKFStateEstimator::ComputeDCM() {
+  Eigen::Vector3d com_pos = robot_->get_com_pos();
+  Eigen::Vector3d com_vel = sp_->com_vel_est;
+  double dcm_omega = sqrt(9.81 / com_pos[2]);
+
+  sp_->prev_dcm = sp_->dcm;
+  sp_->dcm = com_pos + com_vel / dcm_omega;
+
+  double alpha_vel = 0.1; // TODO Study this alpha value
+  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_dt) +
+                 (1.0 - alpha_vel) * sp_->dcm_vel;
 }
 

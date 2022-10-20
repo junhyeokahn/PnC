@@ -44,13 +44,13 @@ public:
     base_vel_y() = 0.0;
     base_vel_z() = 0.0;
 
-    lfoot_pos_x() = lfoot_transform.translation().x();
-    lfoot_pos_y() = lfoot_transform.translation().y();
-    lfoot_pos_z() = lfoot_transform.translation().z();
+    lfoot_pos_x() = base_pos_x() + lfoot_transform.translation().x();
+    lfoot_pos_y() = base_pos_y() + lfoot_transform.translation().y();
+    lfoot_pos_z() = base_pos_z() + lfoot_transform.translation().z();
 
-    rfoot_pos_x() = rfoot_transform.translation().x();
-    rfoot_pos_y() = rfoot_transform.translation().y();
-    rfoot_pos_z() = rfoot_transform.translation().z();
+    rfoot_pos_x() = base_pos_x() + rfoot_transform.translation().x();
+    rfoot_pos_y() = base_pos_y() + rfoot_transform.translation().y();
+    rfoot_pos_z() = base_pos_z() + rfoot_transform.translation().z();
     }
 
     static constexpr size_t base_position_x = 0;
