@@ -102,14 +102,14 @@ void DracoInterface::getCommand(void *_data, void *_command) {
 
   std::chrono::duration<double> compute_time_kf_estimator;
   if (count_ <= waiting_count_) {
-    se_->initialize(data);
+//    se_->initialize(data);
     auto start = std::chrono::high_resolution_clock::now();
     sekf_->initialize(data);
     auto end = std::chrono::high_resolution_clock::now();
     compute_time_kf_estimator = std::chrono::duration_cast<std::chrono::duration<double>>(end-start);
     this->SetSafeCommand(data, cmd);
   } else {
-    se_->update(data);
+//    se_->update(data);
     auto start = std::chrono::high_resolution_clock::now();
     sekf_->update(data);
     auto end = std::chrono::high_resolution_clock::now();
