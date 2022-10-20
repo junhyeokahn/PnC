@@ -83,17 +83,17 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   }
 
   // update contact
-  if (data->b_rf_contact) {
-    sp_->b_rf_contact = true;
-  } else {
-    sp_->b_rf_contact = false;
-  }
-
-  if (data->b_lf_contact) {
-    sp_->b_lf_contact = true;
-  } else {
-    sp_->b_lf_contact = false;
-  }
+//  if (data->b_rf_contact) {
+//    sp_->b_rf_contact = true;
+//  } else {
+//    sp_->b_rf_contact = false;
+//  }
+//
+//  if (data->b_lf_contact) {
+//    sp_->b_lf_contact = true;
+//  } else {
+//    sp_->b_lf_contact = false;
+//  }
   updateSupportState(sp_, current_support_state_);
 
   // at support state change, update global offset and covariance gains
