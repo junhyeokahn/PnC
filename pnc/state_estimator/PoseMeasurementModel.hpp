@@ -53,7 +53,7 @@ public:
     {
       u_n.accel_measurement_x = rot_world_to_base.row(0) * accelerometer;
       u_n.accel_measurement_y = rot_world_to_base.row(1) * accelerometer;
-      u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer + gravity;
+      u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer; // + gravity;
     }
 
     void update_position_from_lfoot(const Eigen::Vector3d& lfoot_wrt_world,

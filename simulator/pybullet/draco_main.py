@@ -224,8 +224,11 @@ if __name__ == "__main__":
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_accel'], current_torso_acceleration = \
-            pybullet_util.simulate_accelerometer_data(
+            pybullet_util.simulate_dVel_data(
             robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
+        # sensor_data_dict['imu_accel'], current_torso_acceleration = \
+        #     pybullet_util.simulate_accelerometer_data(
+        #     robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
 
         pybullet_util.add_sensor_noise(sensor_data_dict, noisy_sensors)
 
