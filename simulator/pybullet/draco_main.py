@@ -216,8 +216,8 @@ if __name__ == "__main__":
             'b_rf_contact'] = True if rf_height <= 0.005 else False
         sensor_data_dict[
             'b_lf_contact'] = True if lf_height <= 0.005 else False
-        sensor_data_dict['b_lf_contact'] = b_lf_force_contact
-        sensor_data_dict['b_rf_contact'] = b_rf_force_contact
+        # sensor_data_dict['b_lf_contact'] = b_lf_force_contact
+        # sensor_data_dict['b_rf_contact'] = b_rf_force_contact
 
         sensor_data_dict['imu_frame_iso'] = pybullet_util.get_link_iso(
             robot, link_id['torso_imu'])
