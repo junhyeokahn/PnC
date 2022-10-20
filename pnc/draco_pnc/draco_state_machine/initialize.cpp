@@ -57,6 +57,7 @@ bool Initialize::endOfState() {
     return false;
   } else {
     if (state_machine_time_ >= end_time + transition_dur_) {
+      sp_->setStateEstimator(true);
       return true;
     } else {
       return false;

@@ -67,9 +67,11 @@ DracoInterface::DracoInterface() : Interface() {
   if (b_exp) {
     control_architecture_->state = draco_states::kInitialize;
     sp_->state = control_architecture_->state;
+    sp_->setStateEstimator(false);
   } else {
     control_architecture_->state = draco_states::kStand;
     sp_->state = control_architecture_->state;
+    sp_->setStateEstimator(true);
   }
   interrupt = new DracoInterruptLogic(
       static_cast<DracoControlArchitecture *>(control_architecture_));
