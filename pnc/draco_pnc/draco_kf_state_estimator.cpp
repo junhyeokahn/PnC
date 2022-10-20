@@ -134,11 +134,11 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     b_skip_prediction = false;
 
   // update measurement assuming at least one foot is on the ground
-  if (data->b_lf_contact) {
+  if (sp_->b_lf_contact) {
     Eigen::Vector3d pos_base_from_lfoot = -robot_->get_link_iso("l_foot_contact").translation();
     base_pose_model_.update_position_from_lfoot(pos_base_from_lfoot, base_estimate_);
   }
-  if (data->b_rf_contact) {
+  if (sp_->b_rf_contact) {
     Eigen::Vector3d pos_base_from_rfoot = -robot_->get_link_iso("r_foot_contact").translation();
     base_pose_model_.update_position_from_rfoot(pos_base_from_rfoot, base_estimate_);
   }
