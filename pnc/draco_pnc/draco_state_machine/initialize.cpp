@@ -50,14 +50,13 @@ void Initialize::oneStep() {
                                                         des_jacc);
 }
 
-void Initialize::lastVisit() {}
+void Initialize::lastVisit() {sp_->setStateEstimator(true);}
 
 bool Initialize::endOfState() {
   if (b_joint_pos_test_) {
     return false;
   } else {
     if (state_machine_time_ >= end_time + transition_dur_) {
-      sp_->setStateEstimator(true);
       return true;
     } else {
       return false;
