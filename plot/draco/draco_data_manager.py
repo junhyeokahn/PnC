@@ -286,9 +286,9 @@ while True:
     data_saver.add('base_vel_kf', list(msg.base_vel_kf))
 
     # kinematics-based state estimator
-    data_saver.add('base_joint_pos_est', list(msg.base_joint_pos_est))
-    data_saver.add('base_joint_quat_est', list(msg.base_joint_quat_est))
-    data_saver.add('base_joint_euler_est', list(msg.base_joint_euler_est))
+    # data_saver.add('base_joint_pos_est', list(msg.base_joint_pos_est))
+    # data_saver.add('base_joint_quat_est', list(msg.base_joint_quat_est))
+    # data_saver.add('base_joint_euler_est', list(msg.base_joint_euler_est))
 
     data_saver.add('base_com_pos', list(msg.base_com_pos))
     data_saver.add('base_com_quat', list(msg.base_com_quat))
@@ -322,12 +322,14 @@ while True:
 
     # publish joint positions for meshcat
     if args.b_visualize:
-        vis_q[0:3] = np.array(msg.base_joint_pos_est)  # << base pos
-        vis_q[3] = msg.base_joint_quat_est[1]  # << quaternion x
-        vis_q[4] = msg.base_joint_quat_est[2]  # << quaternion y
-        vis_q[5] = msg.base_joint_quat_est[3]  # << quaternion z
-        vis_q[6] = msg.base_joint_quat_est[0]  # << quaternion w
-        vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+        if not config ["b_exp"]:
+            vis_q[0:3] = np.array(gt_msg.base_joint_pos)  # << base pos
+            vis_q[3] = gt_msg.base_joint_quat[0]  # << quaternion x
+            vis_q[4] = gt_msg.base_joint_quat[1]  # << quaternion y
+            vis_q[5] = gt_msg.base_joint_quat[2]  # << quaternion z
+            vis_q[6] = gt_msg.base_joint_quat[3]  # << quaternion w
+            vis_q[7:] = np.array(msg.joint_positions)  # << joint pos
+            viz.display(vis_q)
 
         vis_q_kf[0:3] = np.array(msg.base_pos_kf)
         vis_q_kf[3] = np.array(msg.base_quat_kf[1])
@@ -348,7 +350,6 @@ while True:
         cmp_des_q[1] = msg.des_cmp[1]
         cmp_des_q[2] = 0.
 
-        viz.display(vis_q)
         viz_kf.display(vis_q_kf)
         icp_viz.display(icp_viz_q)
         icp_des_viz.display(icp_des_viz_q)
