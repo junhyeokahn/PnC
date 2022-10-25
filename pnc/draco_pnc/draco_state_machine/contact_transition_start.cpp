@@ -91,7 +91,15 @@ void ContactTransitionStart::oneStep() {
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
 }
 
-void ContactTransitionStart::lastVisit() {}
+void ContactTransitionStart::lastVisit() {
+  // if next step is kBalance, update the desired feet location accordingly
+  if (ctrl_arch_->dcm_tm->noRemainingSteps()) {
+    sp_->nominal_lfoot_iso.translation() = ctrl_arch_->lfoot_tm->GetDesiredPos();
+    sp_->nominal_lfoot_iso.linear() = ctrl_arch_->lfoot_tm->GetDesiredOri();
+    sp_->nominal_rfoot_iso.translation() = ctrl_arch_->rfoot_tm->GetDesiredPos();
+    sp_->nominal_rfoot_iso.linear() = ctrl_arch_->rfoot_tm->GetDesiredOri();
+  }
+}
 
 bool ContactTransitionStart::endOfState() {
   if (state_machine_time_ >= end_time_) {

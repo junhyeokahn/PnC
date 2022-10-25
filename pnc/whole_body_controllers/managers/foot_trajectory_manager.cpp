@@ -161,6 +161,16 @@ void FootTrajectoryManager::UpdateDesired(const double current_time) {
   foot_ori_task_->update_desired(ori_des, ang_vel_des, ang_acc_des);
 }
 
+Eigen::Vector3d FootTrajectoryManager::GetDesiredPos()
+{
+  return foot_pos_task_->pos_des;
+}
+
+Eigen::Matrix3d FootTrajectoryManager::GetDesiredOri()
+{
+  return util::QuatToMatrix(foot_ori_task_->pos_des);
+}
+
 // foot trajectory interpolation
 void FootTrajectoryManager::InitializeInterpolationTrajectory(
     const double &_start_time, const double &_duration,

@@ -30,6 +30,9 @@ public:
   /// computes the swing foot and updates the desired swing foot task
   void UpdateDesired(const double current_time);
 
+  Eigen::Vector3d GetDesiredPos();
+  Eigen::Matrix3d GetDesiredOri();
+
   double swing_height;
 
   void InitializeInterpolationTrajectory(
