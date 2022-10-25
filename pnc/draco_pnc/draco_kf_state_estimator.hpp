@@ -76,4 +76,5 @@ protected:
   bool b_first_visit_;
   bool b_skip_prediction;
   bool b_use_marg_filter;
+  bool b_request_offset_reset;
 };

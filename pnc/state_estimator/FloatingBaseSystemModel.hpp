@@ -132,6 +132,12 @@ public:
       this->rfoot_offset = offset;
     }
 
+    void reset_offsets()
+    {
+      this->lfoot_offset.setZero();
+      this->rfoot_offset.setZero();
+    }
+
 
     State f(const State& x, const Control& u) const
     {

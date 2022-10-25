@@ -36,6 +36,7 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   b_first_visit_ = true;
   b_skip_prediction = false;
   b_use_marg_filter = false;
+  b_request_offset_reset = false;
 }
 
 DracoKFStateEstimator::~DracoKFStateEstimator() {
@@ -108,6 +109,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
       global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
 //      global_linear_offset_.z() = 0.0;    // TODO make more robust later for non-flat ground
       system_model_.update_lfoot_offset(global_linear_offset_);
+      b_request_offset_reset = true;
       foot_pos_from_base_post_transition.z() = 0.0;    // TODO make more robust later for non-flat ground
 //      system_model_.update_lfoot_offset(foot_pos_from_base_post_transition);
 //      base_pose_model_.update_lfoot_offset(foot_pos_from_base_post_transition);
@@ -121,6 +123,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
       global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
 //      global_linear_offset_.z() = 0.0;  // TODO make more robust later for non-flat ground
       system_model_.update_rfoot_offset(global_linear_offset_);
+      b_request_offset_reset = true;
       foot_pos_from_base_post_transition.z() = 0.0;  // TODO make more robust later for non-flat ground
 //      system_model_.update_rfoot_offset(foot_pos_from_base_post_transition);
       base_pose_model_.update_leg_covariance(PoseMeasurementModel::RIGHT, COV_LEVEL_LOW);
@@ -135,9 +138,10 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   }
   if(!b_skip_prediction) {
     x_hat_ = kalman_filter_.predict(system_model_, accelerometer_input_);
-    Eigen::Vector3d zeros3d = Eigen::Vector3d::Zero();
-    system_model_.update_lfoot_offset(zeros3d);
-    system_model_.update_rfoot_offset(zeros3d);
+    if (b_request_offset_reset) {
+      system_model_.reset_offsets();
+      b_request_offset_reset = false;
+    }
   } else {
     b_skip_prediction = false;
   }
