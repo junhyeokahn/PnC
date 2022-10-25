@@ -87,6 +87,8 @@ Eigen::Quaterniond EulerZYXtoQuat(const double roll, const double pitch,
 // Quaternion to Euler ZYX
 Eigen::Vector3d QuatToEulerZYX(const Eigen::Quaterniond &quat_in);
 
+Eigen::Matrix3d QuatToMatrix(const Eigen::VectorXd &quat_in);
+
 // ZYX extrinsic rotation rates to world angular velocity
 // angular vel = [wx, wy, wz]
 Eigen::Vector3d EulerZYXRatestoAngVel(const double roll, const double pitch,
