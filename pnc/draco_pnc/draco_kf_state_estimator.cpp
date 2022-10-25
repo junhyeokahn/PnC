@@ -190,6 +190,8 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   // save current time step data
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
+    dm->data->joint_positions = robot_->get_q().tail(robot_->n_a);
+    dm->data->joint_velocities = robot_->get_q_dot().tail(robot_->n_a);
     dm->data->base_pos_kf = base_position_estimate;
     dm->data->base_vel_kf = base_velocity_estimate;
     dm->data->base_euler_kf = util::QuatToEulerZYX(Eigen::Quaterniond(rot_world_to_base));
@@ -200,6 +202,12 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
 //                                             margFilter_.getQuaternion().y(),
 //                                             margFilter_.getQuaternion().z()) ;
 
+    dm->data->com_vel_est = sp_->com_vel_est;
+    dm->data->com_vel_raw = robot_->get_com_lin_vel();
+    dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;
+    dm->data->imu_ang_vel_raw = data->imu_frame_vel.head(3);
+    dm->data->cam_est = sp_->cam_est;
+    dm->data->cam_raw = robot_->hg.head(3);
     dm->data->icp = sp_->dcm.head(2);
     dm->data->icp_dot = sp_->dcm_vel.head(2);
 
