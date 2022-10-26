@@ -8,6 +8,8 @@ PointContact::PointContact(RobotSystem *robot, const std::string _target_id,
 
 PointContact::~PointContact() {}
 
+Eigen::MatrixXd PointContact::getRot() { return rot_; }
+
 void PointContact::_update_jacobian() {
   jacobian =
       robot_->get_link_jacobian(target_id).block(dim, 0, dim, robot_->n_q_dot);
@@ -18,7 +20,7 @@ void PointContact::_update_jacobian() {
 void PointContact::_update_cone_constraint() {
 
   cone_constraint_mat = Eigen::MatrixXd::Zero(6, dim);
-  Eigen::MatrixXd rot(robot_->get_link_iso(target_id).linear().transpose());
+  rot_ = robot_->get_link_iso(target_id).linear().transpose();
 
   cone_constraint_mat(0, 2) = 1.; // Fz >= 0
   cone_constraint_mat(1, 0) = 1.;
@@ -33,7 +35,7 @@ void PointContact::_update_cone_constraint() {
   // Upper bound of vertical directional reaction force
   cone_constraint_mat(5, 2) = -1.; // -Fz >= -rf_z_max
 
-  cone_constraint_mat *= rot;
+  cone_constraint_mat *= rot_;
 
   cone_constraint_vec = Eigen::VectorXd::Zero(6);
   cone_constraint_vec[5] = -rf_z_max;
@@ -47,9 +49,12 @@ SurfaceContact::SurfaceContact(RobotSystem *robot, const std::string _target_id,
 
   x_ = _x;
   y_ = _y;
+  rot_ = Eigen::MatrixXd::Zero(6, 6);
 }
 
 SurfaceContact::~SurfaceContact() {}
+
+Eigen::MatrixXd SurfaceContact::getRot() { return rot_; }
 
 void SurfaceContact::_update_jacobian() {
   jacobian = robot_->get_link_jacobian(target_id);
@@ -59,12 +64,11 @@ void SurfaceContact::_update_jacobian() {
 void SurfaceContact::_update_cone_constraint() {
   cone_constraint_mat = Eigen::MatrixXd::Zero(16 + 2, dim);
 
-  Eigen::MatrixXd rot = Eigen::MatrixXd::Zero(6, 6);
-  rot.block(0, 0, 3, 3) = robot_->get_link_iso(target_id).linear().transpose();
-  rot.block(3, 3, 3, 3) = robot_->get_link_iso(target_id).linear().transpose();
+  rot_.block(0, 0, 3, 3) = robot_->get_link_iso(target_id).linear().transpose();
+  rot_.block(3, 3, 3, 3) = robot_->get_link_iso(target_id).linear().transpose();
 
   cone_constraint_mat = this->_get_u(x_, y_, mu_);
-  cone_constraint_mat *= rot;
+  cone_constraint_mat *= rot_;
 
   cone_constraint_vec = Eigen::VectorXd::Zero(16 + 2);
   cone_constraint_vec[17] = -rf_z_max;

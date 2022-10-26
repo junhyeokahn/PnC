@@ -60,6 +60,8 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
       cfg_["wbc"]["regularization"], "lambda_q_ddot");
   wbc_->lambda_rf =
       util::ReadParameter<double>(cfg_["wbc"]["regularization"], "lambda_rf");
+  wbc_->lambda_rf_new = util::ReadParameter<Eigen::VectorXd>(
+      cfg_["wbc"]["regularization"], "lambda_rf_new");
   wbc_->w_rf = util::ReadParameter<double>(cfg_["wbc"]["contact"], "w_rf");
 
   // Initialize Joint Integrator

@@ -28,6 +28,7 @@ public:
 
   /// Regularization weight for reaction force.
   double lambda_rf;
+  Eigen::VectorXd lambda_rf_new;
 
   /// Weight for reaction force tracking.
   double w_rf;

@@ -26,6 +26,7 @@ IHWBC::IHWBC(const Eigen::MatrixXd &_sf, const Eigen::MatrixXd &_sa,
   lambda_q_ddot = 0.;
   lambda_rf = 0.;
   w_rf = 0.;
+  lambda_rf_new = Eigen::VectorXd::Zero(12);
 }
 
 IHWBC::~IHWBC() {}
@@ -135,7 +136,7 @@ void IHWBC::solve(
   }
   cost_t_mat += lambda_q_ddot * A_;
 
-  Eigen::MatrixXd uf_mat, jc;
+  Eigen::MatrixXd uf_mat, jc, local_world_rot;
   Eigen::VectorXd uf_vec;
   if (b_contact_) {
     for (int i = 0; i < contact_list.size(); ++i) {
@@ -143,17 +144,29 @@ void IHWBC::solve(
         uf_mat = contact_list[i]->cone_constraint_mat;
         uf_vec = contact_list[i]->cone_constraint_vec;
         jc = contact_list[i]->jacobian;
+        local_world_rot = contact_list[i]->getRot();
       } else {
         uf_mat = util::block_diag(uf_mat, contact_list[i]->cone_constraint_mat);
         uf_vec = util::vStack(uf_vec, contact_list[i]->cone_constraint_vec);
         jc = util::vStack(jc, contact_list[i]->jacobian);
+        local_world_rot =
+            util::block_diag(local_world_rot, contact_list[i]->getRot());
       }
     }
     dim_cone_constraint_ = uf_mat.rows();
     dim_contacts_ = uf_mat.cols();
 
-    cost_rf_mat = (lambda_rf + w_rf) *
-                  Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
+    // cost_rf_mat = (lambda_rf + w_rf) *
+    // Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_);
+
+    // TODO: TEST
+    cost_rf_mat =
+        w_rf * Eigen::MatrixXd::Identity(dim_contacts_, dim_contacts_) +
+        local_world_rot.transpose() * lambda_rf_new.asDiagonal() *
+            local_world_rot;
+    // std::cout << cost_rf_mat << std::endl;
+    // TODO: TEST
+
     cost_rf_vec = -w_rf * rf_des;
 
     cost_mat = util::block_diag(cost_t_mat, cost_rf_mat);
