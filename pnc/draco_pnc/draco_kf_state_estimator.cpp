@@ -107,7 +107,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     } else if ((prev_support_state_ == RIGHT) && (current_support_state_ == DOUBLE)) {
       foot_pos_from_base_post_transition = x_hat_.head(3) + robot_->get_link_iso("l_foot_contact").translation();
       global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
-//      global_linear_offset_.z() = 0.0;    // TODO make more robust later for non-flat ground
+      global_linear_offset_.z() = 0.0;    // TODO make more robust later for non-flat ground
       system_model_.update_lfoot_offset(global_linear_offset_);
       b_request_offset_reset = true;
       foot_pos_from_base_post_transition.z() = 0.0;    // TODO make more robust later for non-flat ground
@@ -121,7 +121,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     } else if ((prev_support_state_ == LEFT) && (current_support_state_ == DOUBLE)) {
       foot_pos_from_base_post_transition = x_hat_.head(3) + robot_->get_link_iso("r_foot_contact").translation();
       global_linear_offset_ = foot_pos_from_base_post_transition - foot_pos_from_base_pre_transition;
-//      global_linear_offset_.z() = 0.0;  // TODO make more robust later for non-flat ground
+      global_linear_offset_.z() = 0.0;  // TODO make more robust later for non-flat ground
       system_model_.update_rfoot_offset(global_linear_offset_);
       b_request_offset_reset = true;
       foot_pos_from_base_post_transition.z() = 0.0;  // TODO make more robust later for non-flat ground
