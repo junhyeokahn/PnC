@@ -83,7 +83,7 @@ public:
 };
 
 static double COV_LEVEL_LOW = 0.001;
-static double COV_LEVEL_HIGH = 100000.0;
+static double COV_LEVEL_HIGH = 10.0;
 
 //template<typename Vector3, template<class> class CovarianceBase = Kalman::StandardBase>
 class FloatingBaseSystemModel : public Kalman::LinearizedSystemModel<State, Control, Kalman::StandardBase>
