@@ -24,7 +24,8 @@ wbc:
         lambda_rf_new: [1e-4, 1e-4, 1e-5, 1e-6, 1e-6, 1e-6, 1e-4, 1e-4, 1e-5, 1e-6, 1e-6, 1e-6] ## right foot, left foot
 
     contact:
-        rf_z_max: 1000.0
+        #rf_z_max: 1000.0
+        rf_z_max: 450.0
         w_rf: 0.
         #foot_half_width: 0.04 # 8.5 / 2 (cm)
         foot_half_width: 0.04 # 8.5 / 2 (cm)
@@ -58,7 +59,7 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.1, 0.8, 25]
+            exp_kp: [0.1, 0.4, 25]
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]
             time_constant: 5.
