@@ -156,4 +156,7 @@ message pnc_msg {
 
   // imu accel
   repeated float imu_accel = 107;
+
+  // base lin vel
+  repeated float base_joint_lin_vel = 108;
 }

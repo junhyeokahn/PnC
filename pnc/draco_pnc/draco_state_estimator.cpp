@@ -176,6 +176,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     dm->data->base_joint_quat_est =
         Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
     dm->data->base_joint_euler_est = util::QuatToEulerZYX(quat);
+    dm->data->base_joint_lin_vel = base_joint_lin_vel;
     dm->data->com_vel_est = sp_->com_vel_est;
     dm->data->com_vel_raw = robot_->get_com_lin_vel();
     dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;

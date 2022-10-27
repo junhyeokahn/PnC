@@ -170,6 +170,7 @@ void DracoDataManager::Send() {
     pb_msg.add_base_joint_pos_est(data->base_joint_pos_est[i]);
     pb_msg.add_base_joint_euler_est(data->base_joint_euler_est[i]);
     pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[i]);
+    pb_msg.add_base_joint_lin_vel(data->base_joint_lin_vel[i]);
   }
   pb_msg.add_base_joint_quat_est(data->base_joint_quat_est[3]);
 

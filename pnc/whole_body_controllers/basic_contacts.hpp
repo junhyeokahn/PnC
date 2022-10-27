@@ -14,7 +14,10 @@ public:
   virtual ~PointContact();
   /// \}
 
+  virtual Eigen::MatrixXd getRot();
+
 protected:
+  Eigen::MatrixXd rot_;
   void _update_jacobian();
   void _update_cone_constraint();
 };
@@ -27,7 +30,9 @@ public:
                  const double _x, const double _y, const double _mu);
 
   virtual ~SurfaceContact();
+
   /// \}
+  virtual Eigen::MatrixXd getRot();
 
 protected:
   /// Half size of the feet length
@@ -35,6 +40,8 @@ protected:
 
   /// Half size of the feet width
   double y_;
+
+  Eigen::MatrixXd rot_;
 
   void _update_jacobian();
   void _update_cone_constraint();

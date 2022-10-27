@@ -22,9 +22,12 @@ wbc:
         lambda_q_ddot: 1e-7
         lambda_rf: 1e-6
         #lambda_rf: 1e-7
+        #lambda_rf_new: [1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6] ## right foot, left foot
+        lambda_rf_new: [1e-4, 1e-4, 1e-5, 1e-6, 1e-6, 1e-6, 1e-4, 1e-4, 1e-5, 1e-6, 1e-6, 1e-6] ## right foot, left foot
 
     contact:
-        rf_z_max: 1000.0
+        #rf_z_max: 1000.0
+        rf_z_max: 450.0
         w_rf: 0.
         #foot_half_width: 0.04 # 8.5 / 2 (cm)
         foot_half_width: 0.04 # 8.5 / 2 (cm)
@@ -48,7 +51,8 @@ wbc:
             exp_kp: [12, 25, 20]
             exp_kd: [3.0, 2.0, 1.5]
         icp:
-            weight: [40, 40, 20]
+            weight: [1000, 1000, 1000]
+            #weight: [40, 40, 20]
             sim_kp: [10, 10, 100]
             sim_kd: [0, 0, 5] # x, y will be ignored
             sim_ki: [0, 0, 0]
@@ -57,7 +61,7 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.2, 0.8, 25]
+            exp_kp: [0.1, 0.4, 25]
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]
             time_constant: 5.
@@ -69,7 +73,8 @@ wbc:
             exp_kd: [15., 15., 15.]
 
         torso_ori:
-            weight: [20., 20., 2.]
+            weight: [100., 100., 10.]
+            #weight: [20., 20., 2.]
             #weight: [0.0002, 0.0002, 0.02]
             sim_kp: [100, 100, 100]
             #sim_kp: [100, 100, 100]
@@ -78,7 +83,8 @@ wbc:
             exp_kd: [0.2, 0.2, 0.1]
 
         upper_body_joint:
-            weight: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
+            weight: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+            #weight: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
             neck_pitch:
                 sim_kp: 100.
                 sim_kd: 10.
@@ -145,8 +151,10 @@ wbc:
                 exp_kp: 5.
                 exp_kd: 0.
         foot_pos:
-            weight_at_contact: [40., 40., 40.]
-            weight_at_swing: [20., 20., 20.]
+            weight_at_contact: [10000., 10000., 10000.]
+            weight_at_swing: [500., 500., 500.]
+            #weight_at_contact: [40., 40., 40.]
+            #weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
             #exp_kp: [100, 100, 250]
@@ -155,8 +163,10 @@ wbc:
             exp_kd: [0.1, 0.1, 1.2]
             #exp_kd: [0.5, 0.5, 1.5]
         foot_ori:
-            weight_at_contact: [20., 20., 20.]
-            weight_at_swing: [20., 20., 20.]
+            weight_at_contact: [10000., 10000., 10000.]
+            weight_at_swing: [500., 500., 500.]
+            #weight_at_contact: [20., 20., 20.]
+            #weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
             sim_kd: [30., 30., 30.]
             #exp_kp: [20, 20, 20]

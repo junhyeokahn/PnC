@@ -315,6 +315,8 @@ while True:
         data_saver.add('imu_accel', list(msg.imu_accel))
         data_saver.add('des_cmp', list(msg.des_cmp))
 
+    data_saver.add('base_joint_lin_vel', list(msg.base_joint_lin_vel))
+
     data_saver.advance()
 
     # publish back for plot juggler

@@ -54,6 +54,8 @@ public:
     this->_update_cone_constraint();
   };
 
+  virtual Eigen::MatrixXd getRot() = 0;
+
 protected:
   RobotSystem *robot_;
 
