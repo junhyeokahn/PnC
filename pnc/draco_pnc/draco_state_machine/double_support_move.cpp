@@ -19,8 +19,8 @@ void DoubleSupportMove::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
 
-//  sp_->b_lf_contact = true;
-//  sp_->b_rf_contact = true;
+  sp_->b_lf_contact = true;
+  sp_->b_rf_contact = true;
 
   if (com_move_states_ == com_move_states::Left) {
     std::cout << "draco_states::kMoveCoMToLFoot" << std::endl;
