@@ -268,8 +268,9 @@ if __name__ == "__main__":
         sensor_data.joint_velocities = sensor_data_dict["joint_vel"]
         sensor_data.b_rf_contact = sensor_data_dict["b_rf_contact"]
         sensor_data.b_lf_contact = sensor_data_dict["b_lf_contact"]
-        sensor_data.imu_accel = sensor_data_dict['imu_accel']
+        sensor_data.imu_dvel = sensor_data_dict['imu_dvel']
 
+        print(sensor_data_dict['imu_dvel'])
         # TODO : Debugging purpose
         # Copy Base
         sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
