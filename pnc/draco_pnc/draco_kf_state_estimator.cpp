@@ -10,6 +10,7 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   iso_imu_to_base_com_ = robot_->get_link_iso("torso_imu").inverse() *
                         robot_->get_link_iso("torso_link");
 
+  base_acceleration_.setZero();
   x_hat_.setZero();
   system_model_.initialize(deltat);
   double gravity = 9.81; //TODO get from somewhere else
@@ -26,10 +27,13 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
           cfg["state_estimator"], "n_data_com_vel");
   Eigen::VectorXd n_data_cam = util::ReadParameter<Eigen::VectorXd>(
           cfg["state_estimator"], "n_data_cam");
+  Eigen::VectorXd n_data_base_accel = util::ReadParameter<Eigen::VectorXd>(
+          cfg["state_estimator"], "n_data_base_accel");
 
   for (int i = 0; i < 3; ++i) {
     com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
     cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
+    base_accel_filter_.push_back(SimpleMovingAverage(n_data_base_accel[i]));
   }
 
   //TODO move settings to config/draco/pnc.yaml
@@ -57,8 +61,12 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
   rot_world_to_base = compute_world_to_base_rot(data, rot_world_to_imu, b_use_marg_filter);
 
   // compute estimator (control) input, u_n
+  for (int i = 0; i < 3; ++i) {
+    base_accel_filter_[i].Input(data->imu_dvel[i] / sp_->servo_dt);
+    base_acceleration_[i] = base_accel_filter_[i].Output();
+  }
   base_pose_model_.packAccelerationInput(rot_world_to_imu,
-                                         data->imu_accel, accelerometer_input_);
+                                         base_acceleration_, accelerometer_input_);
 
   // update system without base linear states
   robot_->update_system(
@@ -221,6 +229,8 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     dm->data->lf_contact = sp_->b_lf_contact;
     dm->data->rf_contact = sp_->b_rf_contact;
 
+    dm->data->imu_accel = base_acceleration_;
+
     dm->data->base_com_pos = data->base_com_pos;    //TODO remove and pass directly from python
     dm->data->base_com_quat = data->base_com_quat;  //TODO remove and pass directly from python
   }
@@ -247,9 +257,10 @@ Eigen::Matrix3d DracoKFStateEstimator::compute_world_to_base_rot(DracoSensorData
 {
   if(use_marg_filter)
   {
-    margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
-                              data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
-    return margFilter_.getBaseRotation();
+//    margFilter_.filterUpdate(data->imu_frame_vel[0], data->imu_frame_vel[1], data->imu_frame_vel[2],
+//                              data->imu_accel[0], data->imu_accel[1], data->imu_accel[2]);
+//    return margFilter_.getBaseRotation();
+    return rot_world_to_imu * iso_imu_to_base_com_.linear();
   }
   else
   {

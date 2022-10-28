@@ -223,7 +223,7 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
-        sensor_data_dict['imu_accel'], current_torso_acceleration = \
+        sensor_data_dict['imu_dvel'], current_torso_acceleration = \
             pybullet_util.simulate_dVel_data(
             robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
         # sensor_data_dict['imu_accel'], current_torso_acceleration = \
