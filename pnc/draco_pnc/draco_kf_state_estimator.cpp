@@ -48,10 +48,6 @@ void DracoKFStateEstimator::initialize(DracoSensorData *data) {
 
 void DracoKFStateEstimator::update(DracoSensorData *data) {
 
-  // continue only when state estimator is on
-  if (!(sp_->isStateEstimatorOn()))
-    return;
-
   // estimate 0_R_b
   Eigen::Matrix3d rot_world_to_imu = data->imu_frame_iso.block(0, 0, 3, 3);
   rot_world_to_base = compute_world_to_base_rot(data, rot_world_to_imu, b_use_marg_filter);
@@ -68,6 +64,9 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
           Eigen::Vector3d::Zero(), data->imu_frame_vel.head(3),
           data->joint_positions, data->joint_velocities, false);
 
+  // continue only when state estimator is on
+  if (!(sp_->isStateEstimatorOn()))
+    return;
 
   // get initial base estimate
   Eigen::Vector3d world_to_base;
