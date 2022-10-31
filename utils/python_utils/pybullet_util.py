@@ -347,18 +347,12 @@ def simulate_accelerometer_data(robot, link_id, previous_link_velocity,
     return accelerometer_measurement, torso_acceleration
 
 
-def simulate_dVel_data(robot, link_id, previous_link_velocity,
-                                previous_torso_acceleration, dt):
+def simulate_dVel_data(robot, link_id, previous_link_velocity):
+
     # calculate imu acceleration in world frame by numerical differentiation
-    torso_acceleration = (get_link_vel(robot, link_id['torso_imu'])[3:6] - previous_link_velocity) / dt
+    torso_dvel = (get_link_vel(robot, link_id['torso_imu'])[3:6] - previous_link_velocity)
 
-    avg_acceleration = (torso_acceleration + previous_torso_acceleration) / 2.0
-
-    # map acceleration to IMU frame
-    imu_R_world = np.transpose(get_link_iso(robot, link_id['torso_imu']))[0:3, 0:3]
-    imu_dVel_measurement = np.dot(imu_R_world, avg_acceleration)
-
-    return imu_dVel_measurement, torso_acceleration
+    return torso_dvel
 
 def add_sensor_noise(sensors_dictionary, noisy_sensors):
     # go through each sensor in the noisy_sensors dictionary

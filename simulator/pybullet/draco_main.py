@@ -223,12 +223,7 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
-        sensor_data_dict['imu_dvel'], current_torso_acceleration = \
-            pybullet_util.simulate_dVel_data(
-            robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
-        # sensor_data_dict['imu_accel'], current_torso_acceleration = \
-        #     pybullet_util.simulate_accelerometer_data(
-        #     robot, link_id, previous_torso_velocity, previous_torso_acceleration, dt)
+        sensor_data_dict['imu_dvel'] = pybullet_util.simulate_dVel_data(robot, link_id, previous_torso_velocity)
 
         pybullet_util.add_sensor_noise(sensor_data_dict, noisy_sensors)
 
@@ -270,7 +265,6 @@ if __name__ == "__main__":
         sensor_data.b_lf_contact = sensor_data_dict["b_lf_contact"]
         sensor_data.imu_dvel = sensor_data_dict['imu_dvel']
 
-        print(sensor_data_dict['imu_dvel'])
         # TODO : Debugging purpose
         # Copy Base
         sensor_data.base_com_pos = sensor_data_dict['base_com_pos']
@@ -283,7 +277,7 @@ if __name__ == "__main__":
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
         previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
-        previous_torso_acceleration = current_torso_acceleration
+        previous_torso_acceleration = sensor_data_dict['imu_dvel']
 
         # ground truth
         del bullet_msg.base_joint_pos[:]

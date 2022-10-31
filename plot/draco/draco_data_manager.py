@@ -284,6 +284,7 @@ while True:
     data_saver.add('base_euler_kf', list(msg.base_euler_kf))
     data_saver.add('base_pos_kf', list(msg.base_pos_kf))
     data_saver.add('base_vel_kf', list(msg.base_vel_kf))
+    data_saver.add('imu_accel', list(msg.imu_accel))
 
     # kinematics-based state estimator
     # data_saver.add('base_joint_pos_est', list(msg.base_joint_pos_est))
@@ -312,7 +313,6 @@ while True:
         data_saver.add('rf_normal_force', list(gt_msg.rf_normal_force))
         data_saver.add('b_lf_force_contact', list(gt_msg.b_lf_force_contact))
         data_saver.add('b_rf_force_contact', list(gt_msg.b_rf_force_contact))
-        data_saver.add('imu_accel', list(msg.imu_accel))
         data_saver.add('des_cmp', list(msg.des_cmp))
 
     data_saver.add('base_joint_lin_vel', list(msg.base_joint_lin_vel))
