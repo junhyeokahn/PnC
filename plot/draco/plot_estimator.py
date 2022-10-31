@@ -48,7 +48,6 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             base_joint_rpy.append(quat_to_rpy(d['base_joint_quat']))
             base_joint_lin_vel.append(d['base_joint_lin_vel'])
             base_joint_ang_vel.append(d['imu_ang_vel_raw'])
-            imu_acceleration.append(d['imu_accel'])
 
         except EOFError:
             break

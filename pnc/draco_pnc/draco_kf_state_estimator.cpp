@@ -28,12 +28,15 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   Eigen::VectorXd n_data_cam = util::ReadParameter<Eigen::VectorXd>(
       cfg["state_estimator"], "n_data_cam");
   Eigen::VectorXd n_data_base_accel = util::ReadParameter<Eigen::VectorXd>(
-          cfg["state_estimator"], "n_data_base_accel");
+      cfg["state_estimator"], "n_data_base_accel");
+  Eigen::VectorXd n_data_ang_vel = util::ReadParameter<Eigen::VectorXd>(
+      cfg["state_estimator"], "n_data_ang_vel");
 
   for (int i = 0; i < 3; ++i) {
     com_vel_filter_.push_back(SimpleMovingAverage(n_data_com_vel[i]));
     cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
     base_accel_filter_.push_back(SimpleMovingAverage(n_data_base_accel[i]));
+    imu_ang_vel_filter_.push_back(SimpleMovingAverage(n_data_ang_vel[i]));
   }
 
   // TODO move settings to config/draco/pnc.yaml
@@ -50,6 +53,12 @@ void DracoKFStateEstimator::initialize(DracoSensorData *data) {
 }
 
 void DracoKFStateEstimator::update(DracoSensorData *data) {
+
+  // filter imu angular velocity
+  for (int i = 0; i < 3; ++i) {
+    imu_ang_vel_filter_[i].Input(data->imu_frame_vel[i]);
+    sp_->imu_ang_vel_est[i] = imu_ang_vel_filter_[i].Output();
+  }
 
   // estimate 0_R_b
   Eigen::Matrix3d rot_world_to_imu = data->imu_frame_iso.block(0, 0, 3, 3);
@@ -295,7 +304,6 @@ Eigen::Matrix3d DracoKFStateEstimator::compute_world_to_base_rot(
   } else {
     return rot_world_to_imu * iso_imu_to_base_com_.linear();
   }
-
 }
 
 void DracoKFStateEstimator::ComputeDCM() {
@@ -310,4 +318,3 @@ void DracoKFStateEstimator::ComputeDCM() {
   sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_dt) +
                  (1.0 - alpha_vel) * sp_->dcm_vel;
 }
-

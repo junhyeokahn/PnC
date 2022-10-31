@@ -318,7 +318,7 @@ while True:
         data_saver.add('b_rf_force_contact', list(gt_msg.b_rf_force_contact))
         data_saver.add('des_cmp', list(msg.des_cmp))
 
-    data_saver.add('base_joint_lin_vel', list(msg.base_joint_lin_vel))
+    # data_saver.add('base_joint_lin_vel', list(msg.base_joint_lin_vel))
 
     data_saver.advance()
 
