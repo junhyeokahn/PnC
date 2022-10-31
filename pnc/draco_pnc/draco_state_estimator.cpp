@@ -52,10 +52,10 @@ void DracoStateEstimator::update_debug(DracoSensorData *_data) {
 
   Eigen::Vector3d dummy = Eigen::Vector3d::Zero();
   robot_->update_system(_data->base_com_pos, base_com_quat,
-                        _data->base_com_lin_vel, _data->base_com_ang_vel,
-                        dummy, base_com_quat,
-                        _data->base_joint_lin_vel, _data->base_joint_ang_vel,
-                        _data->joint_positions, _data->joint_velocities, true);
+                        _data->base_com_lin_vel, _data->base_com_ang_vel, dummy,
+                        base_com_quat, _data->base_joint_lin_vel,
+                        _data->base_joint_ang_vel, _data->joint_positions,
+                        _data->joint_velocities, true);
 
   if (sp_->count % sp_->save_freq == 0) {
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
@@ -149,16 +149,16 @@ void DracoStateEstimator::update(DracoSensorData *data) {
   this->ComputeDCM();
 
   // update contact
-   if (data->b_rf_contact) {
-   sp_->b_rf_contact = 1;
+  if (data->b_rf_contact) {
+    sp_->b_rf_contact = 1;
   } else {
-   sp_->b_rf_contact = 0;
+    sp_->b_rf_contact = 0;
   }
 
-   if (data->b_lf_contact) {
-   sp_->b_lf_contact = 1;
+  if (data->b_lf_contact) {
+    sp_->b_lf_contact = 1;
   } else {
-   sp_->b_lf_contact = 0;
+    sp_->b_lf_contact = 0;
   }
 
   // save current time step data

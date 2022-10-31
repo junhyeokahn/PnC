@@ -37,9 +37,11 @@ pnc_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 if not config["b_exp"]:
     gt_socket = context.socket(zmq.SUB)
-    gt_socket.connect("tcp://localhost:5558")       # match to PUB address from sim, e.g., from pybullet_simulation.py
+    gt_socket.connect(
+        "tcp://localhost:5558"
+    )  # match to PUB address from sim, e.g., from pybullet_simulation.py
     gt_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-    gt_msg = bullet_gt_msg()   # messages that live only within python
+    gt_msg = bullet_gt_msg()  # messages that live only within python
 
 pj_context = zmq.Context()
 pj_socket = pj_context.socket(zmq.PUB)
@@ -306,7 +308,8 @@ while True:
     if not config["b_exp"]:
         data_saver.add('base_joint_pos', list(gt_msg.base_joint_pos))
         data_saver.add('base_com_pos_py', list(gt_msg.base_com_pos_py))
-        data_saver.add('base_joint_quat', list(gt_msg.base_joint_quat))     # (w, x, y, z) order
+        data_saver.add('base_joint_quat',
+                       list(gt_msg.base_joint_quat))  # (w, x, y, z) order
         data_saver.add('base_joint_lin_vel', list(gt_msg.base_joint_lin_vel))
         data_saver.add('base_joint_ang_vel', list(gt_msg.base_joint_ang_vel))
         data_saver.add('lf_normal_force', list(gt_msg.lf_normal_force))
@@ -324,7 +327,7 @@ while True:
 
     # publish joint positions for meshcat
     if args.b_visualize:
-        if not config ["b_exp"]:
+        if not config["b_exp"]:
             vis_q[0:3] = np.array(gt_msg.base_joint_pos)  # << base pos
             vis_q[3] = gt_msg.base_joint_quat[0]  # << quaternion x
             vis_q[4] = gt_msg.base_joint_quat[1]  # << quaternion y

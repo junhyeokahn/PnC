@@ -50,7 +50,7 @@ void Initialize::oneStep() {
                                                         des_jacc);
 }
 
-void Initialize::lastVisit() {sp_->setStateEstimator(true);}
+void Initialize::lastVisit() { sp_->setStateEstimator(true); }
 
 bool Initialize::endOfState() {
   if (b_joint_pos_test_) {

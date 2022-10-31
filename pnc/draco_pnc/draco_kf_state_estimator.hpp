@@ -11,16 +11,16 @@
  * Conference on Humanoid Robotics (Humanoids) (pp. 889-895). IEEE.
  */
 
-#include <vector>
 #include <Eigen/Dense>
+#include <vector>
 
 #include "configuration.hpp"
+#include "pnc/draco_pnc/draco_interface.hpp"
+#include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/filters/digital_filters.hpp"
+#include "pnc/state_estimator/MARGFilter.hpp"
 #include "pnc/state_estimator/humanoid_state_estimator.hpp"
 #include "utils/util.hpp"
-#include "pnc/draco_pnc/draco_state_provider.hpp"
-#include "pnc/state_estimator/MARGFilter.hpp"
-#include "pnc/draco_pnc/draco_interface.hpp"
 
 // kalman filter files
 #include "pnc/state_estimator/FloatingBaseSystemModel.hpp"
@@ -31,7 +31,7 @@ class DracoSensorData;
 
 class DracoKFStateEstimator {
 public:
-  enum SupportState {LEFT, RIGHT, DOUBLE};
+  enum SupportState { LEFT, RIGHT, DOUBLE };
 
   DracoKFStateEstimator(RobotSystem *robot);
   ~DracoKFStateEstimator();
@@ -42,7 +42,7 @@ public:
   void ComputeDCM();
 
 private:
-  void updateSupportState(DracoStateProvider* sp, SupportState& support_state);
+  void updateSupportState(DracoStateProvider *sp, SupportState &support_state);
   Eigen::Matrix3d compute_world_to_base_rot(DracoSensorData *data,
                                             Eigen::Matrix3d rot_world_to_imu,
                                             bool use_marg_filter);

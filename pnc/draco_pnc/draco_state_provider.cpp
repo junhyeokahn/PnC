@@ -53,6 +53,8 @@ DracoStateProvider::DracoStateProvider() {
   des_lfoot_ori_foot_lifting.setIdentity();
 }
 
-void DracoStateProvider::setStateEstimator(bool flag) { this->b_state_estimator_on = flag; }
+void DracoStateProvider::setStateEstimator(bool flag) {
+  this->b_state_estimator_on = flag;
+}
 
 bool DracoStateProvider::isStateEstimatorOn() { return b_state_estimator_on; }

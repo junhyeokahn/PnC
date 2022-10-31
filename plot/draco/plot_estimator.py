@@ -68,7 +68,8 @@ base_joint_rpy = np.stack(base_joint_rpy, axis=0)[st_idx:, :]
 base_joint_lin_vel = np.stack(base_joint_lin_vel, axis=0)[st_idx:, :]
 base_joint_ang_vel = np.stack(base_joint_ang_vel, axis=0)[st_idx:, :]
 
-plot_vector_traj(time, imu_acceleration, phase, ["x", "y", "z"], "g", "imu_acceleration")
+plot_vector_traj(time, imu_acceleration, phase, ["x", "y", "z"], "g",
+                 "imu_acceleration")
 
 axes = plot_vector_traj(time, com_vel_raw, phase, ["x", "y", "z"], "k",
                         "com vel")

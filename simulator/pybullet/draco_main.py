@@ -50,9 +50,11 @@ if Config.B_SIMULATE_SENSOR_NOISE:
     noisy_sensors = {
         'imu_frame_vel': 0.0035,
         'joint_pos': 0.00001,
-        'joint_vel': 0.00001}
+        'joint_vel': 0.00001
+    }
 else:
     noisy_sensors = {}
+
 
 def set_initial_config(robot, joint_id):
     # Upperbody
@@ -113,9 +115,10 @@ if __name__ == "__main__":
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
-                       Config.INITIAL_POS_WORLD_TO_BASEJOINT,
-                       Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
+    robot = p.loadURDF(
+        cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
+        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
+        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
     p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0],
                useFixedBase=1)
@@ -209,8 +212,9 @@ if __name__ == "__main__":
 
         # use schmitt trigger for contact estimation
         b_lf_force_contact, b_rf_force_contact = pybullet_util.evaluate_force_contact(
-                            sensor_data_dict['lf_normal_force'], sensor_data_dict['rf_normal_force'],
-                            b_previous_lf_contact, b_previous_rf_contact, robot_weight)
+            sensor_data_dict['lf_normal_force'],
+            sensor_data_dict['rf_normal_force'], b_previous_lf_contact,
+            b_previous_rf_contact, robot_weight)
 
         sensor_data_dict[
             'b_rf_contact'] = True if rf_height <= 0.005 else False
@@ -223,7 +227,8 @@ if __name__ == "__main__":
             robot, link_id['torso_imu'])
         sensor_data_dict['imu_frame_vel'] = pybullet_util.get_link_vel(
             robot, link_id['torso_imu'])
-        sensor_data_dict['imu_dvel'] = pybullet_util.simulate_dVel_data(robot, link_id, previous_torso_velocity)
+        sensor_data_dict['imu_dvel'] = pybullet_util.simulate_dVel_data(
+            robot, link_id, previous_torso_velocity)
 
         pybullet_util.add_sensor_noise(sensor_data_dict, noisy_sensors)
 
@@ -276,7 +281,8 @@ if __name__ == "__main__":
         # sensor_data.base_joint_quat = np.array([qt[3], qt[0], qt[1], qt[2]])
         sensor_data.base_joint_lin_vel = sensor_data_dict["base_joint_lin_vel"]
         sensor_data.base_joint_ang_vel = sensor_data_dict["base_joint_ang_vel"]
-        previous_torso_velocity = pybullet_util.get_link_vel(robot, link_id['torso_imu'])[3:6]
+        previous_torso_velocity = pybullet_util.get_link_vel(
+            robot, link_id['torso_imu'])[3:6]
         previous_torso_acceleration = sensor_data_dict['imu_dvel']
 
         # ground truth
@@ -290,11 +296,15 @@ if __name__ == "__main__":
         del bullet_msg.b_lf_force_contact[:]
         del bullet_msg.b_rf_force_contact[:]
         for i in range(3):
-            bullet_msg.base_joint_pos.append(sensor_data_dict['base_joint_pos'][i])
-            bullet_msg.base_com_pos_py.append(sensor_data_dict['base_com_pos_py'][i])
+            bullet_msg.base_joint_pos.append(
+                sensor_data_dict['base_joint_pos'][i])
+            bullet_msg.base_com_pos_py.append(
+                sensor_data_dict['base_com_pos_py'][i])
             bullet_msg.base_joint_quat.append(qt[i])
-            bullet_msg.base_joint_lin_vel.append(sensor_data_dict['base_joint_lin_vel'][i])
-            bullet_msg.base_joint_ang_vel.append(sensor_data_dict['base_joint_ang_vel'][i])
+            bullet_msg.base_joint_lin_vel.append(
+                sensor_data_dict['base_joint_lin_vel'][i])
+            bullet_msg.base_joint_ang_vel.append(
+                sensor_data_dict['base_joint_ang_vel'][i])
         bullet_msg.base_joint_quat.append(qt[3])
         bullet_msg.lf_normal_force.append(sensor_data_dict['lf_normal_force'])
         bullet_msg.rf_normal_force.append(sensor_data_dict['rf_normal_force'])
@@ -326,7 +336,7 @@ if __name__ == "__main__":
         pybullet_util.set_motor_trq(robot, joint_id, command_joint_torques)
 
         # Send ground truth data
-        if(count % SAVE_FREQ == 0):
+        if (count % SAVE_FREQ == 0):
             serialized_msg = bullet_msg.SerializeToString()
             estimator_gt_socket.send(serialized_msg)
 
