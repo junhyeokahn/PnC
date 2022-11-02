@@ -133,6 +133,14 @@ def plot_weights(time, weights_dict, phase):
     ax.legend()
     fig.suptitle('task weights')
 
+def plot_single_vec(time, vector, phase, label):
+    fig, ax = plt.subplots()
+    ax.plot(time, vector[:], color='k', linewidth=3)
+    plot_phase(ax, time, phase)
+    ax.grid(True)
+    ax.set_xlabel('time')
+    ax.set_ylabel(label)
+
 
 def plot_rf_z_max(time, rf_z_max, phase):
     fig, ax = plt.subplots()
