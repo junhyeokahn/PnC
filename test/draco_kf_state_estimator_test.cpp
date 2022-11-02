@@ -86,9 +86,15 @@ TEST(DracoKFStateEstimatorTest, linearKFZeroNoise)
 {
   // parameters used for testing
   Eigen::Matrix3d rot_world_to_base = Eigen::Matrix3d::Identity();
-  Eigen::Vector3d imu_accel;
-  double gravity = -9.81;
+  Eigen::Vector3d imu_accel, sigma_base_vel, sigma_base_acc,
+                  sigma_pos_lfoot, sigma_pos_rfoot, sigma_vel_lfoot, sigma_vel_rfoot;
   imu_accel << 0.0, 0.0, 9.81;
+  sigma_base_vel << 0.5, 0.5, 0.02;
+  sigma_base_acc << 0.005, 0.005, 0.005;
+  sigma_pos_lfoot << 0.001, 0.001, 0.001;
+  sigma_pos_rfoot << 0.001, 0.001, 0.001;
+  sigma_vel_lfoot << 0.01, 0.01, 0.0001;
+  sigma_vel_rfoot << 0.01, 0.01, 0.0001;
 
   // stuff needed for the kalman filter
   State x, x_hat;
@@ -106,10 +112,10 @@ TEST(DracoKFStateEstimatorTest, linearKFZeroNoise)
   x = x_hat;
 
   // initialize estimated state system dynamics (matrices A and B)
-  system_model.initialize(deltat);
+  system_model.initialize(deltat, sigma_base_acc, sigma_base_vel, sigma_vel_lfoot, sigma_vel_rfoot);
 
   // initialize output matrix H in z_hat = H * x_hat
-  base_pose_model.initialize(gravity);
+  base_pose_model.initialize(sigma_pos_lfoot, sigma_pos_rfoot);
 
   // set initial state of the system
   kalman_filter.init(x_hat);

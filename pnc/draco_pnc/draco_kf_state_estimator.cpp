@@ -10,11 +10,23 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   iso_imu_to_base_com_ = robot_->get_link_iso("torso_imu").inverse() *
                          robot_->get_link_iso("torso_link");
 
+  Eigen::Vector3d sigma_base_vel = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_base_vel");
+  Eigen::Vector3d sigma_base_acc = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_base_acc");
+  Eigen::Vector3d sigma_pos_lfoot = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_pos_lfoot");
+  Eigen::Vector3d sigma_pos_rfoot = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_pos_rfoot");
+  Eigen::Vector3d sigma_vel_lfoot = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_vel_lfoot");
+  Eigen::Vector3d sigma_vel_rfoot = util::ReadParameter<Eigen::Vector3d>(
+          cfg["state_estimator"], "sigma_vel_rfoot");
+
   base_acceleration_.setZero();
   x_hat_.setZero();
-  system_model_.initialize(deltat);
-  double gravity = 9.81; // TODO get from somewhere else
-  base_pose_model_.initialize(gravity);
+  system_model_.initialize(deltat, sigma_base_vel, sigma_base_acc, sigma_vel_lfoot, sigma_vel_rfoot);
+  base_pose_model_.initialize(sigma_pos_lfoot, sigma_pos_rfoot);
   rot_world_to_base.setZero();
   global_linear_offset_.setZero();
   prev_base_com_pos_.setZero();

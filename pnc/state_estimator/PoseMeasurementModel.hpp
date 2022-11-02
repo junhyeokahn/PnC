@@ -33,10 +33,9 @@ public:
     {
       H.setZero();
       V.setIdentity();
-      V = V * 0.001;
     }
 
-    void initialize(const double &gravity)
+    void initialize(const Eigen::Vector3d &sigma_pos_lfoot, const Eigen::Vector3d &sigma_pos_rfoot)
     {
       // assign values to LTI matrix C
       H.block(0, 0, 3, 3) = I;
@@ -44,7 +43,8 @@ public:
       H.block(3, 0, 3, 3) = I;
       H.block(3, 9, 3, 3) = -I;
 
-      this->gravity = gravity;
+      V.block(0, 0, 3, 3)= sigma_pos_lfoot.asDiagonal();
+      V.block(3, 3, 3, 3) = sigma_pos_rfoot.asDiagonal();
     }
 
     void packAccelerationInput(const Eigen::Matrix3d &rot_world_to_base,
@@ -53,7 +53,7 @@ public:
     {
       u_n.accel_measurement_x = rot_world_to_base.row(0) * accelerometer;
       u_n.accel_measurement_y = rot_world_to_base.row(1) * accelerometer;
-      u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer; // + gravity;
+      u_n.accel_measurement_z = rot_world_to_base.row(2) * accelerometer;
     }
 
     void update_position_from_lfoot(const Eigen::Vector3d& lfoot_wrt_world,
@@ -119,8 +119,6 @@ public:
     {
 
     }
-
-    double gravity;
 
     const Eigen::Matrix3d I = Eigen::Matrix3d::Identity();
 };

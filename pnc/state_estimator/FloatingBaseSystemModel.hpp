@@ -97,15 +97,14 @@ public:
       position_offset.setZero();
       lfoot_offset.setZero();
       rfoot_offset.setZero();
-
       W.setZero();
-      W.block(0,0,3,3) = 0.001 * I;
-      W.block(3,3,3,3) = 0.5 * I;
-      W.block(6,6,3,3) = 0.0001 * I;
-      W.block(9,9,3,3) = 0.0001 * I;
     }
 
-    void initialize(const double &delta_t)
+    void initialize(const double &delta_t,
+                    const Eigen::Vector3d &sigma_base_pos,
+                    const Eigen::Vector3d &sigma_base_vel,
+                    const Eigen::Vector3d &sigma_pos_lfoot,
+                    const Eigen::Vector3d &sigma_pos_rfoot)
     {
       // assign non-zero elements to A and B matrices
       F.block(0, 0, 3, 3) = I;
@@ -115,6 +114,11 @@ public:
       F.block(9, 9, 3, 3) = I;
       B.block(0, 0, 3, 3) = 0.5 * delta_t * delta_t * I;
       B.block(3, 0, 3, 3) = delta_t * I;
+
+      W.block(0, 0, 3, 3) = sigma_base_pos.asDiagonal();
+      W.block(3, 3, 3, 3) = sigma_base_vel.asDiagonal();
+      W.block(6, 6, 3, 3) = sigma_pos_lfoot.asDiagonal();
+      W.block(9, 9, 3, 3) = sigma_pos_rfoot.asDiagonal();
     }
 
     void update_base_offset(const Eigen::Vector3d& offset)
