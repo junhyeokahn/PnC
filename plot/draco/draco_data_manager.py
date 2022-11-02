@@ -287,6 +287,7 @@ while True:
     data_saver.add('base_pos_kf', list(msg.base_pos_kf))
     data_saver.add('base_vel_kf', list(msg.base_vel_kf))
     data_saver.add('imu_accel', list(msg.imu_accel))
+    data_saver.add('imu_accel_raw', list(msg.imu_accel_raw))
 
     # kinematics-based state estimator
     # data_saver.add('base_joint_pos_est', list(msg.base_joint_pos_est))

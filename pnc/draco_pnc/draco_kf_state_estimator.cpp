@@ -279,6 +279,7 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
     dm->data->lf_contact = sp_->b_lf_contact;
     dm->data->rf_contact = sp_->b_rf_contact;
 
+    dm->data->imu_accel_raw = data->imu_dvel / sp_->servo_dt;
     dm->data->imu_accel = base_acceleration_;
 
     dm->data->base_com_pos =

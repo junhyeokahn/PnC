@@ -180,4 +180,5 @@ public:
 
   // imu accel
   Eigen::VectorXd imu_accel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd imu_accel_raw = Eigen::VectorXd::Zero(3);
 };

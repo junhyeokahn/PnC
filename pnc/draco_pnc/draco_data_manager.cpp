@@ -232,6 +232,7 @@ void DracoDataManager::Send() {
   // add imu accel data
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_imu_accel(data->imu_accel[i]);
+    pb_msg.add_imu_accel_raw(data->imu_accel_raw[i]);
   }
 
   // serialize
