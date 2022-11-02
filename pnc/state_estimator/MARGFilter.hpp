@@ -16,7 +16,7 @@
 #include <Eigen/Geometry>
 
 // System constants
-const float deltat = 0.001f; // sampling period in seconds (shown as 1 ms)
+const float deltat = 0.00125f; // sampling period in seconds (shown as 800 Hz)
 const float gyroMeasError = 3.14159265358979 * (5.0f / 180.0f); // gyroscope measurement error in rad/s (shown as 5 deg/s)
 const float gyroMeasDrift = 3.14159265358979 * (0.2f / 180.0f); // gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
 const float beta = sqrt(3.0f / 4.0f) * gyroMeasError; // compute beta
