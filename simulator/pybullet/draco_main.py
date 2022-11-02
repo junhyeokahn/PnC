@@ -47,10 +47,11 @@ if Config.B_USE_MESHCAT:
     import pinocchio as pin
 
 if Config.B_SIMULATE_SENSOR_NOISE:
+    # sensors assumed to have 0 mean and the following standard deviation
     noisy_sensors = {
-        'imu_frame_vel': 0.0035,
-        'joint_pos': 0.00001,
-        'joint_vel': 0.00001
+        'imu_frame_vel': 0.0035 * np.sqrt(800) * (np.pi / 180.),    # noise_density in [deg / s / sqrt(Hz)]
+        'joint_pos': 0.0001,
+        'joint_vel': 0.001
     }
 else:
     noisy_sensors = {}
