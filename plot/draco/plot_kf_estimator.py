@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_vector_traj
+from plot.helper import plot_vector_traj,  plot_single_vec
 
 from utils.python_utils.util import quat_to_rpy
 
@@ -24,6 +24,7 @@ com_vel_raw = []
 imu_ang_vel_est = []
 imu_ang_vel_raw = []
 imu_acceleration = []
+imu_acceleration_raw = []
 cam_est = []
 cam_raw = []
 
@@ -31,6 +32,8 @@ base_joint_pos = []
 base_joint_rpy = []
 base_joint_lin_vel = []
 base_joint_ang_vel = []
+
+kf_time_ms = []
 
 with open('experiment_data/pnc.pkl', 'rb') as file:
     while True:
@@ -49,6 +52,8 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             base_joint_lin_vel.append(d['base_vel_kf'])
             base_joint_ang_vel.append(d['imu_ang_vel_raw'])
             imu_acceleration.append(d['imu_accel'])
+            imu_acceleration_raw.append(d['imu_accel_raw'])
+            kf_time_ms.append(d['kf_time_ms'])
 
         except EOFError:
             break
@@ -56,6 +61,7 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
 time = np.array(time)[st_idx:]
 phase = np.array(phase)[st_idx:]
 imu_acceleration = np.stack(imu_acceleration, axis=0)[st_idx:, :]
+imu_acceleration_raw = np.stack(imu_acceleration_raw, axis=0)[st_idx:, :]
 com_vel_est = np.stack(com_vel_est, axis=0)[st_idx:, :]
 com_vel_raw = np.stack(com_vel_raw, axis=0)[st_idx:, :]
 imu_ang_vel_est = np.stack(imu_ang_vel_est, axis=0)[st_idx:, :]
@@ -68,8 +74,16 @@ base_joint_rpy = np.stack(base_joint_rpy, axis=0)[st_idx:, :]
 base_joint_lin_vel = np.stack(base_joint_lin_vel, axis=0)[st_idx:, :]
 base_joint_ang_vel = np.stack(base_joint_ang_vel, axis=0)[st_idx:, :]
 
-plot_vector_traj(time, imu_acceleration, phase, ["x", "y", "z"], "g",
+# kf_time_ms = np.stack(kf_time_ms, axis=0)[st_idx:]
+kf_time_ms = np.array(kf_time_ms)[st_idx:]
+kf_time_ms = np.reshape(kf_time_ms, (len(kf_time_ms), 1))
+
+plot_single_vec(time, kf_time_ms, phase, "KF time (ms)")
+
+axes = plot_vector_traj(time, imu_acceleration_raw, phase, ["x", "y", "z"], "k",
                  "imu_acceleration")
+
+plot_vector_traj(time, imu_acceleration, phase, ["x", "y", "z"], "g", None, axes)
 
 axes = plot_vector_traj(time, com_vel_raw, phase, ["x", "y", "z"], "k",
                         "com vel")
