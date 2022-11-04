@@ -163,6 +163,8 @@ if __name__ == "__main__":
         robot, joint_id, link_id, pos_basejoint_to_basecom,
         rot_basejoint_to_basecom)
 
+    pybullet_util.draw_link_frame(robot, link_id["l_hand_contact"], text="lh")
+    pybullet_util.draw_link_frame(robot, link_id["r_hand_contact"], text="rh")
     while (1):
 
         # while_start = time.time()

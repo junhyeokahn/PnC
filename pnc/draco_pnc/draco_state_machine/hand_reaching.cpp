@@ -69,7 +69,7 @@ void HandReaching::oneStep() {
 
 void HandReaching::lastVisit() {}
 
-bool HandReaching::endOfState() { b_trigger_return_ == true ? true : false; }
+bool HandReaching::endOfState() { return b_trigger_return_ ? true : false; }
 
 StateIdentifier HandReaching::getNextState() {
   // TODO:
