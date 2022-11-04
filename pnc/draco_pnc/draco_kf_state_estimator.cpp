@@ -51,6 +51,15 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
     imu_ang_vel_filter_.push_back(SimpleMovingAverage(n_data_ang_vel[i]));
   }
 
+  Eigen::VectorXd base_accel_limits = Eigen::VectorXd::Zero(3);
+  base_accel_limits << 1., 1., 1.;
+  double time_constant =
+          util::ReadParameter<double>(cfg["state_estimator"], "base_accel_time_constant");
+  // Filtered base velocity
+  base_accel_filt_ = new ExponentialMovingAverageFilter(
+          sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(3), -base_accel_limits,
+          base_accel_limits);
+
   // TODO move settings to config/draco/pnc.yaml
   b_first_visit_ = true;
   b_skip_prediction = false;
@@ -58,7 +67,7 @@ DracoKFStateEstimator::DracoKFStateEstimator(RobotSystem *_robot) {
   b_request_offset_reset = false;
 }
 
-DracoKFStateEstimator::~DracoKFStateEstimator() {}
+DracoKFStateEstimator::~DracoKFStateEstimator() { delete base_accel_filt_; }
 
 void DracoKFStateEstimator::initialize(DracoSensorData *data) {
   this->update(data);
@@ -78,10 +87,13 @@ void DracoKFStateEstimator::update(DracoSensorData *data) {
       compute_world_to_base_rot(data, rot_world_to_imu, b_use_marg_filter);
 
   // compute estimator (control) input, u_n
-  for (int i = 0; i < 3; ++i) {
-    base_accel_filter_[i].Input(data->imu_dvel[i] / sp_->servo_dt);
-    base_acceleration_[i] = base_accel_filter_[i].Output();
-  }
+//  for (int i = 0; i < 3; ++i) {
+//    base_accel_filter_[i].Input(data->imu_dvel[i] / sp_->servo_dt);
+//    base_acceleration_[i] = base_accel_filter_[i].Output();
+//  }
+  base_accel_filt_->Input(data->imu_dvel / sp_->servo_dt);
+  base_acceleration_ = base_accel_filt_->Output();
+
   base_pose_model_.packAccelerationInput(rot_world_to_imu, base_acceleration_,
                                          accelerometer_input_);
 

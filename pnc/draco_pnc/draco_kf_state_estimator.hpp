@@ -75,6 +75,7 @@ protected:
   std::vector<SimpleMovingAverage> cam_filter_;
   std::vector<SimpleMovingAverage> base_accel_filter_;
   std::vector<SimpleMovingAverage> imu_ang_vel_filter_;
+  ExponentialMovingAverageFilter *base_accel_filt_;
 
   bool b_first_visit_;
   bool b_skip_prediction;
