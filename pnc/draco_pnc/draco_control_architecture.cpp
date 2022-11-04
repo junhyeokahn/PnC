@@ -12,6 +12,7 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/hand_reaching.hpp"
+#include "pnc/draco_pnc/draco_state_machine/hand_returning.hpp"
 #include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_landing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_lifting.hpp"
@@ -379,6 +380,16 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   (static_cast<HandReaching *>(state_machines[draco_states::kRHandReaching]))
       ->setRelTargetOri(rhand_rel_quat);
 
+  state_machines[draco_states::kLHandReturning] =
+      new HandReturning(draco_states::kLHandReturning, this, robot_);
+  (static_cast<HandReturning *>(state_machines[draco_states::kLHandReturning]))
+      ->setDuration(left_hand_duration);
+
+  state_machines[draco_states::kRHandReturning] =
+      new HandReturning(draco_states::kRHandReturning, this, robot_);
+  (static_cast<HandReturning *>(state_machines[draco_states::kRHandReturning]))
+      ->setDuration(right_hand_duration);
+
   state = draco_states::kStand;
   prev_state = draco_states::kStand;
 
@@ -432,6 +443,8 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete state_machines[draco_states::kLFootLanding];
   delete state_machines[draco_states::kLHandReaching];
   delete state_machines[draco_states::kRHandReaching];
+  delete state_machines[draco_states::kLHandReturning];
+  delete state_machines[draco_states::kRHandReturning];
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {

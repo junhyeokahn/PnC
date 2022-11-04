@@ -20,6 +20,8 @@ public:
   void setRelTargetPos(const Eigen::Vector3d &pos) { rel_target_pos_ = pos; }
   void setRelTargetOri(const Eigen::Quaterniond &ori) { rel_target_ori_ = ori; }
 
+  bool b_trigger_return_;
+
 protected:
   DracoStateProvider *sp_;
   DracoControlArchitecture *ctrl_arch_;
@@ -27,6 +29,4 @@ protected:
   double duration_;
   Eigen::Vector3d rel_target_pos_;
   Eigen::Quaterniond rel_target_ori_;
-
-  bool b_trigger_return_;
 };

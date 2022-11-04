@@ -45,6 +45,8 @@ constexpr int kLFootSingleSupportLanding = 24;
 // hand reaching
 constexpr int kLHandReaching = 25;
 constexpr int kRHandReaching = 26;
+constexpr int kLHandReturning = 27;
+constexpr int kRHandReturning = 28;
 } // namespace draco_states
 
 class DracoControlArchitecture : public ControlArchitecture {

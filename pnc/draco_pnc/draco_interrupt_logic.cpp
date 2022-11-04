@@ -4,6 +4,7 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
 #include <pnc/draco_pnc/draco_interrupt_logic.hpp>
 #include <pnc/draco_pnc/draco_state_machine/double_support_balance.hpp>
+#include <pnc/draco_pnc/draco_state_machine/hand_reaching.hpp>
 #include <pnc/draco_pnc/draco_state_machine/single_support_lifting.hpp>
 
 DracoInterruptLogic::DracoInterruptLogic(DracoControlArchitecture *_ctrl_arch)
@@ -240,29 +241,60 @@ void DracoInterruptLogic::processInterrupts() {
   }
 
   if (b_interrupt_button_z) {
-    std::cout << "[LHandReaching Interrupt Logic] button Z pressed"
-              << std::endl;
     if (ctrl_arch_->state == draco_states::kBalance) {
+      std::cout << "[LHandReaching Interrupt Logic] button Z pressed"
+                << std::endl;
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
           ->b_lhand_reaching_trigger = true;
-    } else {
-      std::cout << "-- Command Ignored. Please Wait for Double Support Balance "
-                << std::endl;
     }
+    // else {
+    // std::cout << "-- Command Ignored. Please Wait for Double Support Balance
+    // "
+    //<< std::endl;
+    //}
+
+    if (ctrl_arch_->state == draco_states::kLHandReaching) {
+      std::cout << "[LHandReturning Interrupt Logic] button Z pressed"
+                << std::endl;
+
+      (static_cast<HandReaching *>(
+           ctrl_arch_->state_machines[draco_states::kLHandReaching]))
+          ->b_trigger_return_ = true;
+    }
+    // else {
+    // std::cout << "-- Command Ignored. Please Wait for Hand Reaching State "
+    //<< std::endl;
+    //}
   }
 
   if (b_interrupt_button_c) {
-    std::cout << "[RHandReaching Interrupt Logic] button X pressed"
-              << std::endl;
     if (ctrl_arch_->state == draco_states::kBalance) {
+      std::cout << "[RHandReaching Interrupt Logic] button X pressed"
+                << std::endl;
       (static_cast<DoubleSupportBalance *>(
            ctrl_arch_->state_machines[draco_states::kBalance]))
           ->b_rhand_reaching_trigger = true;
-    } else {
-      std::cout << "-- Command Ignored. Please Wait for Double Support Balance "
-                << std::endl;
     }
+    // else {
+    // std::cout << "-- Command Ignored. Please Wait for Double Support
+    // Balance "
+    //<< std::endl;
+    //}
+
+    if (ctrl_arch_->state == draco_states::kRHandReaching) {
+      std::cout << "[RHandReturning Interrupt Logic] button X pressed"
+                << std::endl;
+
+      (static_cast<HandReaching *>(
+           ctrl_arch_->state_machines[draco_states::kRHandReaching]))
+          ->b_trigger_return_ = true;
+    }
+    //} else {
+    // std::cout << "-- Command Ignored. Please Wait for Hand Reaching State "
+    //<< std::endl;
+    //}
   }
+
   resetFlags();
 }

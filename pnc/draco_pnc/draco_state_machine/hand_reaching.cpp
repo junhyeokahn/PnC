@@ -14,6 +14,7 @@ HandReaching::HandReaching(const StateIdentifier _state_identifier_in,
 }
 
 void HandReaching::firstVisit() {
+  b_trigger_return_ = false;
   Eigen::Vector3d target_pos = Eigen::Vector3d::Zero();
   Eigen::Quaterniond target_ori = Eigen::Quaterniond::Identity();
 
@@ -72,6 +73,9 @@ void HandReaching::lastVisit() {}
 bool HandReaching::endOfState() { return b_trigger_return_ ? true : false; }
 
 StateIdentifier HandReaching::getNextState() {
-  // TODO:
-  // adding hand return state
+  if (state_identity_ == draco_states::kLHandReaching)
+    return draco_states::kLHandReturning;
+
+  if (state_identity_ == draco_states::kRHandReaching)
+    return draco_states::kRHandReturning;
 }
