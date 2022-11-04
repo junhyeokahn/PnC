@@ -22,6 +22,8 @@ public:
   bool b_swaying_trigger;
   bool b_interpolation_trigger;
   bool b_static_walking_trigger;
+  bool b_rhand_reaching_trigger;
+  bool b_lhand_reaching_trigger;
 
 protected:
   DracoStateProvider *sp_;

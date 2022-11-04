@@ -32,6 +32,9 @@ public:
     b_interrupt_button_k = false;
     b_interrupt_button_h = false;
     b_interrupt_button_l = false;
+
+    b_interrupt_button_z = false;
+    b_interrupt_button_c = false;
   }
 
   bool b_interrupt_button_f;
@@ -49,4 +52,7 @@ public:
   bool b_interrupt_button_k;
   bool b_interrupt_button_h;
   bool b_interrupt_button_l;
+
+  bool b_interrupt_button_z;
+  bool b_interrupt_button_c;
 };

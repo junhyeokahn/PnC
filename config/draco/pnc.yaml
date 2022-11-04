@@ -3,14 +3,14 @@ servo_dt: 0.00125
 save_freq: 50
 ip_addr: "tcp://127.0.0.1:5557"
 
-#b_exp: false
-b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
+b_exp: false
+#b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_termination
 
 b_joint_pos_test: false
 
 state_estimator:
-    n_data_com_vel: [200, 200, 250]
-    #n_data_com_vel: [20, 20, 20]
+    #n_data_com_vel: [200, 200, 250]
+    n_data_com_vel: [20, 20, 20]
     #n_data_com_vel: [100, 100, 250]
     n_data_ang_vel: [5, 5, 5]
     n_data_cam: [50, 50, 50]
@@ -174,6 +174,22 @@ wbc:
             #exp_kd: [0.3, 0.3, 0.3]
             exp_kd: [1.5, 1.5, 1.5]
 
+        hand_pos:
+          weight_at_min: [0., 0., 0.]
+          weight_at_max: [1000., 1000., 1000.]
+          sim_kp: [400., 400., 400.]
+          sim_kd: [60., 60., 60.]
+          exp_kp: [10., 10., 10.]
+          exp_kd: [6., 6., 6.]
+
+        hand_ori:
+          weight_at_min: [0., 0., 0.]
+          weight_at_max: [1000., 1000., 1000.]
+          sim_kp: [250., 250., 250.]
+          sim_kd: [10., 10., 10.]
+          exp_kp: [5., 5., 5.]
+          exp_kd: [4., 4., 4.]
+
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz
         pos_cutoff_freq: 0.5 # Hz
@@ -288,8 +304,17 @@ static_balancing:
     des_foot_height: 0.05
     landing_duration: 1.
 
+hand_reaching:
+  left_hand_duration: 3.
+  left_hand_rel_target_pos: [1., 0., 0.]
+  left_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
+
+  right_hand_duration: 3.
+  right_hand_rel_target_pos: [1., 0., 0.]
+  right_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
+
 controller:
     waiting_count: 10
-    b_smoothing: true
-    #b_smoothing: false
+    #b_smoothing: true
+    b_smoothing: false
     smoothing_duration: 0.2

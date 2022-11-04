@@ -11,6 +11,7 @@
 #include "pnc/draco_pnc/draco_state_machine/foot_landing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_lifting.hpp"
 #include "pnc/draco_pnc/draco_state_machine/foot_swing.hpp"
+#include "pnc/draco_pnc/draco_state_machine/hand_reaching.hpp"
 #include "pnc/draco_pnc/draco_state_machine/initialize.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_landing.hpp"
 #include "pnc/draco_pnc/draco_state_machine/single_support_lifting.hpp"
@@ -54,6 +55,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   upper_body_tm =
       new UpperBodyTrajectoryManager(tci_container->upper_body_task, robot_);
 
+  lhand_tm = new EndEffectorTrajectoryManager(
+      tci_container->lhand_pos_task, tci_container->lhand_ori_task, robot_);
+
+  rhand_tm = new EndEffectorTrajectoryManager(
+      tci_container->rhand_pos_task, tci_container->rhand_ori_task, robot_);
+
   int com_control_feedback_height_target = util::ReadParameter<int>(
       cfg["wbc"]["task"], "com_control_feedback_height_target");
   bool b_use_base_height = false;
@@ -93,6 +100,31 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
                                            "weight_at_contact"),
       util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["foot_ori"],
                                            "weight_at_swing"));
+
+  rhand_pos_hm = new TaskHierarchyManager(
+      tci_container->rhand_pos_task,
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_pos"],
+                                           "weight_at_max"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_pos"],
+                                           "weight_at_min"));
+  rhand_ori_hm = new TaskHierarchyManager(
+      tci_container->rhand_ori_task,
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_ori"],
+                                           "weight_at_max"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_ori"],
+                                           "weight_at_min"));
+  lhand_pos_hm = new TaskHierarchyManager(
+      tci_container->lhand_pos_task,
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_pos"],
+                                           "weight_at_max"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_pos"],
+                                           "weight_at_min"));
+  lhand_ori_hm = new TaskHierarchyManager(
+      tci_container->lhand_ori_task,
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_ori"],
+                                           "weight_at_max"),
+      util::ReadParameter<Eigen::VectorXd>(cfg["wbc"]["task"]["hand_ori"],
+                                           "weight_at_min"));
 
   // Initialize Reaction Force Manager
   double rf_max;
@@ -305,6 +337,48 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
       ->moving_duration_ =
       util::ReadParameter<double>(cfg["static_balancing"], "landing_duration");
 
+  // hand reaching state machine
+  state_machines[draco_states::kLHandReaching] =
+      new HandReaching(draco_states::kLHandReaching, this, robot_);
+  double left_hand_duration =
+      util::ReadParameter<double>(cfg["hand_reaching"], "left_hand_duration");
+  Eigen::Vector3d left_hand_rel_target_pos =
+      util::ReadParameter<Eigen::Vector3d>(cfg["hand_reaching"],
+                                           "left_hand_rel_target_pos");
+  Eigen::Vector4d left_hand_rel_target_ori =
+      util::ReadParameter<Eigen::Vector4d>(cfg["hand_reaching"],
+                                           "left_hand_rel_target_ori");
+  Eigen::Quaterniond lhand_rel_quat(
+      left_hand_rel_target_ori[0], left_hand_rel_target_ori[1],
+      left_hand_rel_target_ori[2], left_hand_rel_target_ori[3]);
+  (static_cast<HandReaching *>(state_machines[draco_states::kLHandReaching]))
+      ->setDuration(left_hand_duration);
+  (static_cast<HandReaching *>(state_machines[draco_states::kLHandReaching]))
+      ->setRelTargetPos(left_hand_rel_target_pos);
+  (static_cast<HandReaching *>(state_machines[draco_states::kLHandReaching]))
+      ->setRelTargetOri(lhand_rel_quat);
+
+  state_machines[draco_states::kRHandReaching] =
+      new HandReaching(draco_states::kRHandReaching, this, robot_);
+  double right_hand_duration =
+      util::ReadParameter<double>(cfg["hand_reaching"], "right_hand_duration");
+  Eigen::Vector3d right_hand_rel_target_pos =
+      util::ReadParameter<Eigen::Vector3d>(cfg["hand_reaching"],
+                                           "right_hand_rel_target_pos");
+  Eigen::Vector4d right_hand_rel_target_ori =
+      util::ReadParameter<Eigen::Vector4d>(cfg["hand_reaching"],
+                                           "right_hand_rel_target_ori");
+  Eigen::Quaterniond rhand_rel_quat(
+      right_hand_rel_target_ori[0], right_hand_rel_target_ori[1],
+      right_hand_rel_target_ori[2], right_hand_rel_target_ori[3]);
+
+  (static_cast<HandReaching *>(state_machines[draco_states::kRHandReaching]))
+      ->setDuration(right_hand_duration);
+  (static_cast<HandReaching *>(state_machines[draco_states::kRHandReaching]))
+      ->setRelTargetPos(right_hand_rel_target_pos);
+  (static_cast<HandReaching *>(state_machines[draco_states::kRHandReaching]))
+      ->setRelTargetOri(rhand_rel_quat);
+
   state = draco_states::kStand;
   prev_state = draco_states::kStand;
 
@@ -327,6 +401,11 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete rfoot_ori_hm;
   delete lfoot_pos_hm;
   delete lfoot_ori_hm;
+
+  delete rhand_pos_hm;
+  delete rhand_ori_hm;
+  delete lhand_pos_hm;
+  delete lhand_ori_hm;
 
   delete rfoot_fm;
   delete lfoot_fm;
@@ -351,6 +430,8 @@ DracoControlArchitecture::~DracoControlArchitecture() {
   delete state_machines[draco_states::kLFootSwingStatic];
   delete state_machines[draco_states::kRFootLanding];
   delete state_machines[draco_states::kLFootLanding];
+  delete state_machines[draco_states::kLHandReaching];
+  delete state_machines[draco_states::kRHandReaching];
 }
 
 void DracoControlArchitecture::getCommand(void *_command) {

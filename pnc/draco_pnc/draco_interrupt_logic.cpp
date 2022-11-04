@@ -238,5 +238,31 @@ void DracoInterruptLogic::processInterrupts() {
       std::cout << "[Error] No Matching Interruption Method" << std::endl;
     }
   }
+
+  if (b_interrupt_button_z) {
+    std::cout << "[LHandReaching Interrupt Logic] button Z pressed"
+              << std::endl;
+    if (ctrl_arch_->state == draco_states::kBalance) {
+      (static_cast<DoubleSupportBalance *>(
+           ctrl_arch_->state_machines[draco_states::kBalance]))
+          ->b_lhand_reaching_trigger = true;
+    } else {
+      std::cout << "-- Command Ignored. Please Wait for Double Support Balance "
+                << std::endl;
+    }
+  }
+
+  if (b_interrupt_button_c) {
+    std::cout << "[RHandReaching Interrupt Logic] button X pressed"
+              << std::endl;
+    if (ctrl_arch_->state == draco_states::kBalance) {
+      (static_cast<DoubleSupportBalance *>(
+           ctrl_arch_->state_machines[draco_states::kBalance]))
+          ->b_rhand_reaching_trigger = true;
+    } else {
+      std::cout << "-- Command Ignored. Please Wait for Double Support Balance "
+                << std::endl;
+    }
+  }
   resetFlags();
 }

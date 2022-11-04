@@ -14,6 +14,8 @@ DoubleSupportBalance::DoubleSupportBalance(
   b_swaying_trigger = false;
   b_interpolation_trigger = false;
   b_static_walking_trigger = false;
+  b_rhand_reaching_trigger = false;
+  b_lhand_reaching_trigger = false;
 }
 
 DoubleSupportBalance::~DoubleSupportBalance() {}
@@ -26,6 +28,8 @@ void DoubleSupportBalance::firstVisit() {
   b_swaying_trigger = false;
   b_interpolation_trigger = false;
   b_static_walking_trigger = false;
+  b_rhand_reaching_trigger = false;
+  b_lhand_reaching_trigger = false;
 
   Eigen::Isometry3d lfoot_iso = robot_->get_link_iso("l_foot_contact");
   Eigen::Isometry3d rfoot_iso = robot_->get_link_iso("r_foot_contact");
@@ -64,6 +68,9 @@ bool DoubleSupportBalance::endOfState() {
   if (b_static_walking_trigger) {
     return true;
   }
+
+  if (b_rhand_reaching_trigger || b_lhand_reaching_trigger)
+    return true;
   return false;
 }
 
@@ -95,4 +102,9 @@ StateIdentifier DoubleSupportBalance::getNextState() {
       assert(false);
     }
   }
+
+  if (b_lhand_reaching_trigger)
+    return draco_states::kLHandReaching;
+  if (b_rhand_reaching_trigger)
+    return draco_states::kRHandReaching;
 }

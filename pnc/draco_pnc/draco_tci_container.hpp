@@ -19,6 +19,10 @@ public:
   Task *rfoot_ori_task;
   Task *lfoot_pos_task;
   Task *lfoot_ori_task;
+  Task *lhand_pos_task;
+  Task *lhand_ori_task;
+  Task *rhand_pos_task;
+  Task *rhand_ori_task;
 
   Contact *rfoot_contact;
   Contact *lfoot_contact;

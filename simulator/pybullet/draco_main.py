@@ -89,9 +89,10 @@ if __name__ == "__main__":
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
-                       Config.INITIAL_POS_WORLD_TO_BASEJOINT,
-                       Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
+    robot = p.loadURDF(
+        cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
+        Config.INITIAL_POS_WORLD_TO_BASEJOINT,
+        Config.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
     p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0],
                useFixedBase=1)
@@ -216,6 +217,10 @@ if __name__ == "__main__":
             force = [500, 0, 0]
             pos = [0, 0, 0]
             p.applyExternalForce(robot, -1, force, pos, p.WORLD_FRAME)
+        elif pybullet_util.is_key_triggered(keys, 'z'):
+            interface.interrupt.b_interrupt_button_z = True
+        elif pybullet_util.is_key_triggered(keys, 'c'):
+            interface.interrupt.b_interrupt_button_c = True
 
         # Copy sensor_data_dict
         sensor_data.imu_frame_iso = sensor_data_dict['imu_frame_iso']

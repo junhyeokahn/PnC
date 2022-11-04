@@ -8,6 +8,7 @@
 #include "pnc/planners/locomotion/dcm_planner/dcm_planner.hpp"
 #include "pnc/robot_system/robot_system.hpp"
 #include "pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp"
+#include "pnc/whole_body_controllers/managers/end_effector_trajectory_manager.hpp"
 #include "pnc/whole_body_controllers/managers/floating_base_trajectory_manager.hpp"
 #include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
 #include "pnc/whole_body_controllers/managers/reaction_force_manager.hpp"
@@ -41,6 +42,9 @@ constexpr int kRFootSingleSupportLifting = 21;
 constexpr int kLFootSingleSupportLifting = 22;
 constexpr int kRFootSingleSupportLanding = 23;
 constexpr int kLFootSingleSupportLanding = 24;
+// hand reaching
+constexpr int kLHandReaching = 25;
+constexpr int kRHandReaching = 26;
 } // namespace draco_states
 
 class DracoControlArchitecture : public ControlArchitecture {
@@ -54,11 +58,17 @@ public:
   FootTrajectoryManager *lfoot_tm;
   UpperBodyTrajectoryManager *upper_body_tm;
   FloatingBaseTrajectoryManager *floating_base_tm;
+  EndEffectorTrajectoryManager *lhand_tm;
+  EndEffectorTrajectoryManager *rhand_tm;
   DCMTrajectoryManager *dcm_tm;
   TaskHierarchyManager *rfoot_pos_hm;
   TaskHierarchyManager *rfoot_ori_hm;
   TaskHierarchyManager *lfoot_pos_hm;
   TaskHierarchyManager *lfoot_ori_hm;
+  TaskHierarchyManager *rhand_pos_hm;
+  TaskHierarchyManager *rhand_ori_hm;
+  TaskHierarchyManager *lhand_pos_hm;
+  TaskHierarchyManager *lhand_ori_hm;
   ReactionForceManager *rfoot_fm;
   ReactionForceManager *lfoot_fm;
 

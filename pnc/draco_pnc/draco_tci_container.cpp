@@ -113,6 +113,38 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   lfoot_ori_task->w_hierarchy = util::ReadParameter<Eigen::VectorXd>(
       cfg["wbc"]["task"]["foot_ori"], "weight_at_swing");
 
+  lhand_pos_task = new LinkPosTask(robot_, {"l_hand_contact"});
+  lhand_pos_task->kp = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], gain_prefix + "kp");
+  lhand_pos_task->kd = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], gain_prefix + "kd");
+  lhand_pos_task->w_hierarchy = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], "weight_at_min");
+
+  lhand_ori_task = new LinkOriTask(robot_, {"l_hand_contact"});
+  lhand_ori_task->kp = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], gain_prefix + "kp");
+  lhand_ori_task->kd = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], gain_prefix + "kd");
+  lhand_ori_task->w_hierarchy = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], "weight_at_min");
+
+  rhand_pos_task = new LinkPosTask(robot_, {"r_hand_contact"});
+  rhand_pos_task->kp = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], gain_prefix + "kp");
+  rhand_pos_task->kd = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], gain_prefix + "kd");
+  rhand_pos_task->w_hierarchy = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_pos"], "weight_at_min");
+
+  rhand_ori_task = new LinkOriTask(robot_, {"r_hand_contact"});
+  rhand_ori_task->kp = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], gain_prefix + "kp");
+  rhand_ori_task->kd = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], gain_prefix + "kd");
+  rhand_ori_task->w_hierarchy = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["hand_ori"], "weight_at_min");
+
   task_list.clear();
   task_list.push_back(com_task);        // 0
   task_list.push_back(cam_task);        // 1
@@ -122,6 +154,10 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
   task_list.push_back(rfoot_ori_task);  // 5
   task_list.push_back(lfoot_pos_task);  // 6
   task_list.push_back(lfoot_ori_task);  // 7
+  task_list.push_back(rhand_pos_task);  // 8
+  task_list.push_back(rhand_ori_task);  // 9
+  task_list.push_back(lhand_pos_task);  // 10
+  task_list.push_back(lhand_ori_task);  // 11
 
   // Initialize Contact
   double foot_half_width =
@@ -156,6 +192,11 @@ DracoTCIContainer::~DracoTCIContainer() {
   delete rfoot_ori_task;
   delete lfoot_pos_task;
   delete lfoot_ori_task;
+
+  delete rhand_pos_task;
+  delete rhand_ori_task;
+  delete lhand_pos_task;
+  delete lhand_ori_task;
 
   delete rfoot_contact;
   delete lfoot_contact;
