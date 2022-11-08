@@ -10,8 +10,8 @@ import time
 import json
 from ruamel.yaml import YAML
 import numpy as np
-from pinocchio.visualize import MeshcatVisualizer
-import pinocchio as pin
+# from pinocchio.visualize import MeshcatVisualizer
+# import pinocchio as pin
 
 from utils.python_utils import util
 
@@ -160,9 +160,9 @@ while True:
     data_saver.add('task_rfoot_ori_vel', list(msg.task_rfoot_ori_vel))
 
     data_saver.add('task_rfoot_rpy_pos_des',
-                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_des)))
+                   (util.quat_to_rpy(msg.task_rfoot_ori_pos_des)).tolist())
     data_saver.add('task_rfoot_rpy_pos',
-                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos)))
+                   (util.quat_to_rpy(msg.task_rfoot_ori_pos)).tolist())
 
     data_saver.add('task_rfoot_ori_pos_des_local',
                    list(msg.task_rfoot_ori_pos_des_local))
@@ -176,9 +176,9 @@ while True:
                    list(msg.task_rfoot_ori_vel_local))
 
     data_saver.add('task_rfoot_rpy_pos_des_local',
-                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_des_local)))
+                   (util.quat_to_rpy(msg.task_rfoot_ori_pos_des_local)).tolist())
     data_saver.add('task_rfoot_rpy_pos_local',
-                   list(util.quat_to_rpy(msg.task_rfoot_ori_pos_local)))
+                   (util.quat_to_rpy(msg.task_rfoot_ori_pos_local)).tolist())
 
     data_saver.add('task_lfoot_lin_pos_des', list(msg.task_lfoot_lin_pos_des))
     data_saver.add('task_lfoot_lin_vel_des', list(msg.task_lfoot_lin_vel_des))
@@ -204,9 +204,9 @@ while True:
     data_saver.add('task_lfoot_ori_vel', list(msg.task_lfoot_ori_vel))
 
     data_saver.add('task_lfoot_rpy_pos_des',
-                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_des)))
+                   (util.quat_to_rpy(msg.task_lfoot_ori_pos_des)).tolist())
     data_saver.add('task_lfoot_rpy_pos',
-                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos)))
+                   (util.quat_to_rpy(msg.task_lfoot_ori_pos)).tolist())
 
     data_saver.add('task_lfoot_ori_pos_des_local',
                    list(msg.task_lfoot_ori_pos_des_local))
@@ -220,9 +220,9 @@ while True:
                    list(msg.task_lfoot_ori_vel_local))
 
     data_saver.add('task_lfoot_rpy_pos_des_local',
-                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_des_local)))
+                   (util.quat_to_rpy(msg.task_lfoot_ori_pos_des_local)).tolist())
     data_saver.add('task_lfoot_rpy_pos_local',
-                   list(util.quat_to_rpy(msg.task_lfoot_ori_pos_local)))
+                   (util.quat_to_rpy(msg.task_lfoot_ori_pos_local)).tolist())
 
     data_saver.add('task_upper_body_pos_des',
                    list(msg.task_upper_body_pos_des))
@@ -266,6 +266,95 @@ while True:
     data_saver.add('des_cmp', list(msg.des_cmp))
 
     data_saver.add('base_joint_lin_vel', list(msg.base_joint_lin_vel))
+
+    ##hand
+    data_saver.add('task_rhand_lin_pos_des', list(msg.task_rhand_lin_pos_des))
+    data_saver.add('task_rhand_lin_vel_des', list(msg.task_rhand_lin_vel_des))
+    data_saver.add('task_rhand_lin_acc_des', list(msg.task_rhand_lin_acc_des))
+    data_saver.add('task_rhand_lin_pos', list(msg.task_rhand_lin_pos))
+    data_saver.add('task_rhand_lin_vel', list(msg.task_rhand_lin_vel))
+
+    data_saver.add('task_rhand_lin_pos_des_local',
+    list(msg.task_rhand_lin_pos_des_local))
+    data_saver.add('task_rhand_lin_vel_des_local',
+    list(msg.task_rhand_lin_vel_des_local))
+    data_saver.add('task_rhand_lin_acc_des_local',
+    list(msg.task_rhand_lin_acc_des_local))
+    data_saver.add('task_rhand_lin_pos_local',
+    list(msg.task_rhand_lin_pos_local))
+    data_saver.add('task_rhand_lin_vel_local',
+    list(msg.task_rhand_lin_vel_local))
+
+    data_saver.add('task_rhand_ori_pos_des', list(msg.task_rhand_ori_pos_des))
+    data_saver.add('task_rhand_ori_vel_des', list(msg.task_rhand_ori_vel_des))
+    data_saver.add('task_rhand_ori_acc_des', list(msg.task_rhand_ori_acc_des))
+    data_saver.add('task_rhand_ori_pos', list(msg.task_rhand_ori_pos))
+    data_saver.add('task_rhand_ori_vel', list(msg.task_rhand_ori_vel))
+
+    data_saver.add('task_rhand_rpy_pos_des',
+    (util.quat_to_rpy(msg.task_rhand_ori_pos_des)).tolist())
+    data_saver.add('task_rhand_rpy_pos',
+    (util.quat_to_rpy(msg.task_rhand_ori_pos)).tolist())
+
+    data_saver.add('task_rhand_ori_pos_des_local',
+    list(msg.task_rhand_ori_pos_des_local))
+    data_saver.add('task_rhand_ori_vel_des_local',
+    list(msg.task_rhand_ori_vel_des_local))
+    data_saver.add('task_rhand_ori_acc_des_local',
+    list(msg.task_rhand_ori_acc_des_local))
+    data_saver.add('task_rhand_ori_pos_local',
+    list(msg.task_rhand_ori_pos_local))
+    data_saver.add('task_rhand_ori_vel_local',
+    list(msg.task_rhand_ori_vel_local))
+
+    data_saver.add('task_rhand_rpy_pos_des_local',
+    (util.quat_to_rpy(msg.task_rhand_ori_pos_des_local)).tolist())
+    data_saver.add('task_rhand_rpy_pos_local',
+    (util.quat_to_rpy(msg.task_rhand_ori_pos_local)).tolist())
+
+    data_saver.add('task_lhand_lin_pos_des', list(msg.task_lhand_lin_pos_des))
+    data_saver.add('task_lhand_lin_vel_des', list(msg.task_lhand_lin_vel_des))
+    data_saver.add('task_lhand_lin_acc_des', list(msg.task_lhand_lin_acc_des))
+    data_saver.add('task_lhand_lin_pos', list(msg.task_lhand_lin_pos))
+    data_saver.add('task_lhand_lin_vel', list(msg.task_lhand_lin_vel))
+
+    data_saver.add('task_lhand_lin_pos_des_local',
+    list(msg.task_lhand_lin_pos_des_local))
+    data_saver.add('task_lhand_lin_vel_des_local',
+    list(msg.task_lhand_lin_vel_des_local))
+    data_saver.add('task_lhand_lin_acc_des_local',
+    list(msg.task_lhand_lin_acc_des_local))
+    data_saver.add('task_lhand_lin_pos_local',
+    list(msg.task_lhand_lin_pos_local))
+    data_saver.add('task_lhand_lin_vel_local',
+    list(msg.task_lhand_lin_vel_local))
+
+    data_saver.add('task_lhand_ori_pos_des', list(msg.task_lhand_ori_pos_des))
+    data_saver.add('task_lhand_ori_vel_des', list(msg.task_lhand_ori_vel_des))
+    data_saver.add('task_lhand_ori_acc_des', list(msg.task_lhand_ori_acc_des))
+    data_saver.add('task_lhand_ori_pos', list(msg.task_lhand_ori_pos))
+    data_saver.add('task_lhand_ori_vel', list(msg.task_lhand_ori_vel))
+
+    data_saver.add('task_lhand_rpy_pos_des',
+    (util.quat_to_rpy(msg.task_lhand_ori_pos_des)).tolist())
+    data_saver.add('task_lhand_rpy_pos',
+    (util.quat_to_rpy(msg.task_lhand_ori_pos)).tolist())
+
+    data_saver.add('task_lhand_ori_pos_des_local',
+    list(msg.task_lhand_ori_pos_des_local))
+    data_saver.add('task_lhand_ori_vel_des_local',
+    list(msg.task_lhand_ori_vel_des_local))
+    data_saver.add('task_lhand_ori_acc_des_local',
+    list(msg.task_lhand_ori_acc_des_local))
+    data_saver.add('task_lhand_ori_pos_local',
+    list(msg.task_lhand_ori_pos_local))
+    data_saver.add('task_lhand_ori_vel_local',
+    list(msg.task_lhand_ori_vel_local))
+
+    data_saver.add('task_lhand_rpy_pos_des_local',
+    (util.quat_to_rpy(msg.task_lhand_ori_pos_des_local)).tolist())
+    data_saver.add('task_lhand_rpy_pos_local',
+    (util.quat_to_rpy(msg.task_lhand_ori_pos_local)).tolist())
 
     data_saver.advance()
 

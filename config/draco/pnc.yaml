@@ -177,16 +177,16 @@ wbc:
         hand_pos:
           weight_at_min: [0., 0., 0.]
           weight_at_max: [100., 100., 100.]
-          sim_kp: [100., 100., 100.]
-          sim_kd: [20., 20., 20.]
+          sim_kp: [300., 300., 300.]
+          sim_kd: [34., 34., 34.]
           exp_kp: [10., 10., 10.]
           exp_kd: [6., 6., 6.]
 
         hand_ori:
           weight_at_min: [0., 0., 0.]
           weight_at_max: [100., 100., 100.]
-          sim_kp: [100., 100., 100.]
-          sim_kd: [20., 20., 20.]
+          sim_kp: [300., 300., 300.]
+          sim_kd: [34., 34., 34.]
           exp_kp: [5., 5., 5.]
           exp_kd: [4., 4., 4.]
 
@@ -310,7 +310,7 @@ hand_reaching:
   left_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
   right_hand_duration: 3.
-  right_hand_rel_target_pos: [0.4, 0., 0.] ## side reaching
+  right_hand_rel_target_pos: [0.2, 0., 0.] ## side reaching
   right_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
 controller:

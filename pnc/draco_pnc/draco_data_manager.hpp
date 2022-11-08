@@ -163,4 +163,53 @@ public:
 
   // imu accel
   Eigen::VectorXd imu_accel = Eigen::VectorXd::Zero(3);
+
+  // hand task
+  Eigen::VectorXd task_rhand_lin_pos = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_vel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_rhand_lin_pos_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_vel_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_pos_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_vel_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_lin_acc_des_local = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_rhand_ori_pos_des = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ori_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ori_acc_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ori_pos = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ori_vel = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_rhand_ori_pos_des_local = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ori_vel_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ori_acc_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_rhand_ori_pos_local = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_rhand_ori_vel_local = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_lin_pos = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_vel = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_pos_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_acc_des = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_lin_pos_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_vel_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_pos_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_vel_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_lin_acc_des_local = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_ori_pos_des = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ori_vel_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ori_acc_des = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ori_pos = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ori_vel = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd task_lhand_ori_pos_des_local = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ori_vel_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ori_acc_des_local = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd task_lhand_ori_pos_local = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd task_lhand_ori_vel_local = Eigen::VectorXd::Zero(3);
 };

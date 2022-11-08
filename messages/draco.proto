@@ -141,4 +141,56 @@ message pnc_msg {
 
   // base lin vel
   repeated float base_joint_lin_vel = 96;
+
+  // hand task
+  repeated float task_rhand_lin_pos = 97;
+  repeated float task_rhand_lin_vel = 98;
+  repeated float task_rhand_lin_pos_des = 99;
+  repeated float task_rhand_lin_vel_des = 100;
+  repeated float task_rhand_lin_acc_des = 101;
+
+  repeated float task_rhand_lin_pos_local = 102;
+  repeated float task_rhand_lin_vel_local = 103;
+  repeated float task_rhand_lin_pos_des_local = 104;
+  repeated float task_rhand_lin_vel_des_local = 105;
+  repeated float task_rhand_lin_acc_des_local = 106;
+
+  // rhand ori
+  repeated float task_rhand_ori_pos_des = 107;
+  repeated float task_rhand_ori_vel_des = 108;
+  repeated float task_rhand_ori_acc_des = 109;
+  repeated float task_rhand_ori_pos = 110;
+  repeated float task_rhand_ori_vel = 111;
+
+  repeated float task_rhand_ori_pos_des_local = 112;
+  repeated float task_rhand_ori_vel_des_local = 113;
+  repeated float task_rhand_ori_acc_des_local = 114;
+  repeated float task_rhand_ori_pos_local = 115;
+  repeated float task_rhand_ori_vel_local = 116;
+
+  // lhand pos
+  repeated float task_lhand_lin_pos = 117;
+  repeated float task_lhand_lin_vel = 118;
+  repeated float task_lhand_lin_pos_des = 119;
+  repeated float task_lhand_lin_vel_des = 120;
+  repeated float task_lhand_lin_acc_des = 121;
+
+  repeated float task_lhand_lin_pos_local = 122;
+  repeated float task_lhand_lin_vel_local = 123;
+  repeated float task_lhand_lin_pos_des_local = 124;
+  repeated float task_lhand_lin_vel_des_local = 125;
+  repeated float task_lhand_lin_acc_des_local = 126;
+
+  // lhand ori
+  repeated float task_lhand_ori_pos_des = 127;
+  repeated float task_lhand_ori_vel_des = 128;
+  repeated float task_lhand_ori_acc_des = 129;
+  repeated float task_lhand_ori_pos = 130;
+  repeated float task_lhand_ori_vel = 131;
+
+  repeated float task_lhand_ori_pos_des_local = 132;
+  repeated float task_lhand_ori_vel_des_local = 133;
+  repeated float task_lhand_ori_acc_des_local = 134;
+  repeated float task_lhand_ori_pos_local = 135;
+  repeated float task_lhand_ori_vel_local = 136;
 }

@@ -127,6 +127,66 @@ void DracoDataManager::Send() {
         data->task_lfoot_ori_vel_des_local[i]);
     pb_msg.add_task_lfoot_ori_acc_des_local(
         data->task_lfoot_ori_acc_des_local[i]);
+
+    pb_msg.add_task_rhand_lin_pos(data->task_rhand_lin_pos[i]);
+    pb_msg.add_task_rhand_lin_vel(data->task_rhand_lin_vel[i]);
+    pb_msg.add_task_rhand_lin_pos_des(data->task_rhand_lin_pos_des[i]);
+    pb_msg.add_task_rhand_lin_vel_des(data->task_rhand_lin_vel_des[i]);
+    pb_msg.add_task_rhand_lin_acc_des(data->task_rhand_lin_acc_des[i]);
+
+    pb_msg.add_task_rhand_lin_pos_local(data->task_rhand_lin_pos_local[i]);
+    pb_msg.add_task_rhand_lin_vel_local(data->task_rhand_lin_vel_local[i]);
+    pb_msg.add_task_rhand_lin_pos_des_local(
+        data->task_rhand_lin_pos_des_local[i]);
+    pb_msg.add_task_rhand_lin_vel_des_local(
+        data->task_rhand_lin_vel_des_local[i]);
+    pb_msg.add_task_rhand_lin_acc_des_local(
+        data->task_rhand_lin_acc_des_local[i]);
+
+    pb_msg.add_task_rhand_ori_pos(data->task_rhand_ori_pos[i]);
+    pb_msg.add_task_rhand_ori_vel(data->task_rhand_ori_vel[i]);
+    pb_msg.add_task_rhand_ori_pos_des(data->task_rhand_ori_pos_des[i]);
+    pb_msg.add_task_rhand_ori_vel_des(data->task_rhand_ori_vel_des[i]);
+    pb_msg.add_task_rhand_ori_acc_des(data->task_rhand_ori_acc_des[i]);
+
+    pb_msg.add_task_rhand_ori_pos_local(data->task_rhand_ori_pos_local[i]);
+    pb_msg.add_task_rhand_ori_vel_local(data->task_rhand_ori_vel_local[i]);
+    pb_msg.add_task_rhand_ori_pos_des_local(
+        data->task_rhand_ori_pos_des_local[i]);
+    pb_msg.add_task_rhand_ori_vel_des_local(
+        data->task_rhand_ori_vel_des_local[i]);
+    pb_msg.add_task_rhand_ori_acc_des_local(
+        data->task_rhand_ori_acc_des_local[i]);
+
+    pb_msg.add_task_lhand_lin_pos(data->task_lhand_lin_pos[i]);
+    pb_msg.add_task_lhand_lin_vel(data->task_lhand_lin_vel[i]);
+    pb_msg.add_task_lhand_lin_pos_des(data->task_lhand_lin_pos_des[i]);
+    pb_msg.add_task_lhand_lin_vel_des(data->task_lhand_lin_vel_des[i]);
+    pb_msg.add_task_lhand_lin_acc_des(data->task_lhand_lin_acc_des[i]);
+
+    pb_msg.add_task_lhand_lin_pos_local(data->task_lhand_lin_pos_local[i]);
+    pb_msg.add_task_lhand_lin_vel_local(data->task_lhand_lin_vel_local[i]);
+    pb_msg.add_task_lhand_lin_pos_des_local(
+        data->task_lhand_lin_pos_des_local[i]);
+    pb_msg.add_task_lhand_lin_vel_des_local(
+        data->task_lhand_lin_vel_des_local[i]);
+    pb_msg.add_task_lhand_lin_acc_des_local(
+        data->task_lhand_lin_acc_des_local[i]);
+
+    pb_msg.add_task_lhand_ori_pos(data->task_lhand_ori_pos[i]);
+    pb_msg.add_task_lhand_ori_vel(data->task_lhand_ori_vel[i]);
+    pb_msg.add_task_lhand_ori_pos_des(data->task_lhand_ori_pos_des[i]);
+    pb_msg.add_task_lhand_ori_vel_des(data->task_lhand_ori_vel_des[i]);
+    pb_msg.add_task_lhand_ori_acc_des(data->task_lhand_ori_acc_des[i]);
+
+    pb_msg.add_task_lhand_ori_pos_local(data->task_lhand_ori_pos_local[i]);
+    pb_msg.add_task_lhand_ori_vel_local(data->task_lhand_ori_vel_local[i]);
+    pb_msg.add_task_lhand_ori_pos_des_local(
+        data->task_lhand_ori_pos_des_local[i]);
+    pb_msg.add_task_lhand_ori_vel_des_local(
+        data->task_lhand_ori_vel_des_local[i]);
+    pb_msg.add_task_lhand_ori_acc_des_local(
+        data->task_lhand_ori_acc_des_local[i]);
   }
 
   pb_msg.add_task_torso_ori_pos_des(data->task_torso_ori_pos_des[3]);
@@ -146,6 +206,18 @@ void DracoDataManager::Send() {
   pb_msg.add_task_rfoot_ori_pos_des_local(
       data->task_rfoot_ori_pos_des_local[3]);
   pb_msg.add_task_rfoot_ori_pos_local(data->task_rfoot_ori_pos_local[3]);
+
+  pb_msg.add_task_lhand_ori_pos_des(data->task_lhand_ori_pos_des[3]);
+  pb_msg.add_task_lhand_ori_pos(data->task_lhand_ori_pos[3]);
+  pb_msg.add_task_lhand_ori_pos_des_local(
+      data->task_lhand_ori_pos_des_local[3]);
+  pb_msg.add_task_lhand_ori_pos_local(data->task_lhand_ori_pos_local[3]);
+
+  pb_msg.add_task_rhand_ori_pos_des(data->task_rhand_ori_pos_des[3]);
+  pb_msg.add_task_rhand_ori_pos(data->task_rhand_ori_pos[3]);
+  pb_msg.add_task_rhand_ori_pos_des_local(
+      data->task_rhand_ori_pos_des_local[3]);
+  pb_msg.add_task_rhand_ori_pos_local(data->task_rhand_ori_pos_local[3]);
 
   for (int i = 0; i < data->task_upper_body_pos_des.size(); ++i) {
     pb_msg.add_task_upper_body_pos_des(data->task_upper_body_pos_des[i]);

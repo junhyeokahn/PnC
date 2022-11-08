@@ -539,4 +539,36 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_upper_body_pos_des, dm->data->task_upper_body_vel_des,
       dm->data->task_upper_body_acc_des, dm->data->task_upper_body_pos,
       dm->data->task_upper_body_vel);
+
+  tci_container->rhand_pos_task->CopyData(
+      dm->data->task_rhand_lin_pos_des, dm->data->task_rhand_lin_vel_des,
+      dm->data->task_rhand_lin_acc_des, dm->data->task_rhand_lin_pos,
+      dm->data->task_rhand_lin_vel, dm->data->task_rhand_lin_pos_des_local,
+      dm->data->task_rhand_lin_vel_des_local,
+      dm->data->task_rhand_lin_acc_des_local,
+      dm->data->task_rhand_lin_pos_local, dm->data->task_rhand_lin_vel_local);
+
+  tci_container->rhand_ori_task->CopyData(
+      dm->data->task_rhand_ori_pos_des, dm->data->task_rhand_ori_vel_des,
+      dm->data->task_rhand_ori_acc_des, dm->data->task_rhand_ori_pos,
+      dm->data->task_rhand_ori_vel, dm->data->task_rhand_ori_pos_des_local,
+      dm->data->task_rhand_ori_vel_des_local,
+      dm->data->task_rhand_ori_acc_des_local,
+      dm->data->task_rhand_ori_pos_local, dm->data->task_rhand_ori_vel_local);
+
+  tci_container->lhand_pos_task->CopyData(
+      dm->data->task_lhand_lin_pos_des, dm->data->task_lhand_lin_vel_des,
+      dm->data->task_lhand_lin_acc_des, dm->data->task_lhand_lin_pos,
+      dm->data->task_lhand_lin_vel, dm->data->task_lhand_lin_pos_des_local,
+      dm->data->task_lhand_lin_vel_des_local,
+      dm->data->task_lhand_lin_acc_des_local,
+      dm->data->task_lhand_lin_pos_local, dm->data->task_lhand_lin_vel_local);
+
+  tci_container->lhand_ori_task->CopyData(
+      dm->data->task_lhand_ori_pos_des, dm->data->task_lhand_ori_vel_des,
+      dm->data->task_lhand_ori_acc_des, dm->data->task_lhand_ori_pos,
+      dm->data->task_lhand_ori_vel, dm->data->task_lhand_ori_pos_des_local,
+      dm->data->task_lhand_ori_vel_des_local,
+      dm->data->task_lhand_ori_acc_des_local,
+      dm->data->task_lhand_ori_pos_local, dm->data->task_lhand_ori_vel_local);
 }
