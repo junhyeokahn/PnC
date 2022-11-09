@@ -29,14 +29,14 @@ void SingleSupportSwing::firstVisit() {
   if (leg_side_ == EndEffector::RFoot) {
     // rfoot swing
     ctrl_arch_->rfoot_tm->InitializeSwingTrajectory(
-        sp_->curr_time, end_time_,
+        sp_->curr_time, end_time_, sp_->nominal_rfoot_iso,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
     sp_->b_rf_contact = false;
     sp_->b_lf_contact = true;
   } else if (leg_side_ == EndEffector::LFoot) {
     // lfoot swing
     ctrl_arch_->lfoot_tm->InitializeSwingTrajectory(
-        sp_->curr_time, end_time_,
+        sp_->curr_time, end_time_, sp_->nominal_lfoot_iso,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
     sp_->b_rf_contact = true;
     sp_->b_lf_contact = false;
@@ -51,10 +51,12 @@ void SingleSupportSwing::oneStep() {
   // Update Foot Task
   if (leg_side_ == EndEffector::LFoot) {
     ctrl_arch_->lfoot_tm->UpdateDesired(sp_->curr_time);
-    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+//    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
   } else {
     ctrl_arch_->rfoot_tm->UpdateDesired(sp_->curr_time);
-    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
+//    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   }
 
   // Update floating base task
@@ -63,6 +65,11 @@ void SingleSupportSwing::oneStep() {
 
 void SingleSupportSwing::lastVisit() {
   ctrl_arch_->dcm_tm->incrementStepIndex();
+
+  sp_->nominal_lfoot_iso.translation() = ctrl_arch_->lfoot_tm->GetDesiredPos();
+  sp_->nominal_lfoot_iso.linear() = ctrl_arch_->lfoot_tm->GetDesiredOri();
+  sp_->nominal_rfoot_iso.translation() = ctrl_arch_->rfoot_tm->GetDesiredPos();
+  sp_->nominal_rfoot_iso.linear() = ctrl_arch_->rfoot_tm->GetDesiredOri();
 
   sp_->b_rf_contact = true;
   sp_->b_lf_contact = true;

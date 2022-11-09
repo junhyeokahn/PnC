@@ -27,6 +27,12 @@ public:
                                  const double _swing_duration,
                                  const Footstep &_landing_foot);
 
+  /// Initialize the swing foot trajectory from specified starting iso
+  void InitializeSwingTrajectory(const double _start_time,
+                                 const double _swing_duration,
+                                 const Eigen::Isometry3d &_start_foot_iso,
+                                 const Footstep &_landing_foot);
+
   /// computes the swing foot and updates the desired swing foot task
   void UpdateDesired(const double current_time);
 

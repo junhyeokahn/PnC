@@ -59,15 +59,21 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
     const double _start_time, const double _swing_duration,
     const Footstep &_landing_foot) {
 
+  this->InitializeSwingTrajectory(_start_time, _swing_duration, robot_->get_link_iso(link_idx_), _landing_foot);
+}
+
+void FootTrajectoryManager::InitializeSwingTrajectory(
+        const double _start_time, const double _swing_duration,
+        const Eigen::Isometry3d &_start_foot_iso, const Footstep &_landing_foot) {
+
   // Copy and initialize variables
   start_time_ = _start_time;
   duration_ = _swing_duration;
   swing_land_foot_ = _landing_foot;
 
   // initialize swing foot starting pose
-  Eigen::Vector3d start_foot_pos =
-      robot_->get_link_iso(link_idx_).translation();
-  Eigen::Quaterniond start_foot_ori(robot_->get_link_iso(link_idx_).linear());
+  Eigen::Vector3d start_foot_pos = _start_foot_iso.translation();
+  Eigen::Quaterniond start_foot_ori(_start_foot_iso.linear());
 
   swing_init_foot_.setPosOriSide(start_foot_pos, start_foot_ori,
                                  swing_land_foot_.robot_side);
@@ -81,9 +87,9 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
   // swing time
   Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
   Eigen::Vector3d mid_swing_position =
-      swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
+          swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity =
-      (swing_land_foot_.position - swing_init_foot_.position) / duration_;
+          (swing_land_foot_.position - swing_init_foot_.position) / duration_;
 
   // Construct Position trajectories
   pos_traj_init_to_mid_.initialize(swing_init_foot_.position,
