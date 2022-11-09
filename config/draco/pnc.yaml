@@ -59,9 +59,13 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.1, 0.4, 25]
+            #exp_kp: [0.1, 0.4, 25]
+            #exp_kd: [0.04, 0.04, 1.5]
+            #exp_ki: [1.0, 1.0, 0.]
+
+            exp_kp: [0.5, 0.5, 25]
             exp_kd: [0.04, 0.04, 1.5]
-            exp_ki: [1.0, 1.0, 0.]
+            exp_ki: [0.0, 0.0, 0.]
             time_constant: 5.
         cam:
             weight: [0., 0., 0.]
@@ -176,11 +180,11 @@ wbc:
 
         hand_pos:
           weight_at_min: [0., 0., 0.]
-          weight_at_max: [100., 100., 100.]
+          weight_at_max: [1000., 1000., 1000.]
           sim_kp: [300., 300., 300.]
           sim_kd: [34., 34., 34.]
-          exp_kp: [10., 10., 10.]
-          exp_kd: [6., 6., 6.]
+          exp_kp: [20., 20., 20.]
+          exp_kd: [1., 1., 1.]
 
         hand_ori:
           weight_at_min: [0., 0., 0.]
@@ -188,7 +192,7 @@ wbc:
           sim_kp: [300., 300., 300.]
           sim_kd: [34., 34., 34.]
           exp_kp: [5., 5., 5.]
-          exp_kd: [4., 4., 4.]
+          exp_kd: [2., 2., 2.]
 
     joint_integrator:
         vel_cutoff_freq: 2.0 # Hz
@@ -216,28 +220,28 @@ walking:
         l_elbow_fe: -1.57
         r_shoulder_aa: -0.523
         r_elbow_fe: -1.57
-        #l_hip_aa: 0.
-        l_hip_aa: 0.047
+        l_hip_aa: 0.
+        #l_hip_aa: 0.047
         #l_hip_aa: 0.060
         #l_hip_aa: 0.160
         l_hip_fe: -0.785
         l_knee_fe_jp: 0.785
         l_knee_fe_jd: 0.785
         l_ankle_fe: -0.785
-        #l_ankle_ie: 0.
-        l_ankle_ie: -0.047
+        l_ankle_ie: 0.
+        #l_ankle_ie: -0.047
         #l_ankle_ie: -0.060
         #l_ankle_ie: -0.160
-        #r_hip_aa: 0.
-        r_hip_aa: -0.047
+        r_hip_aa: 0.
+        #r_hip_aa: -0.047
         #r_hip_aa: -0.060
         #r_hip_aa: -0.160
         r_hip_fe: -0.785
         r_knee_fe_jp: 0.785
         r_knee_fe_jd: 0.785
         r_ankle_fe: -0.785
-        #r_ankle_ie: 0.
-        r_ankle_ie: 0.047
+        r_ankle_ie: 0.
+        #r_ankle_ie: 0.047
         #r_ankle_ie: 0.060
         #r_ankle_ie: 0.160
         neck_pitch: 0.
@@ -305,12 +309,12 @@ static_balancing:
     landing_duration: 1.
 
 hand_reaching:
-  left_hand_duration: 3.
-  left_hand_rel_target_pos: [0., 0.4, 0.] ## forward reaching
+  left_hand_duration: 2.
+  left_hand_rel_target_pos: [0., 0.2, 0.] ## forward reaching
   left_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
   right_hand_duration: 3.
-  right_hand_rel_target_pos: [0.2, 0., 0.] ## side reaching
+  right_hand_rel_target_pos: [0.2, 0., 0.] ## side reaching (outwards)
   right_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
 controller:
