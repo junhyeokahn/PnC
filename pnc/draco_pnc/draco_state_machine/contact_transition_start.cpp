@@ -57,8 +57,10 @@ void ContactTransitionStart::firstVisit() {
       Eigen::Vector3d ini_pos = sp_->dcm;
       Eigen::Vector3d ini_vel = sp_->dcm_vel;
       if (b_use_base_height) {
-        ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
-        ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
+        ini_pos[2] = sp_->des_com_pos_in_standup[2];
+        ini_vel[2] = 0.;
+//        ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
+//        ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
       }
       Eigen::Quaternion<double> torso_quat(
           robot_->get_link_iso("torso_com_link").linear());
@@ -84,8 +86,10 @@ void ContactTransitionStart::oneStep() {
   ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+//  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+//  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update floating base task
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
