@@ -175,10 +175,10 @@ void DracoController::getCommand(void *cmd) {
         wbc_joint_acc_cmd;
     if (sp_->state == draco_states::kLFootSwing) {
       cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
-      cmd_rfoot_rf_ = rf_des;
+      cmd_rfoot_rf_ = rf_des.head(6);
     } else if (sp_->state == draco_states::kRFootSwing) {
       cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
-      cmd_lfoot_rf_ = rf_des;
+      cmd_lfoot_rf_ = rf_des.tail(6);
     } else {
       // right foot first
       cmd_rfoot_rf_ = rf_des.head(6);
