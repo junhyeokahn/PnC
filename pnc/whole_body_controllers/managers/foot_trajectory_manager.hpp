@@ -49,6 +49,9 @@ public:
       const Eigen::Quaternion<double> &_init_quat);
   void UpdateInterpolationDesired(const double &_curr_time);
 
+  Eigen::Vector3d GetDesiredPos() const;
+  Eigen::Quaternion<double> GetDesiredOri() const;
+
 private:
   void convertQuatDesToOriDes();
   RobotSystem *robot_;
