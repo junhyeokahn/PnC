@@ -143,10 +143,10 @@ void DoubleSupportStand::oneStep() {
   // Update Floating Base Task
   ctrl_arch_->floating_base_tm->UpdateDesired(sp_->curr_time);
   // Update Foot Task
-  // ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-  // ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  // ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
   // Update Max Normal Reaction Force
   ctrl_arch_->rfoot_fm->UpdateRampToMax(sp_->curr_time);
   ctrl_arch_->lfoot_fm->UpdateRampToMax(sp_->curr_time);

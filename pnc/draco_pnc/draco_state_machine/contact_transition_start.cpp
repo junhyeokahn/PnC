@@ -69,6 +69,7 @@ void ContactTransitionStart::firstVisit() {
       // Eigen::Quaternion<double> torso_quat(
       // robot_->get_link_iso("torso_com_link").linear());
       Eigen::Quaternion<double> torso_quat = sp_->nominal_base_quat;
+
       ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,
                                      torso_quat.normalized(), ini_pos, ini_vel);
       ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
@@ -91,10 +92,10 @@ void ContactTransitionStart::oneStep() {
   ctrl_arch_->lfoot_ori_hm->UpdateRampToMax(sp_->curr_time);
 
   // Update Foot Task
-//  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-//  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  // ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update floating base task
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
