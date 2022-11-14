@@ -54,16 +54,21 @@ void ContactTransitionStart::firstVisit() {
                   ctrl_arch_->dcm_tm->getNormalForceRampDownTime();
 
       // TODO : Replanning
-      Eigen::Vector3d ini_pos = sp_->dcm;
-      Eigen::Vector3d ini_vel = sp_->dcm_vel;
+      Eigen::Vector3d ini_pos = ctrl_arch_->tci_container->com_task->pos_des;
+      Eigen::Vector3d ini_vel = ctrl_arch_->tci_container->com_task->vel_des;
+      // Eigen::Vector3d ini_pos = sp_->dcm;
+      // Eigen::Vector3d ini_vel = sp_->dcm_vel;
       if (b_use_base_height) {
         ini_pos[2] = sp_->des_com_pos_in_standup[2];
         ini_vel[2] = 0.;
-//        ini_pos[2] = robot_->get_link_iso("torso_com_link").translation()[2];
-//        ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
+        //        ini_pos[2] =
+        //        robot_->get_link_iso("torso_com_link").translation()[2];
+        //        ini_vel[2] = robot_->get_link_vel("torso_com_link")[5];
       }
-      Eigen::Quaternion<double> torso_quat(
-          robot_->get_link_iso("torso_com_link").linear());
+
+      // Eigen::Quaternion<double> torso_quat(
+      // robot_->get_link_iso("torso_com_link").linear());
+      Eigen::Quaternion<double> torso_quat = sp_->nominal_base_quat;
       ctrl_arch_->dcm_tm->initialize(sp_->curr_time, transfer_type,
                                      torso_quat.normalized(), ini_pos, ini_vel);
       ctrl_arch_->dcm_tm->saveSolution(std::to_string(sp_->planning_id));
