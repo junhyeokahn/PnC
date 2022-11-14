@@ -478,9 +478,12 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     Eigen::MatrixXd curr_rfoot_quat = Eigen::MatrixXd::Zero(1, 4);
     Eigen::MatrixXd curr_lfoot_pos = Eigen::MatrixXd::Zero(1, 3);
     Eigen::MatrixXd curr_lfoot_quat = Eigen::MatrixXd::Zero(1, 4);
+    Eigen::MatrixXd curr_midfoot_pos = Eigen::MatrixXd::Zero(1, 3);
+    Eigen::MatrixXd curr_midfoot_quat = Eigen::MatrixXd::Zero(1, 4);
     for (int i = 0; i < 3; ++i) {
       curr_rfoot_pos(0, i) = right_foot_start_.position(i);
       curr_lfoot_pos(0, i) = left_foot_start_.position(i);
+      curr_midfoot_pos(0, i) = mid_foot_stance_.position(i);
     }
     curr_rfoot_quat(0, 0) = right_foot_start_.orientation.w();
     curr_rfoot_quat(0, 1) = right_foot_start_.orientation.x();
@@ -491,6 +494,11 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     curr_lfoot_quat(0, 1) = left_foot_start_.orientation.x();
     curr_lfoot_quat(0, 2) = left_foot_start_.orientation.y();
     curr_lfoot_quat(0, 3) = left_foot_start_.orientation.z();
+
+    curr_midfoot_quat(0, 0) = mid_foot_stance_.orientation.w();
+    curr_midfoot_quat(0, 1) = mid_foot_stance_.orientation.x();
+    curr_midfoot_quat(0, 2) = mid_foot_stance_.orientation.y();
+    curr_midfoot_quat(0, 3) = mid_foot_stance_.orientation.z();
 
     int n_rf(0);
     int n_lf(0);
@@ -533,6 +541,8 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     cfg["contact"]["curr_right_foot"]["ori"] = curr_rfoot_quat;
     cfg["contact"]["curr_left_foot"]["pos"] = curr_lfoot_pos;
     cfg["contact"]["curr_left_foot"]["ori"] = curr_lfoot_quat;
+    cfg["contact"]["curr_mid_foot"]["pos"] = curr_midfoot_pos;
+    cfg["contact"]["curr_mid_foot"]["ori"] = curr_midfoot_quat;
     cfg["contact"]["right_foot"]["pos"] = rfoot_pos;
     cfg["contact"]["right_foot"]["ori"] = rfoot_quat;
     cfg["contact"]["left_foot"]["pos"] = lfoot_pos;
