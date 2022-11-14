@@ -43,8 +43,8 @@ DCMTrajectoryManager::DCMTrajectoryManager(
   nominal_strafe_distance = 0.125;
 
   // First step before alternating
-  // robot_side_first_ = EndEffector::RFoot;
-  robot_side_first_ = EndEffector::LFoot;
+  robot_side_first_ = EndEffector::RFoot;
+  // robot_side_first_ = EndEffector::LFoot;
 
   convertTemporalParamsToDCMParams();
 }
