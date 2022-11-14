@@ -78,6 +78,7 @@ def plot_foot(ax, pos, ori, color, text):
 
 def main(args):
     file = args.file
+    b_plot_2D = args.b_plot_2D
 
     with open(file, 'r') as stream:
         try:
@@ -136,42 +137,56 @@ def main(args):
     dcmref_linecolor = 'cornflowerblue'
 
     fig1 = plt.figure()
-    com_motion = Axes3D(fig1)
+    if b_plot_2D:
+        plt.plot(com_pos_ref[:, 0],
+                 com_pos_ref[:, 1],
+                 linewidth=comref_linewidth,
+                 color=comref_linecolor)
+        plt.plot(dcm_pos_ref[:, 0],
+                dcm_pos_ref[:, 1],
+                linewidth=dcmref_linewidth,
+                linestyle=line_styles[0],
+                color=dcmref_linecolor)
+        plt.grid()
+        ax = plt.gca()
+        ax.set_aspect('equal')
+    else:
+        com_motion = Axes3D(fig1)
 
-    # plot com
-    com_motion.plot(xs=com_pos_ref[:, 0],
-                    ys=com_pos_ref[:, 1],
-                    zs=com_pos_ref[:, 2],
-                    linewidth=comref_linewidth,
-                    color=comref_linecolor)
-    com_motion.plot(xs=dcm_pos_ref[:, 0],
-                    ys=dcm_pos_ref[:, 1],
-                    zs=dcm_pos_ref[:, 2],
-                    linewidth=dcmref_linewidth,
-                    linestyle=line_styles[0],
-                    color=dcmref_linecolor)
+        # plot com
+        com_motion.plot(xs=com_pos_ref[:, 0],
+                        ys=com_pos_ref[:, 1],
+                        zs=com_pos_ref[:, 2],
+                        linewidth=comref_linewidth,
+                        color=comref_linecolor)
+        com_motion.plot(xs=dcm_pos_ref[:, 0],
+                        ys=dcm_pos_ref[:, 1],
+                        zs=dcm_pos_ref[:, 2],
+                        linewidth=dcmref_linewidth,
+                        linestyle=line_styles[0],
+                        color=dcmref_linecolor)
 
-    # plot foot
-    plot_foot(com_motion, np.squeeze(curr_rfoot_contact_pos),
-              np.squeeze(curr_rfoot_contact_ori), colors[0], "InitRF")
-    plot_foot(com_motion, np.squeeze(curr_lfoot_contact_pos),
-              np.squeeze(curr_lfoot_contact_ori), colors[1], "InitLF")
-    for i, (pos, ori) in enumerate(zip(rfoot_contact_pos, rfoot_contact_ori)):
-        plot_foot(com_motion, pos, ori, colors[0], "RF" + str(i))
-    for i, (pos, ori) in enumerate(zip(lfoot_contact_pos, lfoot_contact_ori)):
-        plot_foot(com_motion, pos, ori, colors[1], "LF" + str(i))
+        # plot foot
+        plot_foot(com_motion, np.squeeze(curr_rfoot_contact_pos),
+                  np.squeeze(curr_rfoot_contact_ori), colors[0], "InitRF")
+        plot_foot(com_motion, np.squeeze(curr_lfoot_contact_pos),
+                  np.squeeze(curr_lfoot_contact_ori), colors[1], "InitLF")
+        for i, (pos, ori) in enumerate(zip(rfoot_contact_pos, rfoot_contact_ori)):
+            plot_foot(com_motion, pos, ori, colors[0], "RF" + str(i))
+        for i, (pos, ori) in enumerate(zip(lfoot_contact_pos, lfoot_contact_ori)):
+            plot_foot(com_motion, pos, ori, colors[1], "LF" + str(i))
 
-    com_motion.tick_params(labelsize=axis_tick_size, colors=axis_tick_color)
-    com_motion.set_xlabel("x",
-                          fontsize=axis_label_size,
-                          color=axis_label_color)
-    com_motion.set_ylabel("y",
-                          fontsize=axis_label_size,
-                          color=axis_label_color)
-    com_motion.set_zlabel("z",
-                          fontsize=axis_label_size,
-                          color=axis_label_color)
-    set_axes_equal(com_motion)
+        com_motion.tick_params(labelsize=axis_tick_size, colors=axis_tick_color)
+        com_motion.set_xlabel("x",
+                              fontsize=axis_label_size,
+                              color=axis_label_color)
+        com_motion.set_ylabel("y",
+                              fontsize=axis_label_size,
+                              color=axis_label_color)
+        com_motion.set_zlabel("z",
+                              fontsize=axis_label_size,
+                              color=axis_label_color)
+        set_axes_equal(com_motion)
 
     # ==========================================================================
     # Plot Trajectory
@@ -184,5 +199,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", type=str)
+    parser.add_argument("--b_plot_2D", default=False, action='store_true')
     args = parser.parse_args()
     main(args)
