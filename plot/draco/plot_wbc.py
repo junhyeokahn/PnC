@@ -167,9 +167,9 @@ plot_task(time, local_des['task_torso_ori_pos'],
 # phase,
 # 'upper body',
 # label=upper_body_pos_label[slc])
-# plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
-# des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
-# 'left foot lin')
+plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
+          des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
+          'left foot lin')
 
 plot_task(time, des['task_lfoot_ori_pos'], act['task_lfoot_ori_pos'],
           des['task_lfoot_ori_vel'], act['task_lfoot_ori_vel'], phase,
