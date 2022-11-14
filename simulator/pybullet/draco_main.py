@@ -38,7 +38,7 @@ def set_initial_config(robot, joint_id):
     p.resetJointState(robot, joint_id["r_elbow_fe"], -np.pi / 2, 0.)
 
     # Lowerbody
-    hip_yaw_angle = 0
+    hip_yaw_angle = 0.047
     p.resetJointState(robot, joint_id["l_hip_aa"], np.radians(hip_yaw_angle),
                       0.)
     p.resetJointState(robot, joint_id["l_hip_fe"], -np.pi / 4, 0.)
