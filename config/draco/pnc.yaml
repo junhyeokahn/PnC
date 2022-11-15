@@ -24,6 +24,7 @@ state_estimator:
     sigma_vel_lfoot: [0.005, 0.005, 0.002]
     sigma_vel_rfoot: [0.005, 0.005, 0.002]
     base_accel_time_constant: 0.02
+    base_com_vel_time_constant: 1.0
 
 wbc:
     regularization:

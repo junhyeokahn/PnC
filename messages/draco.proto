@@ -160,4 +160,6 @@ message pnc_msg {
 
   // base lin vel
   repeated float base_joint_lin_vel = 109;
+
+  repeated float com_vel_est_exp = 110;
 }

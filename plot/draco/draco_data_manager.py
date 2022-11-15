@@ -269,6 +269,7 @@ while True:
     data_saver.add('joint_positions', list(msg.joint_positions))
     data_saver.add('joint_velocities', list(msg.joint_velocities))
 
+    data_saver.add('com_vel_est_exp', list(msg.com_vel_est_exp))
     data_saver.add('com_vel_est', list(msg.com_vel_est))
     data_saver.add('com_vel_raw', list(msg.com_vel_raw))
     data_saver.add('imu_ang_vel_est', list(msg.imu_ang_vel_est))

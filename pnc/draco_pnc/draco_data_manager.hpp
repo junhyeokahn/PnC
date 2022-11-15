@@ -141,6 +141,7 @@ public:
 
   // filtered data
   Eigen::VectorXd com_vel_est = Eigen::VectorXd::Zero(3);
+  Eigen::VectorXd com_vel_est_exp = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd com_vel_raw = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd imu_ang_vel_est = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd imu_ang_vel_raw = Eigen::VectorXd::Zero(3);
