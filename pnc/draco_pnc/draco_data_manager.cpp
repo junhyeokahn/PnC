@@ -252,6 +252,7 @@ void DracoDataManager::Send() {
 
   for (int i = 0; i < 3; ++i) {
     pb_msg.add_com_vel_est(data->com_vel_est[i]);
+    pb_msg.add_com_vel_est_exp(data->com_vel_est_exp[i]);
     pb_msg.add_com_vel_raw(data->com_vel_raw[i]);
     pb_msg.add_imu_ang_vel_est(data->imu_ang_vel_est[i]);
     pb_msg.add_imu_ang_vel_raw(data->imu_ang_vel_raw[i]);

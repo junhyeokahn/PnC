@@ -36,10 +36,19 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
     cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
   }
 
+  Eigen::VectorXd base_com_vel_limits = Eigen::VectorXd::Zero(3);
+  base_com_vel_limits << 1., 1., 1.;
+  double time_constant =
+          util::ReadParameter<double>(cfg["state_estimator"], "base_com_vel_time_constant");
+  // Filtered base velocity
+  base_com_vel_filt_ = new ExponentialMovingAverageFilter(
+          sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(3), -base_com_vel_limits,
+          base_com_vel_limits);
+
   b_first_visit_ = true;
 }
 
-DracoStateEstimator::~DracoStateEstimator() {}
+DracoStateEstimator::~DracoStateEstimator() {base_com_vel_filt_;}
 
 void DracoStateEstimator::initialize(DracoSensorData *data) {
   this->update(data);
@@ -128,6 +137,9 @@ void DracoStateEstimator::update(DracoSensorData *data) {
       (base_com_pos - prev_base_com_pos_) / sp_->servo_dt;
   // Eigen::Vector3d base_joint_vel = -foot_vel; // TODO: also use kinematics
 
+  base_com_vel_filt_->Input(base_com_lin_vel);
+//  base_com_lin_vel = base_com_vel_filt_->Output();
+
   // update system with base linear states
   robot_->update_system(
       base_com_pos, Eigen::Quaternion<double>(rot_world_to_base),
@@ -176,6 +188,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
         Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
     dm->data->base_joint_lin_vel = base_joint_lin_vel;
     dm->data->com_vel_est = sp_->com_vel_est;
+    dm->data->com_vel_est_exp = base_com_vel_filt_->Output();
     dm->data->com_vel_raw = robot_->get_com_lin_vel();
     dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;
     dm->data->imu_ang_vel_raw = data->imu_frame_vel.head(3);

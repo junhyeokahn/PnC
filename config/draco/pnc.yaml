@@ -9,7 +9,7 @@ b_exp: true # Enable b_smoothing at the bottom, n_data_com_vel, b_early_terminat
 b_joint_pos_test: false
 
 state_estimator:
-    n_data_com_vel: [200, 200, 200]
+    n_data_com_vel: [150, 200, 250]
     #n_data_com_vel: [20, 20, 20]
     #n_data_com_vel: [100, 100, 250]
     n_data_ang_vel: [5, 5, 5]
