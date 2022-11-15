@@ -59,9 +59,9 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.6, 0.4, 50]
+            exp_kp: [0.6, 0.4, 50]  ##TODO RETUNE
             exp_kd: [0.04, 0.04, 1.5]
-            exp_ki: [1.0, 1.0, 0.]
+            exp_ki: [1.0, 1.0, 0.]  ##TODO RETUNE
 
             #exp_kp: [0.3, 0.3, 25]
             #exp_kd: [0.04, 0.04, 1.5]
@@ -81,7 +81,7 @@ wbc:
             sim_kp: [100, 100, 100]
             #sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
-            exp_kp: [15, 15, 10]
+            exp_kp: [30, 30, 20]
             exp_kd: [0.2, 0.2, 0.1]
 
         upper_body_joint:
@@ -315,12 +315,12 @@ static_balancing:
     landing_duration: 1.
 
 hand_reaching:
-  left_hand_duration: 2.5
-  left_hand_rel_target_pos: [0., 0.3, 0.] ## forward reaching
+  left_hand_duration: 3.0
+  left_hand_rel_target_pos: [0., 0.20, 0.] ## forward reaching
   left_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
-  right_hand_duration: 2.5
-  right_hand_rel_target_pos: [0.0, 0., 0.3] ## side reaching (outwards)
+  right_hand_duration: 3.0
+  right_hand_rel_target_pos: [0.0, 0., 0.30] ## side reaching (outwards)
   right_hand_rel_target_ori: [1., 0., 0., 0.] #quat_w, quat_x, quat_y, quat_z order
 
 controller:
