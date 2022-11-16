@@ -1,4 +1,5 @@
 #include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
+#include <utils/util.hpp>
 
 DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
@@ -97,12 +98,36 @@ void DCMTrajectoryManager::resetStepIndex() { current_footstep_idx = 0; }
 
 // Updates the feet pose of the starting stance
 void DCMTrajectoryManager::updateStartingStance() {
+  // Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
+  // Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
+  // left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, EndEffector::LFoot);
+
+  // Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
+  // Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
+  // right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, EndEffector::RFoot);
+
+  // mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
+  // mid_foot_stance_);
+  //
   Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
-  Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
+  Eigen::Quaterniond lfoot_ori_act(robot_->get_link_iso(lfoot_id_).linear());
+
+  // project to flat ground
+  Eigen::Vector3d lfoot_ori_act_rpy = util::QuatToEulerZYX(lfoot_ori_act);
+  lfoot_ori_act_rpy(1) = 0;
+  lfoot_ori_act_rpy(2) = 0;
+  Eigen::Quaternion<double> lfoot_ori(util::EulerZYXtoQuat(
+      lfoot_ori_act_rpy(2), lfoot_ori_act_rpy(1), lfoot_ori_act_rpy(0)));
   left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, EndEffector::LFoot);
 
   Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
-  Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
+  Eigen::Quaterniond rfoot_ori_act(robot_->get_link_iso(rfoot_id_).linear());
+
+  Eigen::Vector3d rfoot_ori_act_rpy = util::QuatToEulerZYX(rfoot_ori_act);
+  rfoot_ori_act_rpy(1) = 0;
+  rfoot_ori_act_rpy(2) = 0;
+  Eigen::Quaternion<double> rfoot_ori(util::EulerZYXtoQuat(
+      rfoot_ori_act_rpy(2), rfoot_ori_act_rpy(1), rfoot_ori_act_rpy(0)));
   right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, EndEffector::RFoot);
 
   mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
