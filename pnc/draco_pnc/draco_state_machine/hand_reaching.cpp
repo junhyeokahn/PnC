@@ -61,10 +61,16 @@ void HandReaching::oneStep() {
     ctrl_arch_->lhand_pos_hm->UpdateRampToMax(sp_->curr_time);
     ctrl_arch_->lhand_ori_hm->UpdateRampToMax(sp_->curr_time);
 
+    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+
   } else if (state_identity_ == draco_states::kRHandReaching) {
     ctrl_arch_->rhand_tm->UpdateDesired(sp_->curr_time);
     ctrl_arch_->rhand_pos_hm->UpdateRampToMax(sp_->curr_time);
     ctrl_arch_->rhand_ori_hm->UpdateRampToMax(sp_->curr_time);
+
+    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   }
 }
 
