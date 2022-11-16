@@ -163,17 +163,25 @@ def main(args):
     lfoot_pos_act = np.stack(lfoot_pos_act, axis=0)
     rfoot_pos_act = np.stack(rfoot_pos_act, axis=0)
 
-    first_step_idx = np.where(
+    ## get times of inteterest
+    initial_step_idx = np.where(
         np.abs(np.array(time) -
-               final_time) == np.min(np.abs(np.array(time) -
-                                            final_time)))[0][0]
+               initial_time) == np.min(np.abs(np.array(time) -
+                                              initial_time)))[0][0]
+
     time_at_swing = initial_time + t_transfer + 1.5 * t_ds
+    time_at_touch_down = time_at_swing + t_ss
+
+    first_step_idx = np.where(
+        np.abs(np.array(time) - time_at_touch_down) == np.min(
+            np.abs(np.array(time) - time_at_touch_down)))[0][0]
     first_liftoff_idx = np.where(
         np.abs(np.array(time) -
                time_at_swing) == np.min(np.abs(np.array(time) -
                                                time_at_swing)))[0][0]
 
     landing_rfoot_pos = rfoot_pos_act[first_step_idx]
+    landing_lfoot_pos = lfoot_pos_act[first_step_idx]
     liftoff_icp_pos_act = icp_act[first_liftoff_idx]
     liftoff_icp_pos_des = icp_des[first_liftoff_idx]
 
@@ -215,8 +223,8 @@ def main(args):
                  icp_act[first_step_idx, 1],
                  'co',
                  label='ICP end')
-        plt.plot(icp_act[:first_step_idx, 0],
-                 icp_act[:first_step_idx, 1],
+        plt.plot(icp_act[initial_step_idx:first_step_idx, 0],
+                 icp_act[initial_step_idx:first_step_idx, 1],
                  color='c')
 
         plt.plot(liftoff_icp_pos_act[0],
@@ -232,20 +240,15 @@ def main(args):
         # plt.plot(com_pos_act[:, 0], com_pos_act[:, 1], color='k')
 
         # plot feet position
-        plt.plot(lfoot_pos_act[0, 0],
-                 lfoot_pos_act[0, 1],
+        plt.plot(lfoot_pos_act[initial_step_idx, 0],
+                 lfoot_pos_act[initial_step_idx, 1],
                  'rs',
                  label='LF act',
                  alpha=0.2)
-        plt.plot(rfoot_pos_act[0, 0],
-                 rfoot_pos_act[0, 1],
+        plt.plot(rfoot_pos_act[initial_step_idx, 0],
+                 rfoot_pos_act[initial_step_idx, 1],
                  'bs',
                  label='RF act',
-                 alpha=0.2)
-        plt.plot(landing_rfoot_pos[0],
-                 landing_rfoot_pos[1],
-                 'bo',
-                 label='RF act step',
                  alpha=0.2)
 
         # plot footstep plan
@@ -257,11 +260,27 @@ def main(args):
                  curr_rfoot_contact_pos[0, 1],
                  'bs',
                  label='initRF')
-
-        plt.plot(rfoot_contact_pos[0, 0],
-                 rfoot_contact_pos[0, 1],
-                 'cs',
-                 label='2ndRF(planned)')
+        if rfoot_contact_pos.shape[0] == 0:
+            plt.plot(landing_lfoot_pos[0],
+                     landing_lfoot_pos[1],
+                     'ro',
+                     label='LF act step',
+                     alpha=0.2)
+            plt.plot(lfoot_contact_pos[0, 0],
+                     lfoot_contact_pos[0, 1],
+                     'darkorange',
+                     marker='s',
+                     label='2ndLF(planned)')
+        else:
+            plt.plot(landing_rfoot_pos[0],
+                     landing_rfoot_pos[1],
+                     'bo',
+                     label='RF act step',
+                     alpha=0.2)
+            plt.plot(rfoot_contact_pos[0, 0],
+                     rfoot_contact_pos[0, 1],
+                     'cs',
+                     label='2ndRF(planned)')
 
         # plot feet
         ax = plt.gca()
