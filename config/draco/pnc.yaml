@@ -61,7 +61,7 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.6, 0.4, 50]  ##TODO RETUNE
+            exp_kp: [0.5, 0.3, 50]  ##TODO RETUNE
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]  ##TODO RETUNE
 
@@ -156,7 +156,7 @@ wbc:
                 exp_kd: 0.
         foot_pos:
             weight_at_contact: [10000., 10000., 10000.]
-            weight_at_swing: [1000., 1000., 1000.]
+            weight_at_swing: [500., 500., 500.]
             #weight_at_contact: [40., 40., 40.]
             #weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
@@ -167,8 +167,8 @@ wbc:
             exp_kd: [0.1, 0.1, 1.0]
             #exp_kd: [0.5, 0.5, 1.5]
         foot_ori:
-            weight_at_contact: [20000., 20000., 20000.]
-            weight_at_swing: [1000., 1000., 1000.]
+            weight_at_contact: [10000., 10000., 10000.]
+            weight_at_swing: [500., 500., 500.]
             #weight_at_contact: [20., 20., 20.]
             #weight_at_swing: [20., 20., 20.]
             sim_kp: [300., 300., 300.]
@@ -280,7 +280,7 @@ walking:
     #percentage_settle: 0.9
     #alpha_ds: 0.5
 
-    t_additional_ini_trans: 0.2
+    t_additional_ini_trans: 0.4
     t_contact_trans: 1.6
     t_swing: 0.8
     percentage_settle: 0.9
