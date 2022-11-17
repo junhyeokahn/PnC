@@ -34,9 +34,13 @@ void HandReturning::oneStep() {
   if (state_identity_ == draco_states::kLHandReturning) {
     ctrl_arch_->lhand_pos_hm->UpdateRampToMin(sp_->curr_time);
     ctrl_arch_->lhand_ori_hm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   } else if (state_identity_ == draco_states::kRHandReturning) {
     ctrl_arch_->rhand_pos_hm->UpdateRampToMin(sp_->curr_time);
     ctrl_arch_->rhand_ori_hm->UpdateRampToMin(sp_->curr_time);
+    ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+    ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
   } else
     std::cout << "[[Error]] no matching draco state machine" << std::endl;
 }

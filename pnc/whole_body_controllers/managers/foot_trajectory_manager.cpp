@@ -55,16 +55,30 @@ void FootTrajectoryManager::useNominalPoseCmd(
   foot_ori_task_->update_desired(foot_ori_des, foot_ang_vel_des, foot_acc_des);
 }
 
+Eigen::Vector3d FootTrajectoryManager::GetDesiredPos() const {
+  return foot_pos_task_->pos_des;
+}
+
+Eigen::Quaternion<double> FootTrajectoryManager::GetDesiredOri() const {
+  Eigen::Quaternion<double> quat = Eigen::Quaternion<double>::Identity();
+  Eigen::VectorXd foot_ori = foot_ori_task_->pos_des;
+  quat.w() = foot_ori[0];
+  quat.vec() = foot_ori.tail<3>();
+  return quat;
+}
+
 void FootTrajectoryManager::InitializeSwingTrajectory(
     const double _start_time, const double _swing_duration,
     const Footstep &_landing_foot) {
 
-  this->InitializeSwingTrajectory(_start_time, _swing_duration, robot_->get_link_iso(link_idx_), _landing_foot);
+  this->InitializeSwingTrajectory(_start_time, _swing_duration,
+                                  robot_->get_link_iso(link_idx_),
+                                  _landing_foot);
 }
 
 void FootTrajectoryManager::InitializeSwingTrajectory(
-        const double _start_time, const double _swing_duration,
-        const Eigen::Isometry3d &_start_foot_iso, const Footstep &_landing_foot) {
+    const double _start_time, const double _swing_duration,
+    const Eigen::Isometry3d &_start_foot_iso, const Footstep &_landing_foot) {
 
   // Copy and initialize variables
   start_time_ = _start_time;
@@ -153,9 +167,10 @@ void FootTrajectoryManager::UpdateDesired(const double current_time) {
     vel_des = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
     acc_des = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
   } else {
-    pos_des = pos_traj_mid_to_end_.evaluate(s);
-    vel_des = pos_traj_mid_to_end_.evaluateFirstDerivative(s);
-    acc_des = pos_traj_mid_to_end_.evaluateSecondDerivative(s);
+    pos_des = pos_traj_mid_to_end_.evaluate(s - 0.5 * duration_);
+    vel_des = pos_traj_mid_to_end_.evaluateFirstDerivative(s - 0.5 * duration_);
+    acc_des =
+        pos_traj_mid_to_end_.evaluateSecondDerivative(s - 0.5 * duration_);
   }
 
   quat_hermite_curve_.evaluate(s, quat_des);

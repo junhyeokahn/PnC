@@ -21,16 +21,18 @@ tasks = [
     'task_lfoot_ori_vel', 'task_upper_body_pos', 'task_upper_body_vel',
     'task_rhand_lin_pos', 'task_rhand_lin_vel', 'task_rhand_ori_pos',
     'task_rhand_ori_vel', 'task_lhand_lin_pos', 'task_lhand_lin_vel',
-    'task_lhand_ori_pos', 'task_lhand_ori_vel', 'task_lhand_rpy_pos', 'task_rhand_rpy_pos'
+    'task_lhand_ori_pos', 'task_lhand_ori_vel', 'task_lhand_rpy_pos',
+    'task_rhand_rpy_pos'
 ]
 
 local_tasks = [
     'task_com_pos', 'task_com_vel', 'task_torso_ori_pos', 'task_torso_ori_vel',
     'task_rfoot_lin_pos', 'task_rfoot_lin_vel', 'task_rfoot_ori_pos',
     'task_rfoot_ori_vel', 'task_lfoot_lin_pos', 'task_lfoot_lin_vel',
-    'task_lfoot_ori_pos', 'task_lfoot_ori_vel', 'task_rhand_lin_pos', 'task_rhand_lin_vel', 'task_rhand_ori_pos',
-    'task_rhand_ori_vel', 'task_lhand_lin_pos', 'task_lhand_lin_vel',
-    'task_lhand_ori_pos', 'task_lhand_ori_vel', 'task_lhand_rpy_pos', 'task_rhand_rpy_pos'
+    'task_lfoot_ori_pos', 'task_lfoot_ori_vel', 'task_rhand_lin_pos',
+    'task_rhand_lin_vel', 'task_rhand_ori_pos', 'task_rhand_ori_vel',
+    'task_lhand_lin_pos', 'task_lhand_lin_vel', 'task_lhand_ori_pos',
+    'task_lhand_ori_vel', 'task_lhand_rpy_pos', 'task_rhand_rpy_pos'
 ]
 
 neck_pos_label = ["neck_pitch"]
@@ -167,9 +169,9 @@ plot_task(time, local_des['task_torso_ori_pos'],
 # phase,
 # 'upper body',
 # label=upper_body_pos_label[slc])
-# plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
-# des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
-# 'left foot lin')
+plot_task(time, des['task_lfoot_lin_pos'], act['task_lfoot_lin_pos'],
+          des['task_lfoot_lin_vel'], act['task_lfoot_lin_vel'], phase,
+          'left foot lin')
 
 plot_task(time, des['task_lfoot_ori_pos'], act['task_lfoot_ori_pos'],
           des['task_lfoot_ori_vel'], act['task_lfoot_ori_vel'], phase,
@@ -199,35 +201,33 @@ plot_task(time, local_des['task_rfoot_ori_pos'],
           local_act['task_rfoot_ori_pos'], local_des['task_rfoot_ori_vel'],
           local_act['task_rfoot_ori_vel'], phase, 'right foot ori local')
 
-plot_task(time, des['task_lhand_rpy_pos'], act['task_lhand_rpy_pos'],
-          des['task_lhand_ori_vel'], act['task_lhand_ori_vel'], phase,
-          'left hand ori')
+# plot_task(time, des['task_lhand_rpy_pos'], act['task_lhand_rpy_pos'],
+# des['task_lhand_ori_vel'], act['task_lhand_ori_vel'], phase,
+# 'left hand ori')
 
-plot_task(time, des['task_rhand_lin_pos'], act['task_rhand_lin_pos'],
-          des['task_rhand_lin_vel'], act['task_rhand_lin_vel'], phase,
-          'right hand lin')
+# plot_task(time, des['task_rhand_lin_pos'], act['task_rhand_lin_pos'],
+# des['task_rhand_lin_vel'], act['task_rhand_lin_vel'], phase,
+# 'right hand lin')
 
-plot_task(time, des['task_rhand_rpy_pos'], act['task_rhand_rpy_pos'],
-          des['task_rhand_ori_vel'], act['task_rhand_ori_vel'], phase,
-          'right hand ori')
+# plot_task(time, des['task_rhand_rpy_pos'], act['task_rhand_rpy_pos'],
+# des['task_rhand_ori_vel'], act['task_rhand_ori_vel'], phase,
+# 'right hand ori')
 
-plot_task(time, local_des['task_lhand_lin_pos'],
-          local_act['task_lhand_lin_pos'], local_des['task_lhand_lin_vel'],
-          local_act['task_lhand_lin_vel'], phase, 'left hand lin local')
+# plot_task(time, local_des['task_lhand_lin_pos'],
+# local_act['task_lhand_lin_pos'], local_des['task_lhand_lin_vel'],
+# local_act['task_lhand_lin_vel'], phase, 'left hand lin local')
 
-plot_task(time, local_des['task_lhand_rpy_pos'],
-          local_act['task_lhand_rpy_pos'], local_des['task_lhand_ori_vel'],
-          local_act['task_lhand_ori_vel'], phase, 'left hand ori local')
+# plot_task(time, local_des['task_lhand_rpy_pos'],
+# local_act['task_lhand_rpy_pos'], local_des['task_lhand_ori_vel'],
+# local_act['task_lhand_ori_vel'], phase, 'left hand ori local')
 
-plot_task(time, local_des['task_rhand_lin_pos'],
-          local_act['task_rhand_lin_pos'], local_des['task_rhand_lin_vel'],
-          local_act['task_rhand_lin_vel'], phase, 'right hand lin local')
+# plot_task(time, local_des['task_rhand_lin_pos'],
+# local_act['task_rhand_lin_pos'], local_des['task_rhand_lin_vel'],
+# local_act['task_rhand_lin_vel'], phase, 'right hand lin local')
 
-plot_task(time, local_des['task_rhand_rpy_pos'],
-          local_act['task_rhand_rpy_pos'], local_des['task_rhand_ori_vel'],
-          local_act['task_rhand_ori_vel'], phase, 'right hand ori local')
-
-
+# plot_task(time, local_des['task_rhand_rpy_pos'],
+# local_act['task_rhand_rpy_pos'], local_des['task_rhand_ori_vel'],
+# local_act['task_rhand_ori_vel'], phase, 'right hand ori local')
 
 ## =============================================================================
 ## Plot WBC Solutions

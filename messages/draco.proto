@@ -193,4 +193,6 @@ message pnc_msg {
   repeated float task_lhand_ori_acc_des_local = 134;
   repeated float task_lhand_ori_pos_local = 135;
   repeated float task_lhand_ori_vel_local = 136;
+
+  repeated float com_vel_est_exp = 137;
 }

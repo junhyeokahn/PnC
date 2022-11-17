@@ -54,10 +54,10 @@ void ContactTransitionEnd::oneStep() {
   }
 
   // Update Foot Task
-//  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
-//  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
-  ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
-  ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
+  ctrl_arch_->rfoot_tm->UpdateZeroAccCmd();
+  ctrl_arch_->lfoot_tm->UpdateZeroAccCmd();
+  // ctrl_arch_->rfoot_tm->useNominalPoseCmd(sp_->nominal_rfoot_iso);
+  // ctrl_arch_->lfoot_tm->useNominalPoseCmd(sp_->nominal_lfoot_iso);
 
   // Update floating base task
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
@@ -65,9 +65,11 @@ void ContactTransitionEnd::oneStep() {
 
 void ContactTransitionEnd::lastVisit() {
   sp_->nominal_lfoot_iso.translation() = ctrl_arch_->lfoot_tm->GetDesiredPos();
-  sp_->nominal_lfoot_iso.linear() = ctrl_arch_->lfoot_tm->GetDesiredOri();
+  sp_->nominal_lfoot_iso.linear() =
+      ctrl_arch_->lfoot_tm->GetDesiredOri().normalized().toRotationMatrix();
   sp_->nominal_rfoot_iso.translation() = ctrl_arch_->rfoot_tm->GetDesiredPos();
-  sp_->nominal_rfoot_iso.linear() = ctrl_arch_->rfoot_tm->GetDesiredOri();
+  sp_->nominal_rfoot_iso.linear() =
+      ctrl_arch_->rfoot_tm->GetDesiredOri().normalized().toRotationMatrix();
 }
 
 bool ContactTransitionEnd::endOfState() {

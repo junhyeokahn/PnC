@@ -9,15 +9,15 @@ import matplotlib.pyplot as plt
 xyz_label = ['x', 'y', 'z']
 quat_label = ['w', 'x', ' y', ' z']
 markers = ['*', '+', 'h', 'x', 'o', 'v', 'd']
-# facecolors = [
-# 'lightgray', 'rosybrown', 'cornflowerblue', 'darkorange', 'seagreen',
-# 'gold', 'lightpink', 'slategrey'
-# ]
-
-facecolors = 5 * [
-    'gray', 'brown', 'cornflowerblue', 'red', 'blue', 'yellow', 'purple',
-    'crimson', 'red'
+facecolors = [
+    'gray', 'blue', 'cornflowerblue', 'darkorange', 'seagreen', 'crimson',
+    'brown', 'gold', 'slategray'
 ]
+
+# facecolors = 5 * [
+# 'gray', 'brown', 'cornflowerblue', 'red', 'blue', 'yellow', 'purple',
+# 'crimson', 'red'
+# ]
 
 
 def plot_momentum_task(time, vel_des, vel, phase, suptitle, label=None):

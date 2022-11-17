@@ -35,7 +35,10 @@ protected:
   std::vector<SimpleMovingAverage> imu_ang_vel_filter_;
   std::vector<SimpleMovingAverage> cam_filter_;
 
+  ExponentialMovingAverageFilter *com_vel_filt_;
+
   bool b_first_visit_;
+  bool b_use_exp_filter_;
 
   void ComputeDCM();
 };

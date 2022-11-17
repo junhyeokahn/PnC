@@ -1,4 +1,5 @@
 #include <pnc/whole_body_controllers/managers/dcm_trajectory_manager.hpp>
+#include <utils/util.hpp>
 
 DCMTrajectoryManager::DCMTrajectoryManager(
     DCMPlanner *_dcm_planner, Task *_com_task, Task *_base_ori_task,
@@ -43,8 +44,8 @@ DCMTrajectoryManager::DCMTrajectoryManager(
   nominal_strafe_distance = 0.125;
 
   // First step before alternating
-  // robot_side_first_ = EndEffector::RFoot;
-  robot_side_first_ = EndEffector::LFoot;
+  robot_side_first_ = EndEffector::RFoot;
+  // robot_side_first_ = EndEffector::LFoot;
 
   convertTemporalParamsToDCMParams();
 }
@@ -97,12 +98,36 @@ void DCMTrajectoryManager::resetStepIndex() { current_footstep_idx = 0; }
 
 // Updates the feet pose of the starting stance
 void DCMTrajectoryManager::updateStartingStance() {
+  // Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
+  // Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
+  // left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, EndEffector::LFoot);
+
+  // Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
+  // Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
+  // right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, EndEffector::RFoot);
+
+  // mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
+  // mid_foot_stance_);
+  //
   Eigen::Vector3d lfoot_pos = robot_->get_link_iso(lfoot_id_).translation();
-  Eigen::Quaterniond lfoot_ori(robot_->get_link_iso(lfoot_id_).linear());
+  Eigen::Quaterniond lfoot_ori_act(robot_->get_link_iso(lfoot_id_).linear());
+
+  // project to flat ground
+  Eigen::Vector3d lfoot_ori_act_rpy = util::QuatToEulerZYX(lfoot_ori_act);
+  lfoot_ori_act_rpy(1) = 0;
+  lfoot_ori_act_rpy(2) = 0;
+  Eigen::Quaternion<double> lfoot_ori(util::EulerZYXtoQuat(
+      lfoot_ori_act_rpy(2), lfoot_ori_act_rpy(1), lfoot_ori_act_rpy(0)));
   left_foot_stance_.setPosOriSide(lfoot_pos, lfoot_ori, EndEffector::LFoot);
 
   Eigen::Vector3d rfoot_pos = robot_->get_link_iso(rfoot_id_).translation();
-  Eigen::Quaterniond rfoot_ori(robot_->get_link_iso(rfoot_id_).linear());
+  Eigen::Quaterniond rfoot_ori_act(robot_->get_link_iso(rfoot_id_).linear());
+
+  Eigen::Vector3d rfoot_ori_act_rpy = util::QuatToEulerZYX(rfoot_ori_act);
+  rfoot_ori_act_rpy(1) = 0;
+  rfoot_ori_act_rpy(2) = 0;
+  Eigen::Quaternion<double> rfoot_ori(util::EulerZYXtoQuat(
+      rfoot_ori_act_rpy(2), rfoot_ori_act_rpy(1), rfoot_ori_act_rpy(0)));
   right_foot_stance_.setPosOriSide(rfoot_pos, rfoot_ori, EndEffector::RFoot);
 
   mid_foot_stance_.computeMidfeet(left_foot_stance_, right_foot_stance_,
@@ -478,9 +503,12 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     Eigen::MatrixXd curr_rfoot_quat = Eigen::MatrixXd::Zero(1, 4);
     Eigen::MatrixXd curr_lfoot_pos = Eigen::MatrixXd::Zero(1, 3);
     Eigen::MatrixXd curr_lfoot_quat = Eigen::MatrixXd::Zero(1, 4);
+    Eigen::MatrixXd curr_midfoot_pos = Eigen::MatrixXd::Zero(1, 3);
+    Eigen::MatrixXd curr_midfoot_quat = Eigen::MatrixXd::Zero(1, 4);
     for (int i = 0; i < 3; ++i) {
       curr_rfoot_pos(0, i) = right_foot_start_.position(i);
       curr_lfoot_pos(0, i) = left_foot_start_.position(i);
+      curr_midfoot_pos(0, i) = mid_foot_stance_.position(i);
     }
     curr_rfoot_quat(0, 0) = right_foot_start_.orientation.w();
     curr_rfoot_quat(0, 1) = right_foot_start_.orientation.x();
@@ -491,6 +519,11 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     curr_lfoot_quat(0, 1) = left_foot_start_.orientation.x();
     curr_lfoot_quat(0, 2) = left_foot_start_.orientation.y();
     curr_lfoot_quat(0, 3) = left_foot_start_.orientation.z();
+
+    curr_midfoot_quat(0, 0) = mid_foot_stance_.orientation.w();
+    curr_midfoot_quat(0, 1) = mid_foot_stance_.orientation.x();
+    curr_midfoot_quat(0, 2) = mid_foot_stance_.orientation.y();
+    curr_midfoot_quat(0, 3) = mid_foot_stance_.orientation.z();
 
     int n_rf(0);
     int n_lf(0);
@@ -533,6 +566,8 @@ void DCMTrajectoryManager::saveSolution(const std::string &file_name) {
     cfg["contact"]["curr_right_foot"]["ori"] = curr_rfoot_quat;
     cfg["contact"]["curr_left_foot"]["pos"] = curr_lfoot_pos;
     cfg["contact"]["curr_left_foot"]["ori"] = curr_lfoot_quat;
+    cfg["contact"]["curr_mid_foot"]["pos"] = curr_midfoot_pos;
+    cfg["contact"]["curr_mid_foot"]["ori"] = curr_midfoot_quat;
     cfg["contact"]["right_foot"]["pos"] = rfoot_pos;
     cfg["contact"]["right_foot"]["ori"] = rfoot_quat;
     cfg["contact"]["left_foot"]["pos"] = lfoot_pos;

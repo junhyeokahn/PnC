@@ -4,7 +4,8 @@
 #include "pnc/draco_pnc/draco_state_provider.hpp"
 #include "pnc/robot_system/robot_system.hpp"
 
-DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
+DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot)
+    : b_use_exp_filter_(false) {
   util::PrettyConstructor(1, "DracoStateEstimator");
   robot_ = _robot;
   sp_ = DracoStateProvider::getStateProvider();
@@ -36,10 +37,23 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot) {
     cam_filter_.push_back(SimpleMovingAverage(n_data_cam[i]));
   }
 
+  Eigen::VectorXd base_com_vel_limits = Eigen::VectorXd::Zero(3);
+  base_com_vel_limits << 1., 1., 1.;
+  double time_constant = util::ReadParameter<double>(
+      cfg["state_estimator"], "base_com_vel_time_constant");
+
+  // Filtered base velocity
+  com_vel_filt_ = new ExponentialMovingAverageFilter(
+      sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(3),
+      -base_com_vel_limits, base_com_vel_limits);
+
+  b_use_exp_filter_ =
+      util::ReadParameter<bool>(cfg["state_estimator"], "b_use_exp_filter");
+
   b_first_visit_ = true;
 }
 
-DracoStateEstimator::~DracoStateEstimator() {}
+DracoStateEstimator::~DracoStateEstimator() { delete com_vel_filt_; }
 
 void DracoStateEstimator::initialize(DracoSensorData *data) {
   this->update(data);
@@ -144,6 +158,13 @@ void DracoStateEstimator::update(DracoSensorData *data) {
     sp_->cam_est[i] = cam_filter_[i].Output();
   }
 
+  // expoenetial filter com velocity
+  com_vel_filt_->Input(robot_->get_com_lin_vel());
+
+  if (b_use_exp_filter_) {
+    sp_->com_vel_est = com_vel_filt_->Output();
+  }
+
   // update dcm
   this->ComputeDCM();
 
@@ -176,6 +197,7 @@ void DracoStateEstimator::update(DracoSensorData *data) {
         Eigen::Matrix<double, 4, 1>(quat.w(), quat.x(), quat.y(), quat.z());
     dm->data->base_joint_lin_vel = base_joint_lin_vel;
     dm->data->com_vel_est = sp_->com_vel_est;
+    dm->data->com_vel_est_exp = com_vel_filt_->Output();
     dm->data->com_vel_raw = robot_->get_com_lin_vel();
     dm->data->imu_ang_vel_est = sp_->imu_ang_vel_est;
     dm->data->imu_ang_vel_raw = data->imu_frame_vel.head(3);
