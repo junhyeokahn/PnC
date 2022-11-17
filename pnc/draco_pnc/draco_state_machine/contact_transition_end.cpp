@@ -10,9 +10,12 @@ ContactTransitionEnd::ContactTransitionEnd(
   ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
+  contact_detection_manager_ = new ContactDetectionManager(_robot, "l_foot_contact",
+                                               "r_foot_contact");
+  has_swing_foot_touochdown_ = false;
 }
 
-ContactTransitionEnd::~ContactTransitionEnd() {}
+ContactTransitionEnd::~ContactTransitionEnd() {delete contact_detection_manager_;}
 
 void ContactTransitionEnd::firstVisit() {
   if (leg_side_ == EndEffector::RFoot) {
@@ -35,6 +38,8 @@ void ContactTransitionEnd::firstVisit() {
   } else {
     assert(false);
   }
+
+  contact_detection_manager_->update_contact_stance(leg_side_);
 }
 
 void ContactTransitionEnd::oneStep() {
@@ -61,6 +66,9 @@ void ContactTransitionEnd::oneStep() {
 
   // Update floating base task
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
+
+  double expected_height_difference = 0.;
+  has_swing_foot_touochdown_ = contact_detection_manager_->check_swing_foot_contact(expected_height_difference);
 }
 
 void ContactTransitionEnd::lastVisit() {
@@ -73,7 +81,7 @@ void ContactTransitionEnd::lastVisit() {
 }
 
 bool ContactTransitionEnd::endOfState() {
-  if (state_machine_time_ >= end_time_) {
+  if ((state_machine_time_ >= end_time_) || has_swing_foot_touochdown_) {
     return true;
   } else {
     return false;
