@@ -10,9 +10,13 @@ SingleSupportSwing::SingleSupportSwing(const StateIdentifier _state_identifier,
   ctrl_arch_ = _ctrl_arch;
   leg_side_ = _leg_side;
   sp_ = DracoStateProvider::getStateProvider();
+
+  contact_detection_manager_ = new ContactDetectionManager(_robot, "l_foot_contact",
+                                                           "r_foot_contact");
+  has_swing_foot_touchdown_ = false;
 }
 
-SingleSupportSwing::~SingleSupportSwing() {}
+SingleSupportSwing::~SingleSupportSwing() {delete contact_detection_manager_;}
 
 void SingleSupportSwing::firstVisit() {
   if (leg_side_ == EndEffector::RFoot) {
@@ -23,6 +27,7 @@ void SingleSupportSwing::firstVisit() {
 
   ctrl_start_time_ = sp_->curr_time;
   end_time_ = ctrl_arch_->dcm_tm->getSwingTime();
+  half_end_time_ = 0.5 * end_time_;
 
   int footstep_idx = ctrl_arch_->dcm_tm->current_footstep_idx;
 
@@ -43,6 +48,8 @@ void SingleSupportSwing::firstVisit() {
   } else {
     assert(false);
   }
+
+  contact_detection_manager_->update_swing_side(leg_side_);
 }
 
 void SingleSupportSwing::oneStep() {
@@ -61,6 +68,12 @@ void SingleSupportSwing::oneStep() {
 
   // Update floating base task
   ctrl_arch_->dcm_tm->updateDCMTasksDesired(sp_->curr_time);
+
+  // Check for early touchdown
+  if (state_machine_time_ >= half_end_time_) {
+    double expected_height_difference = 0.;
+    has_swing_foot_touchdown_ = contact_detection_manager_->check_swing_foot_contact(expected_height_difference);
+  }
 }
 
 void SingleSupportSwing::lastVisit() {
@@ -80,7 +93,8 @@ void SingleSupportSwing::lastVisit() {
 bool SingleSupportSwing::endOfState() {
 
   if (b_early_termination) {
-    if (state_machine_time_ >= 0.5 * end_time_) {
+    if (state_machine_time_ >= half_end_time_) {
+
       // use foot position
       if (leg_side_ == EndEffector::RFoot) {
         double rfoot_height =
@@ -105,7 +119,21 @@ bool SingleSupportSwing::endOfState() {
     }
   }
 
+  if (b_early_heel_toe_contact) {
+    if (state_machine_time_ >= half_end_time_) {
+
+      // use foot toe and heel position
+      if (has_swing_foot_touchdown_) {
+        std::cout << "[Early Termination]: " << leg_side_ << " contact happen at "
+                  << state_machine_time_ << " / " << end_time_ << std::endl;
+        return has_swing_foot_touchdown_;
+        }
+      }
+    }
+
   if (state_machine_time_ >= end_time_) {
+    std::cout << "[Late Termination]: " << leg_side_ << " contact happen at "
+              << state_machine_time_ << " / " << end_time_ << std::endl;
     return true;
   } else {
     return false;

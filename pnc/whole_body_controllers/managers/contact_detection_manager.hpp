@@ -11,7 +11,7 @@ public:
     ContactDetectionManager(RobotSystem *_robot, std::string lfoot_id_name,
                             std::string rfoot_id_name);
 
-    void update_contact_stance(int &swing_side);
+    void update_swing_side(int &swing_side);
     bool check_swing_foot_contact(double &expected_height_difference);
 
 private:
