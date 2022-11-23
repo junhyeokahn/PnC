@@ -199,6 +199,9 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
       ->b_early_termination =
       util::ReadParameter<bool>(cfg["walking"], "b_early_termination");
   ((SingleSupportSwing *)state_machines[draco_states::kRFootSwing])
+          ->b_early_heel_toe_contact =
+          util::ReadParameter<bool>(cfg["walking"], "b_early_heel_toe_contact");
+  ((SingleSupportSwing *)state_machines[draco_states::kRFootSwing])
       ->foot_height_threshold =
       util::ReadParameter<double>(cfg["walking"], "foot_height_threshold");
 
