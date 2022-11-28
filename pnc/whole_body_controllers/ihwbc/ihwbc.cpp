@@ -367,7 +367,7 @@ void IHWBC::solve(
       f_int = ji_bar.transpose() * (cori_ + grav_ - sa_.transpose() * tau_cmd);
     }
   }
-  qddot_cmd = sa_ * qddot_result_;
+  qddot_cmd = qddot_result_;
   rf_cmd = fr_result_;
 
   // TEST
