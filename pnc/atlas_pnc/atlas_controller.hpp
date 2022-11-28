@@ -31,4 +31,6 @@ private:
   Eigen::VectorXd joint_vel_cmd_;
 
   void FirstVisit();
+
+  Eigen::MatrixXd sa_;
 };
