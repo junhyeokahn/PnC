@@ -7,7 +7,8 @@
 class ReactionForceManager {
 public:
   /// \{ \name Constructor and Destructor
-  ReactionForceManager(Contact *_contact, double maximum_rf_z_max);
+  ReactionForceManager(Contact *_contact, const double maximum_rf_z_max,
+                       const bool b_use_smooth_interpolation);
 
   ~ReactionForceManager();
   /// \}
@@ -31,4 +32,5 @@ protected:
   double starting_rf_z_max_;
   double start_time_;
   double duration_;
+  bool b_use_smooth_interpolation_;
 };
