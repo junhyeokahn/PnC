@@ -17,6 +17,11 @@ state_estimator:
     base_com_vel_time_constant: 0.1
     b_use_exp_filter: true
 
+contact_estimator:
+    foot_half_width: 0.0425  # 8.5 / 2 (cm)
+    foot_half_length: 0.11  # 22 / 2 (cm)
+    contact_tol: 0.001      # tolerance in height to determine swing foot touchdown
+
 wbc:
     regularization:
         lambda_q_ddot: 1e-7
@@ -263,6 +268,7 @@ walking:
 
 
     b_early_termination: false
+    b_early_heel_toe_contact: true
     foot_height_threshold: 0.01
 
     #com_height: 0.68

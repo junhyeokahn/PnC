@@ -101,9 +101,9 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
   // swing time
   Eigen::Vector3d mid_swing_local_foot_pos(0, 0, swing_height);
   Eigen::Vector3d mid_swing_position =
-      swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
+          swing_midfoot_.position + swing_midfoot_.R_ori * mid_swing_local_foot_pos;
   Eigen::Vector3d mid_swing_velocity =
-      (swing_land_foot_.position - swing_init_foot_.position) / duration_;
+          (swing_land_foot_.position - swing_init_foot_.position) / duration_;
 
   // Construct Position trajectories
   pos_traj_init_to_mid_.initialize(swing_init_foot_.position,
