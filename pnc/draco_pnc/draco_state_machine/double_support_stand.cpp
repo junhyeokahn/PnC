@@ -131,6 +131,8 @@ void DoubleSupportStand::firstVisit() {
   std::cout << sp_->nominal_base_quat.toRotationMatrix() << std::endl;
   std::cout << "[Nominal Stance Foot SO3]" << std::endl;
   std::cout << sp_->nominal_stance_foot_iso.linear() << std::endl;
+  std::cout << "right foot pos:" << std::endl;
+  std::cout << sp_->nominal_rfoot_iso.translation().transpose() << std::endl;
 
   // Initialize Reaction Force Ramp to Max
   ctrl_arch_->rfoot_fm->InitializeRampToMax(sp_->curr_time, rf_z_max_time);
