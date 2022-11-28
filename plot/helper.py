@@ -225,3 +225,10 @@ def plot_joints(full_joint, selected_joint, time, cmd_joint_positions,
               joint_velocities[:, idx_list], phase, title, selected_joint)
     plot_vector_traj(time, cmd_joint_torques[:, idx_list], phase,
                      selected_joint, 'k', title + " torque command")
+
+def plot_joints_cmd(full_joint, selected_joint, time, joints_cmd, phase, title):
+    idx_list = []
+    for name in selected_joint:
+        idx_list.append(full_joint.index(name))
+    plot_vector_traj(time, joints_cmd[:, idx_list], phase,
+                     selected_joint, 'k', title)

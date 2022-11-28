@@ -248,6 +248,8 @@ while True:
     data_saver.add('cmd_joint_positions', list(msg.cmd_joint_positions))
     data_saver.add('cmd_joint_velocities', list(msg.cmd_joint_velocities))
     data_saver.add('cmd_joint_torques', list(msg.cmd_joint_torques))
+    data_saver.add('cmd_joint_accelerations', list(msg.cmd_joint_accelerations))
+    data_saver.add('cmd_joint_accelerations_fb', list(msg.cmd_joint_accelerations_fb))
 
     data_saver.add('joint_positions', list(msg.joint_positions))
     data_saver.add('joint_velocities', list(msg.joint_velocities))

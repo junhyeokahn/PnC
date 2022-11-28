@@ -129,6 +129,8 @@ public:
   Eigen::VectorXd cmd_joint_positions = Eigen::VectorXd::Zero(27);
   Eigen::VectorXd cmd_joint_velocities = Eigen::VectorXd::Zero(27);
   Eigen::VectorXd cmd_joint_torques = Eigen::VectorXd::Zero(27);
+  Eigen::VectorXd cmd_joint_accelerations = Eigen::VectorXd::Zero(27);
+  Eigen::VectorXd cmd_joint_accelerations_fb = Eigen::VectorXd::Zero(6);
   Eigen::VectorXd joint_velocities = Eigen::VectorXd::Zero(27);
 
   // for meshcat visualization

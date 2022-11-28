@@ -27,6 +27,7 @@ private:
 
   Eigen::VectorXd joint_trq_cmd_;
   Eigen::VectorXd joint_acc_cmd_;
+  Eigen::VectorXd joint_acc_cmd_fb_;
   Eigen::VectorXd cmd_lfoot_rf_;
   Eigen::VectorXd cmd_rfoot_rf_;
   Eigen::VectorXd joint_pos_cmd_;
@@ -38,6 +39,7 @@ private:
   Eigen::MatrixXd sa_;
   Eigen::MatrixXd sv_;
   Eigen::MatrixXd sf_;
+  Eigen::MatrixXd snf_;
 
   bool b_smoothing_cmd_;
   double smoothing_duration_;
@@ -52,5 +54,6 @@ private:
   bool b_first_visit_;
 
   bool b_use_modified_swing_jac_;
+
   YAML::Node cfg_;
 };
