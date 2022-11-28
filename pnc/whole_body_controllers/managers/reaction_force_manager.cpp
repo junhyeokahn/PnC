@@ -34,10 +34,10 @@ void ReactionForceManager::UpdateRampToMin(double _curr_time) {
   double t = util::Clamp(_curr_time, start_time_, start_time_ + duration_);
 
   contact_->rf_z_max = b_use_smooth_interpolation_
-                           ? (minimum_rf_z_max_ - starting_rf_z_max_) /
+                           ? (starting_rf_z_max_ - minimum_rf_z_max_) /
                                      std::pow(duration_, 2) *
-                                     std::pow((t - start_time_), 2) +
-                                 starting_rf_z_max_
+                                     std::pow(t - start_time_ - duration_, 2) +
+                                 minimum_rf_z_max_
                            : (minimum_rf_z_max_ - starting_rf_z_max_) /
                                      duration_ * (t - start_time_) +
                                  starting_rf_z_max_;
