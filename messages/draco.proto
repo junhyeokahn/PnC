@@ -195,4 +195,7 @@ message pnc_msg {
   repeated float task_lhand_ori_vel_local = 136;
 
   repeated float com_vel_est_exp = 137;
+
+  repeated float cmd_joint_accelerations = 138;
+  repeated float cmd_joint_accelerations_fb = 139;
 }

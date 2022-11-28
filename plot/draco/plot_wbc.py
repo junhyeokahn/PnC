@@ -11,8 +11,8 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj, plot_momentum_task
-
+# from plot.helper import plot_joints, plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj, plot_momentum_task
+from plot.helper import *
 tasks = [
     'task_com_pos', 'task_com_vel', 'icp', 'icp_dot', 'task_cam_vel',
     'task_torso_ori_pos', 'task_torso_ori_vel', 'task_rfoot_lin_pos',
@@ -73,6 +73,8 @@ cmd_rfoot_rf = []
 cmd_joint_positions = []
 cmd_joint_velocities = []
 cmd_joint_torques = []
+cmd_joint_accelerations = []
+cmd_joint_accelerations_fb = []
 joint_positions = []
 joint_velocities = []
 
@@ -111,6 +113,8 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
             cmd_joint_positions.append(d['cmd_joint_positions'])
             cmd_joint_velocities.append(d['cmd_joint_velocities'])
             cmd_joint_torques.append(d['cmd_joint_torques'])
+            cmd_joint_accelerations.append(d['cmd_joint_accelerations'])
+            cmd_joint_accelerations_fb.append(d['cmd_joint_accelerations_fb'])
             joint_positions.append(d['joint_positions'])
             joint_velocities.append(d['joint_velocities'])
         except EOFError:
@@ -125,12 +129,15 @@ for k, v in local_des.items():
 for k, v in local_act.items():
     local_act[k] = np.stack(v, axis=0)
 
+
 # right foot first
 cmd_rf = np.concatenate((cmd_rfoot_rf, cmd_lfoot_rf), axis=1)
 phase = np.stack(phase, axis=0)
 cmd_joint_positions = np.stack(cmd_joint_positions, axis=0)
 cmd_joint_velocities = np.stack(cmd_joint_velocities, axis=0)
 cmd_joint_torques = np.stack(cmd_joint_torques, axis=0)
+cmd_joint_accelerations = np.stack(cmd_joint_accelerations, axis=0)
+cmd_joint_accelerations_fb = np.stack(cmd_joint_accelerations_fb, axis=0)
 joint_positions = np.stack(joint_positions, axis=0)
 joint_velocities = np.stack(joint_velocities, axis=0)
 
@@ -242,6 +249,10 @@ plot_joints(joint_label, lfoot_label, time, cmd_joint_positions,
             joint_positions, cmd_joint_velocities, joint_velocities,
             cmd_joint_torques, phase, "lfoot")
 
+plot_joints_cmd(joint_label, rfoot_label, time, cmd_joint_accelerations, phase, "rfoot_qddot_cmd")
+plot_joints_cmd(joint_label, lfoot_label, time, cmd_joint_accelerations, phase, "lfoot_qddot_cmd")
+
+plot_vector_traj(time, cmd_joint_accelerations_fb, phase, None, 'k', 'Floating Base qddot Cmd')
 # l_knee_jd_idx = joint_label.index("l_knee_fe_jd")
 # r_knee_jd_idx = joint_label.index("r_knee_fe_jd")
 

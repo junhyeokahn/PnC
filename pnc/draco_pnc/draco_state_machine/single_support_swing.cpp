@@ -1,4 +1,5 @@
 #include "pnc/draco_pnc/draco_state_machine/single_support_swing.hpp"
+#include "utils/util.hpp"
 
 SingleSupportSwing::SingleSupportSwing(const StateIdentifier _state_identifier,
                                        DracoControlArchitecture *_ctrl_arch,
@@ -33,13 +34,45 @@ void SingleSupportSwing::firstVisit() {
 
   if (leg_side_ == EndEffector::RFoot) {
     // rfoot swing
+    // assume flat ground
+    Eigen::Quaterniond curr_rfoot_quat =
+        Eigen::Quaterniond(sp_->nominal_rfoot_iso.linear());
+    Eigen::Vector3d curr_rfoot_ypr = util::QuatToEulerZYX(curr_rfoot_quat);
+    curr_rfoot_ypr.tail<2>() << 0., 0.;
+    Eigen::Quaterniond proj_rfoot_quat = util::EulerZYXtoQuat(
+        curr_rfoot_ypr[2], curr_rfoot_ypr[1], curr_rfoot_ypr[0]);
+    sp_->nominal_rfoot_iso.linear() = proj_rfoot_quat.toRotationMatrix();
+
     ctrl_arch_->rfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_, sp_->nominal_rfoot_iso,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);
+
+    // TEST
+    std::cout << "ini pos: " << sp_->nominal_rfoot_iso.translation().transpose()
+              << std::endl;
+    std::cout
+        << "fin pos: "
+        << ctrl_arch_->dcm_tm->footstep_list[footstep_idx].position.transpose()
+        << std::endl;
+    std::cout << "ini ori: " << sp_->nominal_rfoot_iso.linear() << std::endl;
+    std::cout << "fin ori: "
+              << ctrl_arch_->dcm_tm->footstep_list[footstep_idx]
+                     .orientation.toRotationMatrix()
+              << std::endl;
+    // TEST
     sp_->b_rf_contact = false;
     sp_->b_lf_contact = true;
   } else if (leg_side_ == EndEffector::LFoot) {
     // lfoot swing
+    // assume flat ground
+    Eigen::Quaterniond curr_lfoot_quat =
+        Eigen::Quaterniond(sp_->nominal_lfoot_iso.linear());
+    Eigen::Vector3d curr_lfoot_ypr = util::QuatToEulerZYX(curr_lfoot_quat);
+    curr_lfoot_ypr.tail<2>() << 0., 0.;
+    Eigen::Quaterniond proj_lfoot_quat = util::EulerZYXtoQuat(
+        curr_lfoot_ypr[2], curr_lfoot_ypr[1], curr_lfoot_ypr[0]);
+    sp_->nominal_lfoot_iso.linear() = proj_lfoot_quat.toRotationMatrix();
+
     ctrl_arch_->lfoot_tm->InitializeSwingTrajectory(
         sp_->curr_time, end_time_, sp_->nominal_lfoot_iso,
         ctrl_arch_->dcm_tm->footstep_list[footstep_idx]);

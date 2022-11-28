@@ -130,8 +130,12 @@ DracoControlArchitecture::DracoControlArchitecture(RobotSystem *_robot)
   // Initialize Reaction Force Manager
   double rf_max;
   util::ReadParameter(cfg["wbc"]["contact"], "rf_z_max", rf_max);
-  rfoot_fm = new ReactionForceManager(tci_container->rfoot_contact, rf_max);
-  lfoot_fm = new ReactionForceManager(tci_container->lfoot_contact, rf_max);
+  bool b_use_smooth_interpolation = util::ReadParameter<bool>(
+      cfg["wbc"]["contact"], "use_smooth_interpolation");
+  rfoot_fm = new ReactionForceManager(tci_container->rfoot_contact, rf_max,
+                                      b_use_smooth_interpolation);
+  lfoot_fm = new ReactionForceManager(tci_container->lfoot_contact, rf_max,
+                                      b_use_smooth_interpolation);
 
   // Initialize State Machine
   state_machines[draco_states::kInitialize] =

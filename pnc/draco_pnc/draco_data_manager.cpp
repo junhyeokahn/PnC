@@ -230,6 +230,7 @@ void DracoDataManager::Send() {
   for (int i = 0; i < 6; ++i) {
     pb_msg.add_cmd_rfoot_rf(data->cmd_rfoot_rf[i]);
     pb_msg.add_cmd_lfoot_rf(data->cmd_lfoot_rf[i]);
+    pb_msg.add_cmd_joint_accelerations_fb(data->cmd_joint_accelerations_fb[i]);
   }
 
   for (int i = 0; i < data->joint_positions.size(); ++i) {
@@ -248,6 +249,7 @@ void DracoDataManager::Send() {
     pb_msg.add_cmd_joint_positions(data->cmd_joint_positions[i]);
     pb_msg.add_cmd_joint_velocities(data->cmd_joint_velocities[i]);
     pb_msg.add_cmd_joint_torques(data->cmd_joint_torques[i]);
+    pb_msg.add_cmd_joint_accelerations(data->cmd_joint_accelerations[i]);
   }
 
   for (int i = 0; i < 3; ++i) {

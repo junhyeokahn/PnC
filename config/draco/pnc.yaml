@@ -40,6 +40,7 @@ wbc:
         foot_half_length: 0.08 # 22 / 2 (cm)
         mu: 0.3
         #mu: 0.5
+        use_smooth_interpolation: true
 
     task:
         com_control_feedback_source: 1 # 0: com feedback, 1: icp feedback
@@ -336,3 +337,4 @@ controller:
     b_smoothing: true
     #b_smoothing: false
     smoothing_duration: 0.2
+    use_modified_swing_jac: false

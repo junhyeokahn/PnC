@@ -48,6 +48,9 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   }
   sf_ = Eigen::MatrixXd::Zero(robot_->n_floating, n_q_dot);
   sf_.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
+  snf_ = Eigen::MatrixXd::Zero(n_q_dot - robot_->n_floating, n_q_dot);
+  snf_.rightCols(n_q_dot - robot_->n_floating) = Eigen::MatrixXd::Identity(
+      n_q_dot - robot_->n_floating, n_q_dot - robot_->n_floating);
 
   wbc_ = new IHWBC(sf_, sa_, sv_);
   wbc_->b_trq_limit = util::ReadParameter<bool>(cfg_["wbc"], "b_trq_limit");
@@ -80,6 +83,8 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   joint_trq_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_vel_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
   joint_pos_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  joint_acc_cmd_ = Eigen::VectorXd::Zero(robot_->n_a);
+  joint_acc_cmd_fb_ = Eigen::VectorXd::Zero(6);
   cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
   cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
 
@@ -92,6 +97,9 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   smoothing_duration_ =
       util::ReadParameter<double>(cfg_["controller"], "smoothing_duration");
   smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
+
+  b_use_modified_swing_jac_ =
+      util::ReadParameter<bool>(cfg_["controller"], "use_modified_swing_jac");
 }
 
 DracoController::~DracoController() {
@@ -130,22 +138,24 @@ void DracoController::getCommand(void *cmd) {
           sp_->nominal_base_quat.toRotationMatrix());
     }
 
-    // ignore jacobian cols depending on the state
-    if (!sp_->b_rf_contact) {
-      // ignore right foot joints for com task
-      // tci_container_->task_list[0]->ignore_jacobian_row(sp_->rfoot_jidx);
-      // tci_container_->task_list[2]->ignore_jacobian_row(sp_->rfoot_jidx);
-      // ignore floating joints for swing foot task
-      tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
-      tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
-    }
-    if (!sp_->b_lf_contact) {
-      // ignore left foot joints for com task
-      // tci_container_->task_list[0]->ignore_jacobian_row(sp_->lfoot_jidx);
-      // tci_container_->task_list[2]->ignore_jacobian_row(sp_->lfoot_jidx);
-      // ignore floating joints for swing foot task
-      tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
-      tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
+    if (b_use_modified_swing_jac_) {
+      // ignore jacobian cols depending on the state
+      if (!sp_->b_rf_contact) {
+        // ignore right foot joints for com task
+        // tci_container_->task_list[0]->ignore_jacobian_row(sp_->rfoot_jidx);
+        // tci_container_->task_list[2]->ignore_jacobian_row(sp_->rfoot_jidx);
+        // ignore floating joints for swing foot task
+        tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
+        tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
+      }
+      if (!sp_->b_lf_contact) {
+        // ignore left foot joints for com task
+        // tci_container_->task_list[0]->ignore_jacobian_row(sp_->lfoot_jidx);
+        // tci_container_->task_list[2]->ignore_jacobian_row(sp_->lfoot_jidx);
+        // ignore floating joints for swing foot task
+        tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
+        tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
+      }
     }
 
     int rf_dim(0);
@@ -161,31 +171,34 @@ void DracoController::getCommand(void *cmd) {
     // WBC commands
     Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
     Eigen::VectorXd wbc_joint_trq_cmd = Eigen::VectorXd::Zero(sa_.rows());
-    Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(sa_.rows());
+    Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_q_dot);
     Eigen::VectorXd wbc_int_frc_cmd;
     wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
                 tci_container_->internal_constraint_list, rf_des,
                 wbc_joint_trq_cmd, wbc_joint_acc_cmd, rf_des, wbc_int_frc_cmd);
     l_knee_int_frc_cmd_ = wbc_int_frc_cmd[0];
     r_knee_int_frc_cmd_ = wbc_int_frc_cmd[1];
-    joint_trq_cmd_ = (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
-                     wbc_joint_trq_cmd;
-    Eigen::VectorXd joint_acc_cmd =
-        (sa_.block(0, 6, sa_.rows(), sa_.cols() - 6)).transpose() *
-        wbc_joint_acc_cmd;
-    if (sp_->state == draco_states::kLFootSwing) {
-      cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
-      cmd_rfoot_rf_ = rf_des.head(6);
-    } else if (sp_->state == draco_states::kRFootSwing) {
-      cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
-      cmd_lfoot_rf_ = rf_des.tail(6);
-    } else {
-      // right foot first
-      cmd_rfoot_rf_ = rf_des.head(6);
-      cmd_lfoot_rf_ = rf_des.tail(6);
-    }
+    joint_trq_cmd_ =
+        sa_.rightCols(sa_.cols() - sf_.rows()).transpose() * wbc_joint_trq_cmd;
+    joint_acc_cmd_ = snf_ * wbc_joint_acc_cmd;
+    joint_acc_cmd_fb_ = sf_ * wbc_joint_acc_cmd;
 
-    joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
+    // if (sp_->state == draco_states::kLFootSwing) {
+    // cmd_lfoot_rf_ = Eigen::VectorXd::Zero(6);
+    // cmd_rfoot_rf_ = rf_des.head(6);
+    //} else if (sp_->state == draco_states::kRFootSwing) {
+    // cmd_rfoot_rf_ = Eigen::VectorXd::Zero(6);
+    // cmd_lfoot_rf_ = rf_des.tail(6);
+    //} else {
+    // cmd_rfoot_rf_ = rf_des.head(6);
+    // cmd_lfoot_rf_ = rf_des.tail(6);
+    //}
+
+    // right foot first
+    cmd_rfoot_rf_ = rf_des.head(6);
+    cmd_lfoot_rf_ = rf_des.tail(6);
+
+    joint_integrator_->integrate(joint_acc_cmd_, robot_->joint_velocities,
                                  robot_->joint_positions, joint_vel_cmd_,
                                  joint_pos_cmd_);
   }
@@ -243,6 +256,8 @@ void DracoController::SaveData() {
   dm->data->cmd_joint_positions = joint_pos_cmd_;
   dm->data->cmd_joint_velocities = joint_vel_cmd_;
   dm->data->cmd_joint_torques = joint_trq_cmd_;
+  dm->data->cmd_joint_accelerations = joint_acc_cmd_;
+  dm->data->cmd_joint_accelerations_fb = joint_acc_cmd_fb_;
 
   dm->data->l_knee_int_frc_cmd = l_knee_int_frc_cmd_;
   dm->data->r_knee_int_frc_cmd = r_knee_int_frc_cmd_;

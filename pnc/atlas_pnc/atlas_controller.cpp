@@ -23,13 +23,13 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   int n_active(robot_->n_a);
   int n_passive(n_q_dot - n_active - robot_->n_floating);
 
-  Eigen::MatrixXd sa = Eigen::MatrixXd::Zero(n_active, n_q_dot);
+  sa_ = Eigen::MatrixXd::Zero(n_active, n_q_dot);
   Eigen::MatrixXd sv = Eigen::MatrixXd::Zero(n_passive, n_q_dot);
   int j(0), k(0);
   for (int i = 0; i < n_q_dot; ++i) {
     if (i >= 6) {
       if (act_list[i]) {
-        sa(j, i) = 1.;
+        sa_(j, i) = 1.;
         j += 1;
       } else {
         sv(k, i) = 1.;
@@ -39,11 +39,11 @@ AtlasController::AtlasController(AtlasTCIContainer *_tci_container,
   }
   Eigen::MatrixXd sf = Eigen::MatrixXd::Zero(robot_->n_floating, n_q_dot);
   sf.block(0, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
-  wbc_ = new IHWBC(sf, sa, sv);
+  wbc_ = new IHWBC(sf, sa_, sv);
   wbc_->b_trq_limit = util::ReadParameter<bool>(cfg["wbc"], "b_trq_limit");
   if (wbc_->b_trq_limit) {
-    wbc_->trq_limit = sa.block(0, robot_->n_floating, n_active,
-                               n_q_dot - robot_->n_floating) *
+    wbc_->trq_limit = sa_.block(0, robot_->n_floating, n_active,
+                                n_q_dot - robot_->n_floating) *
                       robot_->joint_trq_limit;
   }
   wbc_->lambda_q_ddot =
@@ -108,10 +108,11 @@ void AtlasController::getCommand(void *cmd) {
   // WBC commands
   Eigen::VectorXd rf_des = Eigen::VectorXd::Zero(rf_dim);
   Eigen::VectorXd joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_a);
+  Eigen::VectorXd wbc_joint_acc_cmd = Eigen::VectorXd::Zero(robot_->n_q_dot);
   Eigen::VectorXd wbc_int_frc_cmd;
   wbc_->solve(tci_container_->task_list, tci_container_->contact_list,
               tci_container_->internal_constraint_list, rf_des, joint_trq_cmd_,
-              joint_acc_cmd, rf_des, wbc_int_frc_cmd);
+              wbc_joint_acc_cmd, rf_des, wbc_int_frc_cmd);
   if (sp_->state == AtlasStates::LFootSwing) {
     l_rf_cmd_ = Eigen::VectorXd::Zero(6);
     r_rf_cmd_ = rf_des;
@@ -123,6 +124,7 @@ void AtlasController::getCommand(void *cmd) {
     r_rf_cmd_ = rf_des.head(6);
     l_rf_cmd_ = rf_des.tail(6);
   }
+  joint_acc_cmd = sa_ * wbc_joint_acc_cmd;
 
   joint_integrator_->integrate(joint_acc_cmd, robot_->joint_velocities,
                                robot_->joint_positions, joint_vel_cmd_,
