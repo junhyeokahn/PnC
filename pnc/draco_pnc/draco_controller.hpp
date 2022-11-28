@@ -51,5 +51,6 @@ private:
 
   bool b_first_visit_;
 
+  bool b_use_modified_swing_jac_;
   YAML::Node cfg_;
 };

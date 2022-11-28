@@ -92,6 +92,9 @@ DracoController::DracoController(DracoTCIContainer *_tci_container,
   smoothing_duration_ =
       util::ReadParameter<double>(cfg_["controller"], "smoothing_duration");
   smoothing_start_joint_positions_ = Eigen::VectorXd::Zero(robot_->n_a);
+
+  b_use_modified_swing_jac_ =
+      util::ReadParameter<bool>(cfg_["controller"], "use_modified_swing_jac");
 }
 
 DracoController::~DracoController() {
@@ -146,6 +149,24 @@ void DracoController::getCommand(void *cmd) {
       // ignore floating joints for swing foot task
       tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
       tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
+    if (b_use_modified_swing_jac_) {
+      // ignore jacobian cols depending on the state
+      if (!sp_->b_rf_contact) {
+        // ignore right foot joints for com task
+        // tci_container_->task_list[0]->ignore_jacobian_row(sp_->rfoot_jidx);
+        // tci_container_->task_list[2]->ignore_jacobian_row(sp_->rfoot_jidx);
+        // ignore floating joints for swing foot task
+        tci_container_->task_list[4]->ignore_jacobian_row(sp_->floating_jidx);
+        tci_container_->task_list[5]->ignore_jacobian_row(sp_->floating_jidx);
+      }
+      if (!sp_->b_lf_contact) {
+        // ignore left foot joints for com task
+        // tci_container_->task_list[0]->ignore_jacobian_row(sp_->lfoot_jidx);
+        // tci_container_->task_list[2]->ignore_jacobian_row(sp_->lfoot_jidx);
+        // ignore floating joints for swing foot task
+        tci_container_->task_list[6]->ignore_jacobian_row(sp_->floating_jidx);
+        tci_container_->task_list[7]->ignore_jacobian_row(sp_->floating_jidx);
+      }
     }
 
     int rf_dim(0);
