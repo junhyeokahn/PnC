@@ -26,6 +26,8 @@ public:
 
   Eigen::Vector2d icp_des;
   Eigen::Vector2d icp_dot_des;
+  Eigen::Vector2d icp_err_integral_;
+  ExponentialMovingAverageFilter *icp_err_integrator_;
 
 private:
   void
@@ -37,5 +39,7 @@ private:
   int feedback_source_;
   int feedback_height_target_;
 
-  ExponentialMovingAverageFilter *icp_err_integrator_;
+  Eigen::Vector2d icp_err_int_lim;
+  double leak_rate;
+  bool b_leaky_integrator_;
 };

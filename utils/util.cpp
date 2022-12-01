@@ -427,4 +427,25 @@ Eigen::MatrixXd WeightedPseudoInverse(const Eigen::MatrixXd &J,
   return Jinv;
 }
 
+double clampValue(const double &in, const double &min, const double &max) {
+  if (in >= max) {
+    return max;
+  } else if (in <= min) {
+    return min;
+  } else {
+    return in;
+  }
+}
+
+Eigen::Vector2d clampVec(const Eigen::Vector2d &vec_in,
+                         const Eigen::Vector2d &vec_min,
+                         const Eigen::Vector2d &vec_max) {
+  Eigen::Vector2d vec_out = vec_in;
+  for (int i = 0; i < vec_in.size(); i++) {
+    vec_out[i] = clampValue(vec_in[i], vec_min[i], vec_max[i]);
+  }
+  return vec_out;
+
+}
+
 } // namespace util

@@ -365,6 +365,9 @@ while True:
     data_saver.add('task_lhand_rpy_pos_local',
                    (util.quat_to_rpy(msg.task_lhand_ori_pos_local)).tolist())
 
+    data_saver.add('icp_err_integrator', list(msg.icp_err_integrator))
+    data_saver.add('icp_err_leaky_integral', list(msg.icp_err_leaky_integral))
+
     data_saver.advance()
 
     # publish back for plot juggler

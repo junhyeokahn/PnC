@@ -112,4 +112,10 @@ Eigen::MatrixXd NullSpace(const Eigen::MatrixXd &J,
 Eigen::MatrixXd WeightedPseudoInverse(const Eigen::MatrixXd &J,
                                       const Eigen::MatrixXd &W,
                                       const double sigma_threshold = 0.0001);
+
+double clampValue(const double &in, const double &min, const double &max);
+Eigen::Vector2d clampVec(const Eigen::Vector2d &vec_in,
+                         const Eigen::Vector2d &vec_min,
+                         const Eigen::Vector2d &vec_max);
+
 } // namespace util

@@ -493,6 +493,11 @@ void DracoControlArchitecture::SaveData() {
       dm->data->task_com_vel_des_local, dm->data->task_com_acc_des_local,
       dm->data->task_com_pos_local, dm->data->task_com_vel_local);
 
+  dm->data->icp_err_integrator =
+          dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)->icp_err_integrator_->Output();
+  dm->data->icp_err_leaky_integral =
+          dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)->icp_err_integral_;
+
   dm->data->icp_des =
       dynamic_cast<DracoCenterOfMassTask *>(tci_container->com_task)->icp_des;
   dm->data->icp_dot_des =

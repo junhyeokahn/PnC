@@ -284,6 +284,12 @@ void DracoDataManager::Send() {
     pb_msg.add_imu_accel(data->imu_accel[i]);
   }
 
+  // icp integrators
+  for (unsigned int i = 0; i < 2; ++i) {
+    pb_msg.add_icp_err_integrator(data->icp_err_integrator[i]);
+    pb_msg.add_icp_err_leaky_integral(data->icp_err_leaky_integral[i]);
+  }
+
   // serialize
   std::string serialized_str;
   pb_msg.SerializeToString(&serialized_str);

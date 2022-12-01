@@ -215,4 +215,7 @@ public:
   Eigen::VectorXd task_lhand_ori_acc_des_local = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_lhand_ori_pos_local = Eigen::VectorXd::Zero(4);
   Eigen::VectorXd task_lhand_ori_vel_local = Eigen::VectorXd::Zero(3);
+
+  Eigen::VectorXd icp_err_integrator = Eigen::VectorXd::Zero(2);
+  Eigen::VectorXd icp_err_leaky_integral = Eigen::VectorXd::Zero(2);
 };

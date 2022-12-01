@@ -198,4 +198,7 @@ message pnc_msg {
 
   repeated float cmd_joint_accelerations = 138;
   repeated float cmd_joint_accelerations_fb = 139;
+
+  repeated float icp_err_integrator = 140;
+  repeated float icp_err_leaky_integral = 141;
 }

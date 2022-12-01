@@ -23,6 +23,11 @@ DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot,
   icp_err_integrator_ = new ExponentialMovingAverageFilter(
       sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(2), -icp_err_lim,
       icp_err_lim);
+
+  b_leaky_integrator_ = util::ReadParameter<bool>(cfg["wbc"]["task"]["icp"], "leaky_integrator");
+  leak_rate = util::ReadParameter<double>(cfg["wbc"]["task"]["icp"], "leak_rate");
+  icp_err_int_lim << 0.05, 0.05;
+  icp_err_integral_.setZero();
 }
 
 void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
@@ -73,6 +78,9 @@ void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
     icp_dot_des = vel_des.head(2) + acc_des.head(2) / omega;
 
     icp_err_integrator_->Input(icp_des - icp);
+    Eigen::Vector2d icp_err = icp_des - icp;
+    Eigen::Vector2d leaky_err = icp_err * sp_->servo_dt + leak_rate * icp_err_integral_;
+    icp_err_integral_ = util::clampVec(leaky_err, -icp_err_int_lim, icp_err_int_lim);
 
     pos = com_pos;
     if (feedback_height_target_ == feedback_height_target::kBaseHeight) {
@@ -92,9 +100,15 @@ void DracoCenterOfMassTask::update_cmd(Eigen::Matrix3d rot_world_local) {
     local_pos_err = rot_world_local.transpose() * pos_err;
     local_vel_err = rot_world_local.transpose() * vel_err;
 
-    Eigen::Vector2d cmp_des =
-        icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -
-        ki.head(2).cwiseProduct(icp_err_integrator_->Output());
+    Eigen::Vector2d cmp_des;
+    if (b_leaky_integrator_){
+        cmp_des = icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -
+        ki.head(2).cwiseProduct(icp_err_integral_);
+    } else {
+      cmp_des =
+              icp - icp_dot_des / omega - kp.head(2).cwiseProduct(icp_des - icp) -
+              ki.head(2).cwiseProduct(icp_err_integrator_->Output());
+    }
 
     DracoDataManager *dm = DracoDataManager::GetDracoDataManager();
     dm->data->des_cmp << cmp_des[0], cmp_des[1];
