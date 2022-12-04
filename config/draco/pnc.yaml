@@ -16,6 +16,7 @@ state_estimator:
     n_data_cam: [50, 50, 50]
     base_com_vel_time_constant: 0.1
     b_use_exp_filter: false
+    dcm_vel_filter_alpha: 0.1
 
 contact_estimator:
     foot_half_width: 0.0425  # 8.5 / 2 (cm)
@@ -67,7 +68,7 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [0.3, 0.2, 25]  ##TODO RETUNE
+            exp_kp: [1.0, 0.7, 50]  ##TODO RETUNE
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]  ##TODO RETUNE
             leaky_integrator: true

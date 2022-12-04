@@ -36,7 +36,7 @@ protected:
   std::vector<SimpleMovingAverage> cam_filter_;
 
   ExponentialMovingAverageFilter *com_vel_filt_;
-
+  double alpha_vel_filter_;
   bool b_first_visit_;
   bool b_use_exp_filter_;
 

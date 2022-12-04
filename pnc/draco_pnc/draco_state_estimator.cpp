@@ -42,6 +42,9 @@ DracoStateEstimator::DracoStateEstimator(RobotSystem *_robot)
   double time_constant = util::ReadParameter<double>(
       cfg["state_estimator"], "base_com_vel_time_constant");
 
+  alpha_vel_filter_ = util::ReadParameter<double>(cfg["state_estimator"],
+                                                  "dcm_vel_filter_alpha");
+
   // Filtered base velocity
   com_vel_filt_ = new ExponentialMovingAverageFilter(
       sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(3),
@@ -223,7 +226,7 @@ void DracoStateEstimator::ComputeDCM() {
   sp_->prev_dcm = sp_->dcm;
   sp_->dcm = com_pos + com_vel / dcm_omega;
 
-  double alpha_vel = 0.1; // TODO Study this alpha value
-  sp_->dcm_vel = alpha_vel * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_dt) +
-                 (1.0 - alpha_vel) * sp_->dcm_vel;
+  sp_->dcm_vel =
+      alpha_vel_filter_ * ((sp_->dcm - sp_->prev_dcm) / sp_->servo_dt) +
+      (1.0 - alpha_vel_filter_) * sp_->dcm_vel;
 }
