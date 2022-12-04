@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 xyz_label = ['x', 'y', 'z']
 quat_label = ['w', 'x', ' y', ' z']
 markers = ['*', '+', 'h', 'x', 'o', 'v', 'd']
-facecolors = [
+facecolors = 5 * [
     'gray', 'blue', 'cornflowerblue', 'darkorange', 'seagreen', 'crimson',
     'brown', 'gold', 'slategray'
 ]
@@ -173,6 +173,29 @@ def plot_vector_traj(time,
     return axes
 
 
+def plot_scalar_traj(time,
+                     vector,
+                     phase,
+                     label,
+                     color,
+                     suptitle=None,
+                     axes=None):
+    dim = 1
+    if axes is None:
+        fig, axes = plt.subplots(dim, 1)
+    for i in range(dim):
+        axes.plot(time, vector, color=color, linewidth=3)
+        axes.grid(True)
+        if label is not None:
+            axes.set_ylabel(label)
+        if phase is not None:
+            plot_phase(axes, time, phase)
+    axes.set_xlabel('time')
+    if (suptitle is not None):
+        fig.title(suptitle)
+    return axes
+
+
 def plot_rf(time, rfs, phase):
     fig, axes = plt.subplots(6, 2)
     for i in range(6):
@@ -226,9 +249,11 @@ def plot_joints(full_joint, selected_joint, time, cmd_joint_positions,
     plot_vector_traj(time, cmd_joint_torques[:, idx_list], phase,
                      selected_joint, 'k', title + " torque command")
 
-def plot_joints_cmd(full_joint, selected_joint, time, joints_cmd, phase, title):
+
+def plot_joints_cmd(full_joint, selected_joint, time, joints_cmd, phase,
+                    title):
     idx_list = []
     for name in selected_joint:
         idx_list.append(full_joint.index(name))
-    plot_vector_traj(time, joints_cmd[:, idx_list], phase,
-                     selected_joint, 'k', title)
+    plot_vector_traj(time, joints_cmd[:, idx_list], phase, selected_joint, 'k',
+                     title)

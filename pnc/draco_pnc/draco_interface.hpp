@@ -17,6 +17,8 @@ public:
     imu_dvel.setZero();
     b_rf_contact = false;
     b_lf_contact = false;
+    rf_sg_ = 0.;
+    lf_sg_ = 0.;
   }
   virtual ~DracoSensorData() {}
 
@@ -25,6 +27,9 @@ public:
   Eigen::Vector3d imu_dvel;
   std::map<std::string, double> joint_positions;
   std::map<std::string, double> joint_velocities;
+
+  double rf_sg_;
+  double lf_sg_;
 
   bool b_rf_contact;
   bool b_lf_contact;

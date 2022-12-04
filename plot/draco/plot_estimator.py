@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_vector_traj
+from plot.helper import *
 
 from utils.python_utils.util import quat_to_rpy
 
@@ -32,12 +32,17 @@ base_joint_rpy = []
 base_joint_lin_vel = []
 base_joint_ang_vel = []
 
+rf_sg = []
+lf_sg = []
+
 with open('experiment_data/pnc.pkl', 'rb') as file:
     while True:
         try:
             d = pickle.load(file)
             time.append(d['time'])
             phase.append(d['phase'])
+            rf_sg.append(d['rf_sg'])
+            lf_sg.append(d['lf_sg'])
             com_vel_est.append(d['com_vel_est'])
             com_vel_est_exp.append(d['com_vel_est_exp'])
             com_vel_raw.append(d['com_vel_raw'])
@@ -55,6 +60,8 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
 
 time = np.array(time)[st_idx:]
 phase = np.array(phase)[st_idx:]
+rf_sg = np.array(rf_sg)[st_idx:]
+lf_sg = np.array(lf_sg)[st_idx:]
 com_vel_est = np.stack(com_vel_est, axis=0)[st_idx:, :]
 com_vel_est_exp = np.stack(com_vel_est_exp, axis=0)[st_idx:, :]
 com_vel_raw = np.stack(com_vel_raw, axis=0)[st_idx:, :]
@@ -91,5 +98,7 @@ plot_vector_traj(time, base_joint_lin_vel, phase, ["x_dot", "y_dot", "z_dot"],
                  "k", "base_joint_lin_vel")
 plot_vector_traj(time, base_joint_ang_vel, phase, ["w_x", "w_y", "w_z"], "k",
                  "base_joint_ang_vel")
+axes = plot_scalar_traj(time, rf_sg, phase, "rf_sg", "k")
+axes = plot_scalar_traj(time, lf_sg, phase, "lf_sg", "k")
 
 plt.show()

@@ -37,6 +37,9 @@ public:
   double time = 0.;
   int phase = 0;
 
+  double rf_sg = 0.;
+  double lf_sg = 0.;
+
   Eigen::VectorXd task_com_pos = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_com_vel = Eigen::VectorXd::Zero(3);
   Eigen::VectorXd task_com_pos_des = Eigen::VectorXd::Zero(3);

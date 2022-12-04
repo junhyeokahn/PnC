@@ -142,6 +142,7 @@ def main(args):
     com_pos_act = []
     icp_act = []
     icp_des = []
+    cmp_des = []
     lfoot_pos_act = []
     rfoot_pos_act = []
     with open('experiment_data/pnc.pkl', 'rb') as file:
@@ -154,12 +155,14 @@ def main(args):
                 icp_des.append(d['icp_des'])
                 lfoot_pos_act.append(d['task_lfoot_lin_pos'])
                 rfoot_pos_act.append(d['task_rfoot_lin_pos'])
+                cmp_des.append(d['des_cmp'])
             except EOFError:
                 break
 
     com_pos_act = np.stack(com_pos_act, axis=0)
     icp_act = np.stack(icp_act, axis=0)
     icp_des = np.stack(icp_des, axis=0)
+    cmp_des = np.stack(cmp_des, axis=0)
     lfoot_pos_act = np.stack(lfoot_pos_act, axis=0)
     rfoot_pos_act = np.stack(rfoot_pos_act, axis=0)
 
@@ -218,6 +221,8 @@ def main(args):
                  linestyle=line_styles[0],
                  color=dcmref_linecolor)
         plt.grid()
+
+        # plot ICP during stepping time
         plt.plot(icp_act[0, 0], icp_act[0, 1], 'ms', label='ICP start')
         plt.plot(icp_act[first_step_idx, 0],
                  icp_act[first_step_idx, 1],
@@ -235,6 +240,13 @@ def main(args):
                  liftoff_icp_pos_des[1],
                  'k*',
                  label='ICP liftoff(des)')
+
+        # plot cmp during single support
+        plt.plot(cmp_des[first_liftoff_idx:first_step_idx, 0],
+                 cmp_des[first_liftoff_idx:first_step_idx, 1],
+                 'pink',
+                 label='CMP des (ss)')
+
         # plt.plot(com_pos_act[0, 0], com_pos_act[0, 1], 'ms', label='CoM start')
         # plt.plot(com_pos_act[-1, 0], com_pos_act[-1, 1], 'co', label='CoM end')
         # plt.plot(com_pos_act[:, 0], com_pos_act[:, 1], color='k')
@@ -260,6 +272,8 @@ def main(args):
                  curr_rfoot_contact_pos[0, 1],
                  'bs',
                  label='initRF')
+
+        # plot planned and actual feet position at landing
         if rfoot_contact_pos.shape[0] == 0:
             plt.plot(landing_lfoot_pos[0],
                      landing_lfoot_pos[1],

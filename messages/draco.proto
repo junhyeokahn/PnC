@@ -201,4 +201,7 @@ message pnc_msg {
 
   repeated float icp_err_integrator = 140;
   repeated float icp_err_leaky_integral = 141;
+
+  float rf_sg = 142;
+  float lf_sg = 143;
 }

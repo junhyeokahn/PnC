@@ -94,6 +94,9 @@ while True:
     data_saver.add('time', msg.time)
     data_saver.add('phase', msg.phase)
 
+    data_saver.add('rf_sg', msg.rf_sg)
+    data_saver.add('lf_sg', msg.lf_sg)
+
     data_saver.add('l_knee_int_frc_cmd', msg.l_knee_int_frc_cmd)
     data_saver.add('r_knee_int_frc_cmd', msg.r_knee_int_frc_cmd)
 
@@ -248,8 +251,10 @@ while True:
     data_saver.add('cmd_joint_positions', list(msg.cmd_joint_positions))
     data_saver.add('cmd_joint_velocities', list(msg.cmd_joint_velocities))
     data_saver.add('cmd_joint_torques', list(msg.cmd_joint_torques))
-    data_saver.add('cmd_joint_accelerations', list(msg.cmd_joint_accelerations))
-    data_saver.add('cmd_joint_accelerations_fb', list(msg.cmd_joint_accelerations_fb))
+    data_saver.add('cmd_joint_accelerations',
+                   list(msg.cmd_joint_accelerations))
+    data_saver.add('cmd_joint_accelerations_fb',
+                   list(msg.cmd_joint_accelerations_fb))
 
     data_saver.add('joint_positions', list(msg.joint_positions))
     data_saver.add('joint_velocities', list(msg.joint_velocities))

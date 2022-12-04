@@ -208,6 +208,10 @@ void DracoStateEstimator::update(DracoSensorData *data) {
 
     // saving imu accel
     dm->data->imu_accel = data->imu_dvel / sp_->servo_dt;
+
+    // save foot strain gauge data
+    dm->data->rf_sg = data->rf_sg_;
+    dm->data->lf_sg = data->lf_sg_;
   }
 }
 
