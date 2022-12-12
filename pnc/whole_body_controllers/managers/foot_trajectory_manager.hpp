@@ -76,4 +76,7 @@ private:
   HermiteCurveVec pos_traj_init_to_mid_;
   HermiteCurveVec pos_traj_mid_to_end_;
   HermiteQuaternionCurve quat_hermite_curve_;
+  HermiteQuinticCurveVec pos_traj_init_to_mid_quint_;
+  HermiteQuinticCurveVec pos_traj_mid_to_end_quint_;
+  bool b_use_quintic_spline_in_swing;
 };

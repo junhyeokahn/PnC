@@ -5,11 +5,15 @@ FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
                                              RobotSystem *_robot) {
   util::PrettyConstructor(2, "TrajectoryManager: Foot");
 
+  YAML::Node cfg = YAML::LoadFile(THIS_COM "config/draco/pnc.yaml");
+
   robot_ = _robot;
   foot_pos_task_ = _foot_pos_task;
   foot_ori_task_ = _foot_ori_task;
 
   link_idx_ = foot_pos_task_->target_ids[0];
+
+  b_use_quintic_spline_in_swing = util::ReadParameter<bool>(cfg["walking"], "b_use_quintic_spline_in_swing");
 
   ini_pos_.setZero();
   target_pos_.setZero();
@@ -112,6 +116,13 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
   pos_traj_mid_to_end_.initialize(mid_swing_position, mid_swing_velocity,
                                   swing_land_foot_.position,
                                   Eigen::Vector3d::Zero(3), 0.5 * duration_);
+  pos_traj_init_to_mid_quint_.initialize(swing_init_foot_.position,
+                                   Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
+                                   mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
+                                   0.5 * duration_);
+  pos_traj_mid_to_end_quint_.initialize(mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
+                                  swing_land_foot_.position, Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
+                                  0.5 * duration_);
 
   // Construct Quaternion trajectory
   Eigen::Vector3d ang_vel_start;
@@ -162,15 +173,28 @@ void FootTrajectoryManager::UpdateDesired(const double current_time) {
   // ang_vel_des /= duration_;
   // ang_acc_des /= duration_;
   double s = current_time - start_time_;
-  if (s < 0.5 * duration_) {
-    pos_des = pos_traj_init_to_mid_.evaluate(s);
-    vel_des = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
-    acc_des = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
+  if (b_use_quintic_spline_in_swing) {
+    if (s < 0.5 * duration_) {
+      pos_des = pos_traj_init_to_mid_quint_.evaluate(s);
+      vel_des = pos_traj_init_to_mid_quint_.evaluateFirstDerivative(s);
+      acc_des = pos_traj_init_to_mid_quint_.evaluateSecondDerivative(s);
+    } else {
+      pos_des = pos_traj_mid_to_end_quint_.evaluate(s - 0.5 * duration_);
+      vel_des = pos_traj_mid_to_end_quint_.evaluateFirstDerivative(s - 0.5 * duration_);
+      acc_des =
+              pos_traj_mid_to_end_quint_.evaluateSecondDerivative(s - 0.5 * duration_);
+    }
   } else {
-    pos_des = pos_traj_mid_to_end_.evaluate(s - 0.5 * duration_);
-    vel_des = pos_traj_mid_to_end_.evaluateFirstDerivative(s - 0.5 * duration_);
-    acc_des =
-        pos_traj_mid_to_end_.evaluateSecondDerivative(s - 0.5 * duration_);
+    if (s < 0.5 * duration_) {
+      pos_des = pos_traj_init_to_mid_.evaluate(s);
+      vel_des = pos_traj_init_to_mid_.evaluateFirstDerivative(s);
+      acc_des = pos_traj_init_to_mid_.evaluateSecondDerivative(s);
+    } else {
+      pos_des = pos_traj_mid_to_end_.evaluate(s - 0.5 * duration_);
+      vel_des = pos_traj_mid_to_end_.evaluateFirstDerivative(s - 0.5 * duration_);
+      acc_des =
+              pos_traj_mid_to_end_.evaluateSecondDerivative(s - 0.5 * duration_);
+    }
   }
 
   quat_hermite_curve_.evaluate(s, quat_des);
