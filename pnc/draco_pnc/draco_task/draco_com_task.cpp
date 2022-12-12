@@ -18,8 +18,8 @@ DracoCenterOfMassTask::DracoCenterOfMassTask(RobotSystem *_robot,
   double time_constant =
       util::ReadParameter<double>(cfg["wbc"]["task"]["icp"], "time_constant");
 
-  Eigen::VectorXd icp_err_lim = Eigen::VectorXd::Zero(2);
-  icp_err_lim << 0.03, 0.03;
+  Eigen::VectorXd icp_err_lim = util::ReadParameter<Eigen::VectorXd>(
+      cfg["wbc"]["task"]["icp"], "exp_filt_err_limit");
   icp_err_integrator_ = new ExponentialMovingAverageFilter(
       sp_->servo_dt, time_constant, Eigen::VectorXd::Zero(2), -icp_err_lim,
       icp_err_lim);

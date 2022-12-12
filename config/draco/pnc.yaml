@@ -71,6 +71,9 @@ wbc:
             exp_kp: [1.0, 0.7, 50]  ##TODO RETUNE
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [1.0, 1.0, 0.]  ##TODO RETUNE
+
+            exp_filt_err_limit: [0.03, 0.03] ## x, y
+
             leaky_integrator: true
             leak_rate: 0.5
 
