@@ -286,6 +286,7 @@ walking:
     #com_height: 1.
 
     swing_height: 0.03
+    b_use_quintic_spline_in_swing: true
 
     #t_additional_ini_trans: 0.
     #t_contact_trans: 0.45
