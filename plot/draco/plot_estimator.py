@@ -77,18 +77,19 @@ base_joint_ang_vel = np.stack(base_joint_ang_vel, axis=0)[st_idx:, :]
 
 axes = plot_vector_traj(time, com_vel_raw, phase, ["x", "y", "z"], "k",
                         "com vel")
-axes = plot_vector_traj(time, com_vel_est, phase, ["x", "y", "z"], "g", None,
-                        axes)
+axes = plot_vector_traj(time,
+                        com_vel_est,
+                        phase, ["x", "y", "z"],
+                        "g",
+                        axes=axes)
 
-plot_vector_traj(time, com_vel_est_exp, phase, ["x", "y", "z"], "c", None,
-                 axes)
+plot_vector_traj(time, com_vel_est_exp, phase, ["x", "y", "z"], "c", axes=axes)
 
 axes = plot_vector_traj(time, imu_ang_vel_raw, phase, ["x", "y", "z"], "k",
                         "imu ang vel")
-plot_vector_traj(time, imu_ang_vel_est, phase, ["x", "y", "z"], "g", None,
-                 axes)
+plot_vector_traj(time, imu_ang_vel_est, phase, ["x", "y", "z"], "g", axes=axes)
 axes = plot_vector_traj(time, cam_raw, phase, ["x", "y", "z"], "k", "cam")
-plot_vector_traj(time, cam_est, phase, ["x", "y", "z"], "g", None, axes)
+plot_vector_traj(time, cam_est, phase, ["x", "y", "z"], "g", axes=axes)
 
 plot_vector_traj(time, base_joint_pos, phase, ["x", "y", "z"], "k",
                  "base_joint_pos")

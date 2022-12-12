@@ -155,14 +155,20 @@ def plot_vector_traj(time,
                      phase,
                      label,
                      color,
+                     legend=None,
                      suptitle=None,
                      axes=None):
     dim = vector.shape[1]
     if axes is None:
         fig, axes = plt.subplots(dim, 1)
     for i in range(dim):
-        axes[i].plot(time, vector[:, i], color=color, linewidth=3)
+        axes[i].plot(time,
+                     vector[:, i],
+                     color=color,
+                     linewidth=3,
+                     label=legend)
         axes[i].grid(True)
+        axes[i].legend()
         if label is not None:
             axes[i].set_ylabel(label[i])
         if phase is not None:
