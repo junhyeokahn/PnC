@@ -36,9 +36,9 @@ wbc:
         rf_z_max: 450.0
         w_rf: 0.
         #foot_half_width: 0.04 # 8.5 / 2 (cm)
-        foot_half_width: 0.03 # 8.5 / 2 (cm)
+        foot_half_width: 0.04 # 8.5 / 2 (cm)
         #foot_half_length: 0.05 # 22 / 2 (cm)
-        foot_half_length: 0.08 # 22 / 2 (cm)
+        foot_half_length: 0.09 # 22 / 2 (cm)
         mu: 0.3
         #mu: 0.5
         use_smooth_interpolation: true
@@ -68,14 +68,14 @@ wbc:
             #exp_ki: [0.0, 0.0, 0.]
             # Gains for squatting
             #exp_kp: [0.2, 0.1, 25]
-            exp_kp: [1.4, 1.0, 50]  ##TODO RETUNE
+            exp_kp: [1.4, 1.4, 50]  ##TODO RETUNE
             exp_kd: [0.04, 0.04, 1.5]
             exp_ki: [0.0, 0.0, 0.]  ##TODO RETUNE
 
-            exp_filt_err_limit: [0.03, 0.03] ## x, y
+            exp_filt_err_limit: [0.04, 0.04] ## x, y
             leaky_integrator_limit: [0.03, 0.03] ## x, y
 
-            leaky_integrator: false
+            leaky_integrator: true
             leak_rate: 0.5
 
             #exp_kp: [0.3, 0.3, 25]
@@ -96,7 +96,7 @@ wbc:
             sim_kp: [100, 100, 100]
             #sim_kp: [100, 100, 100]
             sim_kd: [10, 10, 10]
-            exp_kp: [30, 30, 20]
+            exp_kp: [50, 50, 20]
             exp_kd: [0.2, 0.2, 0.1]
 
         upper_body_joint:
@@ -299,8 +299,8 @@ walking:
     #percentage_settle: 0.9
     #alpha_ds: 0.5
 
-    t_additional_ini_trans: 0.8
-    t_contact_trans: 1.0
+    t_additional_ini_trans: 0.0
+    t_contact_trans: 1.8
     t_swing: 0.8
     percentage_settle: 0.9
     alpha_ds: 0.5
