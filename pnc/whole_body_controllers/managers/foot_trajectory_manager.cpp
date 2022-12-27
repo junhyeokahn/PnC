@@ -1,4 +1,6 @@
 #include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
+#include "utils/cubic_hermite_curve.hpp"
+#include "utils/quintic_hermite_curve.hpp"
 
 FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
                                              Task *_foot_ori_task,
@@ -110,19 +112,38 @@ void FootTrajectoryManager::InitializeSwingTrajectory(
           (swing_land_foot_.position - swing_init_foot_.position) / duration_;
 
   // Construct Position trajectories
-  pos_traj_init_to_mid_.initialize(swing_init_foot_.position,
-                                   Eigen::Vector3d::Zero(3), mid_swing_position,
-                                   mid_swing_velocity, 0.5 * duration_);
-  pos_traj_mid_to_end_.initialize(mid_swing_position, mid_swing_velocity,
-                                  swing_land_foot_.position,
-                                  Eigen::Vector3d::Zero(3), 0.5 * duration_);
-  pos_traj_init_to_mid_quint_.initialize(swing_init_foot_.position,
-                                   Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
-                                   mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
-                                   0.5 * duration_);
-  pos_traj_mid_to_end_quint_.initialize(mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
-                                  swing_land_foot_.position, Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
-                                  0.5 * duration_);
+  pos_traj_init_to_mid_.initialize(swing_init_foot_.position.size());
+  pos_traj_mid_to_end_.initialize(swing_init_foot_.position.size());
+  pos_traj_init_to_mid_quint_.initialize(swing_init_foot_.position.size());
+  pos_traj_mid_to_end_quint_.initialize(swing_init_foot_.position.size());
+
+//  pos_traj_init_to_mid_.initialize(swing_init_foot_.position,
+//                                   Eigen::Vector3d::Zero(3), mid_swing_position,
+//                                   mid_swing_velocity, 0.5 * duration_);
+//  pos_traj_mid_to_end_.initialize(mid_swing_position, mid_swing_velocity,
+//                                  swing_land_foot_.position,
+//                                  Eigen::Vector3d::Zero(3), 0.5 * duration_);
+//  pos_traj_init_to_mid_quint_.initialize(swing_init_foot_.position,
+//                                   Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
+//                                   mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
+//                                   0.5 * duration_);
+//  pos_traj_mid_to_end_quint_.initialize(mid_swing_position, mid_swing_velocity, Eigen::Vector3d::Zero(3),
+//                                  swing_land_foot_.position, Eigen::Vector3d::Zero(3), Eigen::Vector3d::Zero(3),
+//                                  0.5 * duration_);
+  //TODO check added curves to curve_vec's
+  for (int i = 0; i < swing_init_foot_.position.size(); i++) {
+    pos_traj_init_to_mid_.add_curve(std::make_unique<CubicHermiteCurve>(
+            swing_init_foot_.position[i], 0., mid_swing_position[i], mid_swing_velocity[i], 0.5*duration_));
+    pos_traj_mid_to_end_.add_curve(std::make_unique<CubicHermiteCurve>(
+            mid_swing_position[i], mid_swing_velocity[i], swing_land_foot_.position[i], 0., 0.5*duration_));
+    pos_traj_init_to_mid_quint_.add_curve(std::make_unique<QuinticHermiteCurve>(
+            swing_init_foot_.position[i], 0., 0.,
+            mid_swing_position[i], mid_swing_velocity[i], 0., 0.5*duration_));
+    pos_traj_mid_to_end_quint_.add_curve(std::make_unique<QuinticHermiteCurve>(
+            mid_swing_position[i], mid_swing_velocity[i], 0.,
+            swing_land_foot_.position[i], 0., 0., 0.5*duration_));
+  }
+
 
   // Construct Quaternion trajectory
   Eigen::Vector3d ang_vel_start;

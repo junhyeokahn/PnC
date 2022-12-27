@@ -10,6 +10,7 @@
 
 #include "configuration.hpp"
 #include "utils/util.hpp"
+#include "hermite_curve_vec.hpp"
 
 namespace util {
 double SmoothPos(double ini, double end, double moving_duration,
@@ -208,122 +209,122 @@ private:
   Eigen::VectorXd output_;
 };
 
-class HermiteCurve {
-public:
-  HermiteCurve();
-  HermiteCurve(const double &start_pos, const double &start_vel,
-               const double &end_pos, const double &end_vel,
-               const double &duration);
-  ~HermiteCurve();
-  double evaluate(const double &t_in);
-  double evaluateFirstDerivative(const double &t_in);
-  double evaluateSecondDerivative(const double &t_in);
-
-private:
-  double p1;
-  double v1;
-  double p2;
-  double v2;
-
-  double t_dur;
-
-  double s_;
-
-  // by default clamps within 0 and 1.
-  double clamp(const double &t_in, double lo = 0.0, double hi = 1.0);
-};
-
-class HermiteCurveVec {
-public:
-  HermiteCurveVec();
-  HermiteCurveVec(const Eigen::VectorXd &start_pos,
-                  const Eigen::VectorXd &start_vel,
-                  const Eigen::VectorXd &end_pos,
-                  const Eigen::VectorXd &end_vel, const double &duration);
-  ~HermiteCurveVec();
-
-  void initialize(const Eigen::VectorXd &start_pos,
-                  const Eigen::VectorXd &start_vel,
-                  const Eigen::VectorXd &end_pos,
-                  const Eigen::VectorXd &end_vel, const double &duration);
-  Eigen::VectorXd evaluate(const double &t_in);
-  Eigen::VectorXd evaluateFirstDerivative(const double &t_in);
-  Eigen::VectorXd evaluateSecondDerivative(const double &t_in);
-
-private:
-  Eigen::VectorXd p1;
-  Eigen::VectorXd v1;
-  Eigen::VectorXd p2;
-  Eigen::VectorXd v2;
-
-  double t_dur;
-
-  std::vector<HermiteCurve> curves;
-  Eigen::VectorXd output;
-};
-
-class HermiteQuinticCurve {
-public:
-    HermiteQuinticCurve();
-    HermiteQuinticCurve(const double &start_pos, const double &start_vel,
-                 const double &start_accel, const double &end_pos,
-                 const double &end_vel, const double &end_accel,
-                 const double &duration);
-    ~HermiteQuinticCurve();
-    double evaluate(const double &t_in);
-    double evaluateFirstDerivative(const double &t_in);
-    double evaluateSecondDerivative(const double &t_in);
-
-private:
-    double p1;
-    double v1;
-    double a1;
-    double p2;
-    double v2;
-    double a2;
-
-    double t_dur;
-
-    double s_;
-
-    // by default clamps within 0 and 1.
-    double clamp(const double &t_in, double lo = 0.0, double hi = 1.0);
-};
-
-class HermiteQuinticCurveVec {
-public:
-    HermiteQuinticCurveVec();
-    HermiteQuinticCurveVec(const Eigen::VectorXd &start_pos,
-                    const Eigen::VectorXd &start_vel,
-                    const Eigen::VectorXd &start_accel,
-                    const Eigen::VectorXd &end_pos,
-                    const Eigen::VectorXd &end_vel,
-                    const Eigen::VectorXd &end_accel, const double &duration);
-    ~HermiteQuinticCurveVec();
-
-    void initialize(const Eigen::VectorXd &start_pos,
-                    const Eigen::VectorXd &start_vel,
-                    const Eigen::VectorXd &start_accel,
-                    const Eigen::VectorXd &end_pos,
-                    const Eigen::VectorXd &end_vel,
-                    const Eigen::VectorXd &end_accel, const double &duration);
-    Eigen::VectorXd evaluate(const double &t_in);
-    Eigen::VectorXd evaluateFirstDerivative(const double &t_in);
-    Eigen::VectorXd evaluateSecondDerivative(const double &t_in);
-
-private:
-    Eigen::VectorXd p1;
-    Eigen::VectorXd v1;
-    Eigen::VectorXd a1;
-    Eigen::VectorXd p2;
-    Eigen::VectorXd v2;
-    Eigen::VectorXd a2;
-
-    double t_dur;
-
-    std::vector<HermiteQuinticCurve> curves;
-    Eigen::VectorXd output;
-};
+//class HermiteCurve {
+//public:
+//  HermiteCurve();
+//  HermiteCurve(const double &start_pos, const double &start_vel,
+//               const double &end_pos, const double &end_vel,
+//               const double &duration);
+//  ~HermiteCurve();
+//  double evaluate(const double &t_in);
+//  double evaluateFirstDerivative(const double &t_in);
+//  double evaluateSecondDerivative(const double &t_in);
+//
+//private:
+//  double p1;
+//  double v1;
+//  double p2;
+//  double v2;
+//
+//  double t_dur;
+//
+//  double s_;
+//
+//  // by default clamps within 0 and 1.
+//  double clamp(const double &t_in, double lo = 0.0, double hi = 1.0);
+//};
+//
+//class HermiteCurveVec {
+//public:
+//  HermiteCurveVec();
+//  HermiteCurveVec(const Eigen::VectorXd &start_pos,
+//                  const Eigen::VectorXd &start_vel,
+//                  const Eigen::VectorXd &end_pos,
+//                  const Eigen::VectorXd &end_vel, const double &duration);
+//  ~HermiteCurveVec();
+//
+//  void initialize(const Eigen::VectorXd &start_pos,
+//                  const Eigen::VectorXd &start_vel,
+//                  const Eigen::VectorXd &end_pos,
+//                  const Eigen::VectorXd &end_vel, const double &duration);
+//  Eigen::VectorXd evaluate(const double &t_in);
+//  Eigen::VectorXd evaluateFirstDerivative(const double &t_in);
+//  Eigen::VectorXd evaluateSecondDerivative(const double &t_in);
+//
+//private:
+//  Eigen::VectorXd p1;
+//  Eigen::VectorXd v1;
+//  Eigen::VectorXd p2;
+//  Eigen::VectorXd v2;
+//
+//  double t_dur;
+//
+//  std::vector<HermiteCurve> curves;
+//  Eigen::VectorXd output;
+//};
+//
+//class HermiteQuinticCurve {
+//public:
+//    HermiteQuinticCurve();
+//    HermiteQuinticCurve(const double &start_pos, const double &start_vel,
+//                 const double &start_accel, const double &end_pos,
+//                 const double &end_vel, const double &end_accel,
+//                 const double &duration);
+//    ~HermiteQuinticCurve();
+//    double evaluate(const double &t_in);
+//    double evaluateFirstDerivative(const double &t_in);
+//    double evaluateSecondDerivative(const double &t_in);
+//
+//private:
+//    double p1;
+//    double v1;
+//    double a1;
+//    double p2;
+//    double v2;
+//    double a2;
+//
+//    double t_dur;
+//
+//    double s_;
+//
+//    // by default clamps within 0 and 1.
+//    double clamp(const double &t_in, double lo = 0.0, double hi = 1.0);
+//};
+//
+//class HermiteQuinticCurveVec {
+//public:
+//    HermiteQuinticCurveVec();
+//    HermiteQuinticCurveVec(const Eigen::VectorXd &start_pos,
+//                    const Eigen::VectorXd &start_vel,
+//                    const Eigen::VectorXd &start_accel,
+//                    const Eigen::VectorXd &end_pos,
+//                    const Eigen::VectorXd &end_vel,
+//                    const Eigen::VectorXd &end_accel, const double &duration);
+//    ~HermiteQuinticCurveVec();
+//
+//    void initialize(const Eigen::VectorXd &start_pos,
+//                    const Eigen::VectorXd &start_vel,
+//                    const Eigen::VectorXd &start_accel,
+//                    const Eigen::VectorXd &end_pos,
+//                    const Eigen::VectorXd &end_vel,
+//                    const Eigen::VectorXd &end_accel, const double &duration);
+//    Eigen::VectorXd evaluate(const double &t_in);
+//    Eigen::VectorXd evaluateFirstDerivative(const double &t_in);
+//    Eigen::VectorXd evaluateSecondDerivative(const double &t_in);
+//
+//private:
+//    Eigen::VectorXd p1;
+//    Eigen::VectorXd v1;
+//    Eigen::VectorXd a1;
+//    Eigen::VectorXd p2;
+//    Eigen::VectorXd v2;
+//    Eigen::VectorXd a2;
+//
+//    double t_dur;
+//
+//    std::vector<HermiteQuinticCurve> curves;
+//    Eigen::VectorXd output;
+//};
 
 // Hermite Quaternion curve for global frame quaternion trajectory given
 // boundary conditions also computes global frame angular velocity and angular
