@@ -133,6 +133,9 @@ if(PYTHON_BINDING)
   add_subdirectory(bindings)
 endif()
 
+# unit-testing tools
+set(B_BUILD_GTESTS true)
+set(B_FETCH_GTEST_PKG false)
 
 ##=============================================================================
 ## Add Subdirectory
