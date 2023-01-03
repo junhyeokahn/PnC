@@ -186,6 +186,7 @@ DracoTCIContainer::DracoTCIContainer(RobotSystem *_robot)
 DracoTCIContainer::~DracoTCIContainer() {
   delete joint_task;
   delete com_task;
+  delete cam_task;
   delete torso_ori_task;
   delete upper_body_task;
   delete rfoot_pos_task;
