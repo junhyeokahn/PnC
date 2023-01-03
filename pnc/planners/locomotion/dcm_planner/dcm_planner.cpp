@@ -326,9 +326,16 @@ void DCMPlanner::computeDCM_states() {
     dcm_P[i] = polynomialMatrix(Ts, dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i],
                                 dcm_end_DS_list[i], dcm_vel_end_DS_list[i]);
 
-    dcm_minjerk[i] = MinJerkCurveVec(
-        dcm_ini_DS_list[i], dcm_vel_ini_DS_list[i], dcm_acc_ini_DS_list[i],
-        dcm_end_DS_list[i], dcm_vel_end_DS_list[i], dcm_acc_end_DS_list[i], Ts);
+    dcm_minjerk[i] = HermiteCurveVec(dcm_ini_DS_list[i].size());
+    Eigen::Vector3d init_state, end_state;
+    for (int j = 0; j < dcm_ini_DS_list[i].size(); j++) {
+      init_state.setZero();
+      end_state.setZero();
+      init_state << dcm_ini_DS_list[i][j], dcm_vel_ini_DS_list[i][j], dcm_acc_ini_DS_list[i][j];
+      end_state << dcm_end_DS_list[i][j], dcm_vel_end_DS_list[i][j], dcm_acc_end_DS_list[i][j];
+      dcm_minjerk[i].add_curve(std::make_unique<MinJerkCurve>(
+              init_state, end_state, 0.0, Ts));
+    }
   }
 
   // Compute the total trajectory time.
@@ -574,7 +581,7 @@ Eigen::Vector3d DCMPlanner::get_DCM_DS_minjerk(const int &step_index,
                                                const double &t) {
   double Ts = get_polynomial_duration(step_index);
   double time = clampDOUBLE(t, 0.0, Ts);
-  return dcm_minjerk[step_index].Evaluate(time);
+  return dcm_minjerk[step_index].evaluate(time);
 }
 
 // Returns the DCM double support velocity min jerk interpolation for the
@@ -584,7 +591,7 @@ Eigen::Vector3d DCMPlanner::get_DCM_DS_vel_minjerk(const int &step_index,
                                                    const double &t) {
   double Ts = get_polynomial_duration(step_index);
   double time = clampDOUBLE(t, 0.0, Ts);
-  return dcm_minjerk[step_index].EvaluateFirstDerivative(time);
+  return dcm_minjerk[step_index].evaluateFirstDerivative(time);
 }
 
 void DCMPlanner::get_ref_dcm(const double t, Eigen::Vector3d &dcm_out) {

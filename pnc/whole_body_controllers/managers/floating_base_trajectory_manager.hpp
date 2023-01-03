@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pnc/whole_body_controllers/basic_tasks.hpp"
-#include "utils/interpolation.hpp"
+#include "utils/interpolation/interpolation.hpp"
 #include "utils/util.hpp"
 
 /// class FloatingBaseTrajectoryManager

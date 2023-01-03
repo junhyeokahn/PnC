@@ -5,7 +5,7 @@
 #include "pnc/robot_system/robot_system.hpp"
 #include "pnc/whole_body_controllers/contact.hpp"
 #include "pnc/whole_body_controllers/task.hpp"
-#include "utils/interpolation.hpp"
+#include "utils/interpolation/interpolation.hpp"
 #include "utils/util.hpp"
 
 /// class FootTrajectoryManager

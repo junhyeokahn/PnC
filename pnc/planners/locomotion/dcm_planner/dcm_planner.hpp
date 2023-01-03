@@ -7,7 +7,8 @@
 #include <string>
 
 #include "pnc/planners/locomotion/dcm_planner/footstep.hpp"
-#include "utils/interpolation.hpp"
+#include "utils/interpolation/interpolation.hpp"
+#include "utils/interpolation/min_jerk_curve_vec.hpp"
 #include "utils/util.hpp"
 
 /// namespace vrp_type
@@ -103,7 +104,7 @@ public:
   /// polynomial matrices for polynomial interpolation
   std::vector<Eigen::MatrixXd> dcm_P;
   /// minjerk curves for interpolation
-  std::vector<MinJerkCurveVec> dcm_minjerk;
+  std::vector<HermiteCurveVec> dcm_minjerk;
   /// \}
 
   /// \{ \name DCM Planning Parameters

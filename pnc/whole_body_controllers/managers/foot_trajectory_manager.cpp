@@ -1,6 +1,6 @@
 #include "pnc/whole_body_controllers/managers/foot_trajectory_manager.hpp"
-#include "utils/cubic_hermite_curve.hpp"
-#include "utils/quintic_hermite_curve.hpp"
+#include "utils/interpolation/cubic_hermite_curve.hpp"
+#include "utils/interpolation/quintic_hermite_curve.hpp"
 
 FootTrajectoryManager::FootTrajectoryManager(Task *_foot_pos_task,
                                              Task *_foot_ori_task,
