@@ -20,11 +20,11 @@ jobs:
     steps:
       - name: Test build
         run: |
-        mkdir build 
-        cd build 
-        cmake .. 
-        make 
-        cd ..
+          mkdir build 
+          cd build 
+          cmake .. 
+          make 
+          cd ..
 
   test:
     needs: build
@@ -32,4 +32,4 @@ jobs:
     steps:
       - name: Running tests
         run: |
-        ./build/bin/hermite_curves_test
+          ./build/bin/hermite_curves_test
