@@ -17,6 +17,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v3
       - name: Test build
         run: |
           cd ..
