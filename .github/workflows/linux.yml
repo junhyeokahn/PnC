@@ -12,7 +12,6 @@ jobs:
       - run: ./scripts/install/install_cmake.sh && ./scripts/install/install_dart.sh && 
           ./scripts/install/install_doxygen.sh && ./scripts/install/install_protobuf.sh && 
           ./scripts/install/install_zmq.sh
-      - run: bats -v
 
   build:
     needs: setup
