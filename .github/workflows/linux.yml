@@ -19,6 +19,7 @@ jobs:
     steps:
       - name: Test build
         run: |
+          cd ..
           mkdir build 
           cd build 
           cmake .. 
