@@ -9,7 +9,17 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - run: ./scripts/install/install_cmake.sh && ./scripts/install/install_dart.sh && 
+      - run: |
+          ./scripts/install/install_cmake.sh && ./scripts/install/install_dart.sh 
+          cd ${PATH_PACKAGE}/../
+          git clone https://github.com/dartsim/dart.git 
+          cd dart
+          git checkout release-6.11 
+          mkdir build 
+          cd build 
+          cmake .. && make -j4 
+          sudo make install
+          cd ${PATH_PACKAGE}
           ./scripts/install/install_doxygen.sh && ./scripts/install/install_protobuf.sh && 
           ./scripts/install/install_zmq.sh
 
