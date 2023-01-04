@@ -1,0 +1,35 @@
+name: tests
+on: 
+  push:
+    branches:
+      - master
+      - 'refactor/hermite-curve'
+jobs:
+  setup:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: ./scripts/install/install_cmake.sh && ./scripts/install/install_dart.sh && 
+          ./scripts/install/install_doxygen.sh && ./scripts/install/install_protobuf.sh && 
+          ./scripts/install/install_zmq.sh
+      - run: bats -v
+
+  build:
+    needs: setup
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Test build
+        run: |
+        mkdir build 
+        cd build 
+        cmake .. 
+        make 
+        cd ..
+
+  test:
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Running tests
+        run: |
+        ./build/bin/hermite_curves_test
