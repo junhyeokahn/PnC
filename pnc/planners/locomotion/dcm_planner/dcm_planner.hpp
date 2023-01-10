@@ -8,7 +8,7 @@
 
 #include "pnc/planners/locomotion/dcm_planner/footstep.hpp"
 #include "utils/interpolation/interpolation.hpp"
-#include "utils/interpolation/min_jerk_curve_vec.hpp"
+#include "utils/interpolation/min_jerk_curve.hpp"
 #include "utils/util.hpp"
 
 /// namespace vrp_type
