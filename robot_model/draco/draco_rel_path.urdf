@@ -653,7 +653,8 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/l_ankle_ie_link.stl"/>
+<!--        <mesh filename="meshes/l_ankle_ie_link.stl"/>-->
+        <mesh filename="meshes/l_ankle_ie_link_big_foot.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
@@ -866,7 +867,8 @@
     <visual>
       <origin rpy="0 -0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/r_ankle_ie_link.stl"/>
+<!--        <mesh filename="meshes/r_ankle_ie_link.stl"/>-->
+        <mesh filename="meshes/r_ankle_ie_link_big_foot.stl"/>
       </geometry>
       <material name="dark_gray"/>
     </visual>
