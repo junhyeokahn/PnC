@@ -16,6 +16,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     cd $PATH_PACKAGE/../ &&
     git clone https://github.com/protocolbuffers/protobuf.git &&
     cd protobuf &&
+    git checkout tags/v21.9
     git submodule update --init --recursive &&
     ./autogen.sh &&
     ./configure &&
