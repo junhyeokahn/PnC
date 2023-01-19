@@ -45,8 +45,9 @@ def set_grf_default_position(meschat_visualizer, foot_position):
 
 def get_rpy_from_world_to(foot_grf):
     foot_grf_normalized = foot_grf[3:] / np.linalg.norm(foot_grf[3:])
-    pitch = -np.arcsin(foot_grf_normalized[1])
-    roll = np.arctan2(foot_grf_normalized[0], foot_grf_normalized[2])
+    roll = -np.arcsin(foot_grf_normalized[1])
+    pitch = np.arctan2(foot_grf_normalized[0], foot_grf_normalized[2])
+    
     return np.array([roll, pitch, 0.])
 
 
