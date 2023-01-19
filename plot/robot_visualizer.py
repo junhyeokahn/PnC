@@ -21,36 +21,67 @@ sys.path.append(cwd)
 
 
 def add_arrow(meschat_visualizer, obj_name, meshColor=[1, 0, 0]):
-    obj = g.Cylinder(0.1, 0.02)
+    arrow_shaft = g.Cylinder(0.1, 0.01)
+    arrow_head = g.Cylinder(0.04, 0.04, radiusTop=0.001, radiusBottom=0.04)
     material = meshcat.geometry.MeshPhongMaterial()
     material.color = int(meshColor[0] * 255) * 256**2 + int(meshColor[1] * 255) * 256 + int(meshColor[2] * 255)
 
-    meschat_visualizer[obj_name].set_object(obj, material)
-
-    return obj
+    meschat_visualizer[obj_name].set_object(arrow_shaft, material)
+    meschat_visualizer[obj_name]["head"].set_object(arrow_head, material)
 
 
 def set_grf_default_position(meschat_visualizer, foot_position):
-    arrow_height = [0, 0, 0.05]
+    arrow_height = np.array([0, 0, 0.05])
+    arrow_head_offset = np.array([0, arrow_height[2]+0.02/2, 0.0])
     T_rot = tf.rotation_matrix(np.pi/2, [1, 0, 0])
     T_trans = tf.translation_matrix(foot_position + arrow_height)
+    T_trans_arrow_head = tf.translation_matrix(arrow_head_offset)
 
     # first translate, then rotate
     T = tf.concatenate_matrices(T_trans, T_rot)
     meschat_visualizer.set_transform(T)
+    meschat_visualizer["head"].set_transform(T_trans_arrow_head)
 
+def get_rpy_from_world_to(foot_grf):
+    foot_grf_normalized = foot_grf[3:] / np.linalg.norm(foot_grf[3:])
+    pitch = -np.arcsin(foot_grf_normalized[1])
+    roll = np.arctan2(foot_grf_normalized[0], foot_grf_normalized[2])
+    return np.array([roll, pitch, 0.])
 
 def grf_display(meshcat_visualizer, foot_pos, foot_ori, foot_grf):
-    arrow_height = np.array([0, 0, 0.05])
-    T_arrow_rot = tf.rotation_matrix(np.pi/2, [1, 0, 0])
+    # scale length
+    scale = foot_grf[5] / 100.      # 200 is about half weight
+    S = tf.identity_matrix()
+    S[1, 1] = scale     # y-axis corresponds to height (i.e., length) of cylinder
+
+    # translate and rotate GRF vectors
+    arrow_height = np.array([0, 0, (0.1*scale)/2.])
+    arrow_head_offset = np.array([0, 0.1/2, 0.0])
+    # arrow_head_offset = np.array([0, arrow_height[2]+0.02/2, 0.0])
+    T_arrow_vertical = tf.rotation_matrix(np.pi/2, [1, 0, 0])
     T_foot_rot = tf.euler_matrix(foot_ori[0], foot_ori[1], foot_ori[2])
+    grf_ori = get_rpy_from_world_to(foot_grf)
+    T_grf_ori = tf.euler_matrix(grf_ori[0], grf_ori[1], grf_ori[2])
     T_trans = tf.translation_matrix(foot_pos + arrow_height)
-    scale = foot_grf[5] / 200.      # 200 is about half weight
-    S = tf.scale_matrix(scale)
+    T_trans_arrow_head = tf.translation_matrix(arrow_head_offset)
 
     # first translate, then rotate, and scale
-    T = tf.concatenate_matrices(T_trans, T_foot_rot, T_arrow_rot, S)
+    # T = tf.concatenate_matrices(T_trans, T_foot_rot, T_arrow_vertical, S)
+    T = tf.concatenate_matrices(T_trans, T_grf_ori, T_arrow_vertical, S)
     meshcat_visualizer.set_transform(T)
+    meshcat_visualizer["head"].set_transform(T_trans_arrow_head)
+
+
+def display_visualizer_frames(meshcat_visualizer):
+    for visual in meshcat_visualizer.visual_model.geometryObjects:
+        # Get mesh pose.
+        M = meshcat_visualizer.visual_data.oMg[meshcat_visualizer.visual_model.getGeometryId(visual.name)]
+        # Manage scaling
+        scale = np.asarray(visual.meshScale).flatten()
+        S = np.diag(np.concatenate((scale, [1.0])))
+        T = np.array(M.homogeneous).dot(S)
+        # Update viewer configuration.
+        frame[meshcat_visualizer.getViewerNodeName(visual, pin.GeometryType.VISUAL)].set_transform(T)
 
 
 # variables to load/display on Meshcat
@@ -155,12 +186,10 @@ with open('experiment_data/pnc.pkl', 'rb') as file:
         except EOFError:
             break
 
-anim = Animation()
-
-# display poses
-# note: the sleep time should ideally be: save_freq / loop_rate (e.g., 50/800) but this doesn't
-# take into account compute time of this PC, so a somewhat faster value should be used
-save_freq = 40          # hertz
+# replay data
+save_freq = 50          # hertz
+anim = Animation(default_framerate=800 / save_freq)
+frame_index = 0
 for ti in range(len(exp_time)):
     viz.display(np.array(joint_positions[ti]))
 
@@ -184,11 +213,20 @@ for ti in range(len(exp_time)):
     grf_display(viz.viewer["grf_rf"], rfoot_position[ti], rfoot_orientation[ti], rfoot_grf[ti])
 
     # make animation
-    # with anim.at_frame(viz.viewer, 0) as frame:
-    #     frame["grf_lf"].set
+    with anim.at_frame(viz.viewer, frame_index) as frame:
+        grf_display(frame["grf_lf"], lfoot_position[ti], lfoot_orientation[ti], lfoot_grf[ti])
+        grf_display(frame["grf_rf"], rfoot_position[ti], rfoot_orientation[ti], rfoot_grf[ti])
 
-    print("experiment time: ", exp_time[ti])
-    time.sleep(1.0 / save_freq)
+        # save other visualizations at current frame
+        display_visualizer_frames(viz)                  # robot
+        display_visualizer_frames(com_proj_viz)         # projected CoM
+        display_visualizer_frames(com_des_viz)          # desired CoM position
+        display_visualizer_frames(com_viz)              # actual CoM position
 
 
+    frame_index = frame_index + 1
+
+print("Experiment initial time: ", exp_time[0])
+print("Experiment final time: ", exp_time[-1])
+viz.viewer.set_animation(anim)
 
