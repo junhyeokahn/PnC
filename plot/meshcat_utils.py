@@ -6,6 +6,7 @@ import meshcat.transformations as tf
 
 import pinocchio as pin
 
+violet = [1., 0., 1., 0.3]
 
 def add_arrow(meshcat_visualizer, obj_name, color=[1, 0, 0], height=0.1):
     arrow_shaft = g.Cylinder(height, 0.01)
