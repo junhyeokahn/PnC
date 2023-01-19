@@ -10,8 +10,10 @@ import time
 import json
 from ruamel.yaml import YAML
 import numpy as np
-# from pinocchio.visualize import MeshcatVisualizer
-# import pinocchio as pin
+from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin
+import meshcat
+from plot import meshcat_utils as vis_tools
 
 from utils.python_utils import util
 
@@ -82,6 +84,11 @@ if args.b_visualize:
     cmp_viz.initViewer(viz.viewer)
     cmp_viz.loadViewerModel(rootNodeName="cmp_des", color=[0., 1., 0., 0.5])
     cmp_des_q = pin.neutral(cmp_model)
+
+    # add arrows visualizers to viewer
+    arrow_viz = meshcat.Visualizer(window=viz.viewer.window)
+    vis_tools.add_arrow(arrow_viz, "grf_lf", color=[0, 0, 1])
+    vis_tools.add_arrow(arrow_viz, "grf_rf", color=[1, 0, 0])
 
 msg = pnc_msg()
 
@@ -398,3 +405,7 @@ while True:
         icp_viz.display(icp_viz_q)
         icp_des_viz.display(icp_des_viz_q)
         cmp_viz.display(cmp_des_q)
+
+        # plot GRFs
+        vis_tools.grf_display(arrow_viz["grf_lf"], msg.task_lfoot_lin_pos_des, msg.task_lfoot_ori_pos_des, msg.cmd_lfoot_rf)
+        vis_tools.grf_display(arrow_viz["grf_rf"], msg.task_rfoot_lin_pos_des, msg.task_rfoot_ori_pos_des, msg.cmd_rfoot_rf)
