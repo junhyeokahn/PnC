@@ -16,7 +16,7 @@ jobs:
           sudo apt install python3-pip
           pip install "pybind11[global]"
           cd ${PATH_PACKAGE}/../
-          git clone https://github.com/google/googletest.git 
+          sudo git clone https://github.com/google/googletest.git 
           cd googletest &&
           git checkout tags/release-1.11.0 
           mkdir build 
