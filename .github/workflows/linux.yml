@@ -13,6 +13,8 @@ jobs:
           ./scripts/install/install_cmake.sh && ./scripts/install/gh_install_dart.sh 
           ./scripts/install/install_doxygen.sh && ./scripts/install/install_protobuf.sh 
           ./scripts/install/install_zmq.sh
+          sudo apt install python3-pip
+          pip install pybind11
           export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
           export CMAKE_PREFIX_PATH=/usr/local/include:$CMAKE_PREFIX_PATH
           ls /usr/local/include
