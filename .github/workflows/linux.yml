@@ -14,7 +14,7 @@ jobs:
           ./scripts/install/install_doxygen.sh && ./scripts/install/install_protobuf.sh 
           ./scripts/install/install_zmq.sh
           sudo apt install python3-pip
-          pip install pybind11
+          pip install "pybind11[global]"
           export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
           export CMAKE_PREFIX_PATH=/usr/local/include:$CMAKE_PREFIX_PATH
           ls /usr/local/include
