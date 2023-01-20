@@ -23,27 +23,3 @@ jobs:
           cmake .. 
           make 
           ./bin/hermite_curves_test
-
-  build:
-    needs: setup
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Test build
-        run: |
-          export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
-          export CMAKE_PREFIX_PATH=/usr/local/include:$CMAKE_PREFIX_PATH
-          ls /usr/local/include
-          mkdir build 
-          cd build 
-          cmake .. 
-          make 
-          cd ..
-
-  test:
-    needs: build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Running tests
-        run: |
-          ./build/bin/hermite_curves_test
